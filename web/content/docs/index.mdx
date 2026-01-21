@@ -1,0 +1,65 @@
+---
+title: Introduction
+description: Welcome to the KoreShield documentation
+icon: House
+---
+
+KoreShield is an open-source security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It acts as a transparent security layer between your application and LLM API providers, sanitizing inputs, detecting threats, and enforcing policies before requests reach the model.
+
+## Why KoreShield?
+
+Prompt injection attacks pose a critical security risk for LLM-integrated systems. Attackers can:
+- Override system instructions
+- Extract sensitive data
+- Bypass security controls
+- Manipulate AI behavior
+- Exfiltrate proprietary information
+
+KoreShield provides defense-in-depth protection with four core security components:
+
+- **Input Sanitization**: Cleans and normalizes prompts to remove potentially malicious content
+- **Attack Detection**: Analyzes prompts and responses for signs of prompt injection and other attacks
+- **Policy Enforcement**: Applies configurable security rules and determines how to handle suspicious requests
+- **Audit Logging**: Records all security events and decisions for compliance and monitoring
+
+## How it works
+
+KoreShield sits transparently between your application and LLM providers (OpenAI, Anthropic, Google Gemini, etc.). Every request passes through our security pipeline:
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Application   │───▶│ Input Sanitizer │───▶│ Attack Detector │───▶│  Policy Engine  │───▶│   LLM Provider  │
+│                 │    │                 │    │                 │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                                                   │
+                                                                                   ▼
+                                                                    ┌─────────────────┐
+                                                                    │  Audit Logger   │
+                                                                    └─────────────────┘
+```
+
+## Key Features
+
+- **Multi-Provider Support**: Works with OpenAI, Anthropic, Google Gemini, Azure OpenAI, and any OpenAI-compatible API
+- **Real-time Protection**: Sub-millisecond latency with comprehensive security scanning
+- **Configurable Policies**: Adjust sensitivity levels and response actions based on your security requirements
+- **Enterprise Ready**: SOC 2 compliant with comprehensive audit trails and compliance reporting
+- **Easy Integration**: Drop-in replacement for existing LLM API calls
+- **Open Source**: Transparent security with community-driven improvements
+
+## Next Steps
+
+<Cards>
+  <Card title="Installation" href="/docs/installation">
+    Get up and running with KoreShield in minutes.
+  </Card>
+  <Card title="Quick Start" href="/docs/getting-started">
+    Learn how to secure your first LLM integration.
+  </Card>
+  <Card title="Configuration" href="/docs/configuration">
+    Configure security policies and provider settings.
+  </Card>
+  <Card title="API Reference" href="/docs/api-reference">
+    Explore the complete KoreShield API.
+  </Card>
+</Cards>
