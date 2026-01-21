@@ -16,7 +16,7 @@ export const MultipleProtocols = () => (
       <div className="grid md:grid-cols-3 gap-6">
         {/* Cloud-Hosted Card */}
         <div className="group relative bg-white/2 border border-white/5 rounded-3xl p-8 hover:border-accent/20 transition-all duration-300 hover:-translate-y-1">
-          <div className="absolute inset-0 bg-linear-to-b from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
 
           <div className="relative z-10">
             <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -37,7 +37,7 @@ export const MultipleProtocols = () => (
 
         {/* Self-Hosted Card */}
         <div className="group relative bg-white/2 border border-white/5 rounded-3xl p-8 hover:border-accent/20 transition-all duration-300 hover:-translate-y-1">
-          <div className="absolute inset-0 bg-linear-to-b from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
 
           <div className="relative z-10">
             <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -58,7 +58,7 @@ export const MultipleProtocols = () => (
 
         {/* Enterprise Card */}
         <div className="group relative bg-white/2 border border-white/5 rounded-3xl p-8 hover:border-accent/20 transition-all duration-300 hover:-translate-y-1">
-          <div className="absolute inset-0 bg-linear-to-b from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-b from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
 
           <div className="relative z-10">
             <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
