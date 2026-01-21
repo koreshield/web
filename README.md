@@ -2,9 +2,13 @@
 
 ## About
 
-KoreShield is an open-source middleware proxy designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It sits transparently between your application and LLM API providers (OpenAI, Anthropic, Google Gemini, etc.), sanitizing inputs, detecting threats, and enforcing security policies before requests reach the model.
+KoreShield (formerly LLM Firewall) is an open-source security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It sits transparently between your application and LLM API providers (OpenAI, Anthropic, Google Gemini, etc.), sanitizing inputs, detecting threats, and enforcing security policies before requests reach the model.
 
-This project is part of a broader research initiative on prompt injection defense in enterprise Retrieval-Augmented Generation (RAG) systems, combining practical tooling with academic research.
+This project is now unified under the KoreShield brand, with all resources, SDKs, and documentation available at [koreshield.com](https://koreshield.com).
+
+### Related Research
+
+- [Preprint: LLM Firewall – A Novel Taxonomy of Indirect Prompt Injection Attacks in Enterprise RAG Systems](https://www.academia.edu/145685538/_Preprint_LLM_Firewall_A_Novel_Taxonomy_of_Indirect_Prompt_Injection_Attacks_in_Enterprise_RAG_Systems)
 
 ## Why KoreShield?
 
@@ -30,6 +34,7 @@ KoreShield provides defense-in-depth:
 - Structured logging and alerting
 - Easy integration (OpenAI-compatible API)
 - Extensible plugin architecture
+- Unified under the KoreShield brand ([koreshield.com](https://koreshield.com))
 
 ## Architecture
 
@@ -43,14 +48,14 @@ Application → KoreShield → LLM API Provider
 ```
 
 ### Component Overview
-- **LLMFirewallProxy**: Orchestrates security pipeline, handles HTTP requests, tracks metrics
+- **KoreShield Proxy**: Orchestrates security pipeline, handles HTTP requests, tracks metrics
 - **Sanitization Engine**: Cleans and normalizes prompts, detects basic threats
 - **Attack Detector**: Heuristic and behavioral analysis for prompt injection
 - **Policy Engine**: Enforces rules, sensitivity, blocklist/whitelist
 - **Logger/Alerting**: Logs requests, attacks, blocks, and sends alerts
 - **Provider Layer**: Forwards safe requests to OpenAI, Anthropic, Gemini, etc.
 
-## API Reference
+## API Reference (KoreShield)
 
 ### Health Check
 `GET /health`
@@ -114,7 +119,7 @@ pip install -r requirements.txt
 cp config/config.example.yaml config/config.yaml
 export OPENAI_API_KEY=your-api-key-here
 
-# Start the firewall
+# Start KoreShield
 python -m src.firewall.cli start
 ```
 
@@ -132,7 +137,7 @@ response = requests.post(
 )
 ```
 
-## Security Model
+## Security Model (KoreShield)
 
 - **Input Sanitization**: Pattern matching, normalization
 - **Attack Detection**: Heuristics for prompt injection, role manipulation, code block injection
@@ -165,9 +170,10 @@ pytest
 - Configuration Guide: config/config.example.yaml
 - Examples: examples/
 - Research Notes: research/
+- Official website: [koreshield.com](https://koreshield.com)
 
 ## License
 MIT License
 
 ## Contact
-For questions or feedback, open an issue on GitHub.
+For questions or feedback, visit [koreshield.com](https://koreshield.com) or open an issue on GitHub.
