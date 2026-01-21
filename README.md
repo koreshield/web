@@ -1,13 +1,16 @@
 # KoreShield
 
-> **Project Status:** Currently undergoing rebranding from "LLM Firewall" to "KoreShield"  
-> **Target Completion:** February 2026  
+[![CI](https://github.com/koreshield/koreshield/actions/workflows/test.yml/badge.svg)](https://github.com/koreshield/koreshield/actions/workflows/test.yml)
+[![Lint](https://github.com/koreshield/koreshield/actions/workflows/lint.yml/badge.svg)](https://github.com/koreshield/koreshield/actions/workflows/lint.yml)
+[![Docker](https://github.com/koreshield/koreshield/actions/workflows/docker.yml/badge.svg)](https://github.com/koreshield/koreshield/actions/workflows/docker.yml)
+[![PyPI](https://img.shields.io/pypi/v/koreshield)](https://pypi.org/project/koreshield/)
+[![License](https://img.shields.io/github/license/koreshield/koreshield)](https://github.com/koreshield/koreshield/blob/main/LICENSE)
 
 ## About
 
-KoreShield (formerly LLM Firewall) is an open-source security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It sits transparently between your application and LLM API providers (OpenAI, Anthropic, Google Gemini, etc.), sanitizing inputs, detecting threats, and enforcing security policies before requests reach the model.
+KoreShield is an open-source security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It sits transparently between your application and LLM API providers (OpenAI, Anthropic, Google Gemini, etc.), sanitizing inputs, detecting threats, and enforcing security policies before requests reach the model.
 
-This project is now unified under the KoreShield brand, with all resources, SDKs, and documentation available at [koreshield.com](https://koreshield.com).
+This project is unified under the KoreShield brand, with all resources, SDKs, and documentation available at [koreshield.com](https://koreshield.com).
 
 The goal is for KoreShield to be the "security layer" for any LLM-powered enterprise system—easy to integrate, highly configurable, and always up-to-date with the latest defenses and best practices.
 
@@ -110,7 +113,7 @@ API keys are set via environment variables (e.g., `OPENAI_API_KEY`).
 ### Quick Start
 ```bash
 # Clone the repository
-git clone https://github.com/nsisongltd/llm-firewall.git
+git clone https://github.com/koreshield/koreshield.git
 cd llm-firewall
 
 # Create virtual environment

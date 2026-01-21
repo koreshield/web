@@ -1,0 +1,62 @@
+---
+title: Installation
+description: How to install KoreShield
+icon: Terminal
+---
+
+# Installation
+
+KoreShield is a Python-based security platform that can be installed via pip. Choose the installation method that best fits your deployment needs.
+
+## Prerequisites
+
+- Python 3.10 or higher
+- pip (Python package manager)
+
+## Install from PyPI
+
+The recommended way to install KoreShield is from PyPI:
+
+```bash
+pip install koreshield
+```
+
+## Install from Source
+
+If you want to install from the latest development version:
+
+```bash
+git clone https://github.com/koreshield/koreshield.git
+cd koreshield/llm-firewall
+pip install -e .
+```
+
+## Verify Installation
+
+To verify that KoreShield has been installed successfully:
+
+```bash
+koreshield --version
+```
+
+You should see the version number of the installed package.
+
+## Docker Installation
+
+For containerized deployments, you can use our Docker image:
+
+```bash
+docker pull koreshield/koreshield
+docker run -p 8000:8000 koreshield/koreshield
+```
+
+## System Requirements
+
+- **Python**: 3.10+
+- **Memory**: 256MB minimum, 512MB recommended
+- **Storage**: 100MB for installation
+- **Network**: Outbound HTTPS access to LLM providers
+
+## Next Steps
+
+Once installed, proceed to [Getting Started](/docs/getting-started) to configure KoreShield and secure your first LLM integration.
