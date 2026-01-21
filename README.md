@@ -1,12 +1,15 @@
 # KoreShield
 
+> **Project Status:** Currently undergoing rebranding from "LLM Firewall" to "KoreShield"  
+> **Target Completion:** February 2026  
+
 ## About
 
 KoreShield (formerly LLM Firewall) is an open-source security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It sits transparently between your application and LLM API providers (OpenAI, Anthropic, Google Gemini, etc.), sanitizing inputs, detecting threats, and enforcing security policies before requests reach the model.
 
 This project is now unified under the KoreShield brand, with all resources, SDKs, and documentation available at [koreshield.com](https://koreshield.com).
 
-The goal is for KoreShield to be the “security layer” for any LLM-powered enterprise system—easy to integrate, highly configurable, and always up-to-date with the latest defenses and best practices.
+The goal is for KoreShield to be the "security layer" for any LLM-powered enterprise system—easy to integrate, highly configurable, and always up-to-date with the latest defenses and best practices.
 
 ### Related Research
 
@@ -166,9 +169,6 @@ pytest
 ```
 
 ## Documentation
-- System Design: docs/SYSTEM_DESIGN.md
-- API Reference: docs/API.md
-- Getting Started: docs/GETTING_STARTED.md
 - Configuration Guide: config/config.example.yaml
 - Examples: examples/
 - Research Notes: research/
