@@ -8,7 +8,7 @@ export function NetworkDiagram() {
         <div className="text-center mb-24">
           <div className="relative inline-block">
             <motion.div
-              className="absolute -inset-8 bg-linear-to-r from-green-500/20 via-blue-500/20 to-purple-500/20 blur-2xl rounded-full"
+              className="absolute -inset-8 bg-gradient-to-r from-green-500/20 via-blue-500/20 to-purple-500/20 blur-2xl rounded-full"
               animate={{
                 opacity: [0.3, 0.6, 0.3],
                 scale: [1, 1.1, 1],
@@ -19,7 +19,7 @@ export function NetworkDiagram() {
                 ease: "easeInOut",
               }}
             />
-            <h2 className="relative text-6xl md:text-7xl font-bold italic tracking-tighter text-transparent bg-clip-text bg-linear-to-b from-white via-white/90 to-white/70 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+            <h2 className="relative text-6xl md:text-7xl font-bold italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/70 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
               Defense in Depth
             </h2>
 
@@ -59,7 +59,7 @@ export function NetworkDiagram() {
         </div>
 
         <div className="relative">
-          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-y-1/2 hidden md:block" />
+          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-y-1/2 hidden md:block" />
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
             <div className="flex flex-col items-center text-center group">
@@ -161,7 +161,7 @@ export function NetworkDiagram() {
 
           <div className="absolute top-1/2 left-0 w-full -translate-y-1/2 hidden md:block pointer-events-none">
             <motion.div
-              className="w-24 h-1 bg-linear-to-r from-transparent via-green-400 to-transparent opacity-50"
+              className="w-24 h-1 bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-50"
               animate={{
                 x: ["0%", "100%"],
                 opacity: [0, 1, 0],

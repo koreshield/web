@@ -118,9 +118,9 @@ export function Terminal() {
                   <span className="text-white/80 flex-1">{log.path}</span>
                   <span
                     className={
-                      log.status >= 400
+                      log.status === "BLOCKED"
                         ? "text-red-400"
-                        : log.status >= 300
+                        : log.status === "WARN"
                           ? "text-yellow-400"
                           : "text-green-400"
                     }
