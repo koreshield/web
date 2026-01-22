@@ -23,6 +23,12 @@ logger = structlog.get_logger(__name__)
 from fastapi.middleware.cors import CORSMiddleware
 from .api.management import router as management_router
 
+
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+
 class KoreShieldProxy:
     """
     Main proxy class that handles requests between applications and LLM providers.
@@ -54,7 +60,22 @@ class KoreShieldProxy:
         self.AzureOpenAIProvider = AzureOpenAIProvider
 
         self.config = config
-        self.app = FastAPI(title="LLM Firewall Community", version="0.1.0")
+        self.app = FastAPI(
+            title="KoreShield: Enterprise LLM Firewall", 
+            version="0.1.0",
+            description="Manage, monitor, and secure your LLM traffic with advanced policy enforcement and attack detection.",
+            openapi_tags=[
+                {"name": "Chat", "description": "LLM Chat Completions endpoint"},
+                {"name": "Management", "description": "Admin Dashboard APIs"},
+                {"name": "Health", "description": "System health checks"}
+            ]
+        )
+
+        # Initialize parameter-based rate limiter
+        self.limiter = Limiter(key_func=get_remote_address)
+        self.app.state.limiter = self.limiter
+        self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+        self.app.add_middleware(SlowAPIMiddleware)
 
         # Add CORS middleware
         origins = [
@@ -107,86 +128,20 @@ class KoreShieldProxy:
         # Include management router
         self.app.include_router(management_router, prefix="/v1/management")
 
-    def _init_providers(self, config: dict):
-        """Initialize all enabled LLM providers with priority ordering."""
-        providers_config = config.get("providers", {})
-        logger.info(f"Available providers config: {providers_config}")
-
-        # Provider options with priority order (higher index = higher priority)
-        provider_options = [
-            ("deepseek", "DEEPSEEK_API_KEY", self.DeepSeekProvider),
-            ("openai", "OPENAI_API_KEY", self.OpenAIProvider),
-            ("anthropic", "ANTHROPIC_API_KEY", self.AnthropicProvider),
-            ("gemini", "GOOGLE_API_KEY", self.GeminiProvider),
-            ("azure_openai", "AZURE_OPENAI_API_KEY", self.AzureOpenAIProvider),
-        ]
-
-        self.providers = []
-        self.provider_priority = []
-
-        for provider_name, env_var, provider_class in provider_options:
-            provider_cfg = providers_config.get(provider_name, {})
-            logger.info(f"Checking provider {provider_name}: enabled={provider_cfg.get('enabled', False)}")
-            if provider_cfg.get("enabled", False):
-                api_key = os.getenv(env_var)
-                logger.info(f"Provider {provider_name}: API key {'found' if api_key else 'NOT found'} for env var {env_var}")
-                if api_key:
-                    try:
-                        base_url = provider_cfg.get("base_url")
-                        provider_instance = provider_class(api_key=api_key, base_url=base_url)
-                        self.providers.append(provider_instance)
-                        self.provider_priority.append(provider_name)
-                        logger.info(f"{provider_name.capitalize()} provider initialized successfully")
-                    except Exception as e:
-                        logger.error(f"Failed to initialize {provider_name} provider: {e}")
-                else:
-                    logger.warning(f"{env_var} not found in environment variables")
-
-        if not self.providers:
-            logger.warning("No LLM providers configured. Set up API keys and enable providers in config.yaml")
-        else:
-            logger.info(f"Initialized {len(self.providers)} providers: {', '.join(self.provider_priority)}")
-
-    @property
-    def provider(self):
-        """Get the primary (highest priority) provider."""
-        return self.providers[0] if self.providers else None
-
-    async def _get_healthy_provider(self):
-        """Get the first healthy provider using failover logic."""
-        for i, provider in enumerate(self.providers):
-            provider_name = self.provider_priority[i]
-            try:
-                # For now, just check if provider is initialized
-                # TODO: Implement actual health checks with test requests
-                if provider:
-                    logger.debug(f"Using provider: {provider_name}")
-                    return provider
-            except Exception as e:
-                logger.warning(f"Provider {provider_name} health check failed: {e}")
-                continue
-
-        logger.error("All providers are unhealthy")
-        return None
-
-    async def start_monitoring(self):
-        """Start the monitoring system."""
-        await self.monitoring.start_monitoring()
-
-    async def stop_monitoring(self):
-        """Stop the monitoring system."""
-        await self.monitoring.stop_monitoring()
+    # ... (rest of class)
 
     def _setup_routes(self):
         """Set up FastAPI routes."""
+        
+        rate_limit = self.config.get("security", {}).get("rate_limit", "60/minute")
 
         # Health check endpoint
-        @self.app.get("/health")
+        @self.app.get("/health", tags=["Health"])
         async def health():
             return {"status": "healthy", "version": "0.1.0"}
 
         # Provider health check endpoint
-        @self.app.get("/health/providers")
+        @self.app.get("/health/providers", tags=["Health"])
         async def provider_health():
             health_status = {}
             for i, provider in enumerate(self.providers):
@@ -214,7 +169,7 @@ class KoreShieldProxy:
             }
 
         # Status/metrics endpoint
-        @self.app.get("/status")
+        @self.app.get("/status", tags=["Health"])
         async def status():
             provider_status = {}
             for i, provider in enumerate(self.providers):
@@ -234,7 +189,7 @@ class KoreShieldProxy:
             }
 
         # Prometheus metrics endpoint
-        @self.app.get("/metrics")
+        @self.app.get("/metrics", tags=["Health"])
         async def metrics():
             from prometheus_client import CONTENT_TYPE_LATEST
             return Response(
@@ -243,7 +198,8 @@ class KoreShieldProxy:
             )
 
         # OpenAI-compatible chat completions endpoint
-        @self.app.post("/v1/chat/completions")
+        @self.app.post("/v1/chat/completions", tags=["Chat"])
+        @self.limiter.limit(rate_limit)
         async def chat_completions(request: Request):
             return await self._handle_chat_completion(request)
 
@@ -251,6 +207,7 @@ class KoreShieldProxy:
         @self.app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
         async def proxy(request: Request, path: str):
             return await self._handle_request(request, path)
+
 
     async def _handle_chat_completion(self, request: Request) -> Response:
         """

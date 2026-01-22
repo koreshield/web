@@ -7,34 +7,65 @@ from typing import Any, Dict
 import structlog
 
 
-def setup_logging(log_level: str = "INFO", json_logs: bool = False):
+
+import logging
+import os
+from logging.handlers import RotatingFileHandler
+import sys
+
+def setup_logging(log_level: str = "INFO", json_logs: bool = True):
     """
     Set up structured logging for the application.
 
     Args:
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-        json_logs: Whether to output JSON logs (useful for production)
+        json_logs: Whether to output JSON logs (default True for easier parsing)
     """
+    # Create logs directory if it doesn't exist
+    log_dir = "logs"
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, "koreshield.log")
+
+    # Configure standard logging
+    root_logger = logging.getLogger()
+    root_logger.setLevel(getattr(logging, log_level.upper()))
+    
+    # Clear existing handlers
+    root_logger.handlers = []
+
+    # File Handler (JSONL)
+    file_handler = RotatingFileHandler(
+        log_file, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
+    )
+    # Stream Handler (Stdout)
+    stream_handler = logging.StreamHandler(sys.stdout)
+
+    root_logger.addHandler(file_handler)
+    root_logger.addHandler(stream_handler)
+
     processors = [
         structlog.contextvars.merge_contextvars,
-        structlog.processors.add_log_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
         structlog.processors.TimeStamper(fmt="iso"),
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
     ]
 
     if json_logs:
         processors.append(structlog.processors.JSONRenderer())
     else:
-        processors.extend([structlog.dev.ConsoleRenderer()])
+        processors.append(structlog.dev.ConsoleRenderer())
 
+    # Configure structlog to wrap standard logging
     structlog.configure(
         processors=processors,
-        wrapper_class=structlog.make_filtering_bound_logger(
-            getattr(structlog.processors, log_level.upper())
-        ),
-        context_class=dict,
-        logger_factory=structlog.PrintLoggerFactory(),
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
+
 
 
 class FirewallLogger:

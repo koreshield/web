@@ -51,6 +51,10 @@ class PolicyEngine:
         Returns:
             List of policy dictionaries
         """
+        # Load from config if available
+        if self.config and "policies" in self.config:
+            return self.config["policies"].copy()
+
         # Default policies
         return [
             {
