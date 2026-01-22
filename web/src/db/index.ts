@@ -14,5 +14,6 @@ export function getDb() {
   return db;
 }
 
-// For backward compatibility, export a getter
-export const database = getDb;
+// For backward compatibility, export both
+export const database = getDb();
+export { getDb as db };

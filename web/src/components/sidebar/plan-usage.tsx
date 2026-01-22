@@ -1,5 +1,5 @@
 interface PlanUsageProps {
-  activeTunnelsCount: number;
+  activeProvidersCount: number;
   limit: number;
   currentPlan: string;
 }

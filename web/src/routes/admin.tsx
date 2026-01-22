@@ -277,7 +277,7 @@ function AdminOverview({ token }: { token: string }) {
           </div>
 
           <div className="h-72">
-            {loading && securityData.length === 0 ? (
+            {loading || securityData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-gray-500">
                 Loading...
               </div>

@@ -164,7 +164,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       {!isCollapsed && (
         <div className="px-3 pt-3 border-t border-white/5 bg-black/20">
           <PlanUsage
-            activeTunnelsCount={activeTunnelsCount}
+            activeProvidersCount={activeTunnelsCount}
             limit={providerLimit}
             currentPlan={currentPlan}
           />
