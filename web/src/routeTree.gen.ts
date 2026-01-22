@@ -15,12 +15,17 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EmailTemplatesRouteImport } from './routes/email-templates'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as OrgSlugRouteImport } from './routes/$orgSlug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as OrgSlugIndexRouteImport } from './routes/$orgSlug/index'
 import { Route as InvitationsAcceptRouteImport } from './routes/invitations.accept'
 import { Route as DocsSplatRouteImport } from './routes/docs/$'
+import { Route as DashboardPoliciesRouteImport } from './routes/dashboard/policies'
+import { Route as DashboardLogsRouteImport } from './routes/dashboard/logs'
+import { Route as DashboardConfigRouteImport } from './routes/dashboard/config'
 import { Route as CliLoginRouteImport } from './routes/cli.login'
 import { Route as ApiSearchRouteImport } from './routes/api/search'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
@@ -96,6 +101,11 @@ const EmailTemplatesRoute = EmailTemplatesRouteImport.update({
   path: '/email-templates',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -111,6 +121,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const OrgSlugIndexRoute = OrgSlugIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -125,6 +140,21 @@ const DocsSplatRoute = DocsSplatRouteImport.update({
   id: '/docs/$',
   path: '/docs/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardPoliciesRoute = DashboardPoliciesRouteImport.update({
+  id: '/policies',
+  path: '/policies',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardLogsRoute = DashboardLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardConfigRoute = DashboardConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => DashboardRoute,
 } as any)
 const CliLoginRoute = CliLoginRouteImport.update({
   id: '/cli/login',
@@ -358,6 +388,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$orgSlug': typeof OrgSlugRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/dashboard': typeof DashboardRouteWithChildren
   '/email-templates': typeof EmailTemplatesRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -376,9 +407,13 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/api/search': typeof ApiSearchRoute
   '/cli/login': typeof CliLoginRoute
+  '/dashboard/config': typeof DashboardConfigRoute
+  '/dashboard/logs': typeof DashboardLogsRoute
+  '/dashboard/policies': typeof DashboardPoliciesRoute
   '/docs/$': typeof DocsSplatRoute
   '/invitations/accept': typeof InvitationsAcceptRoute
   '/$orgSlug/': typeof OrgSlugIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/$orgSlug/settings/organization': typeof OrgSlugSettingsOrganizationRoute
   '/$orgSlug/settings/profile': typeof OrgSlugSettingsProfileRoute
   '/admin/organizations/$slug': typeof AdminOrganizationsSlugRoute
@@ -432,9 +467,13 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/api/search': typeof ApiSearchRoute
   '/cli/login': typeof CliLoginRoute
+  '/dashboard/config': typeof DashboardConfigRoute
+  '/dashboard/logs': typeof DashboardLogsRoute
+  '/dashboard/policies': typeof DashboardPoliciesRoute
   '/docs/$': typeof DocsSplatRoute
   '/invitations/accept': typeof InvitationsAcceptRoute
   '/$orgSlug': typeof OrgSlugIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
   '/$orgSlug/settings/organization': typeof OrgSlugSettingsOrganizationRoute
   '/$orgSlug/settings/profile': typeof OrgSlugSettingsProfileRoute
   '/admin/organizations/$slug': typeof AdminOrganizationsSlugRoute
@@ -473,6 +512,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$orgSlug': typeof OrgSlugRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/dashboard': typeof DashboardRouteWithChildren
   '/email-templates': typeof EmailTemplatesRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -491,9 +531,13 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/api/search': typeof ApiSearchRoute
   '/cli/login': typeof CliLoginRoute
+  '/dashboard/config': typeof DashboardConfigRoute
+  '/dashboard/logs': typeof DashboardLogsRoute
+  '/dashboard/policies': typeof DashboardPoliciesRoute
   '/docs/$': typeof DocsSplatRoute
   '/invitations/accept': typeof InvitationsAcceptRoute
   '/$orgSlug/': typeof OrgSlugIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/$orgSlug/settings/organization': typeof OrgSlugSettingsOrganizationRoute
   '/$orgSlug/settings/profile': typeof OrgSlugSettingsProfileRoute
   '/admin/organizations/$slug': typeof AdminOrganizationsSlugRoute
@@ -533,6 +577,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$orgSlug'
     | '/admin'
+    | '/dashboard'
     | '/email-templates'
     | '/login'
     | '/onboarding'
@@ -551,9 +596,13 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/api/search'
     | '/cli/login'
+    | '/dashboard/config'
+    | '/dashboard/logs'
+    | '/dashboard/policies'
     | '/docs/$'
     | '/invitations/accept'
     | '/$orgSlug/'
+    | '/dashboard/'
     | '/$orgSlug/settings/organization'
     | '/$orgSlug/settings/profile'
     | '/admin/organizations/$slug'
@@ -607,9 +656,13 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/api/search'
     | '/cli/login'
+    | '/dashboard/config'
+    | '/dashboard/logs'
+    | '/dashboard/policies'
     | '/docs/$'
     | '/invitations/accept'
     | '/$orgSlug'
+    | '/dashboard'
     | '/$orgSlug/settings/organization'
     | '/$orgSlug/settings/profile'
     | '/admin/organizations/$slug'
@@ -647,6 +700,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$orgSlug'
     | '/admin'
+    | '/dashboard'
     | '/email-templates'
     | '/login'
     | '/onboarding'
@@ -665,9 +719,13 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/api/search'
     | '/cli/login'
+    | '/dashboard/config'
+    | '/dashboard/logs'
+    | '/dashboard/policies'
     | '/docs/$'
     | '/invitations/accept'
     | '/$orgSlug/'
+    | '/dashboard/'
     | '/$orgSlug/settings/organization'
     | '/$orgSlug/settings/profile'
     | '/admin/organizations/$slug'
@@ -706,6 +764,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OrgSlugRoute: typeof OrgSlugRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  DashboardRoute: typeof DashboardRouteWithChildren
   EmailTemplatesRoute: typeof EmailTemplatesRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -785,6 +844,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailTemplatesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -806,6 +872,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/$orgSlug/': {
       id: '/$orgSlug/'
       path: '/'
@@ -826,6 +899,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/docs/$'
       preLoaderRoute: typeof DocsSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/policies': {
+      id: '/dashboard/policies'
+      path: '/policies'
+      fullPath: '/dashboard/policies'
+      preLoaderRoute: typeof DashboardPoliciesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/logs': {
+      id: '/dashboard/logs'
+      path: '/logs'
+      fullPath: '/dashboard/logs'
+      preLoaderRoute: typeof DashboardLogsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/config': {
+      id: '/dashboard/config'
+      path: '/config'
+      fullPath: '/dashboard/config'
+      preLoaderRoute: typeof DashboardConfigRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/cli/login': {
       id: '/cli/login'
@@ -1197,6 +1291,24 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface DashboardRouteChildren {
+  DashboardConfigRoute: typeof DashboardConfigRoute
+  DashboardLogsRoute: typeof DashboardLogsRoute
+  DashboardPoliciesRoute: typeof DashboardPoliciesRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardConfigRoute: DashboardConfigRoute,
+  DashboardLogsRoute: DashboardLogsRoute,
+  DashboardPoliciesRoute: DashboardPoliciesRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 interface ApiOrgSlugRequestsRouteChildren {
   ApiOrgSlugRequestsCaptureRoute: typeof ApiOrgSlugRequestsCaptureRoute
   ApiOrgSlugRequestsReplayRoute: typeof ApiOrgSlugRequestsReplayRoute
@@ -1239,6 +1351,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OrgSlugRoute: OrgSlugRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  DashboardRoute: DashboardRouteWithChildren,
   EmailTemplatesRoute: EmailTemplatesRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
