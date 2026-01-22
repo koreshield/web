@@ -42,7 +42,6 @@
     "nanostores": "^0.11.4",
     "nitro": "^3.0.1-alpha.1",
     "pg": "^8.16.3",
-    "posthog-js": "^1.318.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",

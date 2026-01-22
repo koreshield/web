@@ -224,24 +224,24 @@ const {data:orgs}=authClient.useListOrganizations();
 
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricBar
-                label="Tunnels"
-                value={data?.usage?.tunnels}
-                limit={planLimits.maxTunnels}
+                label="Protected Requests"
+                value={data?.usage?.requests}
+                limit={planLimits.requestsPerMonth}
               />
               <MetricBar
-                label="Domains"
-                value={data?.usage?.domains}
-                limit={planLimits.maxDomains}
+                label="LLM Providers"
+                value={data?.usage?.providers}
+                limit={planLimits.maxProviders}
               />
               <MetricBar
-                label="Subdomains"
-                value={data?.usage?.subdomains}
-                limit={planLimits.maxSubdomains}
-              />
-              <MetricBar
-                label="Members"
+                label="Team Members"
                 value={data?.usage?.members}
                 limit={planLimits.maxMembers}
+              />
+              <MetricBar
+                label="Security Logs"
+                value={data?.usage?.logs}
+                limit={planLimits.retentionDays}
               />
             </div>
           </div>
@@ -260,30 +260,30 @@ const {data:orgs}=authClient.useListOrganizations();
                 ][]
               ).map(([key, plan]) => {
                 const f = plan.features as {
-                  maxTunnels: number;
-                  maxDomains: number;
-                  maxSubdomains: number;
+                  maxProviders: number;
                   maxMembers: number;
-                  bandwidthPerMonth: number;
+                  requestsPerMonth: number;
                   retentionDays: number;
-                  customDomains: boolean;
+                  auditLogs: boolean;
+                  sso: boolean;
                   prioritySupport: boolean;
-                };
-                const formatBandwidth = (bytes: number) => {
-                  const gb = bytes / (1024 * 1024 * 1024);
-                  return gb >= 1024 ? `${gb / 1024}TB` : `${gb}GB`;
+                  advancedDetection: boolean;
+                  customRules: boolean;
                 };
                 const features: string[] = [
-                  `${f.maxTunnels === -1 ? "Unlimited" : f.maxTunnels} Active Tunnel${f.maxTunnels === 1 ? "" : "s"}`,
-                  `${f.maxSubdomains === -1 ? "Unlimited" : f.maxSubdomains} Subdomain${f.maxSubdomains === 1 ? "" : "s"}`,
-                  `${f.maxMembers === -1 ? "Unlimited" : f.maxMembers} Team Member${f.maxMembers === 1 ? "" : "s"}`,
-                  ...(f.maxDomains !== 0
-                    ? [
-                        `${f.maxDomains === -1 ? "Unlimited" : f.maxDomains} Custom Domain${f.maxDomains === 1 ? "" : "s"}`,
-                      ]
-                    : []),
-                  `${formatBandwidth(f.bandwidthPerMonth)} Bandwidth`,
-                  `${f.retentionDays} Days Retention`,
+                  `${f.requestsPerMonth === -1
+                    ? "Unlimited"
+                    : f.requestsPerMonth.toLocaleString()
+                    } Protected Requests/mo`,
+                  `${f.maxProviders === -1 ? "Unlimited" : f.maxProviders
+                    } LLM Providers`,
+                  `${f.maxMembers === -1 ? "Unlimited" : f.maxMembers
+                    } Team Members`,
+                  `${f.retentionDays} Days Security Logs`,
+                  ...(f.customRules ? ["Custom Security Rules"] : []),
+                  ...(f.advancedDetection ? ["ML-Based Detection"] : []),
+                  ...(f.auditLogs ? ["Audit Logs & Analytics"] : []),
+                  ...(f.sso ? ["Single Sign-On (SSO)"] : []),
                   ...(f.prioritySupport ? ["Priority Support"] : []),
                 ];
                 const descriptions: Record<string, string> = {
@@ -409,17 +409,35 @@ function MetricBar({
 }: {
   label: string;
   value?: number;
-  limit: number;
+  limit: number | string;
 }) {
+  // For retention days, show as "X days" instead of a progress bar
+  if (label === "Security Logs") {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-gray-500">{label}</span>
+          <span className="text-xs font-medium text-white">
+            {typeof limit === 'number' ? `${limit} days` : limit}
+          </span>
+        </div>
+        <div className="h-2 w-full bg-accent/20 rounded-full overflow-hidden">
+          <div className="h-full bg-accent transition-all duration-500 ease-out" style={{ width: '100%' }} />
+        </div>
+      </div>
+    );
+  }
+
+  const numericLimit = typeof limit === 'number' ? limit : -1;
   const percentage =
-    limit === -1 ? 0 : Math.min(100, Math.max(0, ((value || 0) / limit) * 100));
+    numericLimit === -1 ? 0 : Math.min(100, Math.max(0, ((value || 0) / numericLimit) * 100));
 
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs text-gray-500">{label}</span>
         <span className="text-xs font-medium text-white">
-          {value ?? "-"} / {limit === -1 ? "∞" : limit}
+          {value ?? "-"} / {numericLimit === -1 ? "∞" : numericLimit}
         </span>
       </div>
       <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
