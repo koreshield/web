@@ -20,6 +20,8 @@ from .sanitizer import SanitizationEngine
 
 logger = structlog.get_logger(__name__)
 
+from fastapi.middleware.cors import CORSMiddleware
+from .api.management import router as management_router
 
 class KoreShieldProxy:
     """
@@ -54,6 +56,23 @@ class KoreShieldProxy:
         self.config = config
         self.app = FastAPI(title="LLM Firewall Community", version="0.1.0")
 
+        # Add CORS middleware
+        origins = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "https://koreshield.com",
+            # Add Vercel preview domains if needed, or allow all for dev
+            "*"
+        ]
+        
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
         # Statistics tracking
         self.stats = {
             "requests_total": 0,
@@ -62,6 +81,10 @@ class KoreShieldProxy:
             "attacks_detected": 0,
             "errors": 0,
         }
+        
+        # Store state for API access
+        self.app.state.config = self.config
+        self.app.state.stats = self.stats
 
         # Initialize security components
         security_config = config.get("security", {})
@@ -75,7 +98,14 @@ class KoreShieldProxy:
         self.provider_priority = []
         self._init_providers(config)
 
+        # Initialize monitoring system
+        from .monitoring import MonitoringSystem
+        self.monitoring = MonitoringSystem(config)
+
         self._setup_routes()
+        
+        # Include management router
+        self.app.include_router(management_router, prefix="/v1/management")
 
     def _init_providers(self, config: dict):
         """Initialize all enabled LLM providers with priority ordering."""
@@ -139,6 +169,14 @@ class KoreShieldProxy:
         logger.error("All providers are unhealthy")
         return None
 
+    async def start_monitoring(self):
+        """Start the monitoring system."""
+        await self.monitoring.start_monitoring()
+
+    async def stop_monitoring(self):
+        """Stop the monitoring system."""
+        await self.monitoring.stop_monitoring()
+
     def _setup_routes(self):
         """Set up FastAPI routes."""
 
@@ -195,6 +233,15 @@ class KoreShieldProxy:
                 "total_providers": len(self.providers),
             }
 
+        # Prometheus metrics endpoint
+        @self.app.get("/metrics")
+        async def metrics():
+            from prometheus_client import CONTENT_TYPE_LATEST
+            return Response(
+                content=self.monitoring.get_metrics_text(),
+                media_type=CONTENT_TYPE_LATEST
+            )
+
         # OpenAI-compatible chat completions endpoint
         @self.app.post("/v1/chat/completions")
         async def chat_completions(request: Request):
@@ -215,6 +262,16 @@ class KoreShieldProxy:
         Returns:
             Response with either the LLM response or an error
         """
+        import time
+        start_time = time.time()
+
+        # Record request metrics
+        self.monitoring.metrics.requests_total.labels(
+            method=request.method,
+            endpoint="/v1/chat/completions",
+            status="started"
+        ).inc()
+
         request_id = str(uuid.uuid4())
 
         try:
@@ -331,6 +388,19 @@ class KoreShieldProxy:
                 self.stats["requests_blocked"] += 1
                 self.stats["attacks_detected"] += 1
 
+                # Record blocked request metrics
+                duration = time.time() - start_time
+                self.monitoring.metrics.requests_total.labels(
+                    method=request.method,
+                    endpoint="/v1/chat/completions",
+                    status="blocked"
+                ).inc()
+                self.monitoring.metrics.requests_blocked.labels(reason=reason).inc()
+                self.monitoring.metrics.attacks_detected.labels(
+                    attack_type="prompt_injection",
+                    severity="high"  # Could be determined from detection result
+                ).inc()
+
                 self.logger.log_attack(
                     request_id=request_id,
                     attack_type="prompt_injection",
@@ -363,6 +433,8 @@ class KoreShieldProxy:
                 )
 
             # Forward the request to the provider with failover
+            provider_start = time.time()
+            provider_name = type(provider).__name__.replace('Provider', '').lower()
             try:
                 response = await provider.chat_completion(
                     messages=messages,
@@ -370,12 +442,40 @@ class KoreShieldProxy:
                     **{k: v for k, v in body.items() if k not in ["messages", "model"]},
                 )
 
+                # Record provider metrics
+                provider_duration = time.time() - provider_start
+                self.monitoring.metrics.provider_requests.labels(
+                    provider=provider_name,
+                    status="success"
+                ).inc()
+                self.monitoring.metrics.provider_latency.labels(
+                    provider=provider_name
+                ).observe(provider_duration)
+
                 self.stats["requests_allowed"] += 1
                 self.logger.log_allowed(request_id=request_id)
+
+                # Record successful request metrics
+                duration = time.time() - start_time
+                self.monitoring.metrics.requests_total.labels(
+                    method=request.method,
+                    endpoint="/v1/chat/completions",
+                    status="success"
+                ).inc()
+                self.monitoring.metrics.requests_duration.labels(
+                    method=request.method,
+                    endpoint="/v1/chat/completions"
+                ).observe(duration)
 
                 return JSONResponse(content=response)
 
             except httpx.HTTPStatusError as e:
+                # Record provider error metrics
+                self.monitoring.metrics.provider_requests.labels(
+                    provider=provider_name,
+                    status=f"error_{e.response.status_code}"
+                ).inc()
+
                 self.stats["errors"] += 1
                 logger.error("Provider API error", status_code=e.response.status_code, error=str(e))
                 return JSONResponse(
@@ -383,6 +483,12 @@ class KoreShieldProxy:
                     content=e.response.json() if e.response.content else {"error": str(e)},
                 )
             except Exception as e:
+                # Record provider error metrics
+                self.monitoring.metrics.provider_requests.labels(
+                    provider=provider_name,
+                    status="error_unknown"
+                ).inc()
+
                 self.stats["errors"] += 1
                 logger.error("Provider error", error=str(e))
                 raise HTTPException(status_code=500, detail=f"Provider error: {str(e)}")

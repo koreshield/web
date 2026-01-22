@@ -56,7 +56,58 @@ providers:
 # Alerting configuration
 alerting:
   enabled: false
-  webhooks: []
-  email: null
+  
+  # Alert rules
+  rules:
+    - name: "High Attack Rate"
+      condition: "attacks_detected > 10"
+      severity: "warning"
+      channels: ["email", "slack"]
+      cooldown_minutes: 5
+      description: "Alert when attack detection rate is high"
+      enabled: true
+      
+    - name: "Provider Down"
+      condition: "healthy_providers == 0"
+      severity: "critical"
+      channels: ["email", "webhook", "pagerduty"]
+      cooldown_minutes: 10
+      description: "Alert when all providers are down"
+      enabled: true
+  
+  # Email alerting
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    use_tls: true
+    username: "your-email@gmail.com"
+    from_address: "alerts@koreshield.com"
+    recipients: ["admin@koreshield.com"]
+  
+  # Webhook alerting
+  webhook:
+    enabled: false
+    url: "https://your-webhook-url.com/alert"
+  
+  # Slack alerting
+  slack:
+    enabled: false
+    webhook_url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+  
+  # Microsoft Teams alerting
+  teams:
+    enabled: false
+    webhook_url: "https://your-org.webhook.office.com/webhook/YOUR-TEAMS-WEBHOOK"
+  
+  # PagerDuty alerting
+  pagerduty:
+    enabled: false
+    routing_key: "your-pagerduty-routing-key"
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  check_interval_seconds: 60
   slack: null
 
