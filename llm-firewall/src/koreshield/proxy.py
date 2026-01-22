@@ -43,9 +43,13 @@ class KoreShieldProxy:
         from providers.openai import OpenAIProvider
         from providers.anthropic import AnthropicProvider
         from providers.deepseek import DeepSeekProvider
+        from providers.gemini import GeminiProvider
+        from providers.azure_openai import AzureOpenAIProvider
         self.OpenAIProvider = OpenAIProvider
         self.AnthropicProvider = AnthropicProvider
         self.DeepSeekProvider = DeepSeekProvider
+        self.GeminiProvider = GeminiProvider
+        self.AzureOpenAIProvider = AzureOpenAIProvider
 
         self.config = config
         self.app = FastAPI(title="LLM Firewall Community", version="0.1.0")
@@ -82,6 +86,8 @@ class KoreShieldProxy:
             ("deepseek", "DEEPSEEK_API_KEY", self.DeepSeekProvider),
             ("openai", "OPENAI_API_KEY", self.OpenAIProvider),
             ("anthropic", "ANTHROPIC_API_KEY", self.AnthropicProvider),
+            ("gemini", "GOOGLE_API_KEY", self.GeminiProvider),
+            ("azure_openai", "AZURE_OPENAI_API_KEY", self.AzureOpenAIProvider),
         ]
 
         for provider_name, env_var, provider_class in provider_options:
