@@ -22,14 +22,14 @@ function Dust() {
 
   useFrame((state) => {
     if (mesh.current) {
-      mesh.current.rotation.x = state.clock.elapsedTime * 0.05;
-      mesh.current.position.x =
-        8 + Math.sin(state.clock.elapsedTime * 0.2) * 0.5;
+      mesh.current.rotation.y = state.clock.elapsedTime * 0.05;
+      mesh.current.position.y =
+        Math.sin(state.clock.elapsedTime * 0.2) * 2;
     }
   });
 
   return (
-    <points ref={mesh} position={[8, 0, 0]}>
+    <points ref={mesh} position={[0, 0, 0]}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
@@ -68,7 +68,7 @@ function Spotlight() {
   });
 
   return (
-    <mesh ref={mesh} position={[8, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+    <mesh ref={mesh} position={[0, 0, 0]}>
       <cylinderGeometry args={[1.2, 5, 16, 64, 1, true]} />
       <shaderMaterial
         side={THREE.DoubleSide}
