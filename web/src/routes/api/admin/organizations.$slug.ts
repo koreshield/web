@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getDb } from "../../../db";
-import { organizations, members, subscriptions, tunnels, subdomains, domains } from "../../../db/schema";
+import { organizations, members, subscriptions } from "../../../db/schema";
 import { redis } from "../../../lib/redis";
 import { hashToken } from "../../../lib/hash";
-import { eq, count, gte, and } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
 
 export const Route = createFileRoute("/api/admin/organizations/$slug")({
   server: {
@@ -24,12 +24,6 @@ export const Route = createFileRoute("/api/admin/organizations/$slug")({
 
           const [sub] = await getDb().select().from(subscriptions).where(eq(subscriptions.organizationId, org.id)).limit(1);
           const [memberCount] = await getDb().select({ count: count() }).from(members).where(eq(members.organizationId, org.id));
-          const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-          const [activeTunnelCount] = await getDb().select({ count: count() }).from(tunnels)
-            .where(and(eq(tunnels.organizationId, org.id), gte(tunnels.lastSeenAt, fiveMinutesAgo)));
-          const [totalTunnelCount] = await getDb().select({ count: count() }).from(tunnels).where(eq(tunnels.organizationId, org.id));
-          const [subdomainCount] = await getDb().select({ count: count() }).from(subdomains).where(eq(subdomains.organizationId, org.id));
-          const [domainCount] = await getDb().select({ count: count() }).from(domains).where(eq(domains.organizationId, org.id));
 
           const memberList = await getDb().select({
             id: members.id,
@@ -43,10 +37,6 @@ export const Route = createFileRoute("/api/admin/organizations/$slug")({
             subscription: sub || { plan: "free", status: "active" },
             stats: {
               members: memberCount.count,
-              activeTunnels: activeTunnelCount.count,
-              totalTunnels: totalTunnelCount.count,
-              subdomains: subdomainCount.count,
-              domains: domainCount.count,
             },
             members: memberList,
           });

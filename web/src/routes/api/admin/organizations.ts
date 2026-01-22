@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getDb } from "../../../db";
-import { organizations, members, tunnels, subscriptions } from "../../../db/schema";
+import { organizations, members, subscriptions } from "../../../db/schema";
 import { redis } from "../../../lib/redis";
 import { hashToken } from "../../../lib/hash";
 import { count, desc, like, or, inArray, gte, and } from "drizzle-orm";
@@ -82,29 +82,6 @@ export const Route = createFileRoute("/api/admin/organizations")({
             memberCounts.map((mc) => [mc.organizationId, mc.count])
           );
 
-          // Get tunnel counts (active tunnels - seen in last 5 minutes)
-          const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-          const tunnelCounts =
-            orgIds.length > 0
-              ? await db
-                  .select({
-                    organizationId: tunnels.organizationId,
-                    count: count(),
-                  })
-                  .from(tunnels)
-                  .where(
-                    and(
-                      inArray(tunnels.organizationId, orgIds),
-                      gte(tunnels.lastSeenAt, fiveMinutesAgo)
-                    )
-                  )
-                  .groupBy(tunnels.organizationId)
-              : [];
-
-          const tunnelCountMap = new Map(
-            tunnelCounts.map((tc) => [tc.organizationId, tc.count])
-          );
-
           // Get subscription plans
           const subscriptionPlans =
             orgIds.length > 0
@@ -128,7 +105,6 @@ export const Route = createFileRoute("/api/admin/organizations")({
           const orgsWithMeta = orgList.map((org) => ({
             ...org,
             memberCount: memberCountMap.get(org.id) || 0,
-            activeTunnels: tunnelCountMap.get(org.id) || 0,
             subscription: subscriptionMap.get(org.id) || {
               plan: "free",
               status: "active",

@@ -1,4 +1,4 @@
-import { Terminal as TerminalIcon, Code, Activity } from "lucide-react";
+import { Shield, Code, Activity } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useState } from "react";
 
@@ -39,25 +39,25 @@ const LOGS = [
     color: "text-red-400",
   },
   {
-    status: "200 OK",
-    method: "GET",
-    path: "/api/products",
-    time: "15ms",
-    color: "text-accent",
+    status: "SAFE",
+    method: "POST",
+    path: "/v1/completions",
+    time: "38ms",
+    color: "text-green-400",
   },
   {
-    status: "200 OK",
-    method: "GET",
-    path: "/api/settings",
-    time: "24ms",
-    color: "text-accent",
+    status: "WARN",
+    method: "POST",
+    path: "/v1/chat/completions",
+    time: "51ms",
+    color: "text-yellow-400",
   },
   {
-    status: "404 Not Found",
-    method: "GET",
-    path: "/api/unknown",
-    time: "5ms",
-    color: "text-white/40",
+    status: "SAFE",
+    method: "POST",
+    path: "/v1/messages",
+    time: "42ms",
+    color: "text-green-400",
   },
 ];
 
@@ -91,14 +91,14 @@ export const DeveloperExperience = () => {
           <div className="bg-white/2 border border-white/5 rounded-3xl p-8 hover:border-white/10 transition-colors group h-full flex flex-col">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                <TerminalIcon size={20} className="text-accent" />
+                <Shield size={20} className="text-accent" />
               </div>
               <h3 className="text-xl font-bold text-white">
-                Online in one line
+                Drop-in protection
               </h3>
             </div>
             <p className="text-white/40 mb-6">
-              One command, you're protected. Seriously, try for yourself.
+              One command, you're protected. Replace your LLM API endpoint with KoreShield's proxy.
             </p>
             <div className="bg-black/40 rounded-2xl border border-white/5 p-4 font-mono text-sm mt-auto">
               <span className="text-accent">$</span> koreshield start
@@ -139,12 +139,11 @@ export const DeveloperExperience = () => {
                 <Activity size={20} className="text-accent" />
               </div>
               <h3 className="text-xl font-bold text-white">
-                Instant Observability
+                Real-time Security Monitoring
               </h3>
             </div>
             <p className="text-white/40">
-              View live traffic happening on your APIs in real-time the second
-              it goes online.
+              Watch LLM requests flow through KoreShield with real-time threat detection and blocking.
             </p>
           </div>
 

@@ -2,13 +2,11 @@ import { useState, useEffect } from "react";
 import { useParams } from "@tanstack/react-router";
 import {
   LayoutDashboard,
-  Network,
+  Shield,
   Settings,
   History,
-  Globe,
   PanelLeftClose,
   PanelLeftOpen,
-  Link2,
   CreditCard,
   Users,
   Key,
@@ -55,7 +53,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   const subscription = subscriptionData?.subscription;
   const currentPlan = subscription?.plan || "free";
   const planLimits = getPlanLimits(currentPlan as any);
-  const tunnelLimit = planLimits.maxTunnels;
+  const providerLimit = planLimits.maxProviders;
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -83,24 +81,14 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       activeOptions: { exact: true },
     },
     {
-      to: "/$orgSlug/tunnels",
-      label: "Active Tunnels",
-      icon: <Network size={NAV_ICON_SIZE} />,
+      to: "/$orgSlug/firewall",
+      label: "Firewall",
+      icon: <Shield size={NAV_ICON_SIZE} />,
     },
     {
       to: "/$orgSlug/requests",
       label: "Requests",
       icon: <History size={NAV_ICON_SIZE} />,
-    },
-    {
-      to: "/$orgSlug/subdomains",
-      label: "Subdomains",
-      icon: <Globe size={NAV_ICON_SIZE} />,
-    },
-    {
-      to: "/$orgSlug/domains",
-      label: "Domains",
-      icon: <Link2 size={NAV_ICON_SIZE} />,
     },
     canManageBilling && {
       to: "/$orgSlug/billing",
@@ -177,7 +165,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         <div className="px-3 pt-3 border-t border-white/5 bg-black/20">
           <PlanUsage
             activeTunnelsCount={activeTunnelsCount}
-            limit={tunnelLimit}
+            limit={providerLimit}
             currentPlan={currentPlan}
           />
         </div>

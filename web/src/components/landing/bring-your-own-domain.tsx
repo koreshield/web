@@ -1,4 +1,4 @@
-import { Check, Bot, Cpu, Cloud } from "lucide-react";
+import { Check, Shield } from "lucide-react";
 
 export const BringYourOwnDomain = () => (
   <div className="py-24 bg-[#050a14] relative overflow-hidden">
@@ -48,19 +48,19 @@ export const BringYourOwnDomain = () => (
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-electric-blue/10 flex items-center justify-center shrink-0 border border-electric-blue/20">
-                  <Bot className="w-6 h-6 text-electric-blue" />
+                  <Shield className="w-6 h-6 text-electric-blue" />
                 </div>
                 <div>
                   <div className="flex items-center gap-3">
                     <h3 className="text-lg font-bold text-white font-sans">
-                      Multi-Provider Configuration
+                      Firewall Status
                     </h3>
                     <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-security-green/10 border border-security-green/20 text-xs font-bold text-security-green tracking-wide">
-                      Active
+                      Protected
                     </span>
                   </div>
                   <p className="text-sm text-white/40 mt-1 font-sans">
-                    Configured on {new Date().toLocaleDateString()}
+                    Active protection since {new Date().toLocaleDateString()}
                   </p>
                 </div>
               </div>
