@@ -249,7 +249,7 @@ ehthumbs.db
 Thumbs.db
 
 # 1cbyc
-llm-firewall/
+!llm-firewall/
 todo.md
 *.md
 .DS_Store
