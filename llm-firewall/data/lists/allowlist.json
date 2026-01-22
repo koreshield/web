@@ -1,0 +1,26 @@
+{
+  "list_type": "allowlist",
+  "last_updated": "2026-01-22T22:51:04.023384",
+  "entries": [
+    {
+      "value": "trusted.com",
+      "entry_type": "domain",
+      "reason": "Trusted domain",
+      "added_by": "admin",
+      "created_at": "2026-01-22T22:51:04.004544",
+      "expires_at": null,
+      "metadata": {},
+      "is_active": true
+    },
+    {
+      "value": "allowed.com",
+      "entry_type": "domain",
+      "reason": "Allowed",
+      "added_by": "system",
+      "created_at": "2026-01-22T22:51:04.023381",
+      "expires_at": null,
+      "metadata": {},
+      "is_active": true
+    }
+  ]
+}
