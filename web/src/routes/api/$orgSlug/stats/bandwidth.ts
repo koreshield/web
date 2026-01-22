@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { subscriptions } from "@/db/subscription-schema";
 import { redis } from "@/lib/redis";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";

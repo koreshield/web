@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
-import { db } from "../../../../db";
+import { getDb } from "../../../../db";
 import { domains } from "../../../../db/app-schema";
 import { requireOrgFromSlug } from "../../../../lib/org";
 
@@ -21,7 +21,7 @@ export const Route = createFileRoute(
           return Response.json({ error: "Domain ID required" }, { status: 400 });
         }
 
-        const domain = await db.query.domains.findFirst({
+        const domain = await getDb().query.domains.findFirst({
           where: eq(domains.id, domainId),
         });
 
@@ -33,7 +33,7 @@ export const Route = createFileRoute(
           return Response.json({ error: "Unauthorized" }, { status: 403 });
         }
 
-        await db.delete(domains).where(eq(domains.id, domainId)).returning();
+        await getDb().delete(domains).where(eq(domains.id, domainId)).returning();
 
         return Response.json({ message: "Domain deleted successfully" });
       },

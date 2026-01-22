@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { and, eq } from "drizzle-orm";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { domains } from "../../../db/app-schema";
 
 export const Route = createFileRoute("/api/domain/verify-ownership")({
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/api/domain/verify-ownership")({
             );
           }
 
-          const [existingDomain] = await db
+          const [existingDomain] = await getDb()
             .select()
             .from(domains)
             .where(

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq, and, gt } from "drizzle-orm";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { authTokens, organizationSettings } from "../../../db/app-schema";
 import { cliOrgTokens } from "../../../db/auth-schema";
 import { subscriptions } from "../../../db/subscription-schema";
@@ -36,7 +36,7 @@ export const Route = createFileRoute("/api/tunnel/auth")({
           let tokenType: "legacy" | "org" | undefined;
 
           // Try CLI org token first
-          const cliOrgToken = await db.query.cliOrgTokens.findFirst({
+          const cliOrgToken = await getDb().query.cliOrgTokens.findFirst({
             where: and(
               eq(cliOrgTokens.token, token),
               gt(cliOrgTokens.expiresAt, new Date()),
@@ -59,7 +59,7 @@ export const Route = createFileRoute("/api/tunnel/auth")({
             tokenType = "org";
           } else {
             // Fall back to legacy auth tokens
-            const tokenRecord = await db.query.authTokens.findFirst({
+            const tokenRecord = await getDb().query.authTokens.findFirst({
               where: eq(authTokens.token, token),
               with: {
                 organization: true,
@@ -87,12 +87,12 @@ export const Route = createFileRoute("/api/tunnel/auth")({
           }
 
           // Fetch subscription to get bandwidth limit
-          const subscription = await db.query.subscriptions.findFirst({
+          const subscription = await getDb().query.subscriptions.findFirst({
             where: eq(subscriptions.organizationId, organizationId),
           });
 
           // Fetch organization settings for full capture
-          const orgSettings = await db.query.organizationSettings.findFirst({
+          const orgSettings = await getDb().query.organizationSettings.findFirst({
             where: eq(organizationSettings.organizationId, organizationId),
           });
 

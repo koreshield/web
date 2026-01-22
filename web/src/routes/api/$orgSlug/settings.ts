@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { organizationSettings } from "../../../db/app-schema";
 import { requireOrgFromSlug } from "../../../lib/org";
 
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/api/$orgSlug/settings")({
           const { organization } = orgResult;
 
           // Get organization settings
-          const settings = await db.query.organizationSettings.findFirst({
+          const settings = await getDb().query.organizationSettings.findFirst({
             where: eq(organizationSettings.organizationId, organization.id),
           });
 

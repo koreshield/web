@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq, count } from "drizzle-orm";
 
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { subscriptions } from "../../../db/subscription-schema";
 import { domains, subdomains } from "../../../db/app-schema";
 import { members } from "../../../db/auth-schema";

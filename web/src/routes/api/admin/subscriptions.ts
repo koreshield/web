@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { subscriptions, organizations } from "../../../db/schema";
 import { redis } from "../../../lib/redis";
 import { hashToken } from "../../../lib/hash";

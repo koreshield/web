@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { tunnels, users, organizations } from "../../../db/schema";
 import { redis } from "../../../lib/redis";
 import { hashToken } from "../../../lib/hash";
@@ -95,7 +95,7 @@ export const Route = createFileRoute("/api/admin/tunnels")({
               : undefined;
 
           // Get total count
-          const countQuery = db.select({ count: count() }).from(tunnels);
+          const countQuery = getDb().select({ count: count() }).from(tunnels);
 
           const [totalResult] = whereClause
             ? await countQuery.where(whereClause)

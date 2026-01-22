@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { json } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
-import { db } from "../../db";
+import { getDb } from "../../db";
 import { domains, tunnels } from "../../db/app-schema";
 
 export const Route = createFileRoute("/internal/domain-check")({
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/internal/domain-check")({
           const subdomain = domain.replace(".koreshield.com", "");
 
           // Check if tunnel exists with this subdomain (url)
-          const tunnel = await db.query.tunnels.findFirst({
+          const tunnel = await getDb().query.tunnels.findFirst({
             where: eq(tunnels.url, subdomain),
           });
 
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/internal/domain-check")({
         }
 
         // Check if it's a custom domain
-        const customDomain = await db.query.domains.findFirst({
+        const customDomain = await getDb().query.domains.findFirst({
           where: eq(domains.domain, domain),
         });
 

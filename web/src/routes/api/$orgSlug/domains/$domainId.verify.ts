@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
 import { resolveCname, resolveTxt } from "dns/promises";
-import { db } from "../../../../db";
+import { getDb } from "../../../../db";
 import { domains } from "../../../../db/app-schema";
 import { requireOrgFromSlug } from "../../../../lib/org";
 
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api/$orgSlug/domains/$domainId/verify")({
           return orgContext.error;
         }
 
-        const domain = await db.query.domains.findFirst({
+        const domain = await getDb().query.domains.findFirst({
           where: eq(domains.id, domainId),
         });
 

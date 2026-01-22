@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { organizations, members, subscriptions, tunnels, subdomains, domains } from "../../../db/schema";
 import { redis } from "../../../lib/redis";
 import { hashToken } from "../../../lib/hash";
@@ -19,19 +19,19 @@ export const Route = createFileRoute("/api/admin/organizations/$slug")({
 
         try {
           const { slug } = params;
-          const [org] = await db.select().from(organizations).where(eq(organizations.slug, slug)).limit(1);
+          const [org] = await getDb().select().from(organizations).where(eq(organizations.slug, slug)).limit(1);
           if (!org) return Response.json({ error: "Organization not found" }, { status: 404 });
 
-          const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.organizationId, org.id)).limit(1);
-          const [memberCount] = await db.select({ count: count() }).from(members).where(eq(members.organizationId, org.id));
+          const [sub] = await getDb().select().from(subscriptions).where(eq(subscriptions.organizationId, org.id)).limit(1);
+          const [memberCount] = await getDb().select({ count: count() }).from(members).where(eq(members.organizationId, org.id));
           const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-          const [activeTunnelCount] = await db.select({ count: count() }).from(tunnels)
+          const [activeTunnelCount] = await getDb().select({ count: count() }).from(tunnels)
             .where(and(eq(tunnels.organizationId, org.id), gte(tunnels.lastSeenAt, fiveMinutesAgo)));
-          const [totalTunnelCount] = await db.select({ count: count() }).from(tunnels).where(eq(tunnels.organizationId, org.id));
-          const [subdomainCount] = await db.select({ count: count() }).from(subdomains).where(eq(subdomains.organizationId, org.id));
-          const [domainCount] = await db.select({ count: count() }).from(domains).where(eq(domains.organizationId, org.id));
+          const [totalTunnelCount] = await getDb().select({ count: count() }).from(tunnels).where(eq(tunnels.organizationId, org.id));
+          const [subdomainCount] = await getDb().select({ count: count() }).from(subdomains).where(eq(subdomains.organizationId, org.id));
+          const [domainCount] = await getDb().select({ count: count() }).from(domains).where(eq(domains.organizationId, org.id));
 
-          const memberList = await db.select({
+          const memberList = await getDb().select({
             id: members.id,
             userId: members.userId,
             role: members.role,
@@ -68,12 +68,12 @@ export const Route = createFileRoute("/api/admin/organizations/$slug")({
         try {
           const { slug } = params;
           const body = await request.json();
-          const [org] = await db.select().from(organizations).where(eq(organizations.slug, slug)).limit(1);
+          const [org] = await getDb().select().from(organizations).where(eq(organizations.slug, slug)).limit(1);
           if (!org) return Response.json({ error: "Organization not found" }, { status: 404 });
 
           // Update organization fields
           if (body.name || body.slug) {
-            await db.update(organizations).set({
+            await getDb().update(organizations).set({
               ...(body.name && { name: body.name }),
               ...(body.slug && { slug: body.slug }),
             }).where(eq(organizations.id, org.id));
@@ -81,15 +81,15 @@ export const Route = createFileRoute("/api/admin/organizations/$slug")({
 
           // Update subscription
           if (body.plan || body.status) {
-            const [existingSub] = await db.select().from(subscriptions).where(eq(subscriptions.organizationId, org.id)).limit(1);
+            const [existingSub] = await getDb().select().from(subscriptions).where(eq(subscriptions.organizationId, org.id)).limit(1);
             if (existingSub) {
-              await db.update(subscriptions).set({
+              await getDb().update(subscriptions).set({
                 ...(body.plan && { plan: body.plan }),
                 ...(body.status && { status: body.status }),
                 updatedAt: new Date(),
               }).where(eq(subscriptions.organizationId, org.id));
             } else {
-              await db.insert(subscriptions).values({
+              await getDb().insert(subscriptions).values({
                 id: crypto.randomUUID(),
                 organizationId: org.id,
                 plan: body.plan || "free",

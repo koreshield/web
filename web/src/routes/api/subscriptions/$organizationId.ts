@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { subscriptions } from "../../../db/subscription-schema";
 import { eq, count } from "drizzle-orm";
 import { auth } from "../../../lib/auth";

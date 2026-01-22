@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq, sql } from "drizzle-orm";
 
-import { db } from "../../../../db";
+import { getDb } from "../../../../db";
 import { subdomains } from "../../../../db/app-schema";
 import { subscriptions } from "../../../../db/subscription-schema";
 import { requireOrgFromSlug } from "../../../../lib/org";
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/api/$orgSlug/subdomains/")({
         // Use a transaction with row-level locking to prevent race conditions
         // This ensures atomic check-and-insert to enforce subdomain limits
         try {
-          const result = await db.transaction(async (tx) => {
+          const result = await getDb().transaction(async (tx) => {
             // Lock the organization's subscription row to serialize concurrent requests
             const [subscription] = await tx
               .select()

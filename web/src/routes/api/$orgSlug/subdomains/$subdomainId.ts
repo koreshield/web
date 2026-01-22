@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
-import { db } from "../../../../db";
+import { getDb } from "../../../../db";
 import { subdomains } from "../../../../db/app-schema";
 import { requireOrgFromSlug } from "../../../../lib/org";
 
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/api/$orgSlug/subdomains/$subdomainId")({
           return Response.json({ error: "Unauthorized" }, { status: 403 });
         }
 
-        await db.delete(subdomains).where(eq(subdomains.id, subdomainId));
+        await getDb().delete(subdomains).where(eq(subdomains.id, subdomainId));
 
         return Response.json({ success: true });
       },

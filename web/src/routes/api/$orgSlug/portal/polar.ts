@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CustomerPortal } from "@polar-sh/tanstack-start";
 import { eq } from "drizzle-orm";
 
-import { db } from "../../../../db";
+import { getDb } from "../../../../db";
 import { subscriptions } from "../../../../db/subscription-schema";
 import { auth } from "../../../../lib/auth";
 

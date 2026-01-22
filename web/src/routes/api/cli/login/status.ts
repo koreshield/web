@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "../../../../db";
+import { getDb } from "../../../../db";
 import { cliLoginSessions } from "../../../../db/auth-schema";
 import { eq, and, gt } from "drizzle-orm";
 import {rateLimiters, getClientIdentifier, createRateLimitResponse,} from "../../../../lib/rate-limiter";
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/api/cli/login/status")({
             return Response.json({ status: "expired" }, { status: 400 });
           }
 
-          const session = await db.query.cliLoginSessions.findFirst({
+          const session = await getDb().query.cliLoginSessions.findFirst({
             where: and(
               eq(cliLoginSessions.code, code),
               gt(cliLoginSessions.expiresAt, new Date()),

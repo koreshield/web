@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { and, eq } from "drizzle-orm";
 import { randomBytes } from "crypto";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { authTokens } from "../../../db/app-schema";
 import { requireOrgFromSlug } from "../../../lib/org";
 

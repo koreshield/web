@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { inArray } from "drizzle-orm";
 
-import { db } from "../../../../db";
+import { getDb } from "../../../../db";
 import { tunnels } from "../../../../db/app-schema";
 import { redis } from "../../../../lib/redis";
 import { requireOrgFromSlug } from "../../../../lib/org";

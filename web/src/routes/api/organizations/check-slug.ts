@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
 import { auth } from "../../../lib/auth";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { organizations } from "../../../db/auth-schema";
 import { isReservedSlug } from "@/shared/reserved-slugs";
 
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/api/organizations/check-slug")({
           return Response.json({ available: false, reason: "reserved" });
         }
 
-        const existingOrg = await db.query.organizations.findFirst({
+        const existingOrg = await getDb().query.organizations.findFirst({
           where: eq(organizations.slug, slug),
         });
 

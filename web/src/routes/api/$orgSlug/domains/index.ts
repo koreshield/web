@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-import { db } from "../../../../db";
+import { getDb } from "../../../../db";
 import { domains } from "../../../../db/app-schema";
 import { requireOrgFromSlug } from "../../../../lib/org";
 
@@ -54,7 +54,7 @@ export const Route = createFileRoute("/api/$orgSlug/domains/")({
           );
         }
 
-        const existingDomain = await db.query.domains.findFirst({
+        const existingDomain = await getDb().query.domains.findFirst({
           where: eq(domains.domain, domain.trim()),
         });
 

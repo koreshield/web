@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { tunnels } from "../../../db/app-schema";
 import { subscriptions } from "../../../db/subscription-schema";
 import { getPlanLimits } from "../../../lib/subscription-plans";
@@ -76,7 +76,7 @@ export const Route = createFileRoute("/api/tunnel/register")({
           const tunnelUrl = url;
 
           // Use a transaction with row-level locking to prevent race conditions
-          const result = await db.transaction(async (tx) => {
+          const result = await getDb().transaction(async (tx) => {
             // Lock the organization's subscription row to serialize concurrent requests
             const [subscription] = await tx
               .select()
