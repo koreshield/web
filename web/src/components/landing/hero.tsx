@@ -2,13 +2,11 @@ import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ArrowRight, Copy, Check } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { usePostHog } from "posthog-js/react";
 import { Terminal } from "./Terminal";
 import { BeamGroup } from "./beam-group";
 
 export const Hero = () => {
   const [copied, setCopied] = useState(false);
-  const posthog = usePostHog();
 
   const copyCommand = () => {
     navigator.clipboard.writeText("pip install koreshield");
@@ -36,7 +34,6 @@ export const Hero = () => {
           <a
             href="https://github.com/koreshield/koreshield"
             target="_blank"
-            onClick={() => posthog.capture("github_link_clicked")}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/60 backdrop-blur-md hover:bg-white/10 hover:border-electric-blue/30 hover:text-white transition-all duration-300 animate-fade-in group"
           >
             <span className="w-2 h-2 rounded-full bg-security-green animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
