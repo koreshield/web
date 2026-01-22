@@ -41,7 +41,11 @@ class KoreShieldProxy:
             sys.path.insert(0, str(_src_dir))
 
         from providers.openai import OpenAIProvider
+        from providers.anthropic import AnthropicProvider
+        from providers.deepseek import DeepSeekProvider
         self.OpenAIProvider = OpenAIProvider
+        self.AnthropicProvider = AnthropicProvider
+        self.DeepSeekProvider = DeepSeekProvider
 
         self.config = config
         self.app = FastAPI(title="LLM Firewall Community", version="0.1.0")
@@ -71,15 +75,31 @@ class KoreShieldProxy:
     def _init_provider(self, config: dict):
         """Initialize the LLM provider based on configuration."""
         providers_config = config.get("providers", {})
+        logger.info(f"Available providers config: {providers_config}")
 
-        # For MVP, default to OpenAI
-        if providers_config.get("openai", {}).get("enabled", True):
-            api_key = os.getenv("OPENAI_API_KEY")
-            if not api_key:
-                logger.warning("OPENAI_API_KEY not found in environment variables")
-            else:
-                self.provider = self.OpenAIProvider(api_key=api_key)
-                logger.info("OpenAI provider initialized")
+        # Try providers in order of preference
+        provider_options = [
+            ("deepseek", "DEEPSEEK_API_KEY", self.DeepSeekProvider),
+            ("openai", "OPENAI_API_KEY", self.OpenAIProvider),
+            ("anthropic", "ANTHROPIC_API_KEY", self.AnthropicProvider),
+        ]
+
+        for provider_name, env_var, provider_class in provider_options:
+            provider_cfg = providers_config.get(provider_name, {})
+            logger.info(f"Checking provider {provider_name}: enabled={provider_cfg.get('enabled', False)}")
+            if provider_cfg.get("enabled", False):
+                api_key = os.getenv(env_var)
+                logger.info(f"Provider {provider_name}: API key {'found' if api_key else 'NOT found'} for env var {env_var}")
+                if api_key:
+                    base_url = provider_cfg.get("base_url")
+                    self.provider = provider_class(api_key=api_key, base_url=base_url)
+                    logger.info(f"{provider_name.capitalize()} provider initialized")
+                    break
+                else:
+                    logger.warning(f"{env_var} not found in environment variables")
+
+        if not self.provider:
+            logger.warning("No LLM provider configured. Set up API keys and enable a provider in config.yaml")
 
     def _setup_routes(self):
         """Set up FastAPI routes."""
@@ -336,3 +356,45 @@ class KoreShieldProxy:
                 }
             },
         )
+
+
+# Create global app instance for uvicorn
+def create_app(config_path: str = None) -> FastAPI:
+    """
+    Create and configure the FastAPI application.
+
+    Args:
+        config_path: Path to configuration file (optional, will auto-detect)
+
+    Returns:
+        Configured FastAPI application
+    """
+    import yaml
+    from pathlib import Path
+
+    # Auto-detect config path based on script location
+    if config_path is None:
+        script_dir = Path(__file__).parent.parent.parent  # Go up to llm-firewall/
+        config_path = script_dir / "config" / "config.yaml"
+
+    config_file = Path(config_path)
+    if not config_file.exists():
+        # Try example config
+        example_config = config_file.parent / "config.example.yaml"
+        if example_config.exists():
+            print(f"Loading example config from: {example_config}")
+            config = yaml.safe_load(example_config.read_text()) or {}
+        else:
+            print("Warning: No config file found")
+            config = {}
+    else:
+        print(f"Loading config from: {config_file}")
+        config = yaml.safe_load(config_file.read_text()) or {}
+
+    # Create proxy instance
+    proxy = KoreShieldProxy(config)
+    return proxy.app
+
+
+# Global app instance for direct uvicorn usage
+app = create_app()
