@@ -6,7 +6,7 @@ import pytest
 import tempfile
 import os
 from datetime import datetime, timedelta
-from koreshield.list_manager import ListManager, ListType, ListEntry
+from src.koreshield.list_manager import ListManager, ListType, ListEntry
 
 
 class TestListManager:

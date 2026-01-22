@@ -22,14 +22,14 @@ def mock_config():
 @pytest.fixture
 def proxy(mock_config):
     """Create a proxy instance for testing."""
-    with patch.object(KoreShieldProxy, '_init_provider'):
+    with patch.object(KoreShieldProxy, '_init_providers'):
         proxy = KoreShieldProxy(mock_config)
         return proxy
 
 
 def test_proxy_initialization(mock_config):
     """Test that proxy initializes correctly."""
-    with patch.object(KoreShieldProxy, '_init_provider'):
+    with patch.object(KoreShieldProxy, '_init_providers'):
         proxy = KoreShieldProxy(mock_config)
         assert proxy is not None
         assert proxy.app is not None
@@ -97,7 +97,9 @@ async def test_proxy_forwards_safe_requests(proxy):
     mock_provider.chat_completion = AsyncMock(
         return_value={"choices": [{"message": {"content": "Test response"}}]}
     )
-    proxy.provider = mock_provider
+    # Set up providers list for multi-provider support
+    proxy.providers = [mock_provider]
+    proxy.provider_priority = ["openai"]
 
     client = TestClient(proxy.app)
 
