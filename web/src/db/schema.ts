@@ -31,6 +31,21 @@ import {
 
 import { subscriptions, subscriptionsRelations } from "./subscription-schema";
 
+import {
+  firewallConfigs,
+  apiProviders,
+  securityEvents,
+  firewallMetrics,
+  alertRules,
+  alertHistory,
+  firewallConfigsRelations,
+  apiProvidersRelations,
+  securityEventsRelations,
+  firewallMetricsRelations,
+  alertRulesRelations,
+  alertHistoryRelations,
+} from "./firewall-schema";
+
 export {
   accounts,
   sessions,
@@ -48,6 +63,12 @@ export {
   authTokens,
   organizationSettings,
   subscriptions,
+  firewallConfigs,
+  apiProviders,
+  securityEvents,
+  firewallMetrics,
+  alertRules,
+  alertHistory,
   tunnelsRelations,
   subdomainsRelations,
   domainsRelations,
@@ -59,4 +80,10 @@ export {
   cliUserTokensRelations,
   cliOrgTokensRelations,
   subscriptionsRelations,
+  firewallConfigsRelations,
+  apiProvidersRelations,
+  securityEventsRelations,
+  firewallMetricsRelations,
+  alertRulesRelations,
+  alertHistoryRelations,
 };
