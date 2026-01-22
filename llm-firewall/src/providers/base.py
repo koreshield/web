@@ -44,6 +44,22 @@ class BaseProvider(ABC):
         """
         pass
 
+    async def health_check(self) -> bool:
+        """
+        Perform a basic health check for the provider.
+
+        Returns:
+            True if provider is healthy, False otherwise
+        """
+        try:
+            # Simple health check - try to make a minimal request
+            # This is a basic implementation; providers can override for more specific checks
+            test_messages = [{"role": "user", "content": "Hello"}]
+            await self.chat_completion(test_messages, max_tokens=1)
+            return True
+        except Exception:
+            return False
+
     async def close(self):
         """Close the HTTP client."""
         await self.client.aclose()

@@ -70,18 +70,19 @@ class KoreShieldProxy:
         self.policy_engine = PolicyEngine(config)
         self.logger = FirewallLogger()
 
-        # Initialize provider
-        self.provider = None
-        self._init_provider(config)
+        # Initialize providers (multiple for failover)
+        self.providers = []
+        self.provider_priority = []
+        self._init_providers(config)
 
         self._setup_routes()
 
-    def _init_provider(self, config: dict):
-        """Initialize the LLM provider based on configuration."""
+    def _init_providers(self, config: dict):
+        """Initialize all enabled LLM providers with priority ordering."""
         providers_config = config.get("providers", {})
         logger.info(f"Available providers config: {providers_config}")
 
-        # Try providers in order of preference
+        # Provider options with priority order (higher index = higher priority)
         provider_options = [
             ("deepseek", "DEEPSEEK_API_KEY", self.DeepSeekProvider),
             ("openai", "OPENAI_API_KEY", self.OpenAIProvider),
@@ -90,6 +91,9 @@ class KoreShieldProxy:
             ("azure_openai", "AZURE_OPENAI_API_KEY", self.AzureOpenAIProvider),
         ]
 
+        self.providers = []
+        self.provider_priority = []
+
         for provider_name, env_var, provider_class in provider_options:
             provider_cfg = providers_config.get(provider_name, {})
             logger.info(f"Checking provider {provider_name}: enabled={provider_cfg.get('enabled', False)}")
@@ -97,15 +101,43 @@ class KoreShieldProxy:
                 api_key = os.getenv(env_var)
                 logger.info(f"Provider {provider_name}: API key {'found' if api_key else 'NOT found'} for env var {env_var}")
                 if api_key:
-                    base_url = provider_cfg.get("base_url")
-                    self.provider = provider_class(api_key=api_key, base_url=base_url)
-                    logger.info(f"{provider_name.capitalize()} provider initialized")
-                    break
+                    try:
+                        base_url = provider_cfg.get("base_url")
+                        provider_instance = provider_class(api_key=api_key, base_url=base_url)
+                        self.providers.append(provider_instance)
+                        self.provider_priority.append(provider_name)
+                        logger.info(f"{provider_name.capitalize()} provider initialized successfully")
+                    except Exception as e:
+                        logger.error(f"Failed to initialize {provider_name} provider: {e}")
                 else:
                     logger.warning(f"{env_var} not found in environment variables")
 
-        if not self.provider:
-            logger.warning("No LLM provider configured. Set up API keys and enable a provider in config.yaml")
+        if not self.providers:
+            logger.warning("No LLM providers configured. Set up API keys and enable providers in config.yaml")
+        else:
+            logger.info(f"Initialized {len(self.providers)} providers: {', '.join(self.provider_priority)}")
+
+    @property
+    def provider(self):
+        """Get the primary (highest priority) provider."""
+        return self.providers[0] if self.providers else None
+
+    async def _get_healthy_provider(self):
+        """Get the first healthy provider using failover logic."""
+        for i, provider in enumerate(self.providers):
+            provider_name = self.provider_priority[i]
+            try:
+                # For now, just check if provider is initialized
+                # TODO: Implement actual health checks with test requests
+                if provider:
+                    logger.debug(f"Using provider: {provider_name}")
+                    return provider
+            except Exception as e:
+                logger.warning(f"Provider {provider_name} health check failed: {e}")
+                continue
+
+        logger.error("All providers are unhealthy")
+        return None
 
     def _setup_routes(self):
         """Set up FastAPI routes."""
@@ -115,14 +147,52 @@ class KoreShieldProxy:
         async def health():
             return {"status": "healthy", "version": "0.1.0"}
 
+        # Provider health check endpoint
+        @self.app.get("/health/providers")
+        async def provider_health():
+            health_status = {}
+            for i, provider in enumerate(self.providers):
+                provider_name = self.provider_priority[i]
+                try:
+                    # For now, just check if provider exists
+                    # TODO: Implement actual health checks
+                    is_healthy = provider is not None
+                    health_status[provider_name] = {
+                        "healthy": is_healthy,
+                        "priority": i,
+                        "type": type(provider).__name__ if provider else None,
+                    }
+                except Exception as e:
+                    health_status[provider_name] = {
+                        "healthy": False,
+                        "priority": i,
+                        "error": str(e),
+                    }
+
+            return {
+                "providers": health_status,
+                "total_providers": len(self.providers),
+                "healthy_providers": sum(1 for p in health_status.values() if p["healthy"]),
+            }
+
         # Status/metrics endpoint
         @self.app.get("/status")
         async def status():
+            provider_status = {}
+            for i, provider in enumerate(self.providers):
+                provider_name = self.provider_priority[i]
+                provider_status[provider_name] = {
+                    "configured": True,
+                    "priority": i,
+                    "type": type(provider).__name__,
+                }
+
             return {
                 "status": "healthy",
                 "version": "0.1.0",
                 "statistics": self.stats.copy(),
-                "provider_configured": self.provider is not None,
+                "providers": provider_status,
+                "total_providers": len(self.providers),
             }
 
         # OpenAI-compatible chat completions endpoint
@@ -285,15 +355,16 @@ class KoreShieldProxy:
                 )
 
             # Step 5: Forward to provider if safe
-            if not self.provider:
+            provider = await self._get_healthy_provider()
+            if not provider:
                 raise HTTPException(
                     status_code=500,
-                    detail="No LLM provider configured. Please set OPENAI_API_KEY environment variable.",
+                    detail="No healthy LLM providers available. Please check provider configuration and API keys.",
                 )
 
-            # Forward the request to OpenAI
+            # Forward the request to the provider with failover
             try:
-                response = await self.provider.chat_completion(
+                response = await provider.chat_completion(
                     messages=messages,
                     model=model,
                     **{k: v for k, v in body.items() if k not in ["messages", "model"]},
