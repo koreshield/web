@@ -9,8 +9,8 @@ export function MobileHeader() {
     organizations?.find((org) => org.slug === orgSlug) || organizations?.[0];
 
   return (
-    <header className="md:hidden flex items-center gap-3 px-4 py-3 bg-[#070707] border-b border-white/5">
-      <img src="/logo.png" alt="KoreShield Logo" className="w-8" />
+    <header className="md:hidden flex items-center gap-3 px-4 py-3 bg-[#050a14] border-b border-white/5">
+      <img src="/logo-padlock.png" alt="KoreShield Logo" className="w-8" />
       <div className="flex-1 min-w-0">
         <p className="font-bold text-white text-sm tracking-tight truncate">
           {selectedOrg?.name || "KoreShield"}

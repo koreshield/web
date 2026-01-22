@@ -126,14 +126,14 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
   return (
     <div
-      className={`${isCollapsed ? "w-15" : "w-56"} h-full flex flex-col motion-safe:transition-all motion-safe:duration-150 motion-safe:ease-in-out motion-reduce:transition-none bg-[#070707] overflow-hidden`}
+      className={`${isCollapsed ? "w-15" : "w-56"} h-full flex flex-col motion-safe:transition-all motion-safe:duration-150 motion-safe:ease-in-out motion-reduce:transition-none bg-[#050a14] border-r border-white/5 overflow-hidden`}
     >
       <div
         className={`p-4 flex items-center ${isCollapsed ? "justify-center" : "justify-between"}`}
       >
         {!isCollapsed && (
           <div className="flex items-center gap-3 px-2">
-            <img src="/logo.png" alt="KoreShield Logo" className="w-8" />
+            <img src="/logo-padlock.png" alt="KoreShield Logo" className="w-8" />
             <p className="font-bold text-white text-lg tracking-tight">
               KoreShield
             </p>

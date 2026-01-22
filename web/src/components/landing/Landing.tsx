@@ -26,7 +26,7 @@ export const Landing = () => {
 
         <OpenSource />
 
-        <footer className="border-t border-white/10 py-12 bg-black">
+        <footer className="border-t border-white/10 py-12 bg-[#050a14]">
           <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">
               <span className="font-bold">KoreShield</span>

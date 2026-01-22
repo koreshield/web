@@ -26,8 +26,8 @@ export const Hero = () => {
         <Canvas camera={{ position: [0, 0, 15], fov: 45 }}>
           <color attach="background" args={["#050a14"]} />
           <fog attach="fog" args={["#050a14", 5, 20]} />
-          {/* Tilted Upside Down: Rotated 180 degrees on Z axis and repositioned */}
-          <BeamGroup position={[10, 0, 0]} rotation={[0, 0, Math.PI]} />
+          {/* Vertical Beams: Rotated 90 degrees on Z axis to point up */}
+          <BeamGroup position={[0, -10, -5]} rotation={[0, 0, Math.PI / 2]} />
         </Canvas>
       </div>
 

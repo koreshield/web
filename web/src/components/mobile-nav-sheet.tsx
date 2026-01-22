@@ -81,17 +81,15 @@ export function MobileNavSheet({
     <>
       {/* Backdrop */}
       <div
-        className={`md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         onClick={onClose}
       />
 
       {/* Sheet */}
       <div
-        className={`md:hidden fixed inset-x-0 bottom-0 z-50 bg-[#0a0a0a] border-t border-white/10 rounded-t-3xl transition-transform duration-300 ease-out ${
-          isOpen ? "translate-y-0" : "translate-y-full"
-        }`}
+        className={`md:hidden fixed inset-x-0 bottom-0 z-50 bg-[#050a14] border-t border-white/10 rounded-t-3xl transition-transform duration-300 ease-out ${isOpen ? "translate-y-0" : "translate-y-full"
+          }`}
       >
         {/* Handle bar */}
         <div className="flex justify-center py-3">

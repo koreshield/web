@@ -24,11 +24,17 @@ function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-accent/30 font-sans">
+    <div className="min-h-screen bg-[#050a14] text-white selection:bg-electric-blue/30 font-sans">
       <Navbar />
 
-      <div className="pt-32 pb-24 px-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="pt-32 pb-24 px-6 relative overflow-hidden">
+        {/* Ambient backgrounds */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-[10%] left-[-20%] w-[60%] h-[60%] bg-electric-blue/5 rounded-full blur-[150px]" />
+          <div className="absolute bottom-[10%] right-[-20%] w-[60%] h-[60%] bg-cyber-purple/5 rounded-full blur-[150px]" />
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
               Simple, transparent pricing
@@ -53,16 +59,15 @@ function PricingPage() {
               return (
                 <div
                   key={plan.id}
-                  className={`relative flex flex-col p-8 rounded-3xl border transition-all duration-300 ${
-                    plan.id === "beam"
-                      ? "bg-linear-to-br from-accent/10 via-white/5 to-purple-500/10 border-accent shadow-[0_0_60px_rgba(255,255,255,0.15)] ring-2 ring-accent/30 scale-[1.02]"
-                      : "bg-[#0c0c0c] border-white/10 hover:border-white/20"
-                  }`}
+                  className={`relative flex flex-col p-8 rounded-3xl border transition-all duration-300 ${plan.id === "beam"
+                      ? "bg-white/10 backdrop-blur-xl border-electric-blue/50 shadow-[0_0_60px_rgba(59,130,246,0.15)] ring-1 ring-electric-blue/30 scale-[1.02]"
+                      : "bg-white/5 backdrop-blur-lg border-white/10 hover:border-white/20 hover:bg-white/10"
+                    }`}
                 >
                   {plan.id === "beam" && (
                     <>
-                      <div className="absolute inset-0 rounded-3xl bg-linear-to-br from-accent/5 via-transparent to-purple-500/5 pointer-events-none" />
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-linear-to-r from-accent to-yellow-400 text-black text-xs font-bold rounded-full uppercase tracking-wider shadow-lg shadow-accent/30 flex items-center gap-1.5">
+                      <div className="absolute inset-0 rounded-3xl bg-linear-to-br from-electric-blue/10 via-transparent to-purple-500/5 pointer-events-none" />
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-electric-blue text-white text-xs font-bold rounded-full uppercase tracking-wider shadow-lg shadow-electric-blue/30 flex items-center gap-1.5">
                         <span className="animate-pulse">✨</span>
                         Recommended
                         <span className="animate-pulse">✨</span>
@@ -72,7 +77,7 @@ function PricingPage() {
 
                   <div className="mb-8 relative">
                     <h3
-                      className={`text-xl font-bold mb-2 ${plan.id === "beam" ? "text-accent" : ""}`}
+                      className={`text-xl font-bold mb-2 ${plan.id === "beam" ? "text-electric-blue" : ""}`}
                     >
                       {plan.name}
                     </h3>
@@ -84,25 +89,21 @@ function PricingPage() {
 
                   <div className="flex-1 space-y-4 mb-8">
                     <FeatureItem
-                      label={`${
-                        f.maxTunnels === -1 ? "Unlimited" : f.maxTunnels
-                      } Tunnel${f.maxTunnels === 1 ? "" : "s"}`}
+                      label={`${f.maxTunnels === -1 ? "Unlimited" : f.maxTunnels
+                        } Tunnel${f.maxTunnels === 1 ? "" : "s"}`}
                     />
                     <FeatureItem
-                      label={`${
-                        f.maxDomains === -1 ? "Unlimited" : f.maxDomains
-                      } Custom Domain${f.maxDomains === 1 ? "" : "s"}`}
+                      label={`${f.maxDomains === -1 ? "Unlimited" : f.maxDomains
+                        } Custom Domain${f.maxDomains === 1 ? "" : "s"}`}
                       included={f.maxDomains !== 0}
                     />
                     <FeatureItem
-                      label={`${
-                        f.maxSubdomains === -1 ? "Unlimited" : f.maxSubdomains
-                      } Subdomain${f.maxSubdomains === 1 ? "" : "s"}`}
+                      label={`${f.maxSubdomains === -1 ? "Unlimited" : f.maxSubdomains
+                        } Subdomain${f.maxSubdomains === 1 ? "" : "s"}`}
                     />
                     <FeatureItem
-                      label={`${
-                        f.maxMembers === -1 ? "Unlimited" : f.maxMembers
-                      } Team Member${f.maxMembers === 1 ? "" : "s"}`}
+                      label={`${f.maxMembers === -1 ? "Unlimited" : f.maxMembers
+                        } Team Member${f.maxMembers === 1 ? "" : "s"}`}
                     />
                     <FeatureItem
                       label={`${formatBandwidth(f.bandwidthPerMonth)} Bandwidth`}
@@ -118,11 +119,10 @@ function PricingPage() {
 
                   <Link
                     to="/login"
-                    className={`w-full py-3 rounded-full font-bold text-center transition-all ${
-                      plan.id === "beam"
-                        ? "bg-white text-black hover:bg-gray-200"
-                        : "bg-white/10 text-white hover:bg-white/20"
-                    }`}
+                    className={`w-full py-3 rounded-xl font-bold text-center transition-all ${plan.id === "beam"
+                        ? "bg-electric-blue text-white hover:bg-electric-blue/90 hover:shadow-lg hover:shadow-electric-blue/20"
+                        : "bg-white/10 text-white hover:bg-white/20 border border-white/5"
+                      }`}
                   >
                     {plan.price === 0 ? "Get Started" : "Subscribe"}
                   </Link>
@@ -133,20 +133,20 @@ function PricingPage() {
         </div>
       </div>
 
-      <footer className="border-t border-white/10 py-12 bg-black">
+      <footer className="border-t border-white/10 py-12 bg-[#050a14] relative z-20">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="KoreShield Logo" className="w-6" />
+            <img src="/logo-padlock.png" alt="KoreShield Logo" className="w-8" />
             <span className="font-bold">KoreShield</span>
           </div>
           <div className="text-white/40 text-sm">
             © {new Date().getFullYear()} KoreShield Inc. All rights reserved.
           </div>
           <div className="flex gap-6 text-white/60">
-            <a href="#" className="hover:text-white transition-colors">
+            <a href="https://twitter.com/koreshield" target="_blank" className="hover:text-white transition-colors">
               Twitter
             </a>
-            <a href="#" className="hover:text-white transition-colors">
+            <a href="https://github.com/koreshield/koreshield" target="_blank" className="hover:text-white transition-colors">
               GitHub
             </a>
           </div>

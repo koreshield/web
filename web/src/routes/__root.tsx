@@ -63,7 +63,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-[#050a14] font-sans antialiased text-white">
         <RootProvider>{children}</RootProvider>
         <Scripts />
       </body>
