@@ -116,7 +116,7 @@ function AdminOverview({ token }: { token: string }) {
   const clearToken = useAdminStore((s) => s.clearToken);
   const [period, setPeriod] = useState("24h");
   const [overview, setOverview] = useState<any>(null);
-  const [tunnelData, setTunnelData] = useState<any[]>([]);
+  const [securityData, setSecurityData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -145,7 +145,7 @@ function AdminOverview({ token }: { token: string }) {
           setOverview(overviewRes);
         }
         if (!("error" in statsRes)) {
-          setTunnelData(
+          setSecurityData(
             statsRes.map((d: any) => ({
               ...d,
               time: new Date(d.time.replace(" ", "T")).getTime(),
@@ -227,10 +227,16 @@ function AdminOverview({ token }: { token: string }) {
           icon={<Building2 size={20} />}
         />
         <AdminStatsCard
-          title="Active Tunnels"
-          value={overview?.tunnels?.active?.toLocaleString() || "0"}
+          title="Security Requests"
+          value={overview?.security?.totalRequests?.toLocaleString() || "0"}
           icon={<Network size={20} />}
-          subtitle={`${overview?.tunnels?.total || 0} total`}
+          subtitle={`${overview?.security?.requestsToday || 0} today`}
+        />
+        <AdminStatsCard
+          title="Threats Blocked"
+          value={overview?.security?.threatsBlocked?.toLocaleString() || "0"}
+          icon={<Activity size={20} />}
+          subtitle={`${overview?.security?.activeConfigs || 0} active configs`}
         />
         <AdminStatsCard
           title="Monthly Revenue"
@@ -241,16 +247,16 @@ function AdminOverview({ token }: { token: string }) {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Active Tunnels Chart */}
+        {/* Security Activity Chart */}
         <div className="lg:col-span-2 bg-white/2 border border-white/5 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-medium text-white flex items-center gap-2">
                 <Activity size={18} className="text-accent" />
-                Active Tunnels
+                Security Activity
               </h3>
               <p className="text-sm text-gray-500">
-                Tunnel activity over time
+                Firewall request activity over time
               </p>
             </div>
             <div className="flex bg-white/5 rounded-lg p-1">
@@ -271,19 +277,19 @@ function AdminOverview({ token }: { token: string }) {
           </div>
 
           <div className="h-72">
-            {loading && tunnelData.length === 0 ? (
+            {loading || securityData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-gray-500">
                 Loading...
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={tunnelData}
+                  data={securityData}
                   margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                 >
                   <defs>
                     <linearGradient
-                      id="colorTunnels"
+                      id="colorSecurity"
                       x1="0"
                       y1="0"
                       x2="0"
@@ -324,11 +330,11 @@ function AdminOverview({ token }: { token: string }) {
                   />
                   <Area
                     type="monotone"
-                    dataKey="active_tunnels"
+                    dataKey="security_events"
                     stroke="#FFA62B"
                     strokeWidth={2}
                     fillOpacity={1}
-                    fill="url(#colorTunnels)"
+                    fill="url(#colorSecurity)"
                   />
                 </AreaChart>
               </ResponsiveContainer>

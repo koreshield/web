@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "../../../db";
-import { users, organizations, tunnels, subscriptions } from "../../../db/schema";
+import { getDb } from "../../../db";
+import { users, organizations, securityEvents, subscriptions } from "../../../db/schema";
 import { redis } from "../../../lib/redis";
 import { hashToken } from "../../../lib/hash";
 import { sql, count, gte, desc, eq } from "drizzle-orm";
-import { query as tigerQuery } from "../../../lib/tigerdata";
 
 export const Route = createFileRoute("/api/admin/charts")({
   server: {
@@ -63,37 +62,27 @@ export const Route = createFileRoute("/api/admin/charts")({
             .groupBy(sql`DATE(${subscriptions.updatedAt})`, subscriptions.plan)
             .orderBy(sql`DATE(${subscriptions.updatedAt})`);
 
-          // Tunnel protocol distribution
-          const protocolDist = await db
+          // Security event severity distribution
+          const severityDist = await db
             .select({
-              protocol: tunnels.protocol,
+              severity: securityEvents.severity,
               count: count(),
             })
-            .from(tunnels)
-            .groupBy(tunnels.protocol);
+            .from(securityEvents)
+            .groupBy(securityEvents.severity);
 
-          // Hourly request activity (from TimescaleDB if available)
-          let hourlyRequests: { hour: string; requests: number }[] = [];
-          try {
-            const result = await tigerQuery(`
-              SELECT 
-                time_bucket('1 hour', ts) as hour,
-                SUM(active_tunnels) as requests
-              FROM active_tunnel_snapshots
-              WHERE ts >= NOW() - INTERVAL '24 hours'
-              GROUP BY hour
-              ORDER BY hour
-            `);
-            hourlyRequests = (result as any[]).map((r) => ({
-              hour: r.hour,
-              requests: Number(r.requests) || 0,
-            }));
-          } catch (e) {
-            // TimescaleDB might not be available; log in non-production for debugging
-            if (process.env.NODE_ENV !== "production") {
-              console.error("Failed to fetch hourly request activity from TimescaleDB:", e);
-            }
-          }
+          // Security events over time (last 7 days)
+          const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          const securityActivity = await db
+            .select({
+              date: sql<string>`DATE(${securityEvents.timestamp})`.as("date"),
+              actionTaken: securityEvents.actionTaken,
+              count: count(),
+            })
+            .from(securityEvents)
+            .where(gte(securityEvents.timestamp, sevenDaysAgo))
+            .groupBy(sql`DATE(${securityEvents.timestamp})`, securityEvents.actionTaken)
+            .orderBy(sql`DATE(${securityEvents.timestamp})`);
 
           // User verification status
           const verificationStatus = await db
@@ -113,40 +102,17 @@ export const Route = createFileRoute("/api/admin/charts")({
             .from(subscriptions)
             .groupBy(subscriptions.status);
 
-          // Top organizations by tunnel count
-          const topOrgsByTunnels = await db
+          // Top organizations by security events
+          const topOrgsByActivity = await db
             .select({
-              orgId: tunnels.organizationId,
-              orgName: organizations.name,
-              tunnelCount: count(),
+              provider: securityEvents.provider,
+              count: count(),
             })
-            .from(tunnels)
-            .leftJoin(organizations, eq(tunnels.organizationId, organizations.id))
-            .groupBy(tunnels.organizationId, organizations.name)
+            .from(securityEvents)
+            .where(gte(securityEvents.timestamp, thirtyDaysAgo))
+            .groupBy(securityEvents.provider)
             .orderBy(desc(count()))
             .limit(10);
-
-          // Weekly active tunnels trend (from TimescaleDB)
-          let weeklyTunnelTrend: { day: string; avg: number; max: number }[] = [];
-          try {
-            const result = await tigerQuery(`
-              SELECT 
-                time_bucket('1 day', ts) as day,
-                AVG(active_tunnels)::int as avg,
-                MAX(active_tunnels) as max
-              FROM active_tunnel_snapshots
-              WHERE ts >= NOW() - INTERVAL '7 days'
-              GROUP BY day
-              ORDER BY day
-            `);
-            weeklyTunnelTrend = (result as any[]).map((r) => ({
-              day: r.day,
-              avg: Number(r.avg) || 0,
-              max: Number(r.max) || 0,
-            }));
-          } catch (e) {
-            // TimescaleDB might not be available
-          }
 
           // Cumulative user growth
           const cumulativeUsers = await db
@@ -168,12 +134,11 @@ export const Route = createFileRoute("/api/admin/charts")({
             userSignups,
             orgGrowth,
             subChanges,
-            protocolDist,
-            hourlyRequests,
+            severityDist,
+            securityActivity,
             verificationStatus,
             subStatus,
-            topOrgsByTunnels,
-            weeklyTunnelTrend,
+            topOrgsByActivity,
             cumulativeGrowth: cumulativeGrowth.slice(-90), // Last 90 days
           });
         } catch (error) {

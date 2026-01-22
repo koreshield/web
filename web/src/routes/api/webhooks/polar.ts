@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Webhooks } from "@polar-sh/tanstack-start";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { subscriptions } from "../../../db/subscription-schema";
 import { eq } from "drizzle-orm";
 
@@ -58,7 +58,7 @@ async function handleSubscriptionCreated(subscription: any) {
   const planName = mapPolarProductToPlan(subscription.productId);
 
   try {
-    await db.insert(subscriptions).values({
+    await getDb().insert(subscriptions).values({
       id: crypto.randomUUID(),
       organizationId: subscription.metadata?.organizationId as string,
       plan: planName,

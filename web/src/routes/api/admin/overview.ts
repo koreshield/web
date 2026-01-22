@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "../../../db";
-import { users, organizations, tunnels, subscriptions } from "../../../db/schema";
+import { getDb } from "../../../db";
+import { users, organizations, subscriptions, securityEvents, firewallConfigs } from "../../../db/schema";
 import { redis } from "../../../lib/redis";
 import { hashToken } from "../../../lib/hash";
 import { SUBSCRIPTION_PLANS } from "../../../lib/subscription-plans";
-import { sql, count, gte, and } from "drizzle-orm";
+import { sql, count, gte, and, eq } from "drizzle-orm";
 
 export const Route = createFileRoute("/api/admin/overview")({
   server: {
@@ -86,28 +86,25 @@ export const Route = createFileRoute("/api/admin/overview")({
                 100
               : 0;
 
-          // Get tunnel stats
-          const [totalTunnels] = await db
+          // Get security event stats
+          const [totalRequests] = await db
             .select({ count: count() })
-            .from(tunnels);
+            .from(securityEvents);
 
-          // Get active tunnels from Redis (scan all org sets)
-          let activeTunnelCount = 0;
-          let cursor = "0";
-          do {
-            const [nextCursor, keys] = await redis.scan(
-              cursor,
-              "MATCH",
-              "org:*:online_tunnels",
-              "COUNT",
-              100
-            );
-            cursor = nextCursor;
-            for (const key of keys) {
-              const count = await redis.scard(key);
-              activeTunnelCount += count;
-            }
-          } while (cursor !== "0");
+          const [requestsToday] = await db
+            .select({ count: count() })
+            .from(securityEvents)
+            .where(gte(securityEvents.timestamp, oneDayAgo));
+
+          const [threatsBlocked] = await db
+            .select({ count: count() })
+            .from(securityEvents)
+            .where(eq(securityEvents.actionTaken, "blocked"));
+
+          const [activeConfigs] = await db
+            .select({ count: count() })
+            .from(firewallConfigs)
+            .where(eq(firewallConfigs.isActive, true));
 
           // Get subscription stats
           const subscriptionStats = await db
@@ -158,9 +155,11 @@ export const Route = createFileRoute("/api/admin/overview")({
               total: totalOrgs.count,
               growth: Math.round(orgGrowth * 10) / 10,
             },
-            tunnels: {
-              active: activeTunnelCount,
-              total: totalTunnels.count,
+            security: {
+              totalRequests: totalRequests.count,
+              requestsToday: requestsToday.count,
+              threatsBlocked: threatsBlocked.count,
+              activeConfigs: activeConfigs.count,
             },
             subscriptions: {
               byPlan,

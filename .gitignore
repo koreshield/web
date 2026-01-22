@@ -206,7 +206,7 @@ typings/
 
 # Next.js build output
 .next
-.output
+# .output/
 
 # Nuxt.js build / generate output
 .nuxt
