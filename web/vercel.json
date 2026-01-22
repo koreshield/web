@@ -4,8 +4,8 @@
   "installCommand": "npm install",
   "framework": null,
   "functions": {
-    "src/**/*.ts": {
-      "runtime": "@vercel/node"
+    "src/**/*.server.ts": {
+      "runtime": "nodejs20.x"
     }
   }
 }
