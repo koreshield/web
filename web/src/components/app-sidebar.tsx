@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -13,13 +13,9 @@ import {
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { authClient, usePermission } from "@/lib/auth-client";
-import { appClient } from "@/lib/app-client";
 import { NavItem } from "./sidebar/nav-item";
 import { OrganizationDropdown } from "./sidebar/organization-dropdown";
-import { PlanUsage } from "./sidebar/plan-usage";
 import { UserSection } from "./sidebar/user-section";
-import { useQuery } from "@tanstack/react-query";
-import { getPlanLimits } from "@/lib/subscription-plans";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -30,7 +26,6 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   const { setSelectedOrganization } = useAppStore();
   const { data: organizations = [] } = authClient.useListOrganizations();
   const [isOrgDropdownOpen, setIsOrgDropdownOpen] = useState(false);
-  const [activeTunnelsCount, setActiveTunnelsCount] = useState<number>(0);
   const { orgSlug } = useParams({ from: "/$orgSlug" });
 
   const selectedOrg =
@@ -38,34 +33,6 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
   const { data: session } = authClient.useSession();
   const user = session?.user;
-
-  const { data: subscriptionData } = useQuery({
-    queryKey: ["subscription", orgSlug],
-    queryFn: async () => {
-      if (!orgSlug) return null;
-      const response = await appClient.subscriptions.get(orgSlug);
-      if ("error" in response) throw new Error(response.error);
-      return response;
-    },
-    enabled: !!orgSlug,
-  });
-
-  const subscription = subscriptionData?.subscription;
-  const currentPlan = subscription?.plan || "free";
-  const planLimits = getPlanLimits(currentPlan as any);
-  const providerLimit = planLimits.maxProviders;
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      if (orgSlug) {
-        const response = await appClient.stats.overview(orgSlug);
-        if (response && "activeTunnels" in response) {
-          setActiveTunnelsCount(response.activeTunnels || 0);
-        }
-      }
-    };
-    fetchStats();
-  }, [orgSlug]);
 
   const { data: canManageBilling } = usePermission({
     billing: ["manage"],
@@ -160,16 +127,6 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           />
         ))}
       </div>
-
-      {!isCollapsed && (
-        <div className="px-3 pt-3 border-t border-white/5 bg-black/20">
-          <PlanUsage
-            activeProvidersCount={activeTunnelsCount}
-            limit={providerLimit}
-            currentPlan={currentPlan}
-          />
-        </div>
-      )}
 
       <UserSection user={user} isCollapsed={isCollapsed} />
     </div>
