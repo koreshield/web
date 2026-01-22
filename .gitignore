@@ -256,3 +256,4 @@ todo.md
 
 *.db
 build_output*.txt
+web/.output/
