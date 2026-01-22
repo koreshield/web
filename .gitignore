@@ -253,6 +253,7 @@ llm-firewall/
 todo.md
 *.md
 .DS_Store
+!web/src/lib/
 
 *.db
 build_output*.txt
