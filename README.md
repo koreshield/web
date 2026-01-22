@@ -1,10 +1,10 @@
 # KoreShield
 
-[![CI](https://github.com/1cbyc/koreshield/actions/workflows/test.yml/badge.svg)](https://github.com/1cbyc/koreshield/actions/workflows/test.yml)
-[![Lint](https://github.com/1cbyc/koreshield/actions/workflows/lint.yml/badge.svg)](https://github.com/1cbyc/koreshield/actions/workflows/lint.yml)
-[![Docker](https://github.com/1cbyc/koreshield/actions/workflows/docker.yml/badge.svg)](https://github.com/1cbyc/koreshield/actions/workflows/docker.yml)
+[![CI](https://github.com/koreshield/koreshield/actions/workflows/test.yml/badge.svg)](https://github.com/koreshield/koreshield/actions/workflows/test.yml)
+[![Lint](https://github.com/koreshield/koreshield/actions/workflows/lint.yml/badge.svg)](https://github.com/koreshield/koreshield/actions/workflows/lint.yml)
+[![Docker](https://github.com/koreshield/koreshield/actions/workflows/docker.yml/badge.svg)](https://github.com/koreshield/koreshield/actions/workflows/docker.yml)
 [![PyPI](https://img.shields.io/pypi/v/koreshield)](https://pypi.org/project/koreshield/)
-[![License](https://img.shields.io/github/license/1cbyc/koreshield)](https://github.com/1cbyc/koreshield/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/koreshield/koreshield)](https://github.com/koreshield/koreshield/blob/main/LICENSE)
 
 ## About
 
@@ -113,7 +113,7 @@ API keys are set via environment variables (e.g., `OPENAI_API_KEY`).
 ### Quick Start
 ```bash
 # Clone the repository
-git clone https://github.com/1cbyc/koreshield.git
+git clone https://github.com/koreshield/koreshield.git
 cd llm-firewall
 
 # Create virtual environment
