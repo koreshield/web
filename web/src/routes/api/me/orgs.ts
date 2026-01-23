@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { members, cliUserTokens, organizations } from "../../../db/auth-schema";
 import { eq } from "drizzle-orm";
 
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api/me/orgs")({
           const token = authHeader.substring(7);
 
           // Check if it's a CLI user token
-          const userToken = await db.query.cliUserTokens.findFirst({
+          const userToken = await getDb().query.cliUserTokens.findFirst({
             where: (cliUserTokens, { eq, gt, and }) =>
               and(
                 eq(cliUserTokens.token, token),

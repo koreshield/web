@@ -1,4 +1,9 @@
 {
   "title": "Getting Started",
-  "pages": ["installation", "authentication", "opening-a-tunnel"]
+  "pages": [
+    "installation",
+    "configuration",
+    "authentication",
+    "opening-a-tunnel"
+  ]
 }

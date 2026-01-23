@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  koreshield:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - JSON_LOGS=false
+    volumes:
+      - ../config:/app/config
+      - ../logs:/app/logs
+    restart: unless-stopped
+

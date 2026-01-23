@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { cliOrgTokens, members, cliUserTokens } from "../../../db/auth-schema";
 import { eq, and, gt } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/api/cli/exchange")({
           }
 
           // Verify user token
-          const userToken = await db.query.cliUserTokens.findFirst({
+          const userToken = await getDb().query.cliUserTokens.findFirst({
             where: and(
               eq(cliUserTokens.token, token),
               gt(cliUserTokens.expiresAt, new Date()),
@@ -44,7 +44,7 @@ export const Route = createFileRoute("/api/cli/exchange")({
           }
 
           // Verify user has access to org
-          const membership = await db.query.members.findFirst({
+          const membership = await getDb().query.members.findFirst({
             where: and(
               eq(members.userId, userToken.userId),
               eq(members.organizationId, orgId),
@@ -63,7 +63,7 @@ export const Route = createFileRoute("/api/cli/exchange")({
           const expiresAt = new Date();
           expiresAt.setDate(expiresAt.getDate() + 30);
 
-          await db.insert(cliOrgTokens).values({
+          await getDb().insert(cliOrgTokens).values({
             id: randomUUID(),
             token: orgToken,
             userId: userToken.userId,

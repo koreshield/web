@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { cliLoginSessions, cliUserTokens } from "../../../db/auth-schema";
 import { eq, and, gt } from "drizzle-orm";
 import { auth } from "../../../lib/auth";
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/api/cli/complete")({
           }
 
           // Verify session exists and is pending
-          const loginSession = await db.query.cliLoginSessions.findFirst({
+          const loginSession = await getDb().query.cliLoginSessions.findFirst({
             where: and(
               eq(cliLoginSessions.code, code),
               eq(cliLoginSessions.status, "pending"),
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/api/cli/complete")({
           const expiresAt = new Date();
           expiresAt.setDate(expiresAt.getDate() + 90);
 
-          await db.insert(cliUserTokens).values({
+          await getDb().insert(cliUserTokens).values({
             id: randomUUID(),
             token: userToken,
             userId: session.user.id,

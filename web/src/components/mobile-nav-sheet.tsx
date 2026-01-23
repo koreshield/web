@@ -6,7 +6,6 @@ import {
   Users,
   Key,
   Settings,
-  Bug,
   LogOut,
   Building2,
   Check,
@@ -15,7 +14,6 @@ import {
 import { authClient, usePermission } from "@/lib/auth-client";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ReportBugModal } from "./report-bug-modal";
 
 interface MobileNavSheetProps {
   isOpen: boolean;
@@ -35,7 +33,6 @@ export function MobileNavSheet({
   const { data: session } = authClient.useSession();
   const { data: organizations = [] } = authClient.useListOrganizations();
   const user = session?.user;
-  const [isReportBugModalOpen, setIsReportBugModalOpen] = useState(false);
 
   const { data: canManageBilling } = usePermission({
     billing: ["manage"],
@@ -193,16 +190,6 @@ export function MobileNavSheet({
         {/* Footer actions */}
         <div className="px-4 pb-6 pt-2 border-t border-white/5 space-y-1">
           <button
-            onClick={() => {
-              onClose();
-              setIsReportBugModalOpen(true);
-            }}
-            className="flex items-center gap-4 w-full px-4 py-3.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
-          >
-            <Bug size={NAV_ICON_SIZE} />
-            <span>Report a Bug</span>
-          </button>
-          <button
             onClick={handleLogout}
             className="flex items-center gap-4 w-full px-4 py-3.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors"
           >
@@ -211,12 +198,6 @@ export function MobileNavSheet({
           </button>
         </div>
       </div>
-
-      <ReportBugModal
-        isOpen={isReportBugModalOpen}
-        onClose={() => setIsReportBugModalOpen(false)}
-        userEmail={user?.email}
-      />
     </>
   );
 }

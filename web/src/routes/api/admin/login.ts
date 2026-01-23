@@ -37,7 +37,18 @@ export const Route = createFileRoute("/api/admin/login")({
         const tokenHash = hashToken(token);
         await redis.set(`admin:token:${tokenHash}`, "1", "EX", TOKEN_TTL_SECONDS);
 
-        return Response.json({ token, expiresIn: TOKEN_TTL_SECONDS });
+        // set HTTP-only cookie for 
+        const response = Response.json({ 
+          success: true, 
+          expiresIn: TOKEN_TTL_SECONDS 
+        });
+        
+        response.headers.set(
+          "Set-Cookie", 
+          `admin_token=${token}; HttpOnly; Secure; SameSite=Strict; Max-Age=${TOKEN_TTL_SECONDS}; Path=/`
+        );
+        
+        return response;
       },
     },
   },

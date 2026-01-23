@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { cliLoginSessions } from "../../../db/auth-schema";
 import { randomUUID, randomBytes } from "crypto";
 import {rateLimiters, getClientIdentifier, createRateLimitResponse,} from "../../../lib/rate-limiter";
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/api/cli/login")({
           const expiresAt = new Date();
           expiresAt.setMinutes(expiresAt.getMinutes() + 5); // 5 minute expiry
 
-          await db.insert(cliLoginSessions).values({
+          await getDb().insert(cliLoginSessions).values({
             id,
             code,
             status: "pending",

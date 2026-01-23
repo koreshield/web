@@ -1,11 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq, count } from "drizzle-orm";
 
-import { db } from "../../../db";
+import { getDb } from "../../../db";
 import { subscriptions } from "../../../db/subscription-schema";
-import { domains, subdomains } from "../../../db/app-schema";
 import { members } from "../../../db/auth-schema";
-import { redis } from "../../../lib/redis";
 import { requireOrgFromSlug } from "../../../lib/org";
 
 export const Route = createFileRoute("/api/$orgSlug/subscriptions")({
@@ -25,30 +23,17 @@ export const Route = createFileRoute("/api/$orgSlug/subscriptions")({
             .where(eq(subscriptions.organizationId, organizationId))
             .limit(1);
 
-          const [[domainCount], [subdomainCount], [memberCount], liveTunnels] =
-            await Promise.all([
-              db
-                .select({ value: count() })
-                .from(domains)
-                .where(eq(domains.organizationId, organizationId)),
-              db
-                .select({ value: count() })
-                .from(subdomains)
-                .where(eq(subdomains.organizationId, organizationId)),
-              db
-                .select({ value: count() })
-                .from(members)
-                .where(eq(members.organizationId, organizationId)),
-              redis.scard(`org:${organizationId}:online_tunnels`),
-            ]);
+          const [memberCount] = await Promise.all([
+            db
+              .select({ value: count() })
+              .from(members)
+              .where(eq(members.organizationId, organizationId)),
+          ]);
 
           return new Response(
             JSON.stringify({
               subscription: subscription || null,
               usage: {
-                tunnels: Number(liveTunnels ?? 0),
-                domains: Number(domainCount?.value ?? 0),
-                subdomains: Number(subdomainCount?.value ?? 0),
                 members: Number(memberCount?.value ?? 0),
               },
             }),

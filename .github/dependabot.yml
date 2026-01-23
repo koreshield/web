@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/llm-firewall"
+    directory: "/koreshield"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10

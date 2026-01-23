@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Building2, Users, Network, Globe, Crown, Save, Loader2 } from "lucide-react";
 import { appClient } from "@/lib/app-client";
-import { useAdminStore } from "@/lib/admin-store";
 
 export const Route = createFileRoute("/admin/organizations/$slug")({
   component: AdminOrganizationDetailPage,
@@ -23,7 +22,6 @@ const planColors: Record<string, string> = {
 function AdminOrganizationDetailPage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
-  const token = useAdminStore((s) => s.token);
   const queryClient = useQueryClient();
 
   const [name, setName] = useState("");
@@ -35,11 +33,10 @@ function AdminOrganizationDetailPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "organization", slug],
     queryFn: async () => {
-      const res = await appClient.admin.organization(token!, slug);
+      const res = await appClient.admin.organization(slug);
       if ("error" in res) throw new Error(res.error);
       return res;
     },
-    enabled: !!token,
   });
 
   // Initialize form when data loads
@@ -53,7 +50,7 @@ function AdminOrganizationDetailPage() {
 
   const updateMutation = useMutation({
     mutationFn: async (updates: { name?: string; slug?: string; plan?: string; status?: string }) => {
-      const res = await appClient.admin.updateOrganization(token!, slug, updates);
+      const res = await appClient.admin.updateOrganization(slug, updates);
       if ("error" in res) throw new Error(res.error);
       return res;
     },

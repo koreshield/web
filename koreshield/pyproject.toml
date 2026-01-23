@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "koreshield-server"
+version = "0.1.0"
+description = "Middleware proxy for protecting enterprise LLM integrations from prompt injection attacks"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Emmanuel Isaac", email = "ei@nsisong.com"}
+]
+keywords = ["llm", "security", "prompt-injection", "rag", "koreshield", "ai-safety"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "httpx>=0.25.0",
+    "python-multipart>=0.0.6",
+    "pyyaml>=6.0.1",
+    "structlog>=23.2.0",
+    "slowapi>=0.1.9",
+    "redis>=5.0.0",
+    "prometheus-client>=0.19.0",
+    "sqlalchemy>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "PyJWT>=2.0.0",
+    "cryptography>=41.0.0",
+    "gunicorn>=21.2.0",
+
+
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.11.0",
+    "flake8>=6.1.0",
+    "mypy>=1.7.0",
+    "ruff>=0.1.6",
+]
+
+[project.scripts]
+koreshield = "koreshield.cli:main_cli"
+
+[project.urls]
+Homepage = "https://github.com/nsisongltd/koreshield"
+Documentation = "https://github.com/nsisongltd/koreshield#readme"
+Repository = "https://github.com/nsisongltd/koreshield"
+Issues = "https://github.com/nsisongltd/koreshield/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=src --cov-report=html --cov-report=term"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]  # Line length handled by black
+

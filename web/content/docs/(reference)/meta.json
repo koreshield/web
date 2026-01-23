@@ -1,4 +1,13 @@
 {
   "title": "Reference",
-  "pages": ["protocols", "cli-reference", "architecture"]
+  "pages": [
+    "protocols",
+    "cli-reference",
+    "management-api",
+    "javascript-sdk",
+    "python-sdk",
+    "architecture",
+    "troubleshooting",
+    "faq"
+  ]
 }

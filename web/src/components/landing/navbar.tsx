@@ -58,7 +58,7 @@ export const Navbar = () => {
         </Link>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
-          <Link to="/docs/$" className="hover:text-electric-blue transition-colors">
+          <Link to="/docs" className="hover:text-electric-blue transition-colors">
             Documentation
           </Link>
           <Link to="/pricing" className="hover:text-electric-blue transition-colors">
@@ -109,7 +109,7 @@ export const Navbar = () => {
 
       {/* Mobile menu - full height with animation */}
       <div
-        className={`md:hidden fixed inset-0 bg-[#000000] z-[60] transition-all duration-300 ease-in-out ${mobileMenuOpen
+        className={`md:hidden fixed inset-0 bg-[#050a14] z-[60] transition-all duration-300 ease-in-out ${mobileMenuOpen
           ? "opacity-100 translate-x-0"
           : "opacity-0 translate-x-full pointer-events-none"
           }`}
@@ -135,7 +135,7 @@ export const Navbar = () => {
         <div className="flex flex-col h-[calc(100%-80px)] px-6 pb-8">
           <div className="flex flex-col gap-2 flex-1">
             <Link
-              to="/docs/$"
+              to="/docs"
               onClick={() => setMobileMenuOpen(false)}
               className="text-white/80 hover:text-white transition-colors py-4 text-2xl font-medium border-b border-white/10"
             >
