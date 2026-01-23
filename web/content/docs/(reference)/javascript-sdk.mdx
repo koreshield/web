@@ -11,13 +11,13 @@ The KoreShield JavaScript/TypeScript SDK provides a comprehensive, production-re
 
 ```bash
 # npm
-npm install koreshield-js
+npm install koreshield
 
 # yarn
-yarn add koreshield-js
+yarn add koreshield
 
 # pnpm
-pnpm add koreshield-js
+pnpm add koreshield
 ```
 
 ## Quick Start
@@ -25,7 +25,7 @@ pnpm add koreshield-js
 ### Node.js
 
 ```javascript
-import { createClient } from 'koreshield-js';
+import { createClient } from 'koreshield';
 
 const client = createClient({
     baseURL: 'https://your-koreshield-instance.com',
@@ -44,7 +44,7 @@ const response = await client.createChatCompletion({
 ### Browser
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/koreshield-js@latest/dist/browser/index.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/koreshield@latest/dist/browser/index.global.js"></script>
 <script>
 const client = KoreShield.createClient({
     baseURL: 'https://your-koreshield-instance.com',
@@ -56,7 +56,7 @@ const client = KoreShield.createClient({
 ### OpenAI Compatibility
 
 ```javascript
-import { KoreShieldOpenAI } from 'koreshield-js';
+import { KoreShieldOpenAI } from 'koreshield';
 
 // Drop-in replacement for OpenAI SDK
 const openai = new KoreShieldOpenAI({
@@ -141,7 +141,7 @@ const openai = new KoreShieldOpenAI(config);
 ### Basic Usage
 
 ```javascript
-import { createClient } from 'koreshield-js';
+import { createClient } from 'koreshield';
 
 const client = createClient({
     baseURL: process.env.KORESHIELD_BASE_URL,
@@ -196,7 +196,7 @@ const events = await client.getSecurityEvents({
 ### React/Next.js
 
 ```javascript
-import { createClient } from 'koreshield-js';
+import { createClient } from 'koreshield';
 import { useState, useEffect } from 'react';
 
 function ChatComponent() {
@@ -230,7 +230,7 @@ function ChatComponent() {
 
 ```javascript
 import express from 'express';
-import { createClient } from 'koreshield-js';
+import { createClient } from 'koreshield';
 
 const app = express();
 const koreShield = createClient({

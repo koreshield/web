@@ -10,11 +10,11 @@ Learn how to integrate KoreShield's JavaScript SDK with React and Next.js applic
 ## Installation
 
 ```bash
-npm install koreshield-js
+npm install koreshield
 # or
-yarn add koreshield-js
+yarn add koreshield
 # or
-pnpm add koreshield-js
+pnpm add koreshield
 ```
 
 ## Basic Setup
@@ -33,7 +33,7 @@ KORESHIELD_API_KEY=your-api-key-here
 Create a `lib/koreshield.ts` file:
 
 ```typescript
-import { createClient } from 'koreshield-js';
+import { createClient } from 'koreshield';
 
 export const koreShield = createClient({
     baseURL: process.env.KORESHIELD_BASE_URL!,
@@ -51,7 +51,7 @@ Create a custom hook for chat functionality:
 ```typescript
 import { useState, useCallback } from 'react';
 import { koreShield } from '@/lib/koreshield';
-import type { ChatCompletionRequest, ChatCompletionResponse } from 'koreshield-js';
+import type { ChatCompletionRequest, ChatCompletionResponse } from 'koreshield';
 
 export function useChat() {
     const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);

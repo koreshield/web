@@ -14,7 +14,7 @@ Our comprehensive JavaScript/TypeScript SDK supports all major frameworks and en
 ### Quick Install
 
 ```bash
-npm install koreshield-js
+npm install koreshield
 ```
 
 ### Framework Guides
@@ -30,7 +30,7 @@ npm install koreshield-js
 ### Universal Usage
 
 ```javascript
-import { createClient } from 'koreshield-js';
+import { createClient } from 'koreshield';
 
 const client = createClient({
     baseURL: 'https://your-koreshield-instance.com',
@@ -92,7 +92,7 @@ Containerized deployments with KoreShield.
 Drop-in replacement for OpenAI SDK with security monitoring.
 
 ```javascript
-import { KoreShieldOpenAI } from 'koreshield-js';
+import { KoreShieldOpenAI } from 'koreshield';
 
 // Replace your OpenAI import
 const openai = new KoreShieldOpenAI({

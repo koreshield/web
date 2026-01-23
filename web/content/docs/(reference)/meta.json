@@ -4,7 +4,8 @@
     "protocols",
     "cli-reference",
     "management-api",
-    "sdk",
+    "javascript-sdk",
+    "python-sdk",
     "architecture",
     "troubleshooting",
     "faq"
