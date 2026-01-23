@@ -242,8 +242,9 @@ class KoreShieldProxy:
             try:
                 redis_key = self.stats_keys[stat_name]
                 self.redis_client.incrby(redis_key, amount)
-                # Update the app state for API access
-                self.app.state.stats = self._get_stats_dict()
+                self.redis_client.incrby(redis_key, amount)
+                # Optimization: Do not update app.state.stats on every write.
+                # Endpoints should call _get_stats_dict() directly.
             except Exception as e:
                 logger.error(f"Failed to increment stat {stat_name}", error=str(e))
         else:
@@ -335,7 +336,7 @@ class KoreShieldProxy:
             return {
                 "status": "healthy",
                 "version": "0.1.0",
-                "statistics": self.stats.copy(),
+                "statistics": self._get_stats_dict(),
                 "providers": provider_status,
                 "total_providers": len(self.providers),
             }

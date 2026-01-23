@@ -22,8 +22,11 @@ def setup_logging(log_level: str = "INFO", json_logs: bool = True, container_mod
         json_logs: Whether to output JSON logs (default True for easier parsing)
         container_mode: Whether to run in container mode (stdout only, no file logging)
     """
-    # Clear existing handlers
-    root_logger.handlers = []
+    # Get root logger
+    root_logger = logging.getLogger()
+    if not container_mode:
+        # Clear existing handlers
+        root_logger.handlers = []
 
     # File Handler (JSONL) - only if not in container mode
     if not container_mode:
