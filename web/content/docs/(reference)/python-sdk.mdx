@@ -119,9 +119,9 @@ async def chat(message: str):
             detail="Message blocked by security policy"
         )
 
-    # Process with your LLM through KoreShield
-    # KoreShield will forward to configured provider (DeepSeek, OpenAI, etc.)
-    response = await process_llm_request(message)
+    # TODO: Implement your actual LLM processing logic here
+    # This is a placeholder - replace with your actual LLM integration
+    response = "Response from your LLM processing"
     
     return {"response": response, "scan_result": scan_result.dict()}
 ```

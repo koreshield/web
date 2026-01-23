@@ -149,6 +149,7 @@ function AdminLayout() {
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+            aria-label="Open sidebar"
           >
             <Menu size={24} />
           </button>

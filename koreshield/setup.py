@@ -1,5 +1,5 @@
 """
-Setup script for LLM-Firewall-Community.
+Setup script for KoreShield.
 """
 
 from setuptools import setup, find_packages

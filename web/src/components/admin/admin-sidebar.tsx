@@ -103,6 +103,8 @@ export function AdminSidebar({ onLogout, isOpen, onClose }: AdminSidebarProps) {
         <div
           className="fixed inset-0 bg-black/80 z-40 lg:hidden backdrop-blur-sm"
           onClick={onClose}
+          role="button"
+          aria-label="Close sidebar"
         />
       )}
 

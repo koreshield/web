@@ -114,7 +114,7 @@ API keys are set via environment variables (e.g., `OPENAI_API_KEY`).
 ```bash
 # Clone the repository
 git clone https://github.com/koreshield/koreshield.git
-cd llm-firewall
+cd koreshield
 
 # Create virtual environment
 python -m venv venv
