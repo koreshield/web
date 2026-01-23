@@ -9,9 +9,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar
+  ResponsiveContainer
 } from "recharts";
 import {
   ShieldCheck,
@@ -19,7 +17,8 @@ import {
   Activity,
   Globe,
   ArrowUpRight,
-  Clock
+  Clock,
+  LucideIcon
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -135,7 +134,7 @@ function DashboardHome() {
               <div className="text-center text-gray-400 py-8">No recent threats detected</div>
             ) : (
               recentAttacks.map((log: LogEntry, i: number) => (
-                <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                <div key={log.request_id || i} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
                   <div className="mt-1">
                     <ShieldAlert className="h-4 w-4 text-red-500" />
                   </div>
@@ -146,7 +145,11 @@ function DashboardHome() {
                     <div className="flex items-center gap-2 mt-1">
                       <Clock className="h-3 w-3 text-gray-400" />
                       <span className="text-xs text-gray-500">
-                        {new Date(log.timestamp).toLocaleTimeString()}
+                        {new Date(log.timestamp).toLocaleTimeString(undefined, {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit'
+                        })}
                       </span>
                     </div>
                   </div>
@@ -164,7 +167,15 @@ function DashboardHome() {
   );
 }
 
-function StatsCard({ title, value, icon: Icon, color, trend }: any) {
+interface StatsCardProps {
+  title: string;
+  value: number;
+  icon: LucideIcon;
+  color: string;
+  trend: string;
+}
+
+function StatsCard({ title, value, icon: Icon, color, trend }: StatsCardProps) {
   const colorClasses: Record<string, string> = {
     blue: "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400",
     green: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400",
