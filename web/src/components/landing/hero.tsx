@@ -10,8 +10,8 @@ export const Hero = () => {
   const [currentCommand, setCurrentCommand] = useState(0);
   
   const commands = [
-    { text: "pip install koreshield", label: "Python" },
-    { text: "npm install koreshield", label: "JavaScript" }
+    { text: "pip install koreshield" },
+    { text: "npm install koreshield" }
   ];
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export const Hero = () => {
     }, 3000); // Change every 3 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [commands.length]);
 
   const copyCommand = () => {
     navigator.clipboard.writeText(commands[currentCommand].text);

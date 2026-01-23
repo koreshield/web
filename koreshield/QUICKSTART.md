@@ -13,7 +13,7 @@
 1. **Clone the repository** (or work in the current directory):
    ```bash
    git clone https://github.com/koreshield/koreshield.git
-   cd koreshield/llm-firewall
+   cd koreshield/koreshield
    ```
 
 2. **Create a virtual environment**:
@@ -90,7 +90,7 @@ Visit `http://localhost:8000/health` to verify the service is running.
 ### Project Structure
 
 ```
-llm-firewall/
+koreshield/
 ├── src/
 │   ├── firewall/          # Core firewall modules
 │   └── providers/         # LLM provider integrations

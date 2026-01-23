@@ -1,6 +1,6 @@
 # Examples
 
-This directory contains example code showing how to use LLM-Firewall-Community.
+This directory contains example code showing how to use KoreShield.
 
 ## Basic Usage
 
