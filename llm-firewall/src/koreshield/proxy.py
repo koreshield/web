@@ -94,7 +94,7 @@ class KoreShieldProxy:
         # Initialize parameter-based rate limiter with Redis storage
         if self.redis_client:
             storage = RedisStorage(f"{redis_url}/1")  # Use database 1 for rate limits
-            self.limiter = Limiter(key_func=get_remote_address, storage_uri=storage)
+            self.limiter = Limiter(key_func=get_remote_address, storage=storage)
         else:
             self.limiter = Limiter(key_func=get_remote_address)
         
@@ -137,6 +137,9 @@ class KoreShieldProxy:
             for key in self.stats_keys.values():
                 if not self.redis_client.exists(key):
                     self.redis_client.set(key, 0)
+        else:
+            # Initialize in-memory stats fallback when Redis is disabled
+            self.stats = {stat_name: 0 for stat_name in self.stats_keys.keys()}
         
         # Store state for API access (keep in-memory copy for backward compatibility)
         self.app.state.config = self.config
@@ -173,7 +176,9 @@ class KoreShieldProxy:
     def _init_providers(self, config: dict):
         """Initialize all enabled LLM providers with priority ordering."""
         providers_config = config.get("providers", {})
-        logger.info(f"Available providers config: {providers_config}")
+        # Redact sensitive information from logs
+        safe_config = {k: {**v, 'api_key': '***redacted***'} if 'api_key' in v else v for k, v in providers_config.items()}
+        logger.info(f"Available providers config: {safe_config}")
 
         # Provider options with priority order (higher index = higher priority)
         provider_options = [
@@ -192,7 +197,6 @@ class KoreShieldProxy:
             logger.info(f"Checking provider {provider_name}: enabled={provider_cfg.get('enabled', False)}")
             if provider_cfg.get("enabled", False):
                 api_key = os.getenv(env_var)
-                logger.info(f"Provider {provider_name}: API key {'found' if api_key else 'NOT found'} for env var {env_var}")
                 if api_key:
                     try:
                         base_url = provider_cfg.get("base_url")
@@ -596,7 +600,7 @@ class KoreShieldProxy:
 
                 self._increment_stat("errors")
                 logger.error("Provider error", error=str(e))
-                raise HTTPException(status_code=500, detail=f"Provider error: {str(e)}")
+                raise HTTPException(status_code=500, detail="Provider service unavailable")
 
         except HTTPException:
             # Re-raise HTTP exceptions as-is
@@ -611,7 +615,7 @@ class KoreShieldProxy:
             )
             raise HTTPException(
                 status_code=e.response.status_code,
-                detail=f"Provider API error: {e.response.text if e.response else str(e)}",
+                detail="Provider service error",
             )
         except Exception as e:
             self._increment_stat("errors")

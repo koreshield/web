@@ -70,12 +70,6 @@ def verify_jwt_token(token: str) -> Optional[Dict[str, Any]]:
             logger.warning("Invalid token type", token_type=payload.get("type"))
             return None
 
-        # Check if token is expired (additional safety check)
-        exp = payload.get("exp")
-        if exp and datetime.fromtimestamp(exp, tz=timezone.utc) < datetime.now(timezone.utc):
-            logger.warning("Token expired during verification")
-            return None
-
         return payload
 
     except jwt.ExpiredSignatureError:
@@ -116,6 +110,9 @@ async def get_current_admin(token: str = Depends(oauth2_scheme)) -> Dict[str, An
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Insufficient permissions"
         )
+
+    # Audit logging for admin authentication
+    logger.info("admin_authenticated", user_id=user.get("id"), email=user.get("email"), role=user.get("role"))
 
     return user
 

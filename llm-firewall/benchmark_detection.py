@@ -241,12 +241,12 @@ class DetectionBenchmark:
 
         print("RESULTS SUMMARY")
         print("=" * 60)
-        print(".2%")
-        print(".2%")
-        print(".2%")
-        print(".2%")
-        print(".2%")
-        print(".2%")
+        print(f"True Positive Rate:  {metrics['true_positive_rate']:.2%}")
+        print(f"False Positive Rate: {metrics['false_positive_rate']:.2%}")
+        print(f"Precision:           {metrics.get('precision', 0):.2%}")
+        print(f"Recall:              {metrics.get('recall', 0):.2%}")
+        print(f"Accuracy:            {metrics.get('accuracy', 0):.2%}")
+        print(f"F1 Score:            {metrics.get('f1_score', 0):.2%}")
         print()
 
         print("TARGET METRICS CHECK")

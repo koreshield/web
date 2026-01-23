@@ -12,10 +12,11 @@ class SecurityConfigUpdate(BaseModel):
     sensitivity: str | None = None
     default_action: str | None = None
 
-@router.get("/health")
-async def management_health():
-    """Health check for management API."""
-    return {"status": "online", "component": "management-api"}
+@router.post("/logout")
+async def admin_logout(current_user: dict = Depends(get_current_admin)):
+    """Admin logout endpoint (stateless - just returns success)."""
+    logger.info("admin_logout", user_id=current_user.get("id"), email=current_user.get("email"))
+    return {"status": "logged_out"}
 
 @router.get("/stats")
 async def get_stats(request: Request, current_user: dict = Depends(get_current_admin)):
