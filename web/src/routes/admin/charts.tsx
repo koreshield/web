@@ -7,7 +7,6 @@ import {
 import { TrendingUp, Users, Building2, Network, Activity, Shield, Crown, Zap } from "lucide-react";
 import { appClient } from "@/lib/app-client";
 import { ChartsSkeleton } from "@/components/admin/admin-skeleton";
-import { useAdminStore } from "@/lib/admin-store";
 
 export const Route = createFileRoute("/admin/charts")({
   component: AdminChartsPage,
@@ -43,19 +42,16 @@ const tooltipStyle = {
 };
 
 function AdminChartsPage() {
-  const token = useAdminStore((s) => s.token);
-
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "charts"],
     queryFn: async () => {
-      const res = await appClient.admin.charts(token!);
+      const res = await appClient.admin.charts();
       if ("error" in res) throw new Error(res.error);
       return res;
     },
-    enabled: !!token,
   });
 
-  if (!token || isLoading || !data) {
+  if (isLoading || !data) {
     return <ChartsSkeleton />;
   }
 

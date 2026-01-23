@@ -57,6 +57,7 @@ import { Route as ApiAdminSubscriptionsRouteImport } from './routes/api/admin/su
 import { Route as ApiAdminStatsRouteImport } from './routes/api/admin/stats'
 import { Route as ApiAdminOverviewRouteImport } from './routes/api/admin/overview'
 import { Route as ApiAdminOrganizationsRouteImport } from './routes/api/admin/organizations'
+import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
 import { Route as ApiAdminLoginRouteImport } from './routes/api/admin/login'
 import { Route as ApiAdminChartsRouteImport } from './routes/api/admin/charts'
 import { Route as ApiOrgSlugSubscriptionsRouteImport } from './routes/api/$orgSlug/subscriptions'
@@ -315,6 +316,11 @@ const ApiAdminOrganizationsRoute = ApiAdminOrganizationsRouteImport.update({
   path: '/api/admin/organizations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminLogoutRoute = ApiAdminLogoutRouteImport.update({
+  id: '/api/admin/logout',
+  path: '/api/admin/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminLoginRoute = ApiAdminLoginRouteImport.update({
   id: '/api/admin/login',
   path: '/api/admin/login',
@@ -430,6 +436,7 @@ export interface FileRoutesByFullPath {
   '/api/$orgSlug/subscriptions': typeof ApiOrgSlugSubscriptionsRoute
   '/api/admin/charts': typeof ApiAdminChartsRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/organizations': typeof ApiAdminOrganizationsRouteWithChildren
   '/api/admin/overview': typeof ApiAdminOverviewRoute
   '/api/admin/stats': typeof ApiAdminStatsRoute
@@ -491,6 +498,7 @@ export interface FileRoutesByTo {
   '/api/$orgSlug/subscriptions': typeof ApiOrgSlugSubscriptionsRoute
   '/api/admin/charts': typeof ApiAdminChartsRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/organizations': typeof ApiAdminOrganizationsRouteWithChildren
   '/api/admin/overview': typeof ApiAdminOverviewRoute
   '/api/admin/stats': typeof ApiAdminStatsRoute
@@ -556,6 +564,7 @@ export interface FileRoutesById {
   '/api/$orgSlug/subscriptions': typeof ApiOrgSlugSubscriptionsRoute
   '/api/admin/charts': typeof ApiAdminChartsRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/organizations': typeof ApiAdminOrganizationsRouteWithChildren
   '/api/admin/overview': typeof ApiAdminOverviewRoute
   '/api/admin/stats': typeof ApiAdminStatsRoute
@@ -622,6 +631,7 @@ export interface FileRouteTypes {
     | '/api/$orgSlug/subscriptions'
     | '/api/admin/charts'
     | '/api/admin/login'
+    | '/api/admin/logout'
     | '/api/admin/organizations'
     | '/api/admin/overview'
     | '/api/admin/stats'
@@ -683,6 +693,7 @@ export interface FileRouteTypes {
     | '/api/$orgSlug/subscriptions'
     | '/api/admin/charts'
     | '/api/admin/login'
+    | '/api/admin/logout'
     | '/api/admin/organizations'
     | '/api/admin/overview'
     | '/api/admin/stats'
@@ -747,6 +758,7 @@ export interface FileRouteTypes {
     | '/api/$orgSlug/subscriptions'
     | '/api/admin/charts'
     | '/api/admin/login'
+    | '/api/admin/logout'
     | '/api/admin/organizations'
     | '/api/admin/overview'
     | '/api/admin/stats'
@@ -794,6 +806,7 @@ export interface RootRouteChildren {
   ApiOrgSlugSubscriptionsRoute: typeof ApiOrgSlugSubscriptionsRoute
   ApiAdminChartsRoute: typeof ApiAdminChartsRoute
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
+  ApiAdminLogoutRoute: typeof ApiAdminLogoutRoute
   ApiAdminOrganizationsRoute: typeof ApiAdminOrganizationsRouteWithChildren
   ApiAdminOverviewRoute: typeof ApiAdminOverviewRoute
   ApiAdminStatsRoute: typeof ApiAdminStatsRoute
@@ -1151,6 +1164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminOrganizationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/logout': {
+      id: '/api/admin/logout'
+      path: '/api/admin/logout'
+      fullPath: '/api/admin/logout'
+      preLoaderRoute: typeof ApiAdminLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/login': {
       id: '/api/admin/login'
       path: '/api/admin/login'
@@ -1389,6 +1409,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiOrgSlugSubscriptionsRoute: ApiOrgSlugSubscriptionsRoute,
   ApiAdminChartsRoute: ApiAdminChartsRoute,
   ApiAdminLoginRoute: ApiAdminLoginRoute,
+  ApiAdminLogoutRoute: ApiAdminLogoutRoute,
   ApiAdminOrganizationsRoute: ApiAdminOrganizationsRouteWithChildren,
   ApiAdminOverviewRoute: ApiAdminOverviewRoute,
   ApiAdminStatsRoute: ApiAdminStatsRoute,

@@ -205,33 +205,33 @@ class DetectionBenchmark:
 
     def run_benchmark(self) -> Dict:
         """Run the complete benchmark."""
-        print("🔍 Running KoreShield Detection Accuracy Benchmark")
+        print("Running KoreShield Detection Accuracy Benchmark")
         print("=" * 60)
 
         # Load test datasets
         attack_prompts, safe_prompts = self.load_test_datasets()
 
-        print(f"📊 Testing {len(attack_prompts)} attack prompts and {len(safe_prompts)} safe prompts")
+        print(f"Testing {len(attack_prompts)} attack prompts and {len(safe_prompts)} safe prompts")
         print()
 
         # Test attack prompts
-        print("🛡️  Testing attack detection (True Positives)...")
+        print("Testing attack detection (True Positives)...")
         attack_results = []
         for i, prompt in enumerate(attack_prompts, 1):
             result = self.test_detection(prompt, is_attack=True)
             attack_results.append(result)
-            status = "✅" if result["detected_attack"] else "❌"
+            status = "PASS" if result["detected_attack"] else "FAIL"
             print(f"  {i:2d}. {status} {result['prompt']}")
 
         print()
 
         # Test safe prompts
-        print("✅ Testing safe prompt handling (True Negatives)...")
+        print("Testing safe prompt handling (True Negatives)...")
         safe_results = []
         for i, prompt in enumerate(safe_prompts, 1):
             result = self.test_detection(prompt, is_attack=False)
             safe_results.append(result)
-            status = "✅" if not result["detected_attack"] else "❌"
+            status = "PASS" if not result["detected_attack"] else "FAIL"
             print(f"  {i:2d}. {status} {result['prompt']}")
 
         print()
@@ -239,31 +239,31 @@ class DetectionBenchmark:
         # Calculate and display metrics
         metrics = self.calculate_metrics()
 
-        print("📈 RESULTS SUMMARY")
+        print("RESULTS SUMMARY")
         print("=" * 60)
-        print(".2%")
-        print(".2%")
-        print(".2%")
-        print(".2%")
-        print(".2%")
-        print(".2%")
+        print(f"True Positive Rate:  {metrics['true_positive_rate']:.2%}")
+        print(f"False Positive Rate: {metrics['false_positive_rate']:.2%}")
+        print(f"Precision:           {metrics.get('precision', 0):.2%}")
+        print(f"Recall:              {metrics.get('recall', 0):.2%}")
+        print(f"Accuracy:            {metrics.get('accuracy', 0):.2%}")
+        print(f"F1 Score:            {metrics.get('f1_score', 0):.2%}")
         print()
 
-        print("🎯 TARGET METRICS CHECK")
+        print("TARGET METRICS CHECK")
         print("-" * 30)
         tp_target = metrics["true_positive_rate"] >= 0.95
         fp_target = metrics["false_positive_rate"] <= 0.05
 
-        print(f"True Positive Rate (>95%): {'✅ PASS' if tp_target else '❌ FAIL'}")
-        print(f"False Positive Rate (<5%):  {'✅ PASS' if fp_target else '❌ FAIL'}")
+        print(f"True Positive Rate (>95%): {'PASS' if tp_target else 'FAIL'}")
+        print(f"False Positive Rate (<5%):  {'PASS' if fp_target else 'FAIL'}")
 
         if tp_target and fp_target:
-            print("\n🎉 ALL TARGETS MET! Detection accuracy requirements satisfied.")
+            print("\nALL TARGETS MET! Detection accuracy requirements satisfied.")
         else:
-            print("\n⚠️  TARGETS NOT MET. Further tuning required.")
+            print("\nTARGETS NOT MET. Further tuning required.")
 
         print()
-        print("📋 DETAILED BREAKDOWN")
+        print("DETAILED BREAKDOWN")
         print("-" * 30)
         print(f"True Positives:  {self.results['true_positives']}/{self.results['total_attacks']}")
         print(f"False Negatives: {self.results['false_negatives']}/{self.results['total_attacks']}")
@@ -294,14 +294,14 @@ def main():
 
         # Exit with appropriate code
         if results["targets_met"]:
-            print("\n✅ Benchmark PASSED")
+            print("\nBenchmark PASSED")
             sys.exit(0)
         else:
-            print("\n❌ Benchmark FAILED")
+            print("\nBenchmark FAILED")
             sys.exit(1)
 
     except Exception as e:
-        print(f"❌ Benchmark failed with error: {e}")
+        print(f"Benchmark failed with error: {e}")
         sys.exit(1)
 
 

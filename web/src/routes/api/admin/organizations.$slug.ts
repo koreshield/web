@@ -9,13 +9,26 @@ export const Route = createFileRoute("/api/admin/organizations/$slug")({
   server: {
     handlers: {
       GET: async ({ request, params }) => {
-        const authHeader = request.headers.get("authorization") || "";
-        const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-        if (!token) return Response.json({ error: "Unauthorized" }, { status: 401 });
+        // Admin token check from HTTP-only cookie
+        const cookieHeader = request.headers.get("cookie") || "";
+        const cookies = Object.fromEntries(
+          cookieHeader.split("; ").map(c => {
+            const [key, ...value] = c.split("=");
+            return [key, value.join("=")];
+          })
+        );
+        
+        const token = cookies.admin_token;
+        
+        if (!token) {
+          return Response.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
         const tokenKey = `admin:token:${hashToken(token)}`;
         const exists = await redis.get(tokenKey);
-        if (!exists) return Response.json({ error: "Forbidden" }, { status: 403 });
+        if (!exists) {
+          return Response.json({ error: "Forbidden" }, { status: 403 });
+        }
 
         try {
           const { slug } = params;

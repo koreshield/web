@@ -6,7 +6,6 @@ import { appClient } from "@/lib/app-client";
 import { AdminDataTable, type Column } from "@/components/admin/admin-data-table";
 import { AdminStatsCard } from "@/components/admin/admin-stats-card";
 import { SubscriptionsSkeleton } from "@/components/admin/admin-skeleton";
-import { useAdminStore } from "@/lib/admin-store";
 
 export const Route = createFileRoute("/admin/subscriptions")({
   component: AdminSubscriptionsPage,
@@ -40,21 +39,19 @@ const statusColors: Record<string, string> = {
 };
 
 function AdminSubscriptionsPage() {
-  const token = useAdminStore((s) => s.token);
   const [page, setPage] = useState(1);
   const [planFilter, setPlanFilter] = useState("");
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["admin", "subscriptions", page, planFilter],
     queryFn: async () => {
-      const res = await appClient.admin.subscriptions(token!, { page, plan: planFilter });
+      const res = await appClient.admin.subscriptions({ page, plan: planFilter });
       if ("error" in res) throw new Error(res.error);
       return res;
     },
-    enabled: !!token,
   });
 
-  if (!token || (isLoading && !data)) {
+  if (isLoading && !data) {
     return <SubscriptionsSkeleton />;
   }
 

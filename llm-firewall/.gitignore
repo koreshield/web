@@ -49,6 +49,11 @@ config/config.yaml
 config/*.yaml
 !config/config.example.yaml
 
+# Scripts (never commit executable scripts)
+*.sh
+*.bash
+*.zsh
+
 # Environment variables
 .env
 .env.local

@@ -5,7 +5,6 @@ import { Search, Users, Mail, Building2, Calendar } from "lucide-react";
 import { appClient } from "@/lib/app-client";
 import { AdminDataTable, type Column } from "@/components/admin/admin-data-table";
 import { UsersSkeleton } from "@/components/admin/admin-skeleton";
-import { useAdminStore } from "@/lib/admin-store";
 
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsersPage,
@@ -23,7 +22,6 @@ interface User {
 }
 
 function AdminUsersPage() {
-  const token = useAdminStore((s) => s.token);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
@@ -31,14 +29,13 @@ function AdminUsersPage() {
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["admin", "users", page, search],
     queryFn: async () => {
-      const res = await appClient.admin.users(token!, { page, search });
+      const res = await appClient.admin.users({ page, search });
       if ("error" in res) throw new Error(res.error);
       return res;
     },
-    enabled: !!token,
   });
 
-  if (!token || (isLoading && !data)) {
+  if (isLoading && !data) {
     return <UsersSkeleton />;
   }
 

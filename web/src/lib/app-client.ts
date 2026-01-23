@@ -84,17 +84,26 @@ async function apiCall<T = any>(
   options?: { params?: any; data?: any; headers?: Record<string, string> },
 ): Promise<ApiResponse<T>> {
   try {
+    // add admin JWT token to headers for admin API calls
+    const headers = { ...options?.headers };
+    if (url.startsWith("/api/admin") || url.startsWith("api/admin")) {
+      const token = localStorage.getItem("admin_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
+
     let response;
     if (method === "get" || method === "delete") {
       response = await apiClient[method](url, {
         params: options?.params,
         data: options?.data,
-        headers: options?.headers,
+        headers,
       });
     } else {
       response = await apiClient[method](url, options?.data, {
         params: options?.params,
-        headers: options?.headers,
+        headers,
       });
     }
     return response.data;
@@ -108,20 +117,17 @@ async function apiCall<T = any>(
 
 export const appClient = {
   admin: {
-    stats: async (period: string, token: string) =>
+    stats: async (period: string) =>
       apiCall<any[]>("get", `/api/admin/stats`, {
         params: { period },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       }),
 
     login: async (phrase: string) =>
-      apiCall<{ token: string }>("post", `/api/admin/login`, {
+      apiCall<{ success: boolean; expiresIn: number }>("post", `/api/admin/login`, {
         data: { phrase },
       }),
 
-    overview: async (token: string) =>
+    overview: async () =>
       apiCall<{
         users: { total: number; growth: number; newToday: number };
         organizations: { total: number; growth: number };
@@ -130,12 +136,9 @@ export const appClient = {
           byPlan: Record<string, number>;
           mrr: number;
         };
-      }>("get", `/api/admin/overview`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
+      }>("get", `/api/admin/overview`),
 
     users: async (
-      token: string,
       params: { page?: number; limit?: number; search?: string },
     ) =>
       apiCall<{
@@ -154,11 +157,9 @@ export const appClient = {
         totalPages: number;
       }>("get", `/api/admin/users`, {
         params,
-        headers: { Authorization: `Bearer ${token}` },
       }),
 
     organizations: async (
-      token: string,
       params: { page?: number; limit?: number; search?: string },
     ) =>
       apiCall<{
@@ -177,11 +178,9 @@ export const appClient = {
         totalPages: number;
       }>("get", `/api/admin/organizations`, {
         params,
-        headers: { Authorization: `Bearer ${token}` },
       }),
 
     subscriptions: async (
-      token: string,
       params: { page?: number; limit?: number; plan?: string },
     ) =>
       apiCall<{
@@ -210,11 +209,9 @@ export const appClient = {
         };
       }>("get", `/api/admin/subscriptions`, {
         params,
-        headers: { Authorization: `Bearer ${token}` },
       }),
 
     tunnels: async (
-      token: string,
       params: {
         page?: number;
         limit?: number;
@@ -248,10 +245,9 @@ export const appClient = {
         };
       }>("get", `/api/admin/tunnels`, {
         params,
-        headers: { Authorization: `Bearer ${token}` },
       }),
 
-    charts: async (token: string) =>
+    charts: async () =>
       apiCall<{
         userSignups: Array<{ date: string; count: number }>;
         orgGrowth: Array<{ date: string; count: number }>;
@@ -267,11 +263,9 @@ export const appClient = {
         }>;
         weeklyTunnelTrend: Array<{ day: string; avg: number; max: number }>;
         cumulativeGrowth: Array<{ date: string; total: number }>;
-      }>("get", `/api/admin/charts`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
+      }>("get", `/api/admin/charts`),
 
-    organization: async (token: string, slug: string) =>
+    organization: async (slug: string) =>
       apiCall<{
         organization: {
           id: string;
@@ -302,12 +296,9 @@ export const appClient = {
           role: string;
           createdAt: Date;
         }>;
-      }>("get", `/api/admin/organizations/${slug}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
+      }>("get", `/api/admin/organizations/${slug}`),
 
     updateOrganization: async (
-      token: string,
       slug: string,
       data: { name?: string; slug?: string; plan?: string; status?: string },
     ) =>
@@ -316,7 +307,6 @@ export const appClient = {
         `/api/admin/organizations/${slug}`,
         {
           data,
-          headers: { Authorization: `Bearer ${token}` },
         },
       ),
   },

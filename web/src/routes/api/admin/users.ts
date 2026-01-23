@@ -4,16 +4,18 @@ import { users, members, sessions } from "../../../db/schema";
 import { redis } from "../../../lib/redis";
 import { hashToken } from "../../../lib/hash";
 import { sql, count, desc, like, or, inArray } from "drizzle-orm";
+import { parseCookies } from "../../../lib/cookie";
 
 export const Route = createFileRoute("/api/admin/users")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        // Admin token check
-        const authHeader = request.headers.get("authorization") || "";
-        const token = authHeader.startsWith("Bearer ")
-          ? authHeader.slice("Bearer ".length)
-          : "";
+        // admin token check from HTTP-only cookie
+        const cookies = parseCookies(request);
+        const db = getDb();
+
+
+        const token = cookies.admin_token;
 
         if (!token) {
           return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -35,9 +37,9 @@ export const Route = createFileRoute("/api/admin/users")({
           // Build search condition
           const searchCondition = search
             ? or(
-                like(users.email, `%${search}%`),
-                like(users.name, `%${search}%`)
-              )
+              like(users.email, `%${search}%`),
+              like(users.name, `%${search}%`)
+            )
             : sql`1=1`;
 
           // Get total count
@@ -67,13 +69,13 @@ export const Route = createFileRoute("/api/admin/users")({
           const orgCounts =
             userIds.length > 0
               ? await db
-                  .select({
-                    userId: members.userId,
-                    count: sql<number>`cast(count(${members.userId}) as integer)`,
-                  })
-                  .from(members)
-                  .where(inArray(members.userId, userIds))
-                  .groupBy(members.userId)
+                .select({
+                  userId: members.userId,
+                  count: sql<number>`cast(count(${members.userId}) as integer)`,
+                })
+                .from(members)
+                .where(inArray(members.userId, userIds))
+                .groupBy(members.userId)
               : [];
 
           const orgCountMap = new Map(
@@ -84,15 +86,15 @@ export const Route = createFileRoute("/api/admin/users")({
           const lastActiveSessions =
             userIds.length > 0
               ? await db
-                  .select({
-                    userId: sessions.userId,
-                    lastActive: sql<Date>`MAX(${sessions.updatedAt})`.as(
-                      "lastActive"
-                    ),
-                  })
-                  .from(sessions)
-                  .where(inArray(sessions.userId, userIds))
-                  .groupBy(sessions.userId)
+                .select({
+                  userId: sessions.userId,
+                  lastActive: sql<Date>`MAX(${sessions.updatedAt})`.as(
+                    "lastActive"
+                  ),
+                })
+                .from(sessions)
+                .where(inArray(sessions.userId, userIds))
+                .groupBy(sessions.userId)
               : [];
 
           const lastActiveMap = new Map(

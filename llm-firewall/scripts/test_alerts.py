@@ -23,19 +23,19 @@ logger = structlog.get_logger()
 async def test_alert_delivery():
     """Test alert delivery for all configured channels."""
 
-    print("🔍 Loading KoreShield configuration...")
+    print("Loading KoreShield configuration...")
     try:
         config = Config()
         config.load()
     except Exception as e:
-        print(f"❌ Failed to load config: {e}")
+        print(f"Failed to load config: {e}")
         return False
 
     if not config.monitoring.alerts.enabled:
-        print("❌ Alerting is not enabled in configuration")
+        print("Alerting is not enabled in configuration")
         return False
 
-    print("📡 Initializing AlertManager...")
+    print("Initializing AlertManager...")
     alert_manager = AlertManager(config.monitoring.alerts)
 
     # Test alert
@@ -51,7 +51,7 @@ async def test_alert_delivery():
         }
     }
 
-    print("🚨 Testing alert delivery...")
+    print("Testing alert delivery...")
 
     channels_tested = []
     channels_successful = []
@@ -60,89 +60,89 @@ async def test_alert_delivery():
     channels = config.monitoring.alerts.channels
 
     if channels.email.enabled:
-        print("📧 Testing Email delivery...")
+        print("Testing Email delivery...")
         channels_tested.append("email")
         try:
             await alert_manager._send_email_alert(test_alert)
             channels_successful.append("email")
-            print("✅ Email alert sent successfully")
+            print("Email alert sent successfully")
         except Exception as e:
-            print(f"❌ Email alert failed: {e}")
+            print(f"Email alert failed: {e}")
 
     if channels.slack.enabled:
-        print("💬 Testing Slack delivery...")
+        print("Testing Slack delivery...")
         channels_tested.append("slack")
         try:
             await alert_manager._send_slack_alert(test_alert)
             channels_successful.append("slack")
-            print("✅ Slack alert sent successfully")
+            print("Slack alert sent successfully")
         except Exception as e:
-            print(f"❌ Slack alert failed: {e}")
+            print(f"Slack alert failed: {e}")
 
     if channels.teams.enabled:
-        print("👥 Testing Microsoft Teams delivery...")
+        print("Testing Microsoft Teams delivery...")
         channels_tested.append("teams")
         try:
             await alert_manager._send_teams_alert(test_alert)
             channels_successful.append("teams")
-            print("✅ Teams alert sent successfully")
+            print("Teams alert sent successfully")
         except Exception as e:
-            print(f"❌ Teams alert failed: {e}")
+            print(f"Teams alert failed: {e}")
 
     if channels.pagerduty.enabled:
-        print("📟 Testing PagerDuty delivery...")
+        print("Testing PagerDuty delivery...")
         channels_tested.append("pagerduty")
         try:
             await alert_manager._send_pagerduty_alert(test_alert)
             channels_successful.append("pagerduty")
-            print("✅ PagerDuty alert sent successfully")
+            print("PagerDuty alert sent successfully")
         except Exception as e:
-            print(f"❌ PagerDuty alert failed: {e}")
+            print(f"PagerDuty alert failed: {e}")
 
     if channels.webhook.enabled:
-        print("🔗 Testing Webhook delivery...")
+        print("Testing Webhook delivery...")
         channels_tested.append("webhook")
         try:
             await alert_manager._send_webhook_alert(test_alert)
             channels_successful.append("webhook")
-            print("✅ Webhook alert sent successfully")
+            print("Webhook alert sent successfully")
         except Exception as e:
-            print(f"❌ Webhook alert failed: {e}")
+            print(f"Webhook alert failed: {e}")
 
     # Summary
-    print("\n📊 Test Results:")
+    print("\nTest Results:")
     print(f"Channels tested: {len(channels_tested)}")
     print(f"Channels successful: {len(channels_successful)}")
     print(f"Success rate: {len(channels_successful)}/{len(channels_tested)}")
 
     if channels_successful:
-        print(f"✅ Successful channels: {', '.join(channels_successful)}")
+        print(f"Successful channels: {', '.join(channels_successful)}")
 
     if len(channels_successful) < len(channels_tested):
         failed_channels = [ch for ch in channels_tested if ch not in channels_successful]
-        print(f"❌ Failed channels: {', '.join(failed_channels)}")
-        print("\n🔧 Troubleshooting tips:")
+        print(f"Failed channels: {', '.join(failed_channels)}")
+        print("\nTroubleshooting tips:")
         print("- Check your configuration in config.yaml")
         print("- Verify API keys, webhook URLs, and credentials")
         print("- Check KoreShield logs for detailed error messages")
         print("- Ensure network connectivity to external services")
         return False
 
-    print("\n🎉 All alert channels tested successfully!")
+    print("\nAll alert channels tested successfully!")
     return True
 
 async def main():
     """Main test function."""
-    print("🛡️ KoreShield Alert Delivery Test")
+    print("KoreShield Alert Delivery Test")
     print("=" * 40)
 
     success = await test_alert_delivery()
 
     if success:
-        print("\n✅ Alert delivery test completed successfully!")
+        print("\nAlert delivery test completed successfully!")
         sys.exit(0)
     else:
-        print("\n❌ Alert delivery test failed!")
+        print("\nAlert delivery test failed!")
         sys.exit(1)
 
 if __name__ == "__main__":

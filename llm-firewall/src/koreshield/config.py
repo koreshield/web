@@ -20,6 +20,7 @@ class LoggingConfig(BaseModel):
     """Logging configuration."""
     level: str = "INFO"
     json_logs: bool = False
+    container_mode: bool = False
     file: Optional[str] = None
 
 
@@ -41,6 +42,12 @@ class ProviderConfig(BaseModel):
     enabled: bool = False
     base_url: str = ""
     api_key: Optional[str] = None
+
+
+class RedisConfig(BaseModel):
+    """Redis configuration for distributed state."""
+    enabled: bool = True
+    url: str = "redis://localhost:6379/0"
 
 
 class AlertRule(BaseModel):
@@ -120,6 +127,7 @@ class KoreShieldConfig(BaseModel):
     logging: LoggingConfig = LoggingConfig()
     security: SecurityConfig = SecurityConfig()
     providers: Dict[str, ProviderConfig] = {}
+    redis: RedisConfig = RedisConfig()
     monitoring: MonitoringConfig = MonitoringConfig()
 
     # Legacy fields for backward compatibility

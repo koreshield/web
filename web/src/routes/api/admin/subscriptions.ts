@@ -10,12 +10,17 @@ export const Route = createFileRoute("/api/admin/subscriptions")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        // Admin token check
-        const authHeader = request.headers.get("authorization") || "";
-        const token = authHeader.startsWith("Bearer ")
-          ? authHeader.slice("Bearer ".length)
-          : "";
-
+        // Admin token check from HTTP-only cookie
+        const cookieHeader = request.headers.get("cookie") || "";
+        const cookies = Object.fromEntries(
+          cookieHeader.split("; ").map(c => {
+            const [key, ...value] = c.split("=");
+            return [key, value.join("=")];
+          })
+        );
+        
+        const token = cookies.admin_token;
+        
         if (!token) {
           return Response.json({ error: "Unauthorized" }, { status: 401 });
         }
