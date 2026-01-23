@@ -19,6 +19,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as OrgSlugRouteImport } from './routes/$orgSlug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as OrgSlugIndexRouteImport } from './routes/$orgSlug/index'
 import { Route as InvitationsAcceptRouteImport } from './routes/invitations.accept'
@@ -119,6 +120,11 @@ const OrgSlugRoute = OrgSlugRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/docs/',
+  path: '/docs/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
@@ -414,6 +420,7 @@ export interface FileRoutesByFullPath {
   '/invitations/accept': typeof InvitationsAcceptRoute
   '/$orgSlug/': typeof OrgSlugIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/docs/': typeof DocsIndexRoute
   '/$orgSlug/settings/organization': typeof OrgSlugSettingsOrganizationRoute
   '/$orgSlug/settings/profile': typeof OrgSlugSettingsProfileRoute
   '/admin/organizations/$slug': typeof AdminOrganizationsSlugRoute
@@ -474,6 +481,7 @@ export interface FileRoutesByTo {
   '/invitations/accept': typeof InvitationsAcceptRoute
   '/$orgSlug': typeof OrgSlugIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/docs': typeof DocsIndexRoute
   '/$orgSlug/settings/organization': typeof OrgSlugSettingsOrganizationRoute
   '/$orgSlug/settings/profile': typeof OrgSlugSettingsProfileRoute
   '/admin/organizations/$slug': typeof AdminOrganizationsSlugRoute
@@ -538,6 +546,7 @@ export interface FileRoutesById {
   '/invitations/accept': typeof InvitationsAcceptRoute
   '/$orgSlug/': typeof OrgSlugIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/docs/': typeof DocsIndexRoute
   '/$orgSlug/settings/organization': typeof OrgSlugSettingsOrganizationRoute
   '/$orgSlug/settings/profile': typeof OrgSlugSettingsProfileRoute
   '/admin/organizations/$slug': typeof AdminOrganizationsSlugRoute
@@ -603,6 +612,7 @@ export interface FileRouteTypes {
     | '/invitations/accept'
     | '/$orgSlug/'
     | '/dashboard/'
+    | '/docs/'
     | '/$orgSlug/settings/organization'
     | '/$orgSlug/settings/profile'
     | '/admin/organizations/$slug'
@@ -663,6 +673,7 @@ export interface FileRouteTypes {
     | '/invitations/accept'
     | '/$orgSlug'
     | '/dashboard'
+    | '/docs'
     | '/$orgSlug/settings/organization'
     | '/$orgSlug/settings/profile'
     | '/admin/organizations/$slug'
@@ -726,6 +737,7 @@ export interface FileRouteTypes {
     | '/invitations/accept'
     | '/$orgSlug/'
     | '/dashboard/'
+    | '/docs/'
     | '/$orgSlug/settings/organization'
     | '/$orgSlug/settings/profile'
     | '/admin/organizations/$slug'
@@ -775,6 +787,7 @@ export interface RootRouteChildren {
   CliLoginRoute: typeof CliLoginRoute
   DocsSplatRoute: typeof DocsSplatRoute
   InvitationsAcceptRoute: typeof InvitationsAcceptRoute
+  DocsIndexRoute: typeof DocsIndexRoute
   ApiOrgSlugAuthTokensRoute: typeof ApiOrgSlugAuthTokensRoute
   ApiOrgSlugRequestsRoute: typeof ApiOrgSlugRequestsRouteWithChildren
   ApiOrgSlugSettingsRoute: typeof ApiOrgSlugSettingsRoute
@@ -870,6 +883,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs/': {
+      id: '/docs/'
+      path: '/docs'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/': {
@@ -1362,6 +1382,7 @@ const rootRouteChildren: RootRouteChildren = {
   CliLoginRoute: CliLoginRoute,
   DocsSplatRoute: DocsSplatRoute,
   InvitationsAcceptRoute: InvitationsAcceptRoute,
+  DocsIndexRoute: DocsIndexRoute,
   ApiOrgSlugAuthTokensRoute: ApiOrgSlugAuthTokensRoute,
   ApiOrgSlugRequestsRoute: ApiOrgSlugRequestsRouteWithChildren,
   ApiOrgSlugSettingsRoute: ApiOrgSlugSettingsRoute,
