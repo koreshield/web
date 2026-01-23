@@ -50,7 +50,14 @@ def verify_session_token(token: str) -> Optional[dict]:
             
             # Check expiration
             expires_at = result.expires_at
-            if expires_at < datetime.now():
+            
+            # Ensure expires_at is timezone-aware if it isn't already
+            if expires_at.tzinfo is None:
+                from datetime import timezone
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+                
+            from datetime import timezone
+            if expires_at < datetime.now(timezone.utc):
                 return None
                 
             return {
