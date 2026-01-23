@@ -1,0 +1,25 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "name": "KoreShield JavaScript SDK",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "hideGenerator": true,
+  "readme": "README.md",
+  "githubPages": false,
+  "theme": "default",
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "Core",
+    "Providers",
+    "Utilities",
+    "*"
+  ],
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true
+  }
+}

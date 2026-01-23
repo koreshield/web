@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KoreShield Browser Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ KoreShield Browser Example</h1>
+        <p>This example demonstrates using KoreShield in the browser for secure AI interactions.</p>
+
+        <div id="status" class="status info">Initializing KoreShield...</div>
+
+        <div class="section">
+            <h2>Connection Test</h2>
+            <button id="testConnection">Test Connection</button>
+            <div id="connectionResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>Chat Completion</h2>
+            <textarea id="userInput" placeholder="Enter your message here...">Hello! Can you help me understand how AI safety works?</textarea>
+            <br>
+            <button id="sendMessage">Send Message</button>
+            <div id="chatResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>Security Metrics</h2>
+            <button id="getMetrics">Get Metrics</button>
+            <div id="metricsResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>Security Events</h2>
+            <button id="getEvents">Get Recent Events</button>
+            <div id="eventsResult"></div>
+        </div>
+    </div>
+
+    <!-- Load KoreShield SDK -->
+    <script type="module">
+        import { createClient, checkResponseSafety } from './koreshield-js.browser.js';
+
+        // Initialize KoreShield client
+        let client;
+        let statusDiv = document.getElementById('status');
+
+        try {
+            client = createClient({
+                baseURL: 'http://localhost:8000', // Adjust for your setup
+                debug: true
+            });
+            statusDiv.textContent = '✅ KoreShield client initialized';
+            statusDiv.className = 'status success';
+        } catch (error) {
+            statusDiv.textContent = `❌ Failed to initialize: ${error.message}`;
+            statusDiv.className = 'status error';
+            console.error('Initialization error:', error);
+        }
+
+        // Test connection
+        document.getElementById('testConnection').addEventListener('click', async () => {
+            const button = document.getElementById('testConnection');
+            const result = document.getElementById('connectionResult');
+
+            button.disabled = true;
+            button.textContent = 'Testing...';
+
+            try {
+                const isConnected = await client.testConnection();
+                result.innerHTML = `<div class="status ${isConnected ? 'success' : 'error'}">
+                    ${isConnected ? '✅ Connected to KoreShield' : '❌ Connection failed'}
+                </div>`;
+            } catch (error) {
+                result.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Test Connection';
+            }
+        });
+
+        // Send chat message
+        document.getElementById('sendMessage').addEventListener('click', async () => {
+            const button = document.getElementById('sendMessage');
+            const input = document.getElementById('userInput');
+            const result = document.getElementById('chatResult');
+
+            const message = input.value.trim();
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Sending...';
+            result.innerHTML = '<div class="status info">Sending message...</div>';
+
+            try {
+                const response = await client.createChatCompletion({
+                    model: 'gpt-3.5-turbo',
+                    messages: [
+                        { role: 'user', content: message }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 200
+                }, {
+                    sensitivity: 'medium',
+                    features: {
+                        sanitization: true,
+                        detection: true
+                    }
+                });
+
+                const content = response.choices[0].message.content;
+
+                // Check response safety
+                const safetyCheck = checkResponseSafety(content);
+
+                result.innerHTML = `
+                    <div class="output">${content}</div>
+                    <div class="status ${safetyCheck.safe ? 'success' : 'error'}">
+                        Safety Check: ${safetyCheck.safe ? '✅ Safe' : '⚠️ Issues detected'}
+                        ${!safetyCheck.safe ? `<br>Issues: ${safetyCheck.issues.join(', ')}` : ''}
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Send Message';
+            }
+        });
+
+        // Get metrics
+        document.getElementById('getMetrics').addEventListener('click', async () => {
+            const button = document.getElementById('getMetrics');
+            const result = document.getElementById('metricsResult');
+
+            button.disabled = true;
+            button.textContent = 'Loading...';
+
+            try {
+                const metrics = await client.getMetrics();
+                result.innerHTML = `
+                    <div class="output">
+Total Requests: ${metrics.requests_total}
+Blocked Requests: ${metrics.requests_blocked}
+Attacks Detected: ${metrics.attacks_detected}
+Avg Response Time: ${metrics.avg_response_time}ms
+Active Connections: ${metrics.active_connections}
+Uptime: ${Math.floor(metrics.uptime_seconds / 3600)}h ${Math.floor((metrics.uptime_seconds % 3600) / 60)}m
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Get Metrics';
+            }
+        });
+
+        // Get security events
+        document.getElementById('getEvents').addEventListener('click', async () => {
+            const button = document.getElementById('getEvents');
+            const result = document.getElementById('eventsResult');
+
+            button.disabled = true;
+            button.textContent = 'Loading...';
+
+            try {
+                const events = await client.getSecurityEvents(5);
+                const eventsHtml = events.map(event => `
+                    <div style="margin: 10px 0; padding: 10px; border-left: 4px solid ${getSeverityColor(event.severity)}; background: #f8f9fa;">
+                        <strong>${event.type}</strong> (${event.severity})
+                        <br><small>${new Date(event.timestamp).toLocaleString()}</small>
+                        <br>${event.description}
+                    </div>
+                `).join('');
+
+                result.innerHTML = eventsHtml || '<div class="status info">No recent security events</div>';
+            } catch (error) {
+                result.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Get Recent Events';
+            }
+        });
+
+        function getSeverityColor(severity) {
+            switch (severity) {
+                case 'critical': return '#dc3545';
+                case 'high': return '#fd7e14';
+                case 'medium': return '#ffc107';
+                case 'low': return '#28a745';
+                default: return '#6c757d';
+            }
+        }
+    </script>
+</body>
+</html>
