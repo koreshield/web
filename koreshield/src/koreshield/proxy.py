@@ -667,7 +667,7 @@ def create_app(config_path: str = None) -> FastAPI:
 
     # Auto-detect config path based on script location
     if config_path is None:
-        script_dir = Path(__file__).parent.parent.parent  # Go up to llm-firewall/
+        script_dir = Path(__file__).parent.parent.parent  # Go up to koreshield/
         config_path = script_dir / "config" / "config.yaml"
 
     config_file = Path(config_path)
