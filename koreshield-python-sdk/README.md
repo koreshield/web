@@ -45,7 +45,7 @@ export ANTHROPIC_API_KEY="your-anthropic-key"
 ```
 
 ```bash
-pip install koreshield-python-sdk
+pip install koreshield
 ```
 
 ### Optional Dependencies
@@ -65,7 +65,7 @@ pip install koreshield-python-sdk[fastapi,flask,django]
 ### Basic Usage
 
 ```python
-from koreshield_sdk import KoreShieldClient
+from koreshield import KoreShieldClient
 
 # Initialize client
 client = KoreShieldClient(api_key="your-api-key")

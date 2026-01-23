@@ -7,11 +7,14 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
+import { Menu } from "lucide-react";
+
 function AdminLayout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [phrase, setPhrase] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
   const router = useRouter();
 
@@ -130,12 +133,33 @@ function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-[#070707]">
-      <AdminSidebar onLogout={handleLogout} />
-      <main className="ml-64 min-h-screen overflow-auto">
-        <div className="p-8">
-          {isRootAdmin ? <AdminOverview /> : <Outlet />}
+      <AdminSidebar
+        onLogout={handleLogout}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+
+      <div className="lg:pl-64 flex flex-col min-h-screen transition-all duration-300">
+        {/* Mobile Header */}
+        <div className="lg:hidden h-16 border-b border-white/5 flex items-center justify-between px-4 sticky top-0 bg-[#070707]/80 backdrop-blur-md z-20">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="KoreShield" className="w-8 h-8" />
+            <span className="font-bold text-white text-lg">KoreShield</span>
+          </div>
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+          >
+            <Menu size={24} />
+          </button>
         </div>
-      </main>
+
+        <main className="flex-1 overflow-auto">
+          <div className="p-4 md:p-8">
+            {isRootAdmin ? <AdminOverview /> : <Outlet />}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

@@ -20,7 +20,7 @@ export function Terminal() {
   const [logs, setLogs] = useState<typeof SAMPLE_LOGS>([]);
 
   useEffect(() => {
-    const command = "koreshield start";
+    const command = "docker run -p 8000:8000 koreshield/koreshield";
     if (step === 0) {
       if (text.length < command.length) {
         const timeout = setTimeout(() => {
@@ -95,21 +95,21 @@ export function Terminal() {
 
         {step >= 1 && (
           <p className="text-cyan-400">
-            Starting KoreShield{step === 1 ? dots : "..."}
+            Initializing KoreShield v0.1.1{step === 1 ? dots : "..."}
           </p>
         )}
 
         {step >= 2 && (
-          <p className="text-green-400">Linked to your local port 6967</p>
+          <p className="text-green-400">Server running at http://0.0.0.0:8000</p>
         )}
 
         {step >= 3 && (
           <div className="space-y-2">
             <p className="text-fuchsia-400">
-              KoreShield ready: http://localhost:8000
+              Ready to accept connections.
             </p>
             <p className="text-yellow-400">
-              Keep this running to protect your LLM requests.
+              Monitoring active...
             </p>
             <div className="pt-4 space-y-1">
               {logs.map((log, i) => (
