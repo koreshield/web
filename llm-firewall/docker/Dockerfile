@@ -10,6 +10,10 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/* && 
 # Copy application code
 COPY src/ ./src/
 COPY pyproject.toml .
+COPY config/ ./config/
+
+# Set environment variable to use Railway config
+ENV CONFIG_FILE=config/railway-config.yaml
 
 # Expose port
 EXPOSE 8000
