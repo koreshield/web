@@ -8,7 +8,6 @@ import {
     ChevronRight,
     AlertTriangle,
     Info,
-    ShieldAlert,
     ShieldAlert
 } from "lucide-react";
 

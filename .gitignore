@@ -251,7 +251,7 @@ Thumbs.db
 # 1cbyc
 !llm-firewall/
 todo.md
-*.md
+personal-keep/
 .DS_Store
 !web/src/lib/
 

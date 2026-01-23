@@ -35,8 +35,13 @@ export function validateConfig(config: KoreShieldConfig): { valid: boolean; erro
  * Create a KoreShield client with environment variable defaults
  */
 export function createClient(config: Partial<KoreShieldConfig> = {}): KoreShieldClient {
+  const baseURL = process.env.KORESHIELD_BASE_URL || config.baseURL;
+  if (!baseURL) {
+    throw new Error('baseURL is required. Set KORESHIELD_BASE_URL environment variable or pass baseURL in config.');
+  }
+
   const defaultConfig: KoreShieldConfig = {
-    baseURL: process.env.KORESHIELD_BASE_URL || config.baseURL,
+    baseURL,
     apiKey: process.env.KORESHIELD_API_KEY || config.apiKey,
     timeout: parseInt(process.env.KORESHIELD_TIMEOUT || '30000'),
     debug: process.env.KORESHIELD_DEBUG === 'true' || config.debug || false,
