@@ -2,7 +2,7 @@
 Attack detection engine for identifying prompt injection attempts.
 """
 
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 import re
 import structlog
 from .rule_engine import RuleEngine
