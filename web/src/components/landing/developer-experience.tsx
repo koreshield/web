@@ -21,21 +21,21 @@ const LOGS = [
     status: "WARN",
     method: "POST",
     path: "/v1/chat/completions",
-    time: "23ms",
+    time: "24ms",
     color: "text-yellow-400",
   },
   {
     status: "SAFE",
     method: "POST",
     path: "/v1/chat/completions",
-    time: "67ms",
+    time: "68ms",
     color: "text-green-400",
   },
   {
     status: "BLOCKED",
     method: "POST",
     path: "/v1/chat/completions",
-    time: "15ms",
+    time: "14ms",
     color: "text-red-400",
   },
   {
@@ -49,14 +49,14 @@ const LOGS = [
     status: "WARN",
     method: "POST",
     path: "/v1/chat/completions",
-    time: "51ms",
+    time: "52ms",
     color: "text-yellow-400",
   },
   {
     status: "SAFE",
     method: "POST",
     path: "/v1/messages",
-    time: "42ms",
+    time: "41ms",
     color: "text-green-400",
   },
 ];
@@ -86,7 +86,7 @@ export const DeveloperExperience = () => {
         </h2>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-8 items-stretch">
+      <div className="grid lg:grid-cols-2 gap-6 md:gap-8 items-stretch">
         <div className="grid gap-8 lg:grid-rows-2">
           <div className="bg-white/2 border border-white/5 rounded-3xl p-8 hover:border-white/10 transition-colors group h-full flex flex-col">
             <div className="flex items-center gap-4 mb-6">
@@ -97,11 +97,11 @@ export const DeveloperExperience = () => {
                 Drop-in protection
               </h3>
             </div>
-            <p className="text-white/40 mb-6">
-              One command, you're protected. Replace your LLM API endpoint with KoreShield's proxy.
+            <p className="text-white/40 mb-6 text-sm md:text-base">
+              Deploy KoreShield as a secure proxy between your application and LLM providers.
             </p>
-            <div className="bg-black/40 rounded-2xl border border-white/5 p-4 font-mono text-sm mt-auto">
-              <span className="text-accent">$</span> koreshield start
+            <div className="bg-black/40 rounded-2xl border border-white/5 p-4 font-mono text-xs md:text-sm mt-auto overflow-x-auto">
+              <span className="text-accent">$</span> docker run -p 8000:8000 koreshield/koreshield
             </div>
           </div>
 
@@ -112,20 +112,17 @@ export const DeveloperExperience = () => {
               </div>
               <div className="flex items-center gap-3">
                 <h3 className="text-xl font-bold text-white">SDK Integration</h3>
-                <span className="px-2 py-0.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-medium">
-                  Coming Soon
+                <span className="px-2 py-0.5 rounded-full bg-security-green/10 border border-security-green/20 text-security-green text-xs font-medium">
+                  v0.1.1 Live
                 </span>
               </div>
             </div>
-            <p className="text-white/40 mb-6">
-              Use our SDKs to embed KoreShield directly into your app.
+            <p className="text-white/40 mb-6 text-sm md:text-base">
+              Use our SDKs to integrate KoreShield proxy into your Python or JavaScript applications.
             </p>
-            <div className="bg-black/40 rounded-2xl border border-white/5 p-4 font-mono text-sm overflow-x-auto mt-auto">
-              <span className="text-accent">import</span> KoreShield{" "}
-              <span className="text-accent">from</span>{" "}
-              <span className="text-white/60">"koreshield"</span>;{"\n"}
-              <span className="text-accent">const</span> shield ={" "}
-              <span className="text-accent">new</span> KoreShield();
+            <div className="bg-black/40 rounded-2xl border border-white/5 p-4 font-mono text-xs md:text-sm overflow-x-auto mt-auto">
+              <span className="text-accent">from</span> koreshield <span className="text-accent">import</span> KoreShieldClient{"\n"}
+              <span className="text-accent">client</span> = KoreShieldClient()
             </div>
           </div>
         </div>

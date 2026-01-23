@@ -5,7 +5,7 @@ description: Complete SDK for integrating KoreShield into your applications
 
 # JavaScript/TypeScript SDK
 
-The KoreShield JavaScript/TypeScript SDK provides a comprehensive, production-ready solution for integrating KoreShield's LLM security features into your applications.
+The KoreShield JavaScript/TypeScript SDK provides a comprehensive, production-ready solution for integrating with the KoreShield LLM Security Proxy in your applications.
 
 ## Installation
 
@@ -20,6 +20,17 @@ yarn add koreshield
 pnpm add koreshield
 ```
 
+## Supported LLM Providers
+
+KoreShield proxy supports multiple providers:
+
+- **DeepSeek** - High-performance models (OpenAI-compatible)
+- **OpenAI** - GPT-3.5, GPT-4, and other models
+- **Anthropic** - Claude models
+- **More providers** - Coming soon
+
+Configure providers in your KoreShield proxy's `config.yaml`.
+
 ## Quick Start
 
 ### Node.js
@@ -27,29 +38,34 @@ pnpm add koreshield
 ```javascript
 import { createClient } from 'koreshield';
 
+// Connect to your KoreShield proxy
 const client = createClient({
-    baseURL: 'https://your-koreshield-instance.com',
-    apiKey: 'your-koreshield-api-key'
+    baseURL: 'http://localhost:8000', // Your KoreShield proxy URL
 });
 
-// Secure chat completion
+// Secure chat completion through KoreShield
 const response = await client.createChatCompletion({
-    model: 'gpt-3.5-turbo',
+    model: 'deepseek-chat',
     messages: [
         { role: 'user', content: 'Hello, how are you?' }
     ]
 });
+
+console.log(response.choices[0].message.content);
 ```
 
 ### Browser
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/koreshield@latest/dist/browser/index.global.js"></script>
-<script>
-const client = KoreShield.createClient({
-    baseURL: 'https://your-koreshield-instance.com',
-    apiKey: 'your-koreshield-api-key'
-});
+<script type="module">
+    import { createClient } from './node_modules/koreshield/dist/browser/index.js';
+
+    const client = createClient({
+        baseURL: 'https://your-koreshield-proxy.com',
+        apiKey: 'your-koreshield-api-key'
+    });
+
+    // Use the client...
 </script>
 ```
 

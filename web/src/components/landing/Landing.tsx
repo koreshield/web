@@ -18,23 +18,31 @@ export const Landing = () => {
           <DeveloperExperience />
         </div>
 
-        <NetworkDiagram />
+        <div className="py-24">
+          <NetworkDiagram />
+        </div>
 
-        <BringYourOwnDomain />
+        <div className="py-24">
+          <BringYourOwnDomain />
+        </div>
 
-        <MultipleProtocols />
+        <div className="py-24">
+          <MultipleProtocols />
+        </div>
 
-        <OpenSource />
+        <div className="py-24">
+          <OpenSource />
+        </div>
 
-        <footer className="border-t border-white/10 py-12 bg-[#050a14]">
-          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+        <footer className="border-t border-white/10 py-8 md:py-12 bg-[#050a14]">
+          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
             <div className="flex items-center gap-2">
-              <span className="font-bold">KoreShield</span>
+              <span className="font-bold text-sm md:text-base">KoreShield</span>
             </div>
-            <div className="text-white/40 text-sm">
+            <div className="text-white/40 text-xs md:text-sm text-center">
               © {new Date().getFullYear()} KoreShield. All rights reserved.
             </div>
-            <div className="flex gap-6 text-white/60">
+            <div className="flex gap-4 md:gap-6 text-white/60 text-sm">
               <a
                 href="https://twitter.com/koreshield"
                 target="_blank"

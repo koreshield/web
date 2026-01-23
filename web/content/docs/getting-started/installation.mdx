@@ -6,57 +6,48 @@ icon: Terminal
 
 # Installation
 
-KoreShield is a Python-based security platform that can be installed via pip. Choose the installation method that best fits your deployment needs.
+KoreShield can be used in two ways: as a **standalone proxy** (recommended for production) or as an **SDK** integrated directly into your application code.
 
-## Prerequisites
+## 1. Proxy Installation (Docker)
 
-- Python 3.10 or higher
-- pip (Python package manager)
-
-## Install from PyPI
-
-The recommended way to install KoreShield is from PyPI:
-
-```bash
-pip install koreshield
-```
-
-## Install from Source
-
-If you want to install from the latest development version:
-
-```bash
-git clone https://github.com/koreshield/koreshield.git
-cd koreshield/llm-firewall
-pip install -e .
-```
-
-## Verify Installation
-
-To verify that KoreShield has been installed successfully:
-
-```bash
-koreshield --version
-```
-
-You should see the version number of the installed package.
-
-## Docker Installation
-
-For containerized deployments, you can use our Docker image:
+The standalone proxy sits between your application and LLM providers. This is the **most secure** deployment method as it operates independently of your application logic.
 
 ```bash
 docker pull koreshield/koreshield
 docker run -p 8000:8000 koreshield/koreshield
 ```
 
-## System Requirements
+## 2. SDK Installation
 
-- **Python**: 3.10+
-- **Memory**: 256MB minimum, 512MB recommended
-- **Storage**: 100MB for installation
+The SDKs allow you to integrate KoreShield features (sanitization, scanning) directly into your codebase or interact with a deployed KoreShield Proxy.
+
+### Python SDK
+
+```bash
+pip install koreshield
+```
+
+### JavaScript/TypeScript SDK
+
+```bash
+npm install koreshield
+```
+
+## Verification
+
+To verify that the **Python SDK** has been installed successfully:
+
+```bash
+python -c "import koreshield; print(koreshield.__version__)"
+```
+
+## System Requirements (Proxy)
+
+- **Docker**: Engine 20.10+
+- **Memory**: 512MB recommended
 - **Network**: Outbound HTTPS access to LLM providers
 
 ## Next Steps
 
-Once installed, proceed to [Getting Started](/docs/getting-started) to configure KoreShield and secure your first LLM integration.
+- **[Quick Start](/docs/getting-started)**: Secure your first LLM integration.
+- **[Configuration](/docs/configuration)**: Configure security policies.

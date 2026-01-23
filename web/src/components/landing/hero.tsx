@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ArrowRight, Copy, Check } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -7,9 +7,23 @@ import { BeamGroup } from "./beam-group";
 
 export const Hero = () => {
   const [copied, setCopied] = useState(false);
+  const [currentCommand, setCurrentCommand] = useState(0);
+  
+  const commands = [
+    { text: "pip install koreshield", label: "Python" },
+    { text: "npm install koreshield", label: "JavaScript" }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentCommand((prev) => (prev + 1) % commands.length);
+    }, 3000); // Change every 3 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const copyCommand = () => {
-    navigator.clipboard.writeText("pip install koreshield");
+    navigator.clipboard.writeText(commands[currentCommand].text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -37,19 +51,19 @@ export const Hero = () => {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/60 backdrop-blur-md hover:bg-white/10 hover:border-electric-blue/30 hover:text-white transition-all duration-300 animate-fade-in group"
           >
             <span className="w-2 h-2 rounded-full bg-security-green animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-            <span className="font-mono">v0.1.0 Public Beta</span>
+            <span className="font-mono">v0.1.1 Public Beta</span>
             <span className="w-px h-3 bg-white/10 mx-1" />
             <span className="group-hover:text-electric-blue transition-colors">Open Source Security</span>
           </a>
 
-          <h1 className="text-5xl md:text-8xl font-bold text-center tracking-tight leading-[1.05] animate-fade-in [animation-delay:200ms]">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-center tracking-tight leading-[1.05] animate-fade-in [animation-delay:200ms]">
             Protect your AI <br />
             <span className="text-gradient drop-shadow-lg">
               from Prompt Injection
             </span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-center text-white/60 max-w-2xl leading-relaxed animate-fade-in [animation-delay:400ms]">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-center text-white/60 max-w-2xl leading-relaxed animate-fade-in [animation-delay:400ms] px-4">
             The open-source middleware to detect attacks, enforce policies, and audit LLM interactions in real-time.
           </p>
         </div>
@@ -65,7 +79,8 @@ export const Hero = () => {
             onClick={copyCommand}
             className="w-full sm:w-auto flex items-center gap-3 text-white/70 px-8 py-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 font-mono text-sm backdrop-blur-sm transition-all group cursor-pointer hover:border-white/20"
           >
-            <span className="text-electric-blue font-bold">$</span> pip install koreshield
+            <span className="text-electric-blue font-bold">$</span> 
+            <span className="transition-opacity duration-300">{commands[currentCommand].text}</span>
             {copied ? (
               <Check size={16} className="text-security-green" />
             ) : (

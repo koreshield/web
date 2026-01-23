@@ -20,13 +20,13 @@ A comprehensive JavaScript/TypeScript SDK for integrating with [KoreShield](http
 
 ```bash
 # npm
-npm install koreshield-js
+npm install koreshield
 
 # yarn
-yarn add koreshield-js
+yarn add koreshield
 
 # pnpm
-pnpm add koreshield-js
+pnpm add koreshield
 ```
 
 ## Quick Start
@@ -34,7 +34,7 @@ pnpm add koreshield-js
 ### Node.js
 
 ```javascript
-import { createClient } from 'koreshield-js';
+import { createClient } from 'koreshield';
 
 const client = createClient({
     baseURL: 'https://your-koreshield-instance.com', // Required
