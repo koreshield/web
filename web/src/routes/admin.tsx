@@ -60,6 +60,12 @@ function AdminLayout() {
   };
 
   const handleLogout = async () => {
+    // Call server to clear cookies
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch (e) {
+      console.error("Logout failed", e);
+    }
     // Clear JWT token from localStorage for stateless logout
     localStorage.removeItem("admin_token");
     setIsAuthenticated(false);
@@ -158,6 +164,8 @@ function AdminOverview() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchData = async () => {
       try {
         const [overviewRes, statsRes] = await Promise.all([
@@ -165,10 +173,13 @@ function AdminOverview() {
           appClient.admin.stats(period),
         ]);
 
+        if (!mounted) return;
+
         // Check for auth errors
         if ("error" in overviewRes) {
           if (overviewRes.error === "Unauthorized" || overviewRes.error === "Forbidden") {
-            window.location.reload(); // Force re-auth
+            // Let the parent layout handle auth state if needed, or redirect
+            // For now just log it
             return;
           }
           console.error("Overview error:", overviewRes.error);
@@ -181,48 +192,31 @@ function AdminOverview() {
         }
 
         setOverview(overviewRes);
-        setSecurityData(statsRes);
+        setSecurityData(
+          statsRes.map((d: any) => ({
+            ...d,
+            time: new Date(d.time.replace(" ", "T")).getTime(),
+          }))
+        );
       } catch (error) {
-        console.error("Failed to fetch admin data:", error);
+        if (mounted) {
+          console.error("Failed to fetch admin data:", error);
+        }
       } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [period]);
-            return;
-          }
+        if (mounted) {
+          setLoading(false);
         }
-        if ("error" in statsRes) {
-          if (statsRes.error === "Unauthorized" || statsRes.error === "Forbidden") {
-            clearToken();
-            return;
-          }
-        }
-
-        if (!("error" in overviewRes)) {
-          setOverview(overviewRes);
-        }
-        if (!("error" in statsRes)) {
-          setSecurityData(
-            statsRes.map((d: any) => ({
-              ...d,
-              time: new Date(d.time.replace(" ", "T")).getTime(),
-            }))
-          );
-        }
-      } catch (error) {
-        console.error("Failed to fetch admin data:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchData();
     const interval = setInterval(fetchData, 60000);
-    return () => clearInterval(interval);
-  }, [period, token, clearToken]);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [period]);
 
   if (loading) {
     return <OverviewSkeleton />;
@@ -250,12 +244,12 @@ function AdminOverview() {
 
   const pieData = overview?.subscriptions?.byPlan
     ? Object.entries(overview.subscriptions.byPlan)
-        .filter(([_, value]) => (value as number) > 0)
-        .map(([name, value]) => ({
-          name,
-          value: value as number,
-          color: planColors[name] || "#6B7280",
-        }))
+      .filter(([_, value]) => (value as number) > 0)
+      .map(([name, value]) => ({
+        name,
+        value: value as number,
+        color: planColors[name] || "#6B7280",
+      }))
     : [];
 
   const totalSubs = pieData.reduce((sum, item) => sum + item.value, 0);
@@ -324,11 +318,10 @@ function AdminOverview() {
                 <button
                   key={p}
                   onClick={() => setPeriod(p)}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                    period === p
-                      ? "bg-white/10 text-white shadow-sm"
-                      : "text-gray-500 hover:text-gray-300"
-                  }`}
+                  className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${period === p
+                    ? "bg-white/10 text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-300"
+                    }`}
                 >
                   {p}
                 </button>
