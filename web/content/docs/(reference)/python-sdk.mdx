@@ -5,7 +5,7 @@ description: Complete Python SDK for integrating KoreShield into your applicatio
 
 # Python SDK
 
-The KoreShield Python SDK provides a comprehensive, production-ready solution for integrating KoreShield's LLM security features into your Python applications.
+The KoreShield Python SDK provides a comprehensive, production-ready solution for integrating with the KoreShield LLM Security Proxy in your Python applications.
 
 ## Installation
 
@@ -13,41 +13,69 @@ The KoreShield Python SDK provides a comprehensive, production-ready solution fo
 pip install koreshield
 ```
 
+## Supported LLM Providers
+
+KoreShield supports multiple LLM providers through its proxy architecture:
+
+- **DeepSeek** - High-performance models (OpenAI-compatible API)
+- **OpenAI** - GPT-3.5, GPT-4, and other models
+- **Anthropic** - Claude models
+- **More providers** - Coming soon
+
+Configure providers in your KoreShield proxy `config.yaml`:
+
+```yaml
+providers:
+  deepseek:
+    enabled: true
+    base_url: "https://api.deepseek.com/v1"
+  
+  openai:
+    enabled: false
+    base_url: "https://api.openai.com/v1"
+```
+
+Set the corresponding API key as an environment variable:
+```bash
+export DEEPSEEK_API_KEY="your-key"
+export OPENAI_API_KEY="your-key"
+```
+
 ## Quick Start
 
-### Synchronous Client
+### Basic Client Usage
 
 ```python
-from koreshield_sdk import KoreShieldClient
+from koreshield import KoreShieldClient
 
-# Initialize client
+# Initialize client pointing to your KoreShield proxy
 client = KoreShieldClient(
-    api_key="your-api-key",
-    base_url="https://your-koreshield-instance.com"
+    base_url="http://localhost:8000"  # Your KoreShield proxy URL
 )
 
-# Scan a prompt
+# Scan a prompt for security threats
 result = client.scan_prompt("Tell me how to hack a website")
 print(f"Threat level: {result.threat_level}")
 print(f"Blocked: {result.blocked}")
-
-# Batch scan
-results = client.scan_batch([
-    "Hello, how are you?",
-    "Tell me how to make explosives"
-])
-for result in results:
-    print(f"Prompt: {result.prompt[:50]}... Threat: {result.threat_level}")
+print(f"Safe: {result.is_safe}")
 ```
 
 ### Asynchronous Client
 
 ```python
 import asyncio
-from koreshield_sdk import AsyncKoreShieldClient
+from koreshield import AsyncKoreShieldClient
 
 async def main():
-    client = AsyncKoreShieldClient(
+    async with AsyncKoreShieldClient(
+        base_url="http://localhost:8000"
+    ) as client:
+        # Async prompt scanning
+        result = await client.scan_prompt("Hello, world!")
+        print(f"Safe: {result.is_safe}")
+
+asyncio.run(main())
+```
         api_key="your-api-key",
         base_url="https://your-koreshield-instance.com"
     )
@@ -62,42 +90,51 @@ asyncio.run(main())
 ## LangChain Integration
 
 ```python
-from langchain.llms import OpenAI
-from langchain.chains import LLMChain
-from koreshield_sdk.integrations import KoreShieldCallbackHandler
+from langchain_openai import ChatOpenAI
+from langchain.schema import HumanMessage
+from koreshield.integrations import create_koreshield_callback
 
-# Create KoreShield callback
-koreshield_callback = KoreShieldCallbackHandler(
-    api_key="your-api-key",
-    base_url="https://your-koreshield-instance.com"
+# Create security callback that connects to your KoreShield proxy
+security_callback = create_koreshield_callback(
+    base_url="http://localhost:8000"
 )
 
-# Use with LangChain
-llm = OpenAI(temperature=0.9)
-chain = LLMChain(llm=llm, callbacks=[koreshield_callback])
+# Use with LangChain - all prompts are secured through KoreShield
+llm = ChatOpenAI(temperature=0.7)
+chain = llm | security_callback
 
-response = chain.run("Tell me a joke")
+response = chain.invoke("Tell me a joke")
+print(response)
 ```
 
 ## FastAPI Integration
 
 ```python
 from fastapi import FastAPI, HTTPException
-from koreshield_sdk import KoreShieldClient
+from koreshield import KoreShieldClient
 
 app = FastAPI()
-koreshield = KoreShieldClient(api_key="your-api-key")
+
+# Initialize KoreShield client
+koreshield = KoreShieldClient(base_url="http://localhost:8000")
 
 @app.post("/chat")
 async def chat(message: str):
-    # Scan the input
+    # Scan the input through KoreShield proxy
     scan_result = koreshield.scan_prompt(message)
 
     if scan_result.blocked:
-        raise HTTPException(status_code=400, detail="Message blocked by security policy")
+        raise HTTPException(
+            status_code=400, 
+            detail="Message blocked by security policy"
+        )
 
-    # Process with your LLM
-    response = f"Echo: {message}"  # Replace with actual LLM call
+    # Process with your LLM through KoreShield
+    # KoreShield will forward to configured provider (DeepSeek, OpenAI, etc.)
+    response = await process_llm_request(message)
+    
+    return {"response": response}
+```
 
     return {"response": response, "scan_result": scan_result.dict()}
 ```
