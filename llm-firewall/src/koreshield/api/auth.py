@@ -1,91 +1,126 @@
 
-import os
-from typing import Optional
-from datetime import datetime
+"""
+JWT-based authentication for KoreShield.
+This module provides stateless authentication using JWT tokens.
+The auth service issues signed JWTs, and this firewall only verifies signatures.
+"""
 
+import os
+from typing import Optional, Dict, Any
+from datetime import datetime, timezone
+
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy import create_engine, text
 import structlog
 from dotenv import load_dotenv
 
-# Load environment variables (including DATABASE_URL)
+# Load environment variables
 load_dotenv(".env.local")
 load_dotenv(".env")
 
 logger = structlog.get_logger(__name__)
 
-# Database Setup
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    logger.warning("DATABASE_URL not found. Authentication will fail.")
-
-engine = create_engine(DATABASE_URL) if DATABASE_URL else None
+# JWT Configuration - will be loaded from config
+JWT_PUBLIC_KEY = None
+JWT_ALGORITHM = "RS256"
+JWT_ISSUER = "koreshield-auth"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/management/login")
 
-def verify_session_token(token: str) -> Optional[dict]:
+def init_jwt_config(config: dict):
+    """Initialize JWT configuration from main config."""
+    global JWT_PUBLIC_KEY, JWT_ALGORITHM, JWT_ISSUER
+
+    jwt_config = config.get("jwt", {})
+    JWT_PUBLIC_KEY = jwt_config.get("public_key") or os.getenv("JWT_PUBLIC_KEY")
+    JWT_ALGORITHM = jwt_config.get("algorithm", "RS256")
+    JWT_ISSUER = jwt_config.get("issuer", "koreshield-auth")
+
+    if not JWT_PUBLIC_KEY:
+        logger.warning("JWT_PUBLIC_KEY not configured - authentication will fail")
+    else:
+        logger.info("JWT authentication configured", algorithm=JWT_ALGORITHM, issuer=JWT_ISSUER)
+
+def verify_jwt_token(token: str) -> Optional[Dict[str, Any]]:
     """
-    Verify the better-auth session token against the database.
-    Returns the user dict if valid, None otherwise.
+    Verify JWT token using public key.
+    Returns the decoded payload if valid, None otherwise.
     """
-    if not engine:
-        return None
-    
-    try:
-        with engine.connect() as conn:
-            # Query the session table to find the user_id
-            # better-auth table names usually follow a pattern. Assuming 'session' and 'user'.
-            # Adjust table names if creating a new schema, but standard is 'session' and 'user'.
-            query = text("""
-                SELECT u.id, u.name, u.email, u.role, s.expires_at
-                FROM session s
-                JOIN "user" u ON s.user_id = u.id
-                WHERE s.token = :token
-            """)
-            result = conn.execute(query, {"token": token}).fetchone()
-            
-            if not result:
-                return None
-            
-            # Check expiration
-            expires_at = result.expires_at
-            
-            # Ensure expires_at is timezone-aware if it isn't already
-            if expires_at.tzinfo is None:
-                from datetime import timezone
-                expires_at = expires_at.replace(tzinfo=timezone.utc)
-                
-            from datetime import timezone
-            if expires_at < datetime.now(timezone.utc):
-                return None
-                
-            return {
-                "id": result.id,
-                "name": result.name,
-                "email": result.email,
-                "role": result.role
-            }
-    except Exception as e:
-        logger.error("Database error verifying session", error=str(e))
+    if not JWT_PUBLIC_KEY:
+        logger.error("JWT_PUBLIC_KEY not configured")
         return None
 
-async def get_current_admin(token: str = Depends(oauth2_scheme)):
+    try:
+        # Decode and verify the JWT
+        payload = jwt.decode(
+            token,
+            JWT_PUBLIC_KEY,
+            algorithms=[JWT_ALGORITHM],
+            issuer=JWT_ISSUER,
+            options={
+                "verify_exp": True,
+                "verify_iat": True,
+                "verify_aud": False  # We'll handle audience verification manually if needed
+            }
+        )
+
+        # Additional validation
+        if payload.get("type") != "access":
+            logger.warning("Invalid token type", token_type=payload.get("type"))
+            return None
+
+        return payload
+
+    except jwt.ExpiredSignatureError:
+        logger.warning("Token expired")
+        return None
+    except jwt.InvalidTokenError as e:
+        logger.warning("Invalid token", error=str(e))
+        return None
+    except Exception as e:
+        logger.error("JWT verification error", error=str(e))
+        return None
+
+async def get_current_admin(token: str = Depends(oauth2_scheme)) -> Dict[str, Any]:
     """
-    FastAPI dependency to validate the session token.
+    FastAPI dependency to validate JWT token and return user info.
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
-    user = verify_session_token(token)
-    if not user:
+
+    payload = verify_jwt_token(token)
+    if not payload:
         raise credentials_exception
-        
-    # Optional: Check for admin permission if roles exist
-    # if user.get("role") not in ["admin", "owner"]:
-    #    raise HTTPException(status_code=403, detail="Insufficient permissions")
-        
+
+    # Extract user information from JWT payload
+    user = {
+        "id": payload.get("sub"),
+        "name": payload.get("name"),
+        "email": payload.get("email"),
+        "role": payload.get("role", "user")
+    }
+
+    # Optional: Check for admin permission
+    if user.get("role") not in ["admin", "owner", "superuser"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions"
+        )
+
+    # Audit logging for admin authentication
+    logger.info("admin_authenticated", user_id=user.get("id"), email=user.get("email"), role=user.get("role"))
+
     return user
+
+# Legacy function for backward compatibility (returns None to indicate no DB access)
+def verify_session_token(token: str) -> Optional[dict]:
+    """
+    Legacy function - now uses JWT verification instead of database.
+    This function is kept for backward compatibility but delegates to JWT verification.
+    """
+    logger.warning("verify_session_token called - this should use JWT verification")
+    return verify_jwt_token(token)

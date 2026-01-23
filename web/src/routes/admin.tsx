@@ -2,18 +2,43 @@ import { createFileRoute, Outlet, useLocation, useRouter } from "@tanstack/react
 import { useState, useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { appClient } from "@/lib/app-client";
-import { useAdminStore } from "@/lib/admin-store";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
 function AdminLayout() {
-  const { token, setToken, clearToken } = useAdminStore();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [phrase, setPhrase] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const router = useRouter();
+
+  // checking authentication on mount
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      if (!token) {
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+      // Try to access admin data to check if token is valid
+      await appClient.admin.overview();
+      setIsAuthenticated(true);
+    } catch {
+      // Token is invalid, clear it
+      localStorage.removeItem("admin_token");
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     setAuthError(null);
@@ -23,19 +48,39 @@ function AdminLayout() {
         setAuthError("Invalid passphrase");
         return;
       }
-      setToken(res.token);
+      // Store JWT token in localStorage for stateless auth
+      if (res.token) {
+        localStorage.setItem("admin_token", res.token);
+      }
+      setIsAuthenticated(true);
       setPhrase("");
     } catch {
       setAuthError("Login failed");
     }
   };
 
-  const handleLogout = () => {
-    clearToken();
+  const handleLogout = async () => {
+    // Call server to clear cookies
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch (e) {
+      console.error("Logout failed", e);
+    }
+    // Clear JWT token from localStorage for stateless logout
+    localStorage.removeItem("admin_token");
+    setIsAuthenticated(false);
     router.navigate({ to: "/admin" });
   };
 
-  if (!token) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#070707] flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#070707] flex items-center justify-center p-4">
         <div className="w-full max-w-sm p-8 bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl">
@@ -88,7 +133,7 @@ function AdminLayout() {
       <AdminSidebar onLogout={handleLogout} />
       <main className="ml-64 min-h-screen overflow-auto">
         <div className="p-8">
-          {isRootAdmin ? <AdminOverview token={token} /> : <Outlet />}
+          {isRootAdmin ? <AdminOverview /> : <Outlet />}
         </div>
       </main>
     </div>
@@ -112,57 +157,66 @@ import { Users, Building2, Network, CreditCard, Activity } from "lucide-react";
 import { AdminStatsCard } from "@/components/admin/admin-stats-card";
 import { OverviewSkeleton } from "@/components/admin/admin-skeleton";
 
-function AdminOverview({ token }: { token: string }) {
-  const clearToken = useAdminStore((s) => s.clearToken);
+function AdminOverview() {
   const [period, setPeriod] = useState("24h");
   const [overview, setOverview] = useState<any>(null);
   const [securityData, setSecurityData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchData = async () => {
       try {
         const [overviewRes, statsRes] = await Promise.all([
-          appClient.admin.overview(token),
-          appClient.admin.stats(period, token),
+          appClient.admin.overview(),
+          appClient.admin.stats(period),
         ]);
 
-        // Check for auth errors and clear token if unauthorized
+        if (!mounted) return;
+
+        // Check for auth errors
         if ("error" in overviewRes) {
           if (overviewRes.error === "Unauthorized" || overviewRes.error === "Forbidden") {
-            clearToken();
+            // Let the parent layout handle auth state if needed, or redirect
+            // For now just log it
             return;
           }
-        }
-        if ("error" in statsRes) {
-          if (statsRes.error === "Unauthorized" || statsRes.error === "Forbidden") {
-            clearToken();
-            return;
-          }
+          console.error("Overview error:", overviewRes.error);
+          return;
         }
 
-        if (!("error" in overviewRes)) {
-          setOverview(overviewRes);
+        if ("error" in statsRes) {
+          console.error("Stats error:", statsRes.error);
+          return;
         }
-        if (!("error" in statsRes)) {
-          setSecurityData(
-            statsRes.map((d: any) => ({
-              ...d,
-              time: new Date(d.time.replace(" ", "T")).getTime(),
-            }))
-          );
-        }
+
+        setOverview(overviewRes);
+        setSecurityData(
+          statsRes.map((d: any) => ({
+            ...d,
+            time: new Date(d.time.replace(" ", "T")).getTime(),
+          }))
+        );
       } catch (error) {
-        console.error("Failed to fetch admin data:", error);
+        if (mounted) {
+          console.error("Failed to fetch admin data:", error);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
     const interval = setInterval(fetchData, 60000);
-    return () => clearInterval(interval);
-  }, [period, token, clearToken]);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [period]);
 
   if (loading) {
     return <OverviewSkeleton />;
@@ -190,12 +244,12 @@ function AdminOverview({ token }: { token: string }) {
 
   const pieData = overview?.subscriptions?.byPlan
     ? Object.entries(overview.subscriptions.byPlan)
-        .filter(([_, value]) => (value as number) > 0)
-        .map(([name, value]) => ({
-          name,
-          value: value as number,
-          color: planColors[name] || "#6B7280",
-        }))
+      .filter(([_, value]) => (value as number) > 0)
+      .map(([name, value]) => ({
+        name,
+        value: value as number,
+        color: planColors[name] || "#6B7280",
+      }))
     : [];
 
   const totalSubs = pieData.reduce((sum, item) => sum + item.value, 0);
@@ -264,11 +318,10 @@ function AdminOverview({ token }: { token: string }) {
                 <button
                   key={p}
                   onClick={() => setPeriod(p)}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                    period === p
-                      ? "bg-white/10 text-white shadow-sm"
-                      : "text-gray-500 hover:text-gray-300"
-                  }`}
+                  className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${period === p
+                    ? "bg-white/10 text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-300"
+                    }`}
                 >
                   {p}
                 </button>

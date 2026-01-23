@@ -10,6 +10,7 @@ server:
 logging:
   level: INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
   json_logs: false  # Set to true for production
+  container_mode: false  # Set to true for containerized deployments (stdout only)
   file: logs/koreshield.log
 
 # Security policies
@@ -52,6 +53,13 @@ providers:
     enabled: false
     base_url: "https://your-resource-name.openai.azure.com"
     # api_key should be set via environment variable: AZURE_OPENAI_API_KEY
+
+# Redis configuration (for distributed rate limiting and statistics)
+redis:
+  enabled: true
+  url: "redis://localhost:6379/0"  # Redis connection URL
+  # Alternative format: "redis://:password@localhost:6379/0"
+  # For Redis Cluster: "redis://localhost:7000,localhost:7001,localhost:7002"
 
 # Alerting configuration
 alerting:

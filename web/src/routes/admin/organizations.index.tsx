@@ -5,7 +5,6 @@ import { Search, Building2, Users, Network } from "lucide-react";
 import { appClient } from "@/lib/app-client";
 import { AdminDataTable, type Column } from "@/components/admin/admin-data-table";
 import { UsersSkeleton } from "@/components/admin/admin-skeleton";
-import { useAdminStore } from "@/lib/admin-store";
 
 export const Route = createFileRoute("/admin/organizations/")({
   component: AdminOrganizationsPage,
@@ -30,7 +29,6 @@ const planColors: Record<string, string> = {
 };
 
 function AdminOrganizationsPage() {
-  const token = useAdminStore((s) => s.token);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
@@ -38,14 +36,13 @@ function AdminOrganizationsPage() {
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["admin", "organizations", page, search],
     queryFn: async () => {
-      const res = await appClient.admin.organizations(token!, { page, search });
+      const res = await appClient.admin.organizations({ page, search });
       if ("error" in res) throw new Error(res.error);
       return res;
     },
-    enabled: !!token,
   });
 
-  if (!token || (isLoading && !data)) {
+  if (isLoading && !data) {
     return <UsersSkeleton />;
   }
 
