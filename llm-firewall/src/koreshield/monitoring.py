@@ -8,7 +8,7 @@ import smtplib
 import time
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass
 from enum import Enum
 
@@ -290,10 +290,10 @@ Details:
             return False
 
         emoji = {
-            AlertSeverity.INFO: 'ℹ️',
-            AlertSeverity.WARNING: '⚠️',
-            AlertSeverity.ERROR: '❌',
-            AlertSeverity.CRITICAL: '🚨'
+            AlertSeverity.INFO: 'INFO',
+            AlertSeverity.WARNING: 'WARNING',
+            AlertSeverity.ERROR: 'ERROR',
+            AlertSeverity.CRITICAL: 'CRITICAL'
         }
 
         payload = {
@@ -408,11 +408,12 @@ Details:
 class MonitoringSystem:
     """Main monitoring and alerting system."""
 
-    def __init__(self, config: MonitoringConfig):
+    def __init__(self, config: MonitoringConfig, stats_getter: Optional[Callable[[], Dict[str, int]]] = None):
         self.config = config
         self.metrics = MetricsCollector()
         self.alert_manager = AlertManager(config.alerts)
         self.monitoring_enabled = config.enabled
+        self.stats_getter = stats_getter
 
         # Background monitoring task
         self.monitoring_task: Optional[asyncio.Task] = None
@@ -464,14 +465,28 @@ class MonitoringSystem:
 
     def _collect_current_metrics(self) -> Dict[str, Any]:
         """Collect current system metrics."""
-        # This would integrate with the proxy's stats
-        # For now, return basic structure
-        return {
-            'timestamp': time.time(),
-            'requests_total': 0,  # Would come from proxy stats
-            'attacks_detected': 0,
-            'active_connections': 0,
-        }
+        if self.stats_getter:
+            stats = self.stats_getter()
+            return {
+                'timestamp': time.time(),
+                'requests_total': stats.get('requests_total', 0),
+                'requests_allowed': stats.get('requests_allowed', 0),
+                'requests_blocked': stats.get('requests_blocked', 0),
+                'attacks_detected': stats.get('attacks_detected', 0),
+                'errors': stats.get('errors', 0),
+                'active_connections': 0,  # TODO: implement connection tracking
+            }
+        else:
+            # Fallback to basic structure
+            return {
+                'timestamp': time.time(),
+                'requests_total': 0,
+                'requests_allowed': 0,
+                'requests_blocked': 0,
+                'attacks_detected': 0,
+                'errors': 0,
+                'active_connections': 0,
+            }
 
     def get_metrics_text(self) -> str:
         """Get metrics in Prometheus format."""

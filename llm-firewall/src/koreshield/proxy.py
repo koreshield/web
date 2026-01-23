@@ -10,6 +10,7 @@ from pathlib import Path
 
 import httpx
 import structlog
+import redis
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 
@@ -28,6 +29,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+from limits.storage import RedisStorage
 
 class KoreShieldProxy:
     """
@@ -71,8 +73,31 @@ class KoreShieldProxy:
             ]
         )
 
-        # Initialize parameter-based rate limiter
-        self.limiter = Limiter(key_func=get_remote_address)
+        # Initialize Redis connection for rate limiting and statistics
+        redis_config = config.get("redis", {})
+        redis_enabled = redis_config.get("enabled", True)
+        redis_url = redis_config.get("url", "redis://localhost:6379/0")
+        
+        if redis_enabled:
+            try:
+                self.redis_client = redis.from_url(redis_url)
+                # Test connection
+                self.redis_client.ping()
+                logger.info("Connected to Redis", redis_url=redis_url)
+            except Exception as e:
+                logger.error("Failed to connect to Redis, falling back to in-memory", error=str(e))
+                self.redis_client = None
+        else:
+            logger.info("Redis disabled, using in-memory storage")
+            self.redis_client = None
+
+        # Initialize parameter-based rate limiter with Redis storage
+        if self.redis_client:
+            storage = RedisStorage(f"{redis_url}/1")  # Use database 1 for rate limits
+            self.limiter = Limiter(key_func=get_remote_address, storage_uri=storage)
+        else:
+            self.limiter = Limiter(key_func=get_remote_address)
+        
         self.app.state.limiter = self.limiter
         self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
         self.app.add_middleware(SlowAPIMiddleware)
@@ -98,18 +123,24 @@ class KoreShieldProxy:
             allow_headers=["*"],
         )
 
-        # Statistics tracking
-        self.stats = {
-            "requests_total": 0,
-            "requests_allowed": 0,
-            "requests_blocked": 0,
-            "attacks_detected": 0,
-            "errors": 0,
+        # Statistics tracking (now in Redis)
+        self.stats_keys = {
+            "requests_total": "koreshield:stats:requests_total",
+            "requests_allowed": "koreshield:stats:requests_allowed", 
+            "requests_blocked": "koreshield:stats:requests_blocked",
+            "attacks_detected": "koreshield:stats:attacks_detected",
+            "errors": "koreshield:stats:errors",
         }
         
-        # Store state for API access
+        # Initialize stats in Redis if available
+        if self.redis_client:
+            for key in self.stats_keys.values():
+                if not self.redis_client.exists(key):
+                    self.redis_client.set(key, 0)
+        
+        # Store state for API access (keep in-memory copy for backward compatibility)
         self.app.state.config = self.config
-        self.app.state.stats = self.stats
+        self.app.state.stats = self._get_stats_dict()  # Will be updated dynamically
 
         # Initialize security components
         security_config = config.get("security", {})
@@ -125,7 +156,14 @@ class KoreShieldProxy:
 
         # Initialize monitoring system
         from .monitoring import MonitoringSystem
-        self.monitoring = MonitoringSystem(config)
+        from .config import KoreShieldConfig
+        kore_config = KoreShieldConfig()
+        kore_config.load_from_dict(config)
+        self.monitoring = MonitoringSystem(kore_config.monitoring, stats_getter=self._get_stats_dict)
+
+        # Initialize JWT authentication
+        from .api.auth import init_jwt_config
+        init_jwt_config(config)
 
         self._setup_routes()
         
@@ -171,6 +209,44 @@ class KoreShieldProxy:
             logger.warning("No LLM providers configured. Set up API keys and enable providers in config.yaml")
         else:
             logger.info(f"Initialized {len(self.providers)} providers: {', '.join(self.provider_priority)}")
+
+    def _get_stats_dict(self) -> dict:
+        """Get current statistics as a dictionary."""
+        if self.redis_client:
+            stats = {}
+            for stat_name, redis_key in self.stats_keys.items():
+                try:
+                    value = self.redis_client.get(redis_key)
+                    stats[stat_name] = int(value) if value else 0
+                except Exception as e:
+                    logger.error(f"Failed to get stat {stat_name}", error=str(e))
+                    stats[stat_name] = 0
+            return stats
+        else:
+            # Fallback to in-memory stats for backward compatibility
+            return getattr(self, 'stats', {
+                "requests_total": 0,
+                "requests_allowed": 0,
+                "requests_blocked": 0,
+                "attacks_detected": 0,
+                "errors": 0,
+            })
+
+    def _increment_stat(self, stat_name: str, amount: int = 1):
+        """Increment a statistic counter."""
+        if self.redis_client and stat_name in self.stats_keys:
+            try:
+                redis_key = self.stats_keys[stat_name]
+                self.redis_client.incrby(redis_key, amount)
+                # Update the app state for API access
+                self.app.state.stats = self._get_stats_dict()
+            except Exception as e:
+                logger.error(f"Failed to increment stat {stat_name}", error=str(e))
+        else:
+            # Fallback to in-memory
+            if hasattr(self, 'stats'):
+                self.stats[stat_name] = self.stats.get(stat_name, 0) + amount
+                self.app.state.stats = self.stats
 
     @property
     def provider(self):
@@ -339,7 +415,7 @@ class KoreShieldProxy:
                 combined_prompt = ""  # Empty string for analysis
 
             # Update statistics
-            self.stats["requests_total"] += 1
+            self._increment_stat("requests_total")
 
             self.logger.log_request(
                 request_id=request_id,
@@ -414,8 +490,8 @@ class KoreShieldProxy:
 
             if should_block:
                 # Block the request
-                self.stats["requests_blocked"] += 1
-                self.stats["attacks_detected"] += 1
+                self._increment_stat("requests_blocked")
+                self._increment_stat("attacks_detected")
 
                 # Record blocked request metrics
                 duration = time.time() - start_time
@@ -481,7 +557,7 @@ class KoreShieldProxy:
                     provider=provider_name
                 ).observe(provider_duration)
 
-                self.stats["requests_allowed"] += 1
+                self._increment_stat("requests_allowed")
                 self.logger.log_allowed(request_id=request_id)
 
                 # Record successful request metrics
@@ -505,7 +581,7 @@ class KoreShieldProxy:
                     status=f"error_{e.response.status_code}"
                 ).inc()
 
-                self.stats["errors"] += 1
+                self._increment_stat("errors")
                 logger.error("Provider API error", status_code=e.response.status_code, error=str(e))
                 return JSONResponse(
                     status_code=e.response.status_code,
@@ -518,7 +594,7 @@ class KoreShieldProxy:
                     status="error_unknown"
                 ).inc()
 
-                self.stats["errors"] += 1
+                self._increment_stat("errors")
                 logger.error("Provider error", error=str(e))
                 raise HTTPException(status_code=500, detail=f"Provider error: {str(e)}")
 
@@ -538,7 +614,7 @@ class KoreShieldProxy:
                 detail=f"Provider API error: {e.response.text if e.response else str(e)}",
             )
         except Exception as e:
-            self.stats["errors"] += 1
+            self._increment_stat("errors")
             logger.error(
                 "Request handling error", request_id=request_id, error=str(e), exc_info=True
             )

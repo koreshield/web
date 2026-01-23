@@ -13,34 +13,32 @@ import os
 from logging.handlers import RotatingFileHandler
 import sys
 
-def setup_logging(log_level: str = "INFO", json_logs: bool = True):
+def setup_logging(log_level: str = "INFO", json_logs: bool = True, container_mode: bool = False):
     """
     Set up structured logging for the application.
 
     Args:
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         json_logs: Whether to output JSON logs (default True for easier parsing)
+        container_mode: Whether to run in container mode (stdout only, no file logging)
     """
-    # Create logs directory if it doesn't exist
-    log_dir = "logs"
-    os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, "koreshield.log")
-
-    # Configure standard logging
-    root_logger = logging.getLogger()
-    root_logger.setLevel(getattr(logging, log_level.upper()))
-    
     # Clear existing handlers
     root_logger.handlers = []
 
-    # File Handler (JSONL)
-    file_handler = RotatingFileHandler(
-        log_file, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
-    )
-    # Stream Handler (Stdout)
-    stream_handler = logging.StreamHandler(sys.stdout)
+    # File Handler (JSONL) - only if not in container mode
+    if not container_mode:
+        # Create logs directory if it doesn't exist
+        log_dir = "logs"
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, "koreshield.log")
 
-    root_logger.addHandler(file_handler)
+        file_handler = RotatingFileHandler(
+            log_file, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
+        )
+        root_logger.addHandler(file_handler)
+
+    # Stream Handler (Stdout) - always present
+    stream_handler = logging.StreamHandler(sys.stdout)
     root_logger.addHandler(stream_handler)
 
     processors = [

@@ -58,6 +58,7 @@ Examples:
         help="Logging level (overrides config)",
     )
     start_parser.add_argument("--json-logs", action="store_true", help="Output logs in JSON format")
+    start_parser.add_argument("--container-mode", action="store_true", help="Run in container mode (stdout logging only)")
 
     # Check config command
     check_parser = subparsers.add_parser("check-config", help="Validate configuration file")
@@ -107,11 +108,15 @@ def run_start(args):
         config.setdefault("logging", {})["level"] = args.log_level
     if args.json_logs:
         config.setdefault("logging", {})["json_logs"] = True
+    if args.container_mode:
+        config.setdefault("logging", {})["container_mode"] = True
 
     # Set up logging
     log_config = config.get("logging", {})
     setup_logging(
-        log_level=log_config.get("level", "INFO"), json_logs=log_config.get("json_logs", False)
+        log_level=log_config.get("level", "INFO"), 
+        json_logs=log_config.get("json_logs", False),
+        container_mode=log_config.get("container_mode", False)
     )
 
     logger = structlog.get_logger(__name__)
