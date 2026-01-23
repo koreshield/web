@@ -8,6 +8,8 @@ python-multipart>=0.0.6
 pyyaml>=6.0.1
 structlog>=23.2.0
 prometheus-client>=0.19.0
+sqlalchemy
+python-dotenv
 
 # Development dependencies (install with: pip install -r requirements-dev.txt)
 # pytest>=7.4.0

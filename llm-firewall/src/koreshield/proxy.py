@@ -78,13 +78,17 @@ class KoreShieldProxy:
         self.app.add_middleware(SlowAPIMiddleware)
 
         # Add CORS middleware
-        origins = [
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-            "https://koreshield.com",
-            # Add Vercel preview domains if needed, or allow all for dev
-            "*"
-        ]
+        # SECURITY NOTE: allow_credentials=True cannot be used with allow_origins=["*"]
+        # We default to specific development origins and allow override via env
+        env_origins = os.getenv("ALLOWED_ORIGINS", "")
+        if env_origins:
+            origins = env_origins.split(",")
+        else:
+            origins = [
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "https://koreshield.com",
+            ]
         
         self.app.add_middleware(
             CORSMiddleware,
@@ -128,7 +132,75 @@ class KoreShieldProxy:
         # Include management router
         self.app.include_router(management_router, prefix="/v1/management")
 
-    # ... (rest of class)
+    def _init_providers(self, config: dict):
+        """Initialize all enabled LLM providers with priority ordering."""
+        providers_config = config.get("providers", {})
+        logger.info(f"Available providers config: {providers_config}")
+
+        # Provider options with priority order (higher index = higher priority)
+        provider_options = [
+            ("deepseek", "DEEPSEEK_API_KEY", self.DeepSeekProvider),
+            ("openai", "OPENAI_API_KEY", self.OpenAIProvider),
+            ("anthropic", "ANTHROPIC_API_KEY", self.AnthropicProvider),
+            ("gemini", "GOOGLE_API_KEY", self.GeminiProvider),
+            ("azure_openai", "AZURE_OPENAI_API_KEY", self.AzureOpenAIProvider),
+        ]
+
+        self.providers = []
+        self.provider_priority = []
+
+        for provider_name, env_var, provider_class in provider_options:
+            provider_cfg = providers_config.get(provider_name, {})
+            logger.info(f"Checking provider {provider_name}: enabled={provider_cfg.get('enabled', False)}")
+            if provider_cfg.get("enabled", False):
+                api_key = os.getenv(env_var)
+                logger.info(f"Provider {provider_name}: API key {'found' if api_key else 'NOT found'} for env var {env_var}")
+                if api_key:
+                    try:
+                        base_url = provider_cfg.get("base_url")
+                        provider_instance = provider_class(api_key=api_key, base_url=base_url)
+                        self.providers.append(provider_instance)
+                        self.provider_priority.append(provider_name)
+                        logger.info(f"{provider_name.capitalize()} provider initialized successfully")
+                    except Exception as e:
+                        logger.error(f"Failed to initialize {provider_name} provider: {e}")
+                else:
+                    logger.warning(f"{env_var} not found in environment variables")
+
+        if not self.providers:
+            logger.warning("No LLM providers configured. Set up API keys and enable providers in config.yaml")
+        else:
+            logger.info(f"Initialized {len(self.providers)} providers: {', '.join(self.provider_priority)}")
+
+    @property
+    def provider(self):
+        """Get the primary (highest priority) provider."""
+        return self.providers[0] if self.providers else None
+
+    async def _get_healthy_provider(self):
+        """Get the first healthy provider using failover logic."""
+        for i, provider in enumerate(self.providers):
+            provider_name = self.provider_priority[i]
+            try:
+                # For now, just check if provider is initialized
+                # TODO: Implement actual health checks with test requests
+                if provider:
+                    logger.debug(f"Using provider: {provider_name}")
+                    return provider
+            except Exception as e:
+                logger.warning(f"Provider {provider_name} health check failed: {e}")
+                continue
+
+        logger.error("All providers are unhealthy")
+        return None
+
+    async def start_monitoring(self):
+        """Start the monitoring system."""
+        await self.monitoring.start_monitoring()
+
+    async def stop_monitoring(self):
+        """Stop the monitoring system."""
+        await self.monitoring.stop_monitoring()
 
     def _setup_routes(self):
         """Set up FastAPI routes."""
