@@ -101,7 +101,7 @@ export const DeveloperExperience = () => {
               Deploy KoreShield as a secure proxy between your application and LLM providers.
             </p>
             <div className="bg-black/40 rounded-2xl border border-white/5 p-4 font-mono text-xs md:text-sm mt-auto overflow-x-auto">
-              <span className="text-accent">$</span> docker run -p 8000:8000 koreshield/llm-firewall
+              <span className="text-accent">$</span> docker run -p 8000:8000 koreshield/koreshield
             </div>
           </div>
 

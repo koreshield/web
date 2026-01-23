@@ -76,16 +76,6 @@ async def main():
 
 asyncio.run(main())
 ```
-        api_key="your-api-key",
-        base_url="https://your-koreshield-instance.com"
-    )
-
-    # Async scan
-    result = await client.scan_prompt("Hello, world!")
-    print(f"Result: {result}")
-
-asyncio.run(main())
-```
 
 ## LangChain Integration
 
@@ -133,9 +123,6 @@ async def chat(message: str):
     # KoreShield will forward to configured provider (DeepSeek, OpenAI, etc.)
     response = await process_llm_request(message)
     
-    return {"response": response}
-```
-
     return {"response": response, "scan_result": scan_result.dict()}
 ```
 

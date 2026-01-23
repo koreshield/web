@@ -61,14 +61,11 @@ console.log(response.choices[0].message.content);
     import { createClient } from './node_modules/koreshield/dist/browser/index.js';
 
     const client = createClient({
-        baseURL: 'https://your-koreshield-proxy.com'
+        baseURL: 'https://your-koreshield-proxy.com',
+        apiKey: 'your-koreshield-api-key'
     });
 
     // Use the client...
-</script>
-```
-    apiKey: 'your-koreshield-api-key'
-});
 </script>
 ```
 
