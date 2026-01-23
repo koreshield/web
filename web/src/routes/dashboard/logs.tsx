@@ -9,7 +9,7 @@ import {
     AlertTriangle,
     Info,
     ShieldAlert,
-    Search
+    ShieldAlert
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/logs")({
@@ -77,7 +77,7 @@ function AuditLogs() {
                             <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No logs found.</td></tr>
                         ) : (
                             logs.map((log: LogEntry, i: number) => (
-                                <LogRow key={i} log={log} />
+                                <LogRow key={log.request_id || i} log={log} />
                             ))
                         )}
                     </tbody>
@@ -111,7 +111,14 @@ function LogRow({ log }: { log: LogEntry }) {
                 </span>
             </td>
             <td className="px-6 py-4 text-gray-500 font-mono text-xs">
-                {new Date(log.timestamp).toLocaleString()}
+                {new Date(log.timestamp).toLocaleString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                })}
             </td>
             <td className="px-6 py-4 font-medium">
                 {log.event}
@@ -125,7 +132,7 @@ function LogRow({ log }: { log: LogEntry }) {
     )
 }
 
-function omit(obj: any, keys: string[]) {
+function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
     const newObj = { ...obj };
     keys.forEach(key => delete newObj[key]);
     return newObj;
