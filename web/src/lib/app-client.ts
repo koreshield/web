@@ -84,17 +84,26 @@ async function apiCall<T = any>(
   options?: { params?: any; data?: any; headers?: Record<string, string> },
 ): Promise<ApiResponse<T>> {
   try {
+    // add admin JWT token to headers for admin API calls
+    const headers = { ...options?.headers };
+    if (url.startsWith("/api/admin") || url.startsWith("api/admin")) {
+      const token = localStorage.getItem("admin_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
+
     let response;
     if (method === "get" || method === "delete") {
       response = await apiClient[method](url, {
         params: options?.params,
         data: options?.data,
-        headers: options?.headers,
+        headers,
       });
     } else {
       response = await apiClient[method](url, options?.data, {
         params: options?.params,
-        headers: options?.headers,
+        headers,
       });
     }
     return response.data;

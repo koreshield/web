@@ -22,10 +22,18 @@ function AdminLayout() {
 
   const checkAuth = async () => {
     try {
-      // Try to access admin data to check if authenticated
+      const token = localStorage.getItem("admin_token");
+      if (!token) {
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+      // Try to access admin data to check if token is valid
       await appClient.admin.overview();
       setIsAuthenticated(true);
     } catch {
+      // Token is invalid, clear it
+      localStorage.removeItem("admin_token");
       setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
@@ -40,6 +48,10 @@ function AdminLayout() {
         setAuthError("Invalid passphrase");
         return;
       }
+      // Store JWT token in localStorage for stateless auth
+      if (res.token) {
+        localStorage.setItem("admin_token", res.token);
+      }
       setIsAuthenticated(true);
       setPhrase("");
     } catch {
@@ -48,11 +60,8 @@ function AdminLayout() {
   };
 
   const handleLogout = async () => {
-    try {
-      await appClient.apiCall("post", "/api/admin/logout");
-    } catch {
-      // Ignore logout errors
-    }
+    // Clear JWT token from localStorage for stateless logout
+    localStorage.removeItem("admin_token");
     setIsAuthenticated(false);
     router.navigate({ to: "/admin" });
   };
