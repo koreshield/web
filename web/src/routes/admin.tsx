@@ -2,18 +2,35 @@ import { createFileRoute, Outlet, useLocation, useRouter } from "@tanstack/react
 import { useState, useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { appClient } from "@/lib/app-client";
-import { useAdminStore } from "@/lib/admin-store";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
 function AdminLayout() {
-  const { token, setToken, clearToken } = useAdminStore();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [phrase, setPhrase] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const router = useRouter();
+
+  // checking authentication on mount
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      // Try to access admin data to check if authenticated
+      await appClient.admin.overview();
+      setIsAuthenticated(true);
+    } catch {
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     setAuthError(null);
@@ -23,19 +40,32 @@ function AdminLayout() {
         setAuthError("Invalid passphrase");
         return;
       }
-      setToken(res.token);
+      setIsAuthenticated(true);
       setPhrase("");
     } catch {
       setAuthError("Login failed");
     }
   };
 
-  const handleLogout = () => {
-    clearToken();
+  const handleLogout = async () => {
+    try {
+      await appClient.apiCall("post", "/api/admin/logout");
+    } catch {
+      // Ignore logout errors
+    }
+    setIsAuthenticated(false);
     router.navigate({ to: "/admin" });
   };
 
-  if (!token) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#070707] flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#070707] flex items-center justify-center p-4">
         <div className="w-full max-w-sm p-8 bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl">
@@ -88,7 +118,7 @@ function AdminLayout() {
       <AdminSidebar onLogout={handleLogout} />
       <main className="ml-64 min-h-screen overflow-auto">
         <div className="p-8">
-          {isRootAdmin ? <AdminOverview token={token} /> : <Outlet />}
+          {isRootAdmin ? <AdminOverview /> : <Outlet />}
         </div>
       </main>
     </div>
@@ -112,8 +142,7 @@ import { Users, Building2, Network, CreditCard, Activity } from "lucide-react";
 import { AdminStatsCard } from "@/components/admin/admin-stats-card";
 import { OverviewSkeleton } from "@/components/admin/admin-skeleton";
 
-function AdminOverview({ token }: { token: string }) {
-  const clearToken = useAdminStore((s) => s.clearToken);
+function AdminOverview() {
   const [period, setPeriod] = useState("24h");
   const [overview, setOverview] = useState<any>(null);
   const [securityData, setSecurityData] = useState<any[]>([]);
@@ -123,14 +152,36 @@ function AdminOverview({ token }: { token: string }) {
     const fetchData = async () => {
       try {
         const [overviewRes, statsRes] = await Promise.all([
-          appClient.admin.overview(token),
-          appClient.admin.stats(period, token),
+          appClient.admin.overview(),
+          appClient.admin.stats(period),
         ]);
 
-        // Check for auth errors and clear token if unauthorized
+        // Check for auth errors
         if ("error" in overviewRes) {
           if (overviewRes.error === "Unauthorized" || overviewRes.error === "Forbidden") {
-            clearToken();
+            window.location.reload(); // Force re-auth
+            return;
+          }
+          console.error("Overview error:", overviewRes.error);
+          return;
+        }
+
+        if ("error" in statsRes) {
+          console.error("Stats error:", statsRes.error);
+          return;
+        }
+
+        setOverview(overviewRes);
+        setSecurityData(statsRes);
+      } catch (error) {
+        console.error("Failed to fetch admin data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [period]);
             return;
           }
         }
