@@ -27,6 +27,7 @@ Create these files in your `llm-firewall` directory:
 
 **config/railway-config.yaml** (Railway-specific config):
 ```yaml
+# Railway Production Configuration
 server:
   host: "0.0.0.0"
   port: 8000
