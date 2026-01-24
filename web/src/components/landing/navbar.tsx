@@ -61,7 +61,10 @@ export const Navbar = () => {
 
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
           <Link to="/docs" className="hover:text-electric-blue transition-colors">
-            Documentation
+            Docs
+          </Link>
+          <Link to="/blog" className="hover:text-electric-blue transition-colors">
+            Blog
           </Link>
           <Link to="/pricing" className="hover:text-electric-blue transition-colors">
             Pricing
@@ -142,6 +145,13 @@ export const Navbar = () => {
               className="text-white/80 hover:text-white transition-colors py-4 text-2xl font-medium border-b border-white/10"
             >
               Documentation
+            </Link>
+            <Link
+              to="/blog"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-white/80 hover:text-white transition-colors py-4 text-2xl font-medium border-b border-white/10"
+            >
+              Blog
             </Link>
             <Link
               to="/pricing"

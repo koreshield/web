@@ -78,7 +78,7 @@ export const Hero = () => {
 
         <div className="flex flex-col sm:flex-row items-center gap-5 w-full justify-center animate-fade-in [animation-delay:600ms]">
           <Link
-            to="/docs/$"
+            to="/docs"
             className="w-full sm:w-auto px-8 py-4 bg-electric-blue text-white rounded-xl font-bold text-lg transition-all hover:bg-electric-blue/90 hover:scale-[1.02] hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.5)] flex items-center justify-center gap-2"
           >
             Get Started <ArrowRight size={20} />

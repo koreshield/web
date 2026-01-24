@@ -16,6 +16,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EmailTemplatesRouteImport } from './routes/email-templates'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as OrgSlugRouteImport } from './routes/$orgSlug'
 import { Route as IndexRouteImport } from './routes/index'
@@ -106,6 +107,11 @@ const EmailTemplatesRoute = EmailTemplatesRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -400,6 +406,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$orgSlug': typeof OrgSlugRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/blog': typeof BlogRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/email-templates': typeof EmailTemplatesRoute
   '/login': typeof LoginRoute
@@ -464,6 +471,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/blog': typeof BlogRoute
   '/email-templates': typeof EmailTemplatesRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -528,6 +536,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$orgSlug': typeof OrgSlugRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/blog': typeof BlogRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/email-templates': typeof EmailTemplatesRoute
   '/login': typeof LoginRoute
@@ -595,6 +604,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$orgSlug'
     | '/admin'
+    | '/blog'
     | '/dashboard'
     | '/email-templates'
     | '/login'
@@ -659,6 +669,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/blog'
     | '/email-templates'
     | '/login'
     | '/onboarding'
@@ -722,6 +733,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$orgSlug'
     | '/admin'
+    | '/blog'
     | '/dashboard'
     | '/email-templates'
     | '/login'
@@ -788,6 +800,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OrgSlugRoute: typeof OrgSlugRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  BlogRoute: typeof BlogRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   EmailTemplatesRoute: typeof EmailTemplatesRoute
   LoginRoute: typeof LoginRoute
@@ -875,6 +888,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -1391,6 +1411,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OrgSlugRoute: OrgSlugRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  BlogRoute: BlogRoute,
   DashboardRoute: DashboardRouteWithChildren,
   EmailTemplatesRoute: EmailTemplatesRoute,
   LoginRoute: LoginRoute,
