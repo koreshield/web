@@ -61,10 +61,10 @@ dev = [
 koreshield = "koreshield.cli:main_cli"
 
 [project.urls]
-Homepage = "https://github.com/nsisongltd/koreshield"
-Documentation = "https://github.com/nsisongltd/koreshield#readme"
-Repository = "https://github.com/nsisongltd/koreshield"
-Issues = "https://github.com/nsisongltd/koreshield/issues"
+Homepage = "https://github.com/koreshield/koreshield"
+Documentation = "https://github.com/koreshield/koreshield#readme"
+Repository = "https://github.com/koreshield/koreshield"
+Issues = "https://github.com/koreshield/koreshield/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

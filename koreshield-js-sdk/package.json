@@ -39,11 +39,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/1cbyc/koreshield.git",
+    "url": "https://github.com/koreshield/koreshield.git",
     "directory": "koreshield-js-sdk"
   },
   "bugs": {
-    "url": "https://github.com/1cbyc/koreshield/issues"
+    "url": "https://github.com/koreshield/koreshield/issues"
   },
   "homepage": "https://koreshield.com",
   "engines": {

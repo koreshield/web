@@ -52,7 +52,7 @@ Application → KoreShield → LLM API Provider
 
 ```bash
 # Clone the repository
-git clone https://github.com/nsisongltd/koreshield.git
+git clone https://github.com/koreshield/koreshield.git
 cd koreshield
 
 # Create virtual environment
@@ -141,7 +141,7 @@ See [examples/](examples/) for more usage examples:
 
 ```bash
 # Clone the repository
-git clone https://github.com/nsisongltd/koreshield.git
+git clone https://github.com/koreshield/koreshield.git
 cd koreshield
 
 # Set up virtual environment
