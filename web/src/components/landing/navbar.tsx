@@ -7,7 +7,9 @@ import { GitHubButton } from "./github-button";
 
 export const Navbar = () => {
   const { data: session } = authClient.useSession();
-  const { data: organizations } = authClient.useListOrganizations();
+  const { data: organizations } = authClient.useListOrganizations({
+    enabled: !!session,
+  });
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 

@@ -13,7 +13,7 @@ export const GitHubButton = ({ size = "md" }: GitHubButtonProps) => {
     const fetchStars = async () => {
       try {
         const res = await fetch(
-          "https://api.github.com/repos/koreshield/koreshield"
+          "https://api.github.com/repos/1cbyc/koreshield"
         );
         if (res.ok) {
           const data = await res.json();

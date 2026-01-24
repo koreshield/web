@@ -35,7 +35,15 @@ export const Hero = () => {
         <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-electric-blue/5 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-cyber-purple/5 rounded-full blur-[120px] animate-pulse [animation-delay:1s]" />
 
-        <Canvas camera={{ position: [0, 0, 15], fov: 45 }}>
+        <Canvas 
+          camera={{ position: [0, 0, 15], fov: 45 }}
+          onError={(error) => console.warn('WebGL error:', error)}
+          gl={{ 
+            antialias: false, 
+            alpha: true,
+            powerPreference: "default"
+          }}
+        >
           <color attach="background" args={["#050a14"]} />
           <fog attach="fog" args={["#050a14", 5, 20]} />
           {/* Rotated 180 degrees to point Up (default is Down) */}

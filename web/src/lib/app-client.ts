@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: typeof window !== "undefined" ? window.location.origin : "",
+  baseURL: process.env.APP_URL || (typeof window !== "undefined" ? window.location.origin : ""),
   headers: {
     "Content-Type": "application/json",
   },
@@ -87,9 +87,12 @@ async function apiCall<T = any>(
     // add admin JWT token to headers for admin API calls
     const headers = { ...options?.headers };
     if (url.startsWith("/api/admin") || url.startsWith("api/admin")) {
-      const token = localStorage.getItem("admin_token");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+      // Only access localStorage on client side to prevent SSR hydration issues
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("admin_token");
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
       }
     }
 
