@@ -2,7 +2,7 @@
 Policy engine for evaluating security rules and policies with RBAC support.
 """
 
-from typing import Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 import structlog
 from enum import Enum
 

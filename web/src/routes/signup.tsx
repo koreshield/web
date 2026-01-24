@@ -1,6 +1,6 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { authClient } from "@/lib/auth-client";
-import { FaGithub, FaGoogle } from "react-icons/fa";
+import { FaGithub } from "react-icons/fa";
 import { useState } from "react";
 
 export const Route = createFileRoute("/signup")({
@@ -21,7 +21,7 @@ function RouteComponent() {
     return <Navigate to="/select" />;
   }
 
-  const handleSignup = async (provider: "github" | "google") => {
+  const handleSignup = async (provider: "github") => {
     setLoading(provider);
     await authClient.signIn.social({
       provider,
@@ -70,19 +70,6 @@ function RouteComponent() {
               <FaGithub className="h-5 w-5 text-gray-400 group-hover:text-white transition-colors" />
             )}
             Continue with GitHub
-          </button>
-
-          <button
-            onClick={() => handleSignup("google")}
-            disabled={loading !== null}
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-6 py-4 text-sm font-bold text-white transition-all hover:bg-white/10 hover:border-white/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group"
-          >
-            {loading === "google" ? (
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-electric-blue" />
-            ) : (
-              <FaGoogle className="h-5 w-5 text-gray-400 group-hover:text-white transition-colors" />
-            )}
-            Continue with Google
           </button>
         </div>
 
