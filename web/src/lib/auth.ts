@@ -12,9 +12,16 @@ export const auth = betterAuth({
     provider: "pg",
     usePlural: true,
   }),
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: process.env.BETTER_AUTH_URL || (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"),
   secret: process.env.BETTER_AUTH_SECRET,
-  trustedOrigins: [process.env.BETTER_AUTH_URL as string, "http://localhost:3000"],
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL || "http://localhost:3000",
+    "http://localhost:3000",
+    "http://localhost:3001", 
+    "https://www.koreshield.com",
+    "https://koreshield.com",
+    typeof window !== "undefined" ? window.location.origin : undefined
+  ].filter(Boolean),
   socialProviders: {
     github: {
       clientId: process.env.GITHUB_CLIENT_ID as string,

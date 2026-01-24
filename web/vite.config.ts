@@ -13,7 +13,10 @@ export default defineConfig({
     tsconfigPaths({
       projects: ["./tsconfig.json", "./tsconfig.app.json"],
     }),
-    tanstackStart(),
+    tanstackStart({
+      clientEntry: "./src/client.ts",
+      serverEntry: "./src/server.ts",
+    }),
     nitro(),
     viteReact(),
     tailwindcss(),
