@@ -48,8 +48,8 @@ Examples:
     )
     start_parser.add_argument(
         "--config",
-        default="config/config.yaml",
-        help="Path to configuration file (default: config/config.yaml)",
+        default=os.getenv("CONFIG_FILE", "config/config.yaml"),
+        help="Path to configuration file (default: from CONFIG_FILE env var or config/config.yaml)",
     )
     start_parser.add_argument(
         "--log-level",
