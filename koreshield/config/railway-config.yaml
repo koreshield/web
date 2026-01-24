@@ -28,8 +28,8 @@ providers:
     base_url: "https://api.anthropic.com/v1"
 
 redis:
-  enabled: false  # Disable Redis for now - Railway doesn't provide it by default
-  # url: "${REDIS_URL}"  # Uncomment when Redis plugin is added
+  enabled: true  # Enable Redis since you have it set up
+  url: "${REDIS_URL}"  # Use Railway's provided Redis URL
 
 monitoring:
   enabled: true

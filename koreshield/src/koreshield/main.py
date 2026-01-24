@@ -7,10 +7,36 @@ from pathlib import Path
 
 import structlog
 import uvicorn
+import os
+import re
+from pathlib import Path
+
 import yaml
 
 from .logger import setup_logging
 from .proxy import KoreShieldProxy
+
+
+def expand_env_vars(config: dict) -> dict:
+    """
+    Recursively expand environment variables in configuration values.
+    Supports ${VAR_NAME} and $VAR_NAME syntax.
+    """
+    if isinstance(config, dict):
+        return {key: expand_env_vars(value) for key, value in config.items()}
+    elif isinstance(config, list):
+        return [expand_env_vars(item) for item in config]
+    elif isinstance(config, str):
+        # Expand ${VAR} and $VAR syntax
+        def replace_var(match):
+            var_name = match.group(1) or match.group(2)
+            return os.getenv(var_name, match.group(0))  # Return original if not found
+        
+        # Pattern matches both ${VAR} and $VAR
+        pattern = re.compile(r'\$\{([^}]+)\}|\$([A-Z_][A-Z0-9_]*)')
+        return pattern.sub(replace_var, config)
+    else:
+        return config
 
 
 def load_config(config_path: str = "config/config.yaml") -> dict:
@@ -36,7 +62,10 @@ def load_config(config_path: str = "config/config.yaml") -> dict:
             return {}
 
     with open(config_file, "r") as f:
-        return yaml.safe_load(f) or {}
+        config = yaml.safe_load(f) or {}
+    
+    # Expand environment variables in the configuration
+    return expand_env_vars(config)
 
 
 def validate_config(config: dict) -> list[str]:
