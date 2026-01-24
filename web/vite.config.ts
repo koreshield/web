@@ -15,6 +15,9 @@ export default defineConfig({
     tanstackStart({
       clientEntry: "./src/client.ts",
       serverEntry: "./src/server.ts",
+      deployment: {
+        preset: "cloudflare-pages",
+      },
     }),
     viteReact(),
     tailwindcss(),
