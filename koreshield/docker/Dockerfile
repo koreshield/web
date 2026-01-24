@@ -38,5 +38,8 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8000/status || exit 1
 
+# Set environment variables for Railway
+ENV UVICORN_PROXY_HEADERS=false
+
 # Run the application using Gunicorn with Uvicorn workers
 CMD ["gunicorn", "src.koreshield.proxy:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
