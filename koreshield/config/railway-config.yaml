@@ -1,0 +1,48 @@
+# Railway Production Configuration
+server:
+  host: "0.0.0.0"
+  port: 8000
+
+logging:
+  level: INFO
+  json_logs: true
+  container_mode: true
+
+security:
+  sensitivity: medium
+  default_action: block
+  features:
+    sanitization: true
+    detection: true
+    policy_enforcement: true
+
+providers:
+  deepseek:
+    enabled: true
+    base_url: "https://api.deepseek.com/v1"
+  openai:
+    enabled: false
+    base_url: "https://api.openai.com/v1"
+  anthropic:
+    enabled: false
+    base_url: "https://api.anthropic.com/v1"
+
+redis:
+  enabled: false  # Disable Redis for now - Railway doesn't provide it by default
+  # url: "${REDIS_URL}"  # Uncomment when Redis plugin is added
+
+monitoring:
+  enabled: true
+  check_interval_seconds: 60
+
+alerting:
+  enabled: true
+  rules:
+    - name: "High Attack Rate"
+      condition: "attacks_detected > 10"
+      severity: "warning"
+      channels: ["webhook"]
+      cooldown_minutes: 5
+  webhook:
+    enabled: true
+    url: "${ALERT_WEBHOOK_URL}"
