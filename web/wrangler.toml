@@ -1,12 +1,9 @@
-# Cloudflare Pages build configuration
+# Cloudflare Pages configuration
+name = "koreshield-web"
+pages_build_output_dir = "dist/client"
+compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2024-01-24"
+
 [build]
   command = "npm run build"
-  publish = "dist/client"
 
-[build.environment]
-  NODE_VERSION = "20"
-  NPM_FLAGS = "--prefix=. --legacy-peer-deps"
-
-# Enable Node.js compatibility for Functions
-compatibility_flags = ["nodejs_compat"]
-compatibility_date = "2024-01-01"
