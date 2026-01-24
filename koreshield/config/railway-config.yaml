@@ -31,6 +31,12 @@ redis:
   enabled: true  # Enable Redis since you have it set up
   url: "${REDIS_URL}"  # Use Railway's provided Redis URL
 
+# JWT Authentication (optional - set JWT_PUBLIC_KEY env var instead)
+# jwt:
+#   public_key: "${JWT_PUBLIC_KEY}"
+#   algorithm: "RS256"
+#   issuer: "koreshield-auth"
+
 monitoring:
   enabled: true
   check_interval_seconds: 60
