@@ -342,8 +342,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Support
 
 - [Documentation](https://docs.koreshield.com)
-- [Issues](https://github.com/1cbyc/koreshield/issues)
-- [Discussions](https://github.com/1cbyc/koreshield/discussions)
+- [Issues](https://github.com/koreshield/koreshield/issues)
+- [Discussions](https://github.com/koreshield/koreshield/discussions)
 - [Email Support](mailto:support@koreshield.com)
 
 ## Security

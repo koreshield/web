@@ -16,7 +16,7 @@ setup(
     description="Middleware proxy for protecting enterprise LLM integrations from prompt injection attacks",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/nsisongltd/koreshield",
+    url="https://github.com/koreshield/koreshield",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[
