@@ -17,9 +17,9 @@ export function MobileBottomNav() {
       activeOptions: { exact: true },
     },
     {
-      to: "/$orgSlug/tunnels",
+      to: "/$orgSlug/firewall",
       icon: <Network size={NAV_ICON_SIZE} />,
-      label: "Tunnels",
+      label: "Firewall",
     },
     {
       to: "/$orgSlug/requests",
@@ -27,9 +27,9 @@ export function MobileBottomNav() {
       label: "Requests",
     },
     {
-      to: "/$orgSlug/subdomains",
+      to: "/$orgSlug/tokens",
       icon: <Globe size={NAV_ICON_SIZE} />,
-      label: "Subdomains",
+      label: "Tokens",
     },
   ];
 

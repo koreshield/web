@@ -48,6 +48,11 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       activeOptions: { exact: true },
     },
     {
+      to: "/$orgSlug/install",
+      label: "Install",
+      icon: <Shield size={NAV_ICON_SIZE} />,
+    },
+    {
       to: "/$orgSlug/firewall",
       label: "Firewall",
       icon: <Shield size={NAV_ICON_SIZE} />,

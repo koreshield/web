@@ -48,9 +48,9 @@ export function MobileNavSheet({
 
   const moreNavItems = [
     {
-      to: "/$orgSlug/domains",
+      to: "/$orgSlug/install",
       icon: <Link2 size={NAV_ICON_SIZE} />,
-      label: "Domains",
+      label: "Install",
     },
     canManageBilling && {
       to: "/$orgSlug/billing",
