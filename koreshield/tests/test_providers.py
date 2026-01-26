@@ -23,6 +23,60 @@ class TestBaseProvider:
         with pytest.raises(TypeError):
             BaseProvider(api_key="test")
 
+    @pytest.mark.asyncio
+    async def test_health_check_success(self):
+        """Test successful health check."""
+        # Create a concrete subclass for testing
+        class TestProvider(BaseProvider):
+            def _get_default_url(self) -> str:
+                return "https://test.api.com"
+
+            async def chat_completion(self, messages, **kwargs):
+                return {"success": True}
+
+        provider = TestProvider(api_key="test-key")
+
+        # Mock successful chat completion
+        with patch.object(provider, 'chat_completion', new_callable=AsyncMock) as mock_chat:
+            mock_chat.return_value = {"success": True}
+            result = await provider.health_check()
+            assert result is True
+            mock_chat.assert_called_once_with([{"role": "user", "content": "Hello"}], max_tokens=1)
+
+    @pytest.mark.asyncio
+    async def test_health_check_failure(self):
+        """Test health check failure."""
+        # Create a concrete subclass for testing
+        class TestProvider(BaseProvider):
+            def _get_default_url(self) -> str:
+                return "https://test.api.com"
+
+            async def chat_completion(self, messages, **kwargs):
+                raise Exception("API error")
+
+        provider = TestProvider(api_key="test-key")
+
+        result = await provider.health_check()
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_close(self):
+        """Test closing the HTTP client."""
+        # Create a concrete subclass for testing
+        class TestProvider(BaseProvider):
+            def _get_default_url(self) -> str:
+                return "https://test.api.com"
+
+            async def chat_completion(self, messages, **kwargs):
+                return {"success": True}
+
+        provider = TestProvider(api_key="test-key")
+
+        # Mock the client's aclose method
+        with patch.object(provider.client, 'aclose', new_callable=AsyncMock) as mock_aclose:
+            await provider.close()
+            mock_aclose.assert_called_once()
+
 
 class TestOpenAIProvider:
     """Test OpenAI provider."""

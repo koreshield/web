@@ -172,6 +172,10 @@ pytest
 ```
 
 ## Documentation
+- [System Design](docs/SYSTEM_DESIGN.md) - Comprehensive system architecture and design
+- [Error Codes](docs/ERROR_CODES.md) - Standardized error responses and codes
+- [Detection Patterns](koreshield/docs/DETECTION_PATTERNS.md) - Security pattern documentation
+- [API Documentation](http://localhost:8000/docs) - Interactive OpenAPI/Swagger docs
 - Configuration Guide: config/config.example.yaml
 - Examples: examples/
 - Research Notes: research/

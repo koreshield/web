@@ -2,10 +2,10 @@
 Custom Rule Engine with Domain-Specific Language (DSL) for flexible pattern matching.
 """
 
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, cast
 import re
 import structlog
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 logger = structlog.get_logger(__name__)
@@ -38,14 +38,8 @@ class CustomRule:
     severity: RuleSeverity
     action: RuleAction
     enabled: bool = True
-    tags: List[str] = None
-    metadata: Dict[str, Any] = None
-
-    def __post_init__(self):
-        if self.tags is None:
-            self.tags = []
-        if self.metadata is None:
-            self.metadata = {}
+    tags: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 class RuleEngine:
@@ -377,8 +371,20 @@ class RuleEngine:
             # Set defaults
             rule_data.setdefault('enabled', True)
             rule_data.setdefault('tags', [])
+            rule_data.setdefault('metadata', {})
 
-            return CustomRule(**rule_data)
+            return CustomRule(
+                id=str(rule_data['id']),
+                name=str(rule_data['name']),
+                description=str(rule_data['description']),
+                pattern=str(rule_data['pattern']),
+                pattern_type=str(rule_data['pattern_type']),
+                severity=RuleSeverity(rule_data['severity']),
+                action=RuleAction(rule_data['action']),
+                enabled=bool(rule_data.get('enabled', True)),
+                tags=list(rule_data.get('tags', [])),
+                metadata=cast(Dict[str, Any], rule_data.get('metadata', {})),
+            )
 
         except Exception as e:
             logger.error("Failed to parse DSL", error=str(e), dsl=dsl_string[:100])

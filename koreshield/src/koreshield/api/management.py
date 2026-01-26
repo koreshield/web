@@ -8,9 +8,53 @@ logger = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["management"])
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
 class SecurityConfigUpdate(BaseModel):
     sensitivity: str | None = None
     default_action: str | None = None
+
+@router.post("/login")
+async def admin_login(request: LoginRequest):
+    """
+    Admin login endpoint.
+    
+    This endpoint authenticates admin users and returns a JWT token.
+    Note: This is a placeholder implementation. In production, this should
+    integrate with your authentication service or database.
+    """
+    # TODO: Replace with actual authentication logic
+    # For now, accept any email/password combination
+    if not request.email or not request.password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email and password are required"
+        )
+    
+    # Mock authentication - replace with real auth service
+    if request.email == "admin@koreshield.com" and request.password == "admin123":
+        # In production, this JWT should be issued by your auth service
+        # For demo purposes, we'll return a mock response
+        logger.info("admin_login_success", email=request.email)
+        return {
+            "access_token": "mock_jwt_token_replace_with_real_auth_service",
+            "token_type": "bearer",
+            "expires_in": 3600,
+            "user": {
+                "id": "admin_001",
+                "name": "Admin User", 
+                "email": request.email,
+                "role": "admin"
+            }
+        }
+    else:
+        logger.warning("admin_login_failed", email=request.email)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
 
 @router.post("/logout")
 async def admin_logout(current_user: dict = Depends(get_current_admin)):

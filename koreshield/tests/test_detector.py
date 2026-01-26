@@ -153,3 +153,205 @@ def test_detector_expanded_keyword_patterns():
     for prompt in test_cases:
         result = detector.detect(prompt)
         assert result["is_attack"] is True, f"Failed to detect attack in: {prompt}"
+
+
+def test_detector_custom_rule_management():
+    """Test custom rule management methods."""
+    detector = AttackDetector()
+
+    # Test adding custom rule
+    rule_def = {
+        "id": "test_rule",
+        "name": "Test Rule",
+        "description": "A test rule",
+        "pattern": "test.*pattern",
+        "pattern_type": "regex",
+        "severity": "high",
+        "action": "block",
+        "enabled": True,
+        "tags": ["test"],
+        "metadata": {"source": "test"}
+    }
+
+    success = detector.add_custom_rule(rule_def)
+    assert success is True
+
+    # Test getting custom rule
+    rule = detector.get_custom_rule("test_rule")
+    assert rule is not None
+    assert rule["id"] == "test_rule"
+    assert rule["name"] == "Test Rule"
+
+    # Test listing custom rules
+    rules = detector.list_custom_rules()
+    assert len(rules) >= 1
+    assert any(r["id"] == "test_rule" for r in rules)
+
+    # Test removing custom rule
+    success = detector.remove_custom_rule("test_rule")
+    assert success is True
+
+    # Verify rule is removed
+    rule = detector.get_custom_rule("test_rule")
+    assert rule is None
+
+
+def test_detector_custom_rule_dsl():
+    """Test custom rule DSL functionality."""
+    detector = AttackDetector()
+
+    dsl_string = '''
+    RULE test_dsl_rule "Test DSL Rule" "Rule created from DSL"
+    PATTERN regex "dsl.*test"
+    SEVERITY medium
+    ACTION log
+    TAGS dsl,test
+    ENABLED true
+    '''
+
+    success = detector.add_custom_rule_from_dsl(dsl_string)
+    assert success is True
+
+    rule = detector.get_custom_rule("test_dsl_rule")
+    assert rule is not None
+    assert rule["name"] == "Test DSL Rule"
+    assert "dsl" in rule["tags"]
+
+
+def test_detector_blocklist_allowlist_management():
+    """Test blocklist and allowlist management."""
+    detector = AttackDetector()
+
+    # Test adding to blocklist
+    success = detector.add_to_blocklist("evil.com", "domain", "Malicious domain", "test_user", 30)
+    assert success is True
+
+    # Test checking blocklist
+    entry = detector.check_blocklist("evil.com")
+    assert entry is not None
+    assert entry["value"] == "evil.com"
+    assert entry["entry_type"] == "domain"
+
+    # Test adding to allowlist
+    success = detector.add_to_allowlist("trusted.com", "domain", "Trusted domain", "test_user")
+    assert success is True
+
+    # Test checking allowlist
+    entry = detector.check_allowlist("trusted.com")
+    assert entry is not None
+    assert entry["value"] == "trusted.com"
+
+    # Test listing entries
+    blocklist = detector.list_blocklist_entries()
+    assert len(blocklist) >= 1
+
+    allowlist = detector.list_allowlist_entries()
+    assert len(allowlist) >= 1
+
+    # Test removing entries
+    success = detector.remove_from_blocklist("evil.com")
+    assert success is True
+
+    success = detector.remove_from_allowlist("trusted.com")
+    assert success is True
+
+    # Verify entries are removed
+    entry = detector.check_blocklist("evil.com")
+    assert entry is None
+
+    entry = detector.check_allowlist("trusted.com")
+    assert entry is None
+
+
+def test_detector_list_stats():
+    """Test getting list statistics."""
+    detector = AttackDetector()
+
+    stats = detector.get_list_stats()
+    assert isinstance(stats, dict)
+    assert "blocklist" in stats
+    assert "allowlist" in stats
+
+
+def test_detector_detect_with_custom_rules():
+    """Test detection with custom rules."""
+    detector = AttackDetector()
+
+    # Add a custom rule
+    rule_def = {
+        "id": "custom_test",
+        "name": "Custom Test Rule",
+        "description": "Detects custom test pattern",
+        "pattern": "custom.*attack",
+        "pattern_type": "regex",
+        "severity": "high",
+        "action": "block",
+        "enabled": True,
+        "tags": ["custom"],
+        "metadata": {}
+    }
+
+    detector.add_custom_rule(rule_def)
+
+    # Test detection with custom rule match
+    result = detector.detect("This is a custom attack attempt")
+    assert result["is_attack"] is True
+    assert any(indicator.get("type") == "custom_rule" for indicator in result["indicators"])
+
+
+def test_detector_detect_with_blocklist():
+    """Test detection with blocklist matches."""
+    detector = AttackDetector()
+
+    # Add to blocklist
+    detector.add_to_blocklist("blocked_keyword", "keyword", "Blocked keyword")
+
+    # Test detection
+    result = detector.detect("This contains blocked_keyword in the text")
+    assert result["is_attack"] is True
+    assert any(indicator.get("type") == "blocklist_match" for indicator in result["indicators"])
+
+
+def test_detector_detect_with_allowlist():
+    """Test detection with allowlist reducing false positives."""
+    detector = AttackDetector()
+
+    # Add suspicious content to allowlist
+    detector.add_to_allowlist("suspicious_pattern", "keyword", "Allowed pattern")
+
+    # Test that allowlist reduces confidence
+    result = detector.detect("This contains suspicious_pattern but is allowed")
+    # Should still be detected but with lower confidence
+    assert result["is_attack"] is True  # Still detected due to other patterns
+    assert any(indicator.get("type") == "allowlist_match" for indicator in result["indicators"])
+
+
+def test_detector_ml_feature_extraction():
+    """Test ML feature extraction."""
+    detector = AttackDetector()
+
+    features = detector._extract_features("Test prompt with some keywords and special chars!")
+
+    assert "keyword_density" in features
+    assert "special_chars" in features
+    assert "length_anomaly" in features
+    assert "pattern_complexity" in features
+
+    # All features should be between 0 and 1
+    for value in features.values():
+        assert 0 <= value <= 1
+
+
+def test_detector_ml_based_detection():
+    """Test ML-based detection scoring."""
+    detector = AttackDetector()
+
+    # Test with ML model loaded
+    score = detector._ml_based_detection("Complex prompt with many features")
+    assert isinstance(score, float)
+    assert 0 <= score <= 1
+
+    # Test without ML model
+    detector.ml_model = None
+    score = detector._ml_based_detection("Test prompt")
+    assert score == 0.0
