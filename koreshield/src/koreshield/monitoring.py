@@ -232,14 +232,14 @@ class AlertManager:
 
     async def _send_email_alert(self, alert: Alert) -> bool:
         """Send alert via email."""
-        email_config = self.config.get('alerting', {}).get('email', {})
-        if not email_config.get('enabled', False):
+        email_config = self.config.channels.email
+        if not email_config.enabled:
             return False
 
         try:
             msg = MIMEMultipart()
-            msg['From'] = email_config['from_address']
-            msg['To'] = ', '.join(email_config['recipients'])
+            msg['From'] = email_config.from_address
+            msg['To'] = ', '.join(email_config.to_addresses)
             msg['Subject'] = f"KoreShield Alert: {alert.rule_name}"
 
             body = f"""
@@ -257,11 +257,10 @@ Details:
 
             msg.attach(MIMEText(body, 'plain'))
 
-            server = smtplib.SMTP(email_config['smtp_server'], email_config['smtp_port'])
-            if email_config.get('use_tls', True):
-                server.starttls()
-            if email_config.get('username'):
-                server.login(email_config['username'], email_config['password'])
+            server = smtplib.SMTP(email_config.smtp_server, email_config.smtp_port)
+            server.starttls()  # Always use TLS
+            if email_config.username:
+                server.login(email_config.username, email_config.password)
 
             server.send_message(msg)
             server.quit()
@@ -273,8 +272,8 @@ Details:
 
     async def _send_webhook_alert(self, alert: Alert) -> bool:
         """Send alert via webhook."""
-        webhook_config = self.config.get('alerting', {}).get('webhook', {})
-        if not webhook_config.get('enabled', False):
+        webhook_config = self.config.channels.webhook
+        if not webhook_config.enabled:
             return False
 
         payload = {
@@ -286,17 +285,17 @@ Details:
         }
 
         response = await self.client.post(
-            webhook_config['url'],
+            webhook_config.url,
             json=payload,
-            headers={'Content-Type': 'application/json'}
+            headers={**webhook_config.headers, 'Content-Type': 'application/json'}
         )
 
         return response.status_code == 200
 
     async def _send_slack_alert(self, alert: Alert) -> bool:
         """Send alert via Slack."""
-        slack_config = self.config.get('alerting', {}).get('slack', {})
-        if not slack_config.get('enabled', False):
+        slack_config = self.config.channels.slack
+        if not slack_config.enabled:
             return False
 
         emoji = {
@@ -334,7 +333,7 @@ Details:
         }
 
         response = await self.client.post(
-            slack_config['webhook_url'],
+            slack_config.webhook_url,
             json=payload,
             headers={'Content-Type': 'application/json'}
         )
@@ -343,8 +342,8 @@ Details:
 
     async def _send_teams_alert(self, alert: Alert) -> bool:
         """Send alert via Microsoft Teams."""
-        teams_config = self.config.get('alerting', {}).get('teams', {})
-        if not teams_config.get('enabled', False):
+        teams_config = self.config.channels.teams
+        if not teams_config.enabled:
             return False
 
         color = {
@@ -368,7 +367,7 @@ Details:
         }
 
         response = await self.client.post(
-            teams_config['webhook_url'],
+            teams_config.webhook_url,
             json=payload,
             headers={'Content-Type': 'application/json'}
         )
@@ -377,8 +376,8 @@ Details:
 
     async def _send_pagerduty_alert(self, alert: Alert) -> bool:
         """Send alert via PagerDuty."""
-        pd_config = self.config.get('alerting', {}).get('pagerduty', {})
-        if not pd_config.get('enabled', False):
+        pd_config = self.config.channels.pagerduty
+        if not pd_config.enabled:
             return False
 
         severity = {
@@ -389,7 +388,7 @@ Details:
         }
 
         payload = {
-            'routing_key': pd_config['routing_key'],
+            'routing_key': pd_config.integration_key,
             'event_action': 'trigger',
             'payload': {
                 'summary': f'KoreShield: {alert.message}',

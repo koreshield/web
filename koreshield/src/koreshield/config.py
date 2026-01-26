@@ -183,6 +183,7 @@ class Config:
         """Get configuration object."""
         if self._config is None:
             self.load()
+        assert self._config is not None  # Should be set by load()
         return self._config
 
     def __getattr__(self, name: str) -> Any:

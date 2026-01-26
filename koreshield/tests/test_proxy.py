@@ -2,7 +2,7 @@
 Tests for the proxy server.
 """
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -124,3 +124,34 @@ def test_status_endpoint(proxy):
     data = response.json()
     assert data["status"] == "healthy"
     assert "statistics" in data
+
+
+def test_metrics_endpoint(proxy):
+    """Test the metrics endpoint returns Prometheus metrics."""
+    client = TestClient(proxy.app)
+
+    response = client.get("/metrics")
+
+    assert response.status_code == 200
+    assert "text/plain" in response.headers.get("content-type", "")
+    content = response.text
+    # Should contain Prometheus format metrics
+    assert any(keyword in content for keyword in ["# HELP", "# TYPE", "koreshield_"])
+
+
+def test_provider_health_endpoint(proxy):
+    """Test the provider health endpoint."""
+    # Mock providers
+    proxy.providers = [MagicMock(), MagicMock()]
+    proxy.provider_priority = ["openai", "anthropic"]
+
+    client = TestClient(proxy.app)
+
+    response = client.get("/health/providers")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "providers" in data
+    assert "total_providers" in data
+    assert "healthy_providers" in data
+    assert data["total_providers"] == 2

@@ -62,21 +62,21 @@ class PolicyEngine:
                 "name": "Sanitization Check Required",
                 "description": "All prompts must pass sanitization checks",
                 "severity": "high",
-                "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value],
+                "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value, UserRole.GUEST.value],
             },
             {
                 "id": "attack_detection",
                 "name": "Attack Detection",
                 "description": "Prompts must not contain detected attacks",
                 "severity": "high",
-                "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value],
+                "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value, UserRole.GUEST.value],
             },
             {
                 "id": "blocklist_enforcement",
                 "name": "Blocklist Enforcement",
                 "description": "Blocked terms are not allowed",
                 "severity": "high",
-                "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value],
+                "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value, UserRole.GUEST.value],
             },
         ]
 
@@ -385,125 +385,3 @@ class PolicyEngine:
         """
         self.role_permissions[role.value] = permissions
         logger.info("Role permissions updated", role=role.value, permissions=list(permissions))
-
-    def evaluate(
-        self,
-        prompt: str,
-        sanitization_result: Dict[str, Any],
-        detection_result: Dict[str, Any],
-        user_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        """
-        Evaluate a request against security policies.
-
-        Args:
-            prompt: The input prompt
-            sanitization_result: Results from sanitization engine
-            detection_result: Results from attack detector
-            user_id: Optional user ID for RBAC checks
-
-        Returns:
-            Dictionary with policy evaluation results:
-            - allowed: Boolean indicating if request is allowed
-            - action: Action to take (allow, block, warn)
-            - reason: Reason for the decision
-            - policy_violations: List of violated policies
-        """
-        violations = []
-        allowed = True
-        action = "allow"
-        reason = "No policy violations"
-
-        # Get user role and permissions
-        user_role = None
-        user_permissions = []
-        bypass_allowed = False
-
-        if user_id:
-            user_role = self.get_user_role(user_id)
-            user_permissions = list(self.role_permissions.get(user_role.value, set()))
-            bypass_allowed = self.has_permission(user_id, Permission.BYPASS_CHECKS)
-
-        # Get security configuration
-        sensitivity = self.config.get("security", {}).get("sensitivity", "medium")
-        default_action = self.config.get("security", {}).get("default_action", "block")
-
-        # Check sanitization results
-        if not sanitization_result.get("is_safe", True):
-            policy = self._get_policy_by_id("sanitization_required")
-            if policy and self._check_policy_access(user_id, policy):
-                violations.append(
-                    {
-                        "policy": "sanitization_check",
-                        "severity": "high",
-                        "details": sanitization_result.get("threats", []),
-                    }
-                )
-
-        # Check detection results
-        if detection_result.get("is_attack", False):
-            violations.append(
-                {
-                    "policy": "attack_detection",
-                    "severity": "high" if detection_result.get("confidence", 0) > 0.7 else "medium",
-                    "details": detection_result.get("indicators", []),
-                }
-            )
-
-        # Blocklist enforcement
-        blocklist = self.config.get("security", {}).get("blocklist", [])
-        prompt_lower = prompt.lower()
-        for term in blocklist:
-            if term.lower() in prompt_lower:
-                violations.append(
-                    {"policy": "blocklist", "severity": "high", "details": {"term": term}}
-                )
-
-        # Make decision based on violations and sensitivity
-        if violations and not bypass_allowed:
-            high_severity_violations = [v for v in violations if v.get("severity") == "high"]
-
-            if high_severity_violations:
-                # High severity violations - block based on sensitivity
-                if sensitivity in ["high", "medium"]:
-                    allowed = False
-                    action = default_action
-                    reason = (
-                        f"High severity policy violations detected: {len(high_severity_violations)}"
-                    )
-                else:
-                    # Low sensitivity - warn but allow
-                    allowed = True
-                    action = "warn"
-                    reason = f"High severity violations detected but sensitivity is low: {len(high_severity_violations)}"
-            else:
-                # Medium severity violations
-                if sensitivity == "high":
-                    allowed = False
-                    action = default_action
-                    reason = f"Medium severity policy violations detected: {len(violations)}"
-                else:
-                    allowed = True
-                    action = "warn"
-                    reason = f"Policy violations detected but within tolerance: {len(violations)}"
-        elif bypass_allowed and violations:
-            # User has bypass permission - allow but warn
-            allowed = True
-            action = "warn"
-            reason = f"Policy violations detected but user has bypass permission: {len(violations)} violations bypassed"
-
-        result = {
-            "allowed": allowed,
-            "action": action,
-            "reason": reason,
-            "policy_violations": violations,
-            "user_role": user_role.value if user_role else None,
-            "permissions": user_permissions,
-            "bypass_allowed": bypass_allowed,
-        }
-
-        logger.debug(
-            "Policy evaluation complete", allowed=allowed, action=action, violations=len(violations)
-        )
-
-        return result

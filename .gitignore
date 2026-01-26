@@ -254,7 +254,8 @@ todo.md
 personal-keep/
 .DS_Store
 !web/src/lib/
+docs/
 
 *.db
 build_output*.txt
-!web/public/
+!web/public/docs/

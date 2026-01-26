@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - 2026-01-22
 
+### Added
+- **OpenAPI/Swagger UI Documentation**: Complete interactive API documentation at `/docs` and `/redoc`
+- **Management API Authentication**: Added JWT-based login endpoint for admin dashboard
+- **Type Safety Improvements**: Fixed 25+ mypy type checking errors across core modules
+
 ### Changed
 - Rebranded from LLM Firewall Community to KoreShield
 - Updated all package names, CLI commands, and documentation

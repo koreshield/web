@@ -7,6 +7,7 @@ import os
 import sys
 import uuid
 from pathlib import Path
+from typing import List, Optional, Any
 
 import httpx
 import structlog
@@ -93,13 +94,13 @@ class KoreShieldProxy:
 
         # Initialize parameter-based rate limiter with Redis storage
         if self.redis_client:
-            storage = RedisStorage(f"{redis_url}/1")  # Use database 1 for rate limits
-            self.limiter = Limiter(key_func=get_remote_address, storage=storage)
+            storage_uri = f"{redis_url}/1"  # Use database 1 for rate limits
+            self.limiter = Limiter(key_func=get_remote_address, storage_uri=storage_uri)
         else:
             self.limiter = Limiter(key_func=get_remote_address)
         
         self.app.state.limiter = self.limiter
-        self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+        self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore
         self.app.add_middleware(SlowAPIMiddleware)
 
         # Add CORS middleware
@@ -153,8 +154,8 @@ class KoreShieldProxy:
         self.logger = FirewallLogger()
 
         # Initialize providers (multiple for failover)
-        self.providers = []
-        self.provider_priority = []
+        self.providers: List[Any] = []
+        self.provider_priority: List[str] = []
         self._init_providers(config)
 
         # Initialize monitoring system
@@ -652,7 +653,7 @@ class KoreShieldProxy:
 
 
 # Create global app instance for uvicorn
-def create_app(config_path: str = None) -> FastAPI:
+def create_app(config_path: Optional[str] = None) -> FastAPI:
     """
     Create and configure the FastAPI application.
 
@@ -668,9 +669,9 @@ def create_app(config_path: str = None) -> FastAPI:
     # Auto-detect config path based on script location
     if config_path is None:
         script_dir = Path(__file__).parent.parent.parent  # Go up to koreshield/
-        config_path = script_dir / "config" / "config.yaml"
-
-    config_file = Path(config_path)
+        config_file = script_dir / "config" / "config.yaml"
+    else:
+        config_file = Path(config_path)
     if not config_file.exists():
         # Try example config
         example_config = config_file.parent / "config.example.yaml"

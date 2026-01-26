@@ -90,7 +90,7 @@ class ListManager:
     Manages blocklists and allowlists for various types of entries.
     """
 
-    def __init__(self, config: Optional[Dict] = None, storage_path: str = None):
+    def __init__(self, config: Optional[Dict] = None, storage_path: Optional[str] = None):
         """
         Initialize the list manager.
 
@@ -293,7 +293,7 @@ class ListManager:
             expired_count = sum(1 for e in entries.values() if e.is_expired())
             total_count = len(entries)
 
-            entry_types = {}
+            entry_types: Dict[str, int] = {}
             for entry in entries.values():
                 if entry.is_active and not entry.is_expired():
                     entry_types[entry.entry_type] = entry_types.get(entry.entry_type, 0) + 1

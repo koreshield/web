@@ -231,22 +231,72 @@ class AttackDetector:
 
         # Phase 1: Check blocklist/allowlist
         # Check for blocked keywords/patterns
-        blocked_entry = self.list_manager.check_entry(ListType.BLOCKLIST, prompt)
-        if blocked_entry:
+        blocked_entries = []
+        for entry_value, entry in self.list_manager.lists[ListType.BLOCKLIST.value].items():
+            if not entry.is_active or entry.is_expired():
+                continue
+            
+            match_found = False
+            if entry.entry_type == "keyword":
+                # Check if keyword appears in prompt (case-insensitive)
+                if entry_value.lower() in prompt_lower:
+                    match_found = True
+            elif entry.entry_type == "regex":
+                # Check if regex pattern matches
+                import re
+                if re.search(entry_value, prompt, re.IGNORECASE):
+                    match_found = True
+            elif entry.entry_type == "exact":
+                # Check for exact match
+                if entry_value.lower() == prompt_lower:
+                    match_found = True
+            # Add other entry types as needed
+            
+            if match_found:
+                blocked_entries.append(entry)
+
+        for blocked_entry in blocked_entries:
             indicators.append({
                 "type": "blocklist_match",
                 "entry_type": blocked_entry.entry_type,
+                "value": blocked_entry.value,
                 "reason": blocked_entry.reason,
                 "severity": "high",
             })
             confidence += 0.5
 
+            confidence += 0.5
+
         # Check for allowed patterns (can reduce false positives)
-        allowed_entry = self.list_manager.check_entry(ListType.ALLOWLIST, prompt)
-        if allowed_entry:
+        allowed_entries = []
+        for entry_value, entry in self.list_manager.lists[ListType.ALLOWLIST.value].items():
+            if not entry.is_active or entry.is_expired():
+                continue
+            
+            match_found = False
+            if entry.entry_type == "keyword":
+                # Check if keyword appears in prompt (case-insensitive)
+                if entry_value.lower() in prompt_lower:
+                    match_found = True
+            elif entry.entry_type == "regex":
+                # Check if regex pattern matches
+                import re
+                if re.search(entry_value, prompt, re.IGNORECASE):
+                    match_found = True
+            elif entry.entry_type == "exact":
+                # Check for exact match
+                if entry_value.lower() == prompt_lower:
+                    match_found = True
+            # Add other entry types as needed
+            
+            if match_found:
+                allowed_entries.append(entry)
+
+        for allowed_entry in allowed_entries:
             indicators.append({
                 "type": "allowlist_match",
                 "entry_type": allowed_entry.entry_type,
+                "value": allowed_entry.value,
                 "severity": "low",
             })
             # Allowlist matches can reduce confidence
@@ -298,7 +348,7 @@ class AttackDetector:
         """
         Extract features for ML-based detection.
         """
-        features = {}
+        features: Dict[str, float] = {}
 
         # Keyword density (normalized)
         injection_keywords = [
@@ -316,7 +366,7 @@ class AttackDetector:
         features["length_anomaly"] = min(len(prompt) / 2000.0, 1.0)  # Normalize
 
         # Pattern complexity (code blocks, multiple sentences, etc.)
-        complexity_score = 0
+        complexity_score: float = 0
         if "```" in prompt: complexity_score += 0.3
         if prompt.count('.') > 5: complexity_score += 0.2
         if len(re.findall(r'\b\w+\b', prompt)) > 50: complexity_score += 0.2
@@ -346,8 +396,8 @@ class AttackDetector:
                 description=rule_definition["description"],
                 pattern=rule_definition["pattern"],
                 pattern_type=rule_definition["pattern_type"],
-                severity=RuleSeverity(rule_definition["severity"].upper()),
-                action=RuleAction(rule_definition["action"].upper()),
+                severity=RuleSeverity(rule_definition["severity"]),
+                action=RuleAction(rule_definition["action"]),
                 enabled=rule_definition.get("enabled", True),
                 tags=rule_definition.get("tags", []),
                 metadata=rule_definition.get("metadata", {}),

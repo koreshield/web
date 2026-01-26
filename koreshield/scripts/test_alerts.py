@@ -20,7 +20,7 @@ import structlog
 
 logger = structlog.get_logger()
 
-async def test_alert_delivery():
+async def run_alert_delivery_test():
     """Test alert delivery for all configured channels."""
 
     print("Loading KoreShield configuration...")
@@ -136,7 +136,7 @@ async def main():
     print("KoreShield Alert Delivery Test")
     print("=" * 40)
 
-    success = await test_alert_delivery()
+    success = await run_alert_delivery_test()
 
     if success:
         print("\nAlert delivery test completed successfully!")

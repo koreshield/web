@@ -2,7 +2,7 @@
 Structured logging system for KoreShield.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, List, Callable
 
 import structlog
 
@@ -44,7 +44,7 @@ def setup_logging(log_level: str = "INFO", json_logs: bool = True, container_mod
     stream_handler = logging.StreamHandler(sys.stdout)
     root_logger.addHandler(stream_handler)
 
-    processors = [
+    processors: List[Callable] = [
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
