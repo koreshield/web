@@ -172,15 +172,15 @@ class AsyncKoreShieldClient:
         Returns:
             True if prompt passes policy, False if blocked
         """
+        # Check blocklist patterns first (blocking takes precedence)
+        for pattern in self.security_policy.blocklist_patterns:
+            if pattern.lower() in prompt.lower():
+                return False
+
         # Check allowlist patterns
         for pattern in self.security_policy.allowlist_patterns:
             if pattern.lower() in prompt.lower():
                 return True
-
-        # Check blocklist patterns
-        for pattern in self.security_policy.blocklist_patterns:
-            if pattern.lower() in prompt.lower():
-                return False
 
         return True
 

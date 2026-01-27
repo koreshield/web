@@ -9,6 +9,13 @@
 // Core exports
 export { KoreShieldClient } from './core/client';
 
+// Browser-optimized client
+export { BrowserKoreShieldClient } from './browser/client';
+
+// Node.js streaming support
+export { StreamingClient } from './node/streaming';
+export type { StreamOptions } from './node/streaming';
+
 // Provider wrappers
 export { KoreShieldOpenAI, createKoreShieldOpenAI } from './providers/openai';
 
@@ -23,10 +30,51 @@ export {
   retry
 } from './utils';
 
+// Error recovery and retry logic
+export {
+  retryWithBackoff,
+  CircuitBreaker,
+  FallbackHandler,
+  RateLimiter,
+  BatchHandler
+} from './utils/recovery';
+export type { RetryOptions, CircuitBreakerOptions } from './utils/recovery';
+
+// Framework integrations - React
+export {
+  useKoreShield,
+  useChatCompletion,
+  useStreamingChat,
+  useSecurityEvents,
+  useMetrics
+} from './integrations/react';
+
+// Framework integrations - Vue
+export {
+  useKoreShield as useKoreShieldVue,
+  useChatCompletion as useChatCompletionVue,
+  useStreamingChat as useStreamingChatVue,
+  useSecurityEvents as useSecurityEventsVue,
+  useMetrics as useMetricsVue
+} from './integrations/vue';
+
+// Framework integrations - Angular (services)
+export {
+  KoreShieldService,
+  ChatCompletionService,
+  SecurityEventsService,
+  MetricsService
+} from './integrations/angular';
+
 // Types
 export type {
   KoreShieldConfig,
   SecurityOptions,
+  SecurityFeatures,
+  SensitivityLevel,
+  SecurityAction,
+  ChatMessageRole,
+  ChatMessage,
   ChatCompletionRequest,
   ChatCompletionResponse,
   SecurityEvent,

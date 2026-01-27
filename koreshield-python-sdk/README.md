@@ -6,7 +6,7 @@
 
 A comprehensive Python SDK for integrating KoreShield's LLM security features into your applications with ease.
 
-## 🚀 New in v0.2.0
+## New in v0.2.0
 
 - **Enhanced Async Support**: Improved async/await patterns with context managers and performance monitoring
 - **Advanced Batch Processing**: Optimized batch scanning with progress callbacks, concurrency control, and batching
@@ -619,7 +619,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Support
 
-- 📖 [Documentation](https://docs.koreshield.com)
-- 🐛 [Issue Tracker](https://github.com/koreshield/koreshield-python-sdk/issues)
-- 💬 [Discussions](https://github.com/koreshield/koreshield-python-sdk/discussions)
-- 📧 [Email Support](mailto:support@koreshield.com)
+- [Documentation](https://docs.koreshield.com)
+- [Issue Tracker](https://github.com/koreshield/koreshield-python-sdk/issues)
+- [Discussions](https://github.com/koreshield/koreshield-python-sdk/discussions)
+- [Email Support](mailto:support@koreshield.com)
