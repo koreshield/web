@@ -1,10 +1,11 @@
 {
   "name": "koreshield",
-  "version": "0.1.6",
-  "description": "JavaScript/TypeScript SDK for KoreShield LLM Security Proxy",
+  "version": "0.2.0",
+  "description": "JavaScript/TypeScript SDK for KoreShield LLM Security Platform - Enhanced with browser optimization, streaming, and framework integrations",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "browser": "dist/browser/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,9 +14,8 @@
     }
   },
   "scripts": {
-    "build": "tsup && npm run build:browser",
+    "build": "tsup",
     "build:node": "tsup",
-    "build:browser": "tsup --format iife --global-name KoreShield --out-dir dist/browser",
     "dev": "tsup --watch",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -23,7 +23,7 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "typecheck": "tsc --noEmit",
     "docs": "typedoc",
-    "prepublishOnly": "npm run build && npm run test"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "llm",
@@ -50,27 +50,47 @@
     "node": ">=16.0.0"
   },
   "devDependencies": {
+    "@angular/core": "^21.1.1",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
+    "@types/react": "^19.2.9",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
+    "rxjs": "^7.8.2",
     "ts-jest": "^29.1.0",
     "tsup": "^7.0.0",
     "typedoc": "^0.25.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vue": "^3.5.27"
   },
   "dependencies": {
     "axios": "^1.6.0"
   },
   "peerDependencies": {
+    "@angular/core": ">=12.0.0",
+    "axios": "^1.6.0",
     "openai": "^4.0.0",
-    "axios": "^1.6.0"
+    "react": ">=16.8.0",
+    "rxjs": ">=6.0.0",
+    "vue": ">=3.0.0"
   },
   "peerDependenciesMeta": {
     "openai": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    },
+    "@angular/core": {
+      "optional": true
+    },
+    "rxjs": {
       "optional": true
     }
   },
