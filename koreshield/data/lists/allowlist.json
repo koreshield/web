@@ -13,7 +13,7 @@
       "is_active": true
     },
     {
-      "value": "suspicious_pattern",
+      "value": "safe_test_pattern",
       "entry_type": "keyword",
       "reason": "Allowed pattern",
       "added_by": "system",

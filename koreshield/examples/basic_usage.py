@@ -1,7 +1,10 @@
-curl http://localhost:8000/health"""
-Basic usage example for KoreShield.
+"""Basic usage example for KoreShield.
 
 This example shows how to use the KoreShield as a proxy for OpenAI API requests.
+
+To check the KoreShield health endpoint, you can run:
+
+    curl http://localhost:8000/health
 """
 
 import requests
