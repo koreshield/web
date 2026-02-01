@@ -111,7 +111,8 @@ function DocsPage() {
                             {isSidebarOpen ? <X /> : <Menu />}
                         </button>
                         <Link to="/" className="text-xl font-bold flex items-center gap-2">
-                            Kore<span className="text-electric-green">Shield</span> <span className="text-sm text-gray-500 font-normal">Docs</span>
+                            <img src="/logo/SVG/White.svg" alt="KoreShield Logo" className="w-8 h-8" />
+                            <span>Kore<span className="text-electric-green">Shield</span> <span className="text-sm text-gray-500 font-normal">Docs</span></span>
                         </Link>
                     </div>
                 </div>
