@@ -123,7 +123,8 @@ class TestKoreShieldClient:
             "total_unsafe": 0,
             "processing_time_ms": 25.0,
             "request_id": "batch-123",
-            "timestamp": "2024-01-01T00:00:00Z"
+            "timestamp": "2024-01-01T00:00:00Z",
+            "version": "1.0.0"
         }
         mock_response_obj = Mock()
         mock_response_obj.status_code = 200
