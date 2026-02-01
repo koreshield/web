@@ -19,6 +19,9 @@ export function Layout() {
                     {/* Desktop Nav */}
                     <nav className="hidden md:flex items-center gap-8">
                         <Link to="/docs" className="text-sm font-medium hover:text-electric-green transition-colors">Docs</Link>
+                        <Link to="/pricing" className="text-sm font-medium hover:text-electric-green transition-colors">Pricing</Link>
+                        <Link to="/about" className="text-sm font-medium hover:text-electric-green transition-colors">About</Link>
+                        <Link to="/contact" className="text-sm font-medium hover:text-electric-green transition-colors">Contact</Link>
                         <Link to="/status" className="text-sm font-medium hover:text-electric-green transition-colors">Status</Link>
                         <a href="https://blog.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-electric-green transition-colors">Blog</a>
                         <SearchPalette />
@@ -40,6 +43,9 @@ export function Layout() {
                 {isMobileMenuOpen && (
                     <div className="md:hidden border-t border-border bg-background p-4 flex flex-col gap-4">
                         <Link to="/docs" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Docs</Link>
+                        <Link to="/pricing" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+                        <Link to="/about" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>About</Link>
+                        <Link to="/contact" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
                         <Link to="/status" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Status</Link>
                         <a href="https://github.com/koreshield/koreshield" className="text-sm font-medium hover:text-electric-green">GitHub</a>
                     </div>

@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Suspense, lazy, useEffect } from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { Layout } from './components/Layout';
 import { ThemeProvider } from './context/ThemeContext';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
@@ -10,6 +11,9 @@ import { PageLoader, SuspenseFallback } from './components/LoadingStates';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const DocsPage = lazy(() => import('./pages/DocsPage'));
 const StatusPage = lazy(() => import('./pages/StatusPage'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function AppContent() {
@@ -65,6 +69,36 @@ function AppContent() {
             } 
           />
           <Route 
+            path="/pricing" 
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <PricingPage />
+                </RouteErrorBoundary>
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/contact" 
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ContactPage />
+                </RouteErrorBoundary>
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/about" 
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <AboutPage />
+                </RouteErrorBoundary>
+              </Suspense>
+            } 
+          />
+          <Route 
             path="*" 
             element={
               <Suspense fallback={<SuspenseFallback />}>
@@ -81,13 +115,15 @@ function AppContent() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <ToastProvider>
-          <Suspense fallback={<PageLoader />}>
-            <AppContent />
-          </Suspense>
-        </ToastProvider>
-      </ThemeProvider>
+      <HelmetProvider>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <ToastProvider>
+            <Suspense fallback={<PageLoader />}>
+              <AppContent />
+            </Suspense>
+          </ToastProvider>
+        </ThemeProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   );
 }
