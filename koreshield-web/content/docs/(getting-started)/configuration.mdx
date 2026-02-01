@@ -1,52 +1,832 @@
 ---
 title: Configuration
-description: Configure KoreShield settings, policies, and providers
+description: Complete configuration reference for KoreShield
 icon: Settings
 ---
 
 # Configuration
 
-KoreShield is highly configurable via `config/config.yaml` or through environment variables.
+KoreShield can be configured through `config/config.yaml` or environment variables. This guide covers all configuration options.
 
-## Basic Configuration
+## Configuration File Location
 
-The configuration file is YAML-based. Key sections include server settings, security policies, and provider configurations.
+Default locations:
+- `./config/config.yaml` (current directory)
+- `/etc/koreshield/config.yaml` (system-wide)
+- `~/.koreshield/config.yaml` (user-specific)
+
+Custom location:
+```bash
+koreshield start --config /path/to/config.yaml
+```
+
+## Complete config.yaml Reference
 
 ```yaml
+# Server Configuration
 server:
   host: "0.0.0.0"
   port: 8000
+  workers: 4
+  reload: false  # Enable for development
+  cors:
+    enabled: true
+    allow_origins: ["*"]
+    allow_methods: ["GET", "POST", "PUT", "DELETE"]
+    allow_headers: ["*"]
 
+# Logging Configuration
 logging:
-  level: INFO
-  json_logs: false
+  level: INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: json  # json or text
+  file: null  # /var/log/koreshield/app.log
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
 
+# Security Configuration
 security:
+  # Sensitivity level: low, medium, high
   sensitivity: medium
+  
+  # Default action: block, warn, allow
   default_action: block
+  
+  # Confidence threshold (0.0 - 1.0)
+  min_confidence: 0.75
+  
+  # Features
   features:
     sanitization: true
     detection: true
     policy_enforcement: true
+    rate_limiting: true
+    audit_logging: true
+  
+  # Attack types to detect
+  attack_types:
+    prompt_injection: true
+    jailbreak: true
+    prompt_leaking: true
+    data_exfiltration: true
+    harmful_content: true
+    pii_leaking: true
 
+# Provider Configuration
 providers:
+  # OpenAI
   openai:
     enabled: true
+    api_key: ${OPENAI_API_KEY}
     base_url: "https://api.openai.com/v1"
+    timeout: 30
+    max_retries: 3
+    models:
+      - gpt-4
+      - gpt-4-turbo
+      - gpt-3.5-turbo
+  
+  # Anthropic
+  anthropic:
+    enabled: true
+    api_key: ${ANTHROPIC_API_KEY}
+    base_url: "https://api.anthropic.com"
+    timeout: 30
+    max_retries: 3
+    models:
+      - claude-3-opus
+      - claude-3-sonnet
+      - claude-3-haiku
+  
+  # DeepSeek
+  deepseek:
+    enabled: false
+    api_key: ${DEEPSEEK_API_KEY}
+    base_url: "https://api.deepseek.com/v1"
+    timeout: 30
+    models:
+      - deepseek-chat
+      - deepseek-coder
+  
+  # Google Gemini
+  gemini:
+    enabled: false
+    api_key: ${GOOGLE_API_KEY}
+    base_url: "https://generativelanguage.googleapis.com/v1"
+    timeout: 30
+    models:
+      - gemini-pro
+      - gemini-pro-vision
+  
+  # Azure OpenAI
+  azure_openai:
+    enabled: false
+    api_key: ${AZURE_OPENAI_API_KEY}
+    endpoint: ${AZURE_OPENAI_ENDPOINT}
+    api_version: "2024-02-01"
+    deployment_name: "gpt-4"
 
-alerting:
+# Redis Configuration
+redis:
+  enabled: true
+  host: localhost
+  port: 6379
+  db: 0
+  password: null
+  ssl: false
+  max_connections: 50
+  
+  # Cache settings
+  cache:
+    enabled: true
+    ttl: 3600  # 1 hour
+    max_size: 10000
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+    burst: 10
+
+# Database Configuration (Multi-tenancy)
+database:
   enabled: false
+  type: postgresql  # postgresql or sqlite
+  host: localhost
+  port: 5432
+  database: koreshield
+  username: ${DB_USERNAME}
+  password: ${DB_PASSWORD}
+  pool_size: 10
+  max_overflow: 20
+
+# Policy Engine Configuration
+policy:
+  # RBAC roles: admin, moderator, user, guest
+  default_role: user
+  
+  # Per-role limits
+  roles:
+    admin:
+      rate_limit: 1000
+      sensitivity: low
+      allowed_actions: ["*"]
+    
+    moderator:
+      rate_limit: 500
+      sensitivity: medium
+      allowed_actions: ["read", "write", "moderate"]
+    
+    user:
+      rate_limit: 100
+      sensitivity: medium
+      allowed_actions: ["read", "write"]
+    
+    guest:
+      rate_limit: 10
+      sensitivity: high
+      allowed_actions: ["read"]
+
+# Rule Engine Configuration
+rules:
+  enabled: true
+  custom_rules_path: ./rules/
+  
+  # Built-in rules
+  builtin:
+    - name: block_system_prompt_leak
+      enabled: true
+      priority: high
+    
+    - name: block_jailbreak_attempts
+      enabled: true
+      priority: high
+    
+    - name: detect_pii_leaking
+      enabled: true
+      priority: medium
+
+# Monitoring & Metrics
+monitoring:
+  # Prometheus metrics
+  metrics:
+    enabled: true
+    port: 9090
+    path: /metrics
+  
+  # Health checks
+  health_check:
+    enabled: true
+    interval: 30  # seconds
+    timeout: 5
+  
+  # Performance tracking
+  performance:
+    track_latency: true
+    track_errors: true
+    track_provider_health: true
+
+# Alerting Configuration
+alerting:
+  enabled: true
+  
+  # Alert thresholds
+  thresholds:
+    high_attack_rate: 10  # attacks per minute
+    provider_failure_rate: 0.1  # 10% failure rate
+    high_latency: 5000  # milliseconds
+  
+  # Alert channels
+  channels:
+    # Email
+    email:
+      enabled: false
+      smtp_host: smtp.gmail.com
+      smtp_port: 587
+      smtp_user: ${SMTP_USER}
+      smtp_password: ${SMTP_PASSWORD}
+      from_email: alerts@koreshield.com
+      to_emails:
+        - security@yourcompany.com
+    
+    # Slack
+    slack:
+      enabled: false
+      webhook_url: ${SLACK_WEBHOOK_URL}
+      channel: "#security-alerts"
+    
+    # Webhook
+    webhook:
+      enabled: false
+      url: https://your-webhook-endpoint.com/alerts
+      headers:
+        Authorization: Bearer ${WEBHOOK_TOKEN}
+    
+    # PagerDuty
+    pagerduty:
+      enabled: false
+      api_key: ${PAGERDUTY_API_KEY}
+      service_id: ${PAGERDUTY_SERVICE_ID}
+
+# Multi-Tenancy Configuration
+multi_tenancy:
+  enabled: false
+  
+  # Tenant isolation
+  isolation:
+    database: true  # Separate database per tenant
+    redis: true     # Separate Redis namespace
+    logs: true      # Separate log files
+  
+  # Tenant limits
+  default_limits:
+    requests_per_day: 10000
+    storage_mb: 1000
+    users: 10
+
+# List Management
+lists:
+  # Allowlist
+  allowlist:
+    enabled: true
+    path: ./data/lists/allowlist.json
+    
+  # Blocklist
+  blocklist:
+    enabled: true
+    path: ./data/lists/blocklist.json
+
+# Development Settings
+development:
+  debug: false
+  hot_reload: false
+  mock_providers: false
+```
+
+## Environment Variables
+
+All configuration values can be overridden with environment variables:
+
+### Server
+```bash
+KORESHIELD_HOST=0.0.0.0
+KORESHIELD_PORT=8000
+KORESHIELD_WORKERS=4
+```
+
+### Security
+```bash
+KORESHIELD_SENSITIVITY=medium  # low, medium, high
+KORESHIELD_DEFAULT_ACTION=block  # block, warn, allow
+KORESHIELD_MIN_CONFIDENCE=0.75
+```
+
+### Providers
+```bash
+# OpenAI
+OPENAI_API_KEY=sk-...
+OPENAI_BASE_URL=https://api.openai.com/v1
+
+# Anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+
+# DeepSeek
+DEEPSEEK_API_KEY=...
+
+# Google Gemini
+GOOGLE_API_KEY=...
+
+# Azure OpenAI
+AZURE_OPENAI_API_KEY=...
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
+```
+
+### Redis
+```bash
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=...
+REDIS_SSL=false
+```
+
+### Database
+```bash
+DB_TYPE=postgresql
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=koreshield
+DB_USERNAME=postgres
+DB_PASSWORD=...
+```
+
+### Alerting
+```bash
+# Email
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=...
+SMTP_PASSWORD=...
+
+# Slack
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
+
+# Webhook
+WEBHOOK_URL=https://your-endpoint.com/alerts
+WEBHOOK_TOKEN=...
+
+# PagerDuty
+PAGERDUTY_API_KEY=...
+PAGERDUTY_SERVICE_ID=...
 ```
 
 ## Security Settings
 
 ### Sensitivity Levels
 
-- **Low**: Only blocks high-confidence attacks.
-- **Medium** (Default): Balanced protection.
-- **High**: Aggressive blocking, zero-trust approach.
+#### Low Sensitivity
+- Only blocks high-confidence attacks (>90%)
+- Lower false positive rate
+- Best for: Development, testing
+- Block rate: ~5-10% of suspicious requests
 
-### Default Action
+```yaml
+security:
+  sensitivity: low
+  min_confidence: 0.90
+  default_action: warn
+```
+
+#### Medium Sensitivity (Recommended)
+- Blocks medium to high confidence attacks (>75%)
+- Balanced protection vs. false positives
+- Best for: Most production applications
+- Block rate: ~15-20% of suspicious requests
+
+```yaml
+security:
+  sensitivity: medium
+  min_confidence: 0.75
+  default_action: block
+```
+
+#### High Sensitivity
+- Blocks all suspicious requests (>50%)
+- Highest protection, more false positives
+- Best for: High-security applications, financial, healthcare
+- Block rate: ~25-30% of suspicious requests
+
+```yaml
+security:
+  sensitivity: high
+  min_confidence: 0.50
+  default_action: block
+```
+
+### Default Actions
+
+#### block
+Completely blocks the request and returns an error:
+
+```json
+{
+  "error": {
+    "message": "Security policy violation",
+    "type": "security_error",
+    "code": "PROMPT_INJECTION"
+  }
+}
+```
+
+#### warn
+Allows the request but logs a warning:
+
+```json
+{
+  "choices": [/* normal response */],
+  "koreshield_warning": {
+    "type": "SUSPICIOUS_CONTENT",
+    "confidence": 0.65,
+    "message": "Request contained suspicious patterns"
+  }
+}
+```
+
+#### allow
+No blocking, only logging (useful for testing):
+
+```yaml
+security:
+  default_action: allow
+```
+
+## Provider Configuration
+
+### OpenAI
+
+```yaml
+providers:
+  openai:
+    enabled: true
+    api_key: ${OPENAI_API_KEY}
+    base_url: "https://api.openai.com/v1"
+    timeout: 30
+    max_retries: 3
+    retry_delay: 1
+    
+    # Model-specific settings
+    models:
+      gpt-4:
+        max_tokens: 8192
+        temperature: 0.7
+      gpt-3.5-turbo:
+        max_tokens: 4096
+        temperature: 0.7
+```
+
+### Anthropic (Claude)
+
+```yaml
+providers:
+  anthropic:
+    enabled: true
+    api_key: ${ANTHROPIC_API_KEY}
+    base_url: "https://api.anthropic.com"
+    timeout: 30
+    max_retries: 3
+    
+    # Default model settings
+    default_model: claude-3-sonnet
+    max_tokens: 4096
+```
+
+### Multiple Providers
+
+You can enable multiple providers and route requests based on the model:
+
+```yaml
+providers:
+  openai:
+    enabled: true
+    models: ["gpt-4", "gpt-3.5-turbo"]
+  
+  anthropic:
+    enabled: true
+    models: ["claude-3-opus", "claude-3-sonnet"]
+  
+  deepseek:
+    enabled: true
+    models: ["deepseek-chat", "deepseek-coder"]
+```
+
+KoreShield automatically routes to the correct provider based on the model name.
+
+## Rate Limiting
+
+### Global Rate Limits
+
+```yaml
+redis:
+  rate_limit:
+    enabled: true
+    
+    # Per IP address
+    per_ip:
+      requests_per_minute: 60
+      burst: 10
+    
+    # Per API key
+    per_key:
+      requests_per_minute: 1000
+      burst: 50
+    
+    # Global (all requests)
+    global:
+      requests_per_second: 100
+```
+
+### Per-Role Rate Limits
+
+```yaml
+policy:
+  roles:
+    user:
+      rate_limit: 100  # requests per minute
+      daily_limit: 10000  # requests per day
+    
+    premium:
+      rate_limit: 500
+      daily_limit: 50000
+```
+
+## Monitoring & Alerts
+
+### Prometheus Metrics
+
+```yaml
+monitoring:
+  metrics:
+    enabled: true
+    port: 9090
+    path: /metrics
+    
+    # Custom metrics
+    custom:
+      - name: koreshield_blocked_attacks_total
+        type: counter
+      - name: koreshield_request_latency_seconds
+        type: histogram
+```
+
+Access metrics at: `http://localhost:9090/metrics`
+
+### Alert Configuration
+
+```yaml
+alerting:
+  enabled: true
+  
+  # When to alert
+  thresholds:
+    # Alert if >10 attacks/minute
+    high_attack_rate: 10
+    
+    # Alert if provider fails >10% of requests
+    provider_failure_rate: 0.1
+    
+    # Alert if latency >5 seconds
+    high_latency: 5000
+    
+    # Alert if error rate >5%
+    error_rate: 0.05
+  
+  # Where to send alerts
+  channels:
+    slack:
+      enabled: true
+      webhook_url: ${SLACK_WEBHOOK_URL}
+      
+    email:
+      enabled: true
+      to_emails: ["security@company.com"]
+```
+
+## Multi-Tenancy
+
+### Enable Multi-Tenancy
+
+```yaml
+multi_tenancy:
+  enabled: true
+  
+  # Tenant isolation strategy
+  isolation:
+    database: true  # Separate DB schema per tenant
+    redis: true     # Separate Redis namespace
+    logs: true      # Separate log files
+    
+  # Default tenant limits
+  default_limits:
+    requests_per_day: 10000
+    storage_mb: 1000
+    users: 10
+    api_keys: 5
+```
+
+### Per-Tenant Configuration
+
+```yaml
+tenants:
+  tenant-123:
+    name: "Acme Corp"
+    tier: enterprise
+    limits:
+      requests_per_day: 100000
+      storage_mb: 10000
+    
+    # Tenant-specific security settings
+    security:
+      sensitivity: high
+      default_action: block
+    
+    # Tenant-specific providers
+    providers:
+      openai:
+        api_key: ${ACME_OPENAI_KEY}
+```
+
+## Custom Rules
+
+### Rule Definition
+
+Create custom rules in YAML or Python:
+
+**rules/custom_block.yaml**:
+```yaml
+name: block_competitor_mentions
+description: Block requests mentioning competitors
+enabled: true
+priority: high
+
+conditions:
+  - type: regex
+    pattern: "(competitor1|competitor2|competitor3)"
+    case_insensitive: true
+
+action: block
+message: "Request contains blocked content"
+```
+
+**rules/custom_block.py**:
+```python
+from koreshield.rules import Rule
+
+class BlockCompetitorMentions(Rule):
+    name = "block_competitor_mentions"
+    priority = "high"
+    
+    def evaluate(self, request):
+        content = request.get_content()
+        competitors = ["competitor1", "competitor2"]
+        
+        for comp in competitors:
+            if comp.lower() in content.lower():
+                return {
+                    "action": "block",
+                    "confidence": 0.95,
+                    "reason": f"Mentioned competitor: {comp}"
+                }
+        
+        return {"action": "allow"}
+```
+
+### Load Custom Rules
+
+```yaml
+rules:
+  enabled: true
+  custom_rules_path: ./rules/
+  
+  # Auto-reload on file changes
+  hot_reload: true
+```
+
+## Performance Tuning
+
+### Worker Configuration
+
+```yaml
+server:
+  workers: 4  # Number of worker processes
+  worker_class: uvicorn.workers.UvicornWorker
+  threads: 2  # Threads per worker
+  max_requests: 1000  # Restart workers after N requests
+  max_requests_jitter: 50
+```
+
+### Caching Strategy
+
+```yaml
+redis:
+  cache:
+    enabled: true
+    
+    # Cache detection results
+    detection_cache:
+      enabled: true
+      ttl: 3600  # 1 hour
+      max_size: 10000
+    
+    # Cache provider responses
+    response_cache:
+      enabled: true
+      ttl: 1800  # 30 minutes
+      max_size: 5000
+```
+
+### Connection Pooling
+
+```yaml
+providers:
+  openai:
+    connection_pool:
+      max_connections: 100
+      max_keepalive: 50
+      keepalive_expiry: 30
+```
+
+## Next Steps
+
+- [Authentication Setup](/docs/authentication) - Configure API keys and JWT
+- [Policy Engine](/docs/policy-engine) - RBAC and custom policies
+- [Monitoring Guide](/docs/monitoring) - Set up Prometheus and Grafana
+- [Custom Rules](/docs/custom-rules) - Write your own detection rules
+
+## Configuration Examples
+
+### Development Setup
+
+```yaml
+server:
+  host: localhost
+  port: 8000
+  reload: true
+
+logging:
+  level: DEBUG
+  format: text
+
+security:
+  sensitivity: low
+  default_action: warn
+
+redis:
+  enabled: false
+
+monitoring:
+  metrics:
+    enabled: false
+```
+
+### Production Setup
+
+```yaml
+server:
+  host: 0.0.0.0
+  port: 8000
+  workers: 8
+
+logging:
+  level: INFO
+  format: json
+  file: /var/log/koreshield/app.log
+
+security:
+  sensitivity: high
+  default_action: block
+  min_confidence: 0.75
+
+redis:
+  enabled: true
+  host: redis-cluster.internal
+
+database:
+  enabled: true
+  type: postgresql
+  host: db.internal
+  pool_size: 20
+
+monitoring:
+  metrics:
+    enabled: true
+    port: 9090
+
+alerting:
+  enabled: true
+  channels:
+    slack:
+      enabled: true
+    pagerduty:
+      enabled: true
+```
 
 - **Block**: Rejects the request with a 403 error.
 - **Warn**: Logs the attack but allows the request to proceed (monitoring mode).
