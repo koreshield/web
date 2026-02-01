@@ -6,6 +6,8 @@ import { ThemeProvider } from './context/ThemeContext';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider, setGlobalToast, useToast } from './components/ToastNotification';
 import { PageLoader, SuspenseFallback } from './components/LoadingStates';
+import { ClerkProvider, isClerkConfigured, CLERK_PUBLISHABLE_KEY } from './lib/auth';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Lazy load pages for code splitting
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -20,6 +22,8 @@ const VsLLMGuardPage = lazy(() => import('./pages/VsLLMGuardPage'));
 const VsBuildYourselfPage = lazy(() => import('./pages/VsBuildYourselfPage'));
 const WhyKoreShieldPage = lazy(() => import('./pages/WhyKoreShieldPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 
 function AppContent() {
   const { addToast } = useToast();
@@ -154,6 +158,28 @@ function AppContent() {
             } 
           />
           <Route 
+            path="/login" 
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <LoginPage />
+                </RouteErrorBoundary>
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/dashboard" 
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                </RouteErrorBoundary>
+              </Suspense>
+            } 
+          />
+          <Route 
             path="*" 
             element={
               <Suspense fallback={<SuspenseFallback />}>
@@ -168,7 +194,8 @@ function AppContent() {
 }
 
 function App() {
-  return (
+  // Wrap in Clerk provider if configured
+  const content = (
     <ErrorBoundary>
       <HelmetProvider>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -181,6 +208,16 @@ function App() {
       </HelmetProvider>
     </ErrorBoundary>
   );
+
+  if (isClerkConfigured()) {
+    return (
+      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+        {content}
+      </ClerkProvider>
+    );
+  }
+
+  return content;
 }
 
 export default App;

@@ -3,6 +3,7 @@ import { SearchPalette } from "./SearchPalette";
 import Footer from "./Footer";
 import { useState } from "react";
 import { Menu, X, Github } from "lucide-react";
+import { SignedIn, SignedOut, UserButton, isClerkConfigured } from "../lib/auth";
 
 export function Layout() {
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -24,13 +25,31 @@ export function Layout() {
                         <Link to="/pricing" className="text-sm font-medium hover:text-electric-green transition-colors">Pricing</Link>
                         <Link to="/playground" className="text-sm font-medium hover:text-electric-green transition-colors">Playground</Link>
                         <Link to="/status" className="text-sm font-medium hover:text-electric-green transition-colors">Status</Link>
+                        {isClerkConfigured() && (
+                            <SignedIn>
+                                <Link to="/dashboard" className="text-sm font-medium hover:text-electric-green transition-colors">Dashboard</Link>
+                            </SignedIn>
+                        )}
                         <SearchPalette />
                         <a href="https://github.com/koreshield/koreshield" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white transition-colors">
                             <Github className="w-5 h-5" />
                         </a>
-                        <a href="https://github.com/koreshield/koreshield" className="bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold transition-colors glow-green">
-                            Get Started
-                        </a>
+                        {isClerkConfigured() ? (
+                            <>
+                                <SignedIn>
+                                    <UserButton afterSignOutUrl="/" />
+                                </SignedIn>
+                                <SignedOut>
+                                    <Link to="/login" className="bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold transition-colors glow-green">
+                                        Sign In
+                                    </Link>
+                                </SignedOut>
+                            </>
+                        ) : (
+                            <a href="https://github.com/koreshield/koreshield" className="bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold transition-colors glow-green">
+                                Get Started
+                            </a>
+                        )}
                     </nav>
 
                     {/* Mobile Actions */}
@@ -55,14 +74,35 @@ export function Layout() {
                         <Link to="/pricing" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
                         <Link to="/playground" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Playground</Link>
                         <Link to="/status" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Status</Link>
+                        {isClerkConfigured() && (
+                            <SignedIn>
+                                <Link to="/dashboard" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+                            </SignedIn>
+                        )}
                         <a href="https://github.com/koreshield/koreshield" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors flex items-center gap-2">
                             <Github className="w-5 h-5" /> GitHub
                         </a>
 
                         <div className="pt-4">
-                            <a href="https://github.com/koreshield/koreshield" className="block w-full text-center bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-4 rounded-lg text-lg font-bold transition-colors shadow-lg shadow-electric-green/20">
-                                Get Started
-                            </a>
+                            {isClerkConfigured() ? (
+                                <>
+                                    <SignedIn>
+                                        <div className="flex items-center gap-2">
+                                            <UserButton afterSignOutUrl="/" />
+                                            <span className="text-sm text-muted-foreground">Account</span>
+                                        </div>
+                                    </SignedIn>
+                                    <SignedOut>
+                                        <Link to="/login" className="block w-full text-center bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-4 rounded-lg text-lg font-bold transition-colors shadow-lg shadow-electric-green/20">
+                                            Sign In
+                                        </Link>
+                                    </SignedOut>
+                                </>
+                            ) : (
+                                <a href="https://github.com/koreshield/koreshield" className="block w-full text-center bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-4 rounded-lg text-lg font-bold transition-colors shadow-lg shadow-electric-green/20">
+                                    Get Started
+                                </a>
+                            )}
                         </div>
                     </div>
                 )}
