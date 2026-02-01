@@ -33,9 +33,14 @@ export function Layout() {
                         </a>
                     </nav>
 
-                    {/* Mobile Menu Toggle */}
-                    <div className="flex items-center gap-4 md:hidden">
-                        <button onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}>
+                    {/* Mobile Actions */}
+                    <div className="flex items-center gap-2 md:hidden">
+                        <SearchPalette mobile />
+                        <button
+                            onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
+                            className="p-2 text-gray-400 hover:text-white transition-colors"
+                            aria-label="Toggle menu"
+                        >
                             {isMobileMenuOpen ? <X /> : <Menu />}
                         </button>
                     </div>
@@ -43,16 +48,22 @@ export function Layout() {
 
                 {/* Mobile Nav */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden border-t border-border bg-background p-4 flex flex-col gap-4">
-                        <Link to="/why-koreshield" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Why KoreShield</Link>
-                        <Link to="/docs" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Docs</Link>
-                        <a href="https://blog.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Blog</a>
-                        <Link to="/pricing" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-                        <Link to="/playground" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Playground</Link>
-                        <Link to="/about" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>About</Link>
-                        <Link to="/contact" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
-                        <Link to="/status" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Status</Link>
-                        <a href="https://github.com/koreshield/koreshield" className="text-sm font-medium hover:text-electric-green">GitHub</a>
+                    <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl p-6 flex flex-col gap-4 h-[calc(100vh-4rem)] overflow-y-auto">
+                        <Link to="/why-koreshield" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Why KoreShield</Link>
+                        <Link to="/docs" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Docs</Link>
+                        <a href="https://blog.koreshield.com" target="_blank" rel="noreferrer" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Blog</a>
+                        <Link to="/pricing" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+                        <Link to="/playground" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Playground</Link>
+                        <Link to="/status" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Status</Link>
+                        <a href="https://github.com/koreshield/koreshield" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors flex items-center gap-2">
+                            <Github className="w-5 h-5" /> GitHub
+                        </a>
+
+                        <div className="pt-4">
+                            <a href="https://github.com/koreshield/koreshield" className="block w-full text-center bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-4 rounded-lg text-lg font-bold transition-colors shadow-lg shadow-electric-green/20">
+                                Get Started
+                            </a>
+                        </div>
                     </div>
                 )}
             </header>
