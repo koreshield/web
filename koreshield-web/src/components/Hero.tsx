@@ -43,7 +43,7 @@ function Hero() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
                     >
-                        <button className="group bg-electric-green hover:bg-emerald-bright text-black font-semibold px-8 py-4 rounded-lg transition-all duration-300 flex items-center gap-2 glow-green">
+                        <button className="group bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 py-4 rounded-lg transition-all duration-300 flex items-center gap-2 glow-green shadow-lg shadow-emerald-500/20">
                             Get Started
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </button>
