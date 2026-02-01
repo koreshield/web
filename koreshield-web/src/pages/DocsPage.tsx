@@ -2,8 +2,17 @@ import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { MDXProvider } from '@mdx-js/react';
 import { Menu, X, ArrowLeft } from 'lucide-react';
-import Footer from '../components/Footer';
 import { Cards, Card } from '../components/mdx/Cards';
+
+// Types
+interface MDXModule {
+    default: React.ComponentType;
+    frontmatter: Record<string, string>;
+}
+
+interface Meta {
+    pages: string[];
+}
 
 // Function to normalize slugs (handle group folders)
 // /content/docs/(group)/file.mdx -> file
@@ -20,17 +29,22 @@ const modules = import.meta.glob('/content/docs/**/*.mdx', { eager: true });
 const metaFiles = import.meta.glob('/content/docs/**/meta.json', { eager: true });
 
 // Build slug map
-const slugMap: Record<string, any> = {};
+const slugMap: Record<string, MDXModule> = {};
 Object.entries(modules).forEach(([path, mod]) => {
     const slug = normalizeSlug(path);
-    slugMap[slug] = mod;
+    slugMap[slug] = mod as MDXModule;
 });
 
 // Build Sidebar Navigation
-// Reads root meta.json and traverses
+interface NavItem {
+    type: 'header' | 'link';
+    title: string;
+    slug?: string;
+}
+
 function buildNavigation() {
-    const nav: any[] = [];
-    const rootMeta = metaFiles['/content/docs/meta.json'] as any;
+    const nav: NavItem[] = [];
+    const rootMeta = metaFiles['/content/docs/meta.json'] as Meta;
 
     if (!rootMeta) return nav;
 
@@ -41,7 +55,7 @@ function buildNavigation() {
             // Group reference: ...(getting-started)
             const groupName = page.replace('...', '');
             const groupMetaPath = `/content/docs/${groupName}/meta.json`;
-            const groupMeta = metaFiles[groupMetaPath] as any;
+            const groupMeta = metaFiles[groupMetaPath] as Meta;
 
             if (groupMeta && groupMeta.pages) {
                 groupMeta.pages.forEach((subPage: string) => {
@@ -151,8 +165,6 @@ function DocsPage() {
                     </div>
                 </main>
             </div>
-
-            <Footer />
         </div>
     );
 }
