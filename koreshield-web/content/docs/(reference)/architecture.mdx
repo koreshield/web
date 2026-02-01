@@ -1,0 +1,78 @@
+---
+title: Architecture
+description: Understanding how KoreShield protects LLM integrations
+icon: Cpu
+---
+
+KoreShield is an open-source security platform designed to protect applications from prompt injection attacks and other LLM security vulnerabilities.
+
+## High-Level Overview
+
+The KoreShield project is built around four core security components that work together to provide comprehensive protection for LLM integrations:
+
+1. **Input Sanitizer**: Cleans and validates incoming prompts to remove potentially malicious content
+2. **Attack Detector**: Analyzes prompts and responses for signs of prompt injection and other attacks
+3. **Policy Engine**: Enforces security rules and determines how to handle suspicious requests
+4. **Audit Logger**: Records all security events and decisions for compliance and monitoring
+
+## Security Pipeline
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Application   │───▶│ Input Sanitizer │───▶│ Attack Detector │───▶│  Policy Engine  │───▶│  Audit Logger   │
+│                 │    │                 │    │                 │    │                 │    │                 │
+│ User Request ──▶│    │ Clean Input ──▶│    │ Analysis ──────▶│    │ Decision ──────▶│    │ Log Event ─────▶│
+└─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                        │                        │
+                                                        ▼                        ▼
+                                                 ┌─────────────────┐    ┌─────────────────┐
+                                                 │   LLM Provider  │    │   Application   │
+                                                 │   (OpenAI, etc) │    │   Response      │
+                                                 └─────────────────┘    └─────────────────┘
+```
+
+## Component Details
+
+### Input Sanitizer
+The first line of defense that processes incoming prompts to:
+- Remove or escape potentially dangerous content
+- Validate input format and length
+- Apply basic content filtering rules
+
+### Attack Detector
+Uses advanced pattern matching and AI-powered analysis to identify:
+- Prompt injection attempts
+- Jailbreak attacks
+- Data exfiltration attempts
+- Other malicious patterns
+
+### Policy Engine
+Makes real-time decisions based on detection results:
+- Allow, block, or modify requests
+- Apply different security levels per endpoint
+- Support for custom security policies
+- Integration with existing security systems
+
+### Audit Logger
+Comprehensive logging for:
+- Security events and decisions
+- Performance metrics
+- Compliance reporting
+- Incident investigation
+
+## Supported LLM Providers
+
+KoreShield works with all major LLM providers through a unified API:
+
+- **OpenAI**: GPT-3.5, GPT-4, GPT-4 Turbo
+- **Anthropic**: Claude (all versions)
+- **Google**: Gemini/PaLM
+- **Azure OpenAI**: Enterprise Azure deployments
+- **Custom Providers**: Any OpenAI-compatible API
+
+## Deployment Options
+
+- **Cloud-Hosted**: Managed service with automatic updates
+- **Self-Hosted**: Docker containers for full control
+- **Hybrid**: Mix of cloud and on-premises components
+

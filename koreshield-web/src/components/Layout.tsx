@@ -11,8 +11,9 @@ export function Layout() {
         <div className="min-h-screen bg-background text-foreground flex flex-col font-sans transition-colors duration-300">
             <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <Link to="/" className="text-xl font-bold flex items-center gap-1">
-                        Kore<span className="text-electric-green">Shield</span>
+                    <Link to="/" className="text-xl font-bold flex items-center gap-2">
+                        <img src="/logo.png" alt="KoreShield Logo" className="w-8 h-8" />
+                        <span>Kore<span className="text-electric-green">Shield</span></span>
                     </Link>
 
                     {/* Desktop Nav */}
