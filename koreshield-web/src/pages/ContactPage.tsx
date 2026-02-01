@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from '../components/ToastNotification';
-import { SEOMeta, SEOConfig } from '../components/SEOMeta';
+import { SEOMeta } from '../components/SEOMeta';
+import { SEOConfig } from '../lib/seo-config';
 
 const supportOptions = [
   {
@@ -86,7 +87,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <SEOMeta {...SEOConfig.contact} />
-      
+
       {/* Hero Section */}
       <section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
         <div className="max-w-7xl mx-auto text-center">
@@ -157,31 +158,28 @@ export default function ContactPage() {
           <div className="flex gap-4 mb-8 border-b border-gray-200 dark:border-gray-800">
             <button
               onClick={() => setActiveTab('general')}
-              className={`px-6 py-3 font-medium transition-colors border-b-2 ${
-                activeTab === 'general'
+              className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'general'
                   ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
+                }`}
             >
               General Enquiry
             </button>
             <button
               onClick={() => setActiveTab('enterprise')}
-              className={`px-6 py-3 font-medium transition-colors border-b-2 ${
-                activeTab === 'enterprise'
+              className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'enterprise'
                   ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
+                }`}
             >
               Enterprise Sales
             </button>
             <button
               onClick={() => setActiveTab('technical')}
-              className={`px-6 py-3 font-medium transition-colors border-b-2 ${
-                activeTab === 'technical'
+              className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'technical'
                   ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
+                }`}
             >
               Technical Support
             </button>

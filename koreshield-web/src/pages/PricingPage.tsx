@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useToast } from '../components/ToastNotification';
-import { SEOMeta, SEOConfig } from '../components/SEOMeta';
+import { SEOMeta } from '../components/SEOMeta';
+import { SEOConfig } from '../lib/seo-config';
 
 const tiers = [
   {
@@ -150,7 +151,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <SEOMeta {...SEOConfig.pricing} />
-      
+
       {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
@@ -196,9 +197,8 @@ export default function PricingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`relative bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 flex flex-col ${
-                  tier.popular ? 'ring-2 ring-blue-600 scale-105' : ''
-                }`}
+                className={`relative bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 flex flex-col ${tier.popular ? 'ring-2 ring-blue-600 scale-105' : ''
+                  }`}
               >
                 {tier.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
@@ -251,22 +251,20 @@ export default function PricingPage() {
                 {tier.ctaLink.startsWith('#') ? (
                   <button
                     onClick={handleContactSales}
-                    className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${
-                      tier.popular
+                    className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${tier.popular
                         ? 'bg-blue-600 hover:bg-blue-700 text-white'
                         : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
-                    }`}
+                      }`}
                   >
                     {tier.cta}
                   </button>
                 ) : (
                   <Link
                     to={tier.ctaLink}
-                    className={`w-full py-3 px-6 rounded-lg font-medium transition-colors text-center ${
-                      tier.popular
+                    className={`w-full py-3 px-6 rounded-lg font-medium transition-colors text-center ${tier.popular
                         ? 'bg-blue-600 hover:bg-blue-700 text-white'
                         : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
-                    }`}
+                      }`}
                   >
                     {tier.cta}
                   </Link>
@@ -288,7 +286,7 @@ export default function PricingPage() {
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
             Compare Features
           </h2>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -399,9 +397,8 @@ export default function PricingPage() {
                     {faq.question}
                   </span>
                   <svg
-                    className={`w-5 h-5 text-gray-500 flex-shrink-0 transition-transform ${
-                      openFaq === index ? 'rotate-180' : ''
-                    }`}
+                    className={`w-5 h-5 text-gray-500 flex-shrink-0 transition-transform ${openFaq === index ? 'rotate-180' : ''
+                      }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

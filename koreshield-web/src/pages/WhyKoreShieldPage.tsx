@@ -239,6 +239,31 @@ export default function WhyKoreShieldPage() {
           </div>
         </motion.div>
 
+        {/* Comparison Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+        >
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-8 text-center">See How We Compare</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <a href="/vs/lakera-guard" className="block bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-6 hover:border-blue-500 transition-colors group">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors">Vs. Lakera Guard</h3>
+              <p className="text-gray-600 dark:text-gray-400">See why KoreShield is the open-source alternative to proprietary solutions.</p>
+            </a>
+            <a href="/vs/llm-guard" className="block bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-6 hover:border-blue-500 transition-colors group">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors">Vs. LLM Guard</h3>
+              <p className="text-gray-600 dark:text-gray-400">Compare features, ease of use, and enterprise readiness.</p>
+            </a>
+            <a href="/vs/build-yourself" className="block bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-6 hover:border-blue-500 transition-colors group">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors">Vs. Building In-House</h3>
+              <p className="text-gray-600 dark:text-gray-400">Understand the hidden costs of maintenance and training.</p>
+            </a>
+          </div>
+        </motion.div>
+
+        {/* What Our Users Say Link */}
+
         {/* What Our Users Say */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
