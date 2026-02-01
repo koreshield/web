@@ -1,0 +1,694 @@
+---
+title: API Reference
+description: Complete API documentation for KoreShield endpoints
+icon: Code
+---
+
+# API Reference
+
+KoreShield provides multiple API endpoints for protection, management, and monitoring. All endpoints support JSON request/response format.
+
+## Base URL
+
+```
+http://localhost:8000
+```
+
+For production, replace with your deployed instance URL.
+
+## Authentication
+
+Most endpoints require authentication via API key or JWT token:
+
+```bash
+# API Key in header
+curl -H "Authorization: Bearer your-api-key-here" \
+  http://localhost:8000/v1/chat/completions
+
+# JWT Token
+curl -H "Authorization: Bearer your-jwt-token" \
+  http://localhost:8000/api/admin/stats
+```
+
+---
+
+## Core API Endpoints
+
+### POST /v1/chat/completions
+
+OpenAI-compatible chat completions endpoint with security protection.
+
+**Request**:
+
+```bash
+POST /v1/chat/completions
+Content-Type: application/json
+```
+
+```json
+{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "What is the capital of France?"
+    }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 150,
+  "top_p": 1.0,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "stream": false
+}
+```
+
+**Parameters**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| model | string | Yes | Model identifier (e.g., "gpt-3.5-turbo", "claude-3-sonnet") |
+| messages | array | Yes | Array of message objects with role and content |
+| temperature | number | No | Sampling temperature (0-2), default 0.7 |
+| max_tokens | integer | No | Maximum tokens to generate |
+| top_p | number | No | Nucleus sampling parameter (0-1) |
+| frequency_penalty | number | No | Penalty for frequent tokens (-2.0 to 2.0) |
+| presence_penalty | number | No | Penalty for new tokens (-2.0 to 2.0) |
+| stream | boolean | No | Enable streaming responses |
+| user | string | No | Unique user identifier for tracking |
+
+**Response (Success)**:
+
+```json
+{
+  "id": "chatcmpl-123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "model": "gpt-3.5-turbo-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The capital of France is Paris."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 13,
+    "completion_tokens": 7,
+    "total_tokens": 20
+  },
+  "koreshield": {
+    "scan_time_ms": 12,
+    "threats_detected": 0,
+    "confidence": 0.0
+  }
+}
+```
+
+**Response (Blocked - Security Violation)**:
+
+```json
+{
+  "error": {
+    "message": "Security policy violation: Prompt injection attack detected",
+    "type": "security_error",
+    "code": "PROMPT_INJECTION",
+    "details": {
+      "attack_type": "instruction_override",
+      "confidence": 0.95,
+      "indicators": [
+        "ignore instructions",
+        "reveal system prompt"
+      ],
+      "blocked": true,
+      "scan_time_ms": 8
+    }
+  }
+}
+```
+
+**Status Codes**:
+
+| Code | Description |
+|------|-------------|
+| 200 | Success - Request allowed |
+| 400 | Bad Request - Invalid parameters |
+| 401 | Unauthorized - Missing or invalid API key |
+| 403 | Forbidden - Security policy violation |
+| 429 | Too Many Requests - Rate limit exceeded |
+| 500 | Internal Server Error |
+| 502 | Bad Gateway - Provider unavailable |
+| 503 | Service Unavailable |
+
+---
+
+### GET /health
+
+Health check endpoint for monitoring uptime and service status.
+
+**Request**:
+
+```bash
+GET /health
+```
+
+**Response**:
+
+```json
+{
+  "status": "healthy",
+  "version": "0.1.0",
+  "uptime_seconds": 3600,
+  "timestamp": "2026-02-01T12:00:00Z",
+  "providers": {
+    "openai": {
+      "status": "healthy",
+      "latency_ms": 245
+    },
+    "anthropic": {
+      "status": "healthy",
+      "latency_ms": 312
+    },
+    "redis": {
+      "status": "healthy",
+      "latency_ms": 2
+    }
+  },
+  "components": {
+    "detection_engine": "healthy",
+    "policy_engine": "healthy",
+    "rate_limiter": "healthy"
+  }
+}
+```
+
+**Status Codes**:
+
+| Code | Description |
+|------|-------------|
+| 200 | Healthy - All systems operational |
+| 503 | Unhealthy - Service degraded or unavailable |
+
+---
+
+### GET /status
+
+Detailed status and statistics endpoint.
+
+**Request**:
+
+```bash
+GET /status
+```
+
+**Response**:
+
+```json
+{
+  "uptime_seconds": 86400,
+  "version": "0.1.0",
+  "statistics": {
+    "total_requests": 12543,
+    "blocked_requests": 1832,
+    "allowed_requests": 10711,
+    "block_rate": 0.146,
+    "avg_latency_ms": 245,
+    "p95_latency_ms": 450,
+    "p99_latency_ms": 892
+  },
+  "attack_types": {
+    "prompt_injection": 892,
+    "jailbreak": 453,
+    "prompt_leaking": 287,
+    "data_exfiltration": 142,
+    "pii_leaking": 58
+  },
+  "providers": {
+    "openai": {
+      "status": "healthy",
+      "requests": 8234,
+      "failures": 12,
+      "success_rate": 0.998,
+      "avg_latency_ms": 234
+    },
+    "anthropic": {
+      "status": "healthy",
+      "requests": 4309,
+      "failures": 3,
+      "success_rate": 0.999,
+      "avg_latency_ms": 312
+    }
+  },
+  "rate_limit": {
+    "enabled": true,
+    "current_rpm": 42,
+    "limit_rpm": 1000,
+    "throttled_requests": 23
+  }
+}
+```
+
+---
+
+### GET /metrics
+
+Prometheus-formatted metrics for monitoring.
+
+**Request**:
+
+```bash
+GET /metrics
+```
+
+**Response** (Prometheus format):
+
+```
+# HELP koreshield_requests_total Total number of requests
+# TYPE koreshield_requests_total counter
+koreshield_requests_total{status="allowed"} 10711
+koreshield_requests_total{status="blocked"} 1832
+
+# HELP koreshield_request_duration_seconds Request duration in seconds
+# TYPE koreshield_request_duration_seconds histogram
+koreshield_request_duration_seconds_bucket{le="0.1"} 8234
+koreshield_request_duration_seconds_bucket{le="0.5"} 11543
+koreshield_request_duration_seconds_bucket{le="1.0"} 12234
+koreshield_request_duration_seconds_bucket{le="+Inf"} 12543
+
+# HELP koreshield_attacks_detected_total Total attacks detected by type
+# TYPE koreshield_attacks_detected_total counter
+koreshield_attacks_detected_total{type="prompt_injection"} 892
+koreshield_attacks_detected_total{type="jailbreak"} 453
+koreshield_attacks_detected_total{type="prompt_leaking"} 287
+
+# HELP koreshield_provider_requests_total Provider requests by status
+# TYPE koreshield_provider_requests_total counter
+koreshield_provider_requests_total{provider="openai",status="success"} 8222
+koreshield_provider_requests_total{provider="openai",status="error"} 12
+koreshield_provider_requests_total{provider="anthropic",status="success"} 4306
+koreshield_provider_requests_total{provider="anthropic",status="error"} 3
+```
+
+---
+
+## Management API Endpoints
+
+### POST /api/admin/login
+
+Authenticate admin user and obtain JWT token.
+
+**Request**:
+
+```json
+{
+  "username": "admin",
+  "password": "secure-password"
+}
+```
+
+**Response**:
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "expires_in": 3600,
+  "user": {
+    "id": "user-123",
+    "username": "admin",
+    "role": "admin"
+  }
+}
+```
+
+---
+
+### GET /api/admin/stats
+
+Get comprehensive dashboard statistics.
+
+**Authorization**: JWT Token required
+
+**Request**:
+
+```bash
+GET /api/admin/stats
+Authorization: Bearer your-jwt-token
+```
+
+**Response**:
+
+```json
+{
+  "overview": {
+    "total_requests_today": 12543,
+    "blocked_today": 1832,
+    "block_rate": 0.146,
+    "active_users": 234,
+    "avg_latency_ms": 245
+  },
+  "timeseries": {
+    "requests_per_hour": [
+      {"hour": "2026-02-01T00:00:00Z", "requests": 423, "blocked": 62},
+      {"hour": "2026-02-01T01:00:00Z", "requests": 512, "blocked": 78}
+    ]
+  },
+  "top_attack_types": [
+    {"type": "prompt_injection", "count": 892, "percentage": 48.7},
+    {"type": "jailbreak", "count": 453, "percentage": 24.7}
+  ],
+  "provider_health": {
+    "openai": {"status": "healthy", "uptime": 0.998},
+    "anthropic": {"status": "healthy", "uptime": 0.999}
+  }
+}
+```
+
+---
+
+### GET /api/admin/attacks
+
+Get recent attack details with pagination.
+
+**Authorization**: JWT Token required
+
+**Request**:
+
+```bash
+GET /api/admin/attacks?limit=50&offset=0&type=prompt_injection
+Authorization: Bearer your-jwt-token
+```
+
+**Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| limit | integer | Number of results (default: 50, max: 100) |
+| offset | integer | Pagination offset |
+| type | string | Filter by attack type |
+| severity | string | Filter by severity (low, medium, high) |
+| from_date | string | ISO 8601 start date |
+| to_date | string | ISO 8601 end date |
+
+**Response**:
+
+```json
+{
+  "total": 1832,
+  "limit": 50,
+  "offset": 0,
+  "attacks": [
+    {
+      "id": "attack-123",
+      "timestamp": "2026-02-01T12:34:56Z",
+      "type": "prompt_injection",
+      "confidence": 0.95,
+      "severity": "high",
+      "indicators": ["ignore instructions", "reveal system prompt"],
+      "blocked": true,
+      "user_id": "user-456",
+      "ip_address": "192.168.1.1",
+      "request_preview": "Ignore all previous instructions and..."
+    }
+  ]
+}
+```
+
+---
+
+### GET /api/admin/config
+
+Get current configuration.
+
+**Authorization**: JWT Token (Admin role required)
+
+**Response**:
+
+```json
+{
+  "security": {
+    "sensitivity": "medium",
+    "default_action": "block",
+    "min_confidence": 0.75
+  },
+  "providers": {
+    "openai": {
+      "enabled": true,
+      "models": ["gpt-4", "gpt-3.5-turbo"]
+    }
+  },
+  "rate_limit": {
+    "enabled": true,
+    "requests_per_minute": 60
+  }
+}
+```
+
+---
+
+### PUT /api/admin/config
+
+Update configuration dynamically.
+
+**Authorization**: JWT Token (Admin role required)
+
+**Request**:
+
+```json
+{
+  "security": {
+    "sensitivity": "high",
+    "min_confidence": 0.65
+  },
+  "rate_limit": {
+    "requests_per_minute": 100
+  }
+}
+```
+
+**Response**:
+
+```json
+{
+  "success": true,
+  "message": "Configuration updated successfully",
+  "updated_fields": ["security.sensitivity", "security.min_confidence", "rate_limit.requests_per_minute"]
+}
+```
+
+---
+
+### GET /api/admin/health
+
+Get detailed health check for all providers.
+
+**Authorization**: JWT Token required
+
+**Response**:
+
+```json
+{
+  "providers": [
+    {
+      "name": "openai",
+      "status": "healthy",
+      "latency_ms": 234,
+      "last_check": "2026-02-01T12:00:00Z",
+      "error_rate": 0.001,
+      "requests_last_hour": 2341
+    },
+    {
+      "name": "anthropic",
+      "status": "degraded",
+      "latency_ms": 1234,
+      "last_check": "2026-02-01T12:00:00Z",
+      "error_rate": 0.05,
+      "requests_last_hour": 1432,
+      "issues": ["High latency detected"]
+    }
+  ]
+}
+```
+
+---
+
+## Error Codes Reference
+
+See [Error Codes Documentation](/docs/error-codes) for complete error code reference.
+
+### Common Error Codes
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| PROMPT_INJECTION | 403 | Prompt injection attack detected |
+| JAILBREAK_ATTEMPT | 403 | Jailbreak attempt detected |
+| PROMPT_LEAKING | 403 | System prompt leaking attempt |
+| DATA_EXFILTRATION | 403 | Data exfiltration attempt |
+| PII_LEAKING | 403 | Personal information leaking detected |
+| RATE_LIMIT_EXCEEDED | 429 | Too many requests |
+| INVALID_API_KEY | 401 | API key missing or invalid |
+| PROVIDER_ERROR | 502 | Upstream provider error |
+| INTERNAL_ERROR | 500 | Internal server error |
+
+---
+
+## Rate Limiting
+
+All endpoints are subject to rate limiting. Limit information is returned in response headers:
+
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1675267200
+```
+
+When rate limit is exceeded:
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded",
+    "type": "rate_limit_error",
+    "code": "RATE_LIMIT_EXCEEDED",
+    "details": {
+      "limit": 60,
+      "reset_at": "2026-02-01T12:01:00Z",
+      "retry_after": 42
+    }
+  }
+}
+```
+
+---
+
+## Streaming Responses
+
+Enable streaming for real-time token generation:
+
+**Request**:
+
+```json
+{
+  "model": "gpt-3.5-turbo",
+  "messages": [{"role": "user", "content": "Tell me a story"}],
+  "stream": true
+}
+```
+
+**Response** (Server-Sent Events):
+
+```
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"gpt-3.5-turbo-0613","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"gpt-3.5-turbo-0613","choices":[{"index":0,"delta":{"content":"Once"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"gpt-3.5-turbo-0613","choices":[{"index":0,"delta":{"content":" upon"},"finish_reason":null}]}
+
+data: [DONE]
+```
+
+---
+
+## Batch Requests
+
+Process multiple requests in a single API call:
+
+**Request**:
+
+```json
+{
+  "requests": [
+    {
+      "id": "req-1",
+      "model": "gpt-3.5-turbo",
+      "messages": [{"role": "user", "content": "Hello"}]
+    },
+    {
+      "id": "req-2",
+      "model": "gpt-3.5-turbo",
+      "messages": [{"role": "user", "content": "Hi"}]
+    }
+  ]
+}
+```
+
+**Response**:
+
+```json
+{
+  "responses": [
+    {
+      "id": "req-1",
+      "status": "success",
+      "result": {
+        "choices": [{"message": {"content": "Hello! How can I help you?"}}]
+      }
+    },
+    {
+      "id": "req-2",
+      "status": "blocked",
+      "error": {
+        "code": "PROMPT_INJECTION",
+        "message": "Security violation detected"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Webhook Notifications
+
+Configure webhooks to receive real-time alerts:
+
+```yaml
+# config.yaml
+alerting:
+  channels:
+    webhook:
+      enabled: true
+      url: https://your-endpoint.com/koreshield-alerts
+      headers:
+        Authorization: Bearer your-webhook-secret
+```
+
+**Webhook Payload**:
+
+```json
+{
+  "event": "attack_detected",
+  "timestamp": "2026-02-01T12:34:56Z",
+  "data": {
+    "attack_type": "prompt_injection",
+    "confidence": 0.95,
+    "blocked": true,
+    "user_id": "user-123",
+    "request_id": "req-456"
+  }
+}
+```
+
+---
+
+## Next Steps
+
+- [SDK Documentation - Python](/docs/sdk-python) - Python client library
+- [SDK Documentation - JavaScript](/docs/sdk-javascript) - JavaScript/TypeScript client
+- [Error Codes](/docs/error-codes) - Complete error reference
+- [Rate Limiting](/docs/rate-limiting) - Rate limit configuration
+
+## Code Examples
+
+See complete integration examples:
+
+- [Python Examples](/docs/examples/python)
+- [JavaScript Examples](/docs/examples/javascript)
+- [cURL Examples](/docs/examples/curl)

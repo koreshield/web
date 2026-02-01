@@ -1,0 +1,782 @@
+---
+title: Policy Engine
+description: Configure access control, RBAC, sensitivity levels, and automated response policies
+published: true
+featured: true
+---
+
+# Policy Engine
+
+KoreShield's Policy Engine provides fine-grained control over how threats are detected and handled, with support for role-based access control (RBAC), sensitivity levels, and automated response actions.
+
+## Overview
+
+The Policy Engine allows you to:
+
+- Define **who** can access what (RBAC)
+- Configure **what** threats to detect (sensitivity levels)
+- Control **how** to respond to threats (actions)
+- Customize rules **per tenant** (multi-tenancy)
+- Audit **all** policy changes (compliance)
+
+---
+
+## Role-Based Access Control (RBAC)
+
+### Built-in Roles
+
+KoreShield comes with 5 predefined roles:
+
+#### Super Admin
+```yaml
+role: super_admin
+permissions:
+  - all:*  # Full system access
+description: Complete control over all system resources
+```
+
+**Capabilities:**
+- Manage all tenants
+- Configure global settings
+- Create/delete users
+- Access all data
+- Modify system policies
+
+#### Admin
+```yaml
+role: admin
+permissions:
+  - tenant:read
+  - tenant:write
+  - users:read
+  - users:write
+  - policies:read
+  - policies:write
+  - config:read
+  - config:write
+description: Tenant administrator with full tenant control
+```
+
+**Capabilities:**
+- Manage tenant settings
+- Create/delete tenant users
+- Configure policies
+- View analytics
+- Cannot access other tenants
+
+#### Developer
+```yaml
+role: developer
+permissions:
+  - api:read
+  - api:write
+  - logs:read
+  - metrics:read
+  - policies:read
+description: Developer with API access and read-only policy view
+```
+
+**Capabilities:**
+- Make API calls
+- View logs and metrics
+- Read policy configurations
+- Test detection
+- Cannot modify policies
+
+#### Security Analyst
+```yaml
+role: security_analyst
+permissions:
+  - logs:read
+  - metrics:read
+  - attacks:read
+  - policies:read
+  - reports:generate
+description: Security monitoring and analysis
+```
+
+**Capabilities:**
+- View all security logs
+- Generate reports
+- Analyze attack patterns
+- Read policies
+- Cannot modify settings
+
+#### Viewer
+```yaml
+role: viewer
+permissions:
+  - dashboard:read
+  - metrics:read
+description: Read-only access to dashboards
+```
+
+**Capabilities:**
+- View dashboards
+- See metrics
+- Cannot access logs or make changes
+
+### Custom Roles
+
+Create custom roles for your organization:
+
+```yaml
+custom_roles:
+  - name: "compliance_officer"
+    description: "Compliance and audit access"
+    permissions:
+      - logs:read
+      - audit:read
+      - reports:generate
+      - policies:read
+      - compliance:read
+    
+  - name: "api_readonly"
+    description: "Read-only API access for monitoring tools"
+    permissions:
+      - api:read
+      - metrics:read
+    
+  - name: "incident_responder"
+    description: "Emergency response team"
+    permissions:
+      - logs:read
+      - attacks:read
+      - policies:write  # Can adjust policies during incident
+      - alerts:write
+```
+
+### Assigning Roles
+
+#### Via API
+```python
+from koreshield_sdk import KoreShieldClient
+
+client = KoreShieldClient(api_key="your-api-key")
+
+# Create user with role
+client.create_user(
+    email="analyst@company.com",
+    name="Security Analyst",
+    role="security_analyst",
+    tenant_id="tenant_123"
+)
+
+# Update user role
+client.update_user_role(
+    user_id="user_456",
+    role="admin"
+)
+```
+
+#### Via Configuration
+```yaml
+users:
+  - email: admin@company.com
+    role: admin
+    tenant_id: tenant_main
+    
+  - email: dev@company.com
+    role: developer
+    tenant_id: tenant_main
+    
+  - email: security@company.com
+    role: security_analyst
+    tenant_id: tenant_main
+```
+
+### Permission Format
+
+Permissions follow the format: `resource:action`
+
+**Resources:**
+- `tenant` - Tenant management
+- `users` - User management
+- `policies` - Policy configuration
+- `api` - API access
+- `logs` - Log access
+- `metrics` - Metrics access
+- `attacks` - Attack data
+- `config` - System configuration
+- `reports` - Report generation
+- `audit` - Audit logs
+- `alerts` - Alert configuration
+
+**Actions:**
+- `read` - View resource
+- `write` - Create/update resource
+- `delete` - Delete resource
+- `*` - All actions on resource
+
+---
+
+## Sensitivity Levels
+
+Configure detection sensitivity per use case:
+
+### Global Sensitivity
+
+```yaml
+detection:
+  default_sensitivity: medium
+```
+
+### Per-Tenant Sensitivity
+
+```yaml
+tenants:
+  - id: tenant_healthcare
+    name: "Healthcare Corp"
+    sensitivity: high  # HIPAA compliance
+    
+  - id: tenant_marketing
+    name: "Marketing Agency"
+    sensitivity: low   # Creative freedom
+    
+  - id: tenant_finance
+    name: "Financial Services"
+    sensitivity: high  # PCI-DSS compliance
+```
+
+### Per-Endpoint Sensitivity
+
+```yaml
+endpoints:
+  /v1/chat/completions:
+    sensitivity: medium
+    
+  /v1/admin/commands:
+    sensitivity: high  # Admin endpoints need strict security
+    
+  /v1/public/suggestions:
+    sensitivity: low   # Public autocomplete
+```
+
+### Dynamic Sensitivity
+
+Adjust sensitivity based on context:
+
+```python
+# High-value transaction = high sensitivity
+client.scan(
+    input=user_input,
+    sensitivity="high" if transaction_value > 10000 else "medium"
+)
+
+# Time-based sensitivity
+from datetime import datetime
+
+is_business_hours = 9 <= datetime.now().hour <= 17
+client.scan(
+    input=user_input,
+    sensitivity="medium" if is_business_hours else "high"
+)
+```
+
+---
+
+## Actions & Response Policies
+
+Define what happens when threats are detected:
+
+### Action Types
+
+#### Block
+```yaml
+action: block
+```
+- Request is rejected immediately
+- Error response returned to client
+- Attack logged for analysis
+- User sees "Request blocked for security reasons"
+
+#### Warn
+```yaml
+action: warn
+```
+- Request is allowed to proceed
+- Warning logged for review
+- Can trigger alert for security team
+- Useful for monitoring new patterns
+
+#### Challenge
+```yaml
+action: challenge
+```
+- Request additional verification (CAPTCHA, MFA)
+- Proceed if verification passes
+- Block if verification fails
+- Good for suspicious but not clearly malicious
+
+#### Sanitize
+```yaml
+action: sanitize
+```
+- Attempt to clean/neutralize threat
+- Proceed with sanitized input
+- Log original and sanitized versions
+- Use cautiously - may affect functionality
+
+#### Rate Limit
+```yaml
+action: rate_limit
+```
+- Apply aggressive rate limiting
+- Slow down suspected attacker
+- Allow legitimate users to continue
+- Automatic recovery after cooling period
+
+### Policy Configuration
+
+```yaml
+policies:
+  # Critical severity = immediate block
+  - name: "Block Critical Threats"
+    condition: "severity == 'critical'"
+    action: block
+    notification: slack
+    
+  # High severity = block and alert
+  - name: "Block High Severity"
+    condition: "severity == 'high' AND confidence > 0.85"
+    action: block
+    notification: email
+    escalate: true
+    
+  # Medium severity = warn and monitor
+  - name: "Warn Medium Severity"
+    condition: "severity == 'medium'"
+    action: warn
+    notification: none
+    
+  # Low confidence = allow with logging
+  - name: "Allow Low Confidence"
+    condition: "confidence < 0.60"
+    action: allow
+    log: true
+    
+  # Specific attack types
+  - name: "Block SQL Injection"
+    condition: "attack_type == 'sql_injection'"
+    action: block
+    notification: slack
+    priority: high
+    
+  # Rate limit suspicious users
+  - name: "Rate Limit Repeat Offenders"
+    condition: "user_attack_count_24h > 5"
+    action: rate_limit
+    duration: 3600  # 1 hour
+```
+
+### Conditional Logic
+
+Use advanced conditions:
+
+```yaml
+policies:
+  # Complex AND condition
+  - name: "Block High-Risk Combinations"
+    condition: >
+      (attack_type IN ['prompt_injection', 'jailbreak']) AND
+      (confidence > 0.80) AND
+      (sensitivity == 'high') AND
+      (tenant_tier == 'enterprise')
+    action: block
+    
+  # OR conditions
+  - name: "Flag Any PII Attempt"
+    condition: >
+      attack_type == 'pii_extraction' OR
+      input_contains('social security number') OR
+      input_contains('credit card')
+    action: block
+    
+  # Time-based policies
+  - name: "After Hours Strict Mode"
+    condition: >
+      hour >= 18 OR hour <= 6
+    sensitivity: high
+    action: block
+    
+  # Geographic policies
+  - name: "Block High-Risk Countries"
+    condition: >
+      country_code IN ['XX', 'YY', 'ZZ']
+    action: block
+```
+
+---
+
+## Multi-Tenant Policies
+
+### Tenant Isolation
+
+Each tenant has isolated policies:
+
+```yaml
+tenants:
+  - id: tenant_a
+    name: "Company A"
+    policies:
+      - name: "Company A Strict Mode"
+        condition: "confidence > 0.70"
+        action: block
+    sensitivity: high
+    
+  - id: tenant_b
+    name: "Company B"
+    policies:
+      - name: "Company B Balanced"
+        condition: "confidence > 0.85"
+        action: block
+    sensitivity: medium
+```
+
+### Inheritance
+
+Tenants can inherit global policies:
+
+```yaml
+global_policies:
+  - name: "Block SQL Injection"
+    condition: "attack_type == 'sql_injection'"
+    action: block
+    inherit: true  # All tenants get this policy
+
+tenants:
+  - id: tenant_override
+    policies:
+      # This overrides the global SQL injection policy for this tenant
+      - name: "Block SQL Injection"
+        condition: "attack_type == 'sql_injection' AND confidence > 0.95"
+        action: warn
+        override: true
+```
+
+### Per-User Policies
+
+Fine-grained control per user:
+
+```yaml
+user_policies:
+  - user_id: admin_user_123
+    policies:
+      - name: "Admin User - Relaxed"
+        condition: "true"
+        sensitivity: low
+        action: warn
+        
+  - user_id: external_api_user_456
+    policies:
+      - name: "External API - Strict"
+        condition: "true"
+        sensitivity: high
+        action: block
+        rate_limit:
+          requests_per_minute: 10
+```
+
+---
+
+## Policy Testing
+
+### Dry Run Mode
+
+Test policies without enforcement:
+
+```yaml
+detection:
+  dry_run_mode: true
+  dry_run_log_file: "/var/log/koreshield/dry-run.log"
+```
+
+All requests are allowed, but actions are logged:
+
+```log
+2026-02-01 10:15:23 [DRY RUN] Would block: SQL injection detected (confidence: 0.97)
+2026-02-01 10:16:45 [DRY RUN] Would warn: Medium severity prompt injection (confidence: 0.73)
+```
+
+### Policy Simulation
+
+Test specific policies:
+
+```python
+# Simulate policy application
+result = client.simulate_policy(
+    input="Ignore previous instructions",
+    policy_id="policy_strict_mode"
+)
+
+print(f"Action: {result['action']}")  # block
+print(f"Reason: {result['reason']}")  # Prompt injection detected
+print(f"Confidence: {result['confidence']}")  # 0.97
+```
+
+### A/B Testing Policies
+
+Compare policy effectiveness:
+
+```yaml
+ab_tests:
+  - name: "Strict vs Balanced"
+    policies:
+      - id: policy_strict
+        weight: 50  # 50% of traffic
+      - id: policy_balanced
+        weight: 50  # 50% of traffic
+    metrics:
+      - false_positive_rate
+      - false_negative_rate
+      - user_satisfaction
+    duration_days: 7
+```
+
+---
+
+## Audit Logging
+
+### Compliance Logging
+
+All policy changes are logged:
+
+```json
+{
+  "timestamp": "2026-02-01T10:30:00Z",
+  "event": "policy_updated",
+  "user_id": "user_admin_123",
+  "user_email": "admin@company.com",
+  "tenant_id": "tenant_main",
+  "policy_id": "policy_strict_mode",
+  "changes": {
+    "sensitivity": {"from": "medium", "to": "high"},
+    "action": {"from": "warn", "to": "block"}
+  },
+  "reason": "Increased attacks detected",
+  "ip_address": "192.168.1.100"
+}
+```
+
+### Access Logs
+
+Track all policy access:
+
+```json
+{
+  "timestamp": "2026-02-01T10:35:00Z",
+  "event": "policy_accessed",
+  "user_id": "user_viewer_456",
+  "user_email": "analyst@company.com",
+  "resource": "policy_strict_mode",
+  "action": "read",
+  "allowed": true
+}
+```
+
+### Audit Reports
+
+Generate compliance reports:
+
+```python
+# Generate audit report
+report = client.generate_audit_report(
+    start_date="2026-01-01",
+    end_date="2026-01-31",
+    report_type="policy_changes"
+)
+
+# Export as PDF for compliance
+report.export_pdf("january_audit_report.pdf")
+```
+
+---
+
+## Advanced Configuration
+
+### Policy Versioning
+
+Track policy versions:
+
+```yaml
+policies:
+  - id: policy_main
+    name: "Main Security Policy"
+    version: "2.1.0"
+    changelog:
+      - version: "2.1.0"
+        date: "2026-02-01"
+        changes: "Increased SQL injection threshold"
+      - version: "2.0.0"
+        date: "2026-01-15"
+        changes: "Added PII extraction detection"
+```
+
+### Policy Rollback
+
+Revert to previous version:
+
+```python
+# Rollback policy to previous version
+client.rollback_policy(
+    policy_id="policy_main",
+    version="2.0.0",
+    reason="Too many false positives in 2.1.0"
+)
+```
+
+### Scheduled Policies
+
+Policies that activate at specific times:
+
+```yaml
+scheduled_policies:
+  - name: "Business Hours - Relaxed"
+    schedule: "Mon-Fri 09:00-17:00 America/New_York"
+    sensitivity: medium
+    active: true
+    
+  - name: "After Hours - Strict"
+    schedule: "Mon-Fri 17:00-09:00 America/New_York, Sat-Sun all-day"
+    sensitivity: high
+    active: true
+```
+
+### Emergency Override
+
+Quick override for incidents:
+
+```python
+# Emergency: block all requests temporarily
+client.activate_emergency_mode(
+    duration_minutes=30,
+    reason="Active attack in progress",
+    action="block_all"
+)
+
+# Deactivate emergency mode
+client.deactivate_emergency_mode()
+```
+
+---
+
+## Best Practices
+
+### Start with Defaults
+
+Begin with built-in roles and policies, then customize as needed.
+
+### Principle of Least Privilege
+
+Give users minimum required permissions:
+
+```yaml
+# Bad: Too permissive
+role: admin
+
+# Good: Specific permissions
+role: developer
+permissions:
+  - api:read
+  - api:write
+  - logs:read
+```
+
+### Regular Policy Reviews
+
+Review policies quarterly:
+- Remove unused policies
+- Update sensitivity levels
+- Review false positives
+- Adjust thresholds
+
+### Document Policy Changes
+
+Always document why policies were changed:
+
+```yaml
+policies:
+  - name: "Block SQL Injection"
+    action: block
+    updated: "2026-02-01"
+    reason: "Spike in SQL injection attempts detected"
+    updated_by: "security_team@company.com"
+```
+
+### Test Before Production
+
+Always test policy changes in staging:
+
+```bash
+# Test in staging environment
+KORESHIELD_ENV=staging npm run test:policies
+
+# Deploy to production after validation
+KORESHIELD_ENV=production npm run deploy:policies
+```
+
+### Monitor Policy Effectiveness
+
+Track metrics:
+- False positive rate (target: &lt;1%)
+- False negative rate (target: &lt;0.5%)
+- Detection latency (target: &lt;50ms)
+- User impact (blocked vs allowed)
+
+---
+
+## API Reference
+
+### Create Policy
+
+```bash
+curl -X POST https://api.koreshield.com/v1/policies \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Custom Policy",
+    "condition": "confidence > 0.80",
+    "action": "block",
+    "sensitivity": "high",
+    "tenant_id": "tenant_123"
+  }'
+```
+
+### Update Policy
+
+```bash
+curl -X PUT https://api.koreshield.com/v1/policies/policy_123 \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "warn",
+    "reason": "Reducing false positives"
+  }'
+```
+
+### List Policies
+
+```bash
+curl -X GET https://api.koreshield.com/v1/policies \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+---
+
+## Related Documentation
+
+- [Attack Detection](/docs/attack-detection) - Configure detection patterns
+- [Multi-Tenancy](/docs/multi-tenancy) - Tenant isolation and management
+- [Monitoring & Alerting](/docs/monitoring-alerting) - Set up alerts
+- [RBAC Reference](/docs/rbac-reference) - Complete permission reference
+
+---
+
+## Support
+
+Need help with policies?
+
+- **Discord**: [discord.gg/koreshield](https://discord.gg/koreshield)
+- **GitHub**: [github.com/koreshield/koreshield/issues](https://github.com/koreshield/koreshield/issues)
+- **Email**: support@koreshield.com
+- **Documentation**: [docs.koreshield.com](https://docs.koreshield.com)

@@ -1,6 +1,11 @@
 {
   "title": "Platform Features",
   "pages": [
+    "attack-detection",
+    "policy-engine",
+    "multi-tenancy",
+    "monitoring-alerting",
+    "custom-rules",
     "custom-domains",
     "teams",
     "observability",
