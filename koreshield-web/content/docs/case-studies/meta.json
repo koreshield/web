@@ -1,8 +1,14 @@
 {
   "title": "Case Studies",
   "pages": [
+    "rag-protection",
     "financial-services",
     "healthcare",
-    "rag-protection"
+    "legal-tech",
+    "saas",
+    "ecommerce",
+    "code-generation",
+    "customer-service",
+    "ai-agents"
   ]
 }

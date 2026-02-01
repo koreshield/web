@@ -39,6 +39,13 @@ const searchIndex: SearchItem[] = [
   { title: 'RAG Security', path: '/docs/advanced/rag-security', content: 'RAG protection', category: 'Advanced', tags: ['rag', 'security'] },
   { title: 'Performance', path: '/docs/advanced/performance', content: 'Optimization', category: 'Advanced', tags: ['performance'] },
   { title: 'Troubleshooting', path: '/docs/advanced/troubleshooting', content: 'Debug FAQ', category: 'Advanced', tags: ['troubleshooting'] },
+  { title: 'Compliance', path: '/docs/advanced/compliance', content: 'SOC2 HIPAA GDPR', category: 'Advanced', tags: ['compliance', 'soc2', 'hipaa'] },
+  { title: 'Financial Services', path: '/docs/case-studies/financial-services', content: 'Finance banking security', category: 'Case Studies', tags: ['finance'] },
+  { title: 'Healthcare', path: '/docs/case-studies/healthcare', content: 'Medical PHI HIPAA', category: 'Case Studies', tags: ['healthcare'] },
+  { title: 'SaaS Multi-Tenancy', path: '/docs/case-studies/saas', content: 'SaaS security architecture', category: 'Case Studies', tags: ['saas'] },
+  { title: 'E-commerce', path: '/docs/case-studies/ecommerce', content: 'Shopping assistant protection', category: 'Case Studies', tags: ['ecommerce'] },
+  { title: 'RAG Protection', path: '/docs/case-studies/rag-protection', content: 'RAG specific attacks', category: 'Case Studies', tags: ['rag'] },
+  { title: 'Code Generation', path: '/docs/case-studies/code-generation', content: 'Code assistant security', category: 'Case Studies', tags: ['code'] },
 ];
 
 export function SearchPalette() {

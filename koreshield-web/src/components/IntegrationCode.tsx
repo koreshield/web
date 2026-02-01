@@ -1,6 +1,10 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Copy, Check } from 'lucide-react';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-tomorrow.css';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-javascript';
 
 const codeExamples = {
     python: `import koreshield
@@ -22,6 +26,10 @@ const result = await client.chat.completions.create({
 function IntegrationCode() {
     const [activeTab, setActiveTab] = useState<'python' | 'javascript'>('python');
     const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        Prism.highlightAll();
+    }, [activeTab]);
 
     const handleCopy = () => {
         navigator.clipboard.writeText(codeExamples[activeTab]);
@@ -52,44 +60,48 @@ function IntegrationCode() {
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
                     viewport={{ once: true }}
-                    className="code-block"
+                    className="code-block rounded-xl overflow-hidden border border-gray-800 bg-[#1a1a1a] shadow-2xl"
                 >
-                    <div className="flex items-center justify-between">
-                        <div className="code-tabs flex-1">
+                    <div className="flex items-center justify-between px-4 py-2 bg-[#252525] border-b border-gray-800">
+                        <div className="code-tabs flex gap-2">
                             <button
-                                className={`code-tab ${activeTab === 'python' ? 'active' : ''}`}
+                                className={`px-4 py-1.5 rounded-t-lg text-sm font-medium transition-colors relative top-[1px] ${activeTab === 'python' ? 'text-electric-green border-b-2 border-electric-green' : 'text-gray-400 hover:text-white'}`}
                                 onClick={() => setActiveTab('python')}
                             >
-                                python
+                                Python
                             </button>
                             <button
-                                className={`code-tab ${activeTab === 'javascript' ? 'active' : ''}`}
+                                className={`px-4 py-1.5 rounded-t-lg text-sm font-medium transition-colors relative top-[1px] ${activeTab === 'javascript' ? 'text-electric-green border-b-2 border-electric-green' : 'text-gray-400 hover:text-white'}`}
                                 onClick={() => setActiveTab('javascript')}
                             >
-                                javascript
+                                JavaScript
                             </button>
                         </div>
                         <button
                             onClick={handleCopy}
-                            className="px-4 py-2 text-gray-400 hover:text-electric-green transition-colors flex items-center gap-2"
+                            className="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
                         >
                             {copied ? (
                                 <>
-                                    <Check className="w-4 h-4" />
-                                    <span className="text-sm">copied!</span>
+                                    <Check className="w-4 h-4 text-electric-green" />
+                                    <span className="text-xs">Copied</span>
                                 </>
                             ) : (
                                 <>
                                     <Copy className="w-4 h-4" />
-                                    <span className="text-sm">copy</span>
+                                    <span className="text-xs">Copy</span>
                                 </>
                             )}
                         </button>
                     </div>
 
-                    <pre className="bg-[#1a1a1a]">
-                        <code>{codeExamples[activeTab]}</code>
-                    </pre>
+                    <div className="p-6 overflow-x-auto">
+                        <pre className="!bg-transparent !m-0 !p-0 font-mono text-sm leading-relaxed">
+                            <code className={`language-${activeTab}`}>
+                                {codeExamples[activeTab]}
+                            </code>
+                        </pre>
+                    </div>
                 </motion.div>
             </div>
         </section>

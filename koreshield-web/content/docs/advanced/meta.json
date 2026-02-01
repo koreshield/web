@@ -3,6 +3,7 @@
   "pages": [
     "rag-security",
     "performance",
+    "compliance",
     "troubleshooting"
   ]
 }
