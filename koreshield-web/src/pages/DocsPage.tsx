@@ -6,6 +6,7 @@ import { Cards, Card } from '../components/mdx/Cards';
 import { Pre } from '../components/mdx/CodeBlock';
 import { Callout } from '../components/mdx/Callout';
 import { Accordion, AccordionGroup } from '../components/mdx/Accordion';
+import { Table } from '../components/mdx/Table';
 
 // Types
 interface MDXModule {
@@ -259,7 +260,7 @@ function DocsPage() {
                             <h1 className="text-4xl font-bold mb-4">{meta.title}</h1>
                             {meta.description && <p className="text-xl text-gray-400 mb-12 pb-8 border-b border-slate-800 leading-relaxed">{meta.description}</p>}
 
-                            <MDXProvider components={{ Cards, Card, pre: Pre, Callout, Accordion, AccordionGroup }}>
+                            <MDXProvider components={{ Cards, Card, pre: Pre, Callout, Accordion, AccordionGroup, table: Table }}>
                                 <Content />
                             </MDXProvider>
                         </div>

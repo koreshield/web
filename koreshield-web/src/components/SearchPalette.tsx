@@ -48,11 +48,16 @@ const searchIndex: SearchItem[] = [
   { title: 'Code Generation', path: '/docs/case-studies/code-generation', content: 'Code assistant security', category: 'Case Studies', tags: ['code'] },
 ];
 
-export function SearchPalette() {
+interface SearchPaletteProps {
+  mobile?: boolean;
+}
+
+export function SearchPalette({ mobile }: SearchPaletteProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
+  // ... (fuse and results logic remains same)
   const fuse = useMemo(
     () =>
       new Fuse(searchIndex, {
@@ -101,16 +106,26 @@ export function SearchPalette() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/50 hover:bg-muted border border-border rounded-md text-sm text-muted-foreground transition-all group"
-      >
-        <Search className="w-4 h-4 group-hover:text-primary transition-colors" />
-        <span>Search docs...</span>
-        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-          <span className="text-xs">⌘</span>K
-        </kbd>
-      </button>
+      {mobile ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="flex md:hidden items-center justify-center p-2 text-gray-400 hover:text-white transition-colors"
+          aria-label="Search"
+        >
+          <Search className="w-5 h-5" />
+        </button>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/50 hover:bg-muted border border-border rounded-md text-sm text-muted-foreground transition-all group"
+        >
+          <Search className="w-4 h-4 group-hover:text-primary transition-colors" />
+          <span>Search docs...</span>
+          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <span className="text-xs">⌘</span>K
+          </kbd>
+        </button>
+      )}
 
       {open && (
         <div
