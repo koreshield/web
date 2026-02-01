@@ -6,9 +6,12 @@ import UseCases from '../components/UseCases';
 import { ThreatDashboard } from '../components/ThreatDashboard';
 import { InteractiveDemo } from '../components/InteractiveDemo';
 
+import { SEOMeta } from '../components/SEOMeta';
+
 function LandingPage() {
     return (
         <div className="bg-background text-foreground">
+            <SEOMeta />
             <Hero />
 
             <section className="py-20 px-6">
