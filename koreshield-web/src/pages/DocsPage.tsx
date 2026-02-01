@@ -1,12 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { MDXProvider } from '@mdx-js/react';
-import { Menu, X, ArrowLeft, ArrowRight, ChevronRight } from 'lucide-react';
+import { Menu, X, ArrowLeft, ArrowRight, ChevronRight, Loader2 } from 'lucide-react';
 import { Cards, Card } from '../components/mdx/Cards';
 import { Pre } from '../components/mdx/CodeBlock';
 import { Callout } from '../components/mdx/Callout';
 import { Accordion, AccordionGroup } from '../components/mdx/Accordion';
 import { Table } from '../components/mdx/Table';
+
 
 // Types
 interface MDXModule {
@@ -16,6 +17,7 @@ interface MDXModule {
 
 interface Meta {
     pages: string[];
+    title?: string;
 }
 
 // Function to normalize slugs
@@ -26,15 +28,16 @@ const normalizeSlug = (path: string) => {
         ?.replace('.mdx', '') || '';
 };
 
-// Load all MDX files
-const modules = import.meta.glob('/content/docs/**/*.mdx', { eager: true });
+// Lazy load MDX files
+// We need eager loading for meta.json to build navigation, but lazy for .mdx content
+const mdxModules = import.meta.glob('/content/docs/**/*.mdx');
 const metaFiles = import.meta.glob('/content/docs/**/meta.json', { eager: true });
 
-// Build slug map
-const slugMap: Record<string, MDXModule> = {};
-Object.entries(modules).forEach(([path, mod]) => {
+// Build slug map for lazy loaders
+const slugToPathMap: Record<string, string> = {};
+Object.keys(mdxModules).forEach((path) => {
     const slug = normalizeSlug(path);
-    slugMap[slug] = mod as MDXModule;
+    slugToPathMap[slug] = path;
 });
 
 // Build Sidebar Navigation
@@ -54,20 +57,15 @@ function buildNavigation() {
         if (page.startsWith('---')) {
             nav.push({ type: 'header', title: page.replace(/---/g, '') });
         } else if (page.startsWith('...')) {
-            const groupName = page.replace('...', '').replace(/[()]/g, ''); // Fix: remove parens
+            const groupName = page.replace('...', '').replace(/[()]/g, '');
             const groupMetaPath = `/content/docs/${groupName}/meta.json`;
             const groupMeta = metaFiles[groupMetaPath] as Meta;
 
             if (groupMeta && groupMeta.pages) {
-                // Determine group title from meta.json title or fallback to folder name
                 // @ts-ignore
                 const groupTitle = groupMeta.title || formatTitle(groupName);
 
-                // Add group header if not strictly "features" etc. to avoid dupes if header exists
-                // But typically ...group follows a header.
-
                 groupMeta.pages.forEach((subPage: string) => {
-                    // Check if subPage is a header inside the group (nested headers)
                     if (subPage.startsWith('---')) {
                         nav.push({ type: 'header', title: subPage.replace(/---/g, '') });
                     } else {
@@ -98,35 +96,39 @@ function TableOfContents() {
     const [activeId, setActiveId] = useState<string>('');
 
     useEffect(() => {
-        const elements = Array.from(document.querySelectorAll('h2, h3'));
+        // Wait for MDX content to render
+        const timer = setTimeout(() => {
+            const elements = Array.from(document.querySelectorAll('h2, h3'));
 
-        // Add IDs if missing
-        const extracted = elements.map((elem, index) => {
-            if (!elem.id) {
-                elem.id = `heading-${index}`;
-            }
-            return {
-                id: elem.id,
-                text: elem.textContent || '',
-                level: Number(elem.tagName.substring(1))
-            };
-        });
-        setHeadings(extracted);
+            const extracted = elements.map((elem, index) => {
+                if (!elem.id) {
+                    elem.id = `heading-${index}`;
+                }
+                return {
+                    id: elem.id,
+                    text: elem.textContent || '',
+                    level: Number(elem.tagName.substring(1))
+                };
+            });
+            setHeadings(extracted);
 
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        setActiveId(entry.target.id);
-                    }
-                });
-            },
-            { rootMargin: '-20% 0px -35% 0px' }
-        );
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            setActiveId(entry.target.id);
+                        }
+                    });
+                },
+                { rootMargin: '-20% 0px -35% 0px' }
+            );
 
-        elements.forEach((elem) => observer.observe(elem));
-        return () => observer.disconnect();
-    }, [window.location.pathname]); // Re-run on route change
+            elements.forEach((elem) => observer.observe(elem));
+            return () => observer.disconnect();
+        }, 500); // Small delay to ensure content is mounted
+
+        return () => clearTimeout(timer);
+    }, [window.location.pathname]);
 
     if (headings.length === 0) return null;
 
@@ -161,19 +163,48 @@ function DocsPage() {
     const { pathname } = useLocation();
 
     const currentSlug = slug || 'index';
-    const Content = slugMap[currentSlug]?.default;
-    const meta = slugMap[currentSlug]?.frontmatter || {};
+
+    // Lazy content loading
+    const ContentComponent = useMemo(() => {
+        const path = slugToPathMap[currentSlug];
+        if (!path || !mdxModules[path]) return null;
+        return lazy(() => mdxModules[path]() as Promise<{ default: React.ComponentType }>);
+    }, [currentSlug]);
+
+    // Metadata loading (hacky but works without async component for now)
+    // In a real app we'd probably fetch this or have it in a map
+    const [meta, setMeta] = useState<{ title: string; description?: string }>({ title: formatTitle(currentSlug) });
+
+    useEffect(() => {
+        const loadMeta = async () => {
+            const path = slugToPathMap[currentSlug];
+            if (path && mdxModules[path]) {
+                try {
+                    const mod = await mdxModules[path]() as MDXModule;
+                    if (mod.frontmatter) {
+                        setMeta({
+                            title: mod.frontmatter.title || formatTitle(currentSlug),
+                            description: mod.frontmatter.description
+                        });
+                    } else {
+                        setMeta({ title: formatTitle(currentSlug) });
+                    }
+                } catch (e) {
+                    console.error("Failed to load frontmatter", e);
+                }
+            }
+        };
+        loadMeta();
+    }, [currentSlug]);
+
 
     const navigation = useMemo(() => buildNavigation(), []);
-
     const currentIndex = navigation.findIndex(item => item.slug === currentSlug);
     const currentItem = navigation[currentIndex];
 
     // Calculate Prev/Next
-    // Filter only links for indexing
     const linkItems = navigation.filter(item => item.type === 'link');
     const linkIndex = linkItems.findIndex(item => item.slug === currentSlug);
-
     const prevItem = linkIndex > 0 ? linkItems[linkIndex - 1] : null;
     const nextItem = linkIndex < linkItems.length - 1 ? linkItems[linkIndex + 1] : null;
 
@@ -181,7 +212,7 @@ function DocsPage() {
         window.scrollTo(0, 0);
     }, [pathname]);
 
-    if (!Content) {
+    if (!ContentComponent) {
         return (
             <div className="min-h-screen bg-black text-white p-20 text-center">
                 <h1 className="text-4xl mb-4">404 - Doc Not Found</h1>
@@ -253,16 +284,18 @@ function DocsPage() {
                                 </>
                             )}
                             <ChevronRight className="w-3.5 h-3.5" />
-                            <span className="text-gray-300 font-medium truncate">{meta.title || formatTitle(currentSlug)}</span>
+                            <span className="text-gray-300 font-medium truncate">{meta.title}</span>
                         </div>
 
-                        <div className="prose prose-invert prose-emerald max-w-none">
+                        <div className="prose prose-invert prose-emerald max-w-none min-h-[50vh]">
                             <h1 className="text-4xl font-bold mb-4">{meta.title}</h1>
                             {meta.description && <p className="text-xl text-gray-400 mb-12 pb-8 border-b border-slate-800 leading-relaxed">{meta.description}</p>}
 
-                            <MDXProvider components={{ Cards, Card, pre: Pre, Callout, Accordion, AccordionGroup, table: Table }}>
-                                <Content />
-                            </MDXProvider>
+                            <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-electric-green" /></div>}>
+                                <MDXProvider components={{ Cards, Card, pre: Pre, Callout, Accordion, AccordionGroup, table: Table }}>
+                                    <ContentComponent />
+                                </MDXProvider>
+                            </Suspense>
                         </div>
 
                         {/* Prev/Next Navigation */}
