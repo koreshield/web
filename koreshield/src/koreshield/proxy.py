@@ -165,7 +165,6 @@ class KoreShieldProxy:
         self.health_monitor = HealthMonitor(
             providers=self.providers,
             check_interval=30.0,  # Check every 30 seconds
-            redis_client=self.redis_client
         )
 
         # Start health monitoring

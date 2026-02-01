@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Activity, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  Activity,
+  CheckCircle,
+  AlertCircle,
   XCircle,
   Clock,
   TrendingUp,
@@ -14,6 +14,7 @@ import {
   Bell
 } from 'lucide-react';
 import { SEOMeta } from '../components/SEOMeta';
+import { api } from '../lib/api-client';
 
 // Types
 type ComponentStatus = 'operational' | 'degraded' | 'partial_outage' | 'major_outage' | 'maintenance';
@@ -273,15 +274,34 @@ export default function StatusPage() {
   const averageUptime = getAverageUptime();
 
   // Simulate real-time updates (in production, use WebSocket or polling)
+  // Fetch real health status
   useEffect(() => {
-    const interval = setInterval(() => {
-      setComponents(prev => prev.map(c => ({
-        ...c,
-        lastChecked: new Date(),
-        responseTime: c.responseTime ? c.responseTime + Math.floor(Math.random() * 10 - 5) : undefined,
-      })));
-    }, 30000); // Update every 30 seconds
+    const fetchHealth = async () => {
+      try {
+        const health = await api.getHealth();
 
+        setComponents(prev => prev.map(c => {
+          let newStatus = c.status;
+
+          // Map API health status to component status
+          if (c.id === 'database' && health.services.database !== 'up') newStatus = 'major_outage';
+          if (c.id === 'redis' && health.services.redis !== 'up') newStatus = 'partial_outage';
+          if (c.id === 'openai' && health.services.openai_api !== 'up') newStatus = 'degraded';
+          if (c.id === 'anthropic' && health.services.anthropic_api !== 'up') newStatus = 'degraded';
+
+          return {
+            ...c,
+            status: newStatus,
+            lastChecked: new Date(health.timestamp)
+          };
+        }));
+      } catch (error) {
+        console.error('Failed to fetch health status:', error);
+      }
+    };
+
+    fetchHealth();
+    const interval = setInterval(fetchHealth, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -320,26 +340,24 @@ export default function StatusPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className={`rounded-xl p-8 mb-12 ${
-            overallStatus === 'operational'
-              ? 'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900'
-              : overallStatus === 'maintenance'
+          className={`rounded-xl p-8 mb-12 ${overallStatus === 'operational'
+            ? 'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900'
+            : overallStatus === 'maintenance'
               ? 'bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900'
               : 'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900'
-          }`}
+            }`}
         >
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
-              <div className={`w-4 h-4 rounded-full ${
-                overallStatus === 'operational' ? 'bg-green-500 animate-pulse' :
+              <div className={`w-4 h-4 rounded-full ${overallStatus === 'operational' ? 'bg-green-500 animate-pulse' :
                 overallStatus === 'maintenance' ? 'bg-blue-500 animate-pulse' :
-                'bg-red-500 animate-pulse'
-              }`} />
+                  'bg-red-500 animate-pulse'
+                }`} />
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {overallStatus === 'operational' ? 'All Systems Operational' :
-                   overallStatus === 'maintenance' ? 'Scheduled Maintenance' :
-                   'Service Disruption'}
+                    overallStatus === 'maintenance' ? 'Scheduled Maintenance' :
+                      'Service Disruption'}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
                   Average uptime: {averageUptime}% over last 90 days
@@ -349,11 +367,10 @@ export default function StatusPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setSubscribedToAlerts(!subscribedToAlerts)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                  subscribedToAlerts
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${subscribedToAlerts
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
               >
                 <Bell className="w-4 h-4" />
                 {subscribedToAlerts ? 'Subscribed to Alerts' : 'Subscribe to Alerts'}
@@ -416,9 +433,9 @@ export default function StatusPage() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Components</h2>
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-800">
             {components.map((component, index) => (
-              <ComponentStatusRow 
-                key={component.id} 
-                component={component} 
+              <ComponentStatusRow
+                key={component.id}
+                component={component}
                 isLast={index === components.length - 1}
                 getStatusColor={getStatusColor}
                 getStatusIcon={getStatusIcon}
@@ -468,13 +485,13 @@ export default function StatusPage() {
 }
 
 // Component Status Row
-function ComponentStatusRow({ 
-  component, 
+function ComponentStatusRow({
+  component,
   isLast,
   getStatusColor,
   getStatusIcon
-}: { 
-  component: Component; 
+}: {
+  component: Component;
   isLast: boolean;
   getStatusColor: (status: ComponentStatus) => string;
   getStatusIcon: (status: ComponentStatus) => React.JSX.Element;
@@ -551,12 +568,12 @@ function ComponentStatusRow({
 }
 
 // Incident Card Component
-function IncidentCard({ 
-  incident, 
+function IncidentCard({
+  incident,
   getSeverityColor,
-  isHistorical = false 
-}: { 
-  incident: Incident; 
+  isHistorical = false
+}: {
+  incident: Incident;
   getSeverityColor: (severity: IncidentSeverity) => string;
   isHistorical?: boolean;
 }) {
@@ -628,10 +645,10 @@ function IncidentCard({
 }
 
 // Maintenance Card Component
-function MaintenanceCard({ 
+function MaintenanceCard({
   maintenance,
   mockComponents
-}: { 
+}: {
   maintenance: MaintenanceWindow;
   mockComponents: Component[];
 }) {
