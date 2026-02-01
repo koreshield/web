@@ -1,46 +1,291 @@
 ---
 title: Installation
-description: How to install the KoreShield CLI
+description: Complete installation guide for KoreShield across all platforms
 icon: Terminal
 ---
 
-You can install the KoreShield CLI globally using npm. This is the recommended way to install KoreShield as it allows you to run the `koreshield` command from anywhere in your terminal.
+KoreShield can be installed in multiple ways depending on your deployment needs. Choose the method that best fits your infrastructure.
 
-## Prerequisites
+## Quick Install (Recommended)
 
-- [Node.js](https://nodejs.org/) (version 18 or higher)
-- npm (comes with Node.js)
+### Docker (Fastest Method)
 
-## Install via npm
-
-Run the following command in your terminal:
+The easiest way to get started with KoreShield is using Docker:
 
 ```bash
-npm install -g koreshield
+# Pull the latest image
+docker pull koreshield/koreshield:latest
+
+# Run with default configuration
+docker run -p 8000:8000 \
+  -e OPENAI_API_KEY=your-key-here \
+  koreshield/koreshield:latest
 ```
 
-## Verify Installation
+KoreShield will be available at `http://localhost:8000`.
 
-To verify that KoreShield has been installed successfully, run:
+### Docker Compose (Production Setup)
+
+For a complete production setup with Redis:
 
 ```bash
+# Clone the repository
+git clone https://github.com/koreshield/koreshield.git
+cd koreshield/koreshield
+
+# Copy example config
+cp config/config.example.yaml config/config.yaml
+
+# Edit config with your settings
+nano config/config.yaml
+
+# Start all services
+docker-compose up -d
+```
+
+The `docker-compose.yml` includes:
+- KoreShield proxy server
+- Redis for caching and rate limiting
+- Prometheus for metrics (optional)
+
+---
+
+## Python Package Installation
+
+### Prerequisites
+
+- Python 3.10 or higher
+- pip package manager
+- Virtual environment (recommended)
+
+### Install via pip
+
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install KoreShield
+pip install koreshield
+
+# Verify installation
 koreshield --version
 ```
 
-You should see the version number of the installed CLI.
+### Install from source
 
-## Updating
-
-To update KoreShield to the latest version, simply run the install command again:
+For the latest development version:
 
 ```bash
-npm install -g koreshield@latest
+# Clone repository
+git clone https://github.com/koreshield/koreshield.git
+cd koreshield/koreshield
+
+# Install in development mode
+pip install -e .
+
+# Install development dependencies
+pip install -r requirements-dev.txt
 ```
 
-## Uninstalling
-
-If you need to remove KoreShield from your system:
+### Running the Server
 
 ```bash
-npm uninstall -g koreshield
+# Using CLI
+koreshield start
+
+# With custom configuration
+koreshield start --config /path/to/config.yaml --port 9000
+
+# With debug logging
+koreshield start --log-level DEBUG
+
+# Using Python module directly
+python -m src.koreshield.main
 ```
+
+---
+
+## NPM Package Installation (SDKs)
+
+### JavaScript/TypeScript SDK
+
+```bash
+# npm
+npm install @koreshield/sdk
+
+# yarn
+yarn add @koreshield/sdk
+
+# pnpm
+pnpm add @koreshield/sdk
+```
+
+### Python SDK
+
+```bash
+# Install client SDK
+pip install koreshield-sdk
+
+# With optional dependencies
+pip install koreshield-sdk[langchain]
+```
+
+---
+
+## Kubernetes Deployment
+
+### Using Helm (Recommended)
+
+```bash
+# Add KoreShield Helm repository
+helm repo add koreshield https://charts.koreshield.com
+helm repo update
+
+# Install with default values
+helm install koreshield koreshield/koreshield
+
+# Install with custom values
+helm install koreshield koreshield/koreshield -f values.yaml
+```
+
+### Manual Kubernetes Deployment
+
+```bash
+# Clone repository
+git clone https://github.com/koreshield/koreshield.git
+cd koreshield/koreshield/k8s
+
+# Create namespace
+kubectl create namespace koreshield
+
+# Create secrets for API keys
+kubectl create secret generic koreshield-secrets \
+  --from-literal=openai-api-key=your-key \
+  --namespace koreshield
+
+# Apply manifests
+kubectl apply -f deployment.yaml -n koreshield
+
+# Check deployment status
+kubectl get pods -n koreshield
+```
+
+---
+
+## Railway Deployment (One-Click)
+
+Deploy KoreShield to Railway with a single click:
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/koreshield)
+
+### Manual Railway Setup
+
+1. **Create New Project**
+   - Go to [Railway.app](https://railway.app)
+   - Click "New Project" → "Deploy from GitHub repo"
+   - Select `koreshield/koreshield`
+
+2. **Configure Environment Variables**
+   ```
+   OPENAI_API_KEY=your-openai-key
+   ANTHROPIC_API_KEY=your-anthropic-key
+   REDIS_URL=redis://redis:6379
+   ```
+
+3. **Add Redis Service**
+   - Click "New" → "Database" → "Add Redis"
+   - Railway will automatically set `REDIS_URL`
+
+4. **Deploy**
+   - Railway will automatically build and deploy
+   - Your KoreShield instance will be available at `https://your-app.railway.app`
+
+---
+
+## Verify Installation
+
+After installation, verify KoreShield is running:
+
+```bash
+# Check health endpoint
+curl http://localhost:8000/health
+
+# Expected response:
+# {"status": "healthy", "version": "0.1.0"}
+
+# Test with a sample request
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-3.5-turbo",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+---
+
+## Troubleshooting
+
+### Port Already in Use
+
+If port 8000 is already in use:
+
+```bash
+# Use custom port
+koreshield start --port 9000
+```
+
+### API Key Issues
+
+Ensure API keys are set correctly:
+
+```bash
+# Check environment variables
+echo $OPENAI_API_KEY
+
+# Or set in config.yaml
+providers:
+  openai:
+    enabled: true
+    api_key: ${OPENAI_API_KEY}
+```
+
+### Redis Connection Failed
+
+If Redis is not available:
+
+```bash
+# Disable Redis in config.yaml
+redis:
+  enabled: false
+
+# Or start Redis
+docker run -d -p 6379:6379 redis:latest
+```
+
+---
+
+## Next Steps
+
+- [Quickstart Tutorial](/docs/quickstart) - Complete 15-minute getting started guide
+- [Configuration Guide](/docs/configuration) - Customize KoreShield for your needs
+- [Authentication Setup](/docs/authentication) - Set up API keys and JWT auth
+
+## System Requirements
+
+### Minimum Requirements
+- **CPU**: 1 core
+- **RAM**: 512 MB
+- **Storage**: 1 GB
+- **OS**: Linux, macOS, Windows
+
+### Recommended for Production
+- **CPU**: 4+ cores
+- **RAM**: 4 GB+
+- **Storage**: 10 GB+
+- **Redis**: 512 MB RAM minimum
+
+---
+
+Need help? Join our [Discord community](https://discord.gg/koreshield) or [open an issue](https://github.com/koreshield/koreshield/issues).
