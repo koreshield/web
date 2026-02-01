@@ -11,9 +11,14 @@ import { PageLoader, SuspenseFallback } from './components/LoadingStates';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const DocsPage = lazy(() => import('./pages/DocsPage'));
 const StatusPage = lazy(() => import('./pages/StatusPage'));
+const PlaygroundPage = lazy(() => import('./pages/PlaygroundPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const VsLakeraPage = lazy(() => import('./pages/VsLakeraPage'));
+const VsLLMGuardPage = lazy(() => import('./pages/VsLLMGuardPage'));
+const VsBuildYourselfPage = lazy(() => import('./pages/VsBuildYourselfPage'));
+const WhyKoreShieldPage = lazy(() => import('./pages/WhyKoreShieldPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function AppContent() {
@@ -69,6 +74,16 @@ function AppContent() {
             } 
           />
           <Route 
+            path="/playground" 
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <PlaygroundPage />
+                </RouteErrorBoundary>
+              </Suspense>
+            } 
+          />
+          <Route 
             path="/pricing" 
             element={
               <Suspense fallback={<SuspenseFallback />}>
@@ -94,6 +109,46 @@ function AppContent() {
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <AboutPage />
+                </RouteErrorBoundary>
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/vs/lakera-guard" 
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <VsLakeraPage />
+                </RouteErrorBoundary>
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/vs/llm-guard" 
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <VsLLMGuardPage />
+                </RouteErrorBoundary>
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/vs/build-yourself" 
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <VsBuildYourselfPage />
+                </RouteErrorBoundary>
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/why-koreshield" 
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <WhyKoreShieldPage />
                 </RouteErrorBoundary>
               </Suspense>
             } 
