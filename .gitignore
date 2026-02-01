@@ -253,11 +253,11 @@ Thumbs.db
 todo.md
 personal-keep/
 .DS_Store
-!web/src/lib/
+!koreshield-web/src/lib/
 docs/SYSTEM_DESIGN.md
 
 *.db
 build_output*.txt
-!web/public/docs/
+!koreshield-web/public/docs/
 docs/ARCHITECTURE_OVERVIEW.md
 docs/MARKET_ANALYSIS.md

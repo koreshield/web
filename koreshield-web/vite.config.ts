@@ -16,6 +16,18 @@ export default defineConfig({
         providerImportSource: "@mdx-js/react"
       })
     },
-    react()
+    react(),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'framer-motion': ['framer-motion'],
+          'prismjs': ['prismjs'],
+          'ui-vendor': ['lucide-react', 'clsx', 'tailwind-merge'],
+        }
+      }
+    }
+  }
 })
