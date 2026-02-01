@@ -20,7 +20,7 @@ plausible.enableAutoPageviews();
 export function trackEvent(eventName: string, props?: Record<string, string | number | boolean>) {
   try {
     plausible.trackEvent(eventName, { props });
-  } catch (error) {
+  } catch (_error) {
     // Silently fail in development or if analytics is blocked
     if (import.meta.env.DEV) {
       console.log('Analytics event:', eventName, props);
@@ -39,7 +39,7 @@ export function trackPageView(url?: string) {
     } else {
       plausible.trackPageview();
     }
-  } catch (error) {
+  } catch (_error) {
     if (import.meta.env.DEV) {
       console.log('Analytics page view:', url);
     }
@@ -52,11 +52,11 @@ export const analytics = {
   clickGetStarted: (location: string) => {
     trackEvent('Get Started Click', { location });
   },
-  
+
   clickContactSales: (location: string) => {
     trackEvent('Contact Sales Click', { location });
   },
-  
+
   clickTryDemo: (location: string) => {
     trackEvent('Try Demo Click', { location });
   },
@@ -65,11 +65,11 @@ export const analytics = {
   viewDocs: (page: string) => {
     trackEvent('View Docs', { page });
   },
-  
+
   copyCode: (language: string, location: string) => {
     trackEvent('Copy Code', { language, location });
   },
-  
+
   searchDocs: (query: string) => {
     trackEvent('Search Docs', { query });
   },
@@ -78,7 +78,7 @@ export const analytics = {
   clickGitHub: (location: string) => {
     trackEvent('GitHub Click', { location });
   },
-  
+
   starGitHub: () => {
     trackEvent('GitHub Star');
   },
@@ -87,11 +87,11 @@ export const analytics = {
   viewPricing: () => {
     trackEvent('View Pricing');
   },
-  
+
   selectTier: (tier: string) => {
     trackEvent('Select Tier', { tier });
   },
-  
+
   clickPricingCTA: (tier: string) => {
     trackEvent('Pricing CTA Click', { tier });
   },
@@ -100,7 +100,7 @@ export const analytics = {
   submitContactForm: (formType: 'general' | 'enterprise' | 'technical') => {
     trackEvent('Submit Contact Form', { type: formType });
   },
-  
+
   submitSalesForm: (tier: string) => {
     trackEvent('Submit Sales Form', { tier });
   },
@@ -109,11 +109,11 @@ export const analytics = {
   clickTwitter: () => {
     trackEvent('Twitter Click');
   },
-  
+
   clickLinkedIn: () => {
     trackEvent('LinkedIn Click');
   },
-  
+
   clickDiscord: () => {
     trackEvent('Discord Click');
   },
@@ -122,7 +122,7 @@ export const analytics = {
   selectIntegration: (framework: string) => {
     trackEvent('Select Integration', { framework });
   },
-  
+
   copyIntegrationCode: (framework: string) => {
     trackEvent('Copy Integration Code', { framework });
   },

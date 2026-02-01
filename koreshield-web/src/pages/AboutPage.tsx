@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { SEOMeta, SEOConfig } from '../components/SEOMeta';
+import { SEOMeta } from '../components/SEOMeta';
+import { SEOConfig } from '../lib/seo-config';
 
 const stats = [
   { label: 'Detection Accuracy', value: '95%+' },
@@ -127,7 +128,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <SEOMeta {...SEOConfig.about} />
-      
+
       {/* Hero Section */}
       <section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
         <div className="max-w-7xl mx-auto text-center">
@@ -337,9 +338,8 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
-                className={`relative flex items-center mb-12 ${
-                  index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'
-                }`}
+                className={`relative flex items-center mb-12 ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'
+                  }`}
               >
                 <div className={`w-5/12 ${index % 2 === 0 ? 'text-right pr-8' : 'text-left pl-8'}`}>
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">

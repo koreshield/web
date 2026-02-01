@@ -1,0 +1,45 @@
+
+> koreshield-web@0.0.0 lint
+> eslint .
+
+
+C:\projects\koreshield\koreshield-web\src\components\SEOMeta.tsx
+  118:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\projects\koreshield\koreshield-web\src\components\ToastNotification.tsx
+   26:17  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-refresh/only-export-components
+   50:9   error    Error: Cannot access variable before it is declared
+
+`removeToast` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\projects\koreshield\koreshield-web\src\components\ToastNotification.tsx:50:9
+  48 |     if (newToast.duration && newToast.duration > 0) {
+  49 |       setTimeout(() => {
+> 50 |         removeToast(id);
+     |         ^^^^^^^^^^^ `removeToast` accessed before it is declared
+  51 |       }, newToast.duration);
+  52 |     }
+  53 |   }, []);
+
+C:\projects\koreshield\koreshield-web\src\components\ToastNotification.tsx:55:3
+  53 |   }, []);
+  54 |
+> 55 |   const removeToast = useCallback((id: string) => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 56 |     setToasts((prev) => prev.filter((toast) => toast.id !== id));
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 57 |   }, []);
+     | ^^^^^^^^^^ `removeToast` is declared here
+  58 |
+  59 |   const success = useCallback(
+  60 |     (message: string, description?: string) => {  react-hooks/immutability
+   53:6   warning  React Hook useCallback has a missing dependency: 'removeToast'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/exhaustive-deps
+  198:17  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-refresh/only-export-components
+  202:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-refresh/only-export-components
+
+C:\projects\koreshield\koreshield-web\src\utils\analytics.ts
+  23:12  error  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  42:12  error  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 8 problems (7 errors, 1 warning)
+

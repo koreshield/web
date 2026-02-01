@@ -20,6 +20,7 @@ export function Layout() {
                     <nav className="hidden md:flex items-center gap-8">
                         <Link to="/why-koreshield" className="text-sm font-medium hover:text-electric-green transition-colors">Why KoreShield</Link>
                         <Link to="/docs" className="text-sm font-medium hover:text-electric-green transition-colors">Docs</Link>
+                        <a href="https://blog.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-electric-green transition-colors">Blog</a>
                         <Link to="/pricing" className="text-sm font-medium hover:text-electric-green transition-colors">Pricing</Link>
                         <Link to="/playground" className="text-sm font-medium hover:text-electric-green transition-colors">Playground</Link>
                         <Link to="/status" className="text-sm font-medium hover:text-electric-green transition-colors">Status</Link>
@@ -43,6 +44,7 @@ export function Layout() {
                     <div className="md:hidden border-t border-border bg-background p-4 flex flex-col gap-4">
                         <Link to="/why-koreshield" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Why KoreShield</Link>
                         <Link to="/docs" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Docs</Link>
+                        <a href="https://blog.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Blog</a>
                         <Link to="/pricing" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
                         <Link to="/playground" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>Playground</Link>
                         <Link to="/about" className="text-sm font-medium hover:text-electric-green" onClick={() => setMobileMenuOpen(false)}>About</Link>
