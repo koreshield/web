@@ -1,0 +1,63 @@
+---
+title: Attack Detection Engine
+description: Comprehensive guide to KoreShield's real-time threat detection capabilities, scoring system, and supported attack types.
+---
+
+# Attack Detection
+
+KoreShield's core engine uses a multi-layered approach to detect and block malicious inputs before they reach your LLMs. Our system combines heuristic analysis, signature matching, and machine learning models to identify threats with 95% accuracy.
+
+## Detection Patterns
+
+The detection engine analyzes every request against a set of sophisticated patterns. These are continuously updated to defend against emerging jailbreak techniques.
+
+### Supported Attack Types
+
+KoreShield currently detects and mitigates the following 10+ attack vectors:
+
+1.  **Prompt Injection**: Attempts to override system instructions (e.g., "Ignore previous instructions").
+2.  **Jailbreaking**: Complex role-playing scenarios designed to bypass safety filters (e.g., DAN, Mongo Tom).
+3.  **PII Leaking**: Attempts to extract or inject personally identifiable information.
+4.  **Code Injection**: Malicious code snippets intended to execute on the backend.
+5.  **SQL Injection**: Patterns mimicking SQL commands to manipulate databases.
+6.  **Cross-Site Scripting (XSS)**: Payload injection targeting web interfaces.
+7.  **Token Smuggling**: Using encoding tricks to bypass simplified filters.
+8.  **Denial of Service (DoS)**: Extremely long or repetitive inputs designed to exhaust context windows.
+9.  **Sentiment Manipulation**: Aggressive or toxic content detection.
+10. **Custom Pattern Matching**: User-defined regex and semantic rules.
+
+## Confidence Scoring System
+
+Every scanned prompt receives a **Confidence Score** between 0.0 and 1.0, representing the likelihood of a threat.
+
+| Score Range | Severity | Description | Default Action |
+| :--- | :--- | :--- | :--- |
+| **0.0 - 0.2** | Safe | Normal, benign conversation. | Allow |
+| **0.2 - 0.5** | Suspicious | Ambiguous content or minor policy violations. | Warn / Log |
+| **0.5 - 0.8** | High Risk | Strong indicators of an attack pattern. | Block |
+| **0.8 - 1.0** | Critical | Confirmed attack signature or known jailbreak. | Block Immediately |
+
+### Customizing Sensitivity
+
+You can adjust the sensitivity of the detection engine in your `config.yaml` or via the Policy API.
+
+```yaml
+security:
+  sensitivity: "high" # options: low, medium, high, paranoid
+  thresholds:
+    prompt_injection: 0.7
+    pii_leaking: 0.9
+```
+
+## False Positive Handling
+
+While rare, false positives can occur. KoreShield provides mechanisms to handle them:
+
+*   **Allowlisting**: Whitelist specific user IDs or trusted IP addresses.
+*   **Feedback Loop**: Report false positives via the `/feedback` endpoint to retrain the local model.
+*   **Context Awareness**: The engine can be configured to understand domain-specific jargon that might look suspicious.
+
+## Next Steps
+
+*   Configure your **[Policy Engine](/docs/policy-engine)** to decide what to do with detected threats.
+*   Learn how to write **[Custom Rules](/docs/custom-rules)** for your specific use case.
