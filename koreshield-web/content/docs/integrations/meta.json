@@ -4,15 +4,24 @@
     "index",
     "---JavaScript/TypeScript---",
     "react-nextjs",
+    "express",
+    "nuxt",
     "browser",
     "---Python---",
     "python-django",
     "python-fastapi",
     "python-flask",
+    "---LLM Frameworks---",
+    "langchain",
     "llamaindex",
-    "---Platforms---",
+    "---LLM Providers---",
+    "openai",
+    "anthropic",
+    "deepseek",
+    "---Deployment---",
+    "docker",
+    "kubernetes",
     "vercel",
-    "netlify",
-    "docker"
+    "netlify"
   ]
 }

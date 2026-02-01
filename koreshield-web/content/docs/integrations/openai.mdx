@@ -1,0 +1,435 @@
+---
+title: OpenAI Integration
+description: Integrate KoreShield with OpenAI API for secure LLM interactions
+published: true
+---
+
+# OpenAI Integration
+
+Protect your OpenAI applications from prompt injection attacks and LLM vulnerabilities.
+
+## Installation
+
+```bash
+npm install koreshield-sdk openai
+```
+
+## Basic Integration
+
+### SDK Wrapper
+
+```typescript
+import { KoreShield } from 'koreshield-sdk';
+import OpenAI from 'openai';
+
+const koreshield = new KoreShield({
+  apiKey: process.env.KORESHIELD_API_KEY,
+});
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+async function secureChat(userMessage: string) {
+  // Scan input
+  const scan = await koreshield.scan({
+    content: userMessage,
+    userId: 'user-123',
+  });
+
+  if (scan.threat_detected) {
+    throw new Error(`Threat detected: ${scan.threat_type}`);
+  }
+
+  // Call OpenAI
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [{ role: 'user', content: userMessage }],
+  });
+
+  return response.choices[0].message.content;
+}
+```
+
+## Proxy Mode
+
+Route all OpenAI requests through KoreShield:
+
+```typescript
+const openai = new OpenAI({
+  baseURL: 'https://api.koreshield.com/v1/proxy/openai',
+  apiKey: process.env.OPENAI_API_KEY,
+  defaultHeaders: {
+    'X-KoreShield-API-Key': process.env.KORESHIELD_API_KEY,
+  },
+});
+
+// All requests automatically protected
+const response = await openai.chat.completions.create({
+  model: 'gpt-4',
+  messages: [{ role: 'user', content: userMessage }],
+});
+```
+
+## Streaming Support
+
+```typescript
+async function secureStream(userMessage: string) {
+  // Scan first
+  const scan = await koreshield.scan({ content: userMessage });
+  
+  if (scan.threat_detected) {
+    throw new Error('Threat detected');
+  }
+
+  // Stream response
+  const stream = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [{ role: 'user', content: userMessage }],
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    const content = chunk.choices[0]?.delta?.content || '';
+    process.stdout.write(content);
+  }
+}
+```
+
+## Function Calling
+
+Protect function calls:
+
+```typescript
+const tools: OpenAI.Chat.ChatCompletionTool[] = [
+  {
+    type: 'function',
+    function: {
+      name: 'search_database',
+      description: 'Search the database',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string' },
+        },
+      },
+    },
+  },
+];
+
+async function secureFunction(userMessage: string) {
+  // Scan message
+  const scan = await koreshield.scan({ content: userMessage });
+  
+  if (scan.threat_detected) {
+    throw new Error('Threat detected');
+  }
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [{ role: 'user', content: userMessage }],
+    tools,
+  });
+
+  const toolCall = response.choices[0].message.tool_calls?.[0];
+  
+  if (toolCall) {
+    // Scan function arguments
+    const argsScan = await koreshield.scan({
+      content: toolCall.function.arguments,
+    });
+
+    if (argsScan.threat_detected) {
+      throw new Error('Malicious function arguments detected');
+    }
+
+    // Execute function
+    const result = await executeFunction(
+      toolCall.function.name,
+      JSON.parse(toolCall.function.arguments)
+    );
+
+    return result;
+  }
+}
+```
+
+## Assistants API
+
+Protect Assistant threads:
+
+```typescript
+async function secureAssistant(threadId: string, message: string) {
+  // Scan message
+  const scan = await koreshield.scan({ content: message });
+  
+  if (scan.threat_detected) {
+    throw new Error('Threat detected');
+  }
+
+  // Add message
+  await openai.beta.threads.messages.create(threadId, {
+    role: 'user',
+    content: message,
+  });
+
+  // Run assistant
+  const run = await openai.beta.threads.runs.create(threadId, {
+    assistant_id: 'asst_xxxxx',
+  });
+
+  // Poll for completion
+  let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+  
+  while (runStatus.status !== 'completed') {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+  }
+
+  // Get messages
+  const messages = await openai.beta.threads.messages.list(threadId);
+  return messages.data[0].content[0].text.value;
+}
+```
+
+## Embeddings Protection
+
+```typescript
+async function secureEmbeddings(texts: string[]) {
+  // Scan all texts
+  const scans = await Promise.all(
+    texts.map(text => koreshield.scan({ content: text }))
+  );
+
+  const threats = scans.filter(s => s.threat_detected);
+  if (threats.length > 0) {
+    throw new Error(`${threats.length} threats detected in batch`);
+  }
+
+  // Generate embeddings
+  const response = await openai.embeddings.create({
+    model: 'text-embedding-3-small',
+    input: texts,
+  });
+
+  return response.data.map(d => d.embedding);
+}
+```
+
+## Express Middleware
+
+```typescript
+import express from 'express';
+
+const app = express();
+app.use(express.json());
+
+app.post('/api/chat', async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    // Scan with KoreShield
+    const scan = await koreshield.scan({
+      content: message,
+      userId: req.user?.id,
+    });
+
+    if (scan.threat_detected) {
+      return res.status(400).json({
+        error: 'Security threat detected',
+        type: scan.threat_type,
+      });
+    }
+
+    // Call OpenAI
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: message }],
+    });
+
+    res.json({ response: completion.choices[0].message.content });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+```
+
+## React Hook
+
+```typescript
+import { useState } from 'react';
+
+function useSecureChat() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function sendMessage(message: string) {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error);
+      }
+
+      const data = await response.json();
+      return data.response;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return { sendMessage, loading, error };
+}
+```
+
+## Multi-Model Support
+
+```typescript
+type Model = 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo-preview';
+
+async function secureMultiModel(message: string, model: Model) {
+  const scan = await koreshield.scan({
+    content: message,
+    metadata: { model },
+  });
+
+  if (scan.threat_detected) {
+    throw new Error('Threat detected');
+  }
+
+  const response = await openai.chat.completions.create({
+    model,
+    messages: [{ role: 'user', content: message }],
+  });
+
+  return response.choices[0].message.content;
+}
+```
+
+## Rate Limiting
+
+```typescript
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, '1 m'),
+});
+
+async function rateLimitedChat(userId: string, message: string) {
+  // Check rate limit
+  const { success } = await ratelimit.limit(userId);
+  
+  if (!success) {
+    throw new Error('Rate limit exceeded');
+  }
+
+  // Scan and chat
+  const scan = await koreshield.scan({ content: message, userId });
+  
+  if (scan.threat_detected) {
+    throw new Error('Threat detected');
+  }
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [{ role: 'user', content: message }],
+  });
+
+  return response.choices[0].message.content;
+}
+```
+
+## Batch Processing
+
+```typescript
+async function secureBatch(messages: string[]) {
+  // Scan all messages
+  const scans = await koreshield.batchScan({
+    items: messages.map((content, i) => ({
+      id: `msg-${i}`,
+      content,
+    })),
+  });
+
+  const threats = scans.results.filter(s => s.threat_detected);
+  
+  if (threats.length > 0) {
+    console.warn(`Filtered ${threats.length} threats`);
+  }
+
+  // Process safe messages
+  const safeMessages = messages.filter((_, i) => 
+    !scans.results[i].threat_detected
+  );
+
+  const responses = await Promise.all(
+    safeMessages.map(msg =>
+      openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: msg }],
+      })
+    )
+  );
+
+  return responses.map(r => r.choices[0].message.content);
+}
+```
+
+## Error Handling
+
+```typescript
+async function robustChat(message: string) {
+  try {
+    // Scan with timeout
+    const scan = await Promise.race([
+      koreshield.scan({ content: message }),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Scan timeout')), 5000)
+      ),
+    ]);
+
+    if (scan.threat_detected) {
+      return { error: 'Threat detected', threat: scan.threat_type };
+    }
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: message }],
+    });
+
+    return { response: response.choices[0].message.content };
+  } catch (error) {
+    if (error.message === 'Scan timeout') {
+      // Fail open - log and allow
+      console.warn('KoreShield timeout, proceeding without scan');
+    }
+    
+    // Fallback to OpenAI
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: message }],
+    });
+
+    return { response: response.choices[0].message.content };
+  }
+}
+```
+
+## Related Documentation
+
+- [JavaScript SDK](/docs/getting-started/javascript)
+- [Streaming Guide](/docs/advanced/streaming)
+- [Rate Limiting](/docs/rate-limiting)
