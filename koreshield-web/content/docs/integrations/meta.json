@@ -1,0 +1,18 @@
+{
+  "title": "Integrations",
+  "pages": [
+    "index",
+    "---JavaScript/TypeScript---",
+    "react-nextjs",
+    "browser",
+    "---Python---",
+    "python-django",
+    "python-fastapi",
+    "python-flask",
+    "llamaindex",
+    "---Platforms---",
+    "vercel",
+    "netlify",
+    "docker"
+  ]
+}

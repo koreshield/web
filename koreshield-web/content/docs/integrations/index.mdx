@@ -1,0 +1,159 @@
+---
+title: Integrations
+description: Integrate KoreShield with popular frameworks and platforms
+---
+
+# Integrations
+
+KoreShield provides seamless integration with popular frameworks and platforms. Choose your framework below to get started with secure AI integration.
+
+## JavaScript/TypeScript SDK
+
+Our comprehensive JavaScript/TypeScript SDK supports all major frameworks and environments.
+
+### Quick Install
+
+```bash
+npm install koreshield
+```
+
+### Framework Guides
+
+- **[React/Next.js](react-nextjs)** - Client-side and server-side integration
+- **[Vue.js/Nuxt](vue-nuxt)** - Vue ecosystem integration
+- **[Express.js](express)** - Server-side API protection
+- **[Fastify](fastify)** - High-performance Node.js integration
+- **[Svelte/SvelteKit](svelte)** - Svelte framework integration
+- **[Astro](astro)** - Static site generation with AI security
+- **[Browser](browser)** - Direct browser integration without build tools
+
+### Universal Usage
+
+```javascript
+import { createClient } from 'koreshield';
+
+const client = createClient({
+    baseURL: 'https://your-koreshield-instance.com',
+    apiKey: 'your-api-key'
+});
+
+// Works everywhere - Node.js, browsers, edge functions
+const response = await client.createChatCompletion({
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: 'Hello!' }]
+});
+```
+
+## Python SDK
+
+For Python applications and frameworks.
+
+### Python Guides
+
+Our Python integration guides cover the most popular web frameworks and LLM tools.
+
+- **[Django](python-django)** - Middleware integration for Django apps
+- **[FastAPI](python-fastapi)** - Dependency injection and middleware for FastAPI
+- **[Flask](python-flask)** - Decorator-based protection for Flask routes
+- **[LlamaIndex](llamaindex)** - Secure RAG pipelines with CustomLLM
+
+### Installation
+
+```bash
+pip install koreshield
+```
+
+## Platform Integrations
+
+### Vercel
+
+Deploy KoreShield-protected applications on Vercel with edge function support.
+
+### Netlify
+
+Integrate KoreShield with Netlify functions and edge handlers.
+
+### Cloudflare Workers
+
+Run KoreShield in Cloudflare's edge network for global performance.
+
+### AWS Lambda
+
+Serverless integration with AWS Lambda functions.
+
+### Docker
+
+Containerized deployments with KoreShield.
+
+## API Integrations
+
+### OpenAI
+
+Drop-in replacement for OpenAI SDK with security monitoring.
+
+```javascript
+import { KoreShieldOpenAI } from 'koreshield';
+
+// Replace your OpenAI import
+const openai = new KoreShieldOpenAI({
+    baseURL: 'https://your-koreshield-instance.com',
+    apiKey: 'your-koreshield-api-key'
+});
+
+// Use exactly like OpenAI SDK - with security!
+const completion = await openai.chat.completions.create({
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: 'Hello!' }]
+});
+```
+
+### Anthropic Claude
+
+Secure integration with Anthropic's Claude models.
+
+### Google Gemini
+
+Protected access to Google's Gemini AI models.
+
+### Custom Models
+
+Integrate with any OpenAI-compatible API endpoint.
+
+## Database Integrations
+
+### PostgreSQL
+
+Store security events and metrics in PostgreSQL.
+
+### MongoDB
+
+Document-based storage for security data.
+
+### Redis
+
+High-performance caching and session management.
+
+## Monitoring Integrations
+
+### Prometheus
+
+Export metrics to Prometheus for monitoring.
+
+### Grafana
+
+Create dashboards with security insights.
+
+### Datadog
+
+Enterprise monitoring and alerting.
+
+### Sentry
+
+Error tracking with security context.
+
+## Need Help?
+
+- 📖 [SDK Documentation](/docs/reference/sdk)
+- 💬 [Community Discussions](https://github.com/koreshield/koreshield/discussions)
+- 🐛 [Report Integration Issues](https://github.com/koreshield/koreshield/issues)
+- 📧 [Contact Support](mailto:support@koreshield.com)
