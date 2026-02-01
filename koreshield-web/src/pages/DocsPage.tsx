@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { MDXProvider } from '@mdx-js/react';
 import { Menu, X, ArrowLeft, ArrowRight, ChevronRight } from 'lucide-react';
 import { Cards, Card } from '../components/mdx/Cards';
@@ -157,7 +157,6 @@ function TableOfContents() {
 function DocsPage() {
     const { slug } = useParams();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
-    const navigate = useNavigate();
     const { pathname } = useLocation();
 
     const currentSlug = slug || 'index';
