@@ -2,7 +2,7 @@ import { Outlet, Link } from "react-router-dom";
 import { SearchPalette } from "./SearchPalette";
 import Footer from "./Footer";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Github } from "lucide-react";
 
 export function Layout() {
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,7 +25,9 @@ export function Layout() {
                         <Link to="/playground" className="text-sm font-medium hover:text-electric-green transition-colors">Playground</Link>
                         <Link to="/status" className="text-sm font-medium hover:text-electric-green transition-colors">Status</Link>
                         <SearchPalette />
-                        <a href="https://github.com/koreshield/koreshield" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-electric-green transition-colors">GitHub</a>
+                        <a href="https://github.com/koreshield/koreshield" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                            <Github className="w-5 h-5" />
+                        </a>
                         <a href="https://github.com/koreshield/koreshield" className="bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold transition-colors glow-green">
                             Get Started
                         </a>
