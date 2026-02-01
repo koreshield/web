@@ -1,0 +1,291 @@
+---
+title: Deployment
+description: Deploy KoreShield in production environments
+icon: Server
+---
+
+# Deployment
+
+KoreShield can be deployed in various environments to meet your security and scalability requirements.
+
+## Docker Deployment
+
+### Single Container
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  koreshield:
+    image: koreshield/koreshield:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config.yaml:/app/config.yaml
+      - ./logs:/app/logs
+    environment:
+      - KORE_SHIELD_CONFIG=/app/config.yaml
+    restart: unless-stopped
+```
+
+### With Load Balancer
+
+```yaml
+version: '3.8'
+services:
+  koreshield:
+    image: koreshield/koreshield:latest
+    deploy:
+      replicas: 3
+    volumes:
+      - ./config.yaml:/app/config.yaml
+    environment:
+      - KORE_SHIELD_CONFIG=/app/config.yaml
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/ssl/certs
+    depends_on:
+      - koreshield
+```
+
+## Kubernetes Deployment
+
+### Basic Deployment
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: koreshield
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: koreshield
+  template:
+    metadata:
+      labels:
+        app: koreshield
+    spec:
+      containers:
+      - name: koreshield
+        image: koreshield/koreshield:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: KORE_SHIELD_CONFIG
+          value: "/app/config.yaml"
+        volumeMounts:
+        - name: config
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: config
+        configMap:
+          name: koreshield-config
+```
+
+### Ingress Configuration
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: koreshield-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+    - api.yourcompany.com
+    secretName: koreshield-tls
+  rules:
+  - host: api.yourcompany.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: koreshield-service
+            port:
+              number: 8000
+```
+
+## Cloud Deployments
+
+### AWS
+
+```hcl
+# main.tf
+resource "aws_ecs_cluster" "koreshield" {
+  name = "koreshield-cluster"
+}
+
+resource "aws_ecs_service" "koreshield" {
+  name            = "koreshield"
+  cluster         = aws_ecs_cluster.koreshield.id
+  task_definition = aws_ecs_task_definition.koreshield.arn
+  desired_count   = 2
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.koreshield.arn
+    container_name   = "koreshield"
+    container_port   = 8000
+  }
+}
+```
+
+### Google Cloud
+
+```yaml
+# cloudbuild.yaml
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/koreshield', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/koreshield']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'koreshield'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/koreshield'
+      - '--platform'
+      - 'managed'
+      - '--port'
+      - '8000'
+      - '--allow-unauthenticated'
+```
+
+### Azure
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "resources": [
+    {
+      "type": "Microsoft.ContainerInstance/containerGroups",
+      "apiVersion": "2021-07-01",
+      "name": "koreshield",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "containers": [
+          {
+            "name": "koreshield",
+            "properties": {
+              "image": "koreshield/koreshield:latest",
+              "ports": [
+                {
+                  "port": 8000,
+                  "protocol": "TCP"
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "KORE_SHIELD_CONFIG",
+                  "value": "/app/config.yaml"
+                }
+              ]
+            }
+          }
+        ],
+        "osType": "Linux",
+        "ipAddress": {
+          "type": "Public",
+          "ports": [
+            {
+              "port": 8000,
+              "protocol": "TCP"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+```
+
+## High Availability
+
+### Multi-Region Deployment
+
+```yaml
+# Deploy across multiple regions
+global:
+  image: koreshield/koreshield:latest
+
+regions:
+  - name: us-east
+    replicas: 3
+  - name: eu-west
+    replicas: 2
+  - name: ap-southeast
+    replicas: 2
+```
+
+### Load Balancing
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: koreshield-lb
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+  selector:
+    app: koreshield
+```
+
+## Monitoring & Scaling
+
+### Auto-scaling
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: koreshield-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: koreshield
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+```
+
+## Security Considerations
+
+- Use secrets management (Vault, AWS Secrets Manager, etc.)
+- Enable TLS/SSL in production
+- Configure firewall rules
+- Regular security updates
+- Log aggregation and monitoring
+```

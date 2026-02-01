@@ -1,0 +1,315 @@
+---
+title: JavaScript/TypeScript SDK
+description: Complete SDK for integrating KoreShield into your applications
+---
+
+# JavaScript/TypeScript SDK
+
+The KoreShield JavaScript/TypeScript SDK provides a comprehensive, production-ready solution for integrating with the KoreShield LLM Security Proxy in your applications.
+
+## Installation
+
+```bash
+# npm
+npm install koreshield
+
+# yarn
+yarn add koreshield
+
+# pnpm
+pnpm add koreshield
+```
+
+## Supported LLM Providers
+
+KoreShield proxy supports multiple providers:
+
+- **DeepSeek** - High-performance models (OpenAI-compatible)
+- **OpenAI** - GPT-3.5, GPT-4, and other models
+- **Anthropic** - Claude models
+- **More providers** - Coming soon
+
+Configure providers in your KoreShield proxy's `config.yaml`.
+
+## Quick Start
+
+### Node.js
+
+```javascript
+import { createClient } from 'koreshield';
+
+// Connect to your KoreShield proxy
+const client = createClient({
+    baseURL: 'http://localhost:8000', // Your KoreShield proxy URL
+});
+
+// Secure chat completion through KoreShield
+const response = await client.createChatCompletion({
+    model: 'deepseek-chat',
+    messages: [
+        { role: 'user', content: 'Hello, how are you?' }
+    ]
+});
+
+console.log(response.choices[0].message.content);
+```
+
+### Browser
+
+```html
+<script type="module">
+    import { createClient } from './node_modules/koreshield/dist/browser/index.js';
+
+    const client = createClient({
+        baseURL: 'https://your-koreshield-proxy.com',
+        apiKey: 'your-koreshield-api-key'
+    });
+
+    // Use the client...
+</script>
+```
+
+### OpenAI Compatibility
+
+```javascript
+import { KoreShieldOpenAI } from 'koreshield';
+
+// Drop-in replacement for OpenAI SDK
+const openai = new KoreShieldOpenAI({
+    baseURL: 'https://your-koreshield-instance.com',
+    apiKey: 'your-koreshield-api-key'
+});
+
+// Use exactly like OpenAI SDK
+const completion = await openai.chat.completions.create({
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: 'Hello!' }]
+});
+```
+
+## Features
+
+- **🔒 Security First**: Built-in input sanitization, attack detection, and response filtering
+- **📊 Monitoring**: Real-time metrics and security event tracking
+- **🔄 OpenAI Compatible**: Drop-in replacement for existing OpenAI SDK integrations
+- **🌐 Universal**: Works in Node.js, browsers, and edge environments
+- **📝 TypeScript**: Full TypeScript support with comprehensive type definitions
+- **⚙️ Configurable**: Fine-grained security controls and monitoring options
+- **🏭 Production Ready**: Error handling, retries, and connection management
+
+## Configuration
+
+```javascript
+const client = createClient({
+    baseURL: 'https://your-koreshield-instance.com', // Required
+    apiKey: 'your-api-key',                          // Optional (can use KORESHIELD_API_KEY env var)
+    timeout: 30000,                                  // Request timeout in ms
+    debug: false,                                     // Enable debug logging
+    headers: {                                        // Custom headers
+        'X-Custom-Header': 'value'
+    }
+});
+```
+
+### Environment Variables
+
+- `KORESHIELD_BASE_URL`: KoreShield proxy URL
+- `KORESHIELD_API_KEY`: API key for authentication
+- `KORESHIELD_TIMEOUT`: Request timeout in milliseconds
+- `KORESHIELD_DEBUG`: Enable debug logging (`true`/`false`)
+
+## Security Options
+
+```javascript
+const response = await client.createChatCompletion({
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: 'Hello!' }],
+}, {
+    sensitivity: 'high',  // 'low', 'medium', 'high'
+});
+```
+
+## API Reference
+
+### KoreShieldClient
+
+#### Methods
+
+- `createChatCompletion(request, securityOptions?)`: Create a chat completion with security monitoring
+- `getMetrics()`: Get security metrics and statistics
+- `getSecurityEvents()`: Retrieve security events
+- `testConnection()`: Test connection to KoreShield proxy
+- `updateSecurityConfig(options)`: Update security configuration
+
+### KoreShieldOpenAI
+
+OpenAI-compatible wrapper class with the same API as the official OpenAI SDK.
+
+#### Usage
+
+```javascript
+const openai = new KoreShieldOpenAI(config);
+// Use exactly like the official OpenAI SDK
+```
+
+## Examples
+
+### Basic Usage
+
+```javascript
+import { createClient } from 'koreshield';
+
+const client = createClient({
+    baseURL: process.env.KORESHIELD_BASE_URL,
+    apiKey: process.env.KORESHIELD_API_KEY
+});
+
+const response = await client.createChatCompletion({
+    model: 'gpt-3.5-turbo',
+    messages: [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'user', content: 'Explain quantum computing.' }
+    ]
+});
+
+console.log(response.choices[0].message.content);
+```
+
+### Error Handling
+
+```javascript
+try {
+    const response = await client.createChatCompletion({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: 'Hello!' }]
+    });
+} catch (error) {
+    if (error.code === 'SECURITY_VIOLATION') {
+        console.log('Security violation detected:', error.details);
+    } else {
+        console.error('API Error:', error.message);
+    }
+}
+```
+
+### Monitoring
+
+```javascript
+// Get security metrics
+const metrics = await client.getMetrics();
+console.log('Total requests:', metrics.totalRequests);
+console.log('Security violations:', metrics.securityViolations);
+
+// Get recent security events
+const events = await client.getSecurityEvents({
+    limit: 10,
+    severity: 'high'
+});
+```
+
+## Integration Guides
+
+### React/Next.js
+
+```javascript
+import { createClient } from 'koreshield';
+import { useState, useEffect } from 'react';
+
+function ChatComponent() {
+    const [client] = useState(() => createClient({
+        baseURL: process.env.NEXT_PUBLIC_KORESHIELD_URL,
+        apiKey: process.env.KORESHIELD_API_KEY
+    }));
+
+    const [response, setResponse] = useState('');
+
+    const sendMessage = async (message) => {
+        const result = await client.createChatCompletion({
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: message }]
+        });
+        setResponse(result.choices[0].message.content);
+    };
+
+    return (
+        <div>
+            <button onClick={() => sendMessage('Hello!')}>
+                Send Secure Message
+            </button>
+            <p>{response}</p>
+        </div>
+    );
+}
+```
+
+### Express.js Middleware
+
+```javascript
+import express from 'express';
+import { createClient } from 'koreshield';
+
+const app = express();
+const koreShield = createClient({
+    baseURL: process.env.KORESHIELD_BASE_URL,
+    apiKey: process.env.KORESHIELD_API_KEY
+});
+
+app.use(express.json());
+
+// KoreShield middleware for API protection
+app.use('/api/chat', async (req, res, next) => {
+    try {
+        const response = await koreShield.createChatCompletion({
+            model: req.body.model || 'gpt-3.5-turbo',
+            messages: req.body.messages
+        });
+        res.json(response);
+    } catch (error) {
+        if (error.code === 'SECURITY_VIOLATION') {
+            res.status(400).json({
+                error: 'Security violation detected',
+                details: error.details
+            });
+        } else {
+            next(error);
+        }
+    }
+});
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Connection Failed**
+- Verify `baseURL` is correct and accessible
+- Check network connectivity
+- Ensure KoreShield proxy is running
+
+**Authentication Error**
+- Verify API key is correct
+- Check `KORESHIELD_API_KEY` environment variable
+- Ensure API key has proper permissions
+
+**Security Violations**
+- Review security event logs: `client.getSecurityEvents()`
+- Adjust sensitivity level in security options
+- Check input content for potentially harmful patterns
+
+### Debug Mode
+
+Enable debug logging to troubleshoot issues:
+
+```javascript
+const client = createClient({
+    baseURL: 'https://your-koreshield-instance.com',
+    debug: true
+});
+```
+
+## Support
+
+- 📖 [Full API Documentation](https://koreshield.com/docs/sdk)
+- 💬 [GitHub Discussions](https://github.com/koreshield/koreshield/discussions)
+- 🐛 [Report Issues](https://github.com/koreshield/koreshield/issues)
+- 📧 [Contact Support](mailto:support@koreshield.com)

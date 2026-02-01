@@ -1,0 +1,130 @@
+---
+title: Configuration
+description: Configure KoreShield for your LLM providers and security policies
+icon: Settings
+---
+
+# Configuration
+
+KoreShield uses a YAML configuration file to define your LLM providers, security settings, and deployment options.
+
+## Basic Configuration
+
+Create a `config.yaml` file in your project directory:
+
+```yaml
+# KoreShield Configuration
+providers:
+  openai:
+    api_key: "sk-your-openai-api-key-here"
+    base_url: "https://api.openai.com/v1"
+    models:
+      - "gpt-4"
+      - "gpt-3.5-turbo"
+
+  anthropic:
+    api_key: "sk-ant-your-anthropic-key-here"
+    base_url: "https://api.anthropic.com"
+    models:
+      - "claude-3-opus-20240229"
+      - "claude-3-sonnet-20240229"
+
+security:
+  level: "medium"  # low, medium, high
+  log_level: "info"
+  policies:
+    block_prompt_injection: true
+    sanitize_input: true
+    log_all_requests: true
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+```
+
+## Security Levels
+
+### Low Security
+- Basic input sanitization
+- Minimal false positives
+- Best for development/testing
+
+### Medium Security (Recommended)
+- Balanced detection and usability
+- Blocks common attack patterns
+- Suitable for most production use cases
+
+### High Security
+- Aggressive detection
+- May block legitimate requests
+- Best for sensitive/high-risk applications
+
+## Provider Configuration
+
+### OpenAI
+```yaml
+providers:
+  openai:
+    api_key: "sk-..."
+    base_url: "https://api.openai.com/v1"  # or Azure endpoint
+    organization: "org-..."  # optional
+```
+
+### Anthropic
+```yaml
+providers:
+  anthropic:
+    api_key: "sk-ant-..."
+    base_url: "https://api.anthropic.com"
+```
+
+### Google Gemini
+```yaml
+providers:
+  google:
+    api_key: "your-gemini-api-key"
+    base_url: "https://generativelanguage.googleapis.com"
+```
+
+## Environment Variables
+
+You can use environment variables in your configuration:
+
+```yaml
+providers:
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+```
+
+Set them when running KoreShield:
+
+```bash
+export OPENAI_API_KEY="sk-your-key"
+koreshield start --config config.yaml
+```
+
+## Validation
+
+Validate your configuration before starting:
+
+```bash
+koreshield validate --config config.yaml
+```
+
+This will check for:
+- Required fields
+- Valid API keys (format)
+- Provider connectivity
+- Security policy consistencykoreshield validate-config
+```
+
+See the [CLI Reference](/docs/reference/cli-reference#configuration-files) for complete configuration options.
+
+## Inspecting Traffic
+
+KoreShield provides a real-time view of requests and responses in your terminal. As requests come in, you will see the method, path, and status code.
+
+## Stopping the Tunnel
+
+To stop the tunnel, simply press `Ctrl+C` in your terminal. This will close the connection and the public URL will no longer be accessible.

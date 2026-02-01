@@ -1,0 +1,72 @@
+---
+title: Configuration
+description: Configure KoreShield settings, policies, and providers
+icon: Settings
+---
+
+# Configuration
+
+KoreShield is highly configurable via `config/config.yaml` or through environment variables.
+
+## Basic Configuration
+
+The configuration file is YAML-based. Key sections include server settings, security policies, and provider configurations.
+
+```yaml
+server:
+  host: "0.0.0.0"
+  port: 8000
+
+logging:
+  level: INFO
+  json_logs: false
+
+security:
+  sensitivity: medium
+  default_action: block
+  features:
+    sanitization: true
+    detection: true
+    policy_enforcement: true
+
+providers:
+  openai:
+    enabled: true
+    base_url: "https://api.openai.com/v1"
+
+alerting:
+  enabled: false
+```
+
+## Security Settings
+
+### Sensitivity Levels
+
+- **Low**: Only blocks high-confidence attacks.
+- **Medium** (Default): Balanced protection.
+- **High**: Aggressive blocking, zero-trust approach.
+
+### Default Action
+
+- **Block**: Rejects the request with a 403 error.
+- **Warn**: Logs the attack but allows the request to proceed (monitoring mode).
+
+## Environment Variables
+
+Sensitive credentials should be set as environment variables:
+
+| Variable | Description |
+|----------|-------------|
+| `OPENAI_API_KEY` | API Key for OpenAI provider |
+| `ANTHROPIC_API_KEY` | API Key for Anthropic provider |
+| `KORESHIELD_SECRET` | Secret for JWT signing |
+
+## Dynamic Configuration
+
+You can also update security settings at runtime using the Management API:
+
+```bash
+curl -X PATCH http://localhost:8000/v1/management/config/security \
+  -H "Content-Type: application/json" \
+  -d '{"sensitivity": "high"}'
+```
