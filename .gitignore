@@ -259,3 +259,5 @@ docs/SYSTEM_DESIGN.md
 *.db
 build_output*.txt
 !web/public/docs/
+docs/ARCHITECTURE_OVERVIEW.md
+docs/MARKET_ANALYSIS.md
