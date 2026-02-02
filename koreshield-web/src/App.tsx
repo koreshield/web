@@ -6,7 +6,6 @@ import { ThemeProvider } from './context/ThemeContext';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider, setGlobalToast, useToast } from './components/ToastNotification';
 import { PageLoader, SuspenseFallback } from './components/LoadingStates';
-import { ClerkProvider, isClerkConfigured, CLERK_PUBLISHABLE_KEY } from './lib/auth';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Lazy load pages for code splitting
@@ -194,8 +193,7 @@ function AppContent() {
 }
 
 function App() {
-  // Wrap in Clerk provider if configured
-  const content = (
+  return (
     <ErrorBoundary>
       <HelmetProvider>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -208,16 +206,6 @@ function App() {
       </HelmetProvider>
     </ErrorBoundary>
   );
-
-  if (isClerkConfigured()) {
-    return (
-      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
-        {content}
-      </ClerkProvider>
-    );
-  }
-
-  return content;
 }
 
 export default App;

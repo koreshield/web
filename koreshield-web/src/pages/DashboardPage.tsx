@@ -1,10 +1,13 @@
-import { useUser, SignedIn, SignedOut, UserButton } from '../lib/auth';
+import { authService } from '../lib/auth';
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api-client';
-import { Activity, Shield, Clock, TrendingUp, AlertTriangle, CheckCircle, Copy, Key } from 'lucide-react';
+import { Activity, Shield, Clock, TrendingUp, AlertTriangle, CheckCircle, Copy, Key, LogOut } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 
 export function DashboardPage() {
-    const { user } = useUser();
+    const navigate = useNavigate();
+    const user = authService.getCurrentUser();
+    const isAuthenticated = authService.isAuthenticated();
     const [stats, setStats] = useState<any>(null);
     const [recentAttacks, setRecentAttacks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -26,7 +29,7 @@ export function DashboardPage() {
                 api.getRecentAttacks(10)
             ]);
             setStats(statsData);
-            setRecentAttacks(attacksData.attacks || []);
+            setRecentAttacks((attacksData as any).attacks || []);
         } catch (error) {
             console.error('Failed to load dashboard data:', error);
         } finally {
@@ -40,6 +43,11 @@ export function DashboardPage() {
         setTimeout(() => setCopiedKey(false), 2000);
     };
 
+    const handleLogout = () => {
+        authService.logout();
+        navigate('/');
+    };
+
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
@@ -48,25 +56,56 @@ export function DashboardPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-2xl font-bold">Dashboard</h1>
-                            <SignedIn>
+                            {isAuthenticated ? (
                                 <p className="text-sm text-muted-foreground">
-                                    Welcome back, {user?.firstName || user?.username || 'User'}
+                                    Welcome back, {user?.name || user?.email}
                                 </p>
-                            </SignedIn>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    Demo Mode - Viewing simulated data
+                                </p>
+                            )}
                         </div>
                         <div className="flex items-center gap-4">
-                            <SignedIn>
-                                <UserButton afterSignOutUrl="/" />
-                            </SignedIn>
-                            <SignedOut>
-                                <a href="/login" className="text-sm text-primary hover:underline">
-                                    Sign In
-                                </a>
-                            </SignedOut>
+                            {isAuthenticated ? (
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    Logout
+                                </button>
+                            ) : (
+                                <Link
+                                    to="/login"
+                                    className="text-sm text-primary hover:underline"
+                                >
+                                    Sign In to see real data
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </div>
             </header>
+
+            {/* Data Source Indicator */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                {isAuthenticated ? (
+                    <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-3 flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        <span className="text-sm text-green-600 font-medium">
+                            Connected to Railway API - Showing real-time data
+                        </span>
+                    </div>
+                ) : (
+                    <div className="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-3 flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                        <span className="text-sm text-yellow-600 font-medium">
+                            Demo Mode - Simulated data for demonstration purposes
+                        </span>
+                    </div>
+                )}
+            </div>
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -83,7 +122,7 @@ export function DashboardPage() {
                                     <span className="text-sm font-medium text-muted-foreground">Total Requests</span>
                                     <Activity className="w-5 h-5 text-blue-500" />
                                 </div>
-                                <div className="text-3xl font-bold">{stats?.total_requests.toLocaleString()}</div>
+                                <div className="text-3xl font-bold">{stats?.total_requests?.toLocaleString()}</div>
                             </div>
 
                             <div className="bg-card border border-border rounded-lg p-6">
@@ -119,7 +158,9 @@ export function DashboardPage() {
                                         <Key className="w-5 h-5" />
                                         API Key
                                     </h2>
-                                    <p className="text-sm text-muted-foreground">Use this key to authenticate your API requests</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {isAuthenticated ? 'Your authentication key' : 'Demo API key (not functional)'}
+                                    </p>
                                 </div>
                                 <button
                                     onClick={() => setApiKeyVisible(!apiKeyVisible)}
@@ -169,7 +210,7 @@ export function DashboardPage() {
                                                     {attack.action_taken}
                                                 </span>
                                                 <span className="text-xs text-muted-foreground">
-                                                    {attack.confidence.toFixed(0)}% confidence
+                                                    {(attack.confidence * 100).toFixed(0)}% confidence
                                                 </span>
                                             </div>
                                             <p className="text-sm text-muted-foreground truncate">

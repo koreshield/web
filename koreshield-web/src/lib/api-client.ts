@@ -1,4 +1,5 @@
 import type { ChatCompletionRequest, ChatCompletionResponse, HealthCheckResponse, AttackStats } from '../types/api';
+import { authService } from './auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.koreshield.com';
 
@@ -23,6 +24,14 @@ class ApiClient {
         this.apiKey = apiKey;
     }
 
+    /**
+     * Check if we should use real API or simulated data
+     */
+    private get isRealAPIMode(): boolean {
+        // Use real API if admin is authenticated OR if explicitly configured
+        return authService.isAuthenticated() || import.meta.env.VITE_USE_SIMULATED_API === 'false';
+    }
+
     private async delay(ms: number): Promise<void> {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
@@ -32,11 +41,19 @@ class ApiClient {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-        const headers = {
+        const headers: Record<string, string> = {
             'Content-Type': 'application/json',
-            ...(this.apiKey && { 'Authorization': `Bearer ${this.apiKey}` }),
-            ...options.headers,
+            ...(options.headers as Record<string, string>),
         };
+
+        // Add JWT token if admin is authenticated
+        const adminToken = authService.getToken();
+        if (adminToken) {
+            headers['Authorization'] = `Bearer ${adminToken}`;
+        } else if (this.apiKey) {
+            // Fallback to API key if no admin token
+            headers['Authorization'] = `Bearer ${this.apiKey}`;
+        }
 
         try {
             const response = await fetch(url, {
@@ -54,6 +71,12 @@ class ApiClient {
                     code: response.status,
                     details: errorData.details,
                 };
+
+                // If 401, logout admin
+                if (response.status === 401 && authService.isAuthenticated()) {
+                    authService.logout();
+                    window.location.href = '/login';
+                }
 
                 // Retry on 5xx errors
                 if (response.status >= 500 && retries > 0) {
@@ -80,8 +103,8 @@ class ApiClient {
     }
 
     async chatCompletion(payload: ChatCompletionRequest): Promise<ChatCompletionResponse> {
-        // Check if we should use simulation mode (for demo purposes if no API key)
-        if (!this.apiKey && import.meta.env.VITE_USE_SIMULATED_API === 'true') {
+        // Check if we should use simulation mode
+        if (!this.isRealAPIMode) {
             return this.simulateChatCompletion(payload);
         }
 
@@ -92,42 +115,42 @@ class ApiClient {
     }
 
     async getHealth(): Promise<HealthCheckResponse> {
-        if (!this.apiKey && import.meta.env.VITE_USE_SIMULATED_API === 'true') {
+        if (!this.isRealAPIMode) {
             return this.simulateHealth();
         }
         return this.fetch<HealthCheckResponse>('/health');
     }
 
     async getStats(): Promise<AttackStats> {
-        if (!this.apiKey && import.meta.env.VITE_USE_SIMULATED_API === 'true') {
+        if (!this.isRealAPIMode) {
             return this.simulateStats();
         }
         return this.fetch<AttackStats>('/api/admin/stats');
     }
 
     async getMetrics() {
-        if (!this.apiKey && import.meta.env.VITE_USE_SIMULATED_API === 'true') {
+        if (!this.isRealAPIMode) {
             return this.simulateMetrics();
         }
         return this.fetch('/metrics');
     }
 
     async getProviderHealth() {
-        if (!this.apiKey && import.meta.env.VITE_USE_SIMULATED_API === 'true') {
+        if (!this.isRealAPIMode) {
             return this.simulateProviderHealth();
         }
         return this.fetch('/api/admin/health');
     }
 
     async getRecentAttacks(limit = 10) {
-        if (!this.apiKey && import.meta.env.VITE_USE_SIMULATED_API === 'true') {
+        if (!this.isRealAPIMode) {
             return this.simulateRecentAttacks(limit);
         }
         return this.fetch(`/api/admin/attacks?limit=${limit}`);
     }
 
     async scanText(content: string, metadata?: Record<string, any>) {
-        if (!this.apiKey && import.meta.env.VITE_USE_SIMULATED_API === 'true') {
+        if (!this.isRealAPIMode) {
             return this.simulateScan(content);
         }
         return this.fetch('/v1/scan', {
@@ -183,6 +206,8 @@ class ApiClient {
             }],
             koreshield_blocked: false,
             koreshield_latency_ms: 120
+        };
+    }
 
     private async simulateMetrics() {
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -277,8 +302,6 @@ class ApiClient {
             confidence: matchedPatterns.length > 0 ? confidence : 0.05 + Math.random() * 0.1,
             patterns_matched: matchedPatterns,
             latency_ms: 120 + Math.floor(Math.random() * 100)
-        };
-    }
         };
     }
 
