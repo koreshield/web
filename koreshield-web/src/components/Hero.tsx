@@ -51,9 +51,7 @@ function Hero() {
                         <button className="group border border-gray-700 hover:border-electric-green text-white font-semibold px-8 py-4 rounded-lg transition-all duration-300 flex items-center gap-2">
                             <Github className="w-5 h-5" />
                             <span>View on GitHub</span>
-                            <span className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded text-xs ml-2 text-gray-300 group-hover:text-white transition-colors">
-                                ★ 1.2k
-                            </span>
+
                         </button>
                     </motion.div>
                 </motion.div>
