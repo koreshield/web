@@ -1,24 +1,19 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { SignedIn, SignedOut, isClerkConfigured } from '../lib/auth';
+import { authService } from '../lib/auth';
+import type { ReactNode } from 'react';
 
 interface ProtectedRouteProps {
-    children: React.ReactNode;
+    children: ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const location = useLocation();
+    const isAuthenticated = authService.isAuthenticated();
 
-    // If Clerk is not configured, allow access (for development)
-    if (!isClerkConfigured()) {
-        return <>{children}</>;
+    if (!isAuthenticated) {
+        // Redirect to login, save the attempted location
+        return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    return (
-        <>
-            <SignedIn>{children}</SignedIn>
-            <SignedOut>
-                <Navigate to="/login" state={{ from: location }} replace />
-            </SignedOut>
-        </>
-    );
+    return <>{children}</>;
 }

@@ -261,3 +261,8 @@ build_output*.txt
 !koreshield-web/public/docs/
 docs/ARCHITECTURE_OVERVIEW.md
 docs/MARKET_ANALYSIS.md
+docs/API_INTEGRATION.md
+docs/AUTHENTICATION_PLAN.md
+docs/COMPLETE_ECOSYSTEM_GUIDE.md
+docs/IMPLEMENTATION_PLAN.md
+docs/CLERK_REMOVAL_COMPLETE.md
