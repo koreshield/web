@@ -1,11 +1,20 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import { SearchPalette } from "./SearchPalette";
 import Footer from "./Footer";
 import { useState } from "react";
-import { Menu, X, Github } from "lucide-react";
+import { Menu, X, Github, LogOut, User } from "lucide-react";
+import { authService } from "../lib/auth";
 
 export function Layout() {
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const navigate = useNavigate();
+    const isAuthenticated = authService.isAuthenticated();
+    const user = authService.getCurrentUser();
+
+    const handleLogout = () => {
+        authService.logout();
+        navigate('/');
+    };
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col font-sans transition-colors duration-300">
@@ -24,13 +33,32 @@ export function Layout() {
                         <Link to="/pricing" className="text-sm font-medium hover:text-electric-green transition-colors">Pricing</Link>
                         <Link to="/playground" className="text-sm font-medium hover:text-electric-green transition-colors">Playground</Link>
                         <Link to="/status" className="text-sm font-medium hover:text-electric-green transition-colors">Status</Link>
+                        {isAuthenticated && (
+                            <Link to="/dashboard" className="text-sm font-medium hover:text-electric-green transition-colors">Dashboard</Link>
+                        )}
                         <SearchPalette />
                         <a href="https://github.com/koreshield/koreshield" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white transition-colors">
                             <Github className="w-5 h-5" />
                         </a>
-                        <a href="https://github.com/koreshield/koreshield" className="bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold transition-colors glow-green">
-                            Get Started
-                        </a>
+                        {isAuthenticated ? (
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2 text-sm">
+                                    <User className="w-4 h-4 text-electric-green" />
+                                    <span className="text-muted-foreground">{user?.name || user?.email}</span>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 bg-destructive/10 hover:bg-destructive/20 text-destructive px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    Logout
+                                </button>
+                            </div>
+                        ) : (
+                            <Link to="/login" className="bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold transition-colors glow-green">
+                                Sign In
+                            </Link>
+                        )}
                     </nav>
 
                     {/* Mobile Actions */}
@@ -55,14 +83,36 @@ export function Layout() {
                         <Link to="/pricing" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
                         <Link to="/playground" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Playground</Link>
                         <Link to="/status" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Status</Link>
+                        {isAuthenticated && (
+                            <Link to="/dashboard" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+                        )}
                         <a href="https://github.com/koreshield/koreshield" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors flex items-center gap-2">
                             <Github className="w-5 h-5" /> GitHub
                         </a>
 
                         <div className="pt-4">
-                            <a href="https://github.com/koreshield/koreshield" className="block w-full text-center bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-4 rounded-lg text-lg font-bold transition-colors shadow-lg shadow-electric-green/20">
-                                Get Started
-                            </a>
+                            {isAuthenticated ? (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 px-4 py-3 bg-card border border-border rounded-lg">
+                                        <User className="w-5 h-5 text-electric-green" />
+                                        <div>
+                                            <div className="text-sm font-medium">{user?.name}</div>
+                                            <div className="text-xs text-muted-foreground">{user?.email}</div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center justify-center gap-2 w-full bg-destructive/10 hover:bg-destructive/20 text-destructive px-4 py-4 rounded-lg text-lg font-bold transition-colors"
+                                    >
+                                        <LogOut className="w-5 h-5" />
+                                        Logout
+                                    </button>
+                                </div>
+                            ) : (
+                                <Link to="/login" className="block w-full text-center bg-primary hover:bg-emerald-bright text-primary-foreground px-4 py-4 rounded-lg text-lg font-bold transition-colors shadow-lg shadow-electric-green/20" onClick={() => setMobileMenuOpen(false)}>
+                                    Sign In
+                                </Link>
+                            )}
                         </div>
                     </div>
                 )}
