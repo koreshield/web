@@ -54,20 +54,22 @@ export function ReportsPage() {
     const queryClient = useQueryClient();
 
     // Fetch reports
-    const { data: reports = [], isLoading: reportsLoading } = useQuery({
+    const { data: reportsData = [], isLoading: reportsLoading } = useQuery({
         queryKey: ['reports'],
         queryFn: async () => {
             return api.getReports();
         },
     });
+    const reports = reportsData as Report[];
 
     // Fetch report templates
-    const { data: templates = [], isLoading: templatesLoading } = useQuery({
+    const { data: templatesData = [], isLoading: templatesLoading } = useQuery({
         queryKey: ['report-templates'],
         queryFn: async () => {
             return api.getReportTemplates();
         },
     });
+    const templates = templatesData as ReportTemplate[];
 
     // Generate report mutation
     const generateReportMutation = useMutation({
@@ -545,6 +547,7 @@ export function ReportsPage() {
 }
 
 // Mock data for development - TODO: Replace with real API
+// @ts-ignore - Kept for reference
 const mockReports: Report[] = [
     {
         id: '1',
@@ -596,6 +599,7 @@ const mockReports: Report[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockTemplates: ReportTemplate[] = [
     {
         id: '1',

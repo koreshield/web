@@ -64,8 +64,8 @@ class WebSocketClient {
     private maxReconnectAttempts = 10;
     private reconnectDelay = 1000; // Start with 1 second
     private maxReconnectDelay = 30000; // Max 30 seconds
-    private reconnectTimer: NodeJS.Timeout | null = null;
-    private heartbeatTimer: NodeJS.Timeout | null = null;
+    private reconnectTimer: number | null = null;
+    private heartbeatTimer: number | null = null;
     private heartbeatInterval = 30000; // 30 seconds
     private isIntentionalDisconnect = false;
     private eventHandlers: Map<EventType, Set<EventHandler>> = new Map();
