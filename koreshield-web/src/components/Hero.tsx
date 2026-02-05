@@ -19,7 +19,7 @@ function Hero() {
                     transition={{ duration: 0.8 }}
                 >
                     <motion.h1
-                        className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
+                        className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
@@ -29,7 +29,7 @@ function Hero() {
                     </motion.h1>
 
                     <motion.p
-                        className="text-lg md:text-xl text-gray-400 mb-8 max-w-xl"
+                        className="text-base sm:text-lg md:text-xl text-gray-400 mb-8 max-w-xl"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.4 }}
@@ -38,18 +38,18 @@ function Hero() {
                     </motion.p>
 
                     <motion.div
-                        className="flex flex-wrap gap-4"
+                        className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
                     >
-                        <button className="group bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 py-4 rounded-lg transition-all duration-300 flex items-center gap-2 glow-green shadow-lg shadow-emerald-500/20">
+                        <button className="group bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 glow-green shadow-lg shadow-emerald-500/20 w-full sm:w-auto">
                             Get Started
-                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                         </button>
 
-                        <button className="group border border-gray-700 hover:border-electric-green text-white font-semibold px-8 py-4 rounded-lg transition-all duration-300 flex items-center gap-2">
-                            <Github className="w-5 h-5" />
+                        <button className="group border border-gray-700 hover:border-electric-green text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto">
+                            <Github className="w-4 h-4 sm:w-5 sm:h-5" />
                             <span>View on GitHub</span>
 
                         </button>
