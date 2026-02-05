@@ -1,3 +1,6 @@
+# Planning docs (local only - kept in docs/planning/)
+docs/planning/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -103,12 +106,26 @@ celerybeat.pid
 
 # Environments
 .env
+.env.local
+.env.production
+.env.test
 .venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Security: Private keys and certificates
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
 
 # Spyder project settings
 .spyderproject
@@ -277,3 +294,6 @@ koreshield-js-sdk/.npmrc
 docs/*.md
 MIGRATION_GUIDE.md
 PHASE_3_SUMMARY.md
+*.md files in docs/
+SECURITY_*.md
+PROJECT_ANALYSIS.md

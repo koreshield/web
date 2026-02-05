@@ -1,4 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
+import { setQueryClient } from './websocket-client';
 
 export const queryClient = new QueryClient({
     defaultOptions: {
@@ -13,3 +14,6 @@ export const queryClient = new QueryClient({
         },
     },
 });
+
+// Initialize WebSocket client with query client for cache invalidation
+setQueryClient(queryClient);

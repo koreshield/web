@@ -27,6 +27,19 @@ env/
 ENV/
 .venv
 
+# Environments & Secrets
+.env
+.env.local
+.env.production
+.env.test
+
+# Security: Private keys and certificates  
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
 # IDE
 .vscode/
 .idea/

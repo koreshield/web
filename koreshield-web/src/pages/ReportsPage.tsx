@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FileText, Calendar, Download, Plus, Clock, Play, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/api-client';
 
 
 interface Report {
@@ -53,29 +54,27 @@ export function ReportsPage() {
     const queryClient = useQueryClient();
 
     // Fetch reports
-    const { data: reports = [], isLoading: reportsLoading } = useQuery({
+    const { data: reportsData = [], isLoading: reportsLoading } = useQuery({
         queryKey: ['reports'],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/reports
-            return mockReports;
+            return api.getReports();
         },
     });
+    const reports = reportsData as Report[];
 
     // Fetch report templates
-    const { data: templates = [], isLoading: templatesLoading } = useQuery({
+    const { data: templatesData = [], isLoading: templatesLoading } = useQuery({
         queryKey: ['report-templates'],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/reports/templates
-            return mockTemplates;
+            return api.getReportTemplates();
         },
     });
+    const templates = templatesData as ReportTemplate[];
 
     // Generate report mutation
     const generateReportMutation = useMutation({
         mutationFn: async (reportId: string) => {
-            // TODO: Replace with real API call
-            console.log('Generating report:', reportId);
-            return { success: true };
+            return api.generateReport(reportId);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['reports'] });
@@ -85,9 +84,7 @@ export function ReportsPage() {
     // Create report mutation
     const createReportMutation = useMutation({
         mutationFn: async (report: Partial<Report>) => {
-            // TODO: Replace with real API call
-            console.log('Creating report:', report);
-            return report;
+            return api.createReport(report);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['reports'] });
@@ -105,8 +102,7 @@ export function ReportsPage() {
     // Delete report mutation
     const deleteReportMutation = useMutation({
         mutationFn: async (reportId: string) => {
-            // TODO: Replace with real API call
-            console.log('Deleting report:', reportId);
+            return api.deleteReport(reportId);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['reports'] });
@@ -551,6 +547,7 @@ export function ReportsPage() {
 }
 
 // Mock data for development - TODO: Replace with real API
+// @ts-ignore - Kept for reference
 const mockReports: Report[] = [
     {
         id: '1',
@@ -602,6 +599,7 @@ const mockReports: Report[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockTemplates: ReportTemplate[] = [
     {
         id: '1',

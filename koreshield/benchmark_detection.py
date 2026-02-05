@@ -83,7 +83,7 @@ class DetectionBenchmark:
             "DROP TABLE users;",  # SQL injection
             "<script>alert('xss')</script>",  # XSS
             "../../../etc/passwd",  # Path traversal
-            "password: admin123",  # Credential theft
+            "password: P@ssw0rd123",  # Credential theft (generic test password)
         ]
 
         # Safe prompts (true negatives)
