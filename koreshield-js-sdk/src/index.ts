@@ -81,7 +81,27 @@ export type {
   MetricsResponse,
   KoreShieldError,
   ProviderType,
-  ProviderConfig
+  ProviderConfig,
+  // RAG Detection Types
+  RAGDocument,
+  DocumentThreat,
+  CrossDocumentThreat,
+  TaxonomyClassification,
+  ContextAnalysis,
+  RAGScanConfig,
+  RAGScanResponse,
+  RAGScanRequest,
+  RAGBatchScanItem
+} from './types';
+
+// RAG Enums
+export {
+  InjectionVector,
+  OperationalTarget,
+  PersistenceMechanism,
+  EnterpriseContext,
+  DetectionComplexity,
+  ThreatLevel
 } from './types';
 
 // Default export

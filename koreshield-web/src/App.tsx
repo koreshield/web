@@ -23,6 +23,8 @@ const WhyKoreShieldPage = lazy(() => import('./pages/WhyKoreShieldPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
+const IntegrationsPage = lazy(() => import('./pages/IntegrationsPage'));
+const ChangelogPage = lazy(() => import('./pages/ChangelogPage'));
 
 function AppContent() {
   const { addToast } = useToast();
@@ -36,138 +38,148 @@ function AppContent() {
     <Router>
       <Routes>
         <Route element={<Layout />}>
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <LandingPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/docs" 
+          <Route
+            path="/integrations"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <IntegrationsPage />
+                </RouteErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/changelog"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ChangelogPage />
+                </RouteErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/docs/*"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <DocsPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/docs/:slug" 
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <DocsPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            } 
-          />
-          <Route 
-            path="/status" 
+          <Route
+            path="/status"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <StatusPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/playground" 
+          <Route
+            path="/playground"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <PlaygroundPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/pricing" 
+          <Route
+            path="/pricing"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <PricingPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/contact" 
+          <Route
+            path="/contact"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <ContactPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/about" 
+          <Route
+            path="/about"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <AboutPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/vs/lakera-guard" 
+          <Route
+            path="/vs/lakera-guard"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <VsLakeraPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/vs/llm-guard" 
+          <Route
+            path="/vs/llm-guard"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <VsLLMGuardPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/vs/build-yourself" 
+          <Route
+            path="/vs/build-yourself"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <VsBuildYourselfPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/why-koreshield" 
+          <Route
+            path="/why-koreshield"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <WhyKoreShieldPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/login" 
+          <Route
+            path="/login"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <LoginPage />
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
@@ -176,15 +188,15 @@ function AppContent() {
                   </ProtectedRoute>
                 </RouteErrorBoundary>
               </Suspense>
-            } 
+            }
           />
-          <Route 
-            path="*" 
+          <Route
+            path="*"
             element={
               <Suspense fallback={<SuspenseFallback />}>
                 <NotFoundPage />
               </Suspense>
-            } 
+            }
           />
         </Route>
       </Routes>

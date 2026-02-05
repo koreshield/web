@@ -519,6 +519,65 @@ results = client.scan_rag_context_batch(query_doc_pairs, parallel=True)
 
 ## Troubleshooting
 
+### Known Limitations
+
+#### Streaming + RAG Not Supported
+
+**Current Status:** KoreShield supports both streaming scans and RAG context scans, but **not simultaneously**.
+
+**What works:**
+- `scan_prompt()` - Standard prompt scanning
+- `scan_stream()` - Streaming content scanning (chunks long text)
+- `scan_rag_context()` - RAG document scanning (scans retrieved docs)
+
+**What doesn't work:**
+- Streaming scan of RAG-retrieved documents in real-time
+- Combined `scan_rag_context_stream()` functionality
+
+**Workaround:**
+```python
+# Option 1: Scan RAG docs first, then stream LLM response
+rag_result = client.scan_rag_context(query, documents)
+safe_docs = rag_result.get_safe_documents(documents)
+
+# Then stream LLM with safe docs (no security scan on stream)
+response = llm.stream(query, context=safe_docs)
+
+# Option 2: Batch scan entire retrieved set before using
+all_safe = rag_result.is_safe
+if all_safe:
+    # Proceed with streaming
+    pass
+```
+
+**Future Plans:** Combined streaming + RAG scanning is planned for a future release (v0.4.0+).
+
+#### Maximum Document Limits
+
+**Recommended Limits:**
+- Single scan: Up to 100 documents (optimal: 10-20)
+- Batch scan: Up to 1000 total documents across all queries
+- Document size: Up to 10KB per document (optimal: 1-2KB)
+
+**Why limits exist:**
+- Memory usage scales linearly with document count
+- Cross-document analysis is O(n²) in worst case
+- API timeout limits (30s default)
+
+**Handling large document sets:**
+```python
+# Split into smaller batches
+def scan_large_set(documents, batch_size=50):
+    results = []
+    for i in range(0, len(documents), batch_size):
+        batch = documents[i:i+batch_size]
+        result = client.scan_rag_context(query, batch)
+        results.append(result)
+    return results
+```
+
+---
+
 ### High False Positive Rate
 
 **Symptoms:** Many safe documents flagged as threats

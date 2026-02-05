@@ -1,18 +1,17 @@
 {
-  "title": "Documentation",
   "pages": [
-    "index",
+    "---Overview---",
+    "...intro",
     "---Getting Started---",
-    "...(getting-started)",
-    "---Platform Features---",
-    "...(platform-features)",
+    "...getting-started",
+    "---Platform---",
+    "...features",
+    "...configuration",
     "---Integrations---",
-    "...(integrations)",
-    "---Advanced Topics---",
-    "advanced",
-    "---Case Studies---",
-    "case-studies",
+    "...integrations",
     "---Reference---",
-    "...(reference)"
+    "...api",
+    "---Resources---",
+    "...resources"
   ]
 }
