@@ -228,7 +228,7 @@ temp/
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
+
 *.suo
 *.ntvs*
 *.njsproj
@@ -240,7 +240,7 @@ logs
 *.log
 
 # OS generated files
-.DS_Store
+
 .DS_Store?
 ._*
 .Spotlight-V100
@@ -252,7 +252,7 @@ Thumbs.db
 !koreshield/
 todo.md
 personal-keep/
-.DS_Store
+
 web/src/lib/
 # Only exclude web docs, not SDK/project docs
 web/public/docs/
@@ -261,7 +261,7 @@ koreshield/docs/_build/
 *.db
 build_output*.txt
 FRONTEND_SPEC.md
-.DS_Store
+
 
 # Explicitly include important documentation
 !docs/RAG_INTEGRATION_GUIDE.md
@@ -269,3 +269,4 @@ FRONTEND_SPEC.md
 !koreshield-python-sdk/docs/
 !koreshield-js-sdk/examples/
 !koreshield-js-sdk/docs/
+docs/SYSTEM_DESIGN.md
