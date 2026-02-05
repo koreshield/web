@@ -34,7 +34,7 @@ def upgrade() -> None:
         sa.Column('last_login_at', sa.DateTime()),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('now()')),
         sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('now()')),
-        sa.Column('metadata', postgresql.JSON(), server_default='{}'),
+        sa.Column('user_metadata', postgresql.JSON(), server_default='{}'),
     )
     
     # Create indexes
