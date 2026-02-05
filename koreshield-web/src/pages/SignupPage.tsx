@@ -37,7 +37,7 @@ export function SignupPage() {
             localStorage.setItem('koreshield_user', JSON.stringify(data.user));
 
             // Redirect to dashboard
-            navigate('/admin');
+            navigate('/dashboard');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Signup failed');
         } finally {
