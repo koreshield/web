@@ -8,7 +8,7 @@ retrieved context for adversarial instructions that could compromise the LLM.
 import re
 import uuid
 from typing import List, Optional, Dict, Any, Set
-from datetime import datetime
+from datetime import datetime, UTC
 import structlog
 
 from .rag_taxonomy import (
@@ -148,7 +148,7 @@ class RAGContextDetector:
         Returns:
             RAGDetectionResult with taxonomy-classified threats
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         scan_id = str(uuid.uuid4())
         
         logger.info(
@@ -234,16 +234,36 @@ class RAGContextDetector:
                     excerpt = excerpt[:self.max_excerpt_length] + "..."
                 rag_excerpts.append(excerpt)
         
+        
         # Combine indicators from both detectors
         all_indicators = (
             detection_result.get("indicators", []) +
             [{"type": ind, "severity": "medium"} for ind in rag_indicators]
         )
         
-        # Calculate combined confidence
+        # Calculate combined confidence with boosting for high-risk patterns
         base_confidence = detection_result.get("confidence", 0.0)
         rag_confidence = min(len(rag_indicators) * 0.2, 0.8)
         combined_confidence = max(base_confidence, rag_confidence)
+        
+        # Boost confidence for high-risk patterns
+        content_lower = doc.content.lower()
+        
+        # Critical pattern boosts
+        if any(kw in content_lower for kw in ["ignore", "bypass", "override", "disable"]):
+            combined_confidence = min(combined_confidence + 0.3, 1.0)
+        
+        if any(kw in content_lower for kw in ["reveal", "leak", "exfiltrate", "steal", "extract"]):
+            combined_confidence = min(combined_confidence + 0.35, 1.0)
+        
+        if "[system:" in content_lower or "system:" in content_lower:
+            combined_confidence = min(combined_confidence + 0.25, 1.0)
+        
+        # Boost for multiple injection keywords
+        injection_keywords = ["ignore", "bypass", "override", "reveal", "leak", "disclose"]
+        keyword_count = sum(1 for kw in injection_keywords if kw in content_lower)
+        if keyword_count >= 2:
+            combined_confidence = min(combined_confidence + 0.2, 1.0)
         
         if combined_confidence < self.min_confidence_threshold:
             return None  # No significant threat
@@ -514,16 +534,20 @@ class RAGContextDetector:
             OperationalTarget.ACCESS_CONTROL_BYPASS,
         }
         
-        if target in critical_targets and confidence > 0.7:
+        # Lowered thresholds for better detection
+        if target in critical_targets and confidence >= 0.6:
             return ThreatSeverity.CRITICAL
         
-        if confidence > 0.8:
+        if target in critical_targets and confidence >= 0.45:
             return ThreatSeverity.HIGH
         
-        if confidence > 0.5:
+        if confidence >= 0.7:
+            return ThreatSeverity.HIGH
+        
+        if confidence >= 0.5:
             return ThreatSeverity.MEDIUM
         
-        if confidence > 0.3:
+        if confidence >= 0.3:
             return ThreatSeverity.LOW
         
         return ThreatSeverity.SAFE
@@ -576,7 +600,7 @@ class RAGContextDetector:
         )
         
         # Calculate processing time
-        processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+        processing_time = (datetime.now(UTC) - start_time).total_seconds() * 1000
         
         return RAGDetectionResult(
             is_safe=(overall_severity == ThreatSeverity.SAFE),
@@ -616,7 +640,7 @@ class RAGContextDetector:
     
     def _empty_result(self, scan_id: str, start_time: datetime) -> RAGDetectionResult:
         """Create an empty result for no documents."""
-        processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+        processing_time = (datetime.now(UTC) - start_time).total_seconds() * 1000
         
         return RAGDetectionResult(
             is_safe=True,
