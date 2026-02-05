@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Shield, Network, Users, Activity } from 'lucide-react';
+import { Shield, Network, Users, Activity, Database, Globe } from 'lucide-react';
 
 const features = [
     {
@@ -8,9 +8,19 @@ const features = [
         description: 'Industry-leading detection rate with <3% false positives.',
     },
     {
+        icon: Database,
+        title: 'RAG Defense',
+        description: 'Scan retrieved context (docs, emails) for indirect prompt injection attacks.',
+    },
+    {
         icon: Network,
         title: 'Multi-Provider',
         description: 'Unified security for OpenAI, Anthropic, Gemini, and DeepSeek.',
+    },
+    {
+        icon: Globe,
+        title: 'CRM Integrations',
+        description: 'Secure Salesforce, HubSpot, and Zendesk data pipelines out-of-the-box.',
     },
     {
         icon: Users,

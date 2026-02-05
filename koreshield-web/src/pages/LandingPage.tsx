@@ -5,6 +5,7 @@ import IntegrationCode from '../components/IntegrationCode';
 import UseCases from '../components/UseCases';
 import { ThreatDashboard } from '../components/ThreatDashboard';
 import { InteractiveDemo } from '../components/InteractiveDemo';
+import { RAGShowcase } from '../components/RAGShowcase';
 
 import { SEOMeta } from '../components/SEOMeta';
 
@@ -27,6 +28,7 @@ function LandingPage() {
                 </div>
             </section>
 
+            <RAGShowcase />
             <Architecture />
             <Features />
             <IntegrationCode />
