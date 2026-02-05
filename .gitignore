@@ -259,5 +259,7 @@ docs/
 *.db
 build_output*.txt
 web/public/docs/
-web/
 FRONTEND_SPEC.md
+.DS_Store
+
+!docs/RAG_INTEGRATION_GUIDE.md
