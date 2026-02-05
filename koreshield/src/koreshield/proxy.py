@@ -19,6 +19,8 @@ from .detector import AttackDetector
 from .logger import FirewallLogger
 from .policy import PolicyEngine
 from .sanitizer import SanitizationEngine
+from .rag_detector import RAGContextDetector
+from .rag_taxonomy import RetrievedDocument
 
 logger = structlog.get_logger(__name__)
 
@@ -150,6 +152,7 @@ class KoreShieldProxy:
         security_config = config.get("security", {})
         self.sanitizer = SanitizationEngine(security_config)
         self.detector = AttackDetector(security_config)
+        self.rag_detector = RAGContextDetector(security_config)
         self.policy_engine = PolicyEngine(config)
         self.logger = FirewallLogger()
 
@@ -356,6 +359,12 @@ class KoreShieldProxy:
         @self.limiter.limit(rate_limit)
         async def chat_completions(request: Request):
             return await self._handle_chat_completion(request)
+
+        # RAG context scanning endpoint
+        @self.app.post("/v1/rag/scan", tags=["Chat"])
+        @self.limiter.limit(rate_limit)
+        async def rag_scan(request: Request):
+            return await self._handle_rag_scan(request)
 
         # Generic proxy endpoint for other paths
         @self.app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
@@ -623,6 +632,173 @@ class KoreShieldProxy:
             self._increment_stat("errors")
             logger.error(
                 "Request handling error", request_id=request_id, error=str(e), exc_info=True
+            )
+            raise HTTPException(status_code=500, detail="Internal server error")
+
+    async def _handle_rag_scan(self, request: Request) -> Response:
+        """
+        Handle RAG context scanning requests.
+        
+        Scans both user query and retrieved documents for indirect
+        prompt injection attacks using the 5-dimensional taxonomy.
+        
+        Args:
+            request: FastAPI request object
+            
+        Returns:
+            JSON response with detection results and taxonomy
+        """
+        import time
+        start_time = time.time()
+        request_id = str(uuid.uuid4())
+        
+        logger.info("RAG scan request received", request_id=request_id)
+        
+        try:
+            # Parse request body
+            try:
+                body = await request.json()
+            except Exception as e:
+                logger.error("Failed to parse JSON", request_id=request_id, error=str(e))
+                raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+            
+            # Validate required fields
+            if not isinstance(body, dict):
+                raise HTTPException(status_code=400, detail="Request body must be a JSON object")
+            
+            user_query = body.get("user_query", "")
+            documents_data = body.get("documents", [])
+            config_override = body.get("config", {})
+            
+            if not isinstance(documents_data, list):
+                raise HTTPException(
+                    status_code=400,
+                    detail="'documents' field must be a list"
+                )
+            
+            # Convert documents to RetrievedDocument objects
+            documents = []
+            for idx, doc_data in enumerate(documents_data):
+                if not isinstance(doc_data, dict):
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Document at index {idx} must be an object"
+                    )
+                
+                try:
+                    doc = RetrievedDocument(
+                        id=doc_data.get("id", f"doc_{idx}"),
+                        content=doc_data.get("content", ""),
+                        metadata=doc_data.get("metadata", {}),
+                        score=doc_data.get("score")
+                    )
+                    documents.append(doc)
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Invalid document at index {idx}: {str(e)}"
+                    )
+            
+            # Step 1: Scan user query with standard detector
+            query_detection_result = None
+            if user_query:
+                try:
+                    query_detection_result = self.detector.detect(
+                        user_query,
+                        context={"source": "rag_query", "request_id": request_id}
+                    )
+                except Exception as e:
+                    logger.error("Query detection error", request_id=request_id, error=str(e))
+                    query_detection_result = {
+                        "is_attack": True,
+                        "attack_type": "detection_error",
+                        "confidence": 1.0,
+                        "indicators": [{"type": "error", "error": str(e)}],
+                    }
+            
+            # Step 2: Scan retrieved context with RAG detector
+            try:
+                rag_scan_result = self.rag_detector.scan_retrieved_context(
+                    documents=documents,
+                    user_query=user_query,
+                    config=config_override if config_override else None
+                )
+            except Exception as e:
+                logger.error("RAG detection error", request_id=request_id, error=str(e))
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"RAG detection failed: {str(e)}"
+                )
+            
+            # Step 3: Combined decision
+            # If either query or context has threats, overall is not safe
+            query_is_attack = query_detection_result.get("is_attack", False) if query_detection_result else False
+            combined_is_safe = not query_is_attack and rag_scan_result.is_safe
+            
+            # Log results
+            logger.info(
+                "RAG scan complete",
+                request_id=request_id,
+                query_is_attack=query_is_attack,
+                context_is_safe=rag_scan_result.is_safe,
+                combined_is_safe=combined_is_safe,
+                threats_found=rag_scan_result.total_threats_found,
+                processing_time_ms=(time.time() - start_time) * 1000
+            )
+            
+            # Update statistics
+            self._increment_stat("requests_total")
+            if not combined_is_safe:
+                self._increment_stat("attacks_detected")
+                self._increment_stat("requests_blocked")
+            else:
+                self._increment_stat("requests_allowed")
+            
+            # Record metrics
+            duration = time.time() - start_time
+            self.monitoring.metrics.requests_total.labels(
+                method=request.method,
+                endpoint="/v1/rag/scan",
+                status="success"
+            ).inc()
+            self.monitoring.metrics.requests_duration.labels(
+                method=request.method,
+                endpoint="/v1/rag/scan"
+            ).observe(duration)
+            
+            if not combined_is_safe:
+                self.monitoring.metrics.attacks_detected.labels(
+                    attack_type="indirect_injection",
+                    severity=rag_scan_result.overall_severity.value
+                ).inc()
+            
+            # Build response
+            response_data = {
+                "scan_id": rag_scan_result.scan_id,
+                "is_safe": combined_is_safe,
+                "overall_severity": rag_scan_result.overall_severity.value,
+                "overall_confidence": rag_scan_result.overall_confidence,
+                "query_analysis": {
+                    "is_attack": query_is_attack,
+                    "details": query_detection_result,
+                } if query_detection_result else None,
+                "context_analysis": rag_scan_result.to_dict(),
+                "processing_time_ms": (time.time() - start_time) * 1000,
+                "timestamp": rag_scan_result.scan_timestamp.isoformat(),
+            }
+            
+            return JSONResponse(content=response_data)
+            
+        except HTTPException:
+            # Re-raise HTTP exceptions as-is
+            raise
+        except Exception as e:
+            self._increment_stat("errors")
+            logger.error(
+                "RAG scan error",
+                request_id=request_id,
+                error=str(e),
+                exc_info=True
             )
             raise HTTPException(status_code=500, detail="Internal server error")
 
