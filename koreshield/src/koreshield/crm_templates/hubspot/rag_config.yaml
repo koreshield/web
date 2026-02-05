@@ -1,0 +1,424 @@
+"""
+HubSpot RAG Security Template
+
+Specialized configuration for HubSpot CRM with focus on Deals, Tickets,
+Notes, Conversations, and Marketing automation as attack vectors.
+"""
+
+# CRM Platform Configuration
+platform:
+  name: "HubSpot CRM"
+  type: "hubspot"
+  version: "1.0"
+  description: "RAG security template for HubSpot CRM and Marketing Hub"
+  api_version: "v3"
+
+# RAG Detection Configuration
+rag_detection:
+  enabled: true
+  min_confidence: 0.3
+  enable_cross_document_analysis: true
+  max_documents_per_scan: 75
+
+# Injection Vector Mapping (HubSpot-specific)
+injection_vectors:
+  # Email (Conversations, Marketing Emails)
+  email:
+    enabled: true
+    hubspot_objects:
+      - "conversations"
+      - "marketing_emails"
+      - "engagement_emails"
+    sources:
+      - field: "message_body"
+        api_name: "conversations.text"
+        description: "Conversation message body"
+        risk_level: "high"
+      - field: "email_body"
+        api_name: "emails.hs_email_text"
+        description: "Email content"
+        risk_level: "high"
+      - field: "email_subject"
+        api_name: "emails.hs_email_subject"
+        description: "Email subject line"
+        risk_level: "medium"
+  
+  # Support Tickets
+  customer_support:
+    enabled: true
+    hubspot_objects:
+      - "tickets"
+      - "conversations"
+    sources:
+      - field: "ticket_description"
+        api_name: "tickets.content"
+        description: "Support ticket description"
+        risk_level: "high"
+      - field: "ticket_subject"
+        api_name: "tickets.subject"
+        description: "Ticket subject"
+        risk_level: "medium"
+      - field: "conversation_thread"
+        api_name: "conversations.messages"
+        description: "Conversation thread"
+        risk_level: "high"
+  
+  # Deals & Notes
+  database:
+    enabled: true
+    hubspot_objects:
+      - "deals"
+      - "notes"
+      - "tasks"
+      - "meetings"
+    sources:
+      - field: "deal_notes"
+        api_name: "deals.hs_note_body"
+        description: "Deal notes"
+        risk_level: "medium"
+      - field: "note_body"
+        api_name: "notes.hs_note_body"
+        description: "Note content"
+        risk_level: "high"
+      - field: "task_body"
+        api_name: "tasks.hs_task_body"
+        description: "Task description"
+        risk_level: "medium"
+      - field: "meeting_outcome"
+        api_name: "meetings.hs_meeting_outcome"
+        description: "Meeting notes"
+        risk_level: "medium"
+  
+  # Forms & Landing Pages
+  web_scraping:
+    enabled: true
+    hubspot_objects:
+      - "forms"
+      - "form_submissions"
+    sources:
+      - field: "form_field_value"
+        api_name: "form_submissions.values"
+        description: "Form submission data"
+        risk_level: "high"
+      - field: "custom_properties"
+        api_name: "contacts.properties"
+        description: "Custom contact properties"
+        risk_level: "medium"
+  
+  # Chat/Conversations
+  chat_message:
+    enabled: true
+    hubspot_objects:
+      - "conversations"
+      - "chatflows"
+    sources:
+      - field: "live_chat_message"
+        api_name: "conversations.messages.text"
+        description: "Live chat messages"
+        risk_level: "high"
+      - field: "bot_conversation"
+        api_name: "chatflows.messages"
+        description: "Chatbot conversations"
+        risk_level: "high"
+
+# High-Risk HubSpot Fields
+high_risk_fields:
+  - name: "conversations.messages.text"
+    reason: "Real-time customer communication, minimal filtering"
+    scan_priority: "critical"
+    additional_patterns:
+      - "(?i)password reset"
+      - "(?i)account locked"
+      - "(?i)billing issue"
+  
+  - name: "tickets.content"
+    reason: "Customer-submitted content in support tickets"
+    scan_priority: "high"
+    additional_patterns:
+      - "(?i)urgent"
+      - "(?i)escalate"
+      - "(?i)manager"
+  
+  - name: "form_submissions.values"
+    reason: "External form submissions, high spam/injection risk"
+    scan_priority: "critical"
+    additional_patterns:
+      - "(?i)<script"
+      - "(?i)javascript:"
+      - "(?i)http.*payload"
+  
+  - name: "notes.hs_note_body"
+    reason: "Internal notes can be compromised by social engineering"
+    scan_priority: "medium"
+    additional_patterns:
+      - "(?i)internal only"
+      - "(?i)confidential"
+  
+  - name: "chatflows.messages"
+    reason: "Chatbot interactions vulnerable to prompt injection"
+    scan_priority: "critical"
+    additional_patterns:
+      - "(?i)ignore.*bot.*rules"
+      - "(?i)bypass.*automation"
+
+# HubSpot-Specific Detection Rules
+detection_rules:
+  - id: "hs_conversation_injection"
+    name: "HubSpot Conversation Injection"
+    description: "Detects prompt injection in customer conversations"
+    pattern: "(?i)(ignore|override).{0,30}(bot|automation|script|workflow)"
+    severity: "high"
+    hubspot_objects: ["conversations"]
+    injection_vector: "chat_message"
+    operational_targets:
+      - "context_poisoning"
+      - "access_control_bypass"
+  
+  - id: "hs_ticket_escalation_attack"
+    name: "Ticket Escalation Attack"
+    description: "Detects malicious escalation attempts"
+    pattern: "(?i)(provide|grant|give).{0,30}(admin|manager|supervisor).{0,30}(access|credentials)"
+    severity: "high"
+    hubspot_objects: ["tickets"]
+    injection_vector: "customer_support"
+    operational_targets:
+      - "privilege_escalation"
+  
+  - id: "hs_form_spam_injection"
+    name: "Form Spam/Injection Attack"
+    description: "Detects spam or injection via forms"
+    pattern: "(<script|javascript:|data:|vbscript:|onclick=|onerror=)"
+    severity: "high"
+    hubspot_objects: ["form_submissions"]
+    injection_vector: "web_scraping"
+    operational_targets:
+      - "access_control_bypass"
+      - "misinformation"
+  
+  - id: "hs_data_exfiltration"
+    name: "HubSpot Data Exfiltration"
+    description: "Detects attempts to export HubSpot data"
+    pattern: "(?i)(export|download|extract).{0,30}(all|entire|complete).{0,30}(contacts?|deals?|companies)"
+    severity: "critical"
+    hubspot_objects: ["conversations", "emails"]
+    injection_vector: "email"
+    operational_targets:
+      - "data_exfiltration"
+  
+  - id: "hs_workflow_manipulation"
+    name: "Workflow Manipulation Attack"
+    description: "Detects attempts to manipulate HubSpot workflows"
+    pattern: "(?i)(skip|bypass|disable|stop).{0,30}(workflow|automation|sequence|task)"
+    severity: "high"
+    hubspot_objects: ["notes", "tickets", "conversations"]
+    injection_vector: "database"
+    operational_targets:
+      - "context_poisoning"
+      - "access_control_bypass"
+  
+  - id: "hs_chatbot_jailbreak"
+    name: "Chatbot Jailbreak Attempt"
+    description: "Detects attempts to jailbreak HubSpot chatbots"
+    pattern: "(?i)(hey bot|chatbot).{0,50}(ignore|forget|disregard).{0,50}(instructions?|rules?|limitations?)"
+    severity: "high"
+    hubspot_objects: ["chatflows", "conversations"]
+    injection_vector: "chat_message"
+    operational_targets:
+      - "context_poisoning"
+
+# HubSpot-Specific Sanitization
+sanitization:
+  enabled: true
+  rules:
+    - field: "conversations.messages.text"
+      max_length: 5000
+      strip_html: true
+      remove_scripts: true
+    
+    - field: "form_submissions.values"
+      max_length: 2000
+      strip_html: true
+      remove_scripts: true
+      url_validation: true
+    
+    - field: "tickets.content"
+      max_length: 10000
+      strip_html: false  # Keep formatting
+      remove_scripts: true
+    
+    - field: "emails.hs_email_text"
+      max_length: 20000
+      strip_html: true
+      remove_scripts: true
+      allowed_tags: ["p", "br", "b", "i", "a"]
+
+# Enterprise Context
+enterprise_context:
+  primary: "crm"
+  secondary:
+    - "sales"
+    - "marketing"
+    - "customer_support"
+  
+  hubspot_tier: "Professional"  # or "Enterprise", "Starter"
+  
+  compliance:
+    gdpr: true
+    ccpa: true
+    hipaa: false
+
+# HubSpot API Integration
+integration:
+  api_endpoint: "/v1/rag/scan"
+  authentication: "api_key"  # or "oauth2"
+  
+  hubspot_api:
+    base_url: "https://api.hubapi.com"
+    api_version: "v3"
+    rate_limit_tier: "professional"  # Affects limits
+  
+  rate_limit: "800/hour"  # Based on HubSpot tier
+  timeout_ms: 8000
+  
+  retry:
+    enabled: true
+    max_attempts: 3
+    backoff_ms: 1500
+
+# HubSpot Chatbot Protection
+chatbot_protection:
+  enabled: true
+  
+  protected_chatflows:
+    - name: "Customer Support Bot"
+      chatflow_id: "12345"
+      scan_all_messages: true
+    
+    - name: "Lead Qualification Bot"
+      chatflow_id: "67890"
+      scan_all_messages: true
+  
+  bot_patterns:
+    - "(?i)hey bot"
+    - "(?i)chatbot"
+    - "(?i)virtual assistant"
+
+# Workflow Automation Protection
+workflows:
+  enabled: true
+  
+  protected_workflows:
+    - workflow_id: "1234567"
+      name: "Lead Nurture Sequence"
+      scan_triggers: true
+    
+    - workflow_id: "7654321"
+      name: "Support Ticket Routing"
+      scan_triggers: true
+  
+  trigger_field_scanning:
+    - "contact.properties"
+    - "deal.properties"
+    - "ticket.content"
+
+# Marketing Hub Protection
+marketing:
+  enabled: true
+  
+  scan_targets:
+    - "email_campaigns"
+    - "landing_pages"
+    - "blog_comments"
+    - "social_posts"
+  
+  spam_detection:
+    enabled: true
+    confidence_threshold: 0.4
+
+# Monitoring & Alerting
+monitoring:
+  enabled: true
+  
+  metrics:
+    - "scans_by_hubspot_object"
+    - "chatbot_threats_detected"
+    - "form_spam_blocked"
+    - "ticket_escalation_attempts"
+  
+  alerts:
+    - name: "High Volume Form Spam"
+      condition: "form spam > 10 in 5 minutes"
+      action: "disable_form_temporarily"
+    
+    - name: "Chatbot Manipulation Detected"
+      condition: "chatbot_jailbreak rule triggered"
+      action: "escalate_to_human_agent"
+    
+    - name: "Critical Data Exfiltration Attempt"
+      condition: "data_exfiltration + severity=critical"
+      action: "immediate_security_alert"
+
+# Response Actions
+response_actions:
+  block:
+    enabled: true
+    severity_threshold: "medium"
+  
+  quarantine:
+    enabled: true
+    severity_threshold: "high"
+    # Move to manual review pipeline
+    quarantine_pipeline: "security_review"
+  
+  flag:
+    enabled: true
+    # Tag HubSpot objects for review
+    tag_name: "security_flagged"
+
+# Usage Examples
+examples:
+  - name: "Scan Conversation Before Chatbot Response"
+    description: "Scan customer message before bot processes it"
+    code: |
+      POST /v1/rag/scan
+      {
+        "user_query": "Generate chatbot response",
+        "documents": [
+          {
+            "id": "conversation/001",
+            "content": message.text,
+            "metadata": {
+              "source": "chat_message",
+              "hubspot_object": "conversations",
+              "chatflow_id": conversation.chatflow_id
+            }
+          }
+        ]
+      }
+  
+  - name: "Scan Support Ticket Notes"
+    description: "Scan ticket content and notes before AI summarization"
+    code: |
+      POST /v1/rag/scan
+      {
+        "user_query": "Summarize ticket for agent",
+        "documents": [
+          {
+            "id": "ticket/123",
+            "content": ticket.content,
+            "metadata": {
+              "source": "customer_support",
+              "hubspot_object": "tickets",
+              "ticket_id": ticket.id
+            }
+          },
+          {
+            "id": "notes/456",
+            "content": note.hs_note_body,
+            "metadata": {
+              "source": "database",
+              "hubspot_object": "notes"
+            }
+          }
+        ]
+      }

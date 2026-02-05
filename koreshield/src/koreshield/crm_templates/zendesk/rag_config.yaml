@@ -1,0 +1,444 @@
+"""
+Zendesk RAG Security Template
+
+Specialized configuration for Zendesk Support with focus on Tickets,
+Comments, Articles, Chat, and Help Center as attack vectors.
+"""
+
+# CRM Platform Configuration
+platform:
+  name: "Zendesk Support"
+  type: "zendesk"
+  version: "1.0"
+  description: "RAG security template for Zendesk Support and Help Center"
+  api_version: "v2"
+
+# RAG Detection Configuration
+rag_detection:
+  enabled: true
+  min_confidence: 0.3
+  enable_cross_document_analysis: true
+  max_documents_per_scan: 60
+
+# Injection Vector Mapping (Zendesk-specific)
+injection_vectors:
+  # Support Tickets
+  customer_support:
+    enabled: true
+    zendesk_objects:
+      - "tickets"
+      - "comments"
+    sources:
+      - field: "ticket_description"
+        api_name: "tickets.description"
+        description: "Initial ticket description"
+        risk_level: "high"
+      - field: "ticket_subject"
+        api_name: "tickets.subject"
+        description: "Ticket subject line"
+        risk_level: "medium"
+      - field: "comment_body"
+        api_name: "comments.body"
+        description: "Ticket comment/reply"
+        risk_level: "high"
+      - field: "comment_html"
+        api_name: "comments.html_body"
+        description: "HTML comment body"
+        risk_level: "high"
+  
+  # Help Center / Knowledge Base
+  knowledge_base:
+    enabled: true
+    zendesk_objects:
+      - "articles"
+      - "sections"
+      - "posts"
+    sources:
+      - field: "article_body"
+        api_name: "articles.body"
+        description: "Knowledge base article content"
+        risk_level: "medium"
+      - field: "article_title"
+        api_name: "articles.title"
+        description: "Article title"
+        risk_level: "low"
+      - field: "user_comment"
+        api_name: "posts.body"
+        description: "Community forum post"
+        risk_level: "high"
+  
+  # Chat / Messaging
+  chat_message:
+    enabled: true
+    zendesk_objects:
+      - "chats"
+      - "messages"
+    sources:
+      - field: "chat_message"
+        api_name: "chats.messages.msg"
+        description: "Live chat message"
+        risk_level: "high"
+      - field: "chat_transcript"
+        api_name: "chats.transcript"
+        description: "Full chat transcript"
+        risk_level: "high"
+  
+  # Email
+  email:
+    enabled: true
+    zendesk_objects:
+      - "tickets"  # Tickets created via email
+    sources:
+      - field: "email_body"
+        api_name: "tickets.via.source.from.address"
+        description: "Email-originated ticket"
+        risk_level: "high"
+  
+  # Users & Organizations
+  database:
+    enabled: true
+    zendesk_objects:
+      - "users"
+      - "organizations"
+    sources:
+      - field: "user_notes"
+        api_name: "users.notes"
+        description: "Internal user notes"
+        risk_level: "medium"
+      - field: "org_notes"
+        api_name: "organizations.notes"
+        description: "Organization notes"
+        risk_level: "medium"
+      - field: "custom_fields"
+        api_name: "tickets.custom_fields"
+        description: "Ticket custom fields"
+        risk_level: "medium"
+
+# High-Risk Zendesk Fields
+high_risk_fields:
+  - name: "tickets.description"
+    reason: "Primary customer input vector"
+    scan_priority: "critical"
+    additional_patterns:
+      - "(?i)account.*suspended"
+      - "(?i)verify.*identity"
+      - "(?i)urgent.*assistance"
+  
+  - name: "comments.body"
+    reason: "Ongoing ticket conversation, customer and agent"
+    scan_priority: "high"
+    additional_patterns:
+      - "(?i)escalate"
+      - "(?i)supervisor"
+  
+  - name: "chats.messages.msg"
+    reason: "Real-time chat, minimal moderation"
+    scan_priority: "critical"
+    additional_patterns:
+      - "(?i)password"
+      - "(?i)credit card"
+      - "(?i)social security"
+  
+  - name: "posts.body"
+    reason: "Public community posts, spam risk"
+    scan_priority: "high"
+    additional_patterns:
+      - "(?i)<a href"
+      - "(?i)click here"
+      - "(?i)limited time offer"
+  
+  - name: "tickets.custom_fields"
+    reason: "Custom fields often unvalidated"
+    scan_priority: "medium"
+    additional_patterns: []
+
+# Zendesk-Specific Detection Rules
+detection_rules:
+  - id: "zd_ticket_phishing"
+    name: "Zendesk Ticket Phishing"
+    description: "Detects phishing attempts via support tickets"
+    pattern: "(?i)(verify|confirm|update).{0,30}(account|password|payment|card)"
+    severity: "high"
+    zendesk_objects: ["tickets", "comments"]
+    injection_vector: "customer_support"
+    operational_targets:
+      - "data_exfiltration"
+      - "access_control_bypass"
+  
+  - id: "zd_chat_injection"
+    name: "Chat Prompt Injection"
+    description: "Detects injection attacks via chat"
+    pattern: "(?i)(ignore|bypass|override).{0,30}(bot|agent|automation|script)"
+    severity: "high"
+    zendesk_objects: ["chats"]
+    injection_vector: "chat_message"
+    operational_targets:
+      - "context_poisoning"
+  
+  - id: "zd_escalation_manipulation"
+    name: "Escalation Manipulation"
+    description: "Detects social engineering for escalation"
+    pattern: "(?i)(urgent|emergency|asap|immediate).{0,50}(escalate|manager|supervisor|director)"
+    severity: "medium"
+    zendesk_objects: ["tickets", "comments"]
+    injection_vector: "customer_support"
+    operational_targets:
+      - "privilege_escalation"
+  
+  - id: "zd_data_extraction"
+    name: "Zendesk Data Extraction"
+    description: "Detects attempts to extract ticket/customer data"
+    pattern: "(?i)(export|download|extract|dump).{0,30}(all|entire|complete).{0,30}(tickets?|customers?|users?|data)"
+    severity: "critical"
+    zendesk_objects: ["tickets", "chats"]
+    injection_vector: "customer_support"
+    operational_targets:
+      - "data_exfiltration"
+  
+  - id: "zd_article_poisoning"
+    name: "Knowledge Base Poisoning"
+    description: "Detects attempts to poison KB articles"
+    pattern: "(?i)(always|from now|permanently).{0,30}(respond|answer|include|suggest)"
+    severity: "high"
+    zendesk_objects: ["articles", "posts"]
+    injection_vector: "knowledge_base"
+    operational_targets:
+      - "context_poisoning"
+      - "misinformation"
+  
+  - id: "zd_pii_leakage"
+    name: "PII Leakage Attempt"
+    description: "Detects attempts to leak PII via tickets"
+    pattern: "(?i)(password|ssn|social security|credit card|cvv|pin).*?(send|provide|share|leak)"
+    severity: "critical"
+    zendesk_objects: ["tickets", "comments", "chats"]
+    injection_vector: "customer_support"
+    operational_targets:
+      - "data_exfiltration"
+
+# Zendesk-Specific Sanitization
+sanitization:
+  enabled: true
+  rules:
+    - field: "tickets.description"
+      max_length: 20000
+      strip_html: false
+      remove_scripts: true
+      pii_redaction: true  # Redact SSN, credit cards
+    
+    - field: "comments.html_body"
+      max_length: 10000
+      strip_html: false
+      remove_scripts: true
+      allowed_tags: ["p", "br", "b", "i", "u", "a", "ul", "ol", "li"]
+    
+    - field: "chats.messages.msg"
+      max_length: 2000
+      strip_html: true
+      remove_scripts: true
+      pii_redaction: true
+    
+    - field: "articles.body"
+      max_length: 50000
+      strip_html: false
+      remove_scripts: true
+
+# Enterprise Context
+enterprise_context:
+  primary: "customer_support"
+  secondary:
+    - "knowledge_base"
+  
+  zendesk_plan: "Professional"  # or "Enterprise", "Suite"
+  
+  compliance:
+    gdpr: true
+    ccpa: true
+    hipaa: false
+    pci_dss: false
+
+# Zendesk API Integration
+integration:
+  api_endpoint: "/v1/rag/scan"
+  authentication: "oauth2"  # or "api_token"
+  
+  zendesk_api:
+    subdomain: "your-company"
+    base_url: "https://your-company.zendesk.com"
+    api_version: "v2"
+  
+  rate_limit: "700/minute"  # Zendesk API limits
+  timeout_ms: 7000
+  
+  retry:
+    enabled: true
+    max_attempts: 3
+    backoff_ms: 1000
+
+# Answer Bot Protection
+answer_bot:
+  enabled: true
+  
+  bot_config:
+    scan_before_suggestion: true
+    confidence_threshold: 0.4
+  
+  protected_scenarios:
+    - "article_suggestions"
+    - "automated_responses"
+    - "ticket_deflection"
+
+# Zendesk AI Protection
+zendesk_ai:
+  enabled: true
+  
+  protected_features:
+    - "Advanced AI"
+    - "Agent Copilot"
+    - "Intent Detection"
+    - "Sentiment Analysis"
+    - "Content Cues"
+  
+  ai_patterns:
+    - "(?i)zendesk ai"
+    - "(?i)answer bot"
+    - "(?i)agent copilot"
+
+# Macros & Automations Protection
+automations:
+  enabled: true
+  
+  protected_automations:
+    - type: "triggers"
+      scan_conditions: true
+    
+    - type: "macros"
+      scan_actions: true
+    
+    - type: "sla_policies"
+      scan_triggers: false
+
+# Side Conversations
+side_conversations:
+  enabled: true
+  scan_internal_notes: true
+  scan_slack_messages: true
+
+# Monitoring & Alerting
+monitoring:
+  enabled: true
+  
+  metrics:
+    - "scans_by_zendesk_object"
+    - "ticket_threats_detected"
+    - "chat_injection_attempts"
+    - "kb_poisoning_attempts"
+    - "pii_leakage_blocked"
+  
+  alerts:
+    - name: "High Volume Ticket Threats"
+      condition: "ticket threats > 5 in 10 minutes"
+      action: "notify_support_admin"
+    
+    - name: "PII Leakage Detected"
+      condition: "pii_leakage rule triggered"
+      action: "immediate_security_alert"
+    
+    - name: "Chat Bot Manipulation"
+      condition: "chat_injection + answer_bot"
+      action: "escalate_to_human_agent"
+
+# Response Actions
+response_actions:
+  block:
+    enabled: true
+    severity_threshold: "medium"
+  
+  quarantine:
+    enabled: true
+    severity_threshold: "high"
+    # Move to security queue
+    target_view: "security_review_queue"
+  
+  suspend:
+    enabled: true
+    severity_threshold: "critical"
+    # Suspend user for critical threats
+    suspend_reason: "Security threat detected"
+  
+  tag:
+    enabled: true
+    # Add tags to tickets
+    tags:
+      - "security_flagged"
+      - "rag_threat_detected"
+
+# Usage Examples
+examples:
+  - name: "Scan Ticket Before AI Analysis"
+    description: "Scan ticket description and comments before AI processes"
+    code: |
+      POST /v1/rag/scan
+      {
+        "user_query": "Suggest articles or generate response",
+        "documents": [
+          {
+            "id": "ticket/12345",
+            "content": ticket.description,
+            "metadata": {
+              "source": "customer_support",
+              "zendesk_object": "tickets",
+              "ticket_id": ticket.id,
+              "priority": ticket.priority
+            }
+          },
+          {
+            "id": "comment/67890",
+            "content": comment.body,
+            "metadata": {
+              "source": "customer_support",
+              "zendesk_object": "comments",
+              "author_id": comment.author_id
+            }
+          }
+        ]
+      }
+  
+  - name: "Scan Chat Before Answer Bot"
+    description: "Scan chat messages before Answer Bot suggests articles"
+    code: |
+      POST /v1/rag/scan
+      {
+        "user_query": "Suggest knowledge base articles",
+        "documents": [
+          {
+            "id": "chat/001",
+            "content": chat.transcript,
+            "metadata": {
+              "source": "chat_message",
+              "zendesk_object": "chats",
+              "visitor_id": chat.visitor.id
+            }
+          }
+        ]
+      }
+  
+  - name: "Scan KB Article Before Publication"
+    description: "Scan article content before publishing to Help Center"
+    code: |
+      POST /v1/rag/scan
+      {
+        "user_query": "Validate article content",
+        "documents": [
+          {
+            "id": "article/789",
+            "content": article.body,
+            "metadata": {
+              "source": "knowledge_base",
+              "zendesk_object": "articles",
+              "author_id": article.author_id,
+              "section_id": article.section_id
+            }
+          }
+        ]
+      }

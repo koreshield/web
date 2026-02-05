@@ -1,0 +1,398 @@
+"""
+Salesforce Einstein RAG Security Template
+
+Specialized configuration for Salesforce CRM with Einstein AI integration.
+Focus on email, Chatter, Cases, and custom fields as primary attack vectors.
+"""
+
+# CRM Platform Configuration
+platform:
+  name: "Salesforce Einstein"
+  type: "salesforce"
+  version: "1.0"
+  description: "RAG security template for Salesforce with Einstein AI"
+  api_version: "v59.0"
+
+# RAG Detection Configuration
+rag_detection:
+  enabled: true
+  min_confidence: 0.35  # Slightly higher for enterprise
+  enable_cross_document_analysis: true
+  max_documents_per_scan: 50  # Conservative for Salesforce API limits
+
+# Injection Vector Mapping (Salesforce-specific)
+injection_vectors:
+  # Email (EmailMessage object)
+  email:
+    enabled: true
+    salesforce_objects:
+      - "EmailMessage"
+      - "Task (Email type)"
+    sources:
+      - field: "TextBody"
+        api_name: "EmailMessage.TextBody"
+        description: "Email plain text body"
+        risk_level: "high"
+      - field: "HtmlBody"
+        api_name: "EmailMessage.HtmlBody"
+        description: "Email HTML body"
+        risk_level: "high"
+      - field: "Subject"
+        api_name: "EmailMessage.Subject"
+        description: "Email subject"
+        risk_level: "medium"
+      - field: "FromAddress"
+        api_name: "EmailMessage.FromAddress"
+        description: "Sender email (check domain)"
+        risk_level: "low"
+  
+  # Chatter (FeedItem, FeedComment)
+  chat_message:
+    enabled: true
+    salesforce_objects:
+      - "FeedItem"
+      - "FeedComment"
+      - "ChatterMessage"
+    sources:
+      - field: "Body"
+        api_name: "FeedItem.Body"
+        description: "Chatter post content"
+        risk_level: "high"
+      - field: "CommentBody"
+        api_name: "FeedComment.CommentBody"
+        description: "Chatter comment"
+        risk_level: "high"
+  
+  # Cases (Case object)
+  customer_support:
+    enabled: true
+    salesforce_objects:
+      - "Case"
+    sources:
+      - field: "Description"
+        api_name: "Case.Description"
+        description: "Case description"
+        risk_level: "high"
+      - field: "Comments"
+        api_name: "CaseComment.CommentBody"
+        description: "Case comments"
+        risk_level: "high"
+      - field: "Subject"
+        api_name: "Case.Subject"
+        description: "Case subject"
+        risk_level: "medium"
+  
+  # Documents & Files
+  document:
+    enabled: true
+    salesforce_objects:
+      - "ContentVersion"
+      - "Attachment"
+      - "Document"
+    sources:
+      - field: "VersionData"
+        api_name: "ContentVersion.VersionData"
+        description: "File content"
+        risk_level: "high"
+      - field: "Description"
+        api_name: "ContentVersion.Description"
+        description: "File description"
+        risk_level: "medium"
+  
+  # Custom Fields
+  database:
+    enabled: true
+    salesforce_objects:
+      - "Account"
+      - "Contact"
+      - "Opportunity"
+      - "Lead"
+      - "Custom Objects"
+    sources:
+      - field: "Custom_Notes__c"
+        api_name: "*.Custom_Notes__c"
+        description: "Custom note fields"
+        risk_level: "medium"
+      - field: "Rich_Text_Area__c"
+        api_name: "*.Rich_Text_Area__c"
+        description: "Rich text custom fields"
+        risk_level: "high"
+
+# High-Risk Salesforce Fields
+high_risk_fields:
+  - name: "EmailMessage.TextBody"
+    reason: "Primary vector for email-based attacks"
+    scan_priority: "critical"
+    additional_patterns:
+      - "(?i)verify.*account"
+      - "(?i)urgent.*action"
+      - "(?i)suspended.*account"
+  
+  - name: "Case.Description"
+    reason: "Customer-provided content, often unfiltered"
+    scan_priority: "high"
+    additional_patterns:
+      - "(?i)internal.*system"
+      - "(?i)admin.*access"
+  
+  - name: "FeedItem.Body"
+    reason: "Internal Chatter can be compromised by external actors"
+    scan_priority: "high"
+    additional_patterns:
+      - "(?i)confidential"
+      - "(?i)for internal use"
+  
+  - name: "ContentVersion.VersionData"
+    reason: "File attachments can contain embedded instructions"
+    scan_priority: "critical"
+    additional_patterns: []
+  
+  - name: "*.Rich_Text_Area__c"
+    reason: "Rich text allows HTML/script injection"
+    scan_priority: "high"
+    additional_patterns:
+      - "<script"
+      - "javascript:"
+      - "onerror="
+
+# Salesforce-Specific Detection Rules
+detection_rules:
+  - id: "sf_email_phishing"
+    name: "Salesforce Email Phishing Attack"
+    description: "Detects phishing attempts via email"
+    pattern: "(?i)(verify|confirm|update).{0,30}(account|password|payment|billing)"
+    severity: "high"
+    salesforce_objects: ["EmailMessage"]
+    injection_vector: "email"
+    operational_targets:
+      - "data_exfiltration"
+      - "access_control_bypass"
+  
+  - id: "sf_chatter_injection"
+    name: "Chatter Prompt Injection"
+    description: "Detects injection attacks via Chatter"
+    pattern: "(?i)(@einstein|@salesforce).{0,50}(ignore|bypass|override)"
+    severity: "high"
+    salesforce_objects: ["FeedItem", "FeedComment"]
+    injection_vector: "chat_message"
+    operational_targets:
+      - "context_poisoning"
+  
+  - id: "sf_case_escalation"
+    name: "Case-based Privilege Escalation"
+    description: "Detects attempts to escalate via support cases"
+    pattern: "(?i)(grant|provide|give).{0,30}(admin|full|elevated).{0,30}(access|permission)"
+    severity: "critical"
+    salesforce_objects: ["Case", "CaseComment"]
+    injection_vector: "customer_support"
+    operational_targets:
+      - "privilege_escalation"
+  
+  - id: "sf_data_extraction"
+    name: "Salesforce Data Extraction"
+    description: "Detects attempts to extract Salesforce data"
+    pattern: "(?i)(export|extract|download|query).{0,30}(all|entire|complete).{0,30}(records?|data|accounts?|contacts?)"
+    severity: "critical"
+    salesforce_objects: ["EmailMessage", "Case", "FeedItem"]
+    injection_vector: "email"
+    operational_targets:
+      - "data_exfiltration"
+  
+  - id: "sf_einstein_manipulation"
+    name: "Einstein AI Manipulation"
+    description: "Detects attempts to manipulate Einstein AI"
+    pattern: "(?i)(einstein|ai|model).{0,50}(always|from now|permanently).{0,50}(respond|answer|include)"
+    severity: "high"
+    salesforce_objects: ["FeedItem", "EmailMessage", "Case"]
+    injection_vector: "email"
+    operational_targets:
+      - "context_poisoning"
+  
+  - id: "sf_rich_text_xss"
+    name: "Rich Text XSS/Injection"
+    description: "Detects script injection in rich text fields"
+    pattern: "(<script|javascript:|onerror=|onload=|<iframe)"
+    severity: "high"
+    salesforce_objects: ["Custom Objects"]
+    injection_vector: "database"
+    operational_targets:
+      - "access_control_bypass"
+
+# Salesforce-Specific Sanitization
+sanitization:
+  enabled: true
+  rules:
+    - field: "EmailMessage.HtmlBody"
+      strip_html: true
+      remove_scripts: true
+      allowed_tags: ["p", "br", "b", "i", "u", "a"]
+      max_length: 32000  # Salesforce limit
+    
+    - field: "FeedItem.Body"
+      strip_html: true
+      remove_scripts: true
+      max_length: 10000
+    
+    - field: "Case.Description"
+      strip_html: false  # Keep formatting
+      remove_scripts: true
+      max_length: 32000
+    
+    - field: "ContentVersion.VersionData"
+      max_size_mb: 5  # Conservative
+      allowed_types:
+        - "pdf"
+        - "docx"
+        - "xlsx"
+        - "txt"
+        - "csv"
+      scan_for_malware: true
+
+# Enterprise Context
+enterprise_context:
+  primary: "crm"
+  secondary:
+    - "sales"
+    - "customer_support"
+  
+  salesforce_edition: "Enterprise"  # or "Unlimited", "Professional"
+  
+  compliance:
+    gdpr: true
+    ccpa: true
+    hipaa: false
+    sox: true
+    finra: false
+
+# Salesforce API Integration
+integration:
+  api_endpoint: "/v1/rag/scan"
+  authentication: "oauth2"
+  
+  salesforce_api:
+    instance_url: "https://your-domain.my.salesforce.com"
+    api_version: "v59.0"
+    bulk_api: false  # Use REST API for RAG scanning
+  
+  rate_limit: "500/hour"  # Conservative for API limits
+  timeout_ms: 10000  # Higher for Salesforce API latency
+  
+  retry:
+    enabled: true
+    max_attempts: 3
+    backoff_ms: 2000
+
+# Einstein-Specific Configuration
+einstein:
+  enabled: true
+  
+  # Einstein features to protect
+  protected_features:
+    - "Einstein Bots"
+    - "Einstein Case Classification"
+    - "Einstein Article Recommendations"
+    - "Einstein Opportunity Scoring"
+  
+  # Additional patterns for Einstein interactions
+  einstein_patterns:
+    - "(?i)hey einstein"
+    - "(?i)@einstein"
+    - "(?i)ask einstein"
+
+# Multi-tenancy (Salesforce Orgs)
+multi_tenancy:
+  enabled: true
+  isolation_level: "org"  # Each Salesforce org is a tenant
+  
+  org_config:
+    - org_id: "00D000000000001"
+      name: "Production Org"
+      security_level: "strict"
+    
+    - org_id: "00D000000000002"
+      name: "Sandbox Org"
+      security_level: "moderate"
+
+# Monitoring & Alerting
+monitoring:
+  enabled: true
+  
+  salesforce_shield:
+    enabled: false  # If using Salesforce Shield Event Monitoring
+    event_types:
+      - "EmailMessage"
+      - "FeedItem"
+      - "ContentVersion"
+  
+  metrics:
+    - "scans_by_object_type"
+    - "threats_by_salesforce_object"
+    - "einstein_interaction_threats"
+  
+  alerts:
+    - name: "High Volume Email Threats"
+      condition: "email threats > 5 in 10 minutes"
+      action: "notify_salesforce_admin"
+    
+    - name: "Einstein Manipulation Detected"
+      condition: "einstein_manipulation rule triggered"
+      action: "immediate_security_alert"
+
+# Response Actions
+response_actions:
+  block:
+    enabled: true
+    severity_threshold: "medium"
+    # Block record creation/update in Salesforce
+  
+  quarantine:
+    enabled: true
+    severity_threshold: "high"
+    # Move to quarantine queue in Salesforce
+    quarantine_queue: "Security_Review_Queue"
+  
+  flag:
+    enabled: true
+    # Add field value to mark suspicious records
+    flag_field: "Security_Flag__c"
+    flag_value: "RAG_Threat_Detected"
+
+# Usage Examples
+examples:
+  - name: "Scan Email Before Einstein Processing"
+    description: "Scan EmailMessage before Einstein analyzes it"
+    code: |
+      POST /v1/rag/scan
+      {
+        "user_query": "Analyze customer sentiment",
+        "documents": [
+          {
+            "id": "EmailMessage/001xx000001",
+            "content": email.TextBody,
+            "metadata": {
+              "source": "email",
+              "salesforce_object": "EmailMessage",
+              "from": email.FromAddress
+            }
+          }
+        ]
+      }
+  
+  - name: "Scan Case Comments for Support Bot"
+    description: "Scan case comments before Einstein Bot responds"
+    code: |
+      POST /v1/rag/scan
+      {
+        "user_query": "Suggest case resolution",
+        "documents": [
+          {
+            "id": "CaseComment/001xx000002",
+            "content": comment.CommentBody,
+            "metadata": {
+              "source": "customer_support",
+              "salesforce_object": "CaseComment",
+              "case_id": comment.ParentId
+            }
+          }
+        ]
+      }
