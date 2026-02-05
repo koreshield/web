@@ -36,12 +36,15 @@ export const authService = {
         }
 
         const data: LoginResponse = await response.json();
-        
+
         // Store token and user info
+        // SECURITY NOTE: Storing tokens in localStorage is susceptible to XSS.
+        // We mitigate this via strict Content-Security-Policy (CSP) headers in index.html.
+        // For higher security, consider refactoring to backend-set HttpOnly cookies.
         localStorage.setItem('admin_token', data.access_token);
         localStorage.setItem('admin_user', JSON.stringify(data.user));
         localStorage.setItem('token_expires_at', String(Date.now() + data.expires_in * 1000));
-        
+
         return data.user;
     },
 
@@ -60,7 +63,7 @@ export const authService = {
     isAuthenticated(): boolean {
         const token = localStorage.getItem('admin_token');
         const expiresAt = localStorage.getItem('token_expires_at');
-        
+
         if (!token || !expiresAt) {
             return false;
         }
