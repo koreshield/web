@@ -1,6 +1,6 @@
 # CRM RAG Security Templates
 
-Comprehensive security templates for protecting RAG (Retrieval-Augmented Generation) systems integrated with popular CRM platforms.
+Security templates for protecting RAG (Retrieval-Augmented Generation) systems integrated with popular CRM platforms.
 
 ## Overview
 

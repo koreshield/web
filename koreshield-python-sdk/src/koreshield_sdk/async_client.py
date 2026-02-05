@@ -12,6 +12,9 @@ from .types import (
     BatchScanRequest,
     BatchScanResponse,
     DetectionResult,
+    RAGDocument,
+    RAGScanRequest,
+    RAGScanResponse,
 )
 from .exceptions import (
     KoreShieldError,
