@@ -1,8 +1,10 @@
 import { authService } from '../lib/auth';
 import { useState } from 'react';
-import { Activity, Shield, Clock, TrendingUp, AlertTriangle, CheckCircle, Copy, Key, LogOut } from 'lucide-react';
+import { Activity, Shield, AlertTriangle, CheckCircle, Copy, Key, LogOut } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStats, useRecentAttacks } from '../hooks/useApi';
+import { AttackDetailModal } from '../components/AttackDetailModal';
+import { ThreatTypeBreakdown, ThreatTimeline, ThreatSummary } from '../components/ThreatAnalytics';
 
 export function DashboardPage() {
     const navigate = useNavigate();
@@ -10,6 +12,7 @@ export function DashboardPage() {
     const isAuthenticated = authService.isAuthenticated();
     const [apiKeyVisible, setApiKeyVisible] = useState(false);
     const [copiedKey, setCopiedKey] = useState(false);
+    const [selectedAttack, setSelectedAttack] = useState<any>(null);
 
     // Use React Query hooks
     const { data: stats, isLoading: statsLoading, error: statsError } = useStats();
@@ -187,49 +190,87 @@ export function DashboardPage() {
                         </div>
 
                         {/* Recent Attacks */}
-                        <div className="bg-card border border-border rounded-lg p-6">
+                        <div className="bg-card border border-border rounded-lg p-6 mb-8">
                             <h2 className="text-lg font-semibold mb-4">Recent Threats</h2>
                             <div className="space-y-3">
-                                {recentAttacks.map((attack) => (
-                                    <div
-                                        key={attack.id}
-                                        className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-                                    >
-                                        <div className="mt-1">
-                                            {attack.action_taken === 'blocked' ? (
-                                                <AlertTriangle className="w-5 h-5 text-red-500" />
-                                            ) : (
-                                                <CheckCircle className="w-5 h-5 text-yellow-500" />
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className="font-medium">{attack.threat_type}</span>
-                                                <span className={`text-xs px-2 py-1 rounded-full ${
-                                                    attack.action_taken === 'blocked'
-                                                        ? 'bg-red-500/10 text-red-600'
-                                                        : 'bg-yellow-500/10 text-yellow-600'
-                                                }`}>
-                                                    {attack.action_taken}
-                                                </span>
-                                                <span className="text-xs text-muted-foreground">
-                                                    {(attack.confidence * 100).toFixed(0)}% confidence
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-muted-foreground truncate">
-                                                {attack.content_preview}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground mt-1">
-                                                {new Date(attack.timestamp).toLocaleString()}
-                                            </p>
-                                        </div>
+                                {recentAttacks.length === 0 ? (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                        <Shield className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                                        <p>No threats detected yet</p>
                                     </div>
-                                ))}
+                                ) : (
+                                    recentAttacks.map((attack: any) => (
+                                        <div
+                                            key={attack.id}
+                                            onClick={() => setSelectedAttack(attack)}
+                                            className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                                        >
+                                            <div className="mt-1">
+                                                {attack.action_taken === 'blocked' ? (
+                                                    <AlertTriangle className="w-5 h-5 text-red-500" />
+                                                ) : (
+                                                    <CheckCircle className="w-5 h-5 text-yellow-500" />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="font-medium">{attack.threat_type}</span>
+                                                    <span className={`text-xs px-2 py-1 rounded-full ${
+                                                        attack.action_taken === 'blocked'
+                                                            ? 'bg-red-500/10 text-red-600'
+                                                            : 'bg-yellow-500/10 text-yellow-600'
+                                                    }`}>
+                                                        {attack.action_taken}
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {(attack.confidence * 100).toFixed(0)}% confidence
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-muted-foreground truncate">
+                                                    {attack.content_preview}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {new Date(attack.timestamp).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
+
+                        {/* Threat Analytics */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <ThreatTypeBreakdown data={(stats as any)?.statistics?.attack_types || {}} />
+                            <ThreatSummary
+                                totalRequests={(stats as any)?.statistics?.requests_total || 0}
+                                blockedRequests={(stats as any)?.statistics?.requests_blocked || 0}
+                                attacksDetected={(stats as any)?.statistics?.attacks_detected || 0}
+                                topThreatType={getTopThreatType((stats as any)?.statistics?.attack_types || {})}
+                            />
+                        </div>
+
+                        {recentAttacks.length > 0 && (
+                            <ThreatTimeline attacks={recentAttacks} />
+                        )}
                     </>
                 )}
             </main>
+
+            {/* Attack Detail Modal */}
+            <AttackDetailModal
+                attack={selectedAttack}
+                isOpen={selectedAttack !== null}
+                onClose={() => setSelectedAttack(null)}
+            />
         </div>
     );
+}
+
+function getTopThreatType(attackTypes: Record<string, number>): string {
+    const entries = Object.entries(attackTypes);
+    if (entries.length === 0) return 'None';
+    
+    const sorted = entries.sort(([, a], [, b]) => b - a);
+    return sorted[0][0];
 }
