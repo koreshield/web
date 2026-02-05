@@ -15,25 +15,47 @@ export interface KoreShieldConfig {
   headers?: Record<string, string>;
 }
 
+export type SensitivityLevel = 'low' | 'medium' | 'high';
+export type SecurityAction = 'allow' | 'warn' | 'block';
+
+export interface SecurityFeatures {
+  sanitization?: boolean;
+  detection?: boolean;
+  policyEnforcement?: boolean;
+  rateLimiting?: boolean;
+  anomalyDetection?: boolean;
+}
+
 export interface SecurityOptions {
   /** Sensitivity level: 'low', 'medium', 'high' */
-  sensitivity?: 'low' | 'medium' | 'high';
+  sensitivity?: SensitivityLevel;
   /** Action on detection: 'allow', 'warn', 'block' */
-  defaultAction?: 'allow' | 'warn' | 'block';
+  defaultAction?: SecurityAction;
   /** Enable/disable specific security features */
-  features?: {
-    sanitization?: boolean;
-    detection?: boolean;
-    policyEnforcement?: boolean;
+  features?: SecurityFeatures;
+  /** Custom security rules */
+  customRules?: Array<{
+    name: string;
+    pattern: string;
+    action: SecurityAction;
+  }>;
+}
+
+export type ChatMessageRole = 'system' | 'user' | 'assistant' | 'function' | 'tool';
+
+export interface ChatMessage {
+  role: ChatMessageRole;
+  content: string;
+  name?: string;
+  function_call?: {
+    name: string;
+    arguments: string;
   };
 }
 
 export interface ChatCompletionRequest {
   model: string;
-  messages: Array<{
-    role: 'system' | 'user' | 'assistant';
-    content: string;
-  }>;
+  messages: ChatMessage[];
   temperature?: number;
   max_tokens?: number;
   top_p?: number;
@@ -46,16 +68,14 @@ export interface ChatCompletionRequest {
 
 export interface ChatCompletionResponse {
   id: string;
-  object: string;
+  object: 'chat.completion' | 'chat.completion.chunk';
   created: number;
   model: string;
   choices: Array<{
     index: number;
-    message: {
-      role: string;
-      content: string;
-    };
-    finish_reason: string;
+    message: ChatMessage;
+    finish_reason: 'stop' | 'length' | 'function_call' | 'content_filter' | 'null' | null;
+    delta?: Partial<ChatMessage>; // For streaming
   }>;
   usage: {
     prompt_tokens: number;

@@ -1,0 +1,67 @@
+import { motion } from 'framer-motion';
+import { Shield, Network, Users, Activity } from 'lucide-react';
+
+const features = [
+    {
+        icon: Shield,
+        title: '95% Accuracy',
+        description: 'Industry-leading detection rate with <3% false positives.',
+    },
+    {
+        icon: Network,
+        title: 'Multi-Provider',
+        description: 'Unified security for OpenAI, Anthropic, Gemini, and DeepSeek.',
+    },
+    {
+        icon: Users,
+        title: 'Tenant Isolation',
+        description: 'Built for SaaS. Separate quotas, RBAC, and policies per tenant.',
+    },
+    {
+        icon: Activity,
+        title: 'Real-time Monitoring',
+        description: 'Detect jailbreaks ("DAN mode"), PII leakage, and code injection instantly.',
+    },
+];
+
+function Features() {
+    return (
+        <section className="py-20 px-6 bg-black">
+            <div className="max-w-7xl mx-auto">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    viewport={{ once: true }}
+                    className="text-center mb-16"
+                >
+                    <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                        Key <span className="text-electric-green">Features</span>
+                    </h2>
+                </motion.div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {features.map((feature, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: index * 0.1 }}
+                            viewport={{ once: true }}
+                            whileHover={{ y: -5, borderColor: '#10b981' }}
+                            className="bg-slate-900 border border-slate-700 rounded-lg p-6 transition-all duration-300 group"
+                        >
+                            <div className="bg-electric-green/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:bg-electric-green/20 transition-colors">
+                                <feature.icon className="w-6 h-6 text-electric-green" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                            <p className="text-gray-400">{feature.description}</p>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+export default Features;

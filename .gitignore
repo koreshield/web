@@ -214,7 +214,7 @@ dist
 
 # Gatsby files
 .cache/
-public
+# public
 
 # Storybook build outputs
 .out
@@ -262,7 +262,6 @@ koreshield/docs/_build/
 build_output*.txt
 FRONTEND_SPEC.md
 
-
 # Explicitly include important documentation
 !docs/RAG_INTEGRATION_GUIDE.md
 !koreshield-python-sdk/examples/
@@ -270,3 +269,13 @@ FRONTEND_SPEC.md
 !koreshield-js-sdk/examples/
 !koreshield-js-sdk/docs/
 docs/SYSTEM_DESIGN.md
+.DS_Store
+!koreshield-web/src/lib/
+!koreshield-web/public/docs/
+docs/ARCHITECTURE_OVERVIEW.md
+docs/MARKET_ANALYSIS.md
+docs/API_INTEGRATION.md
+docs/AUTHENTICATION_PLAN.md
+docs/COMPLETE_ECOSYSTEM_GUIDE.md
+docs/IMPLEMENTATION_PLAN.md
+docs/CLERK_REMOVAL_COMPLETE.md

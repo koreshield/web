@@ -1,0 +1,16 @@
+---
+title: Multi-Tenancy & Isolation
+description: Architecting KoreShield for multi-tenant SaaS applications with strict isolation.
+---
+
+# Multi-Tenancy
+
+KoreShield is built from the ground up for SaaS platforms and enterprise environments where data isolation is paramount.
+
+## Architecture
+
+*   **Tenant ID**: Every request is tagged with a `X-Tenant-ID` header.
+*   **Data Isolation**: Logs, metrics, and configurations are logically separated by Tenant ID.
+*   **Rate Limiting**: Define unique rate limits per tenant to prevent "noisy neighbor" issues.
+
+*Documentation in progress. This guide will cover provisioning tenants, setting quotas, and audit logging.*

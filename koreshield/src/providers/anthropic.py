@@ -38,6 +38,6 @@ class AnthropicProvider(BaseProvider):
         }
         data = {"model": model, "messages": messages, **kwargs}
 
-        response = await self.client.post(url, headers=headers, json=data)
+        response = await (await self.get_client()).post(url, headers=headers, json=data)
         response.raise_for_status()
         return response.json()

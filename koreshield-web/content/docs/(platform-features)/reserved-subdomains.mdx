@@ -1,0 +1,237 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for KoreShield
+icon: Wrench
+---
+
+# Troubleshooting
+
+Common issues and their solutions when using KoreShield.
+
+## Configuration Issues
+
+### Invalid Configuration File
+
+**Error**: `Configuration validation failed`
+
+**Solution**:
+```bash
+# Validate your config file
+koreshield validate --config config.yaml
+
+# Check for common issues:
+# - Missing required fields
+# - Invalid API key format
+# - Incorrect indentation (YAML)
+# - Invalid provider URLs
+```
+
+### Provider Connection Failed
+
+**Error**: `Failed to connect to LLM provider`
+
+**Solutions**:
+```yaml
+# Check your provider configuration
+providers:
+  openai:
+    api_key: "sk-..."  # Ensure this is correct
+    base_url: "https://api.openai.com/v1"  # Use correct endpoint
+```
+
+```bash
+# Test provider connectivity
+koreshield test-connection --provider openai
+```
+
+## Security Issues
+
+### False Positives
+
+**Problem**: Legitimate requests being blocked
+
+**Solutions**:
+```yaml
+# Lower security sensitivity
+security:
+  level: "low"  # Try low, then medium
+
+# Customize policies
+policies:
+  prompt_injection_detection: "low"
+  on_suspicious: "warn"  # Instead of "block"
+```
+
+### Missing Security Events
+
+**Problem**: Security events not appearing in logs
+
+**Check**:
+```yaml
+logging:
+  level: "debug"  # Temporarily enable debug logging
+  file: "/var/log/koreshield/security.log"
+```
+
+## Performance Issues
+
+### High Latency
+
+**Causes & Solutions**:
+
+1. **Security scanning overhead**:
+   ```yaml
+   security:
+     level: "low"  # Reduce for better performance
+   ```
+
+2. **Large request payloads**:
+   ```yaml
+   policies:
+     max_tokens_per_request: 2000  # Limit input size
+   ```
+
+3. **Resource constraints**:
+   ```yaml
+   server:
+     workers: 4  # Increase worker processes
+   ```
+
+### Memory Usage
+
+**Problem**: High memory consumption
+
+**Solutions**:
+```yaml
+# Limit concurrent requests
+server:
+  max_concurrent_requests: 100
+
+# Enable request cleanup
+policies:
+  cleanup_temp_files: true
+```
+
+## API Integration Issues
+
+### Authentication Failed
+
+**Error**: `401 Unauthorized`
+
+**Check**:
+- API key is correct and not expired
+- Base URL points to KoreShield proxy
+- Request headers are properly formatted
+
+```python
+# Correct usage
+client = openai.OpenAI(
+    api_key="sk-your-actual-openai-key",
+    base_url="http://localhost:8000/v1"  # KoreShield URL
+)
+```
+
+### Request Timeout
+
+**Problem**: Requests timing out
+
+**Solutions**:
+```yaml
+# Increase timeout
+server:
+  request_timeout: 300  # seconds
+
+# Check provider status
+koreshield test-connection --provider openai
+```
+
+## Deployment Issues
+
+### Port Already in Use
+
+**Error**: `Port 8000 already in use`
+
+**Solutions**:
+```yaml
+# Use different port
+server:
+  port: 8001
+
+# Find what's using the port
+lsof -i :8000
+kill -9 <PID>
+```
+
+### Docker Container Won't Start
+
+**Check**:
+```bash
+# View container logs
+docker logs koreshield
+
+# Check configuration mount
+docker run --rm -v $(pwd)/config.yaml:/app/config.yaml koreshield/koreshield validate
+```
+
+## Logging Issues
+
+### Logs Not Rotating
+
+**Problem**: Log files growing too large
+
+**Solution**:
+```yaml
+logging:
+  max_size: "100MB"
+  retention: "30d"
+  compression: "gzip"
+```
+
+### Missing Log Entries
+
+**Check**:
+```yaml
+# Enable all logging
+logging:
+  level: "debug"
+  console: true
+  file: "/var/log/koreshield/debug.log"
+```
+
+## Database Issues (Analytics)
+
+### TimescaleDB Connection Failed
+
+**Error**: `TIGER_DATA_URL environment variable is required`
+
+**Note**: Analytics features are optional. KoreShield works without TimescaleDB.
+
+**If you want analytics**:
+```bash
+export TIGER_DATA_URL="postgres://user:pass@host:port/db"
+koreshield start
+```
+
+## Getting Help
+
+### Debug Mode
+
+Enable detailed logging for troubleshooting:
+
+```bash
+koreshield start --debug
+```
+
+### Health Check
+
+Check if KoreShield is running properly:
+
+```bash
+curl http://localhost:8000/health
+```
+
+### Support
+
+- Check the [GitHub Issues](https://github.com/koreshield/koreshield/issues)
+- Review the [Configuration Reference](/docs/configuration)
+- Enable debug logging and share relevant logs

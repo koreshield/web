@@ -1,0 +1,459 @@
+---
+title: Performance Optimization
+description: Optimize KoreShield for low latency and high throughput
+published: true
+---
+
+# Performance Optimization
+
+Best practices for achieving low latency and high throughput with KoreShield.
+
+## Caching Strategies
+
+### Response Caching
+
+```typescript
+import { KoreShield } from 'koreshield-sdk';
+import Redis from 'ioredis';
+
+const redis = new Redis(process.env.REDIS_URL);
+const koreshield = new KoreShield({ apiKey: process.env.KORESHIELD_API_KEY });
+
+async function cachedScan(content: string) {
+  // Generate cache key
+  const cacheKey = `scan:${Buffer.from(content).toString('base64')}`;
+
+  // Check cache
+  const cached = await redis.get(cacheKey);
+  if (cached) {
+    return JSON.parse(cached);
+  }
+
+  // Scan with KoreShield
+  const scan = await koreshield.scan({ content });
+
+  // Cache result (5 minutes)
+  await redis.setex(cacheKey, 300, JSON.stringify(scan));
+
+  return scan;
+}
+```
+
+### LRU Cache
+
+```typescript
+import LRU from 'lru-cache';
+
+const cache = new LRU<string, any>({
+  max: 10000,
+  ttl: 1000 * 60 * 5, // 5 minutes
+  updateAgeOnGet: true,
+});
+
+async function lruCachedScan(content: string) {
+  const key = hashContent(content);
+
+  if (cache.has(key)) {
+    return cache.get(key);
+  }
+
+  const scan = await koreshield.scan({ content });
+  cache.set(key, scan);
+
+  return scan;
+}
+
+function hashContent(content: string): string {
+  return require('crypto')
+    .createHash('sha256')
+    .update(content)
+    .digest('hex');
+}
+```
+
+## Batch Processing
+
+### Batch Scanning
+
+```typescript
+async function optimizedBatch(messages: string[]) {
+  // Process in chunks
+  const CHUNK_SIZE = 100;
+  const results = [];
+
+  for (let i = 0; i < messages.length; i += CHUNK_SIZE) {
+    const chunk = messages.slice(i, i + CHUNK_SIZE);
+
+    const batchResult = await koreshield.batchScan({
+      items: chunk.map((content, idx) => ({
+        id: `${i + idx}`,
+        content,
+      })),
+    });
+
+    results.push(...batchResult.results);
+  }
+
+  return results;
+}
+```
+
+### Parallel Processing
+
+```typescript
+async function parallelScan(messages: string[]) {
+  const CONCURRENCY = 10;
+
+  const results = await Promise.all(
+    chunk(messages, CONCURRENCY).map(async batch =>
+      Promise.all(
+        batch.map(content => koreshield.scan({ content }))
+      )
+    )
+  );
+
+  return results.flat();
+}
+
+function chunk<T>(array: T[], size: number): T[][] {
+  return Array.from({ length: Math.ceil(array.length / size) }, (_, i) =>
+    array.slice(i * size, i * size + size)
+  );
+}
+```
+
+## Connection Pooling
+
+```typescript
+import { Agent } from 'https';
+
+const agent = new Agent({
+  keepAlive: true,
+  maxSockets: 50,
+  maxFreeSockets: 10,
+  timeout: 60000,
+});
+
+const koreshield = new KoreShield({
+  apiKey: process.env.KORESHIELD_API_KEY,
+  httpAgent: agent,
+});
+```
+
+## Request Deduplication
+
+```typescript
+class DedupedScanner {
+  private pending = new Map<string, Promise<any>>();
+
+  async scan(content: string) {
+    const key = hashContent(content);
+
+    if (this.pending.has(key)) {
+      return this.pending.get(key);
+    }
+
+    const promise = koreshield.scan({ content }).finally(() => {
+      this.pending.delete(key);
+    });
+
+    this.pending.set(key, promise);
+
+    return promise;
+  }
+}
+
+const scanner = new DedupedScanner();
+
+// Multiple simultaneous requests for same content only trigger one API call
+const [result1, result2, result3] = await Promise.all([
+  scanner.scan('hello'),
+  scanner.scan('hello'),
+  scanner.scan('hello'),
+]);
+```
+
+## Timeouts & Retries
+
+```typescript
+import pRetry from 'p-retry';
+import pTimeout from 'p-timeout';
+
+async function resilientScan(content: string) {
+  return pRetry(
+    async () => {
+      return pTimeout(
+        koreshield.scan({ content }),
+        {
+          milliseconds: 5000,
+          message: 'Scan timeout',
+        }
+      );
+    },
+    {
+      retries: 3,
+      factor: 2,
+      minTimeout: 1000,
+      onFailedAttempt: error => {
+        console.log(
+          `Attempt ${error.attemptNumber} failed. ${error.retriesLeft} retries left.`
+        );
+      },
+    }
+  );
+}
+```
+
+## Lazy Loading
+
+```typescript
+class LazyKoreShield {
+  private instance: KoreShield | null = null;
+
+  private getInstance() {
+    if (!this.instance) {
+      this.instance = new KoreShield({
+        apiKey: process.env.KORESHIELD_API_KEY,
+      });
+    }
+    return this.instance;
+  }
+
+  async scan(content: string) {
+    return this.getInstance().scan({ content });
+  }
+}
+
+// Only initialize when first scan is requested
+const koreshield = new LazyKoreShield();
+```
+
+## Compression
+
+```typescript
+import { gzip, ungzip } from 'node:zlib';
+import { promisify } from 'node:util';
+
+const gzipAsync = promisify(gzip);
+const ungzipAsync = promisify(ungzip);
+
+async function compressedScan(content: string) {
+  // Compress content
+  const compressed = await gzipAsync(Buffer.from(content));
+
+  // Send compressed
+  const scan = await koreshield.scan({
+    content: compressed.toString('base64'),
+    encoding: 'gzip-base64',
+  });
+
+  return scan;
+}
+```
+
+## Edge Computing
+
+### Cloudflare Workers
+
+```typescript
+export default {
+  async fetch(request: Request, env: Env) {
+    const koreshield = new KoreShield({ apiKey: env.KORESHIELD_API_KEY });
+
+    const { message } = await request.json();
+
+    const scan = await koreshield.scan({ content: message });
+
+    return Response.json({ safe: !scan.threat_detected });
+  },
+};
+```
+
+### Vercel Edge Functions
+
+```typescript
+export const config = { runtime: 'edge' };
+
+const koreshield = new KoreShield({
+  apiKey: process.env.KORESHIELD_API_KEY,
+});
+
+export default async function handler(req: Request) {
+  const { message } = await req.json();
+
+  const scan = await koreshield.scan({ content: message });
+
+  return Response.json({ safe: !scan.threat_detected });
+}
+```
+
+## Database Optimization
+
+### Indexed Scans
+
+```typescript
+import { Prisma, PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function trackScans(userId: string, content: string, scan: any) {
+  await prisma.scan.create({
+    data: {
+      userId,
+      content,
+      threatDetected: scan.threat_detected,
+      threatType: scan.threat_type,
+      confidence: scan.confidence,
+      timestamp: new Date(),
+    },
+  });
+}
+
+// Create indexes
+// @@index([userId, timestamp])
+// @@index([threatDetected])
+```
+
+### Aggregate Queries
+
+```typescript
+async function getUserStats(userId: string) {
+  const stats = await prisma.scan.aggregate({
+    where: { userId },
+    _count: { id: true },
+    _sum: { confidence: true },
+  });
+
+  return {
+    totalScans: stats._count.id,
+    avgConfidence: stats._sum.confidence / stats._count.id,
+  };
+}
+```
+
+## Load Balancing
+
+```typescript
+class LoadBalancedScanner {
+  private endpoints = [
+    'https://api-us.koreshield.com',
+    'https://api-eu.koreshield.com',
+    'https://api-asia.koreshield.com',
+  ];
+
+  private currentIndex = 0;
+
+  private getNextEndpoint() {
+    const endpoint = this.endpoints[this.currentIndex];
+    this.currentIndex = (this.currentIndex + 1) % this.endpoints.length;
+    return endpoint;
+  }
+
+  async scan(content: string) {
+    const endpoint = this.getNextEndpoint();
+
+    const koreshield = new KoreShield({
+      apiKey: process.env.KORESHIELD_API_KEY,
+      baseURL: endpoint,
+    });
+
+    return koreshield.scan({ content });
+  }
+}
+```
+
+## Monitoring Performance
+
+```typescript
+import { Histogram } from 'prom-client';
+
+const scanDuration = new Histogram({
+  name: 'koreshield_scan_duration_ms',
+  help: 'KoreShield scan duration in milliseconds',
+  buckets: [10, 50, 100, 200, 500, 1000, 2000],
+});
+
+async function monitoredScan(content: string) {
+  const start = Date.now();
+
+  try {
+    const scan = await koreshield.scan({ content });
+    const duration = Date.now() - start;
+
+    scanDuration.observe(duration);
+
+    return scan;
+  } catch (error) {
+    const duration = Date.now() - start;
+    scanDuration.observe(duration);
+    throw error;
+  }
+}
+```
+
+## Benchmarking
+
+```typescript
+async function benchmark(iterations: number = 1000) {
+  const testContent = 'Hello, world!';
+  const results: number[] = [];
+
+  for (let i = 0; i < iterations; i++) {
+    const start = performance.now();
+    await koreshield.scan({ content: testContent });
+    const duration = performance.now() - start;
+    results.push(duration);
+  }
+
+  const sorted = results.sort((a, b) => a - b);
+
+  console.log('Benchmark Results:');
+  console.log(`  Iterations: ${iterations}`);
+  console.log(`  P50: ${sorted[Math.floor(iterations * 0.5)].toFixed(2)}ms`);
+  console.log(`  P95: ${sorted[Math.floor(iterations * 0.95)].toFixed(2)}ms`);
+  console.log(`  P99: ${sorted[Math.floor(iterations * 0.99)].toFixed(2)}ms`);
+  console.log(`  Max: ${sorted[iterations - 1].toFixed(2)}ms`);
+}
+```
+
+## Best Practices
+
+### Use SDK Built-in Caching
+
+```typescript
+const koreshield = new KoreShield({
+  apiKey: process.env.KORESHIELD_API_KEY,
+  cache: {
+    enabled: true,
+    ttl: 300,
+    maxSize: 10000,
+  },
+});
+```
+
+### Fail Fast
+
+```typescript
+const scan = await Promise.race([
+  koreshield.scan({ content }),
+  new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout')), 2000)
+  ),
+]);
+```
+
+### Optimize Payloads
+
+```typescript
+// Bad: Sending entire document
+const scan = await koreshield.scan({ content: longDocument });
+
+// Good: Send only user input
+const scan = await koreshield.scan({ content: userInput });
+```
+
+## Related Documentation
+
+- [Monitoring & Alerting](/docs/monitoring-alerting)
+- [Troubleshooting](/docs/advanced/troubleshooting)
+- [Caching Strategies](/docs/best-practices/caching)

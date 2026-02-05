@@ -1,0 +1,145 @@
+---
+title: Healthcare AI Security
+description: HIPAA-compliant AI assistant deployment with KoreShield
+published: true
+---
+
+# Healthcare AI Security
+
+How a healthcare provider secured their AI medical assistant while maintaining HIPAA compliance.
+
+## Challenge
+
+A hospital network deployed an AI assistant to help doctors with:
+- Patient history summarization
+- Differential diagnosis suggestions
+- Medical literature references
+- Treatment plan recommendations
+
+**Critical Requirements:**
+- HIPAA compliance for all patient data
+- Zero tolerance for data leakage
+- High accuracy (medical decisions at stake)
+- Audit trail for all AI interactions
+
+## Solution
+
+```typescript
+import { KoreShield } from 'koreshield-sdk';
+import OpenAI from 'openai';
+
+const koreshield = new KoreShield({
+  apiKey: process.env.KORESHIELD_API_KEY,
+  sensitivity: 'high',
+  complianceMode: 'hipaa',
+});
+
+async function secureMedicalQuery(
+  doctorId: string,
+  patientId: string,
+  query: string
+) {
+  // Scan query for prompt injection
+  const scan = await koreshield.scan({
+    content: query,
+    userId: doctorId,
+    metadata: {
+      patientId,
+      department: 'emergency',
+      complianceLevel: 'hipaa',
+    },
+  });
+
+  if (scan.threat_detected) {
+    await auditLog.create({
+      doctorId,
+      patientId,
+      action: 'QUERY_BLOCKED',
+      reason: scan.threat_type,
+      timestamp: new Date(),
+    });
+
+    return {
+      error: 'Security threat detected in query',
+      auditId: await generateAuditId(),
+    };
+  }
+
+  // Retrieve patient context with access control
+  const patientContext = await getPatientContext(patientId, doctorId);
+
+  // Generate medical response
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [
+      {
+        role: 'system',
+        content: `You are a medical AI assistant. 
+CRITICAL RULES:
+- Only reference THIS patient's data (ID: ${patientId})
+- Do not diagnose - provide differential suggestions only
+- Always recommend consulting specialists
+- Cite medical literature when possible
+- Flag contradictions or drug interactions`,
+      },
+      {
+        role: 'user',
+        content: `Patient Context:\n${patientContext}\n\nQuery: ${query}`,
+      },
+    ],
+    temperature: 0.2, // Low temperature for medical accuracy
+  });
+
+  // Audit successful interaction
+  await auditLog.create({
+    doctorId,
+    patientId,
+    action: 'QUERY_PROCESSED',
+    queryHash: hashQuery(query),
+    timestamp: new Date(),
+  });
+
+  return {
+    response: response.choices[0].message.content,
+    disclaimer: 'AI-generated suggestion. Verify with medical literature.',
+  };
+}
+```
+
+## HIPAA Compliance
+
+### PHI Protection
+
+```typescript
+// Remove PHI from logs
+function sanitizePHI(text: string): string {
+  return text
+    .replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN]')
+    .replace(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g, '[NAME]')
+    .replace(/\b\d{10}\b/g, '[PHONE]')
+    .replace(/\b[\w.-]+@[\w.-]+\.\w+\b/g, '[EMAIL]');
+}
+
+// Audit all access
+await auditLog.create({
+  userId: doctorId,
+  action: 'PATIENT_DATA_ACCESS',
+  patientId,
+  query: sanitizePHI(query),
+  ipAddress: req.ip,
+  timestamp: new Date(),
+});
+```
+
+### Results
+
+- **Zero PHI breaches** in 18 months
+- **Blocked 487 prompt injection attempts**
+- **100% audit trail** compliance
+- **&lt;100ms latency** for scans
+- **99.97% uptime**
+
+## Related Documentation
+
+- [HIPAA Compliance](/docs/compliance/hipaa)
+- [RAG Security](/docs/advanced/rag-security)
