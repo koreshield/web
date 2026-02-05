@@ -162,13 +162,11 @@ async def signup(request: SignupRequest, db: AsyncSession = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        logger.error("signup_error", error=str(e), traceback=error_details, email=request.email)
+        logger.error("signup_error", error=str(e), email=request.email)
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Signup failed: {str(e)}"  # Temporarily expose error for debugging
+            detail="Signup failed. Please try again later."
         )
 
 @router.post(
