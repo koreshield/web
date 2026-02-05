@@ -41,17 +41,39 @@ class RAGContextDetector:
         Initialize the RAG context detector.
         
         Args:
-            config: Configuration dictionary
+            config: Configuration dictionary with options:
+                - min_confidence: Minimum confidence threshold (default: 0.3)
+                - max_excerpt_length: Maximum excerpt length (default: 200)
+                - enable_cross_document_analysis: Enable multi-doc analysis (default: True)
+                - confidence_boosts: Dict of boost values for pattern matching:
+                    - ignore_keywords: Boost for ignore/bypass/override (default: 0.3)
+                    - leak_keywords: Boost for leak/exfiltrate/steal (default: 0.35)
+                    - system_keywords: Boost for system prompt markers (default: 0.25)
+                    - multiple_keywords: Boost for 2+ injection keywords (default: 0.2)
         """
         self.config = config or {}
         self.attack_detector = AttackDetector(config)
         
-        # Configuration
+        # Basic configuration
         self.min_confidence_threshold = self.config.get("min_confidence", 0.3)
         self.max_excerpt_length = self.config.get("max_excerpt_length", 200)
         self.enable_cross_document_analysis = self.config.get(
             "enable_cross_document_analysis", True
         )
+        
+        # Configurable confidence boosts for pattern matching
+        default_boosts = {
+            "ignore_keywords": 0.3,
+            "leak_keywords": 0.35,
+            "system_keywords": 0.25,
+            "multiple_keywords": 0.2
+        }
+        self.confidence_boosts = self.config.get("confidence_boosts", default_boosts)
+        # Merge user-provided boosts with defaults
+        if "confidence_boosts" in self.config:
+            for key, value in default_boosts.items():
+                if key not in self.confidence_boosts:
+                    self.confidence_boosts[key] = value
         
         # Load RAG-specific patterns
         self._load_rag_patterns()
@@ -60,6 +82,7 @@ class RAGContextDetector:
             "RAG detector initialized",
             min_confidence=self.min_confidence_threshold,
             cross_document_analysis=self.enable_cross_document_analysis,
+            confidence_boosts=self.confidence_boosts,
         )
     
     def _load_rag_patterns(self):
@@ -246,24 +269,30 @@ class RAGContextDetector:
         rag_confidence = min(len(rag_indicators) * 0.2, 0.8)
         combined_confidence = max(base_confidence, rag_confidence)
         
-        # Boost confidence for high-risk patterns
+        # Boost confidence for high-risk patterns (using configurable values)
         content_lower = doc.content.lower()
         
-        # Critical pattern boosts
+        # Critical pattern boosts - ignore/bypass/override keywords
         if any(kw in content_lower for kw in ["ignore", "bypass", "override", "disable"]):
-            combined_confidence = min(combined_confidence + 0.3, 1.0)
+            boost = self.confidence_boosts.get("ignore_keywords", 0.3)
+            combined_confidence = min(combined_confidence + boost, 1.0)
         
+        # Data exfiltration keywords
         if any(kw in content_lower for kw in ["reveal", "leak", "exfiltrate", "steal", "extract"]):
-            combined_confidence = min(combined_confidence + 0.35, 1.0)
+            boost = self.confidence_boosts.get("leak_keywords", 0.35)
+            combined_confidence = min(combined_confidence + boost, 1.0)
         
+        # System prompt markers
         if "[system:" in content_lower or "system:" in content_lower:
-            combined_confidence = min(combined_confidence + 0.25, 1.0)
+            boost = self.confidence_boosts.get("system_keywords", 0.25)
+            combined_confidence = min(combined_confidence + boost, 1.0)
         
         # Boost for multiple injection keywords
         injection_keywords = ["ignore", "bypass", "override", "reveal", "leak", "disclose"]
         keyword_count = sum(1 for kw in injection_keywords if kw in content_lower)
         if keyword_count >= 2:
-            combined_confidence = min(combined_confidence + 0.2, 1.0)
+            boost = self.confidence_boosts.get("multiple_keywords", 0.2)
+            combined_confidence = min(combined_confidence + boost, 1.0)
         
         if combined_confidence < self.min_confidence_threshold:
             return None  # No significant threat

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { MDXProvider } from '@mdx-js/react';
-import { Menu, X, ArrowLeft, ArrowRight, ChevronRight, Loader2 } from 'lucide-react';
+import { Menu, X, Search, ChevronRight, ExternalLink, Github, Loader2 } from 'lucide-react';
 import { Cards, Card } from '../components/mdx/Cards';
 import { Pre } from '../components/mdx/CodeBlock';
 import { Callout } from '../components/mdx/Callout';
@@ -20,16 +20,16 @@ interface Meta {
     title?: string;
 }
 
-// Function to normalize slugs
+// Function to normalize slugs to relative paths (e.g. 'intro/index')
 const normalizeSlug = (path: string) => {
+    // Remove /content/docs/ prefix and .mdx extension
     return path
-        .split('/')
-        .pop()
-        ?.replace('.mdx', '') || '';
+        .replace('/content/docs/', '')
+        .replace('/src/content/docs/', '') // Handle potential vite path differences
+        .replace('.mdx', '');
 };
 
 // Lazy load MDX files
-// We need eager loading for meta.json to build navigation, but lazy for .mdx content
 const mdxModules = import.meta.glob('/content/docs/**/*.mdx');
 const metaFiles = import.meta.glob('/content/docs/**/meta.json', { eager: true });
 
@@ -40,50 +40,79 @@ Object.keys(mdxModules).forEach((path) => {
     slugToPathMap[slug] = path;
 });
 
-// Build Sidebar Navigation
-interface NavItem {
-    type: 'header' | 'link';
+// Navigation Architecture
+interface NavSection {
     title: string;
-    slug?: string;
-    group?: string; // Parent group for breadcrumbs
+    items: NavItem[];
 }
 
-function buildNavigation() {
-    const nav: NavItem[] = [];
-    const rootMeta = metaFiles['/content/docs/meta.json'] as Meta;
-    if (!rootMeta) return nav;
+interface NavItem {
+    title: string;
+    slug: string;
+}
 
+function buildNavigation(): NavSection[] {
+    const sections: NavSection[] = [];
+    const rootMeta = metaFiles['/content/docs/meta.json'] as Meta;
+
+    // Fallback if no meta.json (shouldn't happen in prod)
+    if (!rootMeta) return [];
+
+    let currentSection: NavSection = { title: 'Overview', items: [] };
+
+    // This logic adapts the existing meta.json format to the new nested UI
     rootMeta.pages.forEach((page: string) => {
         if (page.startsWith('---')) {
-            nav.push({ type: 'header', title: page.replace(/---/g, '') });
+            // Push previous section if it has items
+            if (currentSection.items.length > 0) {
+                sections.push(currentSection);
+            }
+            // Start new section
+            currentSection = {
+                title: page.replace(/---/g, ''),
+                items: []
+            };
         } else if (page.startsWith('...')) {
+            // Handle subgroups (folders)
             const groupName = page.replace('...', '').replace(/[()]/g, '');
             const groupMetaPath = `/content/docs/${groupName}/meta.json`;
             const groupMeta = metaFiles[groupMetaPath] as Meta;
 
             if (groupMeta && groupMeta.pages) {
-                // @ts-ignore
-                const groupTitle = groupMeta.title || formatTitle(groupName);
-
                 groupMeta.pages.forEach((subPage: string) => {
-                    if (subPage.startsWith('---')) {
-                        nav.push({ type: 'header', title: subPage.replace(/---/g, '') });
-                    } else {
-                        nav.push({ type: 'link', slug: subPage, title: formatTitle(subPage), group: groupTitle });
+                    // Skip separators in sub-menus for now, or handle them if needed
+                    if (!subPage.startsWith('---')) {
+                        // Construct full slug: "group/page"
+                        const fullSlug = `${groupName}/${subPage}`;
+                        currentSection.items.push({
+                            title: formatTitle(subPage),
+                            slug: fullSlug
+                        });
                     }
                 });
             }
         } else {
-            nav.push({ type: 'link', slug: page, title: page === 'index' ? 'Introduction' : formatTitle(page) });
+            // Top level pages
+            currentSection.items.push({
+                title: page === 'index' ? 'Introduction' : formatTitle(page),
+                slug: page
+            });
         }
     });
 
-    return nav;
+    // Push the last section
+    if (currentSection.items.length > 0) {
+        sections.push(currentSection);
+    }
+
+    return sections;
 }
 
 function formatTitle(slug: string) {
     if (slug === 'api') return 'API';
     if (slug === 'sdk') return 'SDK';
+    if (slug === 'cli') return 'CLI';
+    if (slug === 'faq') return 'FAQ';
     return slug
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -94,16 +123,13 @@ function formatTitle(slug: string) {
 function TableOfContents() {
     const [headings, setHeadings] = useState<{ id: string; text: string; level: number }[]>([]);
     const [activeId, setActiveId] = useState<string>('');
+    const { pathname } = useLocation();
 
     useEffect(() => {
-        // Wait for MDX content to render
         const timer = setTimeout(() => {
             const elements = Array.from(document.querySelectorAll('h2, h3'));
-
             const extracted = elements.map((elem, index) => {
-                if (!elem.id) {
-                    elem.id = `heading-${index}`;
-                }
+                if (!elem.id) elem.id = `heading-${index}`;
                 return {
                     id: elem.id,
                     text: elem.textContent || '',
@@ -115,9 +141,7 @@ function TableOfContents() {
             const observer = new IntersectionObserver(
                 (entries) => {
                     entries.forEach((entry) => {
-                        if (entry.isIntersecting) {
-                            setActiveId(entry.target.id);
-                        }
+                        if (entry.isIntersecting) setActiveId(entry.target.id);
                     });
                 },
                 { rootMargin: '-20% 0px -35% 0px' }
@@ -125,22 +149,22 @@ function TableOfContents() {
 
             elements.forEach((elem) => observer.observe(elem));
             return () => observer.disconnect();
-        }, 500); // Small delay to ensure content is mounted
+        }, 500);
 
         return () => clearTimeout(timer);
-    }, [window.location.pathname]);
+    }, [pathname]);
 
     if (headings.length === 0) return null;
 
     return (
-        <div className="hidden xl:block w-64 shrink-0 pl-8 border-l border-slate-800 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
-            <h4 className="text-sm font-semibold text-white mb-4">On this page</h4>
+        <div className="hidden xl:block w-64 shrink-0 border-l border-slate-800 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto p-6">
+            <h5 className="mb-4 text-sm font-semibold text-slate-100">On this page</h5>
             <ul className="space-y-2 text-sm">
                 {headings.map((heading) => (
                     <li key={heading.id} style={{ paddingLeft: (heading.level - 2) * 12 }}>
                         <a
                             href={`#${heading.id}`}
-                            className={`block transition-colors hover:text-white ${activeId === heading.id ? 'text-electric-green' : 'text-gray-500'
+                            className={`block transition-colors hover:text-electric-green ${activeId === heading.id ? 'text-electric-green' : 'text-slate-500'
                                 }`}
                             onClick={(e) => {
                                 e.preventDefault();
@@ -158,173 +182,202 @@ function TableOfContents() {
 }
 
 function DocsPage() {
-    const { slug } = useParams();
+    // const { slug } = useParams(); // Start utilizing pathname for robustness
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const { pathname } = useLocation();
 
-    const currentSlug = slug || 'index';
+    // Handle nested routes (react-router v6 "splat" or just capture all in slug if configured)
+    // The Route in App.tsx is "/docs/*" which maps to the 'docs' param usually or '*'
+    // Let's assume the router passes the full path segment as 'slug' or we need to look at pathname
+    // If App.tsx has <Route path="/docs/:slug" ...> it only matches one level.
+    // If we want nested, we need <Route path="/docs/*" ...>
+    // And useLocation to parse.
+
+    // For now, let's try to reconstruct the slug from pathname if standard params fail for nested.
+    // /docs/intro/architecture -> slug might be "intro/architecture" if router is set up right
+    // Or we might need to rely on the splat.
+
+    // Let's rely on pathname parsing which is robust:
+    const currentSlug = pathname.replace('/docs/', '') || 'index';
+    const isRoot = pathname === '/docs' || pathname === '/docs/';
+    const effectiveSlug = isRoot ? 'index' : currentSlug;
 
     // Lazy content loading
     const ContentComponent = useMemo(() => {
-        const path = slugToPathMap[currentSlug];
+        const path = slugToPathMap[effectiveSlug];
+        // Try fallback if trailing slash issues
+        if (!path) {
+            const alternative = slugToPathMap[effectiveSlug.replace(/\/$/, '')];
+            if (alternative && mdxModules[alternative]) return lazy(() => mdxModules[alternative]() as Promise<{ default: React.ComponentType }>);
+        }
+
         if (!path || !mdxModules[path]) return null;
         return lazy(() => mdxModules[path]() as Promise<{ default: React.ComponentType }>);
-    }, [currentSlug]);
+    }, [effectiveSlug]);
 
-    // Metadata loading (hacky but works without async component for now)
-    // In a real app we'd probably fetch this or have it in a map
-    const [meta, setMeta] = useState<{ title: string; description?: string }>({ title: formatTitle(currentSlug) });
+    const [meta, setMeta] = useState<{ title: string; description?: string }>({ title: formatTitle(effectiveSlug.split('/').pop() || '') });
 
     useEffect(() => {
         const loadMeta = async () => {
-            const path = slugToPathMap[currentSlug];
+            const path = slugToPathMap[effectiveSlug];
             if (path && mdxModules[path]) {
                 try {
                     const mod = await mdxModules[path]() as MDXModule;
-                    if (mod.frontmatter) {
-                        setMeta({
-                            title: mod.frontmatter.title || formatTitle(currentSlug),
-                            description: mod.frontmatter.description
-                        });
-                    } else {
-                        setMeta({ title: formatTitle(currentSlug) });
-                    }
+                    setMeta({
+                        title: mod.frontmatter?.title || formatTitle(effectiveSlug.split('/').pop() || ''),
+                        description: mod.frontmatter?.description
+                    });
                 } catch (e) {
                     console.error("Failed to load frontmatter", e);
                 }
             }
         };
         loadMeta();
-    }, [currentSlug]);
-
+    }, [effectiveSlug]);
 
     const navigation = useMemo(() => buildNavigation(), []);
-    const currentIndex = navigation.findIndex(item => item.slug === currentSlug);
-    const currentItem = navigation[currentIndex];
 
-    // Calculate Prev/Next
-    const linkItems = navigation.filter(item => item.type === 'link');
-    const linkIndex = linkItems.findIndex(item => item.slug === currentSlug);
-    const prevItem = linkIndex > 0 ? linkItems[linkIndex - 1] : null;
-    const nextItem = linkIndex < linkItems.length - 1 ? linkItems[linkIndex + 1] : null;
-
+    // Scroll to top on route change
     useEffect(() => {
         window.scrollTo(0, 0);
+        setSidebarOpen(false);
     }, [pathname]);
 
     if (!ContentComponent) {
         return (
-            <div className="min-h-screen bg-black text-white p-20 text-center">
-                <h1 className="text-4xl mb-4">404 - Doc Not Found</h1>
-                <Link to="/docs" className="text-electric-green">Go back to docs</Link>
+            <div className="min-h-screen bg-[#0B1120] text-white p-20 text-center flex flex-col items-center justify-center">
+                <Loader2 className="w-12 h-12 animate-spin text-electric-green mb-4" />
+                <h1 className="text-2xl font-bold">Loading Documentation...</h1>
+                <p className="text-gray-500 mt-2">Requested: {effectiveSlug}</p>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col">
-            {/* Header */}
-            <header className="border-b border-slate-800 bg-black/50 backdrop-blur sticky top-0 z-50">
-                <div className="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setSidebarOpen(!isSidebarOpen)}
-                            className="lg:hidden p-2 hover:bg-slate-800 rounded"
-                            aria-label="Toggle Menu"
-                        >
-                            {isSidebarOpen ? <X /> : <Menu />}
-                        </button>
-                        <Link to="/" className="text-xl font-bold flex items-center gap-2">
-                            <img src="/logo/SVG/White.svg" alt="KoreShield Logo" className="w-8 h-8" />
-                            <span>Kore<span className="text-electric-green">Shield</span> <span className="text-sm text-gray-500 font-normal">Docs</span></span>
+        <div className="min-h-screen bg-[#0B1120] text-slate-300 font-sans selection:bg-electric-green/30">
+            {/* Top Navigation Bar */}
+            <header className="fixed top-0 z-50 w-full border-b border-slate-800 bg-[#0B1120]/90 backdrop-blur supports-[backdrop-filter]:bg-[#0B1120]/60">
+                <div className="max-w-[1600px] mx-auto flex h-16 items-center px-4 md:px-8">
+                    <div className="mr-8 hidden md:flex">
+                        <Link to="/" className="flex items-center space-x-2 font-bold text-slate-100">
+                            <img src="/logo/SVG/White.svg" alt="KoreShield" className="w-8 h-8" />
+                            <span>Kore<span className="text-electric-green">Shield</span> Docs</span>
                         </Link>
+                    </div>
+
+                    <button
+                        className="inline-flex items-center justify-center rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-100 focus:outline-none md:hidden"
+                        onClick={() => setSidebarOpen(!isSidebarOpen)}
+                    >
+                        <span className="sr-only">Open main menu</span>
+                        {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    </button>
+
+                    <div className="flex flex-1 items-center justify-between space-x-4 md:justify-end">
+                        <div className="w-full flex-1 md:w-auto md:flex-none">
+                            <div className="relative">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+                                <input
+                                    type="search"
+                                    placeholder="Search docs..."
+                                    className="h-9 w-full rounded-md border border-slate-700 bg-slate-900 pl-9 pr-4 text-sm text-slate-100 placeholder:text-slate-500 focus:border-electric-green focus:outline-none focus:ring-1 focus:ring-electric-green md:w-64 lg:w-80 transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <nav className="flex items-center space-x-2">
+                            <Link to="/" className="text-sm text-slate-400 hover:text-white hidden sm:block">Home</Link>
+                            <a href="https://github.com/koreshield/koreshield" target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-slate-100">
+                                <Github className="h-5 w-5" />
+                            </a>
+                        </nav>
                     </div>
                 </div>
             </header>
 
-            <div className="flex-1 max-w-[1600px] mx-auto w-full flex">
-                {/* Sidebar */}
-                <aside className={`
-                    fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-black border-r border-slate-800 pl-6 pr-2 py-6 overflow-y-auto transform transition-transform z-40 ease-in-out duration-300
-                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                `}>
-                    <nav className="space-y-1 pb-10">
-                        {navigation.map((item, i) => (
-                            item.type === 'header' ? (
-                                <div key={i} className="mt-8 mb-3 text-xs font-bold text-gray-500 uppercase tracking-wider px-3">
-                                    {item.title}
+            <div className="max-w-[1600px] mx-auto flex h-[calc(100vh-4rem)] pt-16">
+                {/* Left Sidebar - Navigation */}
+                <aside
+                    className={`fixed inset-y-0 left-0 z-40 w-72 transform border-r border-slate-800 bg-[#0B1120] pb-10 transition-transform duration-300 ease-in-out md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:translate-x-0 overflow-y-auto ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                        }`}
+                >
+                    <div className="p-4 md:p-6">
+                        <nav className="space-y-8">
+                            {navigation.map((section, i) => (
+                                <div key={i}>
+                                    <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">
+                                        {section.title}
+                                    </h4>
+                                    <ul className="space-y-1">
+                                        {section.items.map((item, j) => {
+                                            const isActive = effectiveSlug === item.slug;
+                                            return (
+                                                <li key={j}>
+                                                    <Link
+                                                        to={`/docs/${item.slug}`}
+                                                        className={`block rounded-md px-3 py-2 text-sm font-medium transition-all ${isActive
+                                                            ? 'bg-electric-green/10 text-electric-green border-l-2 border-electric-green -ml-[2px]'
+                                                            : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
+                                                            }`}
+                                                    >
+                                                        {item.title}
+                                                    </Link>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
                                 </div>
-                            ) : (
-                                <Link
-                                    key={i}
-                                    to={item.slug === 'index' ? '/docs' : `/docs/${item.slug}`}
-                                    className={`block px-3 py-1.5 rounded-md text-sm transition-colors ${currentSlug === item.slug
-                                        ? 'bg-electric-green/10 text-electric-green font-medium'
-                                        : 'text-gray-400 hover:text-white hover:bg-slate-900'
-                                        }`}
-                                    onClick={() => setSidebarOpen(false)}
-                                >
-                                    {item.title}
-                                </Link>
-                            )
-                        ))}
-                    </nav>
+                            ))}
+                        </nav>
+                    </div>
                 </aside>
 
                 {/* Main Content Area */}
-                <main className="flex-1 min-w-0 px-6 py-12 lg:px-12 flex gap-12">
-                    <div className="flex-1 min-w-0 max-w-4xl mx-auto">
+                <div className="flex flex-1 min-w-0">
+                    <main className="w-full px-6 py-10 md:px-12 overflow-y-auto">
                         {/* Breadcrumbs */}
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-8 overflow-x-auto whitespace-nowrap">
-                            <Link to="/docs" className="hover:text-white">Docs</Link>
-                            {currentItem?.group && (
-                                <>
-                                    <ChevronRight className="w-3.5 h-3.5" />
-                                    <span>{currentItem.group}</span>
-                                </>
-                            )}
+                        <div className="flex items-center gap-2 text-sm text-slate-500 mb-8 overflow-x-auto whitespace-nowrap">
+                            <Link to="/docs" className="hover:text-electric-green transition-colors">Docs</Link>
                             <ChevronRight className="w-3.5 h-3.5" />
-                            <span className="text-gray-300 font-medium truncate">{meta.title}</span>
+                            {/* Try to show group if possible, simplest is just title for now */}
+                            <span className="text-slate-300 font-medium truncate">{meta.title}</span>
                         </div>
 
-                        <div className="prose prose-invert prose-emerald max-w-none min-h-[50vh]">
-                            <h1 className="text-4xl font-bold mb-4">{meta.title}</h1>
-                            {meta.description && <p className="text-xl text-gray-400 mb-12 pb-8 border-b border-slate-800 leading-relaxed">{meta.description}</p>}
+                        {/* Content Container */}
+                        <div className="prose prose-invert prose-slate max-w-4xl mx-auto
+                            prose-h1:text-4xl prose-h1:font-bold prose-h1:tracking-tight prose-h1:mb-8 prose-h1:text-white
+                            prose-h2:text-2xl prose-h2:font-semibold prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-2 prose-h2:border-b prose-h2:border-slate-800 prose-h2:text-slate-100
+                            prose-h3:text-xl prose-h3:font-semibold prose-h3:mt-8 prose-h3:mb-4 prose-h3:text-slate-200
+                            prose-p:text-slate-300 prose-p:leading-7 prose-p:mb-6
+                            prose-li:text-slate-300
+                            prose-code:text-electric-green prose-code:bg-slate-900/80 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+                            prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800 prose-pre:p-4 prose-pre:rounded-lg
+                            prose-a:text-electric-green prose-a:no-underline hover:prose-a:underline
+                            prose-blockquote:border-l-electric-green prose-blockquote:bg-slate-900/30 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r
+                            prose-table:border-collapse prose-th:text-slate-200 prose-th:px-4 prose-th:py-2 prose-th:text-left prose-td:px-4 prose-td:py-2 prose-td:border-t prose-td:border-slate-800
+                        ">
+                            <h1>{meta.title}</h1>
+                            {meta.description && <p className="lead text-xl text-slate-400 mb-10">{meta.description}</p>}
 
-                            <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-electric-green" /></div>}>
+                            <Suspense fallback={<div className="py-20 flex justify-center"><Loader2 className="animate-spin text-electric-green w-8 h-8" /></div>}>
                                 <MDXProvider components={{ Cards, Card, pre: Pre, Callout, Accordion, AccordionGroup, table: Table }}>
                                     <ContentComponent />
                                 </MDXProvider>
                             </Suspense>
                         </div>
 
-                        {/* Prev/Next Navigation */}
-                        <div className="mt-20 pt-8 border-t border-slate-800 grid sm:grid-cols-2 gap-4">
-                            {prevItem ? (
-                                <Link to={prevItem.slug === 'index' ? '/docs' : `/docs/${prevItem.slug}`} className="group border border-slate-800 rounded-lg p-4 hover:border-electric-green transition-colors text-left bg-slate-900/50">
-                                    <div className="text-xs text-gray-500 mb-1 group-hover:text-electric-green transition-colors">Previous</div>
-                                    <div className="font-semibold text-white flex items-center gap-2">
-                                        <ArrowLeft className="w-4 h-4" />
-                                        {prevItem.title}
-                                    </div>
-                                </Link>
-                            ) : <div />}
-
-                            {nextItem && (
-                                <Link to={`/docs/${nextItem.slug}`} className="group border border-slate-800 rounded-lg p-4 hover:border-electric-green transition-colors text-right bg-slate-900/50">
-                                    <div className="text-xs text-gray-500 mb-1 group-hover:text-electric-green transition-colors">Next</div>
-                                    <div className="font-semibold text-white flex items-center justify-end gap-2">
-                                        {nextItem.title}
-                                        <ArrowRight className="w-4 h-4" />
-                                    </div>
-                                </Link>
-                            )}
+                        {/* Docs Footer */}
+                        <div className="max-w-4xl mx-auto mt-20 pt-8 border-t border-slate-800 flex justify-between text-sm text-slate-500">
+                            <p>© 2026 KoreShield. All rights reserved.</p>
+                            <a href={`https://github.com/koreshield/koreshield/tree/main/koreshield-web/content/docs/${effectiveSlug}.mdx`} target="_blank" rel="noreferrer" className="hover:text-electric-green flex items-center gap-1 transition-colors">
+                                Edit this page <ExternalLink className="h-3 w-3" />
+                            </a>
                         </div>
-                    </div>
+                    </main>
 
-                    {/* Table of Contents */}
+                    {/* Right Sidebar - On This Page */}
                     <TableOfContents />
-                </main>
+                </div>
             </div>
         </div>
     );

@@ -2,9 +2,61 @@
 
 Security templates for protecting RAG (Retrieval-Augmented Generation) systems integrated with popular CRM platforms.
 
+## Status
+
+**IMPORTANT**: These templates are currently **reference examples** and educational resources. They demonstrate security configurations for CRM platforms but are not automatically loaded by the RAG detection engine.
+
+**To use these templates**:
+1. Refer to the template Python classes and YAML configurations
+2. Adapt the patterns and rules for your specific use case
+3. Use the `CRMTemplateRegistry` (see Usage section below)
+
+**Future Integration**: Full auto-loading via configuration (e.g., `rag.crm_platform: salesforce`) is planned for a future release.
+
 ## Overview
 
 These templates provide ready-to-use configurations for detecting indirect prompt injection attacks in CRM-based RAG systems. Each template maps CRM-specific data sources to the 5-dimensional threat taxonomy and includes platform-optimized detection rules.
+
+## Usage
+
+### Using the Template Registry
+
+```python
+from koreshield.crm_templates import crm_registry, CRMPlatform
+
+# Get a specific CRM template
+salesforce_template = crm_registry.get_template(CRMPlatform.SALESFORCE)
+
+if salesforce_template:
+    # Get security policy
+    policy = salesforce_template.get_security_policy()
+    
+    # Get attack patterns
+    patterns = salesforce_template.get_attack_patterns()
+    
+    # Get PII patterns
+    pii_patterns = salesforce_template.get_pii_patterns()
+```
+
+### Integration with RAG Detector
+
+```python
+from koreshield.rag_detector import RAGContextDetector
+from koreshield.crm_templates import crm_registry, CRMPlatform
+
+# Initialize detector with CRM-specific config
+crm_template = crm_registry.get_template(CRMPlatform.HUBSPOT)
+config = {
+    "min_confidence": 0.3,
+    "enable_cross_document_analysis": True
+}
+
+detector = RAGContextDetector(config=config)
+
+# Scan documents with CRM context
+documents = [...]  # Your retrieved CRM documents
+result = detector.scan_context(user_query="...", documents=documents)
+```
 
 ## Available Templates
 

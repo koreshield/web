@@ -6,6 +6,8 @@ import UseCases from '../components/UseCases';
 import { ThreatDashboard } from '../components/ThreatDashboard';
 import { InteractiveDemo } from '../components/InteractiveDemo';
 import { RAGShowcase } from '../components/RAGShowcase';
+import { IntegrationTicker } from '../components/IntegrationTicker';
+import { TrustBadges } from '../components/TrustBadges';
 
 import { SEOMeta } from '../components/SEOMeta';
 
@@ -14,6 +16,7 @@ function LandingPage() {
         <div className="bg-background text-foreground">
             <SEOMeta />
             <Hero />
+            <IntegrationTicker />
 
             <section className="py-20 px-6">
                 <div className="max-w-7xl mx-auto">
@@ -32,6 +35,7 @@ function LandingPage() {
             <Architecture />
             <Features />
             <IntegrationCode />
+            <TrustBadges />
             <UseCases />
         </div>
     );

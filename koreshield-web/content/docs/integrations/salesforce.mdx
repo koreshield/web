@@ -1,0 +1,75 @@
+---
+title: Salesforce Integration
+description: Secure your Salesforce Einstein bots and RAG pipelines against prompt injection.
+---
+
+# Salesforce Integration
+
+Salesforce is a prime target for RAG attacks because it aggregates external data (emails, cases) that is often fed directly into LLMs (Einstein Copilot).
+
+KoreShield provides a specialized template for Salesforce that maps standard objects to our threat taxonomy.
+
+## Supported Objects
+
+| Salesforce Object | Mapped Vector | Severity |
+| :--- | :--- | :--- |
+| `EmailMessage` | `email` | **High** |
+| `FeedItem` (Chatter) | `indirect` | **Medium** |
+| `Case` (description) | `indirect` | **High** |
+| `KnowledgeArticle` | `document` | **High** |
+
+## Implementation
+
+We recommend using a Python middleware (e.g., in AWS Lambda or Heroku) to scan data before it reaches your RAG pipeline.
+
+### Prerequisites
+
+1.  Export your Salesforce credentials.
+2.  Install `koreshield` and `simple-salesforce`.
+
+### Code Example
+
+```python
+from simple_salesforce import Salesforce
+from koreshield import AsyncKoreShieldClient
+from koreshield.crm_templates.salesforce import SALESFORCE_TEMPLATE
+
+# 1. Connect
+sf = Salesforce(username='...', password='...', security_token='...')
+ks_client = AsyncKoreShieldClient(api_key="ks_...")
+
+# 2. Fetch recent emails (potential vector)
+query = "SELECT Subject, TextBody FROM EmailMessage ORDER BY CreatedDate DESC LIMIT 5"
+emails = sf.query(query)['records']
+
+# 3. Format for KoreShield
+documents = []
+for email in emails:
+    documents.append({
+        "id": email['Id'],
+        "text": f"Subject: {email['Subject']}\nBody: {email['TextBody']}",
+        "metadata": {
+            "source": "salesforce",
+            "object": "EmailMessage"
+        }
+    })
+
+# 4. Scan with Salesforce Policy
+result = await ks_client.scan_rag_context(
+    user_query="Summarize recent issues",
+    documents=documents,
+    config=SALESFORCE_TEMPLATE # Apply Salesforce-specific rules
+)
+
+if not result.is_safe:
+    print("Blocked malicious email content from RAG context")
+```
+
+## Security Policy
+
+The `SALESFORCE_TEMPLATE` automatically configures sensitivity:
+
+*   **Email Body**: Highest sensitivity (often contains untrusted external input).
+*   **Internal Comments**: Lower sensitivity (trusted agents).
+
+You can override these defaults in your `SecurityPolicy`.
