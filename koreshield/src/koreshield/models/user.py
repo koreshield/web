@@ -26,7 +26,7 @@ class User(Base):
     last_login_at = Column(DateTime)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-    metadata = Column(JSON, default={})
+    user_metadata = Column(JSON, default={})
     
     def to_dict(self):
         """Convert user to dictionary (excluding password)."""
