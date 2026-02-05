@@ -18,6 +18,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source code
 COPY src/ ./src/
 COPY config/ ./config/
+COPY alembic.ini ./
+COPY alembic/ ./alembic/
+
+# Create startup script
+RUN echo '#!/bin/bash\nset -e\necho "Running database migrations..."\nalembic upgrade head\necho "Starting server..."\nexec python -m uvicorn src.koreshield.proxy:app --host 0.0.0.0 --port 8000' > /app/start.sh && \
+    chmod +x /app/start.sh
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash koreshield
@@ -31,5 +37,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Run the application
-CMD ["python", "-m", "uvicorn", "src.koreshield.proxy:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the application with migrations
+CMD ["/bin/bash", "/app/start.sh"]

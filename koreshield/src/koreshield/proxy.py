@@ -71,13 +71,43 @@ class KoreShieldProxy:
         self.config = config
         self.app = FastAPI(
             title="KoreShield: Enterprise LLM Firewall", 
-            version="0.1.0",
-            description="Manage, monitor, and secure your LLM traffic with advanced policy enforcement and attack detection.",
+            version="1.0.0",
+            description=\"\"\"
+            **KoreShield** is an enterprise-grade LLM security platform that provides real-time threat detection,
+            multi-provider support, and comprehensive monitoring for AI applications.
+            
+            ## Features
+            - 🛡️ Real-time threat detection & blocking
+            - 🔄 Multi-provider AI support (OpenAI, Anthropic, DeepSeek, Gemini, Azure)
+            - 📊 Analytics & monitoring dashboard
+            - 🔐 JWT-based authentication
+            - 📧 Email verification & notifications
+            - 🎯 Advanced policy engine with RBAC
+            - 📈 Usage tracking & cost analytics
+            
+            ## Authentication
+            Most endpoints require JWT authentication. Use `/v1/management/signup` to create an account
+            and `/v1/management/login` to get your token.
+            \"\"\",
             openapi_tags=[
-                {"name": "Chat", "description": "LLM Chat Completions endpoint"},
-                {"name": "Management", "description": "Admin Dashboard APIs"},
-                {"name": "Health", "description": "System health checks"}
-            ]
+                {\"name\": \"Authentication\", \"description\": \"User signup, login, and account management\"},
+                {\"name\": \"Chat\", \"description\": \"LLM Chat Completions endpoint with security scanning\"},
+                {\"name\": \"Management\", \"description\": \"Admin Dashboard APIs for configuration and monitoring\"},
+                {\"name\": \"Analytics\", \"description\": \"Usage analytics, metrics, and cost tracking\"},
+                {\"name\": \"RBAC\", \"description\": \"Role-based access control and user management\"},
+                {\"name\": \"Reports\", \"description\": \"Security reports and audit logs\"},
+                {\"name\": \"Teams\", \"description\": \"Team and organization management\"},
+                {\"name\": \"Health\", \"description\": \"System health checks and status\"}
+            ],
+            contact={
+                \"name\": \"KoreShield Support\",
+                \"email\": \"support@koreshield.com\",
+                \"url\": \"https://koreshield.com\"
+            },
+            license_info={
+                \"name\": \"Proprietary\",
+                \"url\": \"https://koreshield.com/terms\"
+            }
         )
 
         # Initialize Redis connection for rate limiting and statistics
