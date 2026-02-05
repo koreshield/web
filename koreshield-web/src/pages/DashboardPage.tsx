@@ -1,41 +1,28 @@
 import { authService } from '../lib/auth';
-import { useEffect, useState } from 'react';
-import { api } from '../lib/api-client';
-import { Activity, Shield, Clock, TrendingUp, AlertTriangle, CheckCircle, Copy, Key, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { Activity, Shield, AlertTriangle, CheckCircle, Copy, Key, LogOut } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useStats, useRecentAttacks } from '../hooks/useApi';
+import { AttackDetailModal } from '../components/AttackDetailModal';
+import { ThreatTypeBreakdown, ThreatTimeline, ThreatSummary } from '../components/ThreatAnalytics';
 
 export function DashboardPage() {
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
     const isAuthenticated = authService.isAuthenticated();
-    const [stats, setStats] = useState<any>(null);
-    const [recentAttacks, setRecentAttacks] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
     const [apiKeyVisible, setApiKeyVisible] = useState(false);
     const [copiedKey, setCopiedKey] = useState(false);
+    const [selectedAttack, setSelectedAttack] = useState<any>(null);
+
+    // Use React Query hooks
+    const { data: stats, isLoading: statsLoading, error: statsError } = useStats();
+    const { data: attacksData, isLoading: attacksLoading } = useRecentAttacks(10);
+
+    const loading = statsLoading || attacksLoading;
+    const recentAttacks = (attacksData as any)?.logs || [];
 
     // Mock API key for demo
     const mockApiKey = 'sk_test_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-    useEffect(() => {
-        loadDashboardData();
-    }, []);
-
-    const loadDashboardData = async () => {
-        setLoading(true);
-        try {
-            const [statsData, attacksData] = await Promise.all([
-                api.getStats(),
-                api.getRecentAttacks(10)
-            ]);
-            setStats(statsData);
-            setRecentAttacks((attacksData as any).attacks || []);
-        } catch (error) {
-            console.error('Failed to load dashboard data:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const copyApiKey = () => {
         navigator.clipboard.writeText(mockApiKey);
@@ -47,6 +34,26 @@ export function DashboardPage() {
         authService.logout();
         navigate('/');
     };
+
+    if (statsError) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center">
+                    <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold mb-2">Failed to Connect</h2>
+                    <p className="text-muted-foreground mb-4">
+                        Unable to reach the KoreShield backend. Please check your connection.
+                    </p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background">
@@ -90,21 +97,12 @@ export function DashboardPage() {
 
             {/* Data Source Indicator */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                {isAuthenticated ? (
-                    <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-3 flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                        <span className="text-sm text-green-600 font-medium">
-                            Connected to Railway API - Showing real-time data
-                        </span>
-                    </div>
-                ) : (
-                    <div className="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-3 flex items-center gap-2">
-                        <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                        <span className="text-sm text-yellow-600 font-medium">
-                            Demo Mode - Simulated data for demonstration purposes
-                        </span>
-                    </div>
-                )}
+                <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-3 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <span className="text-sm text-green-600 font-medium">
+                        Connected to Railway API - Showing real-time data from production backend
+                    </span>
+                </div>
             </div>
 
             {/* Main Content */}
@@ -122,31 +120,39 @@ export function DashboardPage() {
                                     <span className="text-sm font-medium text-muted-foreground">Total Requests</span>
                                     <Activity className="w-5 h-5 text-blue-500" />
                                 </div>
-                                <div className="text-3xl font-bold">{stats?.total_requests?.toLocaleString()}</div>
+                                <div className="text-3xl font-bold">
+                                    {((stats as any)?.statistics?.requests_total || 0).toLocaleString()}
+                                </div>
                             </div>
 
                             <div className="bg-card border border-border rounded-lg p-6">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-muted-foreground">Threats Blocked</span>
+                                    <span className="text-sm font-medium text-muted-foreground">Requests Blocked</span>
                                     <Shield className="w-5 h-5 text-red-500" />
                                 </div>
-                                <div className="text-3xl font-bold text-red-600">{stats?.blocked_requests}</div>
+                                <div className="text-3xl font-bold text-red-600">
+                                    {(stats as any)?.statistics?.requests_blocked || 0}
+                                </div>
                             </div>
 
                             <div className="bg-card border border-border rounded-lg p-6">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-muted-foreground">Avg Latency</span>
-                                    <Clock className="w-5 h-5 text-green-500" />
+                                    <span className="text-sm font-medium text-muted-foreground">Attacks Detected</span>
+                                    <AlertTriangle className="w-5 h-5 text-orange-500" />
                                 </div>
-                                <div className="text-3xl font-bold">{stats?.latency_p95}ms</div>
+                                <div className="text-3xl font-bold text-orange-600">
+                                    {(stats as any)?.statistics?.attacks_detected || 0}
+                                </div>
                             </div>
 
                             <div className="bg-card border border-border rounded-lg p-6">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-muted-foreground">Active Threats</span>
-                                    <TrendingUp className="w-5 h-5 text-orange-500" />
+                                    <span className="text-sm font-medium text-muted-foreground">Requests Allowed</span>
+                                    <CheckCircle className="w-5 h-5 text-green-500" />
                                 </div>
-                                <div className="text-3xl font-bold text-orange-600">{stats?.active_threats}</div>
+                                <div className="text-3xl font-bold text-green-600">
+                                    {(stats as any)?.statistics?.requests_allowed || 0}
+                                </div>
                             </div>
                         </div>
 
@@ -184,49 +190,87 @@ export function DashboardPage() {
                         </div>
 
                         {/* Recent Attacks */}
-                        <div className="bg-card border border-border rounded-lg p-6">
+                        <div className="bg-card border border-border rounded-lg p-6 mb-8">
                             <h2 className="text-lg font-semibold mb-4">Recent Threats</h2>
                             <div className="space-y-3">
-                                {recentAttacks.map((attack) => (
-                                    <div
-                                        key={attack.id}
-                                        className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-                                    >
-                                        <div className="mt-1">
-                                            {attack.action_taken === 'blocked' ? (
-                                                <AlertTriangle className="w-5 h-5 text-red-500" />
-                                            ) : (
-                                                <CheckCircle className="w-5 h-5 text-yellow-500" />
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className="font-medium">{attack.threat_type}</span>
-                                                <span className={`text-xs px-2 py-1 rounded-full ${
-                                                    attack.action_taken === 'blocked'
-                                                        ? 'bg-red-500/10 text-red-600'
-                                                        : 'bg-yellow-500/10 text-yellow-600'
-                                                }`}>
-                                                    {attack.action_taken}
-                                                </span>
-                                                <span className="text-xs text-muted-foreground">
-                                                    {(attack.confidence * 100).toFixed(0)}% confidence
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-muted-foreground truncate">
-                                                {attack.content_preview}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground mt-1">
-                                                {new Date(attack.timestamp).toLocaleString()}
-                                            </p>
-                                        </div>
+                                {recentAttacks.length === 0 ? (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                        <Shield className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                                        <p>No threats detected yet</p>
                                     </div>
-                                ))}
+                                ) : (
+                                    recentAttacks.map((attack: any) => (
+                                        <div
+                                            key={attack.id}
+                                            onClick={() => setSelectedAttack(attack)}
+                                            className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                                        >
+                                            <div className="mt-1">
+                                                {attack.action_taken === 'blocked' ? (
+                                                    <AlertTriangle className="w-5 h-5 text-red-500" />
+                                                ) : (
+                                                    <CheckCircle className="w-5 h-5 text-yellow-500" />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="font-medium">{attack.threat_type}</span>
+                                                    <span className={`text-xs px-2 py-1 rounded-full ${
+                                                        attack.action_taken === 'blocked'
+                                                            ? 'bg-red-500/10 text-red-600'
+                                                            : 'bg-yellow-500/10 text-yellow-600'
+                                                    }`}>
+                                                        {attack.action_taken}
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {(attack.confidence * 100).toFixed(0)}% confidence
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-muted-foreground truncate">
+                                                    {attack.content_preview}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {new Date(attack.timestamp).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
+
+                        {/* Threat Analytics */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <ThreatTypeBreakdown data={(stats as any)?.statistics?.attack_types || {}} />
+                            <ThreatSummary
+                                totalRequests={(stats as any)?.statistics?.requests_total || 0}
+                                blockedRequests={(stats as any)?.statistics?.requests_blocked || 0}
+                                attacksDetected={(stats as any)?.statistics?.attacks_detected || 0}
+                                topThreatType={getTopThreatType((stats as any)?.statistics?.attack_types || {})}
+                            />
+                        </div>
+
+                        {recentAttacks.length > 0 && (
+                            <ThreatTimeline attacks={recentAttacks} />
+                        )}
                     </>
                 )}
             </main>
+
+            {/* Attack Detail Modal */}
+            <AttackDetailModal
+                attack={selectedAttack}
+                isOpen={selectedAttack !== null}
+                onClose={() => setSelectedAttack(null)}
+            />
         </div>
     );
+}
+
+function getTopThreatType(attackTypes: Record<string, number>): string {
+    const entries = Object.entries(attackTypes);
+    if (entries.length === 0) return 'None';
+    
+    const sorted = entries.sort(([, a], [, b]) => b - a);
+    return sorted[0][0];
 }

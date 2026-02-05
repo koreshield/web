@@ -25,6 +25,9 @@ const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const IntegrationsPage = lazy(() => import('./pages/IntegrationsPage'));
 const ChangelogPage = lazy(() => import('./pages/ChangelogPage'));
+const TenantsPage = lazy(() => import('./pages/TenantsPage').then(m => ({ default: m.TenantsPage })));
+const PoliciesPage = lazy(() => import('./pages/PoliciesPage').then(m => ({ default: m.PoliciesPage })));
+const MetricsPage = lazy(() => import('./pages/MetricsPage').then(m => ({ default: m.MetricsPage })));
 
 function AppContent() {
   const { addToast } = useToast();
@@ -185,6 +188,42 @@ function AppContent() {
                 <RouteErrorBoundary>
                   <ProtectedRoute>
                     <DashboardPage />
+                  </ProtectedRoute>
+                </RouteErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/tenants"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ProtectedRoute>
+                    <TenantsPage />
+                  </ProtectedRoute>
+                </RouteErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/policies"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ProtectedRoute>
+                    <PoliciesPage />
+                  </ProtectedRoute>
+                </RouteErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/metrics"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ProtectedRoute>
+                    <MetricsPage />
                   </ProtectedRoute>
                 </RouteErrorBoundary>
               </Suspense>
