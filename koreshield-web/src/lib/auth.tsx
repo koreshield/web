@@ -19,6 +19,36 @@ export interface LoginResponse {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.koreshield.com';
 
+type AuthEventType = 'login' | 'logout';
+type AuthEventHandler = () => void;
+
+class AuthEventEmitter {
+    private handlers: Map<AuthEventType, Set<AuthEventHandler>> = new Map();
+
+    on(event: AuthEventType, handler: AuthEventHandler) {
+        if (!this.handlers.has(event)) {
+            this.handlers.set(event, new Set());
+        }
+        this.handlers.get(event)!.add(handler);
+    }
+
+    off(event: AuthEventType, handler: AuthEventHandler) {
+        const handlers = this.handlers.get(event);
+        if (handlers) {
+            handlers.delete(handler);
+        }
+    }
+
+    emit(event: AuthEventType) {
+        const handlers = this.handlers.get(event);
+        if (handlers) {
+            handlers.forEach(handler => handler());
+        }
+    }
+}
+
+const eventEmitter = new AuthEventEmitter();
+
 export const authService = {
     /**
      * Login with Railway backend
@@ -45,6 +75,9 @@ export const authService = {
         localStorage.setItem('admin_user', JSON.stringify(data.user));
         localStorage.setItem('token_expires_at', String(Date.now() + data.expires_in * 1000));
 
+        // Emit login event
+        eventEmitter.emit('login');
+
         return data.user;
     },
 
@@ -55,6 +88,9 @@ export const authService = {
         localStorage.removeItem('admin_token');
         localStorage.removeItem('admin_user');
         localStorage.removeItem('token_expires_at');
+        
+        // Emit logout event
+        eventEmitter.emit('logout');
     },
 
     /**
@@ -93,5 +129,19 @@ export const authService = {
             return null;
         }
         return localStorage.getItem('admin_token');
+    },
+
+    /**
+     * Register event handler
+     */
+    on(event: AuthEventType, handler: AuthEventHandler) {
+        eventEmitter.on(event, handler);
+    },
+
+    /**
+     * Unregister event handler
+     */
+    off(event: AuthEventType, handler: AuthEventHandler) {
+        eventEmitter.off(event, handler);
     }
 };

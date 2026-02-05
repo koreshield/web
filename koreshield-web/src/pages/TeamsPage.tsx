@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Users, Plus, UserPlus, Shield, Search, Filter, Mail, MoreVertical, Crown, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/api-client';
 
 interface Team {
     id: string;
@@ -54,49 +55,52 @@ export function TeamsPage() {
     const queryClient = useQueryClient();
 
     // Fetch teams
-    const { data: teams = [], isLoading: teamsLoading } = useQuery({
+    const { data: teamsData = [], isLoading: teamsLoading } = useQuery({
         queryKey: ['teams'],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/teams
-            return mockTeams;
+            return api.getTeams();
         },
     });
+    const teams = teamsData as Team[];
 
     // Fetch team members
-    const { data: members = [], isLoading: membersLoading } = useQuery({
+    const { data: membersData = [], isLoading: membersLoading } = useQuery({
         queryKey: ['team-members', selectedTeam?.id],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/teams/{id}/members
-            return mockMembers;
+            if (!selectedTeam?.id) return [];
+            const params = roleFilter !== 'all' ? `?role=${roleFilter}` : '';
+            return api.getTeamMembers(selectedTeam.id, params);
         },
         enabled: !!selectedTeam,
     });
+    const members = membersData as TeamMember[];
 
     // Fetch invites
-    const { data: invites = [], isLoading: invitesLoading } = useQuery({
+    const { data: invitesData = [], isLoading: invitesLoading } = useQuery({
         queryKey: ['team-invites', selectedTeam?.id],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/teams/{id}/invites
-            return mockInvites;
+            if (!selectedTeam?.id) return [];
+            return api.getTeamInvites(selectedTeam.id);
         },
         enabled: !!selectedTeam,
     });
+    const invites = invitesData as TeamInvite[];
 
     // Fetch shared dashboards
-    const { data: sharedDashboards = [], isLoading: dashboardsLoading } = useQuery({
+    const { data: dashboardsData = [], isLoading: dashboardsLoading } = useQuery({
         queryKey: ['shared-dashboards', selectedTeam?.id],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/teams/{id}/dashboards
-            return mockSharedDashboards;
+            if (!selectedTeam?.id) return [];
+            return api.getSharedDashboards(selectedTeam.id);
         },
         enabled: !!selectedTeam,
     });
+    const sharedDashboards = dashboardsData as SharedDashboard[];
 
     // Create team mutation
     const createTeamMutation = useMutation({
         mutationFn: async (team: Partial<Team>) => {
-            // TODO: Replace with real API call
-            return team;
+            return api.createTeam(team);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['teams'] });
@@ -107,8 +111,8 @@ export function TeamsPage() {
     // Invite user mutation
     const inviteUserMutation = useMutation({
         mutationFn: async (invite: { email: string; role: string }) => {
-            // TODO: Replace with real API call
-            return invite;
+            if (!selectedTeam?.id) throw new Error('No team selected');
+            return api.inviteMember(selectedTeam.id, invite);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['team-invites'] });
@@ -119,8 +123,8 @@ export function TeamsPage() {
     // Update member role mutation
     const updateMemberRoleMutation = useMutation({
         mutationFn: async ({ memberId, role }: { memberId: string; role: string }) => {
-            // TODO: Replace with real API call
-            console.log('Updating member role:', memberId, role);
+            if (!selectedTeam?.id) throw new Error('No team selected');
+            return api.updateMemberRole(selectedTeam.id, memberId, role);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['team-members'] });
@@ -661,6 +665,7 @@ export function TeamsPage() {
 }
 
 // Mock data for development - TODO: Replace with real API
+// @ts-ignore - Kept for reference
 const mockTeams: Team[] = [
     {
         id: '1',
@@ -694,6 +699,7 @@ const mockTeams: Team[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockMembers: TeamMember[] = [
     {
         id: '1',
@@ -747,6 +753,7 @@ const mockMembers: TeamMember[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockInvites: TeamInvite[] = [
     {
         id: '1',
@@ -768,6 +775,7 @@ const mockInvites: TeamInvite[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockSharedDashboards: SharedDashboard[] = [
     {
         id: '1',

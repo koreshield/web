@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Shield, Users, Plus, Edit2, Trash2, Key, Search, Filter } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/api-client';
 
 interface User {
     id: string;
@@ -40,37 +41,47 @@ export function RBACPage() {
     const queryClient = useQueryClient();
 
     // Fetch users
-    const { data: users = [], isLoading: usersLoading } = useQuery({
+    const { data: usersData = [], isLoading: usersLoading } = useQuery({
         queryKey: ['rbac-users', searchQuery, roleFilter],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/rbac/users
-            return mockUsers;
+            const params = new URLSearchParams();
+            if (searchQuery) params.append('search', searchQuery);
+            if (roleFilter !== 'all') params.append('role', roleFilter);
+            const paramsObj: { search?: string; role?: string } = {};
+            const searchParam = params.get('search');
+            const roleParam = params.get('role');
+            if (searchParam) paramsObj.search = searchParam;
+            if (roleParam) paramsObj.role = roleParam;
+            return api.getUsers(paramsObj);
         },
     });
+    const users = usersData as User[];
 
     // Fetch roles
-    const { data: roles = [], isLoading: rolesLoading } = useQuery({
+    const { data: rolesData = [], isLoading: rolesLoading } = useQuery({
         queryKey: ['rbac-roles'],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/rbac/roles
-            return mockRoles;
+            return api.getRoles();
         },
     });
+    const roles = rolesData as Role[];
 
     // Fetch permissions
-    const { data: permissions = [], isLoading: permissionsLoading } = useQuery({
+    const { data: permissionsData = [], isLoading: permissionsLoading } = useQuery({
         queryKey: ['rbac-permissions'],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/rbac/permissions
-            return mockPermissions;
+            return api.getPermissions();
         },
     });
+    const permissions = permissionsData as Permission[];
 
     // Create/Update user mutation
     const userMutation = useMutation({
         mutationFn: async (user: Partial<User>) => {
-            // TODO: Replace with real API call
-            return user;
+            if (editingUser) {
+                return api.updateUser(editingUser.id, user);
+            }
+            return api.createUser(user);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['rbac-users'] });
@@ -82,8 +93,10 @@ export function RBACPage() {
     // Create/Update role mutation
     const roleMutation = useMutation({
         mutationFn: async (role: Partial<Role>) => {
-            // TODO: Replace with real API call
-            return role;
+            if (editingRole) {
+                return api.updateRole(editingRole.id, role);
+            }
+            return api.createRole(role);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['rbac-roles'] });
@@ -95,8 +108,7 @@ export function RBACPage() {
     // Delete user mutation
     const deleteUserMutation = useMutation({
         mutationFn: async (userId: string) => {
-            // TODO: Replace with real API call
-            console.log('Deleting user:', userId);
+            return api.deleteUser(userId);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['rbac-users'] });
@@ -545,10 +557,11 @@ export function RBACPage() {
 }
 
 // Mock data for development - TODO: Replace with real API
+// @ts-ignore - Kept for reference
 const mockUsers: User[] = [
     {
         id: '1',
-        email: 'admin@koreshield.com',
+        email: 'admin@example.com',
         name: 'Admin User',
         role: 'Admin',
         status: 'active',
@@ -598,6 +611,7 @@ const mockUsers: User[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockRoles: Role[] = [
     {
         id: '1',
@@ -643,6 +657,7 @@ const mockRoles: Role[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockPermissions: Permission[] = [
     { id: '1', name: 'view:dashboard', description: 'View main dashboard', category: 'Dashboard' },
     { id: '2', name: 'view:analytics', description: 'View analytics and metrics', category: 'Analytics' },

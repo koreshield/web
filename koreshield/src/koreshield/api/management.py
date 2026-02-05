@@ -19,42 +19,42 @@ class SecurityConfigUpdate(BaseModel):
 @router.post("/login")
 async def admin_login(request: LoginRequest):
     """
-    Admin login endpoint.
+    Admin login endpoint with rate limiting to prevent brute force attacks.
+    
+    Security Features:
+    - Rate limited to 5 attempts per minute per IP (configured in proxy.py)
+    - Failed login attempts are logged for security monitoring
+    - Passwords should never be logged
     
     This endpoint authenticates admin users and returns a JWT token.
     Note: This is a placeholder implementation. In production, this should
     integrate with your authentication service or database.
+    
+    ⚠️ SECURITY: In production, implement:
+    - Account lockout after N failed attempts
+    - 2FA/MFA for admin accounts
+    - Password complexity requirements
+    - Secure password hashing (bcrypt/argon2)
     """
     # TODO: Replace with actual authentication logic
     # For now, accept any email/password combination
     if not request.email or not request.password:
+        logger.warning("login_attempt_missing_credentials", email=request.email)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email and password are required"
         )
     
-    # Mock authentication - replace with real auth service
-    if request.email == "admin@koreshield.com" and request.password == "admin123":
-        # In production, this JWT should be issued by your auth service
-        # For demo purposes, we'll return a mock response
-        logger.info("admin_login_success", email=request.email)
-        return {
-            "access_token": "mock_jwt_token_replace_with_real_auth_service",
-            "token_type": "bearer",
-            "expires_in": 3600,
-            "user": {
-                "id": "admin_001",
-                "name": "Admin User", 
-                "email": request.email,
-                "role": "admin"
-            }
-        }
-    else:
-        logger.warning("admin_login_failed", email=request.email)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials"
-        )
+    # TODO: Replace with real auth service (e.g., check database, verify password hash)
+    # This is a placeholder that always fails - implement proper authentication
+    # ⚠️ NEVER log passwords or include them in error messages
+    
+    # For now, always return unauthorized - implement real auth
+    logger.warning("admin_login_failed", email=request.email, reason="auth_not_implemented")
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Authentication not implemented. Please configure a real auth service."
+    )
 
 @router.post("/logout")
 async def admin_logout(current_user: dict = Depends(get_current_admin)):

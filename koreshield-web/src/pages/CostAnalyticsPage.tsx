@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DollarSign, TrendingDown, TrendingUp, Filter, Download, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { api } from '../lib/api-client';
 
 interface CostData {
     period: string;
@@ -33,13 +34,17 @@ export function CostAnalyticsPage() {
     const [selectedTenant, setSelectedTenant] = useState('all');
 
     // Fetch cost data
-    const { data: costData, isLoading } = useQuery({
-        queryKey: ['cost-analytics', timeRange, selectedProvider, selectedTenant],
+    const { data: costData = [] as CostData[], isLoading } = useQuery<CostData[]>({
+        queryKey: ['costAnalytics', timeRange, selectedProvider],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/analytics/costs
-            return mockCostData;
+            const result = await api.getCostAnalytics({ 
+                time_range: timeRange, 
+                provider: selectedProvider !== 'all' ? selectedProvider : undefined 
+            });
+            return result as CostData[];
         },
-        refetchInterval: 300000, // Refresh every 5 minutes
+        staleTime: 60000,
+        refetchInterval: 60000
     });
 
     const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
@@ -58,7 +63,7 @@ export function CostAnalyticsPage() {
 
     // Aggregate provider costs
     const providerCostBreakdown: CostBreakdown[] = costData && costData.length > 0
-        ? costData[costData.length - 1].provider_costs.map((p, idx) => ({
+        ? costData[costData.length - 1].provider_costs.map((p: any, idx: number) => ({
             category: p.provider,
             amount: p.cost,
             percentage: (p.cost / currentPeriodCost) * 100,
@@ -282,7 +287,7 @@ export function CostAnalyticsPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {costData && costData.length > 0 && costData[costData.length - 1].provider_costs.map((provider) => (
+                                        {costData && costData.length > 0 && costData[costData.length - 1].provider_costs.map((provider: any) => (
                                             <tr key={provider.provider} className="border-b border-border hover:bg-muted/50 transition-colors">
                                                 <td className="py-3 px-4 font-medium">{provider.provider}</td>
                                                 <td className="py-3 px-4">{provider.requests.toLocaleString()}</td>
@@ -303,6 +308,7 @@ export function CostAnalyticsPage() {
 }
 
 // Mock data for development - TODO: Replace with real API
+// @ts-ignore - Kept for reference, will be removed later
 const mockCostData: CostData[] = [
     {
         period: 'Jan 29',
