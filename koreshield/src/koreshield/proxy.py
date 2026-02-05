@@ -70,25 +70,9 @@ class KoreShieldProxy:
 
         self.config = config
         self.app = FastAPI(
-            title="KoreShield: Enterprise LLM Firewall", 
+            title="KoreShield API",
             version="1.0.0",
-            description="""
-            **KoreShield** is an enterprise-grade LLM security platform that provides real-time threat detection,
-            multi-provider support, and comprehensive monitoring for AI applications.
-            
-            ## Features
-            - 🛡️ Real-time threat detection & blocking
-            - 🔄 Multi-provider AI support (OpenAI, Anthropic, DeepSeek, Gemini, Azure)
-            - 📊 Analytics & monitoring dashboard
-            - 🔐 JWT-based authentication
-            - 📧 Email verification & notifications
-            - 🎯 Advanced policy engine with RBAC
-            - 📈 Usage tracking & cost analytics
-            
-            ## Authentication
-            Most endpoints require JWT authentication. Use `/v1/management/signup` to create an account
-            and `/v1/management/login` to get your token.
-            """,
+            description="KoreShield API documentation.",
             openapi_tags=[
                 {"name": "Authentication", "description": "User signup, login, and account management"},
                 {"name": "Chat", "description": "LLM Chat Completions endpoint with security scanning"},
