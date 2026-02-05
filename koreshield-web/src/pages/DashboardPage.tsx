@@ -1,18 +1,19 @@
 import { authService } from '../lib/auth';
-import { useState } from 'react';
-import { Activity, Shield, AlertTriangle, CheckCircle, Copy, Key, LogOut } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Activity, Shield, AlertTriangle, CheckCircle, LogOut, Wifi, WifiOff } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStats, useRecentAttacks } from '../hooks/useApi';
 import { AttackDetailModal } from '../components/AttackDetailModal';
 import { ThreatTypeBreakdown, ThreatTimeline, ThreatSummary } from '../components/ThreatAnalytics';
+import { wsClient, type ThreatDetectedEvent } from '../lib/websocket-client';
 
 export function DashboardPage() {
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
     const isAuthenticated = authService.isAuthenticated();
-    const [apiKeyVisible, setApiKeyVisible] = useState(false);
-    const [copiedKey, setCopiedKey] = useState(false);
     const [selectedAttack, setSelectedAttack] = useState<any>(null);
+    const [wsConnected, setWsConnected] = useState(false);
+    const [latestThreats, setLatestThreats] = useState<ThreatDetectedEvent[]>([]);
 
     // Use React Query hooks
     const { data: stats, isLoading: statsLoading, error: statsError } = useStats();
@@ -21,16 +22,45 @@ export function DashboardPage() {
     const loading = statsLoading || attacksLoading;
     const recentAttacks = (attacksData as any)?.logs || [];
 
-    // Mock API key for demo
-    const mockApiKey = 'sk_test_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    // WebSocket real-time updates
+    useEffect(() => {
+        if (!isAuthenticated) return;
 
-    const copyApiKey = () => {
-        navigator.clipboard.writeText(mockApiKey);
-        setCopiedKey(true);
-        setTimeout(() => setCopiedKey(false), 2000);
-    };
+        // Connect to WebSocket
+        wsClient.connect();
+        setWsConnected(wsClient.isConnected());
+
+        // Subscribe to threat events
+        wsClient.subscribe(['threat_detected', 'provider_health_change']);
+
+        // Listen for connection events
+        const cleanupConnection = wsClient.on('connection_established', () => {
+            setWsConnected(true);
+        });
+
+        // Listen for threat detection events
+        const cleanupThreats = wsClient.on<ThreatDetectedEvent>('threat_detected', (event) => {
+            console.log('[Dashboard] New threat detected:', event.data);
+            
+            // Add to latest threats list (keep last 5)
+            setLatestThreats(prev => [event.data, ...prev.slice(0, 4)]);
+            
+            // Show toast notification for critical threats
+            if (event.data.severity === 'critical' || event.data.severity === 'high') {
+                // You can integrate a toast library here
+                console.log(`[Dashboard] ${event.data.severity.toUpperCase()} threat: ${event.data.attack_type}`);
+            }
+        });
+
+        // Cleanup on unmount
+        return () => {
+            cleanupConnection();
+            cleanupThreats();
+        };
+    }, [isAuthenticated]);
 
     const handleLogout = () => {
+        wsClient.disconnect();
         authService.logout();
         navigate('/');
     };
@@ -69,11 +99,27 @@ export function DashboardPage() {
                                 </p>
                             ) : (
                                 <p className="text-sm text-muted-foreground">
-                                    Demo Mode - Viewing simulated data
+                                    Sign in to access the admin dashboard
                                 </p>
                             )}
                         </div>
                         <div className="flex items-center gap-4">
+                            {/* WebSocket Status Indicator */}
+                            {isAuthenticated && (
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg">
+                                    {wsConnected ? (
+                                        <>
+                                            <Wifi className="w-4 h-4 text-green-500" />
+                                            <span className="text-xs font-medium text-green-600">Live</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <WifiOff className="w-4 h-4 text-gray-400" />
+                                            <span className="text-xs font-medium text-gray-500">Connecting...</span>
+                                        </>
+                                    )}
+                                </div>
+                            )}
                             {isAuthenticated ? (
                                 <button
                                     onClick={handleLogout}
@@ -85,9 +131,9 @@ export function DashboardPage() {
                             ) : (
                                 <Link
                                     to="/login"
-                                    className="text-sm text-primary hover:underline"
+                                    className="text-sm px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
                                 >
-                                    Sign In to see real data
+                                    Sign In
                                 </Link>
                             )}
                         </div>
