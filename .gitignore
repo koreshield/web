@@ -291,3 +291,5 @@ koreshield-js-sdk/.npmrc
 docs/*.md
 MIGRATION_GUIDE.md
 PHASE_3_SUMMARY.md
+*.md files in docs/
+SECURITY_*.md
