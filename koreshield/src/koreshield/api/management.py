@@ -51,7 +51,38 @@ class SecurityConfigUpdate(BaseModel):
     sensitivity: str | None = None
     default_action: str | None = None
 
-@router.post("/signup", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/signup",
+    status_code=status.HTTP_201_CREATED,
+    summary="User Signup",
+    description="Create a new user account with email verification. Sends welcome and verification emails.",
+    response_description="User created successfully with JWT token",
+    responses={
+        201: {
+            "description": "User created successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "user": {
+                            "id": "123e4567-e89b-12d3-a456-426614174000",
+                            "email": "user@example.com",
+                            "name": "John Doe",
+                            "role": "user",
+                            "status": "active",
+                            "email_verified": False,
+                            "created_at": "2026-02-05T19:00:00Z"
+                        },
+                        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "message": "Signup successful! Please check your email to verify your account."
+                    }
+                }
+            }
+        },
+        400: {"description": "Email already registered or invalid password"},
+        500: {"description": "Internal server error"}
+    },
+    tags=["Authentication"]
+)
 async def signup(request: SignupRequest, db: AsyncSession = Depends(get_db)):
     """
     User signup endpoint with email verification.
@@ -138,7 +169,37 @@ async def signup(request: SignupRequest, db: AsyncSession = Depends(get_db)):
             detail="Signup failed. Please try again later."
         )
 
-@router.post("/login")
+@router.post(
+    "/login",
+    summary="User Login",
+    description="Authenticate user with email and password. Returns JWT token for subsequent requests.",
+    response_description="Login successful with JWT token",
+    responses={
+        200: {
+            "description": "Login successful",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "user": {
+                            "id": "123e4567-e89b-12d3-a456-426614174000",
+                            "email": "user@example.com",
+                            "name": "John Doe",
+                            "role": "user",
+                            "status": "active",
+                            "email_verified": True,
+                            "last_login_at": "2026-02-05T19:30:00Z"
+                        },
+                        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                }
+            }
+        },
+        401: {"description": "Invalid email or password"},
+        403: {"description": "Account is not active"},
+        500: {"description": "Internal server error"}
+    },
+    tags=["Authentication"]
+)
 async def admin_login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
     """
     User login endpoint with rate limiting to prevent brute force attacks.
