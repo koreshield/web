@@ -254,12 +254,18 @@ todo.md
 personal-keep/
 .DS_Store
 web/src/lib/
-docs/
+# Only exclude web docs, not SDK/project docs
+web/public/docs/
+koreshield/docs/_build/
 
 *.db
 build_output*.txt
-web/public/docs/
 FRONTEND_SPEC.md
 .DS_Store
 
+# Explicitly include important documentation
 !docs/RAG_INTEGRATION_GUIDE.md
+!koreshield-python-sdk/examples/
+!koreshield-python-sdk/docs/
+!koreshield-js-sdk/examples/
+!koreshield-js-sdk/docs/
