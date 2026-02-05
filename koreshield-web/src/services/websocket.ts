@@ -13,7 +13,7 @@ type WebSocketEventHandler = (event: ThreatEvent) => void;
 
 class WebSocketService {
     private ws: WebSocket | null = null;
-    private reconnectTimeout: NodeJS.Timeout | null = null;
+    private reconnectTimeout: number | null = null;
     private reconnectAttempts = 0;
     private maxReconnectAttempts = 5;
     private reconnectDelay = 3000;
@@ -21,7 +21,7 @@ class WebSocketService {
     private baseUrl: string;
 
     constructor() {
-        const apiUrl = import.meta.env.VITE_API_BASE_URL || 'https://koreshield-production.up.railway.app';
+        const apiUrl = import.meta.env.VITE_API_BASE_URL || 'https://api.koreshield.com';
         this.baseUrl = apiUrl.replace('https://', 'wss://').replace('http://', 'ws://');
     }
 
@@ -71,7 +71,7 @@ class WebSocketService {
             clearTimeout(this.reconnectTimeout);
         }
 
-        this.reconnectTimeout = setTimeout(() => {
+        this.reconnectTimeout = window.setTimeout(() => {
             this.reconnectAttempts++;
             console.log(`Reconnecting... (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
             this.connect();
