@@ -201,9 +201,7 @@ class KoreShieldProxy:
         from .api.auth import init_jwt_config
         init_jwt_config(config)
 
-        self._setup_routes()
-        
-        # Include management router
+        # Include management router FIRST (before _setup_routes to avoid catch-all)
         self.app.include_router(management_router, prefix="/v1/management")
         
         # Include new Phase 3 routers
@@ -211,6 +209,9 @@ class KoreShieldProxy:
         self.app.include_router(rbac_router, prefix="/v1")
         self.app.include_router(reports_router, prefix="/v1")
         self.app.include_router(teams_router, prefix="/v1")
+        
+        # Setup routes LAST (includes catch-all route)
+        self._setup_routes()
 
     def _init_providers(self, config: dict):
         """Initialize all enabled LLM providers with priority ordering."""
