@@ -31,6 +31,11 @@ const MetricsPage = lazy(() => import('./pages/MetricsPage').then(m => ({ defaul
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })));
 const RulesPage = lazy(() => import('./pages/RulesPage').then(m => ({ default: m.RulesPage })));
 const AlertsPage = lazy(() => import('./pages/AlertsPage').then(m => ({ default: m.AlertsPage })));
+// Phase 3 pages
+const CostAnalyticsPage = lazy(() => import('./pages/CostAnalyticsPage').then(m => ({ default: m.CostAnalyticsPage })));
+const RBACPage = lazy(() => import('./pages/RBACPage').then(m => ({ default: m.RBACPage })));
+const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
+const TeamsPage = lazy(() => import('./pages/TeamsPage').then(m => ({ default: m.TeamsPage })));
 
 function AppContent() {
   const { addToast } = useToast();
@@ -263,6 +268,54 @@ function AppContent() {
                 <RouteErrorBoundary>
                   <ProtectedRoute>
                     <AlertsPage />
+                  </ProtectedRoute>
+                </RouteErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/cost-analytics"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ProtectedRoute>
+                    <CostAnalyticsPage />
+                  </ProtectedRoute>
+                </RouteErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/rbac"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ProtectedRoute>
+                    <RBACPage />
+                  </ProtectedRoute>
+                </RouteErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ProtectedRoute>
+                    <ReportsPage />
+                  </ProtectedRoute>
+                </RouteErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/teams"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ProtectedRoute>
+                    <TeamsPage />
                   </ProtectedRoute>
                 </RouteErrorBoundary>
               </Suspense>
