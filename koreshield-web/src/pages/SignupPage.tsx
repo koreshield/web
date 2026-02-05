@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Shield, Mail, Lock, User, ArrowRight, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, CheckCircle } from 'lucide-react';
 
 export function SignupPage() {
     const navigate = useNavigate();
@@ -48,15 +48,10 @@ export function SignupPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                {/* Logo */}
+                {/* Header */}
                 <div className="text-center mb-8">
-                    <Link to="/" className="inline-flex items-center gap-2 text-2xl font-bold mb-2">
-                        <Shield className="w-8 h-8 text-primary" />
-                        <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                            KoreShield
-                        </span>
-                    </Link>
-                    <p className="text-muted-foreground">Create your account</p>
+                    <h1 className="text-2xl font-bold mb-2">Create your account</h1>
+                    <p className="text-muted-foreground">Get started with KoreShield</p>
                 </div>
 
                 {/* Signup Form */}
