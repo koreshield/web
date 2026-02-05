@@ -1,7 +1,7 @@
 import type { ChatCompletionRequest, ChatCompletionResponse, HealthCheckResponse, AttackStats } from '../types/api';
 import { authService } from './auth';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.koreshield.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://koreshield-production.up.railway.app';
 
 interface APIError {
     message: string;
@@ -28,8 +28,8 @@ class ApiClient {
      * Check if we should use real API or simulated data
      */
     private get isRealAPIMode(): boolean {
-        // Use real API if admin is authenticated OR if explicitly configured
-        return authService.isAuthenticated() || import.meta.env.VITE_USE_SIMULATED_API === 'false';
+        // Always use real API now
+        return true;
     }
 
     private async delay(ms: number): Promise<void> {
@@ -125,7 +125,7 @@ class ApiClient {
         if (!this.isRealAPIMode) {
             return this.simulateStats();
         }
-        return this.fetch<AttackStats>('/api/admin/stats');
+        return this.fetch<AttackStats>('/status');
     }
 
     async getMetrics() {
@@ -139,14 +139,14 @@ class ApiClient {
         if (!this.isRealAPIMode) {
             return this.simulateProviderHealth();
         }
-        return this.fetch('/api/admin/health');
+        return this.fetch('/health/providers');
     }
 
     async getRecentAttacks(limit = 10) {
         if (!this.isRealAPIMode) {
             return this.simulateRecentAttacks(limit);
         }
-        return this.fetch(`/api/admin/attacks?limit=${limit}`);
+        return this.fetch(`/v1/management/logs?limit=${limit}`);
     }
 
     async scanText(content: string, metadata?: Record<string, any>) {
