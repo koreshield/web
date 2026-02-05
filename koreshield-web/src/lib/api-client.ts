@@ -17,7 +17,9 @@ class ApiClient {
 
     constructor() {
         this.baseUrl = API_BASE_URL;
-        this.apiKey = import.meta.env.VITE_API_KEY;
+        // SECURITY: This must be a restricted, public-only key (e.g. read-only)
+        // Do NOT use a secret admin key here.
+        this.apiKey = import.meta.env.VITE_PUBLIC_API_KEY;
     }
 
     setApiKey(apiKey: string) {
@@ -332,6 +334,194 @@ class ApiClient {
             latency_p95: 150,
             active_threats: 2
         };
+    }
+
+    // Phase 3: Cost Analytics APIs
+    async getCostAnalytics(params?: { time_range?: string; provider?: string; tenant?: string }) {
+        const queryParams = new URLSearchParams(params as any).toString();
+        return this.fetch(`/v1/analytics/costs${queryParams ? '?' + queryParams : ''}`);
+    }
+
+    async getCostSummary() {
+        return this.fetch('/v1/analytics/costs/summary');
+    }
+
+    async getTenantAnalytics() {
+        return this.fetch('/v1/analytics/tenants');
+    }
+
+    // Phase 3: RBAC APIs
+    async getUsers(params?: { search?: string; role?: string }) {
+        const queryParams = new URLSearchParams(params as any).toString();
+        return this.fetch(`/v1/rbac/users${queryParams ? '?' + queryParams : ''}`);
+    }
+
+    async createUser(userData: any) {
+        return this.fetch('/v1/rbac/users', {
+            method: 'POST',
+            body: JSON.stringify(userData),
+        });
+    }
+
+    async updateUser(userId: string, userData: any) {
+        return this.fetch(`/v1/rbac/users/${userId}`, {
+            method: 'PUT',
+            body: JSON.stringify(userData),
+        });
+    }
+
+    async deleteUser(userId: string) {
+        return this.fetch(`/v1/rbac/users/${userId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getRoles() {
+        return this.fetch('/v1/rbac/roles');
+    }
+
+    async createRole(roleData: any) {
+        return this.fetch('/v1/rbac/roles', {
+            method: 'POST',
+            body: JSON.stringify(roleData),
+        });
+    }
+
+    async updateRole(roleId: string, roleData: any) {
+        return this.fetch(`/v1/rbac/roles/${roleId}`, {
+            method: 'PUT',
+            body: JSON.stringify(roleData),
+        });
+    }
+
+    async deleteRole(roleId: string) {
+        return this.fetch(`/v1/rbac/roles/${roleId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getPermissions(category?: string) {
+        const queryParams = category ? `?category=${category}` : '';
+        return this.fetch(`/v1/rbac/permissions${queryParams}`);
+    }
+
+    // Phase 3: Reports APIs
+    async getReports() {
+        return this.fetch('/v1/reports');
+    }
+
+    async createReport(reportData: any) {
+        return this.fetch('/v1/reports', {
+            method: 'POST',
+            body: JSON.stringify(reportData),
+        });
+    }
+
+    async updateReport(reportId: string, reportData: any) {
+        return this.fetch(`/v1/reports/${reportId}`, {
+            method: 'PUT',
+            body: JSON.stringify(reportData),
+        });
+    }
+
+    async deleteReport(reportId: string) {
+        return this.fetch(`/v1/reports/${reportId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getReportTemplates() {
+        return this.fetch('/v1/reports/templates');
+    }
+
+    async generateReport(reportId: string) {
+        return this.fetch(`/v1/reports/${reportId}/generate`, {
+            method: 'POST',
+        });
+    }
+
+    async downloadReport(reportId: string) {
+        return this.fetch(`/v1/reports/${reportId}/download`);
+    }
+
+    // Phase 3: Teams APIs
+    async getTeams(status?: string) {
+        const queryParams = status ? `?status=${status}` : '';
+        return this.fetch(`/v1/teams${queryParams}`);
+    }
+
+    async createTeam(teamData: any) {
+        return this.fetch('/v1/teams', {
+            method: 'POST',
+            body: JSON.stringify(teamData),
+        });
+    }
+
+    async updateTeam(teamId: string, teamData: any) {
+        return this.fetch(`/v1/teams/${teamId}`, {
+            method: 'PUT',
+            body: JSON.stringify(teamData),
+        });
+    }
+
+    async deleteTeam(teamId: string) {
+        return this.fetch(`/v1/teams/${teamId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getTeamMembers(teamId: string, role?: string) {
+        const queryParams = role ? `?role=${role}` : '';
+        return this.fetch(`/v1/teams/${teamId}/members${queryParams}`);
+    }
+
+    async updateMemberRole(teamId: string, memberId: string, role: string) {
+        return this.fetch(`/v1/teams/${teamId}/members/${memberId}/role`, {
+            method: 'POST',
+            body: JSON.stringify({ role }),
+        });
+    }
+
+    async removeMember(teamId: string, memberId: string) {
+        return this.fetch(`/v1/teams/${teamId}/members/${memberId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getTeamInvites(teamId: string, status?: string) {
+        const queryParams = status ? `?status_filter=${status}` : '';
+        return this.fetch(`/v1/teams/${teamId}/invites${queryParams}`);
+    }
+
+    async inviteMember(teamId: string, inviteData: { email: string; role: string }) {
+        return this.fetch(`/v1/teams/${teamId}/invites`, {
+            method: 'POST',
+            body: JSON.stringify(inviteData),
+        });
+    }
+
+    async cancelInvite(teamId: string, inviteId: string) {
+        return this.fetch(`/v1/teams/${teamId}/invites/${inviteId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getSharedDashboards(teamId: string, type?: string) {
+        const queryParams = type ? `?dashboard_type=${type}` : '';
+        return this.fetch(`/v1/teams/${teamId}/dashboards${queryParams}`);
+    }
+
+    async createSharedDashboard(teamId: string, dashboardData: any) {
+        return this.fetch(`/v1/teams/${teamId}/dashboards`, {
+            method: 'POST',
+            body: JSON.stringify(dashboardData),
+        });
+    }
+
+    async deleteSharedDashboard(teamId: string, dashboardId: string) {
+        return this.fetch(`/v1/teams/${teamId}/dashboards/${dashboardId}`, {
+            method: 'DELETE',
+        });
     }
 }
 

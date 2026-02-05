@@ -26,6 +26,10 @@ logger = structlog.get_logger(__name__)
 
 from fastapi.middleware.cors import CORSMiddleware
 from .api.management import router as management_router
+from .api.analytics import router as analytics_router
+from .api.rbac import router as rbac_router
+from .api.reports import router as reports_router
+from .api.teams import router as teams_router
 
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -185,6 +189,12 @@ class KoreShieldProxy:
         
         # Include management router
         self.app.include_router(management_router, prefix="/v1/management")
+        
+        # Include new Phase 3 routers
+        self.app.include_router(analytics_router, prefix="/v1")
+        self.app.include_router(rbac_router, prefix="/v1")
+        self.app.include_router(reports_router, prefix="/v1")
+        self.app.include_router(teams_router, prefix="/v1")
 
     def _init_providers(self, config: dict):
         """Initialize all enabled LLM providers with priority ordering."""
