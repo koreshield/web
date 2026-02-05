@@ -41,31 +41,39 @@ export function RBACPage() {
     const queryClient = useQueryClient();
 
     // Fetch users
-    const { data: users = [], isLoading: usersLoading } = useQuery({
+    const { data: usersData = [], isLoading: usersLoading } = useQuery({
         queryKey: ['rbac-users', searchQuery, roleFilter],
         queryFn: async () => {
             const params = new URLSearchParams();
             if (searchQuery) params.append('search', searchQuery);
             if (roleFilter !== 'all') params.append('role', roleFilter);
-            return api.getUsers(params.toString());
+            const paramsObj: { search?: string; role?: string } = {};
+            const searchParam = params.get('search');
+            const roleParam = params.get('role');
+            if (searchParam) paramsObj.search = searchParam;
+            if (roleParam) paramsObj.role = roleParam;
+            return api.getUsers(paramsObj);
         },
     });
+    const users = usersData as User[];
 
     // Fetch roles
-    const { data: roles = [], isLoading: rolesLoading } = useQuery({
+    const { data: rolesData = [], isLoading: rolesLoading } = useQuery({
         queryKey: ['rbac-roles'],
         queryFn: async () => {
             return api.getRoles();
         },
     });
+    const roles = rolesData as Role[];
 
     // Fetch permissions
-    const { data: permissions = [], isLoading: permissionsLoading } = useQuery({
+    const { data: permissionsData = [], isLoading: permissionsLoading } = useQuery({
         queryKey: ['rbac-permissions'],
         queryFn: async () => {
             return api.getPermissions();
         },
     });
+    const permissions = permissionsData as Permission[];
 
     // Create/Update user mutation
     const userMutation = useMutation({
@@ -549,6 +557,7 @@ export function RBACPage() {
 }
 
 // Mock data for development - TODO: Replace with real API
+// @ts-ignore - Kept for reference
 const mockUsers: User[] = [
     {
         id: '1',
@@ -602,6 +611,7 @@ const mockUsers: User[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockRoles: Role[] = [
     {
         id: '1',
@@ -647,6 +657,7 @@ const mockRoles: Role[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockPermissions: Permission[] = [
     { id: '1', name: 'view:dashboard', description: 'View main dashboard', category: 'Dashboard' },
     { id: '2', name: 'view:analytics', description: 'View analytics and metrics', category: 'Analytics' },

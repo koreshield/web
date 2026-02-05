@@ -13,7 +13,7 @@ export function DashboardPage() {
     const isAuthenticated = authService.isAuthenticated();
     const [selectedAttack, setSelectedAttack] = useState<any>(null);
     const [wsConnected, setWsConnected] = useState(false);
-    const [latestThreats, setLatestThreats] = useState<ThreatDetectedEvent[]>([]);
+    const [_latestThreats, setLatestThreats] = useState<ThreatDetectedEvent[]>([]);
 
     // Use React Query hooks
     const { data: stats, isLoading: statsLoading, error: statsError } = useStats();
@@ -199,39 +199,6 @@ export function DashboardPage() {
                                 <div className="text-3xl font-bold text-green-600">
                                     {(stats as any)?.statistics?.requests_allowed || 0}
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* API Key Section */}
-                        <div className="bg-card border border-border rounded-lg p-6 mb-8">
-                            <div className="flex items-center justify-between mb-4">
-                                <div>
-                                    <h2 className="text-lg font-semibold flex items-center gap-2">
-                                        <Key className="w-5 h-5" />
-                                        API Key
-                                    </h2>
-                                    <p className="text-sm text-muted-foreground">
-                                        {isAuthenticated ? 'Your authentication key' : 'Demo API key (not functional)'}
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={() => setApiKeyVisible(!apiKeyVisible)}
-                                    className="text-sm text-primary hover:underline"
-                                >
-                                    {apiKeyVisible ? 'Hide' : 'Show'}
-                                </button>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <code className="flex-1 bg-muted px-4 py-2 rounded-lg font-mono text-sm">
-                                    {apiKeyVisible ? mockApiKey : '••••••••••••••••••••••••••••••••••••'}
-                                </code>
-                                <button
-                                    onClick={copyApiKey}
-                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
-                                >
-                                    <Copy className="w-4 h-4" />
-                                    {copiedKey ? 'Copied!' : 'Copy'}
-                                </button>
                             </div>
                         </div>
 

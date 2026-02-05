@@ -55,15 +55,16 @@ export function TeamsPage() {
     const queryClient = useQueryClient();
 
     // Fetch teams
-    const { data: teams = [], isLoading: teamsLoading } = useQuery({
+    const { data: teamsData = [], isLoading: teamsLoading } = useQuery({
         queryKey: ['teams'],
         queryFn: async () => {
             return api.getTeams();
         },
     });
+    const teams = teamsData as Team[];
 
     // Fetch team members
-    const { data: members = [], isLoading: membersLoading } = useQuery({
+    const { data: membersData = [], isLoading: membersLoading } = useQuery({
         queryKey: ['team-members', selectedTeam?.id],
         queryFn: async () => {
             if (!selectedTeam?.id) return [];
@@ -72,9 +73,10 @@ export function TeamsPage() {
         },
         enabled: !!selectedTeam,
     });
+    const members = membersData as TeamMember[];
 
     // Fetch invites
-    const { data: invites = [], isLoading: invitesLoading } = useQuery({
+    const { data: invitesData = [], isLoading: invitesLoading } = useQuery({
         queryKey: ['team-invites', selectedTeam?.id],
         queryFn: async () => {
             if (!selectedTeam?.id) return [];
@@ -82,9 +84,10 @@ export function TeamsPage() {
         },
         enabled: !!selectedTeam,
     });
+    const invites = invitesData as TeamInvite[];
 
     // Fetch shared dashboards
-    const { data: sharedDashboards = [], isLoading: dashboardsLoading } = useQuery({
+    const { data: dashboardsData = [], isLoading: dashboardsLoading } = useQuery({
         queryKey: ['shared-dashboards', selectedTeam?.id],
         queryFn: async () => {
             if (!selectedTeam?.id) return [];
@@ -92,6 +95,7 @@ export function TeamsPage() {
         },
         enabled: !!selectedTeam,
     });
+    const sharedDashboards = dashboardsData as SharedDashboard[];
 
     // Create team mutation
     const createTeamMutation = useMutation({
@@ -661,6 +665,7 @@ export function TeamsPage() {
 }
 
 // Mock data for development - TODO: Replace with real API
+// @ts-ignore - Kept for reference
 const mockTeams: Team[] = [
     {
         id: '1',
@@ -694,6 +699,7 @@ const mockTeams: Team[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockMembers: TeamMember[] = [
     {
         id: '1',
@@ -747,6 +753,7 @@ const mockMembers: TeamMember[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockInvites: TeamInvite[] = [
     {
         id: '1',
@@ -768,6 +775,7 @@ const mockInvites: TeamInvite[] = [
     },
 ];
 
+// @ts-ignore - Kept for reference
 const mockSharedDashboards: SharedDashboard[] = [
     {
         id: '1',
