@@ -72,7 +72,7 @@ class KoreShieldProxy:
         self.app = FastAPI(
             title="KoreShield: Enterprise LLM Firewall", 
             version="1.0.0",
-            description=\"\"\"
+            description="""
             **KoreShield** is an enterprise-grade LLM security platform that provides real-time threat detection,
             multi-provider support, and comprehensive monitoring for AI applications.
             
@@ -88,25 +88,25 @@ class KoreShieldProxy:
             ## Authentication
             Most endpoints require JWT authentication. Use `/v1/management/signup` to create an account
             and `/v1/management/login` to get your token.
-            \"\"\",
+            """,
             openapi_tags=[
-                {\"name\": \"Authentication\", \"description\": \"User signup, login, and account management\"},
-                {\"name\": \"Chat\", \"description\": \"LLM Chat Completions endpoint with security scanning\"},
-                {\"name\": \"Management\", \"description\": \"Admin Dashboard APIs for configuration and monitoring\"},
-                {\"name\": \"Analytics\", \"description\": \"Usage analytics, metrics, and cost tracking\"},
-                {\"name\": \"RBAC\", \"description\": \"Role-based access control and user management\"},
-                {\"name\": \"Reports\", \"description\": \"Security reports and audit logs\"},
-                {\"name\": \"Teams\", \"description\": \"Team and organization management\"},
-                {\"name\": \"Health\", \"description\": \"System health checks and status\"}
+                {"name": "Authentication", "description": "User signup, login, and account management"},
+                {"name": "Chat", "description": "LLM Chat Completions endpoint with security scanning"},
+                {"name": "Management", "description": "Admin Dashboard APIs for configuration and monitoring"},
+                {"name": "Analytics", "description": "Usage analytics, metrics, and cost tracking"},
+                {"name": "RBAC", "description": "Role-based access control and user management"},
+                {"name": "Reports", "description": "Security reports and audit logs"},
+                {"name": "Teams", "description": "Team and organization management"},
+                {"name": "Health", "description": "System health checks and status"}
             ],
             contact={
-                \"name\": \"KoreShield Support\",
-                \"email\": \"support@koreshield.com\",
-                \"url\": \"https://koreshield.com\"
+                "name": "KoreShield Support",
+                "email": "support@koreshield.com",
+                "url": "https://koreshield.com"
             },
             license_info={
-                \"name\": \"Proprietary\",
-                \"url\": \"https://koreshield.com/terms\"
+                "name": "Proprietary",
+                "url": "https://koreshield.com/terms"
             }
         )
 
