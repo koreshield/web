@@ -73,20 +73,20 @@ class KoreShieldProxy:
             title="KoreShield API",
             version="1.0.0",
             description="""
-            **KoreShield** - Enterprise LLM Security Platform
+            Enterprise LLM Security Platform
             
             ## Getting Started
-            1. **Sign up**: Create an account at `/v1/management/signup`
-            2. **Login**: Get your JWT token from `/v1/management/login`
-            3. **Authorize**: Click the 🔓 button above and paste your token
-            4. **Use the API**: Send prompts through `/v1/chat/completions` with automatic security scanning
+            1. Sign up: Create an account at /v1/management/signup
+            2. Login: Get your JWT token from /v1/management/login
+            3. Authorize: Click the Authorize button above and paste your token
+            4. Use the API: Send prompts through /v1/chat/completions with automatic security scanning
             
             ## Core Features
-            - **Real-time Threat Detection**: Automatic scanning of all LLM interactions
-            - **Multi-Provider Support**: OpenAI, Anthropic, DeepSeek, Gemini, Azure OpenAI
-            - **Analytics & Monitoring**: Track costs, usage, and security events
-            - **Policy Management**: Configure security rules and access controls
-            - **Team Collaboration**: Multi-tenant support with RBAC
+            - Real-time Threat Detection: Automatic scanning of all LLM interactions
+            - Multi-Provider Support: OpenAI, Anthropic, DeepSeek, Gemini, Azure OpenAI
+            - Analytics and Monitoring: Track costs, usage, and security events
+            - Policy Management: Configure security rules and access controls
+            - Team Collaboration: Multi-tenant support with RBAC
             """,
             openapi_tags=[
                 {"name": "Authentication", "description": "User signup, login, and account management"},
