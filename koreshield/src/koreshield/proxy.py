@@ -161,6 +161,19 @@ class KoreShieldProxy:
         self.provider_priority: List[str] = []
         self._init_providers(config)
 
+        # Initialize provider manager for optimized failover and performance
+        from providers.manager import ProviderManager
+        from providers.health_monitor import HealthMonitor
+        self.provider_manager = ProviderManager(self.providers)
+        self.health_monitor = HealthMonitor(
+            providers=self.providers,
+            check_interval=30.0,  # Check every 30 seconds
+        )
+
+        # Start health monitoring
+        import asyncio
+        asyncio.create_task(self.health_monitor.start_monitoring())
+
         # Initialize monitoring system
         from .monitoring import MonitoringSystem
         from .config import KoreShieldConfig
@@ -204,10 +217,16 @@ class KoreShieldProxy:
                 if api_key:
                     try:
                         base_url = provider_cfg.get("base_url")
-                        provider_instance = provider_class(api_key=api_key, base_url=base_url)
+                        # Pass Redis client for caching and performance optimization
+                        provider_instance = provider_class(
+                            api_key=api_key, 
+                            base_url=base_url,
+                            redis_client=self.redis_client,
+                            cache_enabled=provider_cfg.get("cache_enabled", True)
+                        )
                         self.providers.append(provider_instance)
                         self.provider_priority.append(provider_name)
-                        logger.info(f"{provider_name.capitalize()} provider initialized successfully")
+                        logger.info(f"{provider_name.capitalize()} provider initialized successfully with caching enabled")
                     except Exception as e:
                         logger.error(f"Failed to initialize {provider_name} provider: {e}")
                 else:
@@ -261,23 +280,6 @@ class KoreShieldProxy:
     def provider(self):
         """Get the primary (highest priority) provider."""
         return self.providers[0] if self.providers else None
-
-    async def _get_healthy_provider(self):
-        """Get the first healthy provider using failover logic."""
-        for i, provider in enumerate(self.providers):
-            provider_name = self.provider_priority[i]
-            try:
-                # For now, just check if provider is initialized
-                # TODO: Implement actual health checks with test requests
-                if provider:
-                    logger.debug(f"Using provider: {provider_name}")
-                    return provider
-            except Exception as e:
-                logger.warning(f"Provider {provider_name} health check failed: {e}")
-                continue
-
-        logger.error("All providers are unhealthy")
-        return None
 
     async def start_monitoring(self):
         """Start the monitoring system."""
@@ -544,25 +546,18 @@ class KoreShieldProxy:
                     },
                 )
 
-            # Step 5: Forward to provider if safe
-            provider = await self._get_healthy_provider()
-            if not provider:
-                raise HTTPException(
-                    status_code=500,
-                    detail="No healthy LLM providers available. Please check provider configuration and API keys.",
-                )
-
-            # Forward the request to the provider with failover
+            # Step 5: Forward to provider with optimized failover and caching
             provider_start = time.time()
-            provider_name = type(provider).__name__.replace('Provider', '').lower()
             try:
-                response = await provider.chat_completion(
+                # Use ProviderManager for intelligent provider selection with failover
+                response = await self.provider_manager.chat_completion_with_failover(
                     messages=messages,
                     model=model,
                     **{k: v for k, v in body.items() if k not in ["messages", "model"]},
                 )
 
-                # Record provider metrics
+                # Record provider metrics (get the provider that was actually used)
+                provider_name = getattr(self.provider_manager, '_last_used_provider', 'unknown')
                 provider_duration = time.time() - provider_start
                 self.monitoring.metrics.provider_requests.labels(
                     provider=provider_name,

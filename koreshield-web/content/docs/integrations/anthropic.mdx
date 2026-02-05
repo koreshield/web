@@ -1,0 +1,448 @@
+---
+title: Anthropic Claude Integration
+description: Integrate KoreShield with Anthropic Claude for secure AI conversations
+published: true
+---
+
+# Anthropic Claude Integration
+
+Protect your Claude applications from prompt injection and security threats.
+
+## Installation
+
+```bash
+npm install koreshield-sdk @anthropic-ai/sdk
+```
+
+## Basic Integration
+
+```typescript
+import { KoreShield } from 'koreshield-sdk';
+import Anthropic from '@anthropic-ai/sdk';
+
+const koreshield = new KoreShield({
+  apiKey: process.env.KORESHIELD_API_KEY,
+});
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+async function secureClaude(userMessage: string) {
+  // Scan input
+  const scan = await koreshield.scan({
+    content: userMessage,
+    userId: 'user-123',
+  });
+
+  if (scan.threat_detected) {
+    throw new Error(`Threat: ${scan.threat_type}`);
+  }
+
+  // Call Claude
+  const message = await anthropic.messages.create({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: userMessage }],
+  });
+
+  return message.content[0].text;
+}
+```
+
+## Proxy Mode
+
+```typescript
+const anthropic = new Anthropic({
+  baseURL: 'https://api.koreshield.com/v1/proxy/anthropic',
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  defaultHeaders: {
+    'X-KoreShield-API-Key': process.env.KORESHIELD_API_KEY,
+  },
+});
+
+// Automatic protection
+const message = await anthropic.messages.create({
+  model: 'claude-3-5-sonnet-20241022',
+  max_tokens: 1024,
+  messages: [{ role: 'user', content: userMessage }],
+});
+```
+
+## Streaming
+
+```typescript
+async function secureStream(userMessage: string) {
+  const scan = await koreshield.scan({ content: userMessage });
+  
+  if (scan.threat_detected) {
+    throw new Error('Threat detected');
+  }
+
+  const stream = await anthropic.messages.stream({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: userMessage }],
+  });
+
+  for await (const event of stream) {
+    if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+      process.stdout.write(event.delta.text);
+    }
+  }
+}
+```
+
+## Tool Use (Function Calling)
+
+```typescript
+const tools: Anthropic.Tool[] = [
+  {
+    name: 'search_database',
+    description: 'Search database for information',
+    input_schema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query' },
+      },
+      required: ['query'],
+    },
+  },
+];
+
+async function secureToolUse(userMessage: string) {
+  // Scan message
+  const scan = await koreshield.scan({ content: userMessage });
+  
+  if (scan.threat_detected) {
+    throw new Error('Threat detected');
+  }
+
+  const message = await anthropic.messages.create({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: userMessage }],
+    tools,
+  });
+
+  // Check for tool use
+  const toolUse = message.content.find(
+    block => block.type === 'tool_use'
+  ) as Anthropic.ToolUseBlock | undefined;
+
+  if (toolUse) {
+    // Scan tool inputs
+    const inputScan = await koreshield.scan({
+      content: JSON.stringify(toolUse.input),
+    });
+
+    if (inputScan.threat_detected) {
+      throw new Error('Malicious tool input detected');
+    }
+
+    // Execute tool
+    const result = await executeSearchDatabase(toolUse.input.query);
+
+    // Continue conversation with tool result
+    const followUp = await anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1024,
+      messages: [
+        { role: 'user', content: userMessage },
+        { role: 'assistant', content: message.content },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'tool_result',
+              tool_use_id: toolUse.id,
+              content: JSON.stringify(result),
+            },
+          ],
+        },
+      ],
+      tools,
+    });
+
+    return followUp.content[0].text;
+  }
+
+  return message.content[0].text;
+}
+```
+
+## Vision (Image Analysis)
+
+```typescript
+import fs from 'fs';
+
+async function secureVision(imageUrl: string, query: string) {
+  // Scan text query
+  const scan = await koreshield.scan({ content: query });
+  
+  if (scan.threat_detected) {
+    throw new Error('Threat detected in query');
+  }
+
+  const message = await anthropic.messages.create({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 1024,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image',
+            source: {
+              type: 'url',
+              url: imageUrl,
+            },
+          },
+          {
+            type: 'text',
+            text: query,
+          },
+        ],
+      },
+    ],
+  });
+
+  return message.content[0].text;
+}
+```
+
+## Multi-Turn Conversations
+
+```typescript
+interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+async function secureConversation(
+  history: ConversationMessage[],
+  newMessage: string
+) {
+  // Scan new message
+  const scan = await koreshield.scan({ content: newMessage });
+  
+  if (scan.threat_detected) {
+    throw new Error('Threat detected');
+  }
+
+  // Build message history
+  const messages = [
+    ...history.map(msg => ({
+      role: msg.role as 'user' | 'assistant',
+      content: msg.content,
+    })),
+    { role: 'user' as const, content: newMessage },
+  ];
+
+  const response = await anthropic.messages.create({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 1024,
+    messages,
+  });
+
+  return response.content[0].text;
+}
+```
+
+## System Prompts
+
+```typescript
+async function secureWithSystemPrompt(
+  systemPrompt: string,
+  userMessage: string
+) {
+  // Scan user message
+  const scan = await koreshield.scan({ content: userMessage });
+  
+  if (scan.threat_detected) {
+    throw new Error('Threat detected');
+  }
+
+  const message = await anthropic.messages.create({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 1024,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userMessage }],
+  });
+
+  return message.content[0].text;
+}
+```
+
+## Temperature & Top-P
+
+```typescript
+async function secureWithParams(
+  userMessage: string,
+  temperature: number = 0.7
+) {
+  const scan = await koreshield.scan({ content: userMessage });
+  
+  if (scan.threat_detected) {
+    throw new Error('Threat detected');
+  }
+
+  const message = await anthropic.messages.create({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 1024,
+    temperature,
+    top_p: 0.9,
+    messages: [{ role: 'user', content: userMessage }],
+  });
+
+  return message.content[0].text;
+}
+```
+
+## Next.js API Route
+
+```typescript
+// app/api/chat/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { KoreShield } from 'koreshield-sdk';
+import Anthropic from '@anthropic-ai/sdk';
+
+const koreshield = new KoreShield({
+  apiKey: process.env.KORESHIELD_API_KEY!,
+});
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+});
+
+export async function POST(req: NextRequest) {
+  try {
+    const { message } = await req.json();
+
+    // Scan with KoreShield
+    const scan = await koreshield.scan({
+      content: message,
+      userId: req.headers.get('x-user-id') || undefined,
+    });
+
+    if (scan.threat_detected) {
+      return NextResponse.json(
+        { error: 'Security threat detected' },
+        { status: 400 }
+      );
+    }
+
+    // Call Claude
+    const response = await anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: message }],
+    });
+
+    return NextResponse.json({
+      response: response.content[0].text,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
+  }
+}
+```
+
+## React Component
+
+```typescript
+'use client';
+
+import { useState } from 'react';
+
+export function SecureChatComponent() {
+  const [message, setMessage] = useState('');
+  const [response, setResponse] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error);
+      }
+
+      setResponse(data.response);
+      setMessage('');
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <textarea
+        value={message}
+        onChange={e => setMessage(e.target.value)}
+        placeholder="Ask Claude..."
+      />
+      <button type="submit" disabled={loading}>
+        {loading ? 'Processing...' : 'Send'}
+      </button>
+      {response && <div>{response}</div>}
+    </form>
+  );
+}
+```
+
+## Error Handling
+
+```typescript
+async function robustClaude(message: string) {
+  try {
+    const scan = await koreshield.scan({
+      content: message,
+      timeout: 5000,
+    });
+
+    if (scan.threat_detected) {
+      return {
+        error: 'Security threat detected',
+        threat: scan.threat_type,
+      };
+    }
+
+    const response = await anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: message }],
+    });
+
+    return { response: response.content[0].text };
+  } catch (error) {
+    if (error.status === 429) {
+      return { error: 'Rate limit exceeded' };
+    } else if (error.status === 529) {
+      return { error: 'Service overloaded' };
+    }
+    
+    throw error;
+  }
+}
+```
+
+## Related Documentation
+
+- [JavaScript SDK](/docs/getting-started/javascript)
+- [Streaming Guide](/docs/advanced/streaming)
+- [Tool Use Security](/docs/advanced/tool-security)

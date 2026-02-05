@@ -1,0 +1,63 @@
+---
+title: Compliance & Certifications
+description: Guide to meeting regulatory requirements with KoreShield (SOC2, HIPAA, GDPR).
+published: true
+---
+
+# Compliance & Certifications
+
+KoreShield is designed to help organizations meet strict security and privacy standards. This guide outlines how our architecture supports compliance with major frameworks.
+
+## SOC 2 Type II
+
+KoreShield creates an audit trail that is essential for SOC 2 controls.
+
+### Security Controls
+- **Access Control**: Role-Based Access Control (RBAC) ensures only authorized users can modify security policies.
+- **Monitoring**: Real-time logging of all security events and policy violations.
+- **Change Management**: Versioned policy configurations allow for safe rollbacks and change tracking.
+
+## HIPAA Compliance
+
+For healthcare organizations handling Protected Health Information (PHI).
+
+### PHI Protection
+- **Redaction**: Automatically detect and redact PHI (names, SSNs, medical record numbers) before data leaves your boundary.
+- **Encryption**: All data is encrypted in transit and at rest.
+- **BAA**: Enterprise plans include a Business Associate Agreement (BAA).
+
+```typescript
+// Example: Configuring PHI Redaction
+const koreshield = new KoreShield({
+  apiKey: process.env.KEY,
+  policy: {
+    pii: {
+      action: 'redact',
+      types: ['us_ssn', 'medical_record_number', 'patient_name']
+    }
+  }
+});
+```
+
+## GDPR Considerations
+
+### Data Sovereignty
+- **Region Locking**: Configure KoreShield to process data only within specific EU regions.
+- **Right to Erasure**: API endpoints to delete all data associated with a specific user ID.
+- **Data Minimization**: We strictly limit data retention periods based on your configuration.
+
+## PCI-DSS Requirements
+
+For handling payment card information.
+
+- **PCI Masking**: Automatically mask credit card numbers in logs and prompts.
+- **Audit Logging**: Immutable logs of all access to cardholder data flows.
+
+## FedRAMP (Government)
+
+KoreShield's GovCloud deployment option ensures:
+- **FIPS 140-2 Validated Encryption**
+- **US Persons Only Support**
+- **GovCloud Hosting**
+
+*Contact sales for FedRAMP High package availability.*

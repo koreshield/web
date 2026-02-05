@@ -1,0 +1,22 @@
+---
+title: Custom Rules DSL
+description: Write powerful custom detection rules using our domain-specific language.
+---
+
+# Custom Rules DSL
+
+Sometimes standard detection isn't enough. The Custom Rules DSL allows you to define highly specific patterns to block.
+
+## Syntax
+
+Rules are defined in YAML or JSON.
+
+```yaml
+- name: "Block Competitor Mentions"
+  type: "regex"
+  pattern: "(Anthropic|OpenAI|Google)"
+  action: "block"
+  severity: "low"
+```
+
+*Documentation in progress. Full reference for regex, semantic matching, and conditional logic coming soon.*
