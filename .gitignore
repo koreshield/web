@@ -272,12 +272,6 @@ docs/SYSTEM_DESIGN.md
 .DS_Store
 !koreshield-web/src/lib/
 !koreshield-web/public/docs/
-docs/ARCHITECTURE_OVERVIEW.md
-docs/MARKET_ANALYSIS.md
-docs/API_INTEGRATION.md
-docs/AUTHENTICATION_PLAN.md
-docs/COMPLETE_ECOSYSTEM_GUIDE.md
-docs/IMPLEMENTATION_PLAN.md
-docs/CLERK_REMOVAL_COMPLETE.md
 koreshield-js-sdk/.npmrc
-AUDIT_REPORT_v0.3.0.mdWEB_PLATFORM_*.md
+
+docs/*.md
