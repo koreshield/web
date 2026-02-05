@@ -15,8 +15,16 @@ from .types import (
     DetectionType,
     AuthConfig,
 )
+# RAG Imports
+from .types import (
+    RAGDocument,
+    RAGScanRequest,
+    RAGScanResponse,
+    DocumentThreat,
+    CrossDocumentThreat,
+)
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __all__ = [
     "KoreShieldClient",
     "AsyncKoreShieldClient",
@@ -30,4 +38,10 @@ __all__ = [
     "ThreatLevel",
     "DetectionType",
     "AuthConfig",
+    # RAG Types
+    "RAGDocument",
+    "RAGScanRequest",
+    "RAGScanResponse",
+    "DocumentThreat",
+    "CrossDocumentThreat",
 ]
