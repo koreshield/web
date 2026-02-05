@@ -397,10 +397,8 @@ class KoreShieldProxy:
         async def rag_scan(request: Request):
             return await self._handle_rag_scan(request)
 
-        # Generic proxy endpoint for other paths
-        @self.app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
-        async def proxy(request: Request, path: str):
-            return await self._handle_request(request, path)
+        # Note: Removed catch-all route to prevent interference with specific routes
+        # If needed, implement specific proxy endpoints instead
 
 
     async def _handle_chat_completion(self, request: Request) -> Response:
