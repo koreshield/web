@@ -186,7 +186,7 @@ def _initialize_defaults():
     _users_store = {
         "1": User(
             id="1",
-            email="admin@koreshield.com",
+            email="admin@example.com",
             name="Admin User",
             role="Admin",
             status=UserStatus.ACTIVE,

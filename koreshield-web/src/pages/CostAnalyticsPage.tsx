@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DollarSign, TrendingDown, TrendingUp, Filter, Download, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { api } from '../lib/api-client';
 
 interface CostData {
     period: string;
@@ -33,13 +34,26 @@ export function CostAnalyticsPage() {
     const [selectedTenant, setSelectedTenant] = useState('all');
 
     // Fetch cost data
-    const { data: costData, isLoading } = useQuery({
+    const { data: costData, isLoading, error } = useQuery({
         queryKey: ['cost-analytics', timeRange, selectedProvider, selectedTenant],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/analytics/costs
-            return mockCostData;
+            const params = new URLSearchParams();
+            params.append('period', timeRange);
+            if (selectedProvider !== 'all') params.append('provider', selectedProvider);
+            if (selectedTenant !== 'all') params.append('tenant_id', selectedTenant);
+            
+            return api.getCosts(params.toString());
         },
         refetchInterval: 300000, // Refresh every 5 minutes
+    });
+    
+    // Fetch cost summary for projections
+    const { data: costSummary } = useQuery({
+        queryKey: ['cost-summary', timeRange],
+        queryFn: async () => {
+            return api.getCostSummary(timeRange);
+        },
+        refetchInterval: 300000,
     });
 
     const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];

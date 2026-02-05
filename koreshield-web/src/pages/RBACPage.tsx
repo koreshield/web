@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Shield, Users, Plus, Edit2, Trash2, Key, Search, Filter } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/api-client';
 
 interface User {
     id: string;
@@ -43,8 +44,10 @@ export function RBACPage() {
     const { data: users = [], isLoading: usersLoading } = useQuery({
         queryKey: ['rbac-users', searchQuery, roleFilter],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/rbac/users
-            return mockUsers;
+            const params = new URLSearchParams();
+            if (searchQuery) params.append('search', searchQuery);
+            if (roleFilter !== 'all') params.append('role', roleFilter);
+            return api.getUsers(params.toString());
         },
     });
 
@@ -52,8 +55,7 @@ export function RBACPage() {
     const { data: roles = [], isLoading: rolesLoading } = useQuery({
         queryKey: ['rbac-roles'],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/rbac/roles
-            return mockRoles;
+            return api.getRoles();
         },
     });
 
@@ -61,16 +63,17 @@ export function RBACPage() {
     const { data: permissions = [], isLoading: permissionsLoading } = useQuery({
         queryKey: ['rbac-permissions'],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/rbac/permissions
-            return mockPermissions;
+            return api.getPermissions();
         },
     });
 
     // Create/Update user mutation
     const userMutation = useMutation({
         mutationFn: async (user: Partial<User>) => {
-            // TODO: Replace with real API call
-            return user;
+            if (editingUser) {
+                return api.updateUser(editingUser.id, user);
+            }
+            return api.createUser(user);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['rbac-users'] });
@@ -82,8 +85,10 @@ export function RBACPage() {
     // Create/Update role mutation
     const roleMutation = useMutation({
         mutationFn: async (role: Partial<Role>) => {
-            // TODO: Replace with real API call
-            return role;
+            if (editingRole) {
+                return api.updateRole(editingRole.id, role);
+            }
+            return api.createRole(role);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['rbac-roles'] });
@@ -95,8 +100,7 @@ export function RBACPage() {
     // Delete user mutation
     const deleteUserMutation = useMutation({
         mutationFn: async (userId: string) => {
-            // TODO: Replace with real API call
-            console.log('Deleting user:', userId);
+            return api.deleteUser(userId);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['rbac-users'] });
@@ -548,7 +552,7 @@ export function RBACPage() {
 const mockUsers: User[] = [
     {
         id: '1',
-        email: 'admin@koreshield.com',
+        email: 'admin@example.com',
         name: 'Admin User',
         role: 'Admin',
         status: 'active',
