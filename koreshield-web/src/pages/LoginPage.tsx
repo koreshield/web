@@ -95,6 +95,14 @@ export function LoginPage() {
                     >
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
+
+                    {/* Signup Link */}
+                    <div className="text-center text-sm">
+                        <span className="text-muted-foreground">Don't have an account? </span>
+                        <Link to="/signup" className="text-primary hover:underline font-medium">
+                            Sign up
+                        </Link>
+                    </div>
                 </form>
             </div>
         </div>
