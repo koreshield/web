@@ -39,8 +39,8 @@ export function LoginPage() {
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-card border border-border rounded-lg p-8 shadow-lg">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold mb-2">Admin Login</h1>
-                    <p className="text-muted-foreground">Sign in to access the dashboard</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-2">Admin Login</h1>
+                    <p className="text-sm sm:text-base text-muted-foreground">Sign in to access the dashboard</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-6">

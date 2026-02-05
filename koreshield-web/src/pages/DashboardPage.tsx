@@ -90,32 +90,32 @@ export function DashboardPage() {
             {/* Header */}
             <header className="border-b border-border bg-card">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-bold">Dashboard</h1>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                            <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
                             {isAuthenticated ? (
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-xs sm:text-sm text-muted-foreground truncate">
                                     Welcome back, {user?.name || user?.email}
                                 </p>
                             ) : (
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-xs sm:text-sm text-muted-foreground">
                                     Sign in to access the admin dashboard
                                 </p>
                             )}
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                             {/* WebSocket Status Indicator */}
                             {isAuthenticated && (
-                                <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg">
+                                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-muted rounded-lg">
                                     {wsConnected ? (
                                         <>
-                                            <Wifi className="w-4 h-4 text-green-500" />
-                                            <span className="text-xs font-medium text-green-600">Live</span>
+                                            <Wifi className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
+                                            <span className="text-xs font-medium text-green-600 hidden sm:inline">Live</span>
                                         </>
                                     ) : (
                                         <>
-                                            <WifiOff className="w-4 h-4 text-gray-400" />
-                                            <span className="text-xs font-medium text-gray-500">Connecting...</span>
+                                            <WifiOff className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                                            <span className="text-xs font-medium text-gray-500 hidden sm:inline">Connecting...</span>
                                         </>
                                     )}
                                 </div>
@@ -123,10 +123,11 @@ export function DashboardPage() {
                             {isAuthenticated ? (
                                 <button
                                     onClick={handleLogout}
-                                    className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+                                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+                                    aria-label="Logout"
                                 >
                                     <LogOut className="w-4 h-4" />
-                                    Logout
+                                    <span className="hidden sm:inline">Logout</span>
                                 </button>
                             ) : (
                                 <Link
@@ -143,10 +144,11 @@ export function DashboardPage() {
 
             {/* Data Source Indicator */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-3 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="text-sm text-green-600 font-medium">
-                        Connected to Railway API - Showing real-time data from production backend
+                <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-3 flex items-start sm:items-center gap-2">
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                    <span className="text-xs sm:text-sm text-green-600 font-medium">
+                        <span className="hidden sm:inline">Connected to Railway API - Showing real-time data from production backend</span>
+                        <span className="sm:hidden">Live data from production</span>
                     </span>
                 </div>
             </div>
@@ -160,43 +162,43 @@ export function DashboardPage() {
                 ) : (
                     <>
                         {/* Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <div className="bg-card border border-border rounded-lg p-6">
+                        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
+                            <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-muted-foreground">Total Requests</span>
-                                    <Activity className="w-5 h-5 text-blue-500" />
+                                    <span className="text-xs sm:text-sm font-medium text-muted-foreground">Total Requests</span>
+                                    <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                                 </div>
-                                <div className="text-3xl font-bold">
+                                <div className="text-xl sm:text-3xl font-bold">
                                     {((stats as any)?.statistics?.requests_total || 0).toLocaleString()}
                                 </div>
                             </div>
 
-                            <div className="bg-card border border-border rounded-lg p-6">
+                            <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-muted-foreground">Requests Blocked</span>
-                                    <Shield className="w-5 h-5 text-red-500" />
+                                    <span className="text-xs sm:text-sm font-medium text-muted-foreground">Blocked</span>
+                                    <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                                 </div>
-                                <div className="text-3xl font-bold text-red-600">
+                                <div className="text-xl sm:text-3xl font-bold text-red-600">
                                     {(stats as any)?.statistics?.requests_blocked || 0}
                                 </div>
                             </div>
 
-                            <div className="bg-card border border-border rounded-lg p-6">
+                            <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-muted-foreground">Attacks Detected</span>
-                                    <AlertTriangle className="w-5 h-5 text-orange-500" />
+                                    <span className="text-xs sm:text-sm font-medium text-muted-foreground">Attacks</span>
+                                    <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                                 </div>
-                                <div className="text-3xl font-bold text-orange-600">
+                                <div className="text-xl sm:text-3xl font-bold text-orange-600">
                                     {(stats as any)?.statistics?.attacks_detected || 0}
                                 </div>
                             </div>
 
-                            <div className="bg-card border border-border rounded-lg p-6">
+                            <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-muted-foreground">Requests Allowed</span>
-                                    <CheckCircle className="w-5 h-5 text-green-500" />
+                                    <span className="text-xs sm:text-sm font-medium text-muted-foreground">Allowed</span>
+                                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                                 </div>
-                                <div className="text-3xl font-bold text-green-600">
+                                <div className="text-xl sm:text-3xl font-bold text-green-600">
                                     {(stats as any)?.statistics?.requests_allowed || 0}
                                 </div>
                             </div>
