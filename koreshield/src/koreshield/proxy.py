@@ -170,10 +170,6 @@ class KoreShieldProxy:
             check_interval=30.0,  # Check every 30 seconds
         )
 
-        # Start health monitoring
-        import asyncio
-        asyncio.create_task(self.health_monitor.start_monitoring())
-
         # Initialize monitoring system
         from .monitoring import MonitoringSystem
         from .config import KoreShieldConfig
@@ -291,6 +287,12 @@ class KoreShieldProxy:
 
     def _setup_routes(self):
         """Set up FastAPI routes."""
+        
+        # Startup event to initialize health monitoring
+        @self.app.on_event("startup")
+        async def startup_event():
+            import asyncio
+            asyncio.create_task(self.health_monitor.start_monitoring())
         
         rate_limit = self.config.get("security", {}).get("rate_limit", "60/minute")
 
