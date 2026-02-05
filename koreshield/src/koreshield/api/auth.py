@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 import jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import structlog
 from dotenv import load_dotenv
 
@@ -26,7 +26,8 @@ JWT_PUBLIC_KEY = None
 JWT_ALGORITHM = "RS256"
 JWT_ISSUER = "koreshield-auth"
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/management/login")
+# Use HTTPBearer for simple JWT token authentication in Swagger UI
+http_bearer = HTTPBearer(scheme_name="Bearer Token", description="Enter your JWT token from the login endpoint")
 
 def init_jwt_config(config: dict):
     """Initialize JWT configuration from main config."""
@@ -82,7 +83,7 @@ def verify_jwt_token(token: str) -> Optional[Dict[str, Any]]:
         logger.error("JWT verification error", error=str(e))
         return None
 
-async def get_current_admin(token: str = Depends(oauth2_scheme)) -> Dict[str, Any]:
+async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(http_bearer)) -> Dict[str, Any]:
     """
     FastAPI dependency to validate JWT token and return user info.
     """
@@ -92,7 +93,7 @@ async def get_current_admin(token: str = Depends(oauth2_scheme)) -> Dict[str, An
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    payload = verify_jwt_token(token)
+    payload = verify_jwt_token(credentials.credentials)
     if not payload:
         raise credentials_exception
 
