@@ -11,19 +11,24 @@ interface APIError {
 
 class ApiClient {
     private baseUrl: string;
-    private apiKey?: string;
     private maxRetries: number = 3;
     private timeout: number = 30000;
 
     constructor() {
         this.baseUrl = API_BASE_URL;
-        // SECURITY: This must be a restricted, public-only key (e.g. read-only)
-        // Do NOT use a secret admin key here.
-        this.apiKey = import.meta.env.VITE_PUBLIC_API_KEY;
+        // SECURITY: No API keys stored client-side
+        // All admin endpoints require JWT authentication from authService
+        // Public endpoints (health checks) require no auth
+        // This prevents key exposure in frontend bundles
     }
 
-    setApiKey(apiKey: string) {
-        this.apiKey = apiKey;
+    /**
+     * @deprecated API keys should not be used client-side for security reasons.
+     * All authenticated requests now use JWT tokens from authService.
+     * This method is kept for backward compatibility only.
+     */
+    setApiKey(_apiKey: string) {
+        console.warn('setApiKey() is deprecated. Use JWT authentication via authService instead.');
     }
 
     /**
@@ -49,12 +54,11 @@ class ApiClient {
         };
 
         // Add JWT token if admin is authenticated
+        // SECURITY: Only JWT tokens are used for authentication
+        // No fallback to client-side API keys to prevent key exposure
         const adminToken = authService.getToken();
         if (adminToken) {
             headers['Authorization'] = `Bearer ${adminToken}`;
-        } else if (this.apiKey) {
-            // Fallback to API key if no admin token
-            headers['Authorization'] = `Bearer ${this.apiKey}`;
         }
 
         try {

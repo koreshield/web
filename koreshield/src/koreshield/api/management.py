@@ -19,21 +19,34 @@ class SecurityConfigUpdate(BaseModel):
 @router.post("/login")
 async def admin_login(request: LoginRequest):
     """
-    Admin login endpoint.
+    Admin login endpoint with rate limiting to prevent brute force attacks.
+    
+    Security Features:
+    - Rate limited to 5 attempts per minute per IP (configured in proxy.py)
+    - Failed login attempts are logged for security monitoring
+    - Passwords should never be logged
     
     This endpoint authenticates admin users and returns a JWT token.
     Note: This is a placeholder implementation. In production, this should
     integrate with your authentication service or database.
+    
+    ⚠️ SECURITY: In production, implement:
+    - Account lockout after N failed attempts
+    - 2FA/MFA for admin accounts
+    - Password complexity requirements
+    - Secure password hashing (bcrypt/argon2)
     """
     # TODO: Replace with actual authentication logic
     # For now, accept any email/password combination
     if not request.email or not request.password:
+        logger.warning("login_attempt_missing_credentials", email=request.email)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email and password are required"
         )
     
     # Mock authentication - replace with real auth service
+    # ⚠️ NEVER log passwords or include them in error messages
     if request.email == "admin@koreshield.com" and request.password == "admin123":
         # In production, this JWT should be issued by your auth service
         # For demo purposes, we'll return a mock response
