@@ -1,3 +1,6 @@
+# Planning docs (local only - kept in docs/planning/)
+docs/planning/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -293,3 +296,4 @@ MIGRATION_GUIDE.md
 PHASE_3_SUMMARY.md
 *.md files in docs/
 SECURITY_*.md
+PROJECT_ANALYSIS.md

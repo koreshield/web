@@ -45,29 +45,16 @@ async def admin_login(request: LoginRequest):
             detail="Email and password are required"
         )
     
-    # Mock authentication - replace with real auth service
+    # TODO: Replace with real auth service (e.g., check database, verify password hash)
+    # This is a placeholder that always fails - implement proper authentication
     # ⚠️ NEVER log passwords or include them in error messages
-    if request.email == "admin@koreshield.com" and request.password == "admin123":
-        # In production, this JWT should be issued by your auth service
-        # For demo purposes, we'll return a mock response
-        logger.info("admin_login_success", email=request.email)
-        return {
-            "access_token": "mock_jwt_token_replace_with_real_auth_service",
-            "token_type": "bearer",
-            "expires_in": 3600,
-            "user": {
-                "id": "admin_001",
-                "name": "Admin User", 
-                "email": request.email,
-                "role": "admin"
-            }
-        }
-    else:
-        logger.warning("admin_login_failed", email=request.email)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials"
-        )
+    
+    # For now, always return unauthorized - implement real auth
+    logger.warning("admin_login_failed", email=request.email, reason="auth_not_implemented")
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Authentication not implemented. Please configure a real auth service."
+    )
 
 @router.post("/logout")
 async def admin_logout(current_user: dict = Depends(get_current_admin)):

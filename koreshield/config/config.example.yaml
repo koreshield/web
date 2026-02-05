@@ -91,7 +91,7 @@ alerting:
     use_tls: true
     username: "your-email@gmail.com"
     from_address: "alerts@koreshield.com"
-    recipients: ["admin@koreshield.com"]
+    recipients: ["security-team@yourcompany.com"]
   
   # Webhook alerting
   webhook:

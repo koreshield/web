@@ -56,7 +56,7 @@ export function LoginPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="admin@koreshield.com"
+                                placeholder="your-email@company.com"
                                 required
                                 disabled={loading}
                             />
@@ -96,11 +96,6 @@ export function LoginPage() {
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
-
-                <div className="mt-6 text-center text-sm text-muted-foreground">
-                    <p>Default credentials for testing:</p>
-                    <p className="font-mono text-xs mt-1">admin@koreshield.com / admin123</p>
-                </div>
             </div>
         </div>
     );
