@@ -275,3 +275,4 @@ docs/SYSTEM_DESIGN.md
 koreshield-js-sdk/.npmrc
 
 docs/*.md
+MIGRATION_GUIDE.md
