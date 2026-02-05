@@ -1,60 +1,208 @@
 from fastapi import APIRouter, HTTPException, Request, Depends, status
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 import structlog
+import bcrypt
+import jwt
+import secrets
+import os
+from datetime import datetime, timedelta, timezone
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from .auth import get_current_admin
+from ..models.user import User
+from ..services.email import send_welcome_email, send_verification_email
 
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["management"])
 
+# Database setup
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+engine = create_async_engine(DATABASE_URL, echo=False) if DATABASE_URL else None
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False) if engine else None
+
+async def get_db():
+    """Database session dependency."""
+    if not AsyncSessionLocal:
+        raise HTTPException(status_code=500, detail="Database not configured")
+    async with AsyncSessionLocal() as session:
+        yield session
+
+# JWT Configuration
+JWT_SECRET = os.getenv("JWT_PRIVATE_KEY") or os.getenv("JWT_PUBLIC_KEY", "")
+JWT_ALGORITHM = "RS256" if "BEGIN" in JWT_SECRET else "HS256"
+JWT_EXPIRATION_HOURS = 24
+
+class SignupRequest(BaseModel):
+    email: EmailStr
+    password: str
+    name: str | None = None
+
 class LoginRequest(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 class SecurityConfigUpdate(BaseModel):
     sensitivity: str | None = None
     default_action: str | None = None
 
-@router.post("/login")
-async def admin_login(request: LoginRequest):
+@router.post("/signup", status_code=status.HTTP_201_CREATED)
+async def signup(request: SignupRequest, db: AsyncSession = Depends(get_db)):
     """
-    Admin login endpoint with rate limiting to prevent brute force attacks.
+    User signup endpoint with email verification.
     
-    Security Features:
-    - Rate limited to 5 attempts per minute per IP (configured in proxy.py)
-    - Failed login attempts are logged for security monitoring
-    - Passwords should never be logged
-    
-    This endpoint authenticates admin users and returns a JWT token.
-    Note: This is a placeholder implementation. In production, this should
-    integrate with your authentication service or database.
-    
-    ⚠️ SECURITY: In production, implement:
-    - Account lockout after N failed attempts
-    - 2FA/MFA for admin accounts
-    - Password complexity requirements
-    - Secure password hashing (bcrypt/argon2)
+    Creates a new user account, sends welcome email and verification email.
+    Password is hashed using bcrypt before storage.
     """
-    # TODO: Replace with actual authentication logic
-    # For now, accept any email/password combination
-    if not request.email or not request.password:
-        logger.warning("login_attempt_missing_credentials", email=request.email)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email and password are required"
+    try:
+        # Check if user already exists
+        result = await db.execute(select(User).where(User.email == request.email))
+        existing_user = result.scalar_one_or_none()
+        
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+        
+        # Validate password strength
+        if len(request.password) < 8:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password must be at least 8 characters long"
+            )
+        
+        # Hash password
+        password_hash = bcrypt.hashpw(request.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        
+        # Generate verification token
+        verification_token = secrets.token_urlsafe(32)
+        verification_expires = datetime.now(timezone.utc) + timedelta(hours=24)
+        
+        # Create user
+        import uuid
+        user = User(
+            id=uuid.uuid4(),
+            email=request.email,
+            password_hash=password_hash,
+            name=request.name,
+            role='user',
+            status='active',
+            email_verified=False,
+            email_verification_token=verification_token,
+            email_verification_expires_at=verification_expires
         )
+        
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        
+        # Send emails (non-blocking, don't fail signup if email fails)
+        try:
+            await send_welcome_email(request.email, request.name)
+            await send_verification_email(request.email, verification_token, request.name)
+        except Exception as e:
+            logger.warning("failed_to_send_signup_emails", email=request.email, error=str(e))
+        
+        logger.info("user_signup_success", user_id=str(user.id), email=user.email)
+        
+        # Generate JWT token
+        token_payload = {
+            'user_id': str(user.id),
+            'email': user.email,
+            'role': user.role,
+            'exp': datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS),
+            'iat': datetime.now(timezone.utc)
+        }
+        
+        token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        
+        return {
+            "user": user.to_dict(),
+            "token": token,
+            "message": "Signup successful! Please check your email to verify your account."
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("signup_error", error=str(e), email=request.email)
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Signup failed. Please try again later."
+        )
+
+@router.post("/login")
+async def admin_login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
+    """
+    User login endpoint with rate limiting to prevent brute force attacks.
     
-    # TODO: Replace with real auth service (e.g., check database, verify password hash)
-    # This is a placeholder that always fails - implement proper authentication
-    # ⚠️ NEVER log passwords or include them in error messages
-    
-    # For now, always return unauthorized - implement real auth
-    logger.warning("admin_login_failed", email=request.email, reason="auth_not_implemented")
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Authentication not implemented. Please configure a real auth service."
-    )
+    Authenticates user with email and password, returns JWT token.
+    """
+    try:
+        # Find user by email
+        result = await db.execute(select(User).where(User.email == request.email))
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            logger.warning("login_attempt_user_not_found", email=request.email)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
+        
+        # Verify password
+        if not bcrypt.checkpw(request.password.encode('utf-8'), user.password_hash.encode('utf-8')):
+            logger.warning("login_attempt_invalid_password", email=request.email)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
+        
+        # Check if user is active
+        if user.status != 'active':
+            logger.warning("login_attempt_inactive_user", email=request.email, status=user.status)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account is not active"
+            )
+        
+        # Update last login
+        user.last_login_at = datetime.now(timezone.utc)
+        await db.commit()
+        
+        # Generate JWT token
+        token_payload = {
+            'user_id': str(user.id),
+            'email': user.email,
+            'role': user.role,
+            'exp': datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS),
+            'iat': datetime.now(timezone.utc)
+        }
+        
+        token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        
+        logger.info("login_success", user_id=str(user.id), email=user.email)
+        
+        return {
+            "user": user.to_dict(),
+            "token": token
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("login_error", error=str(e), email=request.email)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Login failed. Please try again later."
+        )
 
 @router.post("/logout")
 async def admin_logout(current_user: dict = Depends(get_current_admin)):

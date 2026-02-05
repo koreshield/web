@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { authService } from '../lib/auth';
 import { Lock, Mail } from 'lucide-react';
 
@@ -95,6 +95,14 @@ export function LoginPage() {
                     >
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
+
+                    {/* Signup Link */}
+                    <div className="text-center text-sm">
+                        <span className="text-muted-foreground">Don't have an account? </span>
+                        <Link to="/signup" className="text-primary hover:underline font-medium">
+                            Sign up
+                        </Link>
+                    </div>
                 </form>
             </div>
         </div>
