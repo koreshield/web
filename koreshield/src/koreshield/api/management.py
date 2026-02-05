@@ -113,7 +113,7 @@ async def signup(request: SignupRequest, db: AsyncSession = Depends(get_db)):
         
         # Generate verification token
         verification_token = secrets.token_urlsafe(32)
-        verification_expires = datetime.now(timezone.utc) + timedelta(hours=24)
+        verification_expires = datetime.utcnow() + timedelta(hours=24)
         
         # Create user
         import uuid
@@ -147,8 +147,8 @@ async def signup(request: SignupRequest, db: AsyncSession = Depends(get_db)):
             'user_id': str(user.id),
             'email': user.email,
             'role': user.role,
-            'exp': datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS),
-            'iat': datetime.now(timezone.utc)
+            'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS),
+            'iat': datetime.utcnow()
         }
         
         token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
@@ -237,7 +237,7 @@ async def admin_login(request: LoginRequest, db: AsyncSession = Depends(get_db))
             )
         
         # Update last login
-        user.last_login_at = datetime.now(timezone.utc)
+        user.last_login_at = datetime.utcnow()
         await db.commit()
         
         # Generate JWT token
@@ -245,8 +245,8 @@ async def admin_login(request: LoginRequest, db: AsyncSession = Depends(get_db))
             'user_id': str(user.id),
             'email': user.email,
             'role': user.role,
-            'exp': datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS),
-            'iat': datetime.now(timezone.utc)
+            'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS),
+            'iat': datetime.utcnow()
         }
         
         token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
