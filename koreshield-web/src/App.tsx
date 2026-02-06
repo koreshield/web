@@ -38,6 +38,7 @@ const RBACPage = lazy(() => import('./pages/RBACPage').then(m => ({ default: m.R
 const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
 const TeamsPage = lazy(() => import('./pages/TeamsPage').then(m => ({ default: m.TeamsPage })));
 const ApiKeysPage = lazy(() => import('./pages/ApiKeysPage').then(m => ({ default: m.ApiKeysPage })));
+const RAGSecurityPage = lazy(() => import('./pages/RAGSecurityPage').then(m => ({ default: m.RAGSecurityPage })));
 
 function AppContent() {
   const { addToast } = useToast();
@@ -340,6 +341,18 @@ function AppContent() {
                 <RouteErrorBoundary>
                   <ProtectedRoute>
                     <ApiKeysPage />
+                  </ProtectedRoute>
+                </RouteErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/rag-security"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ProtectedRoute>
+                    <RAGSecurityPage />
                   </ProtectedRoute>
                 </RouteErrorBoundary>
               </Suspense>
