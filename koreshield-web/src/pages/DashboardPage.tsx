@@ -214,6 +214,22 @@ export function DashboardPage() {
                                     </div>
                                 </div>
 
+                                <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-3 sm:p-4 mb-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Shield className="w-5 h-5 text-purple-500 flex-shrink-0" />
+                                        <h3 className="font-semibold text-sm sm:text-base">🆕 Try RAG Security Scanner</h3>
+                                    </div>
+                                    <p className="text-xs sm:text-sm text-muted-foreground mb-3">
+                                        Scan your retrieved documents for indirect prompt injection attacks with our new 5D taxonomy detection system.
+                                    </p>
+                                    <Link 
+                                        to="/rag-security"
+                                        className="inline-flex items-center gap-1 text-xs sm:text-sm text-purple-500 hover:underline font-medium"
+                                    >
+                                        Open RAG Scanner <ArrowRight className="w-3 h-3" />
+                                    </Link>
+                                </div>
+
                                 <div className="bg-card border border-border rounded-lg p-3 sm:p-4">
                                     <div className="flex items-center gap-2 mb-2 sm:mb-3">
                                         <Code className="w-4 h-4 text-primary flex-shrink-0" />
