@@ -83,9 +83,10 @@ def verify_jwt_token(token: str) -> Optional[Dict[str, Any]]:
         logger.error("JWT verification error", error=str(e))
         return None
 
-async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(http_bearer)) -> Dict[str, Any]:
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(http_bearer)) -> Dict[str, Any]:
     """
     FastAPI dependency to validate JWT token and return user info.
+    Allows any authenticated user (no role restriction).
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -99,21 +100,31 @@ async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(
 
     # Extract user information from JWT payload
     user = {
-        "id": payload.get("sub"),
+        "id": payload.get("sub") or payload.get("user_id"),
         "name": payload.get("name"),
         "email": payload.get("email"),
         "role": payload.get("role", "user")
     }
 
-    # Optional: Check for admin permission
+    # Audit logging for authentication
+    logger.info("user_authenticated", user_id=user.get("id"), email=user.get("email"), role=user.get("role"))
+
+    return user
+
+async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(http_bearer)) -> Dict[str, Any]:
+    """
+    FastAPI dependency to validate JWT token and return user info.
+    Requires admin, owner, or superuser role.
+    """
+    # First validate the user is authenticated
+    user = await get_current_user(credentials)
+
+    # Then check for admin permission
     if user.get("role") not in ["admin", "owner", "superuser"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Insufficient permissions"
         )
-
-    # Audit logging for admin authentication
-    logger.info("admin_authenticated", user_id=user.get("id"), email=user.get("email"), role=user.get("role"))
 
     return user
 

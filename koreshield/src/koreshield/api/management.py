@@ -10,7 +10,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
-from .auth import get_current_admin
+from .auth import get_current_admin, get_current_user
 from ..models.user import User
 from ..services.email import send_welcome_email, send_verification_email
 
@@ -272,7 +272,7 @@ async def admin_logout(current_user: dict = Depends(get_current_admin)):
     return {"status": "logged_out"}
 
 @router.get("/stats")
-async def get_stats(request: Request, current_user: dict = Depends(get_current_admin)):
+async def get_stats(request: Request, current_user: dict = Depends(get_current_user)):
     """Get current proxy statistics."""
     # Access the proxy instance from the app state or request
     if hasattr(request.app.state, "stats"):
@@ -336,7 +336,7 @@ async def get_audit_logs(
     limit: int = 100, 
     offset: int = 0, 
     level: str | None = None,
-    current_user: dict = Depends(get_current_admin)
+    current_user: dict = Depends(get_current_user)
 ):
     """Get audit logs."""
     log_file = "logs/koreshield.log"
@@ -376,7 +376,7 @@ class Policy(BaseModel):
     roles: list[str] = ["admin", "moderator", "user"]
 
 @router.get("/policies")
-async def list_policies(request: Request, current_user: dict = Depends(get_current_admin)):
+async def list_policies(request: Request, current_user: dict = Depends(get_current_user)):
     """List all security policies."""
     # Assuming the proxy instance is available and has the policy engine
     if hasattr(request.app.state, "policy_engine"):
