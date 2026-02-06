@@ -34,8 +34,10 @@ def init_jwt_config(config: dict):
     global JWT_PUBLIC_KEY, JWT_ALGORITHM, JWT_ISSUER
 
     jwt_config = config.get("jwt", {})
-    JWT_PUBLIC_KEY = jwt_config.get("public_key") or os.getenv("JWT_PUBLIC_KEY")
-    JWT_ALGORITHM = jwt_config.get("algorithm", "RS256")
+    JWT_PUBLIC_KEY = jwt_config.get("public_key") or os.getenv("JWT_PUBLIC_KEY") or os.getenv("JWT_PRIVATE_KEY", "")
+    
+    # Auto-detect algorithm based on key format
+    JWT_ALGORITHM = "RS256" if JWT_PUBLIC_KEY and "BEGIN" in JWT_PUBLIC_KEY else "HS256"
     JWT_ISSUER = jwt_config.get("issuer", "koreshield-auth")
 
     if not JWT_PUBLIC_KEY:
