@@ -68,24 +68,24 @@ export function AnalyticsPage() {
         <div className="min-h-screen bg-background">
             {/* Header */}
             <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <BarChart3 className="w-6 h-6 text-primary" />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                                <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                             </div>
-                            <div>
-                                <h1 className="text-2xl font-bold">Multi-Tenant Analytics</h1>
-                                <p className="text-sm text-muted-foreground">
+                            <div className="min-w-0">
+                                <h1 className="text-lg sm:text-2xl font-bold truncate">Multi-Tenant Analytics</h1>
+                                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
                                     Cross-tenant insights and performance comparisons
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 w-full sm:w-auto">
                             <select
                                 value={timeRange}
                                 onChange={(e) => setTimeRange(e.target.value)}
-                                className="px-4 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                             >
                                 <option value="1h">Last hour</option>
                                 <option value="24h">Last 24 hours</option>
@@ -100,22 +100,22 @@ export function AnalyticsPage() {
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Global Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-card border border-border rounded-lg p-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-muted-foreground">Total Requests</span>
-                            <Activity className="w-5 h-5 text-blue-500" />
+                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">Total Requests</span>
+                            <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                         </div>
-                        <div className="text-3xl font-bold">{totalRequests.toLocaleString()}</div>
-                        <div className="text-xs text-muted-foreground mt-1">Across all tenants</div>
+                        <div className="text-xl sm:text-3xl font-bold">{totalRequests.toLocaleString()}</div>
+                        <div className="text-xs text-muted-foreground mt-1 hidden sm:block">Across all tenants</div>
                     </div>
 
-                    <div className="bg-card border border-border rounded-lg p-6">
+                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-muted-foreground">Blocked Requests</span>
-                            <TrendingUp className="w-5 h-5 text-red-500" />
+                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">Blocked</span>
+                            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                         </div>
-                        <div className="text-3xl font-bold text-red-600">{totalBlocked.toLocaleString()}</div>
+                        <div className="text-xl sm:text-3xl font-bold text-red-600">{totalBlocked.toLocaleString()}</div>
                         <div className="text-xs text-muted-foreground mt-1">
                             {totalRequests > 0 ? ((totalBlocked / totalRequests) * 100).toFixed(1) : 0}% block rate
                         </div>

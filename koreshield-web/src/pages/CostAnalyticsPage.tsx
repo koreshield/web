@@ -130,24 +130,24 @@ export function CostAnalyticsPage() {
         <div className="min-h-screen bg-background">
             {/* Header */}
             <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <DollarSign className="w-6 h-6 text-primary" />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                             </div>
-                            <div>
-                                <h1 className="text-2xl font-bold">Cost Analytics</h1>
-                                <p className="text-sm text-muted-foreground">
+                            <div className="min-w-0">
+                                <h1 className="text-lg sm:text-2xl font-bold">Cost Analytics</h1>
+                                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
                                     Track spending across providers, tenants, and time periods
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                             <select
                                 value={exportFormat}
                                 onChange={(e) => setExportFormat(e.target.value as 'csv' | 'pdf')}
-                                className="px-3 py-2 bg-muted border border-border rounded-lg text-sm"
+                                className="px-3 py-2 bg-muted border border-border rounded-lg text-xs sm:text-sm"
                             >
                                 <option value="csv">CSV</option>
                                 <option value="pdf">PDF</option>
