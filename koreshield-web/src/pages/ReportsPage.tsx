@@ -115,39 +115,40 @@ export function ReportsPage() {
         <div className="min-h-screen bg-background">
             {/* Header */}
             <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <FileText className="w-6 h-6 text-primary" />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                             </div>
-                            <div>
-                                <h1 className="text-2xl font-bold">Reports</h1>
-                                <p className="text-sm text-muted-foreground">
+                            <div className="min-w-0">
+                                <h1 className="text-lg sm:text-2xl font-bold">Reports</h1>
+                                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
                                     Generate and schedule custom reports
                                 </p>
                             </div>
                         </div>
                         <button
                             onClick={() => setShowBuilderModal(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm w-full sm:w-auto justify-center"
                         >
                             <Plus className="w-4 h-4" />
-                            Create Report
+                            <span className="hidden sm:inline">Create Report</span>
+                            <span className="sm:hidden">New Report</span>
                         </button>
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex gap-4 mt-6 border-b border-border">
+                    <div className="flex gap-2 sm:gap-4 mt-4 sm:mt-6 border-b border-border overflow-x-auto">
                         <button
                             onClick={() => setActiveTab('reports')}
-                            className={`pb-3 px-2 font-medium transition-colors relative ${activeTab === 'reports'
+                            className={`pb-3 px-2 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${activeTab === 'reports'
                                 ? 'text-primary'
                                 : 'text-muted-foreground hover:text-foreground'
                                 }`}
                         >
-                            <div className="flex items-center gap-2">
-                                <FileText className="w-4 h-4" />
+                            <div className="flex items-center gap-1 sm:gap-2">
+                                <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
                                 All Reports
                             </div>
                             {activeTab === 'reports' && (

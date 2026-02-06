@@ -210,41 +210,42 @@ export function RulesPage() {
         <div className="min-h-screen bg-background">
             {/* Header */}
             <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <Sliders className="w-6 h-6 text-primary" />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                                <Sliders className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                             </div>
-                            <div>
-                                <h1 className="text-2xl font-bold">Rule Engine Configuration</h1>
-                                <p className="text-sm text-muted-foreground">
+                            <div className="min-w-0">
+                                <h1 className="text-lg sm:text-2xl font-bold">Rule Engine</h1>
+                                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
                                     Define custom detection rules and automated responses
                                 </p>
                             </div>
                         </div>
                         <button
                             onClick={() => setShowCreateModal(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm w-full sm:w-auto justify-center"
                         >
                             <Plus className="w-4 h-4" />
-                            Create Rule
+                            <span className="hidden sm:inline">Create Rule</span>
+                            <span className="sm:hidden">New Rule</span>
                         </button>
                     </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <div className="text-sm text-muted-foreground mb-1">Total Rules</div>
-                        <div className="text-3xl font-bold">{rules.length}</div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
+                        <div className="text-xs sm:text-sm text-muted-foreground mb-1">Total Rules</div>
+                        <div className="text-2xl sm:text-3xl font-bold">{rules.length}</div>
                     </div>
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <div className="text-sm text-muted-foreground mb-1">Active</div>
-                        <div className="text-3xl font-bold text-green-600">
+                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
+                        <div className="text-xs sm:text-sm text-muted-foreground mb-1">Active</div>
+                        <div className="text-2xl sm:text-3xl font-bold text-green-600">
                             {rules.filter(r => r.enabled).length}
                         </div>
                     </div>
