@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Key, Plus, Copy, Trash2, CheckCircle, AlertTriangle, Eye, EyeOff, Calendar, Clock } from 'lucide-react';
+import { Key, Plus, Copy, Trash2, CheckCircle, AlertTriangle, Calendar, Clock } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
-import { ToastNotification } from '../components/ToastNotification';
+import { useToast } from '../components/ToastNotification';
 
 interface APIKey {
     id: string;
@@ -28,29 +28,29 @@ export function ApiKeysPage() {
         expires_in_days: '',
     });
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
-    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const { success, error } = useToast();
 
     const queryClient = useQueryClient();
 
     // Fetch API keys
-    const { data: apiKeys = [], isLoading } = useQuery({
+    const { data: apiKeys = [], isLoading } = useQuery<APIKey[]>({
         queryKey: ['api-keys'],
-        queryFn: () => api.getApiKeys(),
+        queryFn: () => api.getApiKeys() as Promise<APIKey[]>,
     });
 
     // Generate API key mutation
-    const generateKeyMutation = useMutation({
+    const generateKeyMutation = useMutation<NewAPIKey, Error, { name: string; description?: string; expires_in_days?: number }>({
         mutationFn: (data: { name: string; description?: string; expires_in_days?: number }) =>
-            api.generateApiKey(data),
+            api.generateApiKey(data) as Promise<NewAPIKey>,
         onSuccess: (data: NewAPIKey) => {
             queryClient.invalidateQueries({ queryKey: ['api-keys'] });
             setNewKeyData(data);
             setShowCreateModal(false);
             setFormData({ name: '', description: '', expires_in_days: '' });
-            setToast({ message: 'API key generated successfully!', type: 'success' });
+            success('API key generated successfully!');
         },
         onError: () => {
-            setToast({ message: 'Failed to generate API key', type: 'error' });
+            error('Failed to generate API key');
         },
     });
 
@@ -59,10 +59,10 @@ export function ApiKeysPage() {
         mutationFn: (keyId: string) => api.revokeApiKey(keyId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['api-keys'] });
-            setToast({ message: 'API key revoked successfully', type: 'success' });
+            success('API key revoked successfully');
         },
         onError: () => {
-            setToast({ message: 'Failed to revoke API key', type: 'error' });
+            error('Failed to revoke API key');
         },
     });
 
@@ -70,7 +70,7 @@ export function ApiKeysPage() {
         navigator.clipboard.writeText(key);
         setCopiedKey(key);
         setTimeout(() => setCopiedKey(null), 2000);
-        setToast({ message: 'Copied to clipboard!', type: 'success' });
+        success('Copied to clipboard!');
     };
 
     const handleCreateKey = () => {
@@ -108,14 +108,6 @@ export function ApiKeysPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            {toast && (
-                <ToastNotification
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => setToast(null)}
-                />
-            )}
-
             {/* Header */}
             <header className="border-b border-border bg-card">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, AlertTriangle, Activity, Lock } from 'lucide-react';
 import { LineChart, Line, Tooltip, ResponsiveContainer } from 'recharts';
-import { api } from '../lib/api-client';
+// import { api } from '../lib/api-client';
 
 function generateData() {
     return Array.from({ length: 20 }, (_, i) => ({
