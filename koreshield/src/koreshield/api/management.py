@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from .auth import get_current_admin, get_current_user
 from ..models.user import User
+from ..models.api_key import APIKey
 from ..services.email import send_welcome_email, send_verification_email
 
 logger = structlog.get_logger(__name__)
@@ -419,6 +420,215 @@ async def delete_policy(request: Request, policy_id: str, current_user: dict = D
 
     return {"status": "deleted", "policy_id": policy_id}
 
+
+# ============================================================================
+# API Key Management Endpoints
+# ============================================================================
+
+class CreateAPIKeyRequest(BaseModel):
+    name: str
+    description: str | None = None
+    expires_in_days: int | None = None  # Optional expiration in days
+
+class APIKeyResponse(BaseModel):
+    id: str
+    name: str
+    description: str | None
+    key_prefix: str
+    last_used_at: str | None
+    expires_at: str | None
+    is_revoked: bool
+    created_at: str
+
+class CreateAPIKeyResponse(APIKeyResponse):
+    api_key: str  # Full key - only shown once!
+
+@router.post(
+    "/api-keys",
+    status_code=status.HTTP_201_CREATED,
+    summary="Generate API Key",
+    description="Generate a new API key for authentication. The full key is only shown once!",
+    response_model=CreateAPIKeyResponse,
+    tags=["API Keys"]
+)
+async def generate_api_key(
+    request: CreateAPIKeyRequest,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Generate a new API key for the authenticated user.
+    
+    **Important**: The full API key is only returned once. Store it securely!
+    """
+    try:
+        # Generate API key
+        full_key, key_hash, key_prefix = APIKey.generate_key()
+        
+        # Calculate expiration
+        expires_at = None
+        if request.expires_in_days:
+            expires_at = datetime.utcnow() + timedelta(days=request.expires_in_days)
+        
+        # Create API key record
+        api_key = APIKey(
+            user_id=current_user["id"],
+            key_hash=key_hash,
+            key_prefix=key_prefix,
+            name=request.name,
+            description=request.description,
+            expires_at=expires_at,
+        )
+        
+        db.add(api_key)
+        await db.commit()
+        await db.refresh(api_key)
+        
+        logger.info(
+            "API key generated",
+            user_id=str(current_user["id"]),
+            key_id=str(api_key.id),
+            key_prefix=key_prefix
+        )
+        
+        # Return with full key (only time it's shown!)
+        response_data = api_key.to_dict()
+        response_data["api_key"] = full_key
+        
+        return response_data
+        
+    except Exception as e:
+        logger.error("Failed to generate API key", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to generate API key"
+        )
+
+@router.get(
+    "/api-keys",
+    summary="List API Keys",
+    description="List all API keys for the authenticated user",
+    response_model=list[APIKeyResponse],
+    tags=["API Keys"]
+)
+async def list_api_keys(
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    List all API keys for the authenticated user.
+    
+    Note: Full keys are never shown again after creation.
+    """
+    try:
+        result = await db.execute(
+            select(APIKey)
+            .where(APIKey.user_id == current_user["id"])
+            .order_by(APIKey.created_at.desc())
+        )
+        api_keys = result.scalars().all()
+        
+        return [api_key.to_dict() for api_key in api_keys]
+        
+    except Exception as e:
+        logger.error("Failed to list API keys", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to list API keys"
+        )
+
+@router.delete(
+    "/api-keys/{key_id}",
+    summary="Revoke API Key",
+    description="Revoke (delete) an API key",
+    tags=["API Keys"]
+)
+async def revoke_api_key(
+    key_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Revoke an API key. The key will be marked as revoked and can no longer be used.
+    """
+    try:
+        # Find the API key
+        result = await db.execute(
+            select(APIKey)
+            .where(APIKey.id == key_id)
+            .where(APIKey.user_id == current_user["id"])
+        )
+        api_key = result.scalar_one_or_none()
+        
+        if not api_key:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="API key not found"
+            )
+        
+        # Mark as revoked
+        api_key.is_revoked = True
+        await db.commit()
+        
+        logger.info(
+            "API key revoked",
+            user_id=str(current_user["id"]),
+            key_id=str(api_key.id),
+            key_prefix=api_key.key_prefix
+        )
+        
+        return {"status": "revoked", "key_id": key_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Failed to revoke API key", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to revoke API key"
+        )
+
+@router.get(
+    "/api-keys/{key_id}",
+    summary="Get API Key Details",
+    description="Get details of a specific API key",
+    response_model=APIKeyResponse,
+    tags=["API Keys"]
+)
+async def get_api_key(
+    key_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get details of a specific API key.
+    
+    Note: The full key is never returned, only the prefix.
+    """
+    try:
+        result = await db.execute(
+            select(APIKey)
+            .where(APIKey.id == key_id)
+            .where(APIKey.user_id == current_user["id"])
+        )
+        api_key = result.scalar_one_or_none()
+        
+        if not api_key:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="API key not found"
+            )
+        
+        return api_key.to_dict()
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Failed to get API key", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to get API key"
+        )
 
 
 
