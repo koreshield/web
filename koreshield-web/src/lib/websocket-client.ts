@@ -261,14 +261,30 @@ class WebSocketClient {
      * Handle WebSocket errors
      */
     private handleError(error: Event) {
-        console.error('[WebSocket] Error:', error);
+        // Only log in development if it's not a connection refused error
+        const isDev = import.meta.env.VITE_ENV !== 'production';
+        if (isDev && this.reconnectAttempts === 0) {
+            console.log('[WebSocket] Connection failed (backend may not be running)');
+        } else if (!isDev) {
+            console.error('[WebSocket] Error:', error);
+        }
     }
 
     /**
      * Handle WebSocket close
      */
     private handleClose(event: CloseEvent) {
-        console.log(`[WebSocket] Connection closed (code: ${event.code}, reason: ${event.reason})`);
+        const isDev = import.meta.env.VITE_ENV !== 'production';
+        
+        // Reduce log spam in development
+        if (event.code === 1006) {
+            if (isDev && this.reconnectAttempts === 0) {
+                console.log('[WebSocket] Connection closed (backend not reachable)');
+            }
+        } else {
+            console.log(`[WebSocket] Connection closed (code: ${event.code}, reason: ${event.reason})`);
+        }
+        
         this.stopHeartbeat();
 
         // Only reconnect if it wasn't an intentional disconnect
@@ -282,7 +298,12 @@ class WebSocketClient {
      */
     private scheduleReconnect() {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-            console.error('[WebSocket] Max reconnection attempts reached. Giving up.');
+            const isDev = import.meta.env.VITE_ENV !== 'production';
+            if (isDev) {
+                console.log('[WebSocket] Stopped trying to connect. Start the backend to enable real-time updates.');
+            } else {
+                console.error('[WebSocket] Max reconnection attempts reached. Giving up.');
+            }
             return;
         }
 
@@ -292,10 +313,15 @@ class WebSocketClient {
             this.maxReconnectDelay
         );
 
-        console.log(`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+        const isDev = import.meta.env.VITE_ENV !== 'production';
+        if (!isDev || this.reconnectAttempts <= 3) {
+            console.log(`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+        }
 
         this.reconnectTimer = setTimeout(() => {
-            console.log('[WebSocket] Attempting to reconnect...');
+            if (!isDev || this.reconnectAttempts <= 3) {
+                console.log('[WebSocket] Attempting to reconnect...');
+            }
             this.connect();
         }, delay);
     }
