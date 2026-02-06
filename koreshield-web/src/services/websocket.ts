@@ -21,7 +21,7 @@ class WebSocketService {
     private baseUrl: string;
 
     constructor() {
-        const apiUrl = import.meta.env.VITE_API_BASE_URL || 'https://api.koreshield.com';
+        const apiUrl = import.meta.env.VITE_API_BASE_URL;
         this.baseUrl = apiUrl.replace('https://', 'wss://').replace('http://', 'ws://');
     }
 

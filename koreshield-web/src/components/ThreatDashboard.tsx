@@ -18,35 +18,31 @@ export function ThreatDashboard() {
     const [activeThreat, setActiveThreat] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const stats = await api.getStats();
-                setBlockedCount(stats.blocked_requests);
+        // Use demo data for landing page showcase
+        const updateDemo = () => {
+            // Animate blocked count
+            setBlockedCount(prev => prev + Math.floor(Math.random() * 5));
 
-                // Update active threat alert if we have active threats
-                if (stats.active_threats > 0) {
-                    const types = Object.keys(stats.attack_types);
-                    const randomType = types[Math.floor(Math.random() * types.length)] || "Anomaly Detected";
-                    setActiveThreat(randomType);
-                    setTimeout(() => setActiveThreat(null), 3000);
-                }
-
-                // Keep the chart animation for visual effect, but maybe influence it with real load?
-                setData(prev => {
-                    const newData = [...prev.slice(1), {
-                        time: prev[prev.length - 1].time + 1,
-                        threats: Math.floor(stats.blocked_requests / 100) + Math.random() * 10, // Mock mapping
-                        requests: Math.floor(stats.total_requests / 1000) + Math.random() * 50 // Mock mapping
-                    }];
-                    return newData;
-                });
-
-            } catch (e) {
-                console.error("Failed to fetch dashboard stats", e);
+            // Randomly show threat alerts
+            if (Math.random() > 0.7) {
+                const threats = ["Prompt Injection", "Data Exfiltration", "Jailbreak Attempt", "PII Leakage"];
+                const randomType = threats[Math.floor(Math.random() * threats.length)];
+                setActiveThreat(randomType);
+                setTimeout(() => setActiveThreat(null), 3000);
             }
+
+            // Animate chart data
+            setData(prev => {
+                const newData = [...prev.slice(1), {
+                    time: prev[prev.length - 1].time + 1,
+                    threats: Math.floor(Math.random() * 50) + 10,
+                    requests: Math.floor(Math.random() * 200) + 100
+                }];
+                return newData;
+            });
         };
 
-        const interval = setInterval(fetchStats, 2000);
+        const interval = setInterval(updateDemo, 2000);
         return () => clearInterval(interval);
     }, []);
 

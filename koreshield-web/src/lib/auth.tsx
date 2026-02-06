@@ -11,13 +11,11 @@ export interface AuthUser {
 }
 
 export interface LoginResponse {
-    access_token: string;
-    token_type: string;
-    expires_in: number;
+    token: string;
     user: AuthUser;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.koreshield.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 type AuthEventType = 'login' | 'logout';
 type AuthEventHandler = () => void;
@@ -54,7 +52,7 @@ export const authService = {
      * Login with Railway backend
      */
     async login(email: string, password: string): Promise<AuthUser> {
-        const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
+        const response = await fetch(`${API_BASE_URL}/v1/management/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -71,9 +69,10 @@ export const authService = {
         // SECURITY NOTE: Storing tokens in localStorage is susceptible to XSS.
         // We mitigate this via strict Content-Security-Policy (CSP) headers in index.html.
         // For higher security, consider refactoring to backend-set HttpOnly cookies.
-        localStorage.setItem('admin_token', data.access_token);
+        localStorage.setItem('admin_token', data.token);
         localStorage.setItem('admin_user', JSON.stringify(data.user));
-        localStorage.setItem('token_expires_at', String(Date.now() + data.expires_in * 1000));
+        // Default token expiration: 24 hours
+        localStorage.setItem('token_expires_at', String(Date.now() + 24 * 60 * 60 * 1000));
 
         // Emit login event
         eventEmitter.emit('login');
