@@ -724,6 +724,27 @@ class ApiClient {
         const blob = await response.blob();
         return blob;
     }
+
+    // RAG Security - Scan retrieved documents for indirect prompt injection
+    async scanRAGContext(params: {
+        user_query?: string;
+        documents: Array<{
+            id: string;
+            content: string;
+            metadata?: Record<string, any>;
+            score?: number;
+        }>;
+        config?: {
+            min_confidence?: number;
+            enable_cross_document_analysis?: boolean;
+            max_excerpt_length?: number;
+        };
+    }) {
+        return this.fetch('/v1/rag/scan', {
+            method: 'POST',
+            body: JSON.stringify(params),
+        });
+    }
 }
 
 export const api = new ApiClient();
