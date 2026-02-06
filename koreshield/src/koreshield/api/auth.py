@@ -58,19 +58,15 @@ def verify_jwt_token(token: str) -> Optional[Dict[str, Any]]:
             token,
             JWT_PUBLIC_KEY,
             algorithms=[JWT_ALGORITHM],
-            issuer=JWT_ISSUER,
             options={
                 "verify_exp": True,
                 "verify_iat": True,
+                "verify_iss": False,  # Issuer not included in tokens from management endpoints
                 "verify_aud": False  # We'll handle audience verification manually if needed
             }
         )
 
-        # Additional validation
-        if payload.get("type") != "access":
-            logger.warning("Invalid token type", token_type=payload.get("type"))
-            return None
-
+        # No additional validation needed - management endpoints don't use type field
         return payload
 
     except jwt.ExpiredSignatureError:
