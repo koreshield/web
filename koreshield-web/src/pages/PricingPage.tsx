@@ -9,7 +9,7 @@ const tiers = [
   {
     name: 'Open Source',
     id: 'free',
-    price: '£0',
+    price: '$0',
     description: 'Perfect for developers and small projects',
     features: [
       'Self-hosted deployment',
@@ -33,7 +33,7 @@ const tiers = [
   {
     name: 'Startup',
     id: 'startup',
-    price: '£249–£799',
+    price: '$299–$999',
     priceDetail: '/month',
     description: 'For growing startups and scale-ups',
     features: [
@@ -54,7 +54,7 @@ const tiers = [
   {
     name: 'Growth',
     id: 'growth',
-    price: '£1,599–£7,999',
+    price: '$1,999–$9,999',
     priceDetail: '/month',
     description: 'For established businesses scaling AI',
     features: [
@@ -100,7 +100,7 @@ const tiers = [
 const faqs = [
   {
     question: 'How does the pricing work?',
-    answer: 'Our pricing is based on the number of API requests per month and the level of support you need. The Open Source tier is completely free for self-hosted deployments. Paid tiers include managed hosting, priority support, and advanced features. All pricing is in British Pounds (£) and excludes VAT.',
+    answer: 'Our pricing is based on the number of API requests per month and the level of support you need. The Open Source tier is completely free for self-hosted deployments. Paid tiers include managed hosting, priority support, and advanced features. All pricing is in US Dollars ($). We also accept payments in British Pounds (£). Prices exclude VAT/sales tax.',
   },
   {
     question: 'What counts as a request?',
@@ -275,7 +275,7 @@ export default function PricingPage() {
 
           {/* Enterprise Note */}
           <p className="text-center text-gray-600 dark:text-gray-400 mt-12">
-            All prices are in British Pounds (£) and exclude VAT. Annual plans save 20%.
+            All prices are in US Dollars ($). We also accept British Pounds (£). Prices exclude VAT/sales tax. Annual plans save 20%.
           </p>
         </div>
       </section>
