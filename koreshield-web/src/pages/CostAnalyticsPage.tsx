@@ -3,6 +3,7 @@ import { DollarSign, TrendingDown, TrendingUp, Filter, Download, Calendar } from
 import { useQuery } from '@tanstack/react-query';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { api } from '../lib/api-client';
+import { useToast } from '../components/ToastNotification';
 
 interface CostData {
     period: string;
@@ -32,13 +33,36 @@ export function CostAnalyticsPage() {
     const [timeRange, setTimeRange] = useState('7d');
     const [selectedProvider, setSelectedProvider] = useState('all');
     const [selectedTenant, setSelectedTenant] = useState('all');
+    const [exportFormat, setExportFormat] = useState<'csv' | 'pdf'>('csv');
+
+    const { success, error: showError } = useToast();
 
     // Fetch cost data
     const { data: costData = [] as CostData[], isLoading } = useQuery<CostData[]>({
         queryKey: ['costAnalytics', timeRange, selectedProvider],
         queryFn: async () => {
+            // Convert time_range to dates (backend expects start_date/end_date)
+            const end = new Date();
+            const start = new Date();
+            
+            switch(timeRange) {
+                case '24h':
+                    start.setHours(start.getHours() - 24);
+                    break;
+                case '7d':
+                    start.setDate(start.getDate() - 7);
+                    break;
+                case '30d':
+                    start.setDate(start.getDate() - 30);
+                    break;
+                case '90d':
+                    start.setDate(start.getDate() - 90);
+                    break;
+            }
+            
             const result = await api.getCostAnalytics({ 
-                time_range: timeRange, 
+                start_date: start.toISOString().split('T')[0],
+                end_date: end.toISOString().split('T')[0],
                 provider: selectedProvider !== 'all' ? selectedProvider : undefined 
             });
             return result as CostData[];
@@ -76,9 +100,30 @@ export function CostAnalyticsPage() {
         ? costData[costData.length - 1].tenant_costs.slice(0, 10) // Top 10
         : [];
 
-    const downloadReport = () => {
-        // TODO: Implement CSV/PDF export
-        console.log('Downloading cost report...');
+    const downloadReport = async () => {
+        try {
+            const params: any = {
+                time_range: timeRange,
+            };
+            if (selectedProvider !== 'all') params.provider = selectedProvider;
+            if (selectedTenant !== 'all') params.tenant_id = selectedTenant;
+
+            const blob = await api.exportData(exportFormat, '/v1/analytics/costs', params);
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `cost-analytics-${timeRange}.${exportFormat}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            success(`Cost report exported as ${exportFormat.toUpperCase()}`);
+        } catch (err) {
+            showError(`Failed to export report: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        }
     };
 
     return (
@@ -98,13 +143,23 @@ export function CostAnalyticsPage() {
                                 </p>
                             </div>
                         </div>
-                        <button
-                            onClick={downloadReport}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                        >
-                            <Download className="w-4 h-4" />
-                            Export Report
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <select
+                                value={exportFormat}
+                                onChange={(e) => setExportFormat(e.target.value as 'csv' | 'pdf')}
+                                className="px-3 py-2 bg-muted border border-border rounded-lg text-sm"
+                            >
+                                <option value="csv">CSV</option>
+                                <option value="pdf">PDF</option>
+                            </select>
+                            <button
+                                onClick={downloadReport}
+                                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                            >
+                                <Download className="w-4 h-4" />
+                                Export Report
+                            </button>
+                        </div>
                     </div>
 
                     {/* Filters */}

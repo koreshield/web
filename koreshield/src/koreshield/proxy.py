@@ -30,6 +30,8 @@ from .api.analytics import router as analytics_router
 from .api.rbac import router as rbac_router
 from .api.reports import router as reports_router
 from .api.teams import router as teams_router
+from .api.rules import router as rules_router
+from .api.alerts import router as alerts_router
 
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -224,6 +226,8 @@ class KoreShieldProxy:
         self.app.include_router(rbac_router, prefix="/v1")
         self.app.include_router(reports_router, prefix="/v1")
         self.app.include_router(teams_router, prefix="/v1")
+        self.app.include_router(rules_router, prefix="/v1")
+        self.app.include_router(alerts_router, prefix="/v1")
         
         # Setup routes LAST (includes catch-all route)
         self._setup_routes()

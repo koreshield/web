@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Sliders, Plus, Edit, Trash2, Code, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/api-client';
+import { useToast } from '../components/ToastNotification';
 
 interface Rule {
     id: string;
@@ -24,16 +26,36 @@ interface Rule {
 export function RulesPage() {
     const [_showCreateModal, setShowCreateModal] = useState(false);
     const [_editingRule, setEditingRule] = useState<Rule | null>(null);
+    
+    const queryClient = useQueryClient();
+    const { success, error: showError } = useToast();
 
-    // Fetch rules
-    const { data: rules = [], isLoading } = useQuery({
+    // Fetch rules from API
+    const { data: rules = [], isLoading } = useQuery<Rule[]>({
         queryKey: ['rules'],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/rules
-            return mockRules;
+            return await api.getRules() as Rule[];
         },
         refetchInterval: 30000,
     });
+    
+    // Delete rule mutation
+    const deleteRuleMutation = useMutation({
+        mutationFn: (ruleId: string) => api.deleteRule(ruleId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['rules'] });
+            success('Rule deleted successfully');
+        },
+        onError: (err: Error) => {
+            showError(`Failed to delete rule: ${err.message}`);
+        },
+    });
+    
+    const handleDeleteRule = (ruleId: string, ruleName: string) => {
+        if (confirm(`Are you sure you want to delete the rule "${ruleName}"? This action cannot be undone.`)) {
+            deleteRuleMutation.mutate(ruleId);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-background">
@@ -179,7 +201,9 @@ export function RulesPage() {
                                                 <Edit className="w-4 h-4" />
                                             </button>
                                             <button
-                                                className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-colors"
+                                                onClick={() => handleDeleteRule(rule.id, rule.name)}
+                                                disabled={deleteRuleMutation.isPending}
+                                                className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-colors disabled:opacity-50"
                                                 title="Delete"
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -198,75 +222,3 @@ export function RulesPage() {
         </div>
     );
 }
-
-// Mock data for development
-const mockRules: Rule[] = [
-    {
-        id: '1',
-        name: 'SQL Injection Detection',
-        description: 'Detect SQL injection patterns in user inputs using regex and keyword matching',
-        enabled: true,
-        priority: 9,
-        conditions: [
-            { type: 'content.contains', operator: 'matches', value: ['SELECT', 'DROP', 'UNION', '--'] },
-            { type: 'confidence', operator: '>=', value: 0.8 },
-        ],
-        actions: [
-            { type: 'block', params: {} },
-            { type: 'log', params: { level: 'critical' } },
-            { type: 'alert', params: { channel: 'security-team' } },
-        ],
-        created_at: '2026-01-01T00:00:00Z',
-        updated_at: '2026-02-01T10:00:00Z',
-    },
-    {
-        id: '2',
-        name: 'Prompt Injection Guard',
-        description: 'Block attempts to manipulate AI system prompts',
-        enabled: true,
-        priority: 10,
-        conditions: [
-            { type: 'content.contains', operator: 'matches', value: ['ignore previous', 'system:', 'DAN mode'] },
-            { type: 'attack_type', operator: '==', value: 'prompt_injection' },
-        ],
-        actions: [
-            { type: 'block', params: {} },
-            { type: 'log', params: { level: 'high' } },
-        ],
-        created_at: '2026-01-05T00:00:00Z',
-        updated_at: '2026-01-20T14:30:00Z',
-    },
-    {
-        id: '3',
-        name: 'Rate Limit Enforcement',
-        description: 'Enforce rate limits per user and IP address',
-        enabled: true,
-        priority: 5,
-        conditions: [
-            { type: 'request_count', operator: '>', value: 100 },
-            { type: 'time_window', operator: '==', value: '1m' },
-        ],
-        actions: [
-            { type: 'throttle', params: { delay_ms: 1000 } },
-            { type: 'log', params: { level: 'warning' } },
-        ],
-        created_at: '2026-01-10T00:00:00Z',
-        updated_at: '2026-01-25T09:15:00Z',
-    },
-    {
-        id: '4',
-        name: 'PII Sanitization',
-        description: 'Automatically redact personally identifiable information',
-        enabled: true,
-        priority: 7,
-        conditions: [
-            { type: 'content.contains_pii', operator: '==', value: true },
-        ],
-        actions: [
-            { type: 'sanitize', params: { method: 'redact' } },
-            { type: 'log', params: { level: 'info' } },
-        ],
-        created_at: '2026-01-15T00:00:00Z',
-        updated_at: '2026-02-02T11:00:00Z',
-    },
-];
