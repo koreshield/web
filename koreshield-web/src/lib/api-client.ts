@@ -545,6 +545,28 @@ class ApiClient {
             method: 'DELETE',
         });
     }
+
+    // API Key Management APIs
+    async generateApiKey(data: { name: string; description?: string; expires_in_days?: number }) {
+        return this.fetch('/v1/management/api-keys', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async getApiKeys() {
+        return this.fetch('/v1/management/api-keys');
+    }
+
+    async revokeApiKey(keyId: string) {
+        return this.fetch(`/v1/management/api-keys/${keyId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getApiKey(keyId: string) {
+        return this.fetch(`/v1/management/api-keys/${keyId}`);
+    }
 }
 
 export const api = new ApiClient();
