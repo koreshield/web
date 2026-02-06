@@ -283,11 +283,13 @@ export default function StatusPage() {
         setComponents(prev => prev.map(c => {
           let newStatus = c.status;
 
-          // Map API health status to component status
-          if (c.id === 'database' && health.services.database !== 'up') newStatus = 'major_outage';
-          if (c.id === 'redis' && health.services.redis !== 'up') newStatus = 'partial_outage';
-          if (c.id === 'openai' && health.services.openai_api !== 'up') newStatus = 'degraded';
-          if (c.id === 'anthropic' && health.services.anthropic_api !== 'up') newStatus = 'degraded';
+          // Map API health status to component status (with null checks)
+          if (health?.services) {
+            if (c.id === 'database' && health.services.database !== 'up') newStatus = 'major_outage';
+            if (c.id === 'redis' && health.services.redis !== 'up') newStatus = 'partial_outage';
+            if (c.id === 'openai' && health.services.openai_api !== 'up') newStatus = 'degraded';
+            if (c.id === 'anthropic' && health.services.anthropic_api !== 'up') newStatus = 'degraded';
+          }
 
           return {
             ...c,

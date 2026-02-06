@@ -26,13 +26,10 @@ export function Layout() {
                     </Link>
 
                     {/* Desktop Nav */}
-                    <nav className="hidden md:flex items-center gap-8">
-                        <Link to="/why-koreshield" className="text-sm font-medium hover:text-electric-green transition-colors">Why KoreShield</Link>
+                    <nav className="hidden md:flex items-center gap-6">
                         <Link to="/docs" className="text-sm font-medium hover:text-electric-green transition-colors">Docs</Link>
-                        <a href="https://blog.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-electric-green transition-colors">Blog</a>
                         <Link to="/pricing" className="text-sm font-medium hover:text-electric-green transition-colors">Pricing</Link>
                         <Link to="/playground" className="text-sm font-medium hover:text-electric-green transition-colors">Playground</Link>
-                        <Link to="/status" className="text-sm font-medium hover:text-electric-green transition-colors">Status</Link>
                         {isAuthenticated && (
                             <Link to="/dashboard" className="text-sm font-medium hover:text-electric-green transition-colors">Dashboard</Link>
                         )}
