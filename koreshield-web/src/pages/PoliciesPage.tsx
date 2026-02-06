@@ -18,8 +18,8 @@ interface Policy {
 }
 
 export function PoliciesPage() {
-    const [editingPolicy, setEditingPolicy] = useState<Policy | null>(null);
-    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [, setEditingPolicy] = useState<Policy | null>(null);
+    const [, setShowCreateModal] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const queryClient = useQueryClient();
     const { addToast } = useToast();
@@ -168,7 +168,7 @@ export function PoliciesPage() {
                                             <div>
                                                 <div className="text-xs text-muted-foreground mb-1">Roles</div>
                                                 <div className="flex flex-wrap gap-1">
-                                                    {policy.roles?.map((role) => (
+                                                    {policy.roles?.map((role: string) => (
                                                         <span key={role} className="px-2 py-1 bg-muted rounded text-xs font-mono">
                                                             {role}
                                                         </span>
@@ -178,7 +178,7 @@ export function PoliciesPage() {
                                             <div>
                                                 <div className="text-xs text-muted-foreground mb-1">Actions</div>
                                                 <div className="flex flex-wrap gap-1">
-                                                    {policy.actions?.map((action) => (
+                                                    {policy.actions?.map((action: string) => (
                                                         <span key={action} className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-mono">
                                                             {action}
                                                         </span>

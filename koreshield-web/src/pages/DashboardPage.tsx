@@ -17,7 +17,7 @@ export function DashboardPage() {
 
     // Use React Query hooks
     const { data: stats, isLoading: statsLoading, error: statsError } = useStats();
-    const { data: attacksData, isLoading: attacksLoading, error: attacksError } = useRecentAttacks(10);
+    const { data: attacksData, isLoading: attacksLoading, error: _attacksError } = useRecentAttacks(10);
 
     const loading = statsLoading || attacksLoading;
     const recentAttacks = (attacksData as any)?.logs || [];
@@ -155,7 +155,9 @@ export function DashboardPage() {
                     </span>
                 </div>
             </div>
-/* Getting Started Banner for New Users */}
+
+            {/* Getting Started Banner for New Users */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {isNewUser && (
                     <div className="mb-8 bg-gradient-to-r from-primary/10 via-purple-500/10 to-blue-500/10 border border-primary/20 rounded-lg p-6">
                         <div className="flex items-start gap-4">
@@ -238,8 +240,8 @@ const response = await client.chat.completions.create({
                         </div>
                     </div>
                 )}
+            </div>
 
-                {
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {loading ? (
