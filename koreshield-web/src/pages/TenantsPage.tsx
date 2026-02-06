@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Users, Plus, Search, Shield, AlertCircle, CheckCircle, XCircle, Edit, Trash2, Key, Settings } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/api-client';
+import { useToast } from '../components/ToastNotification';
 
 interface Tenant {
     id: string;
@@ -24,23 +26,50 @@ export function TenantsPage() {
     const [filterTier, setFilterTier] = useState<string>('all');
     const [_selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
     const [_showCreateModal, setShowCreateModal] = useState(false);
+    
+    const queryClient = useQueryClient();
+    const { success, error } = useToast();
 
     // Fetch tenants
-    const { data: tenants = [], isLoading } = useQuery({
+    const { data: tenantsData = [], isLoading } = useQuery<Tenant[]>({
         queryKey: ['tenants', searchQuery, filterStatus, filterTier],
         queryFn: async () => {
-            // TODO: Replace with real API call
-            return mockTenants.filter(t => {
-                const matchesSearch = !searchQuery || 
+            const params: any = {};
+            if (filterStatus !== 'all') params.status = filterStatus;
+            if (filterTier !== 'all') params.tier = filterTier;
+            const data = await api.getTenants(params) as Tenant[];
+            
+            // Client-side search filtering
+            if (searchQuery) {
+                return data.filter(t => 
                     t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    t.tenant_id.toLowerCase().includes(searchQuery.toLowerCase());
-                const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
-                const matchesTier = filterTier === 'all' || t.tier === filterTier;
-                return matchesSearch && matchesStatus && matchesTier;
-            });
+                    t.tenant_id.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+            }
+            return data;
         },
         refetchInterval: 10000,
     });
+    
+    const tenants = tenantsData as Tenant[];
+
+    // Delete tenant mutation
+    const deleteTenantMutation = useMutation({
+        mutationFn: (tenantId: string) => api.deleteTenant(tenantId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tenants'] });
+            success('Tenant deactivated successfully');
+        },
+        onError: () => {
+            error('Failed to deactivate tenant');
+        },
+    });
+
+    const handleDeleteTenant = (tenant: Tenant) => {
+        if (confirm(`Are you sure you want to deactivate "${tenant.name}"? This action cannot be undone.`)) {
+            deleteTenantMutation.mutate(tenant.tenant_id);
+        }
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -255,12 +284,16 @@ export function TenantsPage() {
                                                     >
                                                         <Settings className="w-4 h-4" />
                                                     </button>
-                                                    <button
-                                                        className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-colors"
-                                                        title="Delete"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
+                                                    {tenant.status !== 'deactivated' && (
+                                                        <button
+                                                            onClick={() => handleDeleteTenant(tenant)}
+                                                            className="p-2 hover:bg-destructive/10 text-destructive rounded-lg transition-colors"
+                                                            title="Deactivate"
+                                                            disabled={deleteTenantMutation.isPending}
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -274,52 +307,3 @@ export function TenantsPage() {
         </div>
     );
 }
-
-// Mock data for development
-const mockTenants: Tenant[] = [
-    {
-        id: '1',
-        tenant_id: 'tenant_abc123',
-        name: 'Acme Corporation',
-        description: 'Enterprise customer with full feature access',
-        status: 'active',
-        tier: 'enterprise',
-        contact_email: 'admin@acme.com',
-        contact_name: 'John Smith',
-        created_at: '2026-01-15T10:00:00Z',
-        updated_at: '2026-02-01T14:30:00Z',
-        max_requests_per_minute: 1000,
-        max_requests_per_hour: 50000,
-        max_requests_per_day: 1000000,
-    },
-    {
-        id: '2',
-        tenant_id: 'tenant_def456',
-        name: 'TechStart Inc',
-        description: 'Growing startup on professional plan',
-        status: 'active',
-        tier: 'professional',
-        contact_email: 'tech@techstart.io',
-        contact_name: 'Sarah Johnson',
-        created_at: '2026-01-20T15:00:00Z',
-        updated_at: '2026-01-25T09:15:00Z',
-        max_requests_per_minute: 100,
-        max_requests_per_hour: 5000,
-        max_requests_per_day: 100000,
-    },
-    {
-        id: '3',
-        tenant_id: 'tenant_ghi789',
-        name: 'DevShop',
-        description: 'Small team on starter plan',
-        status: 'suspended',
-        tier: 'starter',
-        contact_email: 'hello@devshop.com',
-        contact_name: 'Mike Chen',
-        created_at: '2026-02-01T08:00:00Z',
-        updated_at: '2026-02-05T11:00:00Z',
-        max_requests_per_minute: 10,
-        max_requests_per_hour: 500,
-        max_requests_per_day: 10000,
-    },
-];

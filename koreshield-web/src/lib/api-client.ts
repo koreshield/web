@@ -358,20 +358,6 @@ class ApiClient {
         };
     }
 
-    // Phase 3: Cost Analytics APIs
-    async getCostAnalytics(params?: { time_range?: string; provider?: string; tenant?: string }) {
-        const queryParams = new URLSearchParams(params as any).toString();
-        return this.fetch(`/v1/analytics/costs${queryParams ? '?' + queryParams : ''}`);
-    }
-
-    async getCostSummary() {
-        return this.fetch('/v1/analytics/costs/summary');
-    }
-
-    async getTenantAnalytics() {
-        return this.fetch('/v1/analytics/tenants');
-    }
-
     // Phase 3: RBAC APIs
     async getUsers(params?: { search?: string; role?: string }) {
         const queryParams = new URLSearchParams(params as any).toString();
@@ -566,6 +552,177 @@ class ApiClient {
 
     async getApiKey(keyId: string) {
         return this.fetch(`/v1/management/api-keys/${keyId}`);
+    }
+
+    // Tenant Management APIs
+    async getTenants(params?: { status?: string; tier?: string; limit?: number; offset?: number }) {
+        const queryParams = new URLSearchParams();
+        if (params?.status) queryParams.append('status', params.status);
+        if (params?.tier) queryParams.append('tier', params.tier);
+        if (params?.limit) queryParams.append('limit', params.limit.toString());
+        if (params?.offset) queryParams.append('offset', params.offset.toString());
+        const query = queryParams.toString();
+        return this.fetch(`/api/v1/tenants${query ? `?${query}` : ''}`);
+    }
+
+    async getTenant(tenantId: string) {
+        return this.fetch(`/api/v1/tenants/${tenantId}`);
+    }
+
+    async createTenant(tenantData: any) {
+        return this.fetch('/api/v1/tenants', {
+            method: 'POST',
+            body: JSON.stringify(tenantData),
+        });
+    }
+
+    async updateTenant(tenantId: string, tenantData: any) {
+        return this.fetch(`/api/v1/tenants/${tenantId}`, {
+            method: 'PUT',
+            body: JSON.stringify(tenantData),
+        });
+    }
+
+    async deleteTenant(tenantId: string) {
+        return this.fetch(`/api/v1/tenants/${tenantId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getTenantUsageStats(tenantId: string) {
+        return this.fetch(`/api/v1/tenants/${tenantId}/usage`);
+    }
+
+    // Rules Management APIs (custom detection rules)
+    async getRules() {
+        return this.fetch('/v1/management/rules');
+    }
+
+    async getRule(ruleId: string) {
+        return this.fetch(`/v1/management/rules/${ruleId}`);
+    }
+
+    async createRule(ruleData: any) {
+        return this.fetch('/v1/management/rules', {
+            method: 'POST',
+            body: JSON.stringify(ruleData),
+        });
+    }
+
+    async updateRule(ruleId: string, ruleData: any) {
+        return this.fetch(`/v1/management/rules/${ruleId}`, {
+            method: 'PUT',
+            body: JSON.stringify(ruleData),
+        });
+    }
+
+    async deleteRule(ruleId: string) {
+        return this.fetch(`/v1/management/rules/${ruleId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async testRule(ruleData: any) {
+        return this.fetch('/v1/management/rules/test', {
+            method: 'POST',
+            body: JSON.stringify(ruleData),
+        });
+    }
+
+    // Alerts Management APIs
+    async getAlertRules() {
+        return this.fetch('/v1/management/alerts/rules');
+    }
+
+    async getAlertRule(ruleId: string) {
+        return this.fetch(`/v1/management/alerts/rules/${ruleId}`);
+    }
+
+    async createAlertRule(ruleData: any) {
+        return this.fetch('/v1/management/alerts/rules', {
+            method: 'POST',
+            body: JSON.stringify(ruleData),
+        });
+    }
+
+    async updateAlertRule(ruleId: string, ruleData: any) {
+        return this.fetch(`/v1/management/alerts/rules/${ruleId}`, {
+            method: 'PUT',
+            body: JSON.stringify(ruleData),
+        });
+    }
+
+    async deleteAlertRule(ruleId: string) {
+        return this.fetch(`/v1/management/alerts/rules/${ruleId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getAlertChannels() {
+        return this.fetch('/v1/management/alerts/channels');
+    }
+
+    async createAlertChannel(channelData: any) {
+        return this.fetch('/v1/management/alerts/channels', {
+            method: 'POST',
+            body: JSON.stringify(channelData),
+        });
+    }
+
+    async updateAlertChannel(channelId: string, channelData: any) {
+        return this.fetch(`/v1/management/alerts/channels/${channelId}`, {
+            method: 'PUT',
+            body: JSON.stringify(channelData),
+        });
+    }
+
+    async deleteAlertChannel(channelId: string) {
+        return this.fetch(`/v1/management/alerts/channels/${channelId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async testAlertChannel(channelId: string) {
+        return this.fetch(`/v1/management/alerts/channels/${channelId}/test`, {
+            method: 'POST',
+        });
+    }
+
+    // Analytics APIs
+    async getAnalyticsTenants() {
+        return this.fetch('/v1/analytics/tenants');
+    }
+
+    async getCostAnalytics(params?: { start_date?: string; end_date?: string; provider?: string }) {
+        const queryParams = new URLSearchParams();
+        if (params?.start_date) queryParams.append('start_date', params.start_date);
+        if (params?.end_date) queryParams.append('end_date', params.end_date);
+        if (params?.provider) queryParams.append('provider', params.provider);
+        const query = queryParams.toString();
+        return this.fetch(`/v1/analytics/costs${query ? `?${query}` : ''}`);
+    }
+
+    async getCostSummary() {
+        return this.fetch('/v1/analytics/costs/summary');
+    }
+
+    // Export functionality
+    async exportData(type: 'csv' | 'pdf', endpoint: string, params?: any) {
+        const response = await fetch(`${this.baseUrl}${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authService.getToken()}`,
+            },
+            body: JSON.stringify({ format: type, ...params }),
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Export failed: ${response.statusText}`);
+        }
+        
+        const blob = await response.blob();
+        return blob;
     }
 }
 

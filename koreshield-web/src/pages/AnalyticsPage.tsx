@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Building2, TrendingUp, Users, Activity, BarChart3, Filter } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, PieChart as RechartsPie, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { api } from '../lib/api-client';
 
 interface TenantAnalytics {
     tenant_id: string;
@@ -20,12 +21,12 @@ export function AnalyticsPage() {
     const [timeRange, setTimeRange] = useState('24h');
     const [selectedMetric, setSelectedMetric] = useState<'requests' | 'blocked' | 'attacks' | 'latency'>('requests');
 
-    // Fetch tenant analytics
-    const { data: analytics = [], isLoading } = useQuery({
+    // Fetch tenant analytics from API
+    const { data: analytics = [], isLoading } = useQuery<TenantAnalytics[]>({
         queryKey: ['tenant-analytics', timeRange],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/analytics/tenants
-            return mockAnalytics;
+            // Note: Backend doesn't support time_range filtering yet
+            return await api.getAnalyticsTenants() as TenantAnalytics[];
         },
         refetchInterval: 30000,
     });
@@ -305,57 +306,3 @@ export function AnalyticsPage() {
         </div>
     );
 }
-
-// Mock data for development
-const mockAnalytics: TenantAnalytics[] = [
-    {
-        tenant_id: 'tenant_abc123',
-        tenant_name: 'Acme Corporation',
-        requests_total: 45678,
-        requests_blocked: 1234,
-        attacks_detected: 89,
-        avg_latency: 45,
-        error_rate: 0.5,
-        tier: 'enterprise',
-    },
-    {
-        tenant_id: 'tenant_def456',
-        tenant_name: 'TechStart Inc',
-        requests_total: 12345,
-        requests_blocked: 456,
-        attacks_detected: 34,
-        avg_latency: 67,
-        error_rate: 1.2,
-        tier: 'professional',
-    },
-    {
-        tenant_id: 'tenant_ghi789',
-        tenant_name: 'DevShop',
-        requests_total: 5678,
-        requests_blocked: 234,
-        attacks_detected: 12,
-        avg_latency: 52,
-        error_rate: 2.1,
-        tier: 'starter',
-    },
-    {
-        tenant_id: 'tenant_jkl012',
-        tenant_name: 'StartupHub',
-        requests_total: 23456,
-        requests_blocked: 789,
-        attacks_detected: 45,
-        avg_latency: 58,
-        error_rate: 0.8,
-        tier: 'professional',
-    },
-    {
-        tenant_id: 'tenant_mno345',
-        tenant_name: 'CloudCo',
-        requests_total: 67890,
-        requests_blocked: 2345,
-        attacks_detected: 156,
-        avg_latency: 42,
-        error_rate: 0.3,
-        tier: 'enterprise',
-    },
-];

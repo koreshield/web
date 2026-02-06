@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Bell, Plus, Edit, Trash2, Mail, MessageSquare, Webhook, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/api-client';
+import { useToast } from '../components/ToastNotification';
 
 interface AlertRule {
     id: string;
@@ -29,25 +31,62 @@ export function AlertsPage() {
     const [_showCreateChannel, setShowCreateChannel] = useState(false);
     const [_editingRule, setEditingRule] = useState<AlertRule | null>(null);
 
-    // Fetch alert rules
-    const { data: rules = [], isLoading: rulesLoading } = useQuery({
+    const queryClient = useQueryClient();
+    const { success, error: showError } = useToast();
+
+    // Fetch alert rules from API
+    const { data: rules = [], isLoading: rulesLoading } = useQuery<AlertRule[]>({
         queryKey: ['alert-rules'],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/alerts/rules
-            return mockRules;
+            return await api.getAlertRules() as AlertRule[];
         },
         refetchInterval: 30000,
     });
 
-    // Fetch alert channels
-    const { data: channels = [], isLoading: channelsLoading } = useQuery({
+    // Fetch alert channels from API
+    const { data: channels = [], isLoading: channelsLoading } = useQuery<AlertChannel[]>({
         queryKey: ['alert-channels'],
         queryFn: async () => {
-            // TODO: Replace with real API call to /api/v1/alerts/channels
-            return mockChannels;
+            return await api.getAlertChannels() as AlertChannel[];
         },
         refetchInterval: 30000,
     });
+
+    // Delete alert rule mutation
+    const deleteRuleMutation = useMutation({
+        mutationFn: (ruleId: string) => api.deleteAlertRule(ruleId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['alert-rules'] });
+            success('Alert rule deleted successfully');
+        },
+        onError: (err: Error) => {
+            showError(`Failed to delete alert rule: ${err.message}`);
+        },
+    });
+
+    // Delete alert channel mutation
+    const deleteChannelMutation = useMutation({
+        mutationFn: (channelId: string) => api.deleteAlertChannel(channelId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['alert-channels'] });
+            success('Alert channel deleted successfully');
+        },
+        onError: (err: Error) => {
+            showError(`Failed to delete channel: ${err.message}`);
+        },
+    });
+
+    const handleDeleteRule = (ruleId: string, ruleName: string) => {
+        if (confirm(`Are you sure you want to delete the alert rule "${ruleName}"?`)) {
+            deleteRuleMutation.mutate(ruleId);
+        }
+    };
+
+    const handleDeleteChannel = (channelId: string, channelName: string) => {
+        if (confirm(`Are you sure you want to delete the channel "${channelName}"?`)) {
+            deleteChannelMutation.mutate(channelId);
+        }
+    };
 
     const getSeverityColor = (severity: string) => {
         switch (severity) {
@@ -229,7 +268,9 @@ export function AlertsPage() {
                                                     <Edit className="w-4 h-4" />
                                                 </button>
                                                 <button
-                                                    className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-colors"
+                                                    onClick={() => handleDeleteRule(rule.id, rule.name)}
+                                                    disabled={deleteRuleMutation.isPending}
+                                                    className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-colors disabled:opacity-50"
                                                     title="Delete"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -324,7 +365,11 @@ export function AlertsPage() {
                                             <button className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors">
                                                 <Edit className="w-4 h-4" />
                                             </button>
-                                            <button className="px-4 py-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-colors">
+                                            <button 
+                                                onClick={() => handleDeleteChannel(channel.id, channel.name)}
+                                                disabled={deleteChannelMutation.isPending}
+                                                className="px-4 py-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-colors disabled:opacity-50"
+                                            >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
@@ -338,76 +383,3 @@ export function AlertsPage() {
         </div>
     );
 }
-
-// Mock data for development
-const mockRules: AlertRule[] = [
-    {
-        id: '1',
-        name: 'High Error Rate',
-        description: 'Alert when error rate exceeds 5% over 5 minutes',
-        condition: 'error_rate > 0.05',
-        severity: 'critical',
-        enabled: true,
-        channels: ['email', 'slack'],
-        cooldown_minutes: 5,
-        last_triggered: '2026-02-05T10:30:00Z',
-        trigger_count: 12,
-    },
-    {
-        id: '2',
-        name: 'Attack Surge',
-        description: 'Alert when attacks detected exceed 100 in 10 minutes',
-        condition: 'attacks_detected > 100',
-        severity: 'high',
-        enabled: true,
-        channels: ['slack', 'webhook'],
-        cooldown_minutes: 10,
-        last_triggered: '2026-02-04T15:22:00Z',
-        trigger_count: 8,
-    },
-    {
-        id: '3',
-        name: 'High Latency Warning',
-        description: 'Alert when average latency exceeds 500ms',
-        condition: 'avg_latency > 500',
-        severity: 'medium',
-        enabled: true,
-        channels: ['email'],
-        cooldown_minutes: 15,
-        trigger_count: 3,
-    },
-];
-
-const mockChannels: AlertChannel[] = [
-    {
-        id: '1',
-        type: 'email',
-        name: 'Security Team Email',
-        enabled: true,
-        config: {
-            smtp_server: 'smtp.gmail.com',
-            from_address: 'alerts@koreshield.com',
-            to_addresses: 'security@company.com',
-        },
-    },
-    {
-        id: '2',
-        type: 'slack',
-        name: 'Security Slack Channel',
-        enabled: true,
-        config: {
-            webhook_url: 'https://hooks.slack.com/services/...',
-            channel: '#security-alerts',
-        },
-    },
-    {
-        id: '3',
-        type: 'webhook',
-        name: 'PagerDuty Integration',
-        enabled: true,
-        config: {
-            url: 'https://api.pagerduty.com/...',
-            auth_token: '••••••••',
-        },
-    },
-];
