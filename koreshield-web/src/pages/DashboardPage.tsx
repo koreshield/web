@@ -159,67 +159,67 @@ export function DashboardPage() {
             {/* Getting Started Banner for New Users */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {isNewUser && (
-                    <div className="mb-8 bg-gradient-to-r from-primary/10 via-purple-500/10 to-blue-500/10 border border-primary/20 rounded-lg p-6">
-                        <div className="flex items-start gap-4">
-                            <div className="p-3 bg-primary/10 rounded-lg">
-                                <Rocket className="w-6 h-6 text-primary" />
+                    <div className="mb-6 sm:mb-8 bg-gradient-to-r from-primary/10 via-purple-500/10 to-blue-500/10 border border-primary/20 rounded-lg p-4 sm:p-6">
+                        <div className="flex items-start gap-3 sm:gap-4">
+                            <div className="p-2 sm:p-3 bg-primary/10 rounded-lg flex-shrink-0">
+                                <Rocket className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                             </div>
-                            <div className="flex-1">
-                                <h2 className="text-xl font-bold mb-2">Welcome to KoreShield! 🎉</h2>
-                                <p className="text-muted-foreground mb-4">
+                            <div className="flex-1 min-w-0">
+                                <h2 className="text-lg sm:text-xl font-bold mb-2">Welcome to KoreShield! 🎉</h2>
+                                <p className="text-sm sm:text-base text-muted-foreground mb-4">
                                     Get started by integrating KoreShield into your application. Follow these steps:
                                 </p>
                                 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                    <div className="bg-card border border-border rounded-lg p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-4">
+                                    <div className="bg-card border border-border rounded-lg p-3 sm:p-4">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">1</div>
-                                            <h3 className="font-semibold">Get Your Token</h3>
+                                            <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
+                                            <h3 className="font-semibold text-sm sm:text-base">Get Your Token</h3>
                                         </div>
-                                        <p className="text-sm text-muted-foreground mb-3">
+                                        <p className="text-xs sm:text-sm text-muted-foreground mb-3">
                                             Your JWT token is ready to use. Copy it from the browser's localStorage or generate an API key.
                                         </p>
                                     </div>
                                     
-                                    <div className="bg-card border border-border rounded-lg p-4">
+                                    <div className="bg-card border border-border rounded-lg p-3 sm:p-4">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">2</div>
-                                            <h3 className="font-semibold">Configure Policies</h3>
+                                            <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
+                                            <h3 className="font-semibold text-sm sm:text-base">Configure Policies</h3>
                                         </div>
-                                        <p className="text-sm text-muted-foreground mb-3">
+                                        <p className="text-xs sm:text-sm text-muted-foreground mb-3">
                                             Set up security policies to define what threats to block.
                                         </p>
                                         <Link 
                                             to="/policies"
-                                            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                                            className="inline-flex items-center gap-1 text-xs sm:text-sm text-primary hover:underline"
                                         >
                                             Go to Policies <ArrowRight className="w-3 h-3" />
                                         </Link>
                                     </div>
                                     
-                                    <div className="bg-card border border-border rounded-lg p-4">
+                                    <div className="bg-card border border-border rounded-lg p-3 sm:p-4">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">3</div>
-                                            <h3 className="font-semibold">Send Requests</h3>
+                                            <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
+                                            <h3 className="font-semibold text-sm sm:text-base">Send Requests</h3>
                                         </div>
-                                        <p className="text-sm text-muted-foreground mb-3">
+                                        <p className="text-xs sm:text-sm text-muted-foreground mb-3">
                                             Route your LLM requests through KoreShield's proxy.
                                         </p>
                                         <Link 
                                             to="/docs/getting-started"
-                                            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                                            className="inline-flex items-center gap-1 text-xs sm:text-sm text-primary hover:underline"
                                         >
                                             View Docs <BookOpen className="w-3 h-3" />
                                         </Link>
                                     </div>
                                 </div>
 
-                                <div className="bg-card border border-border rounded-lg p-4">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Code className="w-4 h-4 text-primary" />
-                                        <h3 className="font-semibold text-sm">Quick Integration Example</h3>
+                                <div className="bg-card border border-border rounded-lg p-3 sm:p-4">
+                                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                                        <Code className="w-4 h-4 text-primary flex-shrink-0" />
+                                        <h3 className="font-semibold text-xs sm:text-sm">Quick Integration Example</h3>
                                     </div>
-                                    <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+                                    <pre className="bg-muted p-2 sm:p-3 rounded text-[10px] sm:text-xs overflow-x-auto">
 {`import OpenAI from 'openai';
 
 const client = new OpenAI({
