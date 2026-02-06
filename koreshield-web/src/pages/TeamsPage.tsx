@@ -134,11 +134,22 @@ export function TeamsPage() {
     // Remove member mutation
     const removeMemberMutation = useMutation({
         mutationFn: async (memberId: string) => {
-            // TODO: Replace with real API call
-            console.log('Removing member:', memberId);
+            if (!selectedTeam?.id) throw new Error('No team selected');
+            return api.removeMember(selectedTeam.id, memberId);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['team-members'] });
+        },
+    });
+
+    // Cancel invite mutation
+    const cancelInviteMutation = useMutation({
+        mutationFn: async (inviteId: string) => {
+            if (!selectedTeam?.id) throw new Error('No team selected');
+            return api.cancelInvite(selectedTeam.id, inviteId);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['team-invites'] });
         },
     });
 
@@ -519,7 +530,7 @@ export function TeamsPage() {
                                                         className="p-1 hover:bg-muted rounded transition-colors"
                                                         onClick={() => {
                                                             if (confirm('Cancel this invite?')) {
-                                                                // TODO: Implement cancel invite
+                                                                cancelInviteMutation.mutate(invite.id);
                                                             }
                                                         }}
                                                     >
