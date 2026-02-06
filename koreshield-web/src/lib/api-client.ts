@@ -165,6 +165,24 @@ class ApiClient {
         });
     }
 
+    // Policy Management
+    async getPolicies() {
+        return this.fetch('/v1/management/policies');
+    }
+
+    async createPolicy(policy: any) {
+        return this.fetch('/v1/management/policies', {
+            method: 'POST',
+            body: JSON.stringify(policy),
+        });
+    }
+
+    async deletePolicy(policyId: string) {
+        return this.fetch(`/v1/management/policies/${policyId}`, {
+            method: 'DELETE',
+        });
+    }
+
     // Simulations for pure frontend demos
     private async simulateChatCompletion(payload: ChatCompletionRequest): Promise<ChatCompletionResponse> {
         await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1000));
