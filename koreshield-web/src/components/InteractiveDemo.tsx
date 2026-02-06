@@ -23,28 +23,34 @@ export function InteractiveDemo() {
         setLoading(true);
         setResult(null);
 
-        try {
-            const response = await api.chatCompletion({
-                model: 'gpt-4',
-                messages: [{ role: 'user', content: input }]
-            });
+        // Simulate detection - for demo purposes on landing page
+        await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
 
-            if (response.koreshield_blocked) {
-                setResult('blocked');
-                setConfidence(0.99); // In a real app this might come from the API
-            } else {
-                setResult('safe');
-                setConfidence(0.95);
-            }
-            // Use response latency if available, otherwise mock it reasonably
-            const lat = response.koreshield_latency_ms || Math.floor(Math.random() * 50) + 10;
-            setLatency(lat);
-        } catch (error) {
-            console.error(error);
-            // Handle error state visually if needed, for now just reset
-        } finally {
-            setLoading(false);
+        // Simple detection rules for demo
+        const lowerInput = input.toLowerCase();
+        const maliciousPatterns = [
+            'ignore previous',
+            'ignore instructions',
+            'credit card',
+            'password',
+            'delete',
+            'drop table',
+            'system prompt',
+            'jailbreak'
+        ];
+
+        const isBlocked = maliciousPatterns.some(pattern => lowerInput.includes(pattern));
+
+        if (isBlocked) {
+            setResult('blocked');
+            setConfidence(0.98);
+        } else {
+            setResult('safe');
+            setConfidence(0.94);
         }
+
+        setLatency(Math.floor(Math.random() * 50) + 15);
+        setLoading(false);
     };
 
     return (

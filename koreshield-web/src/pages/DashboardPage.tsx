@@ -17,7 +17,7 @@ export function DashboardPage() {
 
     // Use React Query hooks
     const { data: stats, isLoading: statsLoading, error: statsError } = useStats();
-    const { data: attacksData, isLoading: attacksLoading } = useRecentAttacks(10);
+    const { data: attacksData, isLoading: attacksLoading, error: attacksError } = useRecentAttacks(10);
 
     const loading = statsLoading || attacksLoading;
     const recentAttacks = (attacksData as any)?.logs || [];

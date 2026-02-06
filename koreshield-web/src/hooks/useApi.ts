@@ -14,6 +14,8 @@ export function useStats() {
         queryKey: ['stats'],
         queryFn: () => api.getStats(),
         refetchInterval: 5000, // 5 seconds
+        retry: false, // Don't retry on 403/401
+        retryOnMount: false,
     });
 }
 
@@ -30,6 +32,8 @@ export function useRecentAttacks(limit = 10) {
         queryKey: ['recent-attacks', limit],
         queryFn: () => api.getRecentAttacks(limit),
         refetchInterval: 10000, // 10 seconds
+        retry: false, // Don't retry on 403/401
+        retryOnMount: false,
     });
 }
 
