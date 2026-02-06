@@ -37,6 +37,7 @@ const CostAnalyticsPage = lazy(() => import('./pages/CostAnalyticsPage').then(m 
 const RBACPage = lazy(() => import('./pages/RBACPage').then(m => ({ default: m.RBACPage })));
 const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
 const TeamsPage = lazy(() => import('./pages/TeamsPage').then(m => ({ default: m.TeamsPage })));
+const ApiKeysPage = lazy(() => import('./pages/ApiKeysPage').then(m => ({ default: m.ApiKeysPage })));
 
 function AppContent() {
   const { addToast } = useToast();
@@ -327,6 +328,18 @@ function AppContent() {
                 <RouteErrorBoundary>
                   <ProtectedRoute>
                     <TeamsPage />
+                  </ProtectedRoute>
+                </RouteErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/settings/api-keys"
+            element={
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouteErrorBoundary>
+                  <ProtectedRoute>
+                    <ApiKeysPage />
                   </ProtectedRoute>
                 </RouteErrorBoundary>
               </Suspense>
