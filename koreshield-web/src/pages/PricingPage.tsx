@@ -168,31 +168,33 @@ export default function PricingPage() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5 }}
 					>
-						<h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-							Simple, Transparent Pricing
+						<h1 className="text-5xl md:text-7xl font-bold mb-6">
+							<span className="bg-gradient-to-r from-primary via-blue-500 to-purple-600 bg-clip-text text-transparent">
+								Simple, Transparent Pricing
+							</span>
 						</h1>
-						<p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
+						<p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto font-light">
 							Start free with our Open Source tier. Upgrade when you need managed hosting, priority support, and enterprise features.
 						</p>
 
 						{/* Billing Toggle */}
 						<div className="flex items-center justify-center gap-4 mb-12">
-							<span className={`text-lg ${billingPeriod === 'monthly' ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-500'}`}>
+							<span className={`text-lg font-medium transition-colors ${billingPeriod === 'monthly' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
 								Monthly
 							</span>
 							<button
 								onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'annual' : 'monthly')}
-								className="relative w-16 h-8 bg-gray-300 dark:bg-gray-700 rounded-full transition-colors hover:bg-gray-400 dark:hover:bg-gray-600"
+								className="relative w-16 h-8 bg-gradient-to-r from-primary to-blue-500 rounded-full transition-all hover:shadow-lg hover:shadow-primary/50"
 							>
 								<motion.div
-									className="absolute top-1 left-1 w-6 h-6 bg-blue-600 rounded-full"
+									className="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md"
 									animate={{ x: billingPeriod === 'annual' ? 32 : 0 }}
 									transition={{ type: 'spring', stiffness: 500, damping: 30 }}
 								/>
 							</button>
-							<span className={`text-lg ${billingPeriod === 'annual' ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-500'}`}>
+							<span className={`text-lg font-medium transition-colors ${billingPeriod === 'annual' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
 								Annual
-								<span className="ml-2 text-sm text-green-600 dark:text-green-400">(Save 20%)</span>
+								<span className="ml-2 text-sm font-semibold text-green-600 dark:text-green-400">Save 20%</span>
 							</span>
 						</div>
 					</motion.div>
