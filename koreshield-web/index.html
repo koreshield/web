@@ -2,29 +2,32 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/logo/SVG/White.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>koreshield</title>
-  <meta name="description"
-    content="koreshield - the enterprise-grade llm security firewall. secure your ai infrastructure." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Security: Content Security Policy to mitigate XSS attacks -->
-  <!-- Note: 'unsafe-inline' for scripts is required for Vite HMR in dev. Production builds use hashed scripts. -->
-  <!-- Note: 'unsafe-eval' is required for Vite dev mode. Production builds don't use eval. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' ws://localhost:* wss://localhost:* wss://koreshield-production.up.railway.app https://koreshield-production.up.railway.app; img-src 'self' data: https:; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;" />
-  <!-- Security: Prevent MIME type sniffing -->
-  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <!-- Security: Enable XSS filter in older browsers -->
-  <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
-  <!-- Security: Control referrer information -->
-  <meta name="referrer" content="strict-origin-when-cross-origin" />
+	<meta charset="UTF-8" />
+	<link rel="icon" type="image/svg+xml" href="/logo/SVG/White.svg" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>koreshield</title>
+	<meta name="description"
+		content="koreshield - the enterprise-grade llm security firewall. secure your ai infrastructure." />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;200;300;400;500;600;700;800;900&display=swap"
+		rel="stylesheet">
+	<!-- Security: Content Security Policy to mitigate XSS attacks -->
+	<!-- Note: 'unsafe-inline' for scripts is required for Vite HMR in dev. Production builds use hashed scripts. -->
+	<!-- Note: 'unsafe-eval' is required for Vite dev mode. Production builds don't use eval. -->
+	<meta http-equiv="Content-Security-Policy"
+		content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' ws://localhost:* wss://localhost:* wss://koreshield-production.up.railway.app https://koreshield-production.up.railway.app; img-src 'self' data: https:; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;" />
+	<!-- Security: Prevent MIME type sniffing -->
+	<meta http-equiv="X-Content-Type-Options" content="nosniff" />
+	<!-- Security: Enable XSS filter in older browsers -->
+	<meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+	<!-- Security: Control referrer information -->
+	<meta name="referrer" content="strict-origin-when-cross-origin" />
 </head>
 
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
+	<div id="root"></div>
+	<script type="module" src="/src/main.tsx"></script>
 </body>
 
 </html>
