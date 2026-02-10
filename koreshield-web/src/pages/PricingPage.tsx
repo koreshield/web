@@ -9,7 +9,9 @@ const tiers = [
 	{
 		name: 'Open Source',
 		id: 'free',
-		price: '$0',
+		monthlyPrice: 0,
+		yearlyPrice: 0,
+		priceDisplay: '$0',
 		description: 'Perfect for developers and small projects',
 		features: [
 			'Self-hosted deployment',
@@ -33,7 +35,9 @@ const tiers = [
 	{
 		name: 'Startup',
 		id: 'startup',
-		price: '$299–$999',
+		monthlyPrice: 199,
+		yearlyPrice: 1910,
+		priceDisplay: '$199',
 		priceDetail: '/month',
 		description: 'For growing startups and scale-ups',
 		features: [
@@ -54,7 +58,9 @@ const tiers = [
 	{
 		name: 'Growth',
 		id: 'growth',
-		price: '$1,999–$9,999',
+		monthlyPrice: 1999,
+		yearlyPrice: 19190,
+		priceDisplay: '$1,999',
 		priceDetail: '/month',
 		description: 'For established businesses scaling AI',
 		features: [
@@ -76,7 +82,9 @@ const tiers = [
 	{
 		name: 'Enterprise',
 		id: 'enterprise',
-		price: 'Custom',
+		monthlyPrice: null,
+		yearlyPrice: null,
+		priceDisplay: 'Custom',
 		description: 'For large-scale deployments with custom requirements',
 		features: [
 			'Everything in Growth',
@@ -189,89 +197,167 @@ export default function PricingPage() {
 						</div>
 					</motion.div>
 
-					{/* Pricing Cards */}
-					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-						{tiers.map((tier, index) => (
+					{/* Main Pricing Cards (Free, Startup, Growth) */}
+					<div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
+						{tiers.filter(t => t.id !== 'enterprise').map((tier, index) => {
+							const displayPrice = tier.monthlyPrice === null ? tier.priceDisplay :
+								billingPeriod === 'annual' && tier.yearlyPrice ?
+									`$${tier.yearlyPrice.toLocaleString()}` :
+									tier.priceDisplay;
+							const priceDetail = tier.monthlyPrice === null ? '' :
+								billingPeriod === 'annual' ? '/year' : tier.priceDetail;
+
+							return (
+								<motion.div
+									key={tier.id}
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ duration: 0.5, delay: index * 0.1 }}
+									className={`relative bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 flex flex-col ${tier.popular ? 'ring-2 ring-blue-600 scale-105' : ''
+										}`}
+								>
+									{tier.popular && (
+										<div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+											Most Popular
+										</div>
+									)}
+
+									<div className="flex-1">
+										<h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+											{tier.name}
+										</h3>
+										<div className="flex items-baseline mb-4">
+											<span className="text-4xl font-bold text-gray-900 dark:text-white">
+												{displayPrice}
+											</span>
+											{priceDetail && (
+												<span className="text-gray-600 dark:text-gray-400 ml-2">
+													{priceDetail}
+												</span>
+											)}
+										</div>
+										{billingPeriod === 'annual' && tier.monthlyPrice && tier.yearlyPrice && (
+											<p className="text-sm text-green-600 dark:text-green-400 mb-2">
+												Save ${(tier.monthlyPrice * 12 - tier.yearlyPrice).toLocaleString()}/year
+											</p>
+										)}
+										<p className="text-gray-600 dark:text-gray-400 mb-6">
+											{tier.description}
+										</p>
+
+										<ul className="space-y-3 mb-8">
+											{tier.features.map((feature) => (
+												<li key={feature} className="flex items-start gap-3">
+													<svg
+														className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5"
+														fill="none"
+														stroke="currentColor"
+														viewBox="0 0 24 24"
+													>
+														<path
+															strokeLinecap="round"
+															strokeLinejoin="round"
+															strokeWidth={2}
+															d="M5 13l4 4L19 7"
+														/>
+													</svg>
+													<span className="text-sm text-gray-700 dark:text-gray-300">
+														{feature}
+													</span>
+												</li>
+											))}
+										</ul>
+									</div>
+
+									{tier.ctaLink.startsWith('#') ? (
+										<button
+											onClick={handleContactSales}
+											className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${tier.popular
+												? 'bg-blue-600 hover:bg-blue-700 text-white'
+												: 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
+												}`}
+										>
+											{tier.cta}
+										</button>
+									) : (
+										<Link
+											to={tier.ctaLink}
+											className={`w-full py-3 px-6 rounded-lg font-medium transition-colors text-center block ${tier.popular
+												? 'bg-blue-600 hover:bg-blue-700 text-white'
+												: 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
+												}`}
+										>
+											{tier.cta}
+										</Link>
+									)}
+								</motion.div>
+							);
+						})}
+					</div>
+
+					{/* Enterprise Tier - Separate Section */}
+					{(() => {
+						const enterpriseTier = tiers.find(t => t.id === 'enterprise');
+						if (!enterpriseTier) return null;
+
+						return (
 							<motion.div
-								key={tier.id}
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.5, delay: index * 0.1 }}
-								className={`relative bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 flex flex-col ${tier.popular ? 'ring-2 ring-blue-600 scale-105' : ''
-									}`}
+								transition={{ duration: 0.5, delay: 0.3 }}
+								className="max-w-6xl mx-auto"
 							>
-								{tier.popular && (
-									<div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-										Most Popular
-									</div>
-								)}
-
-								<div className="flex-1">
-									<h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-										{tier.name}
-									</h3>
-									<div className="flex items-baseline mb-4">
-										<span className="text-4xl font-bold text-gray-900 dark:text-white">
-											{tier.price}
-										</span>
-										{tier.priceDetail && (
-											<span className="text-gray-600 dark:text-gray-400 ml-2">
-												{tier.priceDetail}
-											</span>
-										)}
-									</div>
-									<p className="text-gray-600 dark:text-gray-400 mb-6">
-										{tier.description}
-									</p>
-
-									<ul className="space-y-3 mb-8">
-										{tier.features.map((feature) => (
-											<li key={feature} className="flex items-start gap-3">
-												<svg
-													className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5"
-													fill="none"
-													stroke="currentColor"
-													viewBox="0 0 24 24"
-												>
-													<path
-														strokeLinecap="round"
-														strokeLinejoin="round"
-														strokeWidth={2}
-														d="M5 13l4 4L19 7"
-													/>
-												</svg>
-												<span className="text-sm text-gray-700 dark:text-gray-300">
-													{feature}
+								<div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl p-8 md:p-12">
+									<div className="grid md:grid-cols-2 gap-8 items-center">
+										<div>
+											<h3 className="text-3xl font-bold text-white mb-4">
+												{enterpriseTier.name}
+											</h3>
+											<p className="text-xl text-blue-100 mb-6">
+												{enterpriseTier.description}
+											</p>
+											<div className="flex items-baseline mb-6">
+												<span className="text-5xl font-bold text-white">
+													{enterpriseTier.priceDisplay}
 												</span>
-											</li>
-										))}
-									</ul>
+												<span className="text-blue-100 ml-3">pricing</span>
+											</div>
+											<button
+												onClick={handleContactSales}
+												className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-lg font-medium transition-colors"
+											>
+												{enterpriseTier.cta}
+											</button>
+										</div>
+										<div>
+											<ul className="space-y-3">
+												{enterpriseTier.features.map((feature) => (
+													<li key={feature} className="flex items-start gap-3">
+														<svg
+															className="w-5 h-5 text-white flex-shrink-0 mt-0.5"
+															fill="none"
+															stroke="currentColor"
+															viewBox="0 0 24 24"
+														>
+															<path
+																strokeLinecap="round"
+																strokeLinejoin="round"
+																strokeWidth={2}
+																d="M5 13l4 4L19 7"
+															/>
+														</svg>
+														<span className="text-sm text-white">
+															{feature}
+														</span>
+													</li>
+												))}
+											</ul>
+										</div>
+									</div>
 								</div>
-
-								{tier.ctaLink.startsWith('#') ? (
-									<button
-										onClick={handleContactSales}
-										className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${tier.popular
-											? 'bg-blue-600 hover:bg-blue-700 text-white'
-											: 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
-											}`}
-									>
-										{tier.cta}
-									</button>
-								) : (
-									<Link
-										to={tier.ctaLink}
-										className={`w-full py-3 px-6 rounded-lg font-medium transition-colors text-center ${tier.popular
-											? 'bg-blue-600 hover:bg-blue-700 text-white'
-											: 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
-											}`}
-									>
-										{tier.cta}
-									</Link>
-								)}
 							</motion.div>
-						))}
-					</div>
+						);
+					})()}
 
 					{/* Enterprise Note */}
 					<p className="text-center text-gray-600 dark:text-gray-400 mt-12">

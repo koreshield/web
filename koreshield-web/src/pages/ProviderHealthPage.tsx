@@ -236,7 +236,7 @@ export function ProviderHealthPage() {
 												<div>
 													<h3 className="font-semibold text-lg capitalize">{name}</h3>
 													<span className={`text-sm ${getStatusColor(provider.status)}`}>
-														{provider.status.toUpperCase()}
+														{provider.status?.toUpperCase() || 'UNKNOWN'}
 													</span>
 												</div>
 											</div>
