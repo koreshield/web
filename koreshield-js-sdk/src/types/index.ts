@@ -98,9 +98,60 @@ export interface MetricsResponse {
   requests_total: number;
   requests_blocked: number;
   attacks_detected: number;
-  avg_response_time: number;
-  active_connections: number;
+  average_response_time_ms: number;
   uptime_seconds: number;
+}
+
+export interface PerformanceMetrics {
+  totalRequests: number;
+  totalProcessingTimeMs: number;
+  averageResponseTimeMs: number;
+  requestsPerSecond: number;
+  errorCount: number;
+  cacheHitRate: number;
+  batchEfficiency: number;
+  streamingChunksProcessed: number;
+  uptimeSeconds: number;
+  memoryUsageMb?: number;
+  customMetrics: Record<string, any>;
+}
+
+/**
+ * Threat severity levels
+ */
+export enum ThreatLevel {
+  SAFE = 'safe',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+/**
+ * Detection type taxonomy
+ */
+export enum DetectionType {
+  KEYWORD = 'keyword',
+  PATTERN = 'pattern',
+  RULE = 'rule',
+  ML = 'ml',
+  BLOCKLIST = 'blocklist',
+  ALLOWLIST = 'allowlist',
+}
+
+export interface SecurityPolicy {
+  name: string;
+  description?: string;
+  threatThreshold: ThreatLevel;
+  blockedDetectionTypes: DetectionType[];
+  customRules: Array<{
+    name: string;
+    pattern: string;
+    action: SecurityAction;
+  }>;
+  allowlistPatterns: string[];
+  blocklistPatterns: string[];
+  metadata?: Record<string, any>;
 }
 
 export interface KoreShieldError extends Error {
@@ -182,17 +233,6 @@ export enum DetectionComplexity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-}
-
-/**
- * Threat severity levels
- */
-export enum ThreatLevel {
-  SAFE = 'safe',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
 }
 
 /**

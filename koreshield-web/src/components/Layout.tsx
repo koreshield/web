@@ -29,15 +29,18 @@ export function Layout() {
 						<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-electric-green transition-colors">Docs</a>
 						<Link to="/pricing" className="text-sm font-medium hover:text-electric-green transition-colors">Pricing</Link>
 						<Link to="/playground" className="text-sm font-medium hover:text-electric-green transition-colors">Playground</Link>
+						<Link to="/changelog" className="text-sm font-medium hover:text-electric-green transition-colors">Changelog</Link>
 						{isAuthenticated && (
 							<>
 								<Link to="/dashboard" className="text-sm font-medium hover:text-electric-green transition-colors">Dashboard</Link>
 								<Link to="/threat-monitoring" className="text-sm font-medium hover:text-electric-green transition-colors">Threat Monitoring</Link>
 								<Link to="/provider-health" className="text-sm font-medium hover:text-electric-green transition-colors">Provider Health</Link>
+								<Link to="/api-key-management" className="text-sm font-medium hover:text-electric-green transition-colors">API Keys</Link>
+								<Link to="/audit-logs" className="text-sm font-medium hover:text-electric-green transition-colors">Audit Logs</Link>
 							</>
 						)}
 
-						<a href="https://github.com/koreshield/koreshield" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white transition-colors">
+						<a href="https://github.com/koreshield/" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white transition-colors">
 							<Github className="w-5 h-5" />
 						</a>
 						{isAuthenticated ? (
@@ -48,7 +51,7 @@ export function Layout() {
 								</div>
 								<button
 									onClick={handleLogout}
-									className="flex items-center gap-2 bg-destructive/10 hover:bg-destructive/20 text-destructive px-3 py-2 rounded-md text-sm font-medium transition-colors"
+									className="flex items-center gap-2 bg-destructive/10 hover:bg-destructive/20 text-destructive px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
 								>
 									<LogOut className="w-4 h-4" />
 									Logout
@@ -88,16 +91,18 @@ export function Layout() {
 								<Link to="/dashboard" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
 								<Link to="/threat-monitoring" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threat Monitoring</Link>
 								<Link to="/provider-health" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Provider Health</Link>
+								<Link to="/api-key-management" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>API Keys</Link>
+								<Link to="/audit-logs" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Audit Logs</Link>
 							</>
 						)}
-						<a href="https://github.com/koreshield/koreshield" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors flex items-center gap-2">
+						<a href="https://github.com/koreshield/" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors flex items-center gap-2">
 							<Github className="w-5 h-5" /> GitHub
 						</a>
 
 						<div className="pt-4">
 							{isAuthenticated ? (
 								<div className="space-y-3">
-									<div className="flex items-center gap-2 px-4 py-3 bg-card border border-border rounded-lg">
+									<div className="flex items-center gap-2 px-4 py-3 bg-card border border-border rounded-lg cursor-default">
 										<User className="w-5 h-5 text-electric-green" />
 										<div>
 											<div className="text-sm font-medium">{user?.name}</div>
@@ -106,7 +111,7 @@ export function Layout() {
 									</div>
 									<button
 										onClick={handleLogout}
-										className="flex items-center justify-center gap-2 w-full bg-destructive/10 hover:bg-destructive/20 text-destructive px-4 py-4 rounded-lg text-lg font-bold transition-colors"
+										className="flex items-center justify-center gap-2 w-full bg-destructive/10 hover:bg-destructive/20 text-destructive px-4 py-4 rounded-lg text-lg font-bold transition-colors cursor-pointer"
 									>
 										<LogOut className="w-5 h-5" />
 										Logout

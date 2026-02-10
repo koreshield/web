@@ -1,5 +1,7 @@
 # Planning docs (local only - kept in docs/planning/)
 docs/planning/
+DEPLOYMENT_RECOMMENDATIONS.md
+POLAR_SETUP.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

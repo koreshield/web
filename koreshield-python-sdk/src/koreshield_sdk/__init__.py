@@ -6,7 +6,15 @@ into your applications with ease.
 
 from .client import KoreShieldClient
 from .async_client import AsyncKoreShieldClient
-from .exceptions import KoreShieldError, AuthenticationError, ValidationError, RateLimitError
+from .exceptions import (
+    KoreShieldError,
+    AuthenticationError,
+    ValidationError,
+    RateLimitError,
+    ServerError,
+    NetworkError,
+    TimeoutError,
+)
 from .types import (
     DetectionResult,
     ScanRequest,
@@ -14,8 +22,13 @@ from .types import (
     ThreatLevel,
     DetectionType,
     AuthConfig,
+    SecurityPolicy,
+    PerformanceMetrics,
+    StreamingScanResponse,
+    DetectionIndicator,
+    BatchScanRequest,
+    BatchScanResponse,
 )
-# RAG Imports
 from .types import (
     RAGDocument,
     RAGScanRequest,
@@ -24,7 +37,7 @@ from .types import (
     CrossDocumentThreat,
 )
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __all__ = [
     "KoreShieldClient",
     "AsyncKoreShieldClient",
@@ -32,13 +45,21 @@ __all__ = [
     "AuthenticationError",
     "ValidationError",
     "RateLimitError",
+    "ServerError",
+    "NetworkError",
+    "TimeoutError",
     "DetectionResult",
     "ScanRequest",
     "ScanResponse",
     "ThreatLevel",
     "DetectionType",
     "AuthConfig",
-    # RAG Types
+    "SecurityPolicy",
+    "PerformanceMetrics",
+    "StreamingScanResponse",
+    "DetectionIndicator",
+    "BatchScanRequest",
+    "BatchScanResponse",
     "RAGDocument",
     "RAGScanRequest",
     "RAGScanResponse",

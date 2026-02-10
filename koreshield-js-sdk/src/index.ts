@@ -79,10 +79,13 @@ export type {
   ChatCompletionResponse,
   SecurityEvent,
   MetricsResponse,
+  PerformanceMetrics,
+  SecurityPolicy,
+  ThreatLevel,
+  DetectionType,
   KoreShieldError,
   ProviderType,
   ProviderConfig,
-  // RAG Detection Types
   RAGDocument,
   DocumentThreat,
   CrossDocumentThreat,
@@ -91,17 +94,13 @@ export type {
   RAGScanConfig,
   RAGScanResponse,
   RAGScanRequest,
-  RAGBatchScanItem
-} from './types';
-
-// RAG Enums
-export {
+  RAGBatchScanItem,
+  // RAG Enums
   InjectionVector,
   OperationalTarget,
   PersistenceMechanism,
   EnterpriseContext,
   DetectionComplexity,
-  ThreatLevel
 } from './types';
 
 // Default export
