@@ -2,6 +2,7 @@
 docs/planning/
 DEPLOYMENT_RECOMMENDATIONS.md
 POLAR_SETUP.md
+DEPLOYMENT_GUIDE.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
