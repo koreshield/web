@@ -58,8 +58,8 @@ const MOCK_TOP_ENDPOINTS: EndpointData[] = [
 
 export function ThreatMapPage() {
 	const [threats, setThreats] = useState<ThreatLocation[]>(MOCK_THREAT_LOCATIONS);
-	const [attackVectors, setAttackVectors] = useState(MOCK_ATTACK_VECTORS);
-	const [topEndpoints, setTopEndpoints] = useState(MOCK_TOP_ENDPOINTS);
+	const [attackVectors] = useState(MOCK_ATTACK_VECTORS);
+	const [topEndpoints] = useState(MOCK_TOP_ENDPOINTS);
 	const [wsConnected, setWsConnected] = useState(false);
 	const [selectedThreat, setSelectedThreat] = useState<ThreatLocation | null>(null);
 
