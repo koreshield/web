@@ -10,7 +10,6 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Lazy load pages for code splitting
 const LandingPage = lazy(() => import('./pages/LandingPage'));
-const DocsPage = lazy(() => import('./pages/DocsPage'));
 const StatusPage = lazy(() => import('./pages/StatusPage'));
 const PlaygroundPage = lazy(() => import('./pages/PlaygroundPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
@@ -78,16 +77,6 @@ function AppContent() {
               <Suspense fallback={<SuspenseFallback />}>
                 <RouteErrorBoundary>
                   <ChangelogPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/docs/*"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <DocsPage />
                 </RouteErrorBoundary>
               </Suspense>
             }
