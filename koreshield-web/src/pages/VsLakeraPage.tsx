@@ -318,7 +318,9 @@ export default function VsLakeraPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="/docs/getting-started/installation"
+              href="https://docs.koreshield.com/getting-started/installation"
+              target="_blank"
+              rel="noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
             >
               <Code className="w-5 h-5" />

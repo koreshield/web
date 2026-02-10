@@ -43,16 +43,25 @@ function Hero() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
                     >
-                        <button className="group bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 glow-green shadow-lg shadow-emerald-500/20 w-full sm:w-auto">
-                            Get Started
+                        <a 
+                            href="https://docs.koreshield.com"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 glow-green shadow-lg shadow-emerald-500/20 w-full sm:w-auto"
+                        >
+                            Read the Docs
                             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                        </button>
+                        </a>
 
-                        <button className="group border border-gray-700 hover:border-electric-green text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <a
+                            href="https://github.com/koreshield/koreshield"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group border border-gray-700 hover:border-electric-green text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto"
+                        >
                             <Github className="w-4 h-4 sm:w-5 sm:h-5" />
                             <span>View on GitHub</span>
-
-                        </button>
+                        </a>
                     </motion.div>
                 </motion.div>
 
