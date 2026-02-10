@@ -39,6 +39,7 @@ const TeamsPage = lazy(() => import('./pages/TeamsPage').then(m => ({ default: m
 const ApiKeysPage = lazy(() => import('./pages/ApiKeysPage').then(m => ({ default: m.ApiKeysPage })));
 const RAGSecurityPage = lazy(() => import('./pages/RAGSecurityPage').then(m => ({ default: m.RAGSecurityPage })));
 const ThreatMonitoringPage = lazy(() => import('./pages/ThreatMonitoringPage').then(m => ({ default: m.ThreatMonitoringPage })));
+const ThreatMapPage = lazy(() => import('./pages/ThreatMapPage').then(m => ({ default: m.ThreatMapPage })));
 const ProviderHealthPage = lazy(() => import('./pages/ProviderHealthPage').then(m => ({ default: m.ProviderHealthPage })));
 const ApiKeyManagementPage = lazy(() => import('./pages/ApiKeyManagementPage'));
 const AuditLogsPage = lazy(() => import('./pages/AuditLogsPage'));
@@ -358,6 +359,18 @@ function AppContent() {
 								<RouteErrorBoundary>
 									<ProtectedRoute>
 										<ThreatMonitoringPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/threat-map"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<ThreatMapPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
 							</Suspense>
