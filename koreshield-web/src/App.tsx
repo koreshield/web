@@ -43,6 +43,8 @@ const ThreatMapPage = lazy(() => import('./pages/ThreatMapPage').then(m => ({ de
 const ProviderHealthPage = lazy(() => import('./pages/ProviderHealthPage').then(m => ({ default: m.ProviderHealthPage })));
 const ApiKeyManagementPage = lazy(() => import('./pages/ApiKeyManagementPage'));
 const AuditLogsPage = lazy(() => import('./pages/AuditLogsPage'));
+const AdvancedAnalyticsPage = lazy(() => import('./pages/AdvancedAnalyticsPage').then(m => ({ default: m.AdvancedAnalyticsPage })));
+const ComplianceReportsPage = lazy(() => import('./pages/ComplianceReportsPage').then(m => ({ default: m.ComplianceReportsPage })));
 
 function AppContent() {
 	const { addToast } = useToast();
@@ -395,6 +397,30 @@ function AppContent() {
 								<RouteErrorBoundary>
 									<ProtectedRoute>
 										<ApiKeyManagementPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/advanced-analytics"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<AdvancedAnalyticsPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/compliance-reports"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<ComplianceReportsPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
 							</Suspense>
