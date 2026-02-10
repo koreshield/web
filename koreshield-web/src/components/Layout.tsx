@@ -26,20 +26,19 @@ export function Layout() {
 
 					{/* Desktop Nav */}
 					<nav className="hidden md:flex items-center gap-6">
-						<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-electric-green transition-colors">Docs</a>
-						<Link to="/pricing" className="text-sm font-medium hover:text-electric-green transition-colors">Pricing</Link>
-						<Link to="/playground" className="text-sm font-medium hover:text-electric-green transition-colors">Playground</Link>
-						<Link to="/changelog" className="text-sm font-medium hover:text-electric-green transition-colors">Changelog</Link>
+						{!isAuthenticated && (
+							<>
+								<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-electric-green transition-colors">Docs</a>
+								<Link to="/pricing" className="text-sm font-medium hover:text-electric-green transition-colors">Pricing</Link>
+								<Link to="/changelog" className="text-sm font-medium hover:text-electric-green transition-colors">Changelog</Link>
+							</>
+						)}
 						{isAuthenticated && (
 							<>
 								<Link to="/dashboard" className="text-sm font-medium hover:text-electric-green transition-colors">Dashboard</Link>
-								<Link to="/threat-monitoring" className="text-sm font-medium hover:text-electric-green transition-colors">Threat Monitoring</Link>
-								<Link to="/threat-map" className="text-sm font-medium hover:text-electric-green transition-colors">Threat Map</Link>
-								<Link to="/provider-health" className="text-sm font-medium hover:text-electric-green transition-colors">Provider Health</Link>
+								<Link to="/threat-monitoring" className="text-sm font-medium hover:text-electric-green transition-colors">Threats</Link>
+								<Link to="/provider-health" className="text-sm font-medium hover:text-electric-green transition-colors">Providers</Link>
 								<Link to="/advanced-analytics" className="text-sm font-medium hover:text-electric-green transition-colors">Analytics</Link>
-								<Link to="/compliance-reports" className="text-sm font-medium hover:text-electric-green transition-colors">Compliance</Link>
-								<Link to="/api-key-management" className="text-sm font-medium hover:text-electric-green transition-colors">API Keys</Link>
-								<Link to="/audit-logs" className="text-sm font-medium hover:text-electric-green transition-colors">Audit Logs</Link>
 							</>
 						)}
 
@@ -83,19 +82,20 @@ export function Layout() {
 				{/* Mobile Nav */}
 				{isMobileMenuOpen && (
 					<div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl p-6 flex flex-col gap-4 h-[calc(100vh-4rem)] overflow-y-auto">
-						<Link to="/why-koreshield" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Why KoreShield</Link>
-						<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors">Docs</a>
-						<a href="https://blog.koreshield.com" target="_blank" rel="noreferrer" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Blog</a>
-						<Link to="/pricing" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-						<Link to="/playground" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Playground</Link>
-						<Link to="/status" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Status</Link>
+						{!isAuthenticated && (
+							<>
+								<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors">Docs</a>
+								<Link to="/pricing" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+								<Link to="/changelog" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Changelog</Link>
+							</>
+						)}
 						{isAuthenticated && (
 							<>
 								<Link to="/dashboard" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
-								<Link to="/threat-monitoring" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threat Monitoring</Link>
-								<Link to="/threat-map" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threat Map</Link>
-								<Link to="/provider-health" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Provider Health</Link>
+								<Link to="/threat-monitoring" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threats</Link>
+								<Link to="/provider-health" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Providers</Link>
 								<Link to="/advanced-analytics" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Analytics</Link>
+								<Link to="/threat-map" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threat Map</Link>
 								<Link to="/compliance-reports" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Compliance</Link>
 								<Link to="/api-key-management" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>API Keys</Link>
 								<Link to="/audit-logs" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Audit Logs</Link>
