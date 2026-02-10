@@ -1,5 +1,5 @@
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const geoUrl = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
@@ -51,8 +51,8 @@ export function ThreatMap({ threats, onMarkerClick }: ThreatMapProps) {
 				className="w-full h-full"
 			>
 				<Geographies geography={geoUrl}>
-					{({ geographies }) =>
-						geographies.map((geo) => (
+					{({ geographies }: any) =>
+						geographies.map((geo: any) => (
 							<Geography
 								key={geo.rsmKey}
 								geography={geo}
