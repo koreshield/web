@@ -30,7 +30,11 @@ export function Layout() {
 						<Link to="/pricing" className="text-sm font-medium hover:text-electric-green transition-colors">Pricing</Link>
 						<Link to="/playground" className="text-sm font-medium hover:text-electric-green transition-colors">Playground</Link>
 						{isAuthenticated && (
-							<Link to="/dashboard" className="text-sm font-medium hover:text-electric-green transition-colors">Dashboard</Link>
+							<>
+								<Link to="/dashboard" className="text-sm font-medium hover:text-electric-green transition-colors">Dashboard</Link>
+								<Link to="/threat-monitoring" className="text-sm font-medium hover:text-electric-green transition-colors">Threat Monitoring</Link>
+								<Link to="/provider-health" className="text-sm font-medium hover:text-electric-green transition-colors">Provider Health</Link>
+							</>
 						)}
 
 						<a href="https://github.com/koreshield/koreshield" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white transition-colors">
@@ -80,7 +84,11 @@ export function Layout() {
 						<Link to="/playground" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Playground</Link>
 						<Link to="/status" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Status</Link>
 						{isAuthenticated && (
-							<Link to="/dashboard" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+							<>
+								<Link to="/dashboard" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+								<Link to="/threat-monitoring" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threat Monitoring</Link>
+								<Link to="/provider-health" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Provider Health</Link>
+							</>
 						)}
 						<a href="https://github.com/koreshield/koreshield" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors flex items-center gap-2">
 							<Github className="w-5 h-5" /> GitHub

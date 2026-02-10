@@ -38,343 +38,369 @@ const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ defaul
 const TeamsPage = lazy(() => import('./pages/TeamsPage').then(m => ({ default: m.TeamsPage })));
 const ApiKeysPage = lazy(() => import('./pages/ApiKeysPage').then(m => ({ default: m.ApiKeysPage })));
 const RAGSecurityPage = lazy(() => import('./pages/RAGSecurityPage').then(m => ({ default: m.RAGSecurityPage })));
+const ThreatMonitoringPage = lazy(() => import('./pages/ThreatMonitoringPage').then(m => ({ default: m.ThreatMonitoringPage })));
+const ProviderHealthPage = lazy(() => import('./pages/ProviderHealthPage').then(m => ({ default: m.ProviderHealthPage })));
 
 function AppContent() {
-  const { addToast } = useToast();
+	const { addToast } = useToast();
 
-  // Set global toast for use outside React components
-  useEffect(() => {
-    setGlobalToast(addToast);
-  }, [addToast]);
+	// Set global toast for use outside React components
+	useEffect(() => {
+		setGlobalToast(addToast);
+	}, [addToast]);
 
-  return (
-    <Router>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route
-            path="/"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <LandingPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/integrations"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <IntegrationsPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/changelog"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ChangelogPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/status"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <StatusPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/playground"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <PlaygroundPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/pricing"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <PricingPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/contact"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ContactPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/about"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <AboutPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/vs/lakera-guard"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <VsLakeraPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/vs/llm-guard"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <VsLLMGuardPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/vs/build-yourself"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <VsBuildYourselfPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/why-koreshield"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <WhyKoreShieldPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <LoginPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <SignupPage />
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/tenants"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <TenantsPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/policies"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <PoliciesPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/metrics"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <MetricsPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/analytics"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <AnalyticsPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/rules"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <RulesPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/alerts"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <AlertsPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/cost-analytics"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <CostAnalyticsPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/rbac"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <RBACPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/reports"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <ReportsPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/teams"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <TeamsPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/settings/api-keys"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <ApiKeysPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="/rag-security"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouteErrorBoundary>
-                  <ProtectedRoute>
-                    <RAGSecurityPage />
-                  </ProtectedRoute>
-                </RouteErrorBoundary>
-              </Suspense>
-            }
-          />
-          <Route
-            path="*"
-            element={
-              <Suspense fallback={<SuspenseFallback />}>
-                <NotFoundPage />
-              </Suspense>
-            }
-          />
-        </Route>
-      </Routes>
-    </Router>
-  );
+	return (
+		<Router>
+			<Routes>
+				<Route element={<Layout />}>
+					<Route
+						path="/"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LandingPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/integrations"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<IntegrationsPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/changelog"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ChangelogPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/status"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<StatusPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/playground"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<PlaygroundPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/pricing"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<PricingPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/contact"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ContactPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/about"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<AboutPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/vs/lakera-guard"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<VsLakeraPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/vs/llm-guard"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<VsLLMGuardPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/vs/build-yourself"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<VsBuildYourselfPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/why-koreshield"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<WhyKoreShieldPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/login"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LoginPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/signup"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<SignupPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/dashboard"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<DashboardPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/tenants"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<TenantsPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/policies"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<PoliciesPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/metrics"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<MetricsPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/analytics"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<AnalyticsPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/rules"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<RulesPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/alerts"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<AlertsPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/cost-analytics"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<CostAnalyticsPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/rbac"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<RBACPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/reports"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<ReportsPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/teams"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<TeamsPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/settings/api-keys"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<ApiKeysPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/rag-security"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<RAGSecurityPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/threat-monitoring"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<ThreatMonitoringPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/provider-health"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<ProviderHealthPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="*"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<NotFoundPage />
+							</Suspense>
+						}
+					/>
+				</Route>
+			</Routes>
+		</Router>
+	);
 }
 
 function App() {
-  return (
-    <ErrorBoundary>
-      <HelmetProvider>
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          <ToastProvider>
-            <Suspense fallback={<PageLoader />}>
-              <AppContent />
-            </Suspense>
-          </ToastProvider>
-        </ThemeProvider>
-      </HelmetProvider>
-    </ErrorBoundary>
-  );
+	return (
+		<ErrorBoundary>
+			<HelmetProvider>
+				<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+					<ToastProvider>
+						<Suspense fallback={<PageLoader />}>
+							<AppContent />
+						</Suspense>
+					</ToastProvider>
+				</ThemeProvider>
+			</HelmetProvider>
+		</ErrorBoundary>
+	);
 }
 
 export default App;
