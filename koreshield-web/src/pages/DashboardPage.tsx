@@ -159,7 +159,7 @@ export function DashboardPage() {
 			{/* Getting Started Banner for New Users */}
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				{isNewUser && (
-					<div className="mb-6 sm:mb-8 bg-gradient-to-r from-primary/10 via-purple-500/10 to-blue-500/10 border border-primary/20 rounded-lg p-4 sm:p-6">
+					<div className="mb-6 sm:mb-8 bg-card border border-border rounded-lg p-4 sm:p-6">
 						<div className="flex items-start gap-3 sm:gap-4">
 							<div className="p-2 sm:p-3 bg-primary/10 rounded-lg flex-shrink-0">
 								<Rocket className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
@@ -216,17 +216,17 @@ export function DashboardPage() {
 									</div>
 								</div>
 
-								<div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-3 sm:p-4 mb-4">
+								<div className="bg-card border border-border rounded-lg p-3 sm:p-4 mb-4">
 									<div className="flex items-center gap-2 mb-2">
 										<Shield className="w-5 h-5 text-purple-500 flex-shrink-0" />
-										<h3 className="font-semibold text-sm sm:text-base">🆕 Try RAG Security Scanner</h3>
+										<h3 className="font-semibold text-sm sm:text-base">Try RAG Security Scanner</h3>
 									</div>
 									<p className="text-xs sm:text-sm text-muted-foreground mb-3">
 										Scan your retrieved documents for indirect prompt injection attacks with our new 5D taxonomy detection system.
 									</p>
 									<Link
 										to="/rag-security"
-										className="inline-flex items-center gap-1 text-xs sm:text-sm text-purple-500 hover:underline font-medium"
+										className="inline-flex items-center gap-1 text-xs sm:text-sm text-primary hover:underline font-medium"
 									>
 										Open RAG Scanner <ArrowRight className="w-3 h-3" />
 									</Link>
@@ -338,8 +338,8 @@ const response = await client.chat.completions.create({
 												<div className="flex items-center gap-2 mb-1">
 													<span className="font-medium">{attack.threat_type}</span>
 													<span className={`text-xs px-2 py-1 rounded-full ${attack.action_taken === 'blocked'
-															? 'bg-red-500/10 text-red-600'
-															: 'bg-yellow-500/10 text-yellow-600'
+														? 'bg-red-500/10 text-red-600'
+														: 'bg-yellow-500/10 text-yellow-600'
 														}`}>
 														{attack.action_taken}
 													</span>
