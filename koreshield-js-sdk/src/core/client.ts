@@ -10,6 +10,9 @@ import {
   ChatCompletionResponse,
   SecurityEvent,
   MetricsResponse,
+  PerformanceMetrics,
+  SecurityPolicy,
+  ThreatLevel,
   KoreShieldError,
   RAGDocument,
   RAGScanRequest,
@@ -22,6 +25,9 @@ import { validateConfig } from '../utils';
 export class KoreShieldClient {
   private client: AxiosInstance;
   private config: Required<KoreShieldConfig>;
+  private metrics: PerformanceMetrics;
+  private securityPolicy: SecurityPolicy | null = null;
+  private startTime: number;
 
   constructor(config: KoreShieldConfig) {
     const validation = validateConfig(config);
@@ -42,17 +48,29 @@ export class KoreShieldClient {
       timeout: this.config.timeout,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'KoreShield-JS/0.1.0',
+        'User-Agent': 'koreshield-js-sdk/0.3.0',
         ...this.config.headers
       }
     });
 
-    // Add API key to requests if provided
     if (this.config.apiKey) {
       this.client.defaults.headers.common['Authorization'] = `Bearer ${this.config.apiKey}`;
     }
 
-    // Add request/response interceptors for debugging
+    this.startTime = Date.now();
+    this.metrics = {
+      totalRequests: 0,
+      totalProcessingTimeMs: 0,
+      averageResponseTimeMs: 0,
+      requestsPerSecond: 0,
+      errorCount: 0,
+      cacheHitRate: 0,
+      batchEfficiency: 0,
+      streamingChunksProcessed: 0,
+      uptimeSeconds: 0,
+      customMetrics: {}
+    };
+
     if (this.config.debug) {
       this.client.interceptors.request.use(
         (config) => {
@@ -76,6 +94,118 @@ export class KoreShieldClient {
         }
       );
     }
+  }
+
+  /**
+   * Scan a single prompt for security threats
+   * @param prompt - The prompt text to scan
+   * @param options - Additional context and options
+   * @returns Detection result with security analysis
+   */
+  async scanPrompt(
+    prompt: string,
+    options?: {
+      userId?: string;
+      sessionId?: string;
+      metadata?: Record<string, any>;
+    }
+  ): Promise<{
+    isSafe: boolean;
+    threatLevel: ThreatLevel;
+    confidence: number;
+    indicators: Array<{
+      type: string;
+      severity: ThreatLevel;
+      confidence: number;
+      description: string;
+      metadata?: Record<string, any>;
+    }>;
+    processingTimeMs: number;
+    scanId?: string;
+    metadata?: Record<string, any>;
+  }> {
+    const startTime = Date.now();
+
+    try {
+      const response = await this.client.post('/v1/scan', {
+        prompt,
+        ...options
+      });
+
+      const processingTime = Date.now() - startTime;
+      this.updateMetrics(processingTime);
+
+      return response.data.result;
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+      this.updateMetrics(processingTime, true);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Scan multiple prompts in batch
+   * @param prompts - Array of prompt texts to scan
+   * @param options - Batch processing options
+   * @returns Array of detection results
+   */
+  async scanBatch(
+    prompts: string[],
+    options?: {
+      parallel?: boolean;
+      maxConcurrent?: number;
+      progressCallback?: (current: number, total: number) => void;
+    }
+  ): Promise<Array<{
+    isSafe: boolean;
+    threatLevel: ThreatLevel;
+    confidence: number;
+    indicators: any[];
+    processingTimeMs: number;
+    scanId?: string;
+    metadata?: Record<string, any>;
+  }>> {
+    const startTime = Date.now();
+    const { parallel = true, maxConcurrent = 10, progressCallback } = options || {};
+    
+    if (!parallel || prompts.length === 1) {
+      const results = [];
+      for (let i = 0; i < prompts.length; i++) {
+        const result = await this.scanPrompt(prompts[i]);
+        results.push(result);
+        if (progressCallback) {
+          progressCallback(i + 1, prompts.length);
+        }
+      }
+      
+      const processingTime = Date.now() - startTime;
+      this.metrics.batchEfficiency = prompts.length / (processingTime / 1000);
+      
+      return results;
+    }
+
+    const results: any[] = [];
+    let completed = 0;
+
+    for (let i = 0; i < prompts.length; i += maxConcurrent) {
+      const batch = prompts.slice(i, i + maxConcurrent);
+      const batchResults = await Promise.all(
+        batch.map(async (prompt) => {
+          const result = await this.scanPrompt(prompt);
+          completed++;
+          if (progressCallback) {
+            progressCallback(completed, prompts.length);
+          }
+          return result;
+        })
+      );
+      results.push(...batchResults);
+    }
+
+    const processingTime = Date.now() - startTime;
+    this.metrics.batchEfficiency = prompts.length / (processingTime / 1000);
+    
+    return results;
   }
 
   /**
@@ -309,6 +439,67 @@ export class KoreShieldClient {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  /**
+   * Get current performance metrics
+   */
+  async getPerformanceMetrics(): Promise<PerformanceMetrics> {
+    const uptimeSeconds = (Date.now() - this.startTime) / 1000;
+    
+    return {
+      ...this.metrics,
+      uptimeSeconds,
+      averageResponseTimeMs: this.metrics.totalRequests > 0 
+        ? this.metrics.totalProcessingTimeMs / this.metrics.totalRequests 
+        : 0,
+      requestsPerSecond: this.metrics.totalRequests / uptimeSeconds
+    };
+  }
+
+  /**
+   * Reset performance metrics
+   */
+  resetMetrics(): void {
+    this.startTime = Date.now();
+    this.metrics = {
+      totalRequests: 0,
+      totalProcessingTimeMs: 0,
+      averageResponseTimeMs: 0,
+      requestsPerSecond: 0,
+      errorCount: 0,
+      cacheHitRate: 0,
+      batchEfficiency: 0,
+      streamingChunksProcessed: 0,
+      uptimeSeconds: 0,
+      customMetrics: {}
+    };
+  }
+
+  /**
+   * Apply a custom security policy
+   */
+  applySecurityPolicy(policy: SecurityPolicy): void {
+    this.securityPolicy = policy;
+  }
+
+  /**
+   * Get current security policy
+   */
+  getSecurityPolicy(): SecurityPolicy | null {
+    return this.securityPolicy;
+  }
+
+  /**
+   * Update internal metrics after request
+   */
+  private updateMetrics(processingTimeMs: number, isError: boolean = false): void {
+    this.metrics.totalRequests++;
+    this.metrics.totalProcessingTimeMs += processingTimeMs;
+    
+    if (isError) {
+      this.metrics.errorCount++;
     }
   }
 
