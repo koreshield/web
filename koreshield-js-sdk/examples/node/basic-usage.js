@@ -25,7 +25,7 @@ async function main() {
   console.log('✅ Connected to KoreShield');
 
   // Example 1: Basic chat completion
-  console.log('\n📝 Example 1: Basic Chat Completion');
+  console.log('\n Example 1: Basic Chat Completion');
   try {
     const response = await client.createChatCompletion({
       model: 'gpt-3.5-turbo',

@@ -82,7 +82,7 @@ async def main():
         benefits of LLM-powered applications.
         """
 
-        print("🚀 Starting streaming content scan...")
+        print(" Starting streaming content scan...")
         print(f"Content length: {len(long_content)} characters")
 
         start_time = time.time()
@@ -113,7 +113,7 @@ async def main():
         # Show details of unsafe chunks
         if unsafe_chunks > 0:
             print("
-⚠️  Unsafe Chunks Details:"            for i, chunk_result in enumerate(streaming_result.chunk_results):
+ Unsafe Chunks Details:"            for i, chunk_result in enumerate(streaming_result.chunk_results):
                 if not chunk_result.is_safe:
                     print(f"Chunk {i+1}: Threat Level {chunk_result.threat_level.value} "
                           f"(Confidence: {chunk_result.confidence:.2f})")

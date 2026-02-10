@@ -194,7 +194,7 @@ class SalesforceRAGScanner:
             return
         
         threat_ids = scan_result.get_threat_document_ids()
-        print(f"\n⚠️  Found {len(threat_ids)} threatening {object_type} records")
+        print(f"\n Found {len(threat_ids)} threatening {object_type} records")
         
         # In production, update records with security flags
         for threat in scan_result.context_analysis.document_threats:
@@ -314,7 +314,7 @@ def main():
     missing = [var for var in required_vars if not os.getenv(var)]
     
     if missing:
-        print(f"\n⚠️  Missing environment variables: {', '.join(missing)}")
+        print(f"\n Missing environment variables: {', '.join(missing)}")
         print("\nSet them with:")
         for var in missing:
             print(f"  export {var}='your-value'")

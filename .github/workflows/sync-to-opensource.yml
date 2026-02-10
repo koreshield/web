@@ -1,0 +1,76 @@
+name: Sync to Open Source Repositories
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'koreshield-python-sdk/**'
+      - 'koreshield-js-sdk/**'
+      - 'koreshield-web/**'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Full history for subtree operations
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for Python SDK Changes
+        id: check_python
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q '^koreshield-python-sdk/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for Node.js SDK Changes
+        id: check_node
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q '^koreshield-js-sdk/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for Frontend Changes
+        id: check_web
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q '^koreshield-web/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Push Python SDK Changes
+        if: steps.check_python.outputs.changed == 'true'
+        run: |
+          git remote add python-sdk https://x-access-token:${{ secrets.GH_PAT }}@github.com/koreshield/python-sdk.git || true
+          git subtree split --prefix=koreshield-python-sdk -b python-sdk-temp
+          git push python-sdk python-sdk-temp:main --force
+          git branch -D python-sdk-temp
+
+      - name: Push Node.js SDK Changes
+        if: steps.check_node.outputs.changed == 'true'
+        run: |
+          git remote add node-sdk https://x-access-token:${{ secrets.GH_PAT }}@github.com/koreshield/node-sdk.git || true
+          git subtree split --prefix=koreshield-js-sdk -b node-sdk-temp
+          git push node-sdk node-sdk-temp:main --force
+          git branch -D node-sdk-temp
+
+      - name: Push Frontend Changes
+        if: steps.check_web.outputs.changed == 'true'
+        run: |
+          git remote add koreshield-web https://x-access-token:${{ secrets.GH_PAT }}@github.com/koreshield/koreshield-web.git || true
+          git subtree split --prefix=koreshield-web -b web-temp
+          git push koreshield-web web-temp:main --force
+          git branch -D web-temp

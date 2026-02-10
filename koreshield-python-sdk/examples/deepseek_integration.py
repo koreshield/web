@@ -24,7 +24,7 @@ def main():
     test_prompt = "Hello, can you help me write a Python function?"
 
     try:
-        print(f"📝 Scanning prompt: '{test_prompt}'")
+        print(f" Scanning prompt: '{test_prompt}'")
         result = client.scan_prompt(test_prompt)
 
         print("✅ Scan Result:"        print(f"   Safe: {result.is_safe}")
