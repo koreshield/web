@@ -69,9 +69,9 @@ all = [
 [project.urls]
 Homepage = "https://koreshield.com"
 Documentation = "https://docs.koreshield.com"
-Repository = "https://github.com/koreshield/koreshield.git"
-Issues = "https://github.com/koreshield/koreshield/issues"
-Changelog = "https://github.com/koreshield/koreshield/blob/main/koreshield-python-sdk/CHANGELOG.md"
+Repository = "https://github.com/koreshield/python-sdk"
+Issues = "https://github.com/koreshield/python-sdk/issues"
+Changelog = "https://github.com/koreshield/python-sdk/blob/main/CHANGELOG.md"
 PyPI = "https://pypi.org/project/koreshield/"
 
 [tool.setuptools.packages.find]

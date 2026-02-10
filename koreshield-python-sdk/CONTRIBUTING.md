@@ -12,8 +12,8 @@ Thank you for your interest in contributing to the KoreShield Python SDK! We wel
 ### Setup
 ```bash
 # Clone the repository
-git clone https://github.com/koreshield/koreshield-python-sdk.git
-cd koreshield-python-sdk
+git clone https://github.com/koreshield/python-sdk.git
+cd python-sdk
 
 # Create virtual environment
 python -m venv venv
@@ -33,7 +33,7 @@ ruff format src/
 ## Development Workflow
 
 ### 1. Choose an Issue
-- Check the [GitHub Issues](https://github.com/koreshield/koreshield-python-sdk/issues) for open tasks
+- Check the [GitHub Issues](https://github.com/koreshield/python-sdk/issues) for open tasks
 - Comment on the issue to indicate you're working on it
 - Create a new branch for your work
 

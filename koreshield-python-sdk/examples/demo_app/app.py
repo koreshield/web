@@ -184,7 +184,7 @@ with tab1:
                 else:
                     threat_count = result.total_threats_found
                     st.session_state.scan_stats["blocked"] += threat_count
-                    status.update(label=f"⚠️ Detected {threat_count} Threats!", state="error")
+                    status.update(label=f"Detected {threat_count} Threats!", state="error")
                     
                     # Show threats
                     for threat in result.document_threats:

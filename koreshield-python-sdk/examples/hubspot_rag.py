@@ -96,7 +96,7 @@ def scan_hubspot_contacts(koreshield: KoreShieldClient, hubspot_client: Any, que
         print("✅ All contacts safe. Proceeding with RAG generation.")
         # proceed_with_rag(documents)
     else:
-        print(f"⚠️ Security Threat Detected (Severity: {scan_result.overall_severity})")
+        print(f"Security Threat Detected (Severity: {scan_result.overall_severity})")
         print(f"Found {len(scan_result.document_threats)} threat(s)")
         
         for threat in scan_result.document_threats:
@@ -153,7 +153,7 @@ def scan_hubspot_tickets(koreshield: KoreShieldClient, hubspot_client: Any, quer
     result = koreshield.scan_rag_context(query, documents)
     
     if not result.is_safe:
-        print(f"⚠️ Blocked {result.total_threats_found} threats in tickets.")
+        print(f"Blocked {result.total_threats_found} threats in tickets.")
         # Log to security system
         for threat in result.document_threats:
             print(f"  [Security Log] Blocked ticket {threat.document_id} - Potential Privilege Escalation")

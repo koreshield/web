@@ -462,8 +462,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Support
 
 - [Documentation](https://docs.koreshield.com)
-- [Issues](https://github.com/koreshield/koreshield/issues)
-- [Discussions](https://github.com/koreshield/koreshield/discussions)
+- [Issues](https://github.com/koreshield/node-sdk/issues)
+- [Discussions](https://github.com/koreshield/node-sdk/discussions)
 - [Email Support](mailto:support@koreshield.com)
 
 ## Security
