@@ -205,12 +205,14 @@ export function DashboardPage() {
                                         <p className="text-xs sm:text-sm text-muted-foreground mb-3">
                                             Route your LLM requests through KoreShield's proxy.
                                         </p>
-                                        <Link 
-                                            to="/docs/getting-started"
+                                        <a 
+                                            href="https://docs.koreshield.com/getting-started"
+                                            target="_blank"
+                                            rel="noreferrer"
                                             className="inline-flex items-center gap-1 text-xs sm:text-sm text-primary hover:underline"
                                         >
                                             View Docs <BookOpen className="w-3 h-3" />
-                                        </Link>
+                                        </a>
                                     </div>
                                 </div>
 

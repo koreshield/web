@@ -51,8 +51,10 @@ export default function NotFoundPage() {
               </svg>
               Back to Home
             </Link>
-            <Link
-              to="/docs"
+            <a
+              href="https://docs.koreshield.com"
+              target="_blank"
+              rel="noreferrer"
               className="px-6 py-3 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-medium rounded-lg transition-colors inline-flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +66,7 @@ export default function NotFoundPage() {
                 />
               </svg>
               View Documentation
-            </Link>
+            </a>
           </div>
 
           {/* Suggested Links */}
@@ -73,8 +75,10 @@ export default function NotFoundPage() {
               Popular Pages
             </h2>
             <div className="space-y-2 text-left">
-              <Link
-                to="/docs/quickstart"
+              <a
+                href="https://docs.koreshield.com/quickstart"
+                target="_blank"
+                rel="noreferrer"
                 className="block p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
               >
                 <div className="flex items-center gap-3">
@@ -100,9 +104,11 @@ export default function NotFoundPage() {
                     </div>
                   </div>
                 </div>
-              </Link>
-              <Link
-                to="/docs/installation"
+              </a>
+              <a
+                href="https://docs.koreshield.com/installation"
+                target="_blank"
+                rel="noreferrer"
                 className="block p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
               >
                 <div className="flex items-center gap-3">
@@ -128,9 +134,11 @@ export default function NotFoundPage() {
                     </div>
                   </div>
                 </div>
-              </Link>
-              <Link
-                to="/docs/api-reference"
+              </a>
+              <a
+                href="https://docs.koreshield.com/api-reference"
+                target="_blank"
+                rel="noreferrer"
                 className="block p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
               >
                 <div className="flex items-center gap-3">
@@ -156,7 +164,7 @@ export default function NotFoundPage() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </a>
             </div>
           </div>
 
