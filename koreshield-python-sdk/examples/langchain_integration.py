@@ -17,7 +17,7 @@ from koreshield_sdk.types import ThreatLevel
 
 def demo_basic_callback():
     """Demonstrate basic callback handler usage."""
-    print("🔍 Basic LangChain + KoreShield Integration")
+    print(" Basic LangChain + KoreShield Integration")
     print("-" * 45)
 
     api_key = os.getenv("KORESHIELD_API_KEY")
@@ -102,10 +102,10 @@ def demo_blocking_callback():
     for prompt, should_succeed in test_prompts:
         try:
             response = llm([HumanMessage(content=prompt)])
-            status = "✅ ALLOWED" if should_succeed else "⚠️  FALSE POSITIVE"
+            status = "✅ ALLOWED" if should_succeed else " FALSE POSITIVE"
             print(f"{status} '{prompt[:35]}...'")
         except Exception as e:
-            status = "❌ BLOCKED" if not should_succeed else "⚠️  FALSE NEGATIVE"
+            status = "❌ BLOCKED" if not should_succeed else " FALSE NEGATIVE"
             print(f"{status} '{prompt[:35]}...' -> {str(e)[:50]}...")
 
 
@@ -180,7 +180,7 @@ def demo_custom_callback():
     # Custom callback with detailed logging
     class LoggingKoreShieldCallback(KoreShieldCallbackHandler):
         def on_llm_start(self, serialized, prompts, **kwargs):
-            print(f"🔍 Scanning {len(prompts)} prompt(s)...")
+            print(f" Scanning {len(prompts)} prompt(s)...")
             super().on_llm_start(serialized, prompts, **kwargs)
 
         def on_llm_end(self, response, **kwargs):
@@ -189,7 +189,7 @@ def demo_custom_callback():
             if scan_results:
                 latest = scan_results[-1]
                 if latest['type'] == 'response':
-                    print(f"📝 Response scanned: {latest['result'].threat_level.value}")
+                    print(f" Response scanned: {latest['result'].threat_level.value}")
 
     callback = LoggingKoreShieldCallback(
         api_key=api_key,
@@ -204,7 +204,7 @@ def demo_custom_callback():
 
 def main():
     """Main demo function."""
-    print("🚀 KoreShield LangChain Integration Demo")
+    print(" KoreShield LangChain Integration Demo")
     print("=" * 50)
 
     demo_basic_callback()
@@ -214,7 +214,7 @@ def main():
 
     print("\n" + "=" * 50)
     print("Demo completed!")
-    print("\n💡 Tips:")
+    print("\n Tips:")
     print("  - Use blocking mode in production for automatic threat prevention")
     print("  - Monitor scan results to understand threat patterns")
     print("  - Adjust threat thresholds based on your risk tolerance")

@@ -38,7 +38,7 @@ async def scan_single_prompt(client: AsyncKoreShieldClient, prompt: str) -> dict
 
 async def demo_single_scanning():
     """Demonstrate single prompt scanning."""
-    print("🔍 Single Prompt Async Scanning")
+    print(" Single Prompt Async Scanning")
     print("-" * 40)
 
     api_key = os.getenv("KORESHIELD_API_KEY")
@@ -62,7 +62,7 @@ async def demo_single_scanning():
 
 async def demo_batch_scanning():
     """Demonstrate batch scanning with concurrency control."""
-    print("\n🔍 Batch Async Scanning (Concurrent)")
+    print("\n Batch Async Scanning (Concurrent)")
     print("-" * 40)
 
     api_key = os.getenv("KORESHIELD_API_KEY")
@@ -102,7 +102,7 @@ async def demo_batch_scanning():
         unsafe_count = 0
 
         for prompt, result in zip(prompts, results):
-            status = "✅" if result.is_safe else "⚠️ "
+            status = "✅" if result.is_safe else ""
             threat = f" ({result.threat_level.value})" if not result.is_safe else ""
             print(f"{status} {prompt[:40]}{'...' if len(prompt) > 40 else ''}{threat}")
 
@@ -117,7 +117,7 @@ async def demo_batch_scanning():
 
 async def demo_sequential_vs_concurrent():
     """Compare sequential vs concurrent batch scanning performance."""
-    print("\n⚡ Performance Comparison: Sequential vs Concurrent")
+    print("\n Performance Comparison: Sequential vs Concurrent")
     print("-" * 55)
 
     api_key = os.getenv("KORESHIELD_API_KEY")
@@ -164,7 +164,7 @@ async def demo_sequential_vs_concurrent():
 
 async def main():
     """Main demo function."""
-    print("🚀 KoreShield Async SDK Demo")
+    print(" KoreShield Async SDK Demo")
     print("=" * 50)
 
     await demo_single_scanning()

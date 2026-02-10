@@ -31,7 +31,7 @@ def main():
         "Generate a random password for me",  # Safe (but could be edge case)
     ]
 
-    print("🔍 KoreShield Prompt Scanning Demo")
+    print(" KoreShield Prompt Scanning Demo")
     print("=" * 50)
 
     for i, prompt in enumerate(test_prompts, 1):
@@ -41,7 +41,7 @@ def main():
             result = client.scan_prompt(prompt)
 
             # Display results
-            status = "✅ SAFE" if result.is_safe else f"⚠️  UNSAFE ({result.threat_level.value.upper()})"
+            status = "✅ SAFE" if result.is_safe else f" UNSAFE ({result.threat_level.value.upper()})"
             print(f"   Status: {status}")
             print(f"   Confidence: {result.confidence:.2%}")
             print(f"   Processing Time: {result.processing_time_ms:.1f}ms")

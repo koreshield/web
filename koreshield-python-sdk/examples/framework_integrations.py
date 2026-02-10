@@ -8,7 +8,7 @@ from koreshield_sdk.integrations import create_fastapi_middleware
 
 async def demo_fastapi_integration():
     """Demonstrate FastAPI integration with KoreShield middleware."""
-    print("🚀 Demonstrating FastAPI Integration")
+    print(" Demonstrating FastAPI Integration")
 
     # Initialize client
     client = AsyncKoreShieldClient(
@@ -26,9 +26,9 @@ async def demo_fastapi_integration():
     )
 
     print("✅ FastAPI middleware created successfully")
-    print("📝 Middleware will scan POST/PUT/PATCH requests automatically")
-    print("🔍 Excluded paths: /health, /docs")
-    print("⚠️  Threats will be logged but not blocked (block_on_threat=False)")
+    print(" Middleware will scan POST/PUT/PATCH requests automatically")
+    print(" Excluded paths: /health, /docs")
+    print(" Threats will be logged but not blocked (block_on_threat=False)")
 
     # Simulate middleware usage
     async with client:
@@ -144,7 +144,7 @@ async def demo_performance_monitoring():
 
 async def main():
     """Run all integration demos."""
-    print("🎯 KoreShield SDK Enhanced Features Demo")
+    print(" KoreShield SDK Enhanced Features Demo")
     print("=" * 50)
 
     try:
@@ -153,7 +153,7 @@ async def main():
         await demo_performance_monitoring()
 
         print("🎉 All demos completed successfully!")
-        print("\n💡 Key Features Demonstrated:")
+        print("\n Key Features Demonstrated:")
         print("   • FastAPI middleware integration")
         print("   • Custom security policies")
         print("   • Performance monitoring")

@@ -73,7 +73,7 @@ def demo_insecure_retrieval(vectorstore: Chroma):
         content_preview = doc.page_content[:80] + "..."
         print(f"  {i}. {content_preview}")
     
-    print("\n⚠️  WARNING: Potentially malicious documents retrieved without filtering!")
+    print("\n WARNING: Potentially malicious documents retrieved without filtering!")
 
 
 def demo_secure_retrieval(vectorstore: Chroma):
@@ -158,7 +158,7 @@ def demo_secure_qa_chain(vectorstore: Chroma):
             response = qa_chain.run(query)
             print(f"Response: {response[:150]}...")
         except Exception as e:
-            print(f"⚠️  Query blocked or error: {e}")
+            print(f" Query blocked or error: {e}")
     
     # Final stats
     stats = secure_retriever.get_stats()
@@ -210,7 +210,7 @@ def main():
     
     # Check environment
     if not os.getenv("OPENAI_API_KEY"):
-        print("\n⚠️  WARNING: OPENAI_API_KEY not set. Some demos may fail.")
+        print("\n WARNING: OPENAI_API_KEY not set. Some demos may fail.")
         print("   Set it with: export OPENAI_API_KEY='your-key'\n")
     
     try:
