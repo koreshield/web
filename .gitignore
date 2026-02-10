@@ -288,7 +288,6 @@ FRONTEND_SPEC.md
 docs/SYSTEM_DESIGN.md
 .DS_Store
 !koreshield-web/src/lib/
-!koreshield-web/public/docs/
 koreshield-js-sdk/.npmrc
 
 docs/*.md
@@ -297,3 +296,7 @@ PHASE_3_SUMMARY.md
 *.md files in docs/
 SECURITY_*.md
 PROJECT_ANALYSIS.md
+koreshield-web/how-to.md
+open_source_strategy.md
+OPEN_SOURCE_SETUP.md
+GITHUB_WORKFLOW_EXPLAINED.md

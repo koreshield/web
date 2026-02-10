@@ -34,7 +34,7 @@ async def main():
             "Write a SQL query to find duplicate records"
         ]
 
-        print("🚀 Starting enhanced batch processing...")
+        print(" Starting enhanced batch processing...")
         start_time = time.time()
 
         # Process batch with progress tracking and optimized concurrency
@@ -65,7 +65,7 @@ async def main():
         # Show details of unsafe prompts
         if unsafe_count > 0:
             print("
-⚠️  Unsafe Prompts Details:"            for i, (prompt, result) in enumerate(zip(prompts, results)):
+ Unsafe Prompts Details:"            for i, (prompt, result) in enumerate(zip(prompts, results)):
                 if not result.is_safe:
                     print(f"Prompt {i+1}: {prompt[:50]}...")
                     print(f"  Threat Level: {result.threat_level.value}")

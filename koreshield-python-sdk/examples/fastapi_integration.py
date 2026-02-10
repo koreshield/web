@@ -141,7 +141,7 @@ async def chat_endpoint(request: ChatRequest, background_tasks: BackgroundTasks)
             is_blocked = True
         elif threat_level in [ThreatLevel.MEDIUM]:
             # Log medium threats but allow
-            print(f"⚠️  Medium threat detected: {scan_result.confidence}")
+            print(f" Medium threat detected: {scan_result.confidence}")
         # Low threats and safe content proceed normally
 
         if is_blocked:
@@ -279,9 +279,9 @@ def generate_mock_response(message: str) -> str:
 
 
 if __name__ == "__main__":
-    print("🚀 Starting KoreShield Protected FastAPI Server")
-    print("📖 API Documentation: http://localhost:8000/docs")
-    print("🔍 Health Check: http://localhost:8000/health")
+    print(" Starting KoreShield Protected FastAPI Server")
+    print(" API Documentation: http://localhost:8000/docs")
+    print(" Health Check: http://localhost:8000/health")
 
     uvicorn.run(
         "fastapi_integration:app",
