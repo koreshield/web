@@ -282,7 +282,7 @@ export function ProviderHealthPage() {
 
 											<div className="pt-2 border-t border-border">
 												<span className="text-xs text-muted-foreground">
-													Last checked: {format(new Date(provider.last_check), 'HH:mm:ss')}
+													Last checked: {provider.last_check && !isNaN(new Date(provider.last_check).getTime()) ? format(new Date(provider.last_check), 'HH:mm:ss') : 'Never'}
 												</span>
 											</div>
 										</div>
@@ -376,7 +376,7 @@ export function ProviderHealthPage() {
 										</div>
 										<p className="text-xs text-muted-foreground">{event.reason}</p>
 										<p className="text-xs text-muted-foreground mt-1">
-											{format(new Date(event.timestamp), 'MMM dd, HH:mm:ss')}
+											{event.timestamp && !isNaN(new Date(event.timestamp).getTime()) ? format(new Date(event.timestamp), 'MMM dd, HH:mm:ss') : 'Unknown time'}
 										</p>
 									</div>
 								))}
