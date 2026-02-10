@@ -27,7 +27,7 @@ export function Layout() {
 
                     {/* Desktop Nav */}
                     <nav className="hidden md:flex items-center gap-6">
-                        <Link to="/docs" className="text-sm font-medium hover:text-electric-green transition-colors">Docs</Link>
+                        <a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-electric-green transition-colors">Docs</a>
                         <Link to="/pricing" className="text-sm font-medium hover:text-electric-green transition-colors">Pricing</Link>
                         <Link to="/playground" className="text-sm font-medium hover:text-electric-green transition-colors">Playground</Link>
                         {isAuthenticated && (
@@ -75,7 +75,7 @@ export function Layout() {
                 {isMobileMenuOpen && (
                     <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl p-6 flex flex-col gap-4 h-[calc(100vh-4rem)] overflow-y-auto">
                         <Link to="/why-koreshield" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Why KoreShield</Link>
-                        <Link to="/docs" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Docs</Link>
+                        <a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors">Docs</a>
                         <a href="https://blog.koreshield.com" target="_blank" rel="noreferrer" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Blog</a>
                         <Link to="/pricing" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
                         <Link to="/playground" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Playground</Link>
