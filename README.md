@@ -223,6 +223,27 @@ pytest
 - Research Notes: research/
 - Official website: [koreshield.com](https://koreshield.com)
 
+### Key Differentiators
+
+**vs Competitors (Lakera, LLM Guard):**
+
+| Feature                    | KoreShield | Others    |
+|----------------------------|------------|-----------|
+| Installation               | 1 LOC      | SDK/Agent |
+| Dashboard                  | Full UI    | Limited   |
+| Open Source                | ✓          | ✗         |
+| RAG Security               | ✓          | ✗         |
+| Multi-tenant               | ✓          | Paid only |
+| Real-time WebSocket        | ✓          | ✗         |
+| Cost Analytics             | ✓          | ✗         |
+| Self-hosted                | ✓          | Limited   |
+
+**Unique Features:**
+1. **RAG Security Scanner** - Only solution with 5D taxonomy for RAG attacks
+2. **Zero Code Integration** - Proxy-based, not SDK-based
+3. **Full Open Source** - Fork and customize everything
+4. **Enterprise Dashboard** - Not just monitoring, full management platform
+
 ## License
 MIT License
 
