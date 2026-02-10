@@ -34,7 +34,10 @@ export function Layout() {
 							<>
 								<Link to="/dashboard" className="text-sm font-medium hover:text-electric-green transition-colors">Dashboard</Link>
 								<Link to="/threat-monitoring" className="text-sm font-medium hover:text-electric-green transition-colors">Threat Monitoring</Link>
+								<Link to="/threat-map" className="text-sm font-medium hover:text-electric-green transition-colors">Threat Map</Link>
 								<Link to="/provider-health" className="text-sm font-medium hover:text-electric-green transition-colors">Provider Health</Link>
+								<Link to="/advanced-analytics" className="text-sm font-medium hover:text-electric-green transition-colors">Analytics</Link>
+								<Link to="/compliance-reports" className="text-sm font-medium hover:text-electric-green transition-colors">Compliance</Link>
 								<Link to="/api-key-management" className="text-sm font-medium hover:text-electric-green transition-colors">API Keys</Link>
 								<Link to="/audit-logs" className="text-sm font-medium hover:text-electric-green transition-colors">Audit Logs</Link>
 							</>
@@ -90,7 +93,10 @@ export function Layout() {
 							<>
 								<Link to="/dashboard" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
 								<Link to="/threat-monitoring" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threat Monitoring</Link>
+								<Link to="/threat-map" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threat Map</Link>
 								<Link to="/provider-health" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Provider Health</Link>
+								<Link to="/advanced-analytics" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Analytics</Link>
+								<Link to="/compliance-reports" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Compliance</Link>
 								<Link to="/api-key-management" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>API Keys</Link>
 								<Link to="/audit-logs" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Audit Logs</Link>
 							</>
