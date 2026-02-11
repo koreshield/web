@@ -21,7 +21,8 @@ jobs:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USERNAME }}
         password: ${{ secrets.VPS_PASSWORD }}
-        source: "koreshield/src,koreshield/config,koreshield/alembic,koreshield/alembic.ini,koreshield/Dockerfile,koreshield/requirements.txt,koreshield/requirements-dev.txt,koreshield/docker-compose.prod.yml,koreshield/Caddyfile"
+        # Copy entire backend directory to preserve structure
+        source: "koreshield"
         target: "/opt/koreshield_deploy"
         strip_components: 0
 
@@ -32,16 +33,21 @@ jobs:
         username: ${{ secrets.VPS_USERNAME }}
         password: ${{ secrets.VPS_PASSWORD }}
         script: |
-          # Create destination if not exists (should exist from manual deploy)
+          # Create destination if not exists
           mkdir -p /opt/koreshield
           
-          # Sync files (rsync is better but we use scp to temp dir then move)
-          # We just overwrite code
-          cp -r /opt/koreshield_deploy/koreshield/* /opt/koreshield/
+          # Sync backend directory to /opt/koreshield/koreshield
+          rsync -av --delete /opt/koreshield_deploy/koreshield /opt/koreshield/
+          
+          # Move config files to root (since docker-compose context depends on it being in root)
+          # We deploy them to /opt/koreshield/ (Repo Root equivalent)
+          mv /opt/koreshield/koreshield/docker-compose.prod.yml /opt/koreshield/
+          mv /opt/koreshield/koreshield/Caddyfile /opt/koreshield/
           
           cd /opt/koreshield
           
-          # Ensure .env exists (it should, from manual set up. secrets are not in git)
+          # Ensure .env exists (it should, from manual set up)
+
           # We do NOT overwrite .env from git (it's not in git)
           
           # Rebuild and restart
