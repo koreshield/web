@@ -6,8 +6,8 @@ WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+	gcc \
+	&& rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
 COPY requirements.txt requirements-dev.txt ./
@@ -22,8 +22,8 @@ COPY alembic.ini ./
 COPY alembic/ ./alembic/
 
 # Create startup script
-RUN echo '#!/bin/bash\nset -e\necho "Running database migrations..."\nalembic upgrade head\necho "Starting server..."\nexec uvicorn koreshield.proxy:app --host 0.0.0.0 --port 8000 --app-dir /app/src' > /app/start.sh && \
-    chmod +x /app/start.sh
+RUN echo '#!/bin/bash\nset -e\necho "Running database migrations..."\nalembic upgrade head\necho "Starting server..."\nexec uvicorn src.koreshield.main:app --host 0.0.0.0 --port 8000 --app-dir /app/src' > /app/start.sh && \
+	chmod +x /app/start.sh
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash koreshield
@@ -35,7 +35,7 @@ EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+	CMD curl -f http://localhost:8000/health || exit 1
 
 # Run the application with migrations
 CMD ["/bin/bash", "/app/start.sh"]

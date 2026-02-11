@@ -7,12 +7,19 @@ from alembic import context
 
 import os
 import sys
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Add the project root to the path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import your models
-from src.koreshield.tenant_models import Base
+# Import your models
+from src.koreshield.models.base import Base
+# Import all modules that define models to ensure they are registered with Base.metadata
+from src.koreshield.models import user, api_key, request_log, report
+from src.koreshield import tenant_models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
