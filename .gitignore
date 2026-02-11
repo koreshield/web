@@ -309,3 +309,5 @@ GITHUB_WORKFLOW_EXPLAINED.md
 *.tar.gz
 koreshield/.env.railway_backup
 koreshield/prod.env
+koreshield_ci_key.pub
+koreshield_ci_key
