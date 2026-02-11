@@ -229,3 +229,36 @@ async def remove_member(
     await db.delete(target_member)
     await db.commit()
     return {"status": "success"}
+
+class UpdateRoleRequest(BaseModel):
+    role: str
+
+@router.post("/{team_id}/members/{user_id}/role")
+async def update_member_role(
+    team_id: UUID,
+    user_id: UUID,
+    request: UpdateRoleRequest,
+    member: TeamMember = Depends(get_team_member),
+    db: AsyncSession = Depends(get_db)
+):
+    """Update a member's role."""
+    if member.role not in ["owner", "admin"]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    # Check target member
+    query = select(TeamMember).where(and_(TeamMember.team_id == team_id, TeamMember.user_id == user_id))
+    result = await db.execute(query)
+    target_member = result.scalar_one_or_none()
+    
+    if not target_member:
+        raise HTTPException(status_code=404, detail="Member not found")
+        
+    if target_member.role == "owner":
+        raise HTTPException(status_code=400, detail="Cannot change owner role")
+        
+    if request.role not in ["admin", "member", "viewer"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+
+    target_member.role = request.role
+    await db.commit()
+    return {"status": "success"}
