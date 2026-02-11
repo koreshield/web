@@ -29,9 +29,13 @@ jobs:
     - name: Execute Remote Deployment
       uses: appleboy/ssh-action@master
       with:
+    - name: Execute Remote Deployment
+      uses: appleboy/ssh-action@master
+      with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USERNAME }}
-        password: ${{ secrets.VPS_PASSWORD }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
         script: |
           # Create destination if not exists
           mkdir -p /opt/koreshield
@@ -39,16 +43,13 @@ jobs:
           # Sync backend directory to /opt/koreshield/koreshield
           rsync -av --delete /opt/koreshield_deploy/koreshield /opt/koreshield/
           
-          # Move config files to root (since docker-compose context depends on it being in root)
-          # We deploy them to /opt/koreshield/ (Repo Root equivalent)
-          mv /opt/koreshield/koreshield/docker-compose.prod.yml /opt/koreshield/
-          mv /opt/koreshield/koreshield/Caddyfile /opt/koreshield/
+          # We deploy config files inside koreshield/
+          # So we run docker-compose FROM /opt/koreshield/koreshield
+          cd /opt/koreshield/koreshield
           
-          cd /opt/koreshield
-          
-          # Ensure .env exists (it should, from manual set up)
-
-          # We do NOT overwrite .env from git (it's not in git)
+          # Ensure we use the .env from the parent directory (/opt/koreshield/.env)
+          # We can symlink it or pass --env-file
+          ln -sf ../.env .env
           
           # Rebuild and restart
           docker-compose -f docker-compose.prod.yml up -d --build --remove-orphans
