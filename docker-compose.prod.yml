@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  api:
+    build:
+      context: ./koreshield
+      dockerfile: Dockerfile
+    image: koreshield:latest
+    container_name: koreshield-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://koreshield:koreshield_password@postgres:5432/koreshield
+      - REDIS_URL=redis://redis:6379/0
+      - ENVIRONMENT=production
+      # Add API Keys here or in a .env file on the VPS
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: always
+    networks:
+      - koreshield-net
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: koreshield-postgres
+    environment:
+      POSTGRES_USER: koreshield
+      POSTGRES_PASSWORD: koreshield_password # Change this in production!
+      POSTGRES_DB: koreshield
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U koreshield" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    networks:
+      - koreshield-net
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: koreshield-redis
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    networks:
+      - koreshield-net
+
+networks:
+  koreshield-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

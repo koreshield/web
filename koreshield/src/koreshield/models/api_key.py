@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from .user import Base
+from .base import Base
 
 
 class APIKey(Base):
