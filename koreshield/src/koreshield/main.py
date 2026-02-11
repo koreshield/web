@@ -4,6 +4,10 @@ Main entry point for the LLM Firewall application.
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 import structlog
 import uvicorn
