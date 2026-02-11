@@ -3,42 +3,29 @@ Reports API for KoreShield
 Provides endpoints for creating, managing, and generating reports.
 """
 
+import uuid
+import structlog
+import asyncio
+from datetime import datetime
+from typing import List, Optional, Dict
+from enum import Enum
+
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, status
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional
-from datetime import datetime
-from enum import Enum
-import structlog
-import uuid
+from sqlalchemy import select, desc
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .auth import get_current_admin
+from ..database import get_db, AsyncSessionLocal
+from ..models.report import Report, ReportTemplate, ReportStatus, ReportSchedule, ReportFormat
+from ..models.request_log import RequestLog
 
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
-
-# Enums
-
-class ReportSchedule(str, Enum):
-    MANUAL = "manual"
-    DAILY = "daily"
-    WEEKLY = "weekly"
-    MONTHLY = "monthly"
-
-
-class ReportFormat(str, Enum):
-    PDF = "pdf"
-    CSV = "csv"
-    JSON = "json"
-
-
-class ReportStatus(str, Enum):
-    READY = "ready"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
-
+# Pydantic Models for Request/Response
+# Note: DB models have same names, so using aliases or separate classes
 
 class DateRange(str, Enum):
     TODAY = "today"
@@ -47,16 +34,12 @@ class DateRange(str, Enum):
     LAST_90_DAYS = "90d"
     CUSTOM = "custom"
 
-
 class ReportCategory(str, Enum):
     SECURITY = "Security"
     FINANCIAL = "Financial"
     COMPLIANCE = "Compliance"
     OPERATIONS = "Operations"
     ANALYTICS = "Analytics"
-
-
-# Models
 
 class ReportFilters(BaseModel):
     date_range: DateRange = DateRange.LAST_30_DAYS
@@ -66,444 +49,256 @@ class ReportFilters(BaseModel):
     tenants: List[str] = Field(default_factory=list)
     metrics: List[str] = Field(default_factory=list)
 
-
-class Report(BaseModel):
+class ReportSchema(BaseModel):
     id: str
     name: str
-    description: str
-    template: str
-    schedule: ReportSchedule
-    format: ReportFormat
-    created_at: str
-    last_run: str
-    status: ReportStatus
-    filters: ReportFilters
+    description: Optional[str]
+    template: str # Name of template
+    schedule: str
+    format: str
+    created_at: datetime
+    last_run: str = "Never" # Computed
+    status: str
+    filters: dict
     file_url: Optional[str] = None
 
+    class Config:
+        from_attributes = True
 
 class ReportCreate(BaseModel):
     name: str
     description: str = ""
     template: str
-    schedule: ReportSchedule = ReportSchedule.MANUAL
-    format: ReportFormat = ReportFormat.PDF
+    schedule: str = "manual"
+    format: str = "pdf"
     filters: ReportFilters
-
 
 class ReportUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    schedule: Optional[ReportSchedule] = None
-    format: Optional[ReportFormat] = None
+    schedule: Optional[str] = None
+    format: Optional[str] = None
     filters: Optional[ReportFilters] = None
 
-
-class ReportTemplate(BaseModel):
+class ReportTemplateSchema(BaseModel):
     id: str
     name: str
-    description: str
-    category: ReportCategory
+    description: Optional[str]
+    category: Optional[str]
     available_metrics: List[str]
 
+    class Config:
+        from_attributes = True
 
-# In-memory stores
-_reports_store: Dict[str, Report] = {}
-_templates_store: List[ReportTemplate] = []
-
-
-def _initialize_templates():
-    """Initialize report templates."""
-    global _templates_store
+# Helper to seed templates
+async def _seed_templates(session: AsyncSession):
+    stmt = select(ReportTemplate)
+    result = await session.execute(stmt)
+    existing = result.scalars().first()
     
-    if _templates_store:
+    if existing:
         return
-    
-    _templates_store = [
-        ReportTemplate(
-            id="1",
-            name="Security Overview",
-            description="Comprehensive security analysis including threats, blocks, and attack patterns",
-            category=ReportCategory.SECURITY,
-            available_metrics=[
-                "Total Attacks Blocked",
-                "Attack Types Distribution",
-                "Top Threat Sources",
-                "Security Rule Effectiveness",
-                "Vulnerability Scan Results",
-                "Incident Response Time"
-            ]
-        ),
-        ReportTemplate(
-            id="2",
-            name="Cost Analytics",
-            description="Detailed cost breakdown across providers, tenants, and time periods",
-            category=ReportCategory.FINANCIAL,
-            available_metrics=[
-                "Total API Costs",
-                "Cost by Provider",
-                "Cost by Tenant",
-                "Token Usage",
-                "Request Volume",
-                "Cost Trends",
-                "Budget vs Actual"
-            ]
-        ),
-        ReportTemplate(
-            id="3",
-            name="Compliance",
-            description="Policy compliance status, violations, and audit trails",
-            category=ReportCategory.COMPLIANCE,
-            available_metrics=[
-                "Policy Violations",
-                "Compliance Score",
-                "Audit Trail Events",
-                "Data Privacy Metrics",
-                "Access Control Logs",
-                "Regulatory Requirements"
-            ]
-        ),
-        ReportTemplate(
-            id="4",
-            name="Performance",
-            description="System performance metrics including latency, throughput, and reliability",
-            category=ReportCategory.OPERATIONS,
-            available_metrics=[
-                "Average Response Time",
-                "Request Throughput",
-                "Error Rates",
-                "Uptime Percentage",
-                "Cache Hit Ratio",
-                "Resource Utilization"
-            ]
-        ),
-        ReportTemplate(
-            id="5",
-            name="User Activity",
-            description="User behavior analysis, access patterns, and engagement metrics",
-            category=ReportCategory.ANALYTICS,
-            available_metrics=[
-                "Active Users",
-                "Login Frequency",
-                "Feature Usage",
-                "Session Duration",
-                "User Retention",
-                "Activity Heatmap"
-            ]
-        ),
-        ReportTemplate(
-            id="6",
-            name="API Usage",
-            description="Detailed API endpoint usage, request patterns, and performance",
-            category=ReportCategory.OPERATIONS,
-            available_metrics=[
-                "Request Count by Endpoint",
-                "Most Used Providers",
-                "Request Success Rate",
-                "Rate Limit Events",
-                "Payload Sizes",
-                "Geographic Distribution"
-            ]
-        )
+
+    # Seed data
+    templates_data = [
+        {
+            "name": "Security Overview",
+            "description": "Comprehensive security analysis including threats, blocks, and attack patterns",
+            "category": "Security",
+            "available_metrics": ["Total Attacks Blocked", "Attack Types Distribution", "Top Threat Sources"]
+        },
+        {
+            "name": "Cost Analytics",
+            "description": "Detailed cost breakdown across providers, tenants, and time periods",
+            "category": "Financial",
+            "available_metrics": ["Total API Costs", "Cost by Provider", "Token Usage"]
+        },
+        # Add others as needed
     ]
     
-    # Initialize some sample reports
-    _reports_store.update({
-        "1": Report(
-            id="1",
-            name="Monthly Security Report",
-            description="Comprehensive security analysis for the past month",
-            template="Security Overview",
-            schedule=ReportSchedule.MONTHLY,
-            format=ReportFormat.PDF,
-            created_at="2024-01-15T10:00:00Z",
-            last_run="3 days ago",
-            status=ReportStatus.COMPLETED,
-            filters=ReportFilters(
-                date_range=DateRange.LAST_30_DAYS,
-                providers=["all"],
-                tenants=["all"],
-                metrics=["attacks", "blocks", "threats"]
-            ),
-            file_url="/api/v1/reports/1/download"
-        ),
-        "2": Report(
-            id="2",
-            name="Weekly Cost Analysis",
-            description="API usage costs breakdown by provider",
-            template="Cost Analytics",
-            schedule=ReportSchedule.WEEKLY,
-            format=ReportFormat.CSV,
-            created_at="2024-01-20T14:30:00Z",
-            last_run="1 day ago",
-            status=ReportStatus.COMPLETED,
-            filters=ReportFilters(
-                date_range=DateRange.LAST_7_DAYS,
-                providers=["all"],
-                tenants=["all"],
-                metrics=["cost", "requests"]
-            ),
-            file_url="/api/v1/reports/2/download"
-        ),
-        "3": Report(
-            id="3",
-            name="Compliance Audit",
-            description="Policy compliance and violations report",
-            template="Compliance",
-            schedule=ReportSchedule.MANUAL,
-            format=ReportFormat.PDF,
-            created_at="2024-02-01T09:15:00Z",
-            last_run="5 hours ago",
-            status=ReportStatus.READY,
-            filters=ReportFilters(
-                date_range=DateRange.LAST_90_DAYS,
-                providers=["all"],
-                tenants=["all"],
-                metrics=["violations", "policies"]
-            )
-        ),
-        "4": Report(
-            id="4",
-            name="Tenant Performance",
-            description="Performance metrics for all active tenants",
-            template="Performance",
-            schedule=ReportSchedule.MANUAL,
-            format=ReportFormat.JSON,
-            created_at="2024-02-03T16:45:00Z",
-            last_run="Never",
-            status=ReportStatus.READY,
-            filters=ReportFilters(
-                date_range=DateRange.LAST_30_DAYS,
-                providers=["all"],
-                tenants=["all"],
-                metrics=["latency", "throughput"]
-            )
+    for t_data in templates_data:
+        template = ReportTemplate(
+            name=t_data["name"],
+            description=t_data["description"],
+            category=t_data["category"],
+            available_metrics=t_data["available_metrics"]
         )
-    })
+        session.add(template)
+    
+    await session.commit()
 
-
-_initialize_templates()
-
-
-# Endpoints
-
-@router.get("/templates", response_model=List[ReportTemplate])
+@router.get("/templates", response_model=List[ReportTemplateSchema])
 async def get_templates(
-    category: Optional[ReportCategory] = None,
-    current_user: dict = Depends(get_current_admin)
+    current_user: dict = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_db)
 ):
     """Get all report templates."""
-    logger.info("get_templates", category=category, user_id=current_user.get("id"))
+    await _seed_templates(session) # Ensure seeded
     
-    templates = _templates_store
-    
-    if category:
-        templates = [t for t in templates if t.category == category]
-    
+    stmt = select(ReportTemplate)
+    result = await session.execute(stmt)
+    templates = result.scalars().all()
     return templates
 
-
-@router.get("/templates/{template_id}", response_model=ReportTemplate)
-async def get_template(
-    template_id: str,
-    current_user: dict = Depends(get_current_admin)
-):
-    """Get a specific report template."""
-    logger.info("get_template", template_id=template_id, user_id=current_user.get("id"))
-    
-    template = next((t for t in _templates_store if t.id == template_id), None)
-    if not template:
-        raise HTTPException(status_code=404, detail="Template not found")
-    
-    return template
-
-
-@router.get("", response_model=List[Report])
+@router.get("", response_model=List[ReportSchema])
 async def get_reports(
-    status: Optional[ReportStatus] = None,
-    schedule: Optional[ReportSchedule] = None,
-    current_user: dict = Depends(get_current_admin)
+    status: Optional[str] = None,
+    schedule: Optional[str] = None,
+    current_user: dict = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_db)
 ):
-    """Get all reports with optional filters."""
-    logger.info("get_reports", status=status, schedule=schedule, user_id=current_user.get("id"))
-    
-    reports = list(_reports_store.values())
+    """Get all reports."""
+    stmt = select(Report).options(select(ReportTemplate)) # Eager load? Or manual join
+    # Actually Report.template relationship should load automatically or lazily. 
+    # For pydantic 'template' field (str name), we need the relationship.
+    stmt = select(Report, ReportTemplate).join(ReportTemplate, Report.template_id == ReportTemplate.id)
     
     if status:
-        reports = [r for r in reports if r.status == status]
-    
+        stmt = stmt.where(Report.status == status)
     if schedule:
-        reports = [r for r in reports if r.schedule == schedule]
+        stmt = stmt.where(Report.schedule == schedule)
+        
+    result = await session.execute(stmt)
+    rows = result.all()
     
+    # Map to schema
+    reports = []
+    for report, template in rows:
+        r_dict = {
+            "id": str(report.id),
+            "name": report.name,
+            "description": report.description,
+            "template": template.name,
+            "schedule": report.schedule,
+            "format": report.format,
+            "created_at": report.created_at,
+            "last_run": report.last_run_at.isoformat() if report.last_run_at else "Never",
+            "status": report.status,
+            "filters": report.filters,
+            "file_url": report.file_url
+        }
+        reports.append(r_dict)
+        
     return reports
 
-
-@router.get("/{report_id}", response_model=Report)
-async def get_report(
-    report_id: str,
-    current_user: dict = Depends(get_current_admin)
-):
-    """Get a specific report by ID."""
-    logger.info("get_report", report_id=report_id, user_id=current_user.get("id"))
-    
-    if report_id not in _reports_store:
-        raise HTTPException(status_code=404, detail="Report not found")
-    
-    return _reports_store[report_id]
-
-
-@router.post("", response_model=Report, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ReportSchema)
 async def create_report(
     report_data: ReportCreate,
-    current_user: dict = Depends(get_current_admin)
+    current_user: dict = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_db)
 ):
     """Create a new report."""
-    logger.info("create_report", name=report_data.name, template=report_data.template,
-                creator=current_user.get("id"))
+    await _seed_templates(session)
     
-    # Verify template exists
-    template = next((t for t in _templates_store if t.name == report_data.template), None)
+    # Find template
+    stmt = select(ReportTemplate).where(ReportTemplate.name == report_data.template)
+    result = await session.execute(stmt)
+    template = result.scalars().first()
+    
     if not template:
         raise HTTPException(status_code=400, detail="Invalid template")
     
-    report_id = str(uuid.uuid4())
     new_report = Report(
-        id=report_id,
         name=report_data.name,
         description=report_data.description,
-        template=report_data.template,
+        template_id=template.id,
         schedule=report_data.schedule,
         format=report_data.format,
-        created_at=datetime.utcnow().isoformat() + "Z",
-        last_run="Never",
-        status=ReportStatus.READY,
-        filters=report_data.filters
+        status="ready",
+        filters=report_data.filters.dict(),
+        created_by=current_user["id"],
+        created_at=datetime.utcnow()
     )
     
-    _reports_store[report_id] = new_report
+    session.add(new_report)
+    await session.commit()
+    await session.refresh(new_report)
     
-    return new_report
-
-
-@router.put("/{report_id}", response_model=Report)
-async def update_report(
-    report_id: str,
-    report_update: ReportUpdate,
-    current_user: dict = Depends(get_current_admin)
-):
-    """Update a report."""
-    logger.info("update_report", report_id=report_id, updater=current_user.get("id"))
-    
-    if report_id not in _reports_store:
-        raise HTTPException(status_code=404, detail="Report not found")
-    
-    report = _reports_store[report_id]
-    
-    # Apply updates
-    if report_update.name is not None:
-        report.name = report_update.name
-    
-    if report_update.description is not None:
-        report.description = report_update.description
-    
-    if report_update.schedule is not None:
-        report.schedule = report_update.schedule
-    
-    if report_update.format is not None:
-        report.format = report_update.format
-    
-    if report_update.filters is not None:
-        report.filters = report_update.filters
-    
-    return report
-
-
-@router.delete("/{report_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_report(
-    report_id: str,
-    current_user: dict = Depends(get_current_admin)
-):
-    """Delete a report."""
-    logger.info("delete_report", report_id=report_id, deleter=current_user.get("id"))
-    
-    if report_id not in _reports_store:
-        raise HTTPException(status_code=404, detail="Report not found")
-    
-    del _reports_store[report_id]
-    return None
-
+    # Return schema
+    return {
+        "id": str(new_report.id),
+        "name": new_report.name,
+        "description": new_report.description,
+        "template": template.name,
+        "schedule": new_report.schedule,
+        "format": new_report.format,
+        "created_at": new_report.created_at,
+        "last_run": "Never",
+        "status": new_report.status,
+        "filters": new_report.filters,
+        "file_url": new_report.file_url
+    }
 
 async def _generate_report_task(report_id: str, user_id: str):
-    """Background task to generate a report."""
-    import asyncio
-    
-    logger.info("generating_report", report_id=report_id, user_id=user_id)
-    
-    if report_id not in _reports_store:
-        logger.error("report_not_found", report_id=report_id)
-        return
-    
-    report = _reports_store[report_id]
-    report.status = ReportStatus.RUNNING
-    
-    # Simulate report generation (2-5 seconds)
-    await asyncio.sleep(3)
-    
-    # Mark as completed
-    report.status = ReportStatus.COMPLETED
-    report.last_run = "Just now"
-    report.file_url = f"/api/v1/reports/{report_id}/download"
-    
-    logger.info("report_generated", report_id=report_id, status="completed")
-
+    """Background task to generate report."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Report).where(Report.id == report_id))
+        report = result.scalars().first()
+        
+        if not report:
+            return
+            
+        report.status = "running"
+        await session.commit()
+        
+        # Simulate generation
+        await asyncio.sleep(2)
+        
+        # In real impl, fetch RequestLogs depending on filters
+        # logs_stmt = select(RequestLog)...
+        
+        report.status = "completed"
+        report.last_run_at = datetime.utcnow()
+        report.file_url = f"/api/v1/reports/{report.id}/download"
+        await session.commit()
 
 @router.post("/{report_id}/generate")
 async def generate_report(
     report_id: str,
     background_tasks: BackgroundTasks,
-    current_user: dict = Depends(get_current_admin)
+    current_user: dict = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_db)
 ):
-    """Generate (run) a report."""
-    logger.info("generate_report_request", report_id=report_id, user_id=current_user.get("id"))
+    """Generate a report."""
+    result = await session.execute(select(Report).where(Report.id == report_id))
+    report = result.scalars().first()
     
-    if report_id not in _reports_store:
+    if not report:
         raise HTTPException(status_code=404, detail="Report not found")
-    
-    report = _reports_store[report_id]
-    
-    if report.status == ReportStatus.RUNNING:
+        
+    if report.status == "running":
         raise HTTPException(status_code=409, detail="Report is already running")
+        
+    background_tasks.add_task(_generate_report_task, str(report.id), str(current_user["id"]))
     
-    # Queue the report generation task
-    background_tasks.add_task(_generate_report_task, report_id, current_user.get("id"))
-    
-    return {
-        "status": "queued",
-        "message": "Report generation started",
-        "report_id": report_id
-    }
+    return {"status": "queued", "message": "Report generation started"}
 
-
-@router.get("/{report_id}/download")
-async def download_report(
-    report_id: str,
-    current_user: dict = Depends(get_current_admin)
+@router.get("/logs", response_model=List[dict])
+async def get_logs(
+    limit: int = 50,
+    offset: int = 0,
+    current_user: dict = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_db)
 ):
-    """Download a generated report."""
-    logger.info("download_report", report_id=report_id, user_id=current_user.get("id"))
-    
-    if report_id not in _reports_store:
-        raise HTTPException(status_code=404, detail="Report not found")
-    
-    report = _reports_store[report_id]
-    
-    if report.status != ReportStatus.COMPLETED:
-        raise HTTPException(status_code=400, detail="Report is not ready for download")
-    
-    # In production, this would return the actual file
-    return {
-        "report_id": report_id,
-        "name": report.name,
-        "format": report.format,
-        "url": f"/reports/{report_id}.{report.format}",
-        "message": "In production, this would stream the actual file"
-    }
+    """Get raw request logs."""
+    stmt = (
+        select(RequestLog)
+        .order_by(desc(RequestLog.timestamp))
+        .limit(limit)
+        .offset(offset)
+    )
+    result = await session.execute(stmt)
+    logs = result.scalars().all()
+    # Need to_dict method on RequestLog or use pydantic
+    return [
+        {
+            "id": str(log.id),
+            "timestamp": log.timestamp,
+            "provider": log.provider,
+            "cost": log.cost,
+            "model": log.model,
+            "status_code": log.status_code,
+            "is_blocked": log.is_blocked
+        }
+        for log in logs
+    ]

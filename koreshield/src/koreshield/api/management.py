@@ -19,20 +19,7 @@ logger = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["management"])
 
-# Database setup
-DATABASE_URL = os.getenv("DATABASE_URL", "")
-if DATABASE_URL.startswith("postgresql://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
-
-engine = create_async_engine(DATABASE_URL, echo=False) if DATABASE_URL else None
-AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False) if engine else None
-
-async def get_db():
-    """Database session dependency."""
-    if not AsyncSessionLocal:
-        raise HTTPException(status_code=500, detail="Database not configured")
-    async with AsyncSessionLocal() as session:
-        yield session
+from ..database import get_db, AsyncSessionLocal, engine
 
 # JWT Configuration
 JWT_SECRET = os.getenv("JWT_PRIVATE_KEY") or os.getenv("JWT_PUBLIC_KEY", "")
@@ -429,6 +416,7 @@ class CreateAPIKeyRequest(BaseModel):
     name: str
     description: str | None = None
     expires_in_days: int | None = None  # Optional expiration in days
+    expires_at: datetime | None = None  # Optional specific expiration date
 
 class APIKeyResponse(BaseModel):
     id: str
@@ -466,9 +454,24 @@ async def generate_api_key(
         full_key, key_hash, key_prefix = APIKey.generate_key()
         
         # Calculate expiration
+        # Calculate expiration
         expires_at = None
-        if request.expires_in_days:
-            expires_at = datetime.utcnow() + timedelta(days=request.expires_in_days)
+        now = datetime.utcnow()
+
+        if request.expires_at is not None:
+            if request.expires_at <= now:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="expires_at must be in the future",
+                )
+            expires_at = request.expires_at
+        elif request.expires_in_days is not None:
+            if request.expires_in_days <= 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="expires_in_days must be greater than 0",
+                )
+            expires_at = now + timedelta(days=request.expires_in_days)
         
         # Create API key record
         api_key = APIKey(
