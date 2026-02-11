@@ -478,6 +478,10 @@ class ApiClient {
 		});
 	}
 
+	async getTeam(teamId: string) {
+		return this.fetch(`/v1/teams/${teamId}`);
+	}
+
 	async getTeamMembers(teamId: string, role?: string) {
 		const queryParams = role ? `?role=${role}` : '';
 		return this.fetch(`/v1/teams/${teamId}/members${queryParams}`);
@@ -490,8 +494,8 @@ class ApiClient {
 		});
 	}
 
-	async removeMember(teamId: string, memberId: string) {
-		return this.fetch(`/v1/teams/${teamId}/members/${memberId}`, {
+	async removeMember(teamId: string, userId: string) {
+		return this.fetch(`/v1/teams/${teamId}/members/${userId}`, {
 			method: 'DELETE',
 		});
 	}
@@ -501,10 +505,10 @@ class ApiClient {
 		return this.fetch(`/v1/teams/${teamId}/invites${queryParams}`);
 	}
 
-	async inviteMember(teamId: string, inviteData: { email: string; role: string }) {
-		return this.fetch(`/v1/teams/${teamId}/invites`, {
+	async addMember(teamId: string, memberData: { email: string; role: string }) {
+		return this.fetch(`/v1/teams/${teamId}/members`, {
 			method: 'POST',
-			body: JSON.stringify(inviteData),
+			body: JSON.stringify(memberData),
 		});
 	}
 
