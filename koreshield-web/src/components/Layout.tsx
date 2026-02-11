@@ -36,6 +36,7 @@ export function Layout() {
 						{isAuthenticated && (
 							<>
 								<Link to="/dashboard" className="text-sm font-medium hover:text-electric-green transition-colors">Dashboard</Link>
+								<Link to="/teams" className="text-sm font-medium hover:text-electric-green transition-colors">Teams</Link>
 								<Link to="/threat-monitoring" className="text-sm font-medium hover:text-electric-green transition-colors">Threats</Link>
 								<Link to="/provider-health" className="text-sm font-medium hover:text-electric-green transition-colors">Providers</Link>
 								<Link to="/advanced-analytics" className="text-sm font-medium hover:text-electric-green transition-colors">Analytics</Link>
@@ -94,6 +95,7 @@ export function Layout() {
 						{isAuthenticated && (
 							<>
 								<Link to="/dashboard" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+								<Link to="/teams" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Teams</Link>
 								<Link to="/threat-monitoring" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threats</Link>
 								<Link to="/provider-health" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Providers</Link>
 								<Link to="/advanced-analytics" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Analytics</Link>

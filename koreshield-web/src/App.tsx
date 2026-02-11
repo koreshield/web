@@ -36,6 +36,7 @@ const CostAnalyticsPage = lazy(() => import('./pages/CostAnalyticsPage').then(m 
 const RBACPage = lazy(() => import('./pages/RBACPage').then(m => ({ default: m.RBACPage })));
 const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
 const TeamsPage = lazy(() => import('./pages/TeamsPage').then(m => ({ default: m.TeamsPage })));
+const TeamDetailsPage = lazy(() => import('./pages/TeamDetailsPage').then(m => ({ default: m.TeamDetailsPage })));
 const ApiKeysPage = lazy(() => import('./pages/ApiKeysPage').then(m => ({ default: m.ApiKeysPage })));
 const RAGSecurityPage = lazy(() => import('./pages/RAGSecurityPage').then(m => ({ default: m.RAGSecurityPage })));
 const ThreatMonitoringPage = lazy(() => import('./pages/ThreatMonitoringPage').then(m => ({ default: m.ThreatMonitoringPage })));
@@ -338,6 +339,18 @@ function AppContent() {
 								<RouteErrorBoundary>
 									<ProtectedRoute>
 										<TeamsPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/teams/:teamId"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<TeamDetailsPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
 							</Suspense>
