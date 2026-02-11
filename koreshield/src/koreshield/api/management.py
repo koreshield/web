@@ -467,11 +467,28 @@ async def generate_api_key(
         full_key, key_hash, key_prefix = APIKey.generate_key()
         
         # Calculate expiration
+        now = datetime.utcnow()
         expires_at = None
-        if request.expires_at:
-            expires_at = request.expires_at
-        elif request.expires_in_days:
-            expires_at = datetime.utcnow() + timedelta(days=request.expires_in_days)
+        
+        if request.expires_at is not None:
+             # Normalize to naive UTC for storage
+             if request.expires_at.tzinfo is not None:
+                 expires_at = request.expires_at.astimezone(timezone.utc).replace(tzinfo=None)
+             else:
+                 expires_at = request.expires_at
+                 
+             if expires_at <= now:
+                 raise HTTPException(
+                     status_code=status.HTTP_400_BAD_REQUEST,
+                     detail="expires_at must be in the future",
+                 )
+        elif request.expires_in_days is not None:
+            if request.expires_in_days <= 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="expires_in_days must be greater than 0",
+                )
+            expires_at = now + timedelta(days=request.expires_in_days)
         
         # Create API key record
         api_key = APIKey(

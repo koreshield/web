@@ -37,7 +37,7 @@ export function ProfilePage() {
 					<div className="p-6 border-b border-border">
 						<h2 className="text-lg font-semibold">Personal Information</h2>
 						<p className="text-sm text-muted-foreground">
-							Basic details about your account account.
+							Basic details about your account.
 						</p>
 					</div>
 					<div className="p-6 space-y-6">
@@ -75,7 +75,7 @@ export function ProfilePage() {
 								</label>
 								<div className="flex items-center gap-2 p-3 bg-muted rounded-md text-foreground font-medium capitalize">
 									<span className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-green-500' : 'bg-yellow-500'}`} />
-									{user.status}
+									{user.status || 'unknown'}
 								</div>
 							</div>
 						</div>
