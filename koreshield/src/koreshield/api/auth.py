@@ -34,7 +34,7 @@ def init_jwt_config(config: dict):
     global JWT_PUBLIC_KEY, JWT_ALGORITHM, JWT_ISSUER
 
     jwt_config = config.get("jwt", {})
-    JWT_PUBLIC_KEY = jwt_config.get("public_key") or os.getenv("JWT_PUBLIC_KEY") or os.getenv("JWT_PRIVATE_KEY", "")
+    JWT_PUBLIC_KEY = jwt_config.get("public_key") or os.getenv("JWT_PUBLIC_KEY") or os.getenv("JWT_PRIVATE_KEY") or os.getenv("JWT_SECRET", "")
     
     # Auto-detect algorithm based on key format
     JWT_ALGORITHM = "RS256" if JWT_PUBLIC_KEY and "BEGIN" in JWT_PUBLIC_KEY else "HS256"

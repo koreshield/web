@@ -49,7 +49,9 @@ export function Layout() {
 							<div className="flex items-center gap-3">
 								<div className="flex items-center gap-2 text-sm">
 									<User className="w-4 h-4 text-electric-green" />
-									<span className="text-muted-foreground">{user?.name || user?.email}</span>
+									<Link to="/profile" className="text-muted-foreground hover:text-foreground transition-colors">
+										{user?.name || user?.email}
+									</Link>
 								</div>
 								<button
 									onClick={handleLogout}

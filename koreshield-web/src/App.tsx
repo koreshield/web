@@ -45,6 +45,7 @@ const ApiKeyManagementPage = lazy(() => import('./pages/ApiKeyManagementPage'));
 const AuditLogsPage = lazy(() => import('./pages/AuditLogsPage'));
 const AdvancedAnalyticsPage = lazy(() => import('./pages/AdvancedAnalyticsPage').then(m => ({ default: m.AdvancedAnalyticsPage })));
 const ComplianceReportsPage = lazy(() => import('./pages/ComplianceReportsPage').then(m => ({ default: m.ComplianceReportsPage })));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 
 function AppContent() {
 	const { addToast } = useToast();
@@ -64,6 +65,18 @@ function AppContent() {
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<LandingPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/profile"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<ProfilePage />
+									</ProtectedRoute>
 								</RouteErrorBoundary>
 							</Suspense>
 						}
