@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 # Import your models
 from src.koreshield.models.base import Base
 # Import all modules that define models to ensure they are registered with Base.metadata
-from src.koreshield.models import user, api_key, request_log, report
+from src.koreshield.models import user, api_key, request_log, report, team
 from src.koreshield import tenant_models
 
 # this is the Alembic Config object, which provides
