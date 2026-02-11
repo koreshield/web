@@ -22,7 +22,7 @@ router = APIRouter(tags=["management"])
 from ..database import get_db, AsyncSessionLocal, engine
 
 # JWT Configuration
-JWT_SECRET = os.getenv("JWT_PRIVATE_KEY") or os.getenv("JWT_PUBLIC_KEY", "")
+JWT_SECRET = os.getenv("JWT_PRIVATE_KEY") or os.getenv("JWT_PUBLIC_KEY") or os.getenv("JWT_SECRET", "")
 JWT_ALGORITHM = "RS256" if "BEGIN" in JWT_SECRET else "HS256"
 JWT_EXPIRATION_HOURS = 24
 
@@ -455,16 +455,21 @@ async def generate_api_key(
         
         # Calculate expiration
         # Calculate expiration
-        expires_at = None
         now = datetime.utcnow()
-
+        expires_at = None
+        
         if request.expires_at is not None:
-            if request.expires_at <= now:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="expires_at must be in the future",
-                )
-            expires_at = request.expires_at
+             # Normalize to naive UTC for storage
+             if request.expires_at.tzinfo is not None:
+                 expires_at = request.expires_at.astimezone(timezone.utc).replace(tzinfo=None)
+             else:
+                 expires_at = request.expires_at
+                 
+             if expires_at <= now:
+                 raise HTTPException(
+                     status_code=status.HTTP_400_BAD_REQUEST,
+                     detail="expires_at must be in the future",
+                 )
         elif request.expires_in_days is not None:
             if request.expires_in_days <= 0:
                 raise HTTPException(
