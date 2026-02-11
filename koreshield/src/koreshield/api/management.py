@@ -35,7 +35,7 @@ async def get_db():
         yield session
 
 # JWT Configuration
-JWT_SECRET = os.getenv("JWT_PRIVATE_KEY") or os.getenv("JWT_PUBLIC_KEY", "")
+JWT_SECRET = os.getenv("JWT_PRIVATE_KEY") or os.getenv("JWT_PUBLIC_KEY") or os.getenv("JWT_SECRET", "")
 JWT_ALGORITHM = "RS256" if "BEGIN" in JWT_SECRET else "HS256"
 JWT_EXPIRATION_HOURS = 24
 
@@ -429,6 +429,7 @@ class CreateAPIKeyRequest(BaseModel):
     name: str
     description: str | None = None
     expires_in_days: int | None = None  # Optional expiration in days
+    expires_at: datetime | None = None  # Optional specific expiration date
 
 class APIKeyResponse(BaseModel):
     id: str
@@ -467,7 +468,9 @@ async def generate_api_key(
         
         # Calculate expiration
         expires_at = None
-        if request.expires_in_days:
+        if request.expires_at:
+            expires_at = request.expires_at
+        elif request.expires_in_days:
             expires_at = datetime.utcnow() + timedelta(days=request.expires_in_days)
         
         # Create API key record
