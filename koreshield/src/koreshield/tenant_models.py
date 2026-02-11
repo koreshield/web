@@ -23,7 +23,7 @@ from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.schema import CreateSchema
 from pydantic import BaseModel, Field, field_validator
 
-Base = declarative_base()
+from .models.base import Base
 
 class TenantStatus(Enum):
     """Tenant lifecycle status."""

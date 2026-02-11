@@ -8,6 +8,8 @@ import sys
 import uuid
 from pathlib import Path
 from typing import List, Optional, Any
+from datetime import datetime
+import asyncio
 
 import httpx
 import structlog
@@ -21,6 +23,10 @@ from .policy import PolicyEngine
 from .sanitizer import SanitizationEngine
 from .rag_detector import RAGContextDetector
 from .rag_taxonomy import RetrievedDocument
+
+from .rag_taxonomy import RetrievedDocument
+from .database import AsyncSessionLocal
+from .models.request_log import RequestLog
 
 logger = structlog.get_logger(__name__)
 
@@ -420,6 +426,16 @@ class KoreShieldProxy:
         # If needed, implement specific proxy endpoints instead
 
 
+    async def _log_request_async(self, log_data: dict):
+        """Log request to database asynchronously."""
+        try:
+            async with AsyncSessionLocal() as session:
+                log_entry = RequestLog(**log_data)
+                session.add(log_entry)
+                await session.commit()
+        except Exception as e:
+            logger.error("Failed to log request to DB", error=str(e))
+
     async def _handle_chat_completion(self, request: Request) -> Response:
         """
         Handle OpenAI chat completion requests with security checks.
@@ -580,6 +596,30 @@ class KoreShieldProxy:
                 )
                 self.logger.log_blocked(request_id=request_id, reason=reason)
 
+                # Log to DB
+                log_data = {
+                    "request_id": request_id,
+                    "timestamp": datetime.utcnow(),
+                    "provider": "unknown", # Blocked before provider selection
+                    "model": model,
+                    "method": request.method,
+                    "path": "/v1/chat/completions",
+                    "status_code": 403,
+                    "latency_ms": (time.time() - start_time) * 1000,
+                    "is_blocked": True,
+                    "block_reason": reason,
+                    "attack_detected": detection_result.get("is_attack", False) if 'detection_result' in locals() else False,
+                    "attack_type": detection_result.get("attack_type") if 'detection_result' in locals() else None,
+                    "attack_details": {
+                        "sanitization": sanitization_result if 'sanitization_result' in locals() else None,
+                        "detection": detection_result if 'detection_result' in locals() else None,
+                        "policy": policy_result if 'policy_result' in locals() else None,
+                    },
+                    "ip_address": request.client.host if request.client else None,
+                    "user_agent": request.headers.get("user-agent"),
+                }
+                asyncio.create_task(self._log_request_async(log_data))
+
                 return JSONResponse(
                     status_code=403,
                     content={
@@ -627,6 +667,26 @@ class KoreShieldProxy:
                     method=request.method,
                     endpoint="/v1/chat/completions"
                 ).observe(duration)
+
+                # Log success to DB
+                usage = response.get("usage", {})
+                log_data = {
+                    "request_id": request_id,
+                    "timestamp": datetime.utcnow(),
+                    "provider": provider_name,
+                    "model": model,
+                    "method": request.method,
+                    "path": "/v1/chat/completions",
+                    "status_code": 200,
+                    "latency_ms": duration * 1000,
+                    "tokens_prompt": usage.get("prompt_tokens", 0),
+                    "tokens_completion": usage.get("completion_tokens", 0),
+                    "tokens_total": usage.get("total_tokens", 0),
+                    "is_blocked": False,
+                    "ip_address": request.client.host if request.client else None,
+                    "user_agent": request.headers.get("user-agent"),
+                }
+                asyncio.create_task(self._log_request_async(log_data))
 
                 return JSONResponse(content=response)
 
