@@ -1,0 +1,51 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'koreshield/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    # Deploy to VPS via SCP
+    - name: Copy files via SCP
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        source: "koreshield/src,koreshield/config,koreshield/alembic,koreshield/alembic.ini,koreshield/Dockerfile,koreshield/requirements.txt,koreshield/requirements-dev.txt,koreshield/docker-compose.prod.yml,koreshield/Caddyfile"
+        target: "/opt/koreshield_deploy"
+        strip_components: 0
+
+    - name: Execute Remote Deployment
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        script: |
+          # Create destination if not exists (should exist from manual deploy)
+          mkdir -p /opt/koreshield
+          
+          # Sync files (rsync is better but we use scp to temp dir then move)
+          # We just overwrite code
+          cp -r /opt/koreshield_deploy/koreshield/* /opt/koreshield/
+          
+          cd /opt/koreshield
+          
+          # Ensure .env exists (it should, from manual set up. secrets are not in git)
+          # We do NOT overwrite .env from git (it's not in git)
+          
+          # Rebuild and restart
+          docker-compose -f docker-compose.prod.yml up -d --build --remove-orphans
+          
+          # Prune unused images
+          docker image prune -f
