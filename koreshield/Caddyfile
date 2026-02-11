@@ -1,3 +1,3 @@
 api.koreshield.com {
-    reverse_proxy koreshield-backend:8000
+    reverse_proxy koreshield:8000
 }
