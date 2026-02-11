@@ -25,6 +25,9 @@ class User(Base):
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     user_metadata = Column(JSON, default={})
+
+    # Relationships
+    # Note: `owned_teams` and `team_memberships` are defined in Team and TeamMember using backref/back_populates
     
     def to_dict(self):
         """Convert user to dictionary (excluding password)."""
