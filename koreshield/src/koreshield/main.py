@@ -91,42 +91,36 @@ def validate_config(config: dict) -> list[str]:
     return issues
 
 
-def main(config_path: str = "config/config.yaml"):
-    """
-    Main entry point.
-
-    Args:
-        config_path: Path to configuration file
-    """
-    # Load configuration
-    config = load_config(config_path)
-
-    # Set up logging
+# Expose app for uvicorn
+# Load config relative to project root or default
+try:
+    config = load_config()
+    # Set up logging early
     log_config = config.get("logging", {})
     setup_logging(
         log_level=log_config.get("level", "INFO"), 
         json_logs=log_config.get("json_logs", False),
         container_mode=log_config.get("container_mode", False)
     )
-
-    logger = structlog.get_logger(__name__)
-
-    # Surface validation issues but do not prevent startup
-    for issue in validate_config(config):
-        logger.warning("config_issue", detail=issue)
-
-    logger.info("Starting LLM Firewall Community", version="0.1.0")
-
-    # Create proxy instance
+    
     proxy = KoreShieldProxy(config)
+    app = proxy.app
+except Exception as e:
+    print(f"Failed to initialize app: {e}")
+    # Fallback/dummy app to prevent import error crashing uvicorn immediately if config fails
+    # But usually we want it to fail specific to config
+    raise e
 
+def main(config_path: str = "config/config.yaml"):
+    """
+    Main entry point for script execution.
+    """
+    # ... existing main logic if needed, or just run uvicorn on the global app ...
+    import uvicorn
     # Get server config
     host = config.get("server", {}).get("host", "0.0.0.0")
     port = config.get("server", {}).get("port", 8000)
-
-    # Run the server
-    uvicorn.run(proxy.app, host=host, port=port, log_config=None)  # We're using structlog
-
+    uvicorn.run(app, host=host, port=port)
 
 if __name__ == "__main__":
     main()

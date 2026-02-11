@@ -19,20 +19,7 @@ logger = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["management"])
 
-# Database setup
-DATABASE_URL = os.getenv("DATABASE_URL", "")
-if DATABASE_URL.startswith("postgresql://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
-
-engine = create_async_engine(DATABASE_URL, echo=False) if DATABASE_URL else None
-AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False) if engine else None
-
-async def get_db():
-    """Database session dependency."""
-    if not AsyncSessionLocal:
-        raise HTTPException(status_code=500, detail="Database not configured")
-    async with AsyncSessionLocal() as session:
-        yield session
+from ..database import get_db, AsyncSessionLocal, engine
 
 # JWT Configuration
 JWT_SECRET = os.getenv("JWT_PRIVATE_KEY") or os.getenv("JWT_PUBLIC_KEY") or os.getenv("JWT_SECRET", "")
@@ -466,6 +453,7 @@ async def generate_api_key(
         # Generate API key
         full_key, key_hash, key_prefix = APIKey.generate_key()
         
+        # Calculate expiration
         # Calculate expiration
         now = datetime.utcnow()
         expires_at = None

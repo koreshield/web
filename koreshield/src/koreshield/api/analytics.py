@@ -9,8 +9,12 @@ from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 from enum import Enum
 import structlog
+from sqlalchemy import select, func, and_
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .auth import get_current_admin
+from ..database import get_db
+from ..models.request_log import RequestLog
 
 logger = structlog.get_logger(__name__)
 
@@ -46,80 +50,76 @@ class CostData(BaseModel):
     tenant_costs: List[TenantCost]
 
 
-# In-memory cost tracking (in production, this should be stored in database)
-_cost_data_store: Dict[str, List[Dict]] = {}
-
-
-def _generate_cost_data(time_range: TimeRange) -> List[CostData]:
-    """Generate cost data based on time range."""
-    days = {
+async def _query_cost_data(session: AsyncSession, time_range: TimeRange) -> List[CostData]:
+    """Generate cost data based on time range using DB aggregation."""
+    days_map = {
         TimeRange.TODAY: 1,
         TimeRange.LAST_7_DAYS: 7,
         TimeRange.LAST_30_DAYS: 30,
         TimeRange.LAST_90_DAYS: 90,
         TimeRange.LAST_YEAR: 365,
     }
+    num_days = days_map.get(time_range, 7)
+    start_date = datetime.utcnow() - timedelta(days=num_days)
     
-    num_days = days.get(time_range, 7)
-    cost_data = []
+    # Query: Group by Date (YYYY-MM-DD), Provider
+    # Note: SQLite/Postgres specific date function. Assuming Postgres.
+    # Postgres: date_trunc('day', timestamp)
+    date_col = func.date_trunc('day', RequestLog.timestamp)
     
-    # Base costs with some variation
-    base_providers = {
-        "OpenAI": {"cost_per_request": 0.002, "tokens_per_request": 1000},
-        "Anthropic": {"cost_per_request": 0.0015, "tokens_per_request": 800},
-        "DeepSeek": {"cost_per_request": 0.0008, "tokens_per_request": 1100},
-        "Gemini": {"cost_per_request": 0.0006, "tokens_per_request": 900},
-    }
+    stmt = (
+        select(
+            date_col.label("day"),
+            RequestLog.provider,
+            func.sum(RequestLog.cost).label("cost"),
+            func.count(RequestLog.id).label("requests"),
+            func.sum(RequestLog.tokens_total).label("tokens")
+        )
+        .where(RequestLog.timestamp >= start_date)
+        .group_by(date_col, RequestLog.provider)
+        .order_by(date_col)
+    )
     
-    base_tenants = {
-        "tenant_1": {"name": "Acme Corporation", "tier": "enterprise", "share": 0.45},
-        "tenant_2": {"name": "TechStart Inc", "tier": "professional", "share": 0.25},
-        "tenant_3": {"name": "DevShop", "tier": "starter", "share": 0.15},
-        "tenant_4": {"name": "CloudCo", "tier": "professional", "share": 0.15},
-    }
+    result = await session.execute(stmt)
+    rows = result.all()
     
-    for day in range(num_days):
-        date = datetime.now() - timedelta(days=num_days - day - 1)
-        period = date.strftime("%b %d")
+    # Process results into structured data
+    # Map {day_str: {provider: ProviderCost}}
+    data_by_day = {}
+    
+    for row in rows:
+        day_str = row.day.strftime("%Y-%m-%d")
+        if day_str not in data_by_day:
+            data_by_day[day_str] = []
         
-        # Add some randomness (±15%) to make it look realistic
-        import random
-        variation = random.uniform(0.85, 1.15)
-        
-        provider_costs = []
-        total_cost = 0
-        
-        for provider, config in base_providers.items():
-            requests = int(random.uniform(8000, 12000) * variation)
-            tokens = requests * config["tokens_per_request"]
-            cost = requests * config["cost_per_request"] * variation
-            total_cost += cost
-            
-            provider_costs.append(ProviderCost(
-                provider=provider,
-                cost=round(cost, 2),
-                requests=requests,
-                tokens=tokens
-            ))
-        
-        tenant_costs = []
-        for tenant_id, config in base_tenants.items():
-            cost = total_cost * config["share"]
-            tenant_costs.append(TenantCost(
-                tenant_id=tenant_id,
-                tenant_name=config["name"],
-                cost=round(cost, 2),
-                tier=config["tier"]
-            ))
-        
-        cost_data.append(CostData(
-            period=period,
-            total_cost=round(total_cost, 2),
-            provider_costs=provider_costs,
-            tenant_costs=tenant_costs
+        data_by_day[day_str].append(ProviderCost(
+            provider=row.provider,
+            cost=round(float(row.cost or 0), 4),
+            requests=row.requests,
+            tokens=row.tokens or 0
         ))
     
-    return cost_data
+    # Fill in gaps and format
+    final_data = []
+    for i in range(num_days):
+        date = datetime.utcnow() - timedelta(days=num_days - i - 1)
+        day_str = date.strftime("%Y-%m-%d")
+        period_label = date.strftime("%b %d")
+        
+        providers = data_by_day.get(day_str, [])
+        total_cost = sum(p.cost for p in providers)
+        
+        # Mock tenant costs for now (until Tenant model linked)
+        tenant_costs = []
+        
+        final_data.append(CostData(
+            period=period_label,
+            total_cost=round(total_cost, 4),
+            provider_costs=providers,
+            tenant_costs=tenant_costs
+        ))
+        
+    return final_data
 
 
 @router.get("/costs", response_model=List[CostData])
@@ -127,12 +127,11 @@ async def get_cost_analytics(
     time_range: TimeRange = Query(TimeRange.LAST_7_DAYS, description="Time range for cost data"),
     provider: Optional[str] = Query(None, description="Filter by provider"),
     tenant: Optional[str] = Query(None, description="Filter by tenant"),
-    current_user: dict = Depends(get_current_admin)
+    current_user: dict = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_db)
 ):
     """
     Get cost analytics data for the specified time range.
-    
-    Returns aggregated cost data by provider and tenant.
     """
     logger.info("get_cost_analytics", 
                 time_range=time_range, 
@@ -141,23 +140,19 @@ async def get_cost_analytics(
                 user_id=current_user.get("id"))
     
     try:
-        cost_data = _generate_cost_data(time_range)
+        cost_data = await _query_cost_data(session, time_range)
         
-        # Apply filters if specified
+        # Apply filters (in memory is easier for post-aggregation, or move to SQL)
         if provider:
             for data in cost_data:
                 data.provider_costs = [
                     pc for pc in data.provider_costs 
                     if pc.provider.lower() == provider.lower()
                 ]
-        
-        if tenant:
-            for data in cost_data:
-                data.tenant_costs = [
-                    tc for tc in data.tenant_costs 
-                    if tc.tenant_id == tenant
-                ]
-        
+                # Recalculate total if needed, or keep original? 
+                # Usually filtered view shows total of filter.
+                data.total_cost = sum(pc.cost for pc in data.provider_costs)
+
         return cost_data
         
     except Exception as e:
@@ -167,14 +162,15 @@ async def get_cost_analytics(
 
 @router.get("/costs/summary")
 async def get_cost_summary(
-    current_user: dict = Depends(get_current_admin)
+    current_user: dict = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_db)
 ):
     """Get a summary of current period costs."""
     logger.info("get_cost_summary", user_id=current_user.get("id"))
     
     try:
-        # Get the last 7 days of data
-        cost_data = _generate_cost_data(TimeRange.LAST_7_DAYS)
+        # Get data
+        cost_data = await _query_cost_data(session, TimeRange.LAST_7_DAYS)
         
         if not cost_data:
             return {
@@ -187,7 +183,12 @@ async def get_cost_summary(
                 "projected_monthly_cost": 0,
             }
         
-        # Current period (last day)
+        # Current period (today/last day) vs Previous
+        # Actually logic in mock was: last day vs day before.
+        # Let's say "Current Period" = Total of last 7 days? Or single day?
+        # Usually dashboard shows "This Week vs Last Week" or "Today vs Yesterday".
+        # Let's assume Today vs Yesterday for quick pulse.
+        
         current = cost_data[-1]
         previous = cost_data[-2] if len(cost_data) > 1 else cost_data[-1]
         
@@ -201,9 +202,9 @@ async def get_cost_summary(
         total_requests = sum(pc.requests for pc in current.provider_costs)
         avg_cost_per_request = current_cost / total_requests if total_requests > 0 else 0
         
-        most_expensive = max(current.provider_costs, key=lambda x: x.cost)
+        most_expensive = max(current.provider_costs, key=lambda x: x.cost) if current.provider_costs else None
         
-        # Project monthly cost based on daily average
+        # Project monthly
         avg_daily_cost = sum(d.total_cost for d in cost_data) / len(cost_data)
         projected_monthly = avg_daily_cost * 30
         
@@ -217,7 +218,7 @@ async def get_cost_summary(
                 "name": most_expensive.provider,
                 "cost": round(most_expensive.cost, 2),
                 "percentage": round((most_expensive.cost / current_cost) * 100, 1)
-            },
+            } if most_expensive else None,
             "projected_monthly_cost": round(projected_monthly, 2),
         }
         
@@ -228,31 +229,10 @@ async def get_cost_summary(
 
 @router.get("/tenants")
 async def get_tenant_analytics(
-    current_user: dict = Depends(get_current_admin)
+    current_user: dict = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_db)
 ):
-    """Get tenant analytics and usage statistics."""
-    logger.info("get_tenant_analytics", user_id=current_user.get("id"))
-    
-    # This would normally query the database
-    # For now, return mock data based on cost analytics
-    cost_data = _generate_cost_data(TimeRange.LAST_7_DAYS)
-    latest = cost_data[-1] if cost_data else None
-    
-    if not latest:
-        return []
-    
-    tenant_stats = []
-    for tenant_cost in latest.tenant_costs:
-        tenant_stats.append({
-            "tenant_id": tenant_cost.tenant_id,
-            "tenant_name": tenant_cost.tenant_name,
-            "tier": tenant_cost.tier,
-            "total_cost": tenant_cost.cost,
-            "total_requests": 10000,  # Mock data
-            "avg_latency_ms": 145,
-            "error_rate": 0.02,
-            "status": "active",
-            "created_at": "2024-01-15T10:00:00Z",
-        })
-    
-    return tenant_stats
+    """Get tenant analytics."""
+    # Placeholder until Tenant model linked to RequestLog
+    # Could group by user_id
+    return []
