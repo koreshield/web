@@ -82,12 +82,19 @@ export function ApiKeysPage() {
 			name: formData.name,
 			description: formData.description || undefined,
 		};
+
 		if (formData.expires_at) {
-			// Set to end of day
-			const date = new Date(formData.expires_at);
-			date.setHours(23, 59, 59, 999);
-			data.expires_at = date.toISOString();
+			// Set to end of day in UTC to avoid timezone-related shifts
+			const [yearStr, monthStr, dayStr] = formData.expires_at.split('-');
+			const year = Number(yearStr);
+			const month = Number(monthStr); // 1-based
+			const day = Number(dayStr);
+
+			// Construct UTC date at 23:59:59.999
+			const utcEndOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+			data.expires_at = utcEndOfDay.toISOString();
 		}
+
 		generateKeyMutation.mutate(data);
 	};
 
@@ -361,7 +368,7 @@ export function ApiKeysPage() {
 								</label>
 								<input
 									type="date"
-									min={new Date().toISOString().split('T')[0]}
+									min={new Date().toLocaleDateString('en-CA')} // YYYY-MM-DD in local time
 									value={formData.expires_at || ''}
 									onChange={(e) =>
 										setFormData({ ...formData, expires_at: e.target.value })
