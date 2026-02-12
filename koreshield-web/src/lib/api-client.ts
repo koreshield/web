@@ -1,7 +1,7 @@
 import type { ChatCompletionRequest, ChatCompletionResponse, HealthCheckResponse, AttackStats } from '../types/api';
 import { authService } from './auth';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.koreshield.com";
 
 interface APIError {
 	message: string;
