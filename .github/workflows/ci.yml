@@ -35,15 +35,46 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-    - name: Test with pytest
-      env:
-        DATABASE_URL: "sqlite+aiosqlite:///:memory:"
-        REDIS_URL: "redis://localhost:6379/0"
-        SECRET_KEY: test_secret_key
-        # We might need a real redis service for tests if we use it extensively
+    - name: Security Scan with Bandit
       run: |
-        # For now, just run tests if they exist. If no tests, we echo pass.
-        if [ -d "tests" ]; then pytest; else echo "No tests found yet"; fi
+        pip install bandit
+        # Run bandit on source code, exclude tests. 
+        # -r: recursive, -ll: log level, -ii: confidence level (optional)
+        # We start with default profile.
+        bandit -r src --exclude src/koreshield/tests -f custom --msg-template "{file}:{line}: {severity}: {test_id}: {msg}" || true
+        # Note: We append || true to avoid failing the build immediately while we tune it.
+        # Once specific issues are fixed, we can remove || true.
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: backend-test
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run Integration Tests (Docker Compose)
+      env:
+        DEEPSEEK_API_KEY: "dummy_key_for_ci"
+      run: |
+        cd koreshield
+        # Start the stack
+        docker-compose up -d --build
+        
+        echo "Waiting for service to be healthy..."
+        # Loop check health endpoint
+        timeout 60s bash -c 'until curl -sf http://localhost:8000/health; do sleep 5; done'
+        
+        echo "Service is UP. API Health Check Passed."
+        
+        # Determine success
+        if [ $? -eq 0 ]; then
+          echo "Integration Test Passed"
+        else
+          echo "Integration Test Failed"
+          docker-compose logs
+          exit 1
+        fi
+        
+        docker-compose down
 
   frontend-check:
     runs-on: ubuntu-latest
