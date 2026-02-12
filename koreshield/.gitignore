@@ -76,4 +76,6 @@ config/*.yaml
 Thumbs.db
 
 # 1cbyc
-auto.ps1prod.env
+auto.ps1
+prod.env
+ENGINEERING.md
