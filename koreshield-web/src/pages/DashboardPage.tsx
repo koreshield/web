@@ -150,7 +150,7 @@ export function DashboardPage() {
 				<div className="bg-green-500/10 border border-green-500/50 rounded-lg p-3 flex items-start sm:items-center gap-2">
 					<CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0 mt-0.5 sm:mt-0" />
 					<span className="text-xs sm:text-sm text-green-600 font-medium">
-						<span className="hidden sm:inline">Connected to Railway API - Showing real-time data from production backend</span>
+						<span className="hidden sm:inline">Connected to Koreshield API - Showing real-time data</span>
 						<span className="sm:hidden">Live data from production</span>
 					</span>
 				</div>
