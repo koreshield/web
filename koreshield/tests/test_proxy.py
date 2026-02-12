@@ -97,8 +97,12 @@ async def test_proxy_forwards_safe_requests(proxy):
     mock_provider.chat_completion = AsyncMock(
         return_value={"choices": [{"message": {"content": "Test response"}}]}
     )
-    # Set up providers list for multi-provider support
-    proxy.providers = [mock_provider]
+
+    # Set up providers list for multi-provider support (modify in place to keep reference)
+    proxy.providers.clear()
+    proxy.providers.append(mock_provider)
+    # Must re-initialize health tracking since we added a provider after init
+    proxy.provider_manager._initialize_health_tracking()
     proxy.provider_priority = ["openai"]
 
     client = TestClient(proxy.app)
