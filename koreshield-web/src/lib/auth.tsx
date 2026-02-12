@@ -1,5 +1,5 @@
 /**
- * Simple authentication system using Railway backend
+ * Simple authentication system using Koreshield backend
  * No third-party services needed
  */
 
