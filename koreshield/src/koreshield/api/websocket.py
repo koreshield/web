@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse
 import structlog
 import redis.asyncio as aioredis
 
-from ..auth import verify_jwt_token
+from .auth import verify_jwt_token
 
 logger = structlog.get_logger(__name__)
 

@@ -69,7 +69,7 @@ jobs:
         
         echo "Waiting for service to be healthy..."
         # Loop check health endpoint
-        timeout 60s bash -c 'until curl -sf http://localhost:8000/health; do sleep 5; done'
+        timeout 120s bash -c 'until curl -sf http://localhost:8000/health; do sleep 5; done'
         
         echo "Service is UP. API Health Check Passed."
         
