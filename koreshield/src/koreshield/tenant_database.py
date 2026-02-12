@@ -189,6 +189,7 @@ _db_manager: Optional[TenantDatabaseManager] = None
 
 def get_tenant_db_manager() -> TenantDatabaseManager:
     """Get the global tenant database manager."""
+    global _db_manager
     if _db_manager is None:
         database_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://localhost/koreshield")
         _db_manager = TenantDatabaseManager(database_url)

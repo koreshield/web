@@ -17,7 +17,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from .tenant_models import TenantContext, Tenant, TenantStatus, TenantTier, ResourceType
+from .tenant_models import TenantContext, Tenant, TenantStatus, TenantTier, ResourceType, TenantAPIKey
 from .logger import FirewallLogger
 from .tenant_database import get_tenant_db_session
 from .tenant_utils import tenant_context, request_id_context

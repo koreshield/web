@@ -26,7 +26,10 @@ from .tenant_middleware import TenantMiddleware
 from .tenant_database import TenantDatabaseManager, TenantConfigurationManager
 from .tenant_quotas import ResourceQuotaManager, TenantResourceQuotaEnforcer
 from .tenant_security import CrossTenantSecurityEnforcer, TenantAuditLogger
-from .tenant_provisioning import TenantProvisioner, TenantDeprovisioner, ProvisioningConfig
+from .tenant_provisioning import (
+    TenantProvisioner, TenantDeprovisioner, ProvisioningConfig,
+    get_tenant_provisioner
+)
 from .logger import FirewallLogger
 
 class TestTenantIsolation:
