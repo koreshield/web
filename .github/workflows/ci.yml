@@ -54,6 +54,14 @@ jobs:
     - name: Run Integration Tests (Docker Compose)
       env:
         DEEPSEEK_API_KEY: "dummy_key_for_ci"
+        # Add required envs for startup
+        DATABASE_URL: "postgresql://postgres:postgres@db:5432/koreshield"
+        REDIS_URL: "redis://redis:6379/0"
+        SECRET_KEY: "ci_secret_key_very_secure"
+        JWT_SECRET: "ci_jwt_secret_key_very_secure"
+        POSTGRES_USER: "postgres"
+        POSTGRES_PASSWORD: "postgres"
+        POSTGRES_DB: "koreshield"
       run: |
         cd koreshield
         # Start the stack
