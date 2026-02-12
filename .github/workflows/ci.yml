@@ -57,7 +57,7 @@ jobs:
       run: |
         cd koreshield
         # Start the stack
-        docker-compose up -d --build
+        docker compose up -d --build
         
         echo "Waiting for service to be healthy..."
         # Loop check health endpoint
@@ -70,11 +70,11 @@ jobs:
           echo "Integration Test Passed"
         else
           echo "Integration Test Failed"
-          docker-compose logs
+          docker compose logs
           exit 1
         fi
         
-        docker-compose down
+        docker compose down
 
   frontend-check:
     runs-on: ubuntu-latest
