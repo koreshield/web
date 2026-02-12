@@ -303,7 +303,6 @@ koreshield-web/how-to.md
 open_source_strategy.md
 OPEN_SOURCE_SETUP.md
 GITHUB_WORKFLOW_EXPLAINED.md
-*.sh
 *.md
 !README.md
 *.tar.gz
@@ -312,3 +311,4 @@ koreshield/prod.env
 koreshield_ci_key.pub
 koreshield_ci_key
 ENGINEERING.md
+!koreshield/start.sh
