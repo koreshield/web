@@ -8,7 +8,7 @@ Ensures complete isolation between tenants and comprehensive audit trails.
 import asyncio
 import json
 import hashlib
-from typing import Dict, List, Optional, Any, Set
+from typing import Dict, List, Optional, Any, Set, Tuple
 from datetime import datetime, timedelta
 import uuid
 
