@@ -188,6 +188,26 @@ class TenantMiddleware(BaseHTTPMiddleware):
             tenant = await self._get_tenant_from_info(tenant_info)
 
             if not tenant:
+                # Check for Admin via Token and create System Context
+                if "token" in tenant_info:
+                    try:
+                        import jwt
+                        # Decode without verification (verified later by auth dependency)
+                        payload = jwt.decode(tenant_info["token"], options={"verify_signature": False})
+                        role = payload.get("role")
+                        if role in ["admin", "owner", "superuser"]:
+                            # Create System Tenant Context
+                            return TenantContext(
+                                tenant_id="system",
+                                tenant_uuid=uuid.UUID(int=0),
+                                schema_name="public",
+                                tier=TenantTier.ENTERPRISE,
+                                is_active=True,
+                                resource_limits={} 
+                            )
+                    except Exception:
+                        pass
+                
                 return None
 
             if not tenant.is_active():
