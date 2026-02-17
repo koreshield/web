@@ -20,10 +20,10 @@ function FlowArrow() {
 
 export function RAGShowcase() {
     return (
-        <section className="py-24 md:py-32 px-6 bg-background transition-colors">
-            <div className="max-w-7xl mx-auto">
+        <section className="py-28 md:py-36 px-6 bg-background transition-colors relative ambient-glow">
+            <div className="max-w-7xl mx-auto relative z-10">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-foreground tracking-tighter">
+                    <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-foreground tracking-[-0.04em]">
                         Secure Your RAG Pipeline
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
@@ -38,7 +38,7 @@ export function RAGShowcase() {
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="bg-card border border-border rounded-xl p-6 relative shadow-sm"
+                        className="bg-card border border-white/[0.08] rounded-xl p-6 relative shadow-sm"
                     >
                         <div className="hidden lg:block"><FlowArrow /></div>
                         <div className="flex items-center gap-3 mb-4 text-electric-green">
@@ -80,7 +80,7 @@ export function RAGShowcase() {
                             </span>
                         </div>
 
-                        <div className="bg-card border-2 border-electric-green/30 rounded-xl p-6 md:p-8 relative shadow-lg shadow-emerald-500/10">
+                        <div className="bg-card border-2 border-electric-green/20 rounded-xl p-6 md:p-8 relative shadow-lg shadow-emerald-500/10">
                             <div className="hidden lg:block"><FlowArrow /></div>
 
                             <div className="flex flex-col items-center text-center gap-3">
@@ -115,7 +115,7 @@ export function RAGShowcase() {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.4 }}
-                        className="bg-card border border-border rounded-xl p-6 shadow-sm"
+                        className="bg-card border border-white/[0.08] rounded-xl p-6 shadow-sm"
                     >
                         <div className="flex items-center gap-3 mb-4 text-blue-500">
                             <Lock className="w-6 h-6" />

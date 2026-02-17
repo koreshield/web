@@ -38,16 +38,16 @@ function IntegrationCode() {
     };
 
     return (
-        <section className="py-24 md:py-32 px-6 bg-muted/30 transition-colors">
+        <section className="py-28 md:py-36 px-6 bg-muted/30 dark:bg-muted/20 transition-colors">
             <div className="max-w-5xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
                     viewport={{ once: true }}
-                    className="text-center mb-12"
+                    className="text-center mb-14"
                 >
-                    <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-foreground tracking-tighter">
+                    <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-foreground tracking-[-0.04em]">
                         Easy Integration
                     </h2>
                     <p className="text-muted-foreground text-lg">
@@ -60,10 +60,10 @@ function IntegrationCode() {
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
                     viewport={{ once: true }}
-                    className="code-block rounded-xl overflow-hidden border border-border bg-[#0d0d0d] shadow-xl relative group"
+                    className="code-block rounded-2xl overflow-hidden border border-white/[0.08] bg-[#09090B] shadow-2xl relative group"
                 >
                     {/* Premium Header */}
-                    <div className="flex items-center justify-between px-4 py-3 bg-[#151515] border-b border-[#2a2a2a]">
+                    <div className="flex items-center justify-between px-4 py-3 bg-[#111113] border-b border-white/[0.06]">
                         {/* Window Controls */}
                         <div className="flex items-center gap-2 w-20">
                             <div className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
@@ -111,7 +111,7 @@ function IntegrationCode() {
                         </div>
                     </div>
 
-                    <div className="p-6 overflow-x-auto bg-[#0d0d0d]">
+                    <div className="p-6 overflow-x-auto bg-[#09090B]">
                         <pre className="!bg-transparent !m-0 !p-0 font-mono text-sm leading-relaxed">
                             <code className={`language-${activeTab}`}>
                                 {codeExamples[activeTab]}

@@ -102,7 +102,7 @@ export function ThreatDashboard() {
     }, []);
 
     return (
-        <div className="bg-card border border-border rounded-xl p-6 md:p-8 w-full max-w-5xl mx-auto shadow-2xl">
+        <div className="bg-card border border-white/[0.08] rounded-2xl p-6 md:p-8 w-full max-w-5xl mx-auto shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
@@ -146,7 +146,7 @@ export function ThreatDashboard() {
             </div>
 
             {/* Chart */}
-            <div className="h-56 md:h-64 w-full bg-muted/40 dark:bg-muted/20 rounded-lg p-4 mb-6 border border-border relative overflow-hidden">
+            <div className="h-56 md:h-64 w-full bg-muted/40 dark:bg-white/[0.03] rounded-xl p-4 mb-6 border border-white/[0.06] relative overflow-hidden">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={data}>
                         <Tooltip
@@ -180,8 +180,8 @@ export function ThreatDashboard() {
             </div>
 
             {/* Live Log Ticker */}
-            <div className="border border-border rounded-lg overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-2 bg-muted/50 border-b border-border">
+            <div className="border border-white/[0.08] rounded-xl overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-2 bg-muted/50 dark:bg-white/[0.03] border-b border-white/[0.06]">
                     <Radio className="w-3.5 h-3.5 text-red-400 animate-pulse" />
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Live Feed</span>
                 </div>

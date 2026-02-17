@@ -15,9 +15,9 @@ function Hero() {
 	};
 
 	return (
-		<section className="relative min-h-[85vh] flex items-center justify-center px-6 py-24 overflow-hidden bg-background transition-colors">
-			{/* Subtle grid */}
-			<div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--foreground)/0.04)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground)/0.04)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+		<section className="relative min-h-[90vh] flex items-center justify-center px-6 py-28 overflow-hidden bg-background transition-colors ambient-glow">
+			{/* Subtle dot grid — barely visible */}
+			<div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
 			<div className="relative z-10 max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
 				{/* Left: Text content */}
@@ -27,7 +27,7 @@ function Hero() {
 					transition={{ duration: 0.8 }}
 				>
 					<motion.h1
-						className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.08] tracking-tighter text-foreground"
+						className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.08] tracking-[-0.04em] text-foreground"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.2 }}
@@ -55,7 +55,7 @@ function Hero() {
 							href="https://docs.koreshield.com"
 							target="_blank"
 							rel="noreferrer"
-							className="group relative bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 w-full sm:w-auto overflow-hidden"
+							className="group relative bg-electric-green hover:bg-emerald-bright text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 w-full sm:w-auto overflow-hidden"
 						>
 							<span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-0 animate-shimmer" />
 							<span className="relative z-10 flex items-center gap-2">
@@ -68,7 +68,7 @@ function Hero() {
 							href="https://github.com/koreshield/"
 							target="_blank"
 							rel="noreferrer"
-							className="group border border-border text-foreground hover:border-electric-green hover:text-electric-green font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto bg-card/60 backdrop-blur"
+							className="group border border-white/10 dark:border-white/10 text-foreground hover:border-electric-green/50 hover:text-electric-green font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto bg-card/60 backdrop-blur-sm"
 						>
 							<Github className="w-4 h-4 sm:w-5 sm:h-5" />
 							<span>View on GitHub</span>
@@ -77,7 +77,7 @@ function Hero() {
 
 					{/* Install command with copy */}
 					<motion.div
-						className="inline-flex items-center gap-3 bg-muted/60 dark:bg-gray-900/60 border border-border rounded-lg px-4 py-2.5 font-mono text-sm text-muted-foreground backdrop-blur"
+						className="inline-flex items-center gap-3 bg-card/80 dark:bg-[#18181B]/80 border border-white/10 dark:border-white/8 rounded-lg px-4 py-2.5 font-mono text-sm text-muted-foreground backdrop-blur-sm"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.8 }}
@@ -86,7 +86,7 @@ function Hero() {
 						<span className="select-all">{INSTALL_CMD}</span>
 						<button
 							onClick={handleCopy}
-							className="ml-1 p-1 rounded hover:bg-muted/80 transition-colors cursor-pointer"
+							className="ml-1 p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
 							aria-label="Copy install command"
 						>
 							{copied ? (

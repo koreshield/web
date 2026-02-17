@@ -2,8 +2,8 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
 function Architecture() {
-        return (
-		<section className="py-24 md:py-32 px-6 bg-background transition-colors">
+    return (
+        <section className="py-28 md:py-36 px-6 bg-muted/30 dark:bg-background transition-colors relative">
             <div className="max-w-7xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -12,11 +12,11 @@ function Architecture() {
                     viewport={{ once: true }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-foreground tracking-tighter">
+                    <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-foreground tracking-[-0.04em]">
                         How It Works
                     </h2>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                        koreshield sits between your application and llm providers, analyzing every request in real-time
+                        KoreShield sits between your application and LLM providers, analyzing every request in real-time.
                     </p>
                 </motion.div>
 
@@ -29,31 +29,31 @@ function Architecture() {
                     className="flex items-center justify-center gap-4 flex-wrap"
                 >
                     {/* Client App */}
-                    <div className="bg-card border border-border rounded-lg px-8 py-6 text-center hover:border-electric-green transition-all duration-300 shadow-sm">
-                        <div className="text-2xl font-bold mb-2 text-foreground">Client App</div>
+                    <div className="bg-card border border-white/[0.08] rounded-2xl px-8 py-6 text-center hover:border-electric-green/30 transition-all duration-300 shadow-sm">
+                        <div className="text-2xl font-bold mb-2 text-foreground tracking-tight">Client App</div>
                         <div className="text-muted-foreground text-sm">Your application</div>
                     </div>
 
                     <ArrowRight className="w-8 h-8 text-electric-green hidden md:block" />
 
                     {/* KoreShield Proxy */}
-                    <div className="bg-card border-2 border-electric-green rounded-lg px-8 py-6 text-center shadow-lg shadow-emerald-500/10 glow-green">
-                        <div className="text-2xl font-bold mb-2 text-electric-green">KoreShield Proxy</div>
-                        <div className="text-muted-foreground text-sm space-y-1 mt-3">
+                    <div className="bg-card border-2 border-electric-green/30 rounded-2xl px-8 py-6 text-center shadow-lg shadow-emerald-500/10 glow-green">
+                        <div className="text-2xl font-bold mb-2 text-electric-green tracking-tight">KoreShield Proxy</div>
+                        <div className="text-muted-foreground text-sm space-y-1.5 mt-3">
                             <div className="flex items-center gap-2 justify-center">
-                                <div className="w-2 h-2 bg-electric-green rounded-full"></div>
+                                <div className="w-2 h-2 bg-electric-green rounded-full status-dot-glow"></div>
                                 <span>Sanitization</span>
                             </div>
                             <div className="flex items-center gap-2 justify-center">
-                                <div className="w-2 h-2 bg-electric-green rounded-full"></div>
+                                <div className="w-2 h-2 bg-electric-green rounded-full status-dot-glow"></div>
                                 <span>Attack Detection</span>
                             </div>
                             <div className="flex items-center gap-2 justify-center">
-                                <div className="w-2 h-2 bg-electric-green rounded-full"></div>
+                                <div className="w-2 h-2 bg-electric-green rounded-full status-dot-glow"></div>
                                 <span>Policy Engine</span>
                             </div>
                             <div className="flex items-center gap-2 justify-center">
-                                <div className="w-2 h-2 bg-electric-green rounded-full"></div>
+                                <div className="w-2 h-2 bg-electric-green rounded-full status-dot-glow"></div>
                                 <span>Audit Logging</span>
                             </div>
                         </div>
@@ -62,8 +62,8 @@ function Architecture() {
                     <ArrowRight className="w-8 h-8 text-electric-green hidden md:block" />
 
                     {/* LLM Providers */}
-                    <div className="bg-card border border-border rounded-lg px-8 py-6 text-center hover:border-electric-green transition-all duration-300 shadow-sm">
-                        <div className="text-2xl font-bold mb-2 text-foreground">LLM Providers</div>
+                    <div className="bg-card border border-white/[0.08] rounded-2xl px-8 py-6 text-center hover:border-electric-green/30 transition-all duration-300 shadow-sm">
+                        <div className="text-2xl font-bold mb-2 text-foreground tracking-tight">LLM Providers</div>
                         <div className="text-muted-foreground text-sm space-y-1">
                             <div>OpenAI</div>
                             <div>Anthropic</div>
