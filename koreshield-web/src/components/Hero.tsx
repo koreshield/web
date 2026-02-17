@@ -1,15 +1,12 @@
 import { motion } from 'framer-motion';
-import { Github, ArrowRight } from 'lucide-react';
+import { ArrowRight, Github } from 'lucide-react';
 import TerminalAnimation from './TerminalAnimation';
 
 function Hero() {
 	return (
-		<section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
-			{/* Background gradient */}
-			<div className="absolute inset-0 bg-gradient-to-b from-emerald-dark/10 via-black to-black" />
-
-			{/* Grid pattern overlay */}
-			<div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000,transparent)]" />
+		<section className="relative min-h-[85vh] flex items-center justify-center px-6 py-20 overflow-hidden bg-background transition-colors">
+			{/* Subtle grid */}
+			<div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--foreground)/0.04)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground)/0.04)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
 			<div className="relative z-10 max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
 				{/* Left: Text content */}
@@ -19,7 +16,7 @@ function Hero() {
 					transition={{ duration: 0.8 }}
 				>
 					<motion.h1
-						className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight"
+						className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight tracking-tight text-foreground"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.2 }}
@@ -29,7 +26,7 @@ function Hero() {
 					</motion.h1>
 
 					<motion.p
-						className="text-base sm:text-lg md:text-xl text-gray-400 mb-8 max-w-xl"
+						className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 max-w-xl"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.4 }}
@@ -47,7 +44,7 @@ function Hero() {
 							href="https://docs.koreshield.com"
 							target="_blank"
 							rel="noreferrer"
-							className="group bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 glow-green shadow-lg shadow-emerald-500/20 w-full sm:w-auto"
+							className="group bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 w-full sm:w-auto"
 						>
 							Read the Docs
 							<ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
@@ -57,7 +54,7 @@ function Hero() {
 							href="https://github.com/koreshield/"
 							target="_blank"
 							rel="noreferrer"
-							className="group border border-gray-700 hover:border-electric-green text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto"
+							className="group border border-border text-foreground hover:border-electric-green hover:text-electric-green font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto bg-card/60 backdrop-blur"
 						>
 							<Github className="w-4 h-4 sm:w-5 sm:h-5" />
 							<span>View on GitHub</span>

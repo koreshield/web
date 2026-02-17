@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Shield, Network, Users, Activity, Database, Globe } from 'lucide-react';
+import { Activity, Database, Globe, Network, Shield, Users } from 'lucide-react';
 
 const features = [
     {
@@ -36,7 +36,7 @@ const features = [
 
 function Features() {
     return (
-        <section className="py-20 px-6 bg-black">
+    		<section className="py-20 px-6 bg-muted/30 transition-colors">
             <div className="max-w-7xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -45,7 +45,7 @@ function Features() {
                     viewport={{ once: true }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4">
+    					<h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
                         Key <span className="text-electric-green">Features</span>
                     </h2>
                 </motion.div>
@@ -59,13 +59,13 @@ function Features() {
                             transition={{ duration: 0.6, delay: index * 0.1 }}
                             viewport={{ once: true }}
                             whileHover={{ y: -5, borderColor: '#10b981' }}
-                            className="bg-slate-900 border border-slate-700 rounded-lg p-6 transition-all duration-300 group"
+                                className="bg-card border border-border rounded-lg p-6 transition-all duration-300 group shadow-sm"
                         >
-                            <div className="bg-electric-green/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:bg-electric-green/20 transition-colors">
+                                <div className="bg-electric-green/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:bg-electric-green/20 transition-colors">
                                 <feature.icon className="w-6 h-6 text-electric-green" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                            <p className="text-gray-400">{feature.description}</p>
+                                <h3 className="text-xl font-bold mb-2 text-foreground">{feature.title}</h3>
+                                <p className="text-muted-foreground">{feature.description}</p>
                         </motion.div>
                     ))}
                 </div>

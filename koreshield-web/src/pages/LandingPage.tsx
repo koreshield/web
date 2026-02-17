@@ -1,14 +1,14 @@
-import Hero from '../components/Hero';
-import { ErrorBoundary } from '../components/ErrorBoundary';
 import Architecture from '../components/Architecture';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import Features from '../components/Features';
+import Hero from '../components/Hero';
 import IntegrationCode from '../components/IntegrationCode';
-import UseCases from '../components/UseCases';
-import { ThreatDashboard } from '../components/ThreatDashboard';
+import { IntegrationTicker } from '../components/IntegrationTicker';
 import { InteractiveDemo } from '../components/InteractiveDemo';
 import { RAGShowcase } from '../components/RAGShowcase';
-import { IntegrationTicker } from '../components/IntegrationTicker';
+import { ThreatDashboard } from '../components/ThreatDashboard';
 import { TrustBadges } from '../components/TrustBadges';
+import UseCases from '../components/UseCases';
 
 import { SEOMeta } from '../components/SEOMeta';
 
@@ -18,7 +18,7 @@ function LandingPage() {
             <SEOMeta />
             <Hero />
 
-            <ErrorBoundary fallback={<div className="h-20 bg-black/50" />}>
+            <ErrorBoundary fallback={<div className="h-20 bg-muted/50" />}>
                 <IntegrationTicker />
             </ErrorBoundary>
 
