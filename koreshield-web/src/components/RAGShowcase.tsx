@@ -20,11 +20,11 @@ function FlowArrow() {
 
 export function RAGShowcase() {
     return (
-        <section className="py-24 px-6 bg-background transition-colors">
+        <section className="py-24 md:py-32 px-6 bg-background transition-colors">
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-bold mb-4 text-foreground">
-                        Secure Your <span className="text-electric-green">RAG Pipeline</span>
+                    <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-foreground tracking-tighter">
+                        Secure Your RAG Pipeline
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
                         Prevent indirect prompt injection attacks where malicious content in retrieved documents hijacks your LLM.

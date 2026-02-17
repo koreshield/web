@@ -168,6 +168,20 @@ body {
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }
 
+/* Shimmer animation for CTA buttons */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
 /* Code block styling — inherits from component Tailwind classes */
 .code-block {
   border-radius: 8px;
