@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, AlertTriangle, Activity, Lock } from 'lucide-react';
-import { LineChart, Line, Tooltip, ResponsiveContainer } from 'recharts';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Activity, AlertTriangle, Lock, Shield } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Line, LineChart, ResponsiveContainer, Tooltip } from 'recharts';
 // import { api } from '../lib/api-client';
 
 function generateData() {
@@ -91,12 +91,17 @@ export function ThreatDashboard() {
                 </div>
             </div>
 
-            <div className="h-64 w-full bg-muted/20 rounded-lg p-4 mb-6 border border-border relative overflow-hidden">
+            <div className="h-64 w-full bg-muted/40 dark:bg-muted/20 rounded-lg p-4 mb-6 border border-border relative overflow-hidden">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={data}>
                         <Tooltip
-                            contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '4px' }}
-                            itemStyle={{ color: '#fff' }}
+                            contentStyle={{
+                                backgroundColor: 'hsl(var(--popover))',
+                                border: '1px solid hsl(var(--border))',
+                                borderRadius: 6,
+                                color: 'hsl(var(--popover-foreground))',
+                            }}
+                            itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
                         />
                         <Line type="monotone" dataKey="requests" stroke="hsl(var(--muted-foreground))" strokeWidth={2} dot={false} />
                         <Line type="monotone" dataKey="threats" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />

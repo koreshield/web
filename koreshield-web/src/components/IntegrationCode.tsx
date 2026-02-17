@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import { Copy, Check, Terminal, FileCode2 } from 'lucide-react';
+import { Check, Copy, FileCode2, Terminal } from 'lucide-react';
 import Prism from 'prismjs';
-import 'prismjs/themes/prism-tomorrow.css';
-import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-python';
+import 'prismjs/themes/prism-tomorrow.css';
+import { useEffect, useState } from 'react';
 
 const codeExamples = {
     python: `import koreshield
@@ -38,7 +38,7 @@ function IntegrationCode() {
     };
 
     return (
-        <section className="py-20 px-6 bg-gradient-to-b from-black via-slate-950 to-black">
+        <section className="py-20 px-6 bg-muted/30 transition-colors">
             <div className="max-w-5xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -47,10 +47,10 @@ function IntegrationCode() {
                     viewport={{ once: true }}
                     className="text-center mb-12"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                    <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
                         Easy <span className="text-electric-green">Integration</span>
                     </h2>
-                    <p className="text-gray-400 text-lg">
+                    <p className="text-muted-foreground text-lg">
                         Drop-in replacement for your existing LLM clients
                     </p>
                 </motion.div>
@@ -60,10 +60,10 @@ function IntegrationCode() {
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
                     viewport={{ once: true }}
-                    className="code-block rounded-xl overflow-hidden border border-gray-800 bg-[#0d0d0d] shadow-2xl relative group"
+                    className="code-block rounded-xl overflow-hidden border border-border bg-[#0d0d0d] shadow-xl relative group"
                 >
                     {/* Premium Header */}
-                    <div className="flex items-center justify-between px-4 py-3 bg-[#151515] border-b border-gray-800">
+                    <div className="flex items-center justify-between px-4 py-3 bg-[#151515] border-b border-[#2a2a2a]">
                         {/* Window Controls */}
                         <div className="flex items-center gap-2 w-20">
                             <div className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
@@ -76,7 +76,7 @@ function IntegrationCode() {
                             <button
                                 onClick={() => setActiveTab('python')}
                                 className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-xs font-medium transition-all duration-300 ${activeTab === 'python'
-                                        ? 'bg-gray-800 text-white shadow-sm ring-1 ring-white/10'
+                                        ? 'bg-gray-800 text-white ring-1 ring-white/10'
                                         : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
                                     }`}
                             >
@@ -86,7 +86,7 @@ function IntegrationCode() {
                             <button
                                 onClick={() => setActiveTab('javascript')}
                                 className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-xs font-medium transition-all duration-300 ${activeTab === 'javascript'
-                                        ? 'bg-gray-800 text-white shadow-sm ring-1 ring-white/10'
+                                        ? 'bg-gray-800 text-white ring-1 ring-white/10'
                                         : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
                                     }`}
                             >

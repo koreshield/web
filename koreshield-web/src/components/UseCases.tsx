@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { DollarSign, HeartPulse, Building2 } from 'lucide-react';
+import { Building2, DollarSign, HeartPulse } from 'lucide-react';
 
 const useCases = [
     {
@@ -21,7 +21,7 @@ const useCases = [
 
 function UseCases() {
     return (
-        <section className="py-20 px-6 bg-black">
+        <section className="py-20 px-6 bg-muted/30 transition-colors">
             <div className="max-w-7xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -30,7 +30,7 @@ function UseCases() {
                     viewport={{ once: true }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                    <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
                         Trusted by <span className="text-electric-green">Industries</span>
                     </h2>
                 </motion.div>
@@ -44,13 +44,13 @@ function UseCases() {
                             transition={{ duration: 0.6, delay: index * 0.15 }}
                             viewport={{ once: true }}
                             whileHover={{ y: -5 }}
-                            className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-700 rounded-lg p-8 hover:border-electric-green transition-all duration-300 group"
+                            className="bg-card border border-border rounded-lg p-8 hover:border-electric-green transition-all duration-300 group shadow-sm"
                         >
                             <div className="bg-electric-green/10 w-16 h-16 rounded-lg flex items-center justify-center mb-6 group-hover:bg-electric-green/20 transition-colors">
                                 <useCase.icon className="w-8 h-8 text-electric-green" />
                             </div>
-                            <h3 className="text-2xl font-bold mb-3">{useCase.title}</h3>
-                            <p className="text-gray-400 text-lg">{useCase.description}</p>
+                            <h3 className="text-2xl font-bold mb-3 text-foreground">{useCase.title}</h3>
+                            <p className="text-muted-foreground text-lg">{useCase.description}</p>
                         </motion.div>
                     ))}
                 </div>

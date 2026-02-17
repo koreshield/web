@@ -1,14 +1,17 @@
-import { Outlet, Link, useNavigate } from "react-router-dom";
-import Footer from "./Footer";
+import { Github, LogOut, Menu, Moon, SunMedium, User, X } from "lucide-react";
 import { useState } from "react";
-import { Menu, X, Github, LogOut, User } from "lucide-react";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 import { authService } from "../lib/auth";
+import Footer from "./Footer";
 
 export function Layout() {
 	const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const navigate = useNavigate();
 	const isAuthenticated = authService.isAuthenticated();
 	const user = authService.getCurrentUser();
+	const { theme, toggleTheme } = useTheme();
+	const logoSrc = theme === 'light' ? '/logo/SVG/Black.svg' : '/logo/SVG/White.svg';
 
 	const handleLogout = () => {
 		authService.logout();
@@ -20,8 +23,8 @@ export function Layout() {
 			<header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
 				<div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 					<Link to="/" className="text-xl font-bold flex items-center gap-2">
-						<img src="/logo/SVG/White.svg" alt="KoreShield Logo" className="w-8 h-8" />
-						<span>Kore<span className="text-electric-green">Shield</span></span>
+						<img src={logoSrc} alt="KoreShield Logo" className="w-8 h-8" />
+						<span className="text-foreground">KoreShield</span>
 					</Link>
 
 					{/* Desktop Nav */}
@@ -43,7 +46,14 @@ export function Layout() {
 							</>
 						)}
 
-						<a href="https://github.com/koreshield/" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white transition-colors">
+						<button
+							onClick={toggleTheme}
+							className="p-2 rounded-md border border-border/60 hover:border-primary transition-colors bg-card"
+							aria-label="Toggle color mode"
+						>
+							{theme === 'light' ? <Moon className="w-5 h-5 text-muted-foreground" /> : <SunMedium className="w-5 h-5 text-muted-foreground" />}
+						</button>
+						<a href="https://github.com/koreshield/" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
 							<Github className="w-5 h-5" />
 						</a>
 						{isAuthenticated ? (
@@ -71,10 +81,17 @@ export function Layout() {
 
 					{/* Mobile Actions */}
 					<div className="flex items-center gap-2 md:hidden">
+						<button
+							onClick={toggleTheme}
+							className="p-2 rounded-md border border-border/60 bg-card text-muted-foreground"
+							aria-label="Toggle color mode"
+						>
+							{theme === 'light' ? <Moon className="w-5 h-5" /> : <SunMedium className="w-5 h-5" />}
+						</button>
 
 						<button
 							onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-							className="p-2 text-gray-400 hover:text-white transition-colors"
+							className="p-2 text-muted-foreground hover:text-foreground transition-colors"
 							aria-label="Toggle menu"
 						>
 							{isMobileMenuOpen ? <X /> : <Menu />}
@@ -87,25 +104,25 @@ export function Layout() {
 					<div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl p-6 flex flex-col gap-4 h-[calc(100vh-4rem)] overflow-y-auto">
 						{!isAuthenticated && (
 							<>
-								<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors">Docs</a>
-								<Link to="/pricing" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-								<Link to="/changelog" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Changelog</Link>
+						<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors">Docs</a>
+						<Link to="/pricing" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+						<Link to="/changelog" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Changelog</Link>
 							</>
 						)}
 						{isAuthenticated && (
 							<>
-								<Link to="/dashboard" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
-								<Link to="/teams" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Teams</Link>
-								<Link to="/threat-monitoring" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threats</Link>
-								<Link to="/provider-health" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Providers</Link>
-								<Link to="/advanced-analytics" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Analytics</Link>
-								<Link to="/threat-map" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threat Map</Link>
-								<Link to="/compliance-reports" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Compliance</Link>
-								<Link to="/api-key-management" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>API Keys</Link>
-								<Link to="/audit-logs" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Audit Logs</Link>
+								<Link to="/dashboard" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+								<Link to="/teams" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Teams</Link>
+								<Link to="/threat-monitoring" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threats</Link>
+								<Link to="/provider-health" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Providers</Link>
+								<Link to="/advanced-analytics" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Analytics</Link>
+								<Link to="/threat-map" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Threat Map</Link>
+								<Link to="/compliance-reports" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Compliance</Link>
+								<Link to="/api-key-management" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>API Keys</Link>
+								<Link to="/audit-logs" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors" onClick={() => setMobileMenuOpen(false)}>Audit Logs</Link>
 							</>
 						)}
-						<a href="https://github.com/koreshield/" className="text-lg font-medium py-3 border-b border-white/5 hover:text-electric-green transition-colors flex items-center gap-2">
+						<a href="https://github.com/koreshield/" className="text-lg font-medium py-3 border-b border-border hover:text-electric-green transition-colors flex items-center gap-2">
 							<Github className="w-5 h-5" /> GitHub
 						</a>
 
