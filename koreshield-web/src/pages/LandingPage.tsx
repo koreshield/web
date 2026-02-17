@@ -22,16 +22,17 @@ function LandingPage() {
                 <IntegrationTicker />
             </ErrorBoundary>
 
-            <section className="py-20 px-6">
+            <section className="py-24 md:py-32 px-6">
                 <div className="max-w-7xl mx-auto">
-                    <h2 className="text-3xl font-bold text-center mb-12">Live Threat Intelligence</h2>
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4 tracking-tighter">Live Threat Intelligence</h2>
+                    <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto">Watch KoreShield defend against real attack patterns in real-time. Every blocked threat below is a simulated production scenario.</p>
                     <ErrorBoundary fallback={<div className="h-64 bg-muted/20 border border-border rounded-lg text-center p-8">Unable to load dashboard</div>}>
                         <ThreatDashboard />
                     </ErrorBoundary>
                 </div>
             </section>
 
-            <section className="py-20 px-6 bg-muted/30">
+            <section className="py-24 md:py-32 px-6 bg-muted/30">
                 <div className="max-w-7xl mx-auto">
                     <ErrorBoundary fallback={null}>
                         <InteractiveDemo />

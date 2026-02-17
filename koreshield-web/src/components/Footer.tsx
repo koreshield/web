@@ -11,7 +11,7 @@ function Footer() {
 						<img src="/logo/SVG/White.svg" alt="KoreShield Logo" className="w-8 h-8 hidden dark:block" />
 						<div>
 							<div className="text-xl font-bold text-foreground">
-								Kore<span className="text-electric-green">Shield</span>
+								KoreShield
 							</div>
 							<p className="text-muted-foreground text-sm mt-1">The enterprise-grade LLM security firewall</p>
 						</div>

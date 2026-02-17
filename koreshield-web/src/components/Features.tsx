@@ -36,7 +36,7 @@ const features = [
 
 function Features() {
     return (
-    		<section className="py-20 px-6 bg-muted/30 transition-colors">
+    		<section className="py-24 md:py-32 px-6 bg-muted/30 transition-colors">
             <div className="max-w-7xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -45,8 +45,8 @@ function Features() {
                     viewport={{ once: true }}
                     className="text-center mb-16"
                 >
-    					<h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-                        Key <span className="text-electric-green">Features</span>
+    					<h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-foreground tracking-tighter">
+                        Key Features
                     </h2>
                 </motion.div>
 

@@ -38,7 +38,7 @@ function IntegrationCode() {
     };
 
     return (
-        <section className="py-20 px-6 bg-muted/30 transition-colors">
+        <section className="py-24 md:py-32 px-6 bg-muted/30 transition-colors">
             <div className="max-w-5xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -47,8 +47,8 @@ function IntegrationCode() {
                     viewport={{ once: true }}
                     className="text-center mb-12"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-                        Easy <span className="text-electric-green">Integration</span>
+                    <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-foreground tracking-tighter">
+                        Easy Integration
                     </h2>
                     <p className="text-muted-foreground text-lg">
                         Drop-in replacement for your existing LLM clients
