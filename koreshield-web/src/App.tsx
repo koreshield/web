@@ -1,12 +1,12 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Suspense, lazy, useEffect } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
-import { Layout } from './components/Layout';
-import { ThemeProvider } from './context/ThemeContext';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
-import { ToastProvider, setGlobalToast, useToast } from './components/ToastNotification';
+import { Layout } from './components/Layout';
 import { PageLoader, SuspenseFallback } from './components/LoadingStates';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ToastProvider, setGlobalToast, useToast } from './components/ToastNotification';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Lazy load pages for code splitting
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -482,7 +482,7 @@ function App() {
 	return (
 		<ErrorBoundary>
 			<HelmetProvider>
-				<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+				<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
 					<ToastProvider>
 						<Suspense fallback={<PageLoader />}>
 							<AppContent />
