@@ -1,3 +1,4 @@
+import emailjs from '@emailjs/browser';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -542,22 +543,40 @@ function ContactSalesForm() {
 		e.preventDefault();
 		setLoading(true);
 
-		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 1500));
+		const payload = {
+			name: formData.name,
+			email: formData.email,
+			company: formData.company,
+			tier: formData.tier,
+			message: formData.message,
+		};
 
-		toast.success(
-			'Thank you for your enquiry!',
-			'Our sales team will contact you within 24 hours.'
-		);
+		try {
+			await emailjs.send(
+				import.meta.env.VITE_EMAILJS_SERVICE_ID,
+				import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+				payload,
+				import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+			);
 
-		setFormData({
-			name: '',
-			email: '',
-			company: '',
-			tier: 'startup',
-			message: '',
-		});
-		setLoading(false);
+			toast.success(
+				'Thank you for your enquiry!',
+				'Our sales team will contact you within 24 hours.'
+			);
+
+			setFormData({
+				name: '',
+				email: '',
+				company: '',
+				tier: 'startup',
+				message: '',
+			});
+		} catch (err: any) {
+			const msg = err?.text || err?.message || 'Something went wrong. Please try again or email hello@koreshield.com directly.';
+			toast.error('Failed to send', msg);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
