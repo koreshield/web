@@ -2,72 +2,33 @@
 
 ## Supported Versions
 
-We currently support the following versions with security updates:
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+| Version | Supported |
+|---|---|
+| Latest (`main`) | :white_check_mark: |
+| Older releases | X |
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability, please report it responsibly:
+**Do not open a public GitHub issue for security vulnerabilities.**
 
-1. **Do NOT** open a public GitHub issue
-2. Email security concerns to: security@koreshield.com
-3. Include:
-   - Description of the vulnerability
-   - Steps to reproduce
-   - Potential impact
-   - Suggested fix (if any)
+If you discover a security vulnerability in KoreShield, please report it responsibly:
 
-We will respond within 48 hours and work with you to address the issue.
+**Email:** security@koreshield.com  
+**Subject line:** `[SECURITY] Brief description`
 
-## Security Best Practices
+Please include:
+- A description of the vulnerability
+- Steps to reproduce it
+- The potential impact
+- Any suggested fix (optional)
 
-### API Keys
+We will acknowledge your report within **48 hours** and aim to release a fix within **14 days** for critical issues.
 
-- **Never** commit API keys to the repository
-- Use environment variables for all API keys
-- The firewall requires `OPENAI_API_KEY` or other provider keys
-- Never log API keys or sensitive credentials
+We do not currently offer a bug bounty program, but we will publicly credit responsible disclosers in our release notes (unless you prefer to remain anonymous).
 
-### Configuration
+## Security Practices
 
-- Keep `config/config.yaml` in `.gitignore` (only commit `config.example.yaml`)
-- Review security settings before deployment
-- Use appropriate sensitivity levels for your use case
-
-### Deployment
-
-- Run the firewall behind a reverse proxy in production
-- Use HTTPS/TLS for all connections
-- Regularly update dependencies
-- Monitor logs for suspicious activity
-
-## Known Security Considerations
-
-1. **Prompt Injection Detection**: The firewall uses pattern matching and heuristics. It may have false positives or negatives. Always review blocked requests.
-
-2. **API Key Handling**: API keys are passed through to providers. Ensure your firewall instance is secure and not exposed publicly without authentication.
-
-3. **Logging**: By default, logs may contain user prompts. Configure logging appropriately for your privacy requirements.
-
-4. **Rate Limiting**: Currently not implemented. Consider adding rate limiting for production use.
-
-## Dependencies
-
-We regularly update dependencies to address security vulnerabilities. Check `requirements.txt` for current versions.
-
-To update dependencies:
-```bash
-pip install --upgrade -r requirements.txt
-```
-
-## Security Features
-
-- Input sanitization
-- Attack pattern detection
-- Configurable security policies
-- Request/response logging
-- Error handling to prevent information leakage
-
+- All dependencies are scanned by Dependabot
+- Code is scanned on every push with CodeQL and Bandit
+- Secrets scanning is enabled on this repository
+- All changes to `main` require a passing CI pipeline and peer review

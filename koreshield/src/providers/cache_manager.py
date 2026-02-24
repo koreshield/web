@@ -30,7 +30,9 @@ class CacheManager:
         """Generate a deterministic cache key from request data."""
         # Sort keys for consistent hashing
         sorted_data = json.dumps(key_data, sort_keys=True)
-        return f"koreshield:cache:{hashlib.md5(sorted_data.encode()).hexdigest()}"
+        # MD5 is used here only as a fast, deterministic cache key fingerprint.
+        # It is NOT used for any security or cryptographic purpose.
+        return f"koreshield:cache:{hashlib.md5(sorted_data.encode(), usedforsecurity=False).hexdigest()}"
 
     async def get(self, key_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
