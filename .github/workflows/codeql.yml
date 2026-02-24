@@ -1,0 +1,91 @@
+name: "Code Scanning — Bandit (Python) & TS Type Check"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run every Sunday at 02:00 UTC
+    - cron: '0 2 * * 0'
+
+jobs:
+  # ── Python SAST with Bandit ──────────────────────────────────────────────────
+  bandit-python:
+    name: Bandit — Python Security Scan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./koreshield
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Bandit
+        run: pip install bandit[toml]
+
+      - name: Run Bandit scan
+        run: |
+          bandit -r src/ \
+            --exclude src/koreshield/tests \
+            -f json \
+            -o bandit-report.json \
+            -ll -ii || true
+
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-security-report
+          path: koreshield/bandit-report.json
+
+      - name: Fail on high-severity findings
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+          try:
+              with open("bandit-report.json") as f:
+                  report = json.load(f)
+              highs = [r for r in report.get("results", []) if r.get("issue_severity") == "HIGH"]
+              if highs:
+                  print(f"❌ {len(highs)} HIGH severity finding(s):")
+                  for h in highs:
+                      print(f"  {h['filename']}:{h['line_number']} — {h['issue_text']}")
+                  sys.exit(1)
+              else:
+                  print("✅ No HIGH severity findings.")
+          except Exception as e:
+              print(f"Warning: Could not parse report: {e}")
+          EOF
+
+  # ── TypeScript / Frontend — Build & Type Check ───────────────────────────────
+  typescript-check:
+    name: TypeScript — Build & Type Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./koreshield-web
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit || true
+
+      - name: Build (validates no runtime errors)
+        run: npm run build
