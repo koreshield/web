@@ -22,6 +22,8 @@ import { pluginCopyButton } from './src/plugins/expressive-code/copy-button';
 import { pluginCollapseButton } from './src/plugins/expressive-code/collapse-button';
 import { pluginLanguageBadge } from './src/plugins/expressive-code/language-badge';
 
+import sanity from '@sanity/astro';
+
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://blog.koreshield.com',
@@ -39,6 +41,12 @@ export default defineConfig({
 		markdoc(),
 		svelte(),
 		icon(),
+		sanity({
+			projectId: 'rdas6fhs',
+			dataset: 'production',
+			useCdn: true,
+			studioBasePath: '/studio',
+		}),
 	],
 
 	adapter: cloudflare(),
