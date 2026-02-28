@@ -1,0 +1,81 @@
+---
+import { getSortedPostsList } from "@utils/content";
+import GridLayout from "@layouts/grid.astro";
+import BlogCard from "@components/BlogCard.astro";
+import Breadcrumbs from "@components/common/breadcrumbs.astro";
+
+export async function getStaticPaths() {
+    const posts = await getSortedPostsList();
+
+    // Get all unique categories
+    const allCategories = new Set<string>();
+    posts.forEach(post => {
+        if (post.data.category) {
+            allCategories.add(post.data.category);
+        }
+    });
+
+    // Create paths for each category
+    const paths = Array.from(allCategories).map(category => ({
+        params: { category: category.toLowerCase().replace(/\s+/g, '-') },
+        props: { category, posts: posts.filter(post => post.data.category === category) }
+    }));
+
+    return paths;
+}
+
+const { category, posts } = Astro.props;
+const title = `${category} Posts`;
+const description = `Browse all blog posts in the ${category} category on KoreShield.`;
+---
+
+<GridLayout title={title} description={description}>
+    <div class="mb-8">
+        <div class="mb-6 onload-animation-up">
+            <Breadcrumbs 
+                items={[
+                    { label: "Blog", href: "/archive" },
+                    { label: "Categories", href: "/archive?view=categories" },
+                    { label: category }
+                ]}
+            />
+        </div>
+        
+        <div class="flex items-center gap-3 mb-4">
+            <div class="px-3 py-1 bg-cyber-purple/20 text-cyber-purple rounded-full text-sm font-medium">
+                📁 {category}
+            </div>
+            <span class="text-gray-400">
+                {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+            </span>
+        </div>
+
+        <h1 class="text-3xl font-bold text-white mb-2">{category} Posts</h1>
+        <p class="text-gray-400">Explore all articles in the {category} category.</p>
+    </div>
+
+    {posts.length > 0 ? (
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {posts.map(post => (
+                <BlogCard
+                    title={post.data.title}
+                    slug={post.id.replace('.md', '')}
+                    publishedDate={post.data.published}
+                    coverImage={post.data.cover}
+                    readingTime={post.data.readingTime}
+                    tags={post.data.tags}
+                    category={post.data.category}
+                />
+            ))}
+        </div>
+    ) : (
+        <div class="text-center py-12">
+            <div class="text-6xl mb-4">📂</div>
+            <h2 class="text-2xl font-bold text-white mb-2">No posts found</h2>
+            <p class="text-gray-400 mb-6">There are no posts in the "{category}" category yet.</p>
+            <a href="/archive" class="inline-flex items-center gap-2 px-6 py-3 bg-electric-blue text-white rounded-lg hover:bg-electric-blue/80 transition-colors">
+                Browse All Posts
+            </a>
+        </div>
+    )}
+</GridLayout>
