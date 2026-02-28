@@ -4,7 +4,7 @@ import { defineConfig } from 'astro/config';
 
 import react from '@astrojs/react';
 
-import vercel from '@astrojs/vercel';
+import cloudflare from '@astrojs/cloudflare';
 
 import markdoc from '@astrojs/markdoc';
 
@@ -41,11 +41,7 @@ export default defineConfig({
 		icon(),
 	],
 
-	adapter: vercel({
-		webAnalytics: {
-			enabled: true
-		}
-	}),
+	adapter: cloudflare(),
 
 	markdown: {
 		remarkPlugins: [remarkDirective, parseDirectiveNode],
