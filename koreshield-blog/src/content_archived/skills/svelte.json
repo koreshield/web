@@ -1,0 +1,15 @@
+{
+    "name": "Incident Response",
+    "description": "Rapid incident detection, analysis, and response to cybersecurity threats.",
+    "icon": "material-symbols:emergency",
+    "category": "cybersecurity",
+    "level": "expert",
+    "experience": {
+        "years": 6,
+        "months": 0
+    },
+    "projects": [
+        "Koreshield Platform"
+    ],
+    "color": "#7c3aed"
+}
