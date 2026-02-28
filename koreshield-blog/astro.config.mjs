@@ -42,8 +42,8 @@ export default defineConfig({
 		svelte(),
 		icon(),
 		sanity({
-			projectId: process.env.PUBLIC_SANITY_PROJECT_ID || 'rdas6fhs',
-			dataset: process.env.PUBLIC_SANITY_DATASET || 'production',
+			projectId: process.env.PUBLIC_SANITY_PROJECT_ID,
+			dataset: process.env.PUBLIC_SANITY_DATASET,
 			useCdn: false,
 		}),
 	],

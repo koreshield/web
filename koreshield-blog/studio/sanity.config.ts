@@ -8,8 +8,8 @@ export default defineConfig({
 	title: 'koreshield-blog',
 	basePath: '/studio',
 
-	projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'rdas6fhs',
-	dataset: process.env.SANITY_STUDIO_DATASET || 'production',
+	projectId: process.env.SANITY_STUDIO_PROJECT_ID as string,
+	dataset: process.env.SANITY_STUDIO_DATASET as string,
 
 	plugins: [structureTool(), visionTool()],
 
