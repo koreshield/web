@@ -1,0 +1,40 @@
+---
+title: "Zero-Click Remote Code Execution: Exploiting MCP & Agentic IDEs"
+published: 2025-01-20
+updated: 2025-01-20
+description: "Discover how a zero-click MCP attack turns a shared Google Doc into remote code execution, stolen secrets, and enterprise-wide compromise."
+cover: '/koreshield-cover.png'
+tags: [RCE, Agentic IDEs, Zero-Click]
+category: Exploits
+draft: false
+author: "isaac-emmanuel"
+slug: zero-click-rce-mcp
+
+---
+
+The promise of agentic development workflows is that your AI coding assistant can fetch information and execute code. But as agents gain the ability to interact with external services, the line between helpful assistant and attack surface gets very thin.
+
+In this post, we demonstrate a large scale, zero-click exploit chain against a **Cursor environment configured with a Google Docs MCP server**.
+
+{% callout type="danger" %}
+**Zero-Click RCE**: By silently sharing a malicious Google Doc, an attacker can trick an AI assistant into executing code automatically. No clicks required from the victim.
+{% /callout %}
+
+## How the Exploit Works
+
+### 1. The Attack Vector
+The attacker silently shares a large number of Google Docs with generic titles like "Technical Requirements". The victim receives no notification.
+
+### 2. The Payload
+Each document contains hidden instructions ("Injection Payload") designed to bypass the agent’s safeguards and coerce it into fetching and executing a malicious script hosted on a Gist.
+
+### 3. The Execution
+The victim asks Cursor to retrieve "latest technical requirements". Cursor reads the poisoned doc, follows the hidden instructions, and executes the malicious code.
+
+**Impact**: Stolen credentials, persistent access, and potential pivot point into company-wide systems.
+
+## Defensive Lessons
+
+- **Validate Tool Calls**: Don't let agents execute code blindly.
+- **Strict Allow-lists**: Only allow execution from trusted sources.
+- **Treat External Data as Untrusted**.

@@ -1,0 +1,12 @@
+{
+    "name": "Penetration Testing",
+    "description": "Comprehensive penetration testing and vulnerability assessment services.",
+    "icon": "material-symbols:bug-report",
+    "category": "cybersecurity",
+    "level": "expert",
+    "experience": {
+        "years": 7,
+        "months": 0
+    },
+    "color": "#10b981"
+}

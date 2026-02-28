@@ -1,0 +1,23 @@
+{
+    "title": "Koreshield Threat Intelligence Platform",
+    "description": "Advanced cybersecurity platform providing real-time threat intelligence and automated protection solutions.",
+    "image": "",
+    "category": "cybersecurity",
+    "techStack": [
+        "Next.js",
+        "TypeScript",
+        "PostgreSQL",
+        "Docker"
+    ],
+    "status": "active",
+    "liveDemo": "https://koreshield.com",
+    "sourceCode": "",
+    "startDate": "2024-01-01",
+    "endDate": "",
+    "featured": true,
+    "tags": [
+        "Cybersecurity",
+        "Threat Intelligence",
+        "Enterprise Security"
+    ]
+}
