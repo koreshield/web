@@ -1,0 +1,135 @@
+---
+import { Icon } from "astro-icon/components";
+
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import GridLayout from "@layouts/grid.astro";
+---
+
+<GridLayout title={i18n(I18nKey.notFound)} description={i18n(I18nKey.notFoundDescription)}>
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-[600px]">
+        <div class="card-base z-10 px-9 py-16 relative w-full flex flex-col items-center justify-center text-center page-transition">
+            <!-- Animated shield icon with glow -->
+            <div class="mb-8 relative">
+                <div class="absolute inset-0 bg-electric-blue/20 rounded-full blur-3xl animate-pulse"></div>
+                <div class="relative">
+                    <svg class="w-32 h-32 text-electric-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 8v4M12 16h.01" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 404 Header -->
+            <h1 class="text-8xl md:text-9xl font-bold mb-4">
+                <span class="text-gradient">404</span>
+            </h1>
+
+            <!-- Title -->
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">
+                Security Breach Detected
+            </h2>
+
+            <!-- Description with security theme -->
+            <p class="text-lg text-white/70 mb-8 max-w-md">
+                The page you're looking for has been protected and moved to a secure location. 
+                Let's get you back to safe territory.
+            </p>
+
+            <!-- Action buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 mb-12">
+                <a
+                    href="/"
+                    class="inline-flex items-center gap-2 px-8 py-4 bg-electric-blue text-white rounded-lg hover:bg-blue-600 transition-all duration-300 font-medium hover-glow"
+                >
+                    <Icon name="material-symbols:home" class="text-xl" />
+                    Return to Base
+                </a>
+                
+                <a
+                    href="/archive"
+                    class="inline-flex items-center gap-2 px-8 py-4 bg-white/5 text-white border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300 font-medium"
+                >
+                    <Icon name="material-symbols:article" class="text-xl" />
+                    Browse Articles
+                </a>
+            </div>
+
+            <!-- Helpful links -->
+            <div class="w-full max-w-2xl mt-8">
+                <h3 class="text-sm font-semibold text-white/50 mb-4 uppercase tracking-wider">Quick Links</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <a href="/about" class="flex items-center gap-2 text-white/70 hover:text-electric-blue transition-colors p-3 rounded-lg hover:bg-white/5">
+                        <Icon name="material-symbols:info" class="text-lg" />
+                        <span>About</span>
+                    </a>
+                    <a href="https://koreshield.com/docs" class="flex items-center gap-2 text-white/70 hover:text-electric-blue transition-colors p-3 rounded-lg hover:bg-white/5">
+                        <Icon name="material-symbols:menu-book" class="text-lg" />
+                        <span>Documentation</span>
+                    </a>
+                    <a href="https://koreshield.com" class="flex items-center gap-2 text-white/70 hover:text-electric-blue transition-colors p-3 rounded-lg hover:bg-white/5">
+                        <Icon name="material-symbols:shield" class="text-lg" />
+                        <span>Platform</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Decorative elements -->
+            <div class="absolute top-8 left-8 opacity-5">
+                <Icon name="material-symbols:lock" class="text-6xl text-electric-blue" />
+            </div>
+            <div class="absolute bottom-8 right-8 opacity-5">
+                <Icon name="material-symbols:verified-user" class="text-6xl text-electric-blue" />
+            </div>
+            
+            <!-- Animated scanning line -->
+            <div class="absolute inset-0 pointer-events-none overflow-hidden">
+                <div class="absolute w-full h-1 bg-gradient-to-r from-transparent via-electric-blue to-transparent opacity-20 animate-scan"></div>
+            </div>
+        </div>
+    </div>
+</GridLayout>
+
+<style>
+    @keyframes scan {
+        0% {
+            top: 0;
+            opacity: 0;
+        }
+        50% {
+            opacity: 0.3;
+        }
+        100% {
+            top: 100%;
+            opacity: 0;
+        }
+    }
+    
+    .animate-scan {
+        animation: scan 3s ease-in-out infinite;
+    }
+</style>
+
+<style>
+    /* 添加一些动画效果 */
+    .card-base {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* 按钮悬停效果 */
+    a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+    }
+</style>

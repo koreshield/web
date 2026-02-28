@@ -1,0 +1,15 @@
+{
+    "name": "Security Monitoring",
+    "description": "Real-time monitoring and alerting for LLM interactions, security events, and anomalous behavior detection.",
+    "icon": "material-symbols:emergency",
+    "category": "ai-security",
+    "level": "expert",
+    "experience": {
+        "years": 3,
+        "months": 0
+    },
+    "projects": [
+        "KoreShield Platform"
+    ],
+    "color": "#7c3aed"
+}

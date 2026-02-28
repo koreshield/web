@@ -1,0 +1,15 @@
+{
+    "name": "Threat Intelligence",
+    "description": "Advanced threat intelligence gathering and analysis for proactive cybersecurity defense.",
+    "icon": "material-symbols:security",
+    "category": "cybersecurity",
+    "level": "expert",
+    "experience": {
+        "years": 5,
+        "months": 0
+    },
+    "projects": [
+        "Koreshield Platform"
+    ],
+    "color": "#3b82f6"
+}
