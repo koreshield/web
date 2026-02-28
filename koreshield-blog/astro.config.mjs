@@ -12,7 +12,6 @@ import svelte from '@astrojs/svelte';
 
 import icon from 'astro-icon';
 
-import keystatic from '@keystatic/astro';
 import remarkDirective from 'remark-directive';
 import rehypeComponents from 'rehype-components';
 import { parseDirectiveNode } from './src/plugins/remark-directive-rehype.js';
@@ -25,43 +24,42 @@ import { pluginLanguageBadge } from './src/plugins/expressive-code/language-badg
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://blog.koreshield.com',
-  output: 'server',
+	site: 'https://blog.koreshield.com',
+	output: 'server',
 
-  integrations: [
-    expressiveCode({
-      themes: ['github-dark', 'github-light'],
-      plugins: [pluginCopyButton(), pluginCollapseButton(), pluginLanguageBadge()],
-      defaultProps: {
-        showLineNumbers: false,
-      },
-    }),
-    react(),
-    markdoc(),
-    svelte(),
-    icon(),
-    keystatic()
-  ],
+	integrations: [
+		expressiveCode({
+			themes: ['github-dark', 'github-light'],
+			plugins: [pluginCopyButton(), pluginCollapseButton(), pluginLanguageBadge()],
+			defaultProps: {
+				showLineNumbers: false,
+			},
+		}),
+		react(),
+		markdoc(),
+		svelte(),
+		icon(),
+	],
 
-  adapter: vercel({
-    webAnalytics: {
-      enabled: true
-    }
-  }),
+	adapter: vercel({
+		webAnalytics: {
+			enabled: true
+		}
+	}),
 
-  markdown: {
-    remarkPlugins: [remarkDirective, parseDirectiveNode],
-    rehypePlugins: [
-      [rehypeComponents, {
-        components: {
-          note: (properties, children) => AdmonitionComponent(properties, children, "note"),
-          tip: (properties, children) => AdmonitionComponent(properties, children, "tip"),
-          warning: (properties, children) => AdmonitionComponent(properties, children, "warning"),
-          caution: (properties, children) => AdmonitionComponent(properties, children, "caution"),
-          important: (properties, children) => AdmonitionComponent(properties, children, "important"),
-          danger: (properties, children) => AdmonitionComponent(properties, children, "danger"),
-        }
-      }]
-    ]
-  }
+	markdown: {
+		remarkPlugins: [remarkDirective, parseDirectiveNode],
+		rehypePlugins: [
+			[rehypeComponents, {
+				components: {
+					note: (properties, children) => AdmonitionComponent(properties, children, "note"),
+					tip: (properties, children) => AdmonitionComponent(properties, children, "tip"),
+					warning: (properties, children) => AdmonitionComponent(properties, children, "warning"),
+					caution: (properties, children) => AdmonitionComponent(properties, children, "caution"),
+					important: (properties, children) => AdmonitionComponent(properties, children, "important"),
+					danger: (properties, children) => AdmonitionComponent(properties, children, "danger"),
+				}
+			}]
+		]
+	}
 });
