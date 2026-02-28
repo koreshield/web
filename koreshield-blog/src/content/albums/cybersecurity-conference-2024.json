@@ -1,0 +1,33 @@
+{
+    "title": "AI Security Summit 2024",
+    "description": "Highlights from KoreShield's participation at the AI Security Summit, showcasing our LLM security platform and demonstrating advanced AI protection capabilities.",
+    "cover": "https://picsum.photos/800/600?random=1",
+    "date": "2024-06-15T00:00:00.000Z",
+    "location": "San Francisco, CA",
+    "tags": ["ai-security", "conference", "llm-protection", "networking"],
+    "layout": "masonry",
+    "columns": 3,
+    "photos": [
+        {
+            "src": "https://picsum.photos/800/600?random=2",
+            "alt": "KoreShield booth at AI Security Summit",
+            "title": "Summit Booth",
+            "description": "Demonstrating our LLM security platform to industry leaders and potential partners",
+            "tags": ["booth", "demonstration", "platform"]
+        },
+        {
+            "src": "https://picsum.photos/800/600?random=3",
+            "alt": "Team presenting AI security research",
+            "title": "Keynote Presentation",
+            "description": "Presenting groundbreaking research on LLM vulnerabilities and protection strategies",
+            "tags": ["presentation", "research", "ai-security"]
+        },
+        {
+            "src": "https://picsum.photos/800/600?random=4",
+            "alt": "Networking with AI industry leaders",
+            "title": "Industry Networking",
+            "description": "Connecting with AI companies, researchers, and security experts",
+            "tags": ["networking", "industry", "collaboration"]
+        }
+    ]
+}

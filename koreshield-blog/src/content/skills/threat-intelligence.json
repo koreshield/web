@@ -1,0 +1,15 @@
+{
+    "name": "LLM Security",
+    "description": "Advanced security measures for Large Language Models including jailbreak detection, prompt injection prevention, and content filtering.",
+    "icon": "material-symbols:security",
+    "category": "ai-security",
+    "level": "expert",
+    "experience": {
+        "years": 3,
+        "months": 0
+    },
+    "projects": [
+        "KoreShield Platform"
+    ],
+    "color": "#3b82f6"
+}

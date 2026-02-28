@@ -1,0 +1,66 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface Props {
+    items: Array<{
+        label: string;
+        href?: string;
+    }>;
+    className?: string;
+}
+
+const { items, className = "" } = Astro.props;
+---
+
+<nav
+    aria-label="Breadcrumb"
+    class:list={["flex items-center gap-2 text-sm", className]}
+>
+    <a
+        href="https://koreshield.com"
+        class="flex items-center gap-1 text-white/50 hover:text-electric-blue transition-colors"
+        aria-label="Home"
+    >
+        <Icon name="material-symbols:home" class="w-4 h-4" />
+        <span class="hidden sm:inline">Home</span>
+    </a>
+
+    <Icon name="material-symbols:chevron-right" class="w-4 h-4 text-white/30" />
+
+    <a
+        href="/"
+        class="text-white/50 hover:text-electric-blue transition-colors font-medium"
+    >
+        Blog
+    </a>
+
+    {
+        items.map((item, index) => (
+            <>
+                <Icon
+                    name="material-symbols:chevron-right"
+                    class="w-4 h-4 text-white/30"
+                />
+
+                {item.href ? (
+                    <a
+                        href={item.href}
+                        class="text-white/50 hover:text-electric-blue transition-colors truncate max-w-[200px]"
+                    >
+                        {item.label}
+                    </a>
+                ) : (
+                    <span class="text-white/90 font-medium truncate max-w-[200px]">
+                        {item.label}
+                    </span>
+                )}
+            </>
+        ))
+    }
+</nav>
+
+<style>
+    nav {
+        -webkit-font-smoothing: antialiased;
+    }
+</style>

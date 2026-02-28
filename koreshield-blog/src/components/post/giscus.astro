@@ -1,0 +1,47 @@
+<script is:inline>
+    function loadGiscus() {
+        const config = document.getElementById("giscus-config")?.dataset;
+        if (!config) return;
+
+        const script = document.createElement("script");
+        script.src = "https://giscus.app/client.js";
+        script.setAttribute("data-repo", config.repo);
+        script.setAttribute("data-repo-id", config.repoId);
+        script.setAttribute("data-category", config.category);
+        script.setAttribute("data-category-id", config.categoryId);
+        script.setAttribute("data-mapping", config.mapping || "pathname");
+        script.setAttribute("data-strict", config.strict || "0");
+        script.setAttribute(
+            "data-reactions-enabled",
+            config.reactionsEnabled || "1",
+        );
+        script.setAttribute("data-emit-metadata", config.emitMetadata || "0");
+        script.setAttribute(
+            "data-input-position",
+            config.inputPosition || "top",
+        );
+        script.setAttribute(
+            "data-theme",
+            config.theme || "preferred_color_scheme",
+        );
+        script.setAttribute("data-lang", config.lang || "en");
+        script.setAttribute("data-loading", config.loading || "lazy");
+        script.crossOrigin = "anonymous";
+        script.async = true;
+
+        const container = document.getElementById("giscus-container");
+        if (container) {
+            container.innerHTML = "";
+            container.appendChild(script);
+        }
+    }
+
+    // Load on initial page load
+    loadGiscus();
+
+    // Re-load on view transitions (if enabled)
+    document.addEventListener("astro:page-load", loadGiscus);
+</script>
+
+<div id="giscus-container" class="giscus mt-8"></div>
+<div id="giscus-config" class="hidden" {...Astro.props}></div>

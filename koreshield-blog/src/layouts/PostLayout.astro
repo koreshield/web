@@ -1,0 +1,60 @@
+---
+import { siteConfig } from "@/config";
+import IconifyLoader from "@components/common/iconifyLoader.astro";
+
+import Footer from "@components/footer.astro";
+import TocButton from "@components/tocButton.astro";
+import BackToTopButton from "@components/back2TopButton.astro";
+import BaseLayout from "./base.astro";
+import "@styles/grid.css"; // Keep grid styles for utility classes but override layout
+
+interface Props {
+    title?: string;
+    banner?: string;
+    description?: string;
+    lang?: string;
+    setOGTypeArticle?: boolean;
+    postSlug?: string;
+}
+
+const { title, banner, description, lang, setOGTypeArticle, postSlug } =
+    Astro.props;
+---
+
+<BaseLayout
+    title={title}
+    banner={banner}
+    description={description}
+    lang={lang}
+    setOGTypeArticle={setOGTypeArticle}
+    postSlug={postSlug}
+>
+    <!-- Basic Loaders -->
+    <IconifyLoader />
+
+    <!-- Navbar Removed (Homepage Only) -->
+
+    <!-- Main Content Area - Single Column, Focused -->
+    <div class="w-full relative z-30 pointer-events-none mt-4 md:mt-8 mb-16">
+        <div
+            class="relative max-w-4xl mx-auto pointer-events-auto px-4 md:px-6"
+        >
+            <main id="swup-container" class="transition-swup-fade">
+                <div
+                    id="content-wrapper"
+                    class="onload-animation-up transition-leaving"
+                >
+                    <slot />
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <div class="mt-20 border-t border-white/5 pt-8">
+                <Footer />
+            </div>
+        </div>
+    </div>
+
+    <TocButton />
+    <BackToTopButton />
+</BaseLayout>
