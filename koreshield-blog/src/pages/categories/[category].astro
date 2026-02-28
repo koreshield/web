@@ -4,6 +4,8 @@ import GridLayout from "@layouts/grid.astro";
 import BlogCard from "@components/BlogCard.astro";
 import Breadcrumbs from "@components/common/breadcrumbs.astro";
 
+export const prerender = true;
+
 export async function getStaticPaths() {
 	const posts = await getSortedPostsList();
 
@@ -87,9 +89,7 @@ const description = `Browse all blog posts in the ${category} category on KoreSh
 							post.data.published
 						}
 						coverImage={post.data.cover}
-						readingTime={
-							post.data.readingTime
-						}
+						readingTime={post.readingTime}
 						tags={post.data.tags}
 						category={
 							post.data.category
