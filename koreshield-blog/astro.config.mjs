@@ -34,7 +34,7 @@ export default defineConfig({
 			themes: ['github-dark', 'github-light'],
 			plugins: [pluginCopyButton(), pluginCollapseButton(), pluginLanguageBadge()],
 			defaultProps: {
-				showLineNumbers: false,
+				// showLineNumbers: false,
 			},
 		}),
 		react(),
@@ -42,8 +42,8 @@ export default defineConfig({
 		svelte(),
 		icon(),
 		sanity({
-			projectId: 'rdas6fhs',
-			dataset: 'production',
+			projectId: process.env.PUBLIC_SANITY_PROJECT_ID || 'rdas6fhs',
+			dataset: process.env.PUBLIC_SANITY_DATASET || 'production',
 			useCdn: false,
 		}),
 	],
@@ -55,12 +55,12 @@ export default defineConfig({
 		rehypePlugins: [
 			[rehypeComponents, {
 				components: {
-					note: (properties, children) => AdmonitionComponent(properties, children, "note"),
-					tip: (properties, children) => AdmonitionComponent(properties, children, "tip"),
-					warning: (properties, children) => AdmonitionComponent(properties, children, "warning"),
-					caution: (properties, children) => AdmonitionComponent(properties, children, "caution"),
-					important: (properties, children) => AdmonitionComponent(properties, children, "important"),
-					danger: (properties, children) => AdmonitionComponent(properties, children, "danger"),
+					note: (/** @type {any} */ properties, /** @type {any} */ children) => AdmonitionComponent(properties, children, "note"),
+					tip: (/** @type {any} */ properties, /** @type {any} */ children) => AdmonitionComponent(properties, children, "tip"),
+					warning: (/** @type {any} */ properties, /** @type {any} */ children) => AdmonitionComponent(properties, children, "warning"),
+					caution: (/** @type {any} */ properties, /** @type {any} */ children) => AdmonitionComponent(properties, children, "caution"),
+					important: (/** @type {any} */ properties, /** @type {any} */ children) => AdmonitionComponent(properties, children, "important"),
+					danger: (/** @type {any} */ properties, /** @type {any} */ children) => AdmonitionComponent(properties, children, "warning"),
 				}
 			}]
 		]
