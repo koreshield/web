@@ -26,6 +26,7 @@
     "@iconify-json/fa6-solid": "^1.2.4",
     "@iconify-json/material-symbols": "^1.2.53",
     "@iconify/svelte": "^5.2.1",
+    "@portabletext/react": "^6.0.2",
     "@sanity/astro": "^3.2.11",
     "@sanity/client": "^7.16.0",
     "@types/react": "^19.2.9",
