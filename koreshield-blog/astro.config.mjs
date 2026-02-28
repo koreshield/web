@@ -27,7 +27,7 @@ import sanity from '@sanity/astro';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://blog.koreshield.com',
-	output: 'server',
+	output: 'static',
 
 	integrations: [
 		expressiveCode({
@@ -44,12 +44,11 @@ export default defineConfig({
 		sanity({
 			projectId: 'rdas6fhs',
 			dataset: 'production',
-			useCdn: true,
-			studioBasePath: '/studio',
+			useCdn: false,
 		}),
 	],
 
-	adapter: cloudflare(),
+	// adapter: cloudflare(),
 
 	markdown: {
 		remarkPlugins: [remarkDirective, parseDirectiveNode],

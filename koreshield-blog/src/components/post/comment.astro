@@ -1,12 +1,10 @@
 ---
-import type { CollectionEntry } from "astro:content";
-
 import { postConfig } from "@/config";
 import Twikoo from "./twikoo.astro";
 import Giscus from "./giscus.astro";
 
 interface Props {
-    post: CollectionEntry<"posts">;
+	post: { id: string };
 }
 
 const { id } = Astro.props.post;
@@ -15,22 +13,22 @@ const path = `/posts/${id}/`;
 
 let commentService = "";
 if (postConfig.comment?.enable) {
-    if (postConfig.comment?.twikoo) {
-        commentService = "twikoo";
-    } else if (postConfig.comment?.giscus) {
-        commentService = "giscus";
-    }
+	if (postConfig.comment?.twikoo) {
+		commentService = "twikoo";
+	} else if (postConfig.comment?.giscus) {
+		commentService = "giscus";
+	}
 }
 ---
 
 {
-    postConfig.comment?.enable && (
-        <div class="card-base p-6 mb-4">
-            {commentService === "twikoo" && <Twikoo path={path} />}
-            {commentService === "giscus" && (
-                <Giscus {...postConfig.comment.giscus} />
-            )}
-            {commentService === "" && null}
-        </div>
-    )
+	postConfig.comment?.enable && (
+		<div class="card-base p-6 mb-4">
+			{commentService === "twikoo" && <Twikoo path={path} />}
+			{commentService === "giscus" && (
+				<Giscus {...postConfig.comment.giscus} />
+			)}
+			{commentService === "" && null}
+		</div>
+	)
 }
