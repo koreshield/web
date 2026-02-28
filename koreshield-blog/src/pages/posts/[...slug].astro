@@ -2,15 +2,12 @@
 import { Icon } from "astro-icon/components";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { PortableText } from '@portabletext/react';
+import { PortableText } from "@portabletext/react";
 
 import { siteConfig, profileConfig, postConfig } from "@/config";
 import { getSortedPosts, type PostForList } from "@utils/content";
 import { formatDateToYYYYMMDD } from "@utils/date";
-import {
-    getPostUrlBySlug,
-    removeFileExtension,
-} from "@utils/url";
+import { getPostUrlBySlug, removeFileExtension } from "@utils/url";
 import PasswordProtection from "@components/common/passwordProtection.astro";
 import AuthorCard from "@components/common/author-card.astro";
 import SocialShare from "@components/common/social-share.astro";
@@ -20,34 +17,36 @@ import PostLayout from "@layouts/PostLayout.astro";
 import Comment from "@components/post/comment.astro";
 
 // Used to generate the base route pages.
+export const prerender = true;
+
 export async function getStaticPaths() {
-    const blogEntries = await getSortedPosts();
-    const paths: {
-        params: { slug: string };
-        props: { entry: PostForList };
-    }[] = [];
+	const blogEntries = await getSortedPosts();
+	const paths: {
+		params: { slug: string };
+		props: { entry: PostForList };
+	}[] = [];
 
-    for (const entry of blogEntries) {
-        const slug = entry.id;
-        paths.push({
-            params: { slug },
-            props: { entry },
-        });
-        if (entry.data.routeName) {
-            let routeName = entry.data.routeName
-                .replace(/^\/+/, "")
-                .replace(/\/+$/, "");
-            if (routeName.startsWith("posts/")) {
-                routeName = routeName.replace(/^posts\//, "");
-            }
-            paths.push({
-                params: { slug: routeName },
-                props: { entry },
-            });
-        }
-    }
+	for (const entry of blogEntries) {
+		const slug = entry.id;
+		paths.push({
+			params: { slug },
+			props: { entry },
+		});
+		if (entry.data.routeName) {
+			let routeName = entry.data.routeName
+				.replace(/^\/+/, "")
+				.replace(/\/+$/, "");
+			if (routeName.startsWith("posts/")) {
+				routeName = routeName.replace(/^posts\//, "");
+			}
+			paths.push({
+				params: { slug: routeName },
+				props: { entry },
+			});
+		}
+	}
 
-    return paths;
+	return paths;
 }
 
 const { slug } = Astro.params;
@@ -55,279 +54,307 @@ const { slug } = Astro.params;
 let entry: PostForList | undefined;
 
 if (Astro.props.entry) {
-    entry = Astro.props.entry;
+	entry = Astro.props.entry;
 } else {
-    const allPosts = await getSortedPosts();
-    entry = allPosts.find((post: any) => post.id === slug);
+	const allPosts = await getSortedPosts();
+	entry = allPosts.find((post: any) => post.id === slug);
 }
 
 if (!entry) {
-    return Astro.redirect("/404");
+	return Astro.redirect("/404");
 }
 
 let isEncrypted = !!(entry.data.encrypted && entry.data.password);
 
 dayjs.extend(utc);
 const lastModified = dayjs(entry.data.updated || entry.data.published)
-    .utc()
-    .format("YYYY-MM-DDTHH:mm:ss");
+	.utc()
+	.format("YYYY-MM-DDTHH:mm:ss");
 
-let authorData = null;
-if (entry.data.author) {
-    authorData = entry.data.author;
-}
+const authorData: any = entry.data.author || null;
 
-const wordCount = JSON.stringify(entry.body || []).split(' ').length;
+const wordCount = JSON.stringify(entry.body || []).split(" ").length;
 const readingTime = Math.ceil(wordCount / 200);
 
 const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: entry.data.title,
-    description: entry.data.description || entry.data.title,
-    keywords: entry.data.tags,
-    author: authorData
-        ? {
-              "@type": "Person",
-              name: authorData.name,
-              url: authorData.website || Astro.site,
-              image: authorData.avatar
-                  ? `${Astro.site}${authorData.avatar}`
-                  : undefined,
-              jobTitle: authorData.role,
-              worksFor: authorData.company
-                  ? {
-                        "@type": "Organization",
-                        name: authorData.company,
-                    }
-                  : undefined,
-          }
-        : {
-              "@type": "Person",
-              name: entry.data.author?.name || profileConfig.name,
-              url: Astro.site,
-          },
-    publisher: {
-        "@type": "Organization",
-        name: "KoreShield",
-        logo: {
-            "@type": "ImageObject",
-            url: `${Astro.site}logo-padlock.png`,
-        },
-    },
-    datePublished: formatDateToYYYYMMDD(entry.data.published),
-    dateModified: formatDateToYYYYMMDD(
-        entry.data.updated || entry.data.published,
-    ),
-    mainEntityOfPage: {
-        "@type": "WebPage",
-        "@id": `${Astro.site}posts/${entry.id}`,
-    },
-    image: entry.data.cover
-        ? `${Astro.site}${entry.data.cover}`
-        : `${Astro.site}logo-padlock.png`,
-    articleSection: entry.data.category?.title,
-    inLanguage: entry.data.lang
-        ? entry.data.lang.replace("_", "-")
-        : siteConfig.lang.replace("_", "-"),
-    wordCount: wordCount,
-    timeRequired: `PT${readingTime}M`,
-    url: `${Astro.site}posts/${entry.id}`,
+	"@context": "https://schema.org",
+	"@type": "BlogPosting",
+	headline: entry.data.title,
+	description: entry.data.description || entry.data.title,
+	keywords: entry.data.tags,
+	author: authorData
+		? {
+				"@type": "Person",
+				name: authorData.name,
+				url: authorData.website || Astro.site,
+				image: authorData.avatar
+					? `${Astro.site}${authorData.avatar}`
+					: undefined,
+				jobTitle: authorData.role,
+				worksFor: authorData.company
+					? {
+							"@type": "Organization",
+							name: authorData.company,
+						}
+					: undefined,
+			}
+		: {
+				"@type": "Person",
+				name:
+					entry.data.author?.name ||
+					profileConfig.name,
+				url: Astro.site,
+			},
+	publisher: {
+		"@type": "Organization",
+		name: "KoreShield",
+		logo: {
+			"@type": "ImageObject",
+			url: `${Astro.site}logo-padlock.png`,
+		},
+	},
+	datePublished: formatDateToYYYYMMDD(entry.data.published),
+	dateModified: formatDateToYYYYMMDD(
+		entry.data.updated || entry.data.published,
+	),
+	mainEntityOfPage: {
+		"@type": "WebPage",
+		"@id": `${Astro.site}posts/${entry.id}`,
+	},
+	image: entry.data.cover
+		? `${Astro.site}${entry.data.cover}`
+		: `${Astro.site}logo-padlock.png`,
+	articleSection: entry.data.category?.title,
+	inLanguage: entry.data.lang
+		? entry.data.lang.replace("_", "-")
+		: siteConfig.lang.replace("_", "-"),
+	wordCount: wordCount,
+	timeRequired: `PT${readingTime}M`,
+	url: `${Astro.site}posts/${entry.id}`,
 };
 ---
 
 <PostLayout
-    banner={entry.data.cover}
-    title={entry.data.title}
-    description={entry.data.description}
-    lang={entry.data.lang}
-    setOGTypeArticle={true}
-    postSlug={entry.id}
-    author={authorData}
+	banner={entry.data.cover}
+	title={entry.data.title}
+	description={entry.data.description}
+	lang={entry.data.lang}
+	setOGTypeArticle={true}
+	postSlug={entry.id}
 >
-    <script
-        is:inline
-        slot="head"
-        type="application/ld+json"
-        set:html={JSON.stringify(jsonLd)}
-    />
+	<script
+		is:inline
+		slot="head"
+		type="application/ld+json"
+		set:html={JSON.stringify(jsonLd)}
+	/>
 
-    <!-- Premium Header Section -->
-    <div class="relative mb-12 pt-8 text-center">
-        <!-- Background Glows -->
-        <div
-            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-electric-blue/10 rounded-full blur-[100px] -z-10 pointer-events-none"
-        >
-        </div>
+	<!-- Premium Header Section -->
+	<div class="relative mb-12 pt-8 text-center">
+		<!-- Background Glows -->
+		<div
+			class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-electric-blue/10 rounded-full blur-[100px] -z-10 pointer-events-none"
+		>
+		</div>
 
-        <!-- Breadcrumbs (Simplified) -->
-        <div class="flex justify-center mb-8">
-            <a
-                href="/"
-                class="text-sm font-mono text-gray-500 hover:text-electric-blue transition-colors"
-                >HOME</a
-            >
-            <span class="mx-3 text-gray-700">/</span>
-            <a
-                href="/archive"
-                class="text-sm font-mono text-gray-500 hover:text-electric-blue transition-colors"
-                >BLOG</a
-            >
-            {
-                entry.data.category && (
-                    <>
-                        <span class="mx-3 text-gray-700">/</span>
-                        <span class="text-sm font-mono text-electric-blue">
-                            {entry.data.category.title?.toUpperCase()}
-                        </span>
-                    </>
-                )
-            }
-        </div>
+		<!-- Breadcrumbs (Simplified) -->
+		<div class="flex justify-center mb-8">
+			<a
+				href="/"
+				class="text-sm font-mono text-gray-500 hover:text-electric-blue transition-colors"
+				>HOME</a
+			>
+			<span class="mx-3 text-gray-700">/</span>
+			<a
+				href="/archive"
+				class="text-sm font-mono text-gray-500 hover:text-electric-blue transition-colors"
+				>BLOG</a
+			>
+			{
+				entry.data.category && (
+					<>
+						<span class="mx-3 text-gray-700">
+							/
+						</span>
+						<span class="text-sm font-mono text-electric-blue">
+							{entry.data.category.title?.toUpperCase()}
+						</span>
+					</>
+				)
+			}
+		</div>
 
-        <h1
-            class="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-6 leading-tight max-w-4xl mx-auto"
-        >
-            {entry.data.title}
-        </h1>
+		<h1
+			class="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-6 leading-tight max-w-4xl mx-auto"
+		>
+			{entry.data.title}
+		</h1>
 
-        <div
-            class="flex flex-wrap items-center justify-center gap-6 text-gray-400 font-mono text-sm uppercase tracking-wider"
-        >
-            <div class="flex items-center gap-2">
-                <Icon
-                    name="material-symbols:calendar-today-outline-rounded"
-                    class="w-4 h-4"
-                />
-                {formatDateToYYYYMMDD(entry.data.published)}
-            </div>
-            <div class="flex items-center gap-2">
-                <Icon
-                    name="material-symbols:schedule-outline-rounded"
-                    class="w-4 h-4"
-                />
-                {wordCount} Words
-            </div>
-            <div class="flex items-center gap-2">
-                <Icon
-                    name="material-symbols:timer-outline-rounded"
-                    class="w-4 h-4"
-                />
-                {readingTime} Min Read
-            </div>
-        </div>
-    </div>
+		<div
+			class="flex flex-wrap items-center justify-center gap-6 text-gray-400 font-mono text-sm uppercase tracking-wider"
+		>
+			<div class="flex items-center gap-2">
+				<Icon
+					name="material-symbols:calendar-today-outline-rounded"
+					class="w-4 h-4"
+				/>
+				{formatDateToYYYYMMDD(entry.data.published)}
+			</div>
+			<div class="flex items-center gap-2">
+				<Icon
+					name="material-symbols:schedule-outline-rounded"
+					class="w-4 h-4"
+				/>
+				{wordCount} Words
+			</div>
+			<div class="flex items-center gap-2">
+				<Icon
+					name="material-symbols:timer-outline-rounded"
+					class="w-4 h-4"
+				/>
+				{readingTime} Min Read
+			</div>
+		</div>
+	</div>
 
-    <!-- Main Content -->
-    <div class="w-full max-w-3xl mx-auto">
-        <!-- Featured Image -->
-        {
-            entry.data.cover && (
-                <div class="mb-12 rounded-2xl overflow-hidden border border-white/5 shadow-2xl shadow-black/50 group">
-                    <img
-                        id="post-cover"
-                        src={entry.data.cover}
-                        class="w-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        loading="eager"
-                        alt={entry.data.title}
-                    />
-                </div>
-            )
-        }
+	<!-- Main Content -->
+	<div class="w-full max-w-3xl mx-auto">
+		<!-- Featured Image -->
+		{
+			entry.data.cover && (
+				<div class="mb-12 rounded-2xl overflow-hidden border border-white/5 shadow-2xl shadow-black/50 group">
+					<img
+						id="post-cover"
+						src={entry.data.cover}
+						class="w-full object-cover group-hover:scale-105 transition-transform duration-700"
+						loading="eager"
+						alt={entry.data.title}
+					/>
+				</div>
+			)
+		}
 
-        <!-- Article Content -->
-        <article
-            class="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-electric-blue prose-img:rounded-xl prose-code:text-cyber-purple prose-pre:bg-[#0f1623] prose-pre:border prose-pre:border-white/5"
-        >
-            <PasswordProtection
-                isEncrypted={isEncrypted}
-                password={entry.data.password}
-            >
-                <PortableText value={entry.body} />
-            </PasswordProtection>
-        </article>
+		<!-- Article Content -->
+		<article
+			class="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-electric-blue prose-img:rounded-xl prose-code:text-cyber-purple prose-pre:bg-[#0f1623] prose-pre:border prose-pre:border-white/5"
+		>
+			<PasswordProtection
+				isEncrypted={isEncrypted}
+				password={entry.data.password}
+			>
+				<PortableText value={entry.body} />
+			</PasswordProtection>
+		</article>
 
-        <!-- Post Footer: License, Tags, Share -->
-        <div class="mt-16 pt-8 border-t border-white/10">
-            {
-                entry.data.tags && (
-                    <div class="flex flex-wrap gap-2 mb-8">
-                        {entry.data.tags.map((tag) => (
-                            <a
-                                href={`/tags/${tag.toLowerCase()}`}
-                                class="px-3 py-1 rounded-md bg-white/5 hover:bg-white/10 text-sm text-gray-300 transition-colors"
-                            >
-                                #{tag}
-                            </a>
-                        ))}
-                    </div>
-                )
-            }
+		<!-- Post Footer: License, Tags, Share -->
+		<div class="mt-16 pt-8 border-t border-white/10">
+			{
+				entry.data.tags && (
+					<div class="flex flex-wrap gap-2 mb-8">
+						{entry.data.tags.map((tag) => (
+							<a
+								href={`/tags/${tag.toLowerCase()}`}
+								class="px-3 py-1 rounded-md bg-white/5 hover:bg-white/10 text-sm text-gray-300 transition-colors"
+							>
+								#{tag}
+							</a>
+						))}
+					</div>
+				)
+			}
 
-            <SocialShare
-                url={`${Astro.site}posts/${entry.id}`}
-                title={entry.data.title}
-                description={entry.data.description}
-                hashtags={[
-                    "KoreShield",
-                    "LLMSecurity",
-                    ...(entry.data.tags || []),
-                ]}
-            />
-        </div>
+			<SocialShare
+				url={`${Astro.site}posts/${entry.id}`}
+				title={entry.data.title}
+				description={entry.data.description}
+				hashtags={[
+					"KoreShield",
+					"LLMSecurity",
+					...(entry.data.tags || []),
+				]}
+			/>
+		</div>
 
-        {authorData && <AuthorCard author={authorData} />}
+		{
+			entry.data.author && (
+				<AuthorCard
+					author={{
+						name:
+							entry.data.author
+								.name ||
+							entry.data.author,
+						bio:
+							entry.data.author.bio ||
+							"",
+						avatar:
+							entry.data.author.image
+								?.asset?._ref ||
+							entry.data.author
+								.avatar,
+						role: entry.data.author.role,
+						company: entry.data.author
+							.company,
+						location: entry.data.author
+							.location,
+					}}
+				/>
+			)
+		}
 
-        <!-- Navigation -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12">
-            {
-                entry.data.prevSlug && (
-                    <a
-                        href={getPostUrlBySlug(entry.data.prevSlug)}
-                        class="group flex flex-col p-6 rounded-xl bg-white/5 border border-white/5 hover:border-electric-blue/30 hover:bg-white/10 transition-all"
-                    >
-                        <span class="text-xs text-gray-500 font-mono mb-2 group-hover:text-electric-blue">
-                            PREVIOUS POST
-                        </span>
-                        <span class="text-white font-bold group-hover:translate-x-1 transition-transform">
-                            {entry.data.prevTitle}
-                        </span>
-                    </a>
-                )
-            }
-            {
-                entry.data.nextSlug && (
-                    <a
-                        href={getPostUrlBySlug(entry.data.nextSlug)}
-                        class="group flex flex-col p-6 rounded-xl bg-white/5 border border-white/5 hover:border-electric-blue/30 hover:bg-white/10 transition-all text-right items-end"
-                    >
-                        <span class="text-xs text-gray-500 font-mono mb-2 group-hover:text-electric-blue">
-                            NEXT POST
-                        </span>
-                        <span class="text-white font-bold group-hover:-translate-x-1 transition-transform">
-                            {entry.data.nextTitle}
-                        </span>
-                    </a>
-                )
-            }
-        </div>
+		<!-- Navigation -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12">
+			{
+				entry.data.prevSlug && (
+					<a
+						href={getPostUrlBySlug(
+							entry.data.prevSlug,
+						)}
+						class="group flex flex-col p-6 rounded-xl bg-white/5 border border-white/5 hover:border-electric-blue/30 hover:bg-white/10 transition-all"
+					>
+						<span class="text-xs text-gray-500 font-mono mb-2 group-hover:text-electric-blue">
+							PREVIOUS POST
+						</span>
+						<span class="text-white font-bold group-hover:translate-x-1 transition-transform">
+							{entry.data.prevTitle}
+						</span>
+					</a>
+				)
+			}
+			{
+				entry.data.nextSlug && (
+					<a
+						href={getPostUrlBySlug(
+							entry.data.nextSlug,
+						)}
+						class="group flex flex-col p-6 rounded-xl bg-white/5 border border-white/5 hover:border-electric-blue/30 hover:bg-white/10 transition-all text-right items-end"
+					>
+						<span class="text-xs text-gray-500 font-mono mb-2 group-hover:text-electric-blue">
+							NEXT POST
+						</span>
+						<span class="text-white font-bold group-hover:-translate-x-1 transition-transform">
+							{entry.data.nextTitle}
+						</span>
+					</a>
+				)
+			}
+		</div>
 
-        <!-- Related Posts -->
-        <div class="mt-20">
-            <h3 class="text-2xl font-bold text-white mb-8">
-                Related Intelligence
-            </h3>
-            <RelatedPosts
-                currentPostId={entry.id}
-                currentTags={entry.data.tags || []}
-                currentCategory={entry.data.category}
-                limit={3}
-            />
-        </div>
+		<!-- Related Posts -->
+		<div class="mt-20">
+			<h3 class="text-2xl font-bold text-white mb-8">
+				Related Intelligence
+			</h3>
+			<RelatedPosts
+				currentPostId={entry.id}
+				currentTags={entry.data.tags || []}
+				currentCategory={entry.data.category}
+				limit={3}
+			/>
+		</div>
 
-        <div class="mt-12">
-            <Newsletter />
-            <Comment post={entry} />
-        </div>
-    </div>
+		<div class="mt-12">
+			<Newsletter />
+			<Comment post={entry} />
+		</div>
+	</div>
 </PostLayout>
