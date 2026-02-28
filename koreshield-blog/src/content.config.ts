@@ -48,12 +48,12 @@ const postsCollection = defineCollection({
 });
 
 const specCollection = defineCollection({
-	loader: glob({ pattern: '**/*.{md,mdx}', base: "src/content" }),
+	loader: glob({ pattern: '*.{md,mdx}', base: "./src/content" }),
 	schema: z.object({}),
 });
 
 const authorsCollection = defineCollection({
-	loader: glob({ pattern: '**/*.{yaml,yml,json}', base: "src/content/authors" }),
+	loader: glob({ pattern: '**/*.{yaml,yml,json}', base: "./src/content/authors" }),
 	schema: z.object({
 		name: z.string(),
 		role: z.string().optional(),
