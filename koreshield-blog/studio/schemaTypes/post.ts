@@ -30,11 +30,7 @@ export default defineType({
 			type: 'image',
 			options: { hotspot: true },
 			fields: [
-				defineField({
-					name: 'alt',
-					title: 'Alt Text',
-					type: 'string',
-				}),
+				defineField({ name: 'alt', title: 'Alt Text', type: 'string' }),
 			],
 		}),
 		defineField({
@@ -58,8 +54,37 @@ export default defineType({
 					],
 				},
 				{
-					type: 'code',
-					options: { withFilename: true },
+					// Custom code block — no plugin required
+					type: 'object',
+					name: 'codeBlock',
+					title: 'Code Block',
+					fields: [
+						defineField({
+							name: 'language',
+							title: 'Language',
+							type: 'string',
+							options: {
+								list: [
+									{ title: 'TypeScript', value: 'typescript' },
+									{ title: 'JavaScript', value: 'javascript' },
+									{ title: 'Python', value: 'python' },
+									{ title: 'Bash / Shell', value: 'bash' },
+									{ title: 'JSON', value: 'json' },
+									{ title: 'YAML', value: 'yaml' },
+									{ title: 'Plain Text', value: 'text' },
+								],
+							},
+							initialValue: 'typescript',
+						}),
+						defineField({ name: 'filename', title: 'Filename (optional)', type: 'string' }),
+						defineField({ name: 'code', title: 'Code', type: 'text', rows: 12 }),
+					],
+					preview: {
+						select: { language: 'language', filename: 'filename' },
+						prepare({ language, filename }: { language?: string; filename?: string }) {
+							return { title: filename || `Code (${language || 'text'})` }
+						},
+					},
 				},
 			],
 		}),
@@ -91,65 +116,25 @@ export default defineType({
 			type: 'datetime',
 			validation: Rule => Rule.required(),
 		}),
-		defineField({
-			name: 'updated',
-			title: 'Last Updated',
-			type: 'datetime',
-		}),
-		defineField({
-			name: 'draft',
-			title: 'Draft',
-			type: 'boolean',
-			initialValue: false,
-		}),
-		defineField({
-			name: 'pinned',
-			title: 'Pinned',
-			type: 'boolean',
-			initialValue: false,
-		}),
-		defineField({
-			name: 'lang',
-			title: 'Language',
-			type: 'string',
-			initialValue: 'en',
-		}),
-		defineField({
-			name: 'licenseName',
-			title: 'License Name',
-			type: 'string',
-		}),
-		defineField({
-			name: 'licenseUrl',
-			title: 'License URL',
-			type: 'url',
-		}),
-		defineField({
-			name: 'sourceLink',
-			title: 'Source Link',
-			type: 'url',
-		}),
+		defineField({ name: 'updated', title: 'Last Updated', type: 'datetime' }),
+		defineField({ name: 'draft', title: 'Draft', type: 'boolean', initialValue: false }),
+		defineField({ name: 'pinned', title: 'Pinned', type: 'boolean', initialValue: false }),
+		defineField({ name: 'lang', title: 'Language', type: 'string', initialValue: 'en' }),
+		defineField({ name: 'licenseName', title: 'License Name', type: 'string' }),
+		defineField({ name: 'licenseUrl', title: 'License URL', type: 'url' }),
+		defineField({ name: 'sourceLink', title: 'Source Link', type: 'url' }),
 	],
 	preview: {
-		select: {
-			title: 'title',
-			author: 'author.name',
-			media: 'coverImage',
-			draft: 'draft',
-		},
-		prepare({ title, author, media, draft }) {
+		select: { title: 'title', author: 'author.name', media: 'coverImage', draft: 'draft' },
+		prepare({ title, author, media, draft }: { title?: string; author?: string; media?: unknown; draft?: boolean }) {
 			return {
-				title: `${draft ? '[DRAFT] ' : ''}${title}`,
+				title: `${draft ? '[DRAFT] ' : ''}${title || 'Untitled'}`,
 				subtitle: author ? `by ${author}` : 'No author',
 				media,
 			}
 		},
 	},
 	orderings: [
-		{
-			title: 'Published At, Newest',
-			name: 'publishedAtDesc',
-			by: [{ field: 'published', direction: 'desc' }],
-		},
+		{ title: 'Published At, Newest', name: 'publishedAtDesc', by: [{ field: 'published', direction: 'desc' }] },
 	],
 })
