@@ -1,0 +1,119 @@
+---
+title: DigitalOcean Deployment
+description: Deploy the KoreShield proxy on DigitalOcean with Docker or App Platform.
+---
+
+# DigitalOcean Deployment
+
+This guide covers a simple Droplet + Docker setup and the managed App Platform option.
+
+## Use Cases
+
+- Quick production deployment with minimal infrastructure
+- Cost-effective proxy for small to mid-sized workloads
+- Managed scaling without running a full Kubernetes stack
+
+## Architecture Choices
+
+- Droplet + Docker for control and lower cost
+- App Platform for managed build, deploy, and autoscaling
+
+## Option A: Droplet + Docker
+
+### 1. Create a Droplet
+
+- Ubuntu 22.04 recommended
+- Add a firewall rule to allow port 8000 (or front with a reverse proxy)
+
+### 2. Install Docker
+
+```bash
+sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+```
+
+### 3. Run KoreShield
+
+```bash
+git clone https://github.com/koreshield/koreshield.git
+cd koreshield/koreshield
+cp config/config.example.yaml config/config.yaml
+
+export OPENAI_API_KEY=your-api-key
+
+docker build -t koreshield .
+
+docker run -d \
+  -p 8000:8000 \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -v $(pwd)/config/config.yaml:/app/config/config.yaml \
+  koreshield
+
+### 4. Verify health
+
+```bash
+curl http://<droplet-ip>:8000/health
+```
+```
+
+## Option B: App Platform
+
+### 1. Build and push to a registry
+
+Use Docker Hub or DigitalOcean Container Registry:
+
+```bash
+docker build -t koreshield .
+
+docker tag koreshield:latest registry.digitalocean.com/<registry>/koreshield:latest
+
+doctl registry login
+
+docker push registry.digitalocean.com/<registry>/koreshield:latest
+```
+
+### 2. Create the App
+
+- Create a new App from your container registry image
+- Set the port to 8000
+- Add environment variables for provider API keys
+- Use App Platform secrets for sensitive values
+
+## Secrets and Config
+
+- Use App Platform secrets or Droplet environment variables
+- Use `CONFIG_FILE` if you mount a custom config path
+- Keep provider keys off the Droplet disk when possible
+
+## Networking and TLS
+
+- Use the App Platform managed TLS or a load balancer
+- Restrict inbound access with a firewall on Droplets
+
+## Observability
+
+- Enable `json_logs: true` for structured logs
+- Ship logs to your monitoring stack (Datadog, Grafana, etc.)
+- Scrape `/metrics` if you have Prometheus
+
+## Security Notes
+
+- Store API keys in App Platform secrets.
+- Use `json_logs: true` and ship logs to your monitoring stack.
+- Restrict inbound access and use HTTPS.
+
+## Troubleshooting
+
+- 401 responses: confirm `KORESHIELD_API_KEY` header from clients
+- Image pull failures: verify registry credentials and permissions
+- Timeouts: increase app timeout for streaming responses
+- Provider errors: confirm API keys are set on the app
+
+## Next Steps
+
+- Configure providers in [/configuration/](/docs/configuration)
+- Add monitoring in [../monitoring/prometheus.mdx](../monitoring/prometheus.mdx)
+
+

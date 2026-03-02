@@ -1,0 +1,76 @@
+---
+title: Attack Detection
+description: Detect prompt injection and policy violations.
+slug: /features/attack-detection
+---
+
+# Attack Detection
+
+KoreShield uses a multi-layered detection system to identify prompt injection attempts and other security risks. Detection combines keyword rules, pattern analysis, custom rules, and ML-inspired heuristics.
+
+## Detection Layers
+
+### Keyword-Based Detection
+
+- Direct injection phrases (e.g., "ignore previous instructions")
+- Prompt leaking attempts (e.g., "system prompt")
+- Exfiltration indicators (e.g., "send to", "upload to")
+
+### Pattern-Based Detection
+
+- Code block injection patterns
+- Role manipulation attempts
+- Encoded content patterns
+- Adversarial suffixes and override markers
+- Multi-turn injection indicators
+
+### Custom Rule Engine
+
+Rules support keyword or regex matching and map to severity and action.
+
+Example rule DSL:
+
+```
+RULE custom_sql "Custom SQL Injection"
+DESCRIPTION: Detects custom SQL patterns
+PATTERN: SELECT * FROM users WHERE
+TYPE: contains
+SEVERITY: high
+ACTION: block
+TAGS: sql,custom
+```
+
+### ML-Inspired Heuristics
+
+- Keyword density
+- Special character ratio
+- Length anomalies
+- Pattern complexity scoring
+
+## Confidence and Severity
+
+- Each indicator contributes to a confidence score
+- Severity levels include `low`, `medium`, `high`, and `critical`
+- Sensitivity settings determine how strict enforcement is
+
+## Configuration Hooks
+
+```yaml
+security:
+	sensitivity: medium
+	default_action: block
+	features:
+		sanitization: true
+		detection: true
+		policy_enforcement: true
+```
+
+## Tuning Guidance
+
+- Use `high` sensitivity for regulated or high-risk workloads
+- Review logs to reduce false positives and refine custom rules
+- Pair with allowlists and blocklists for known safe or unsafe patterns
+
+## Reference
+
+Detection patterns are documented in [koreshield/docs/DETECTION_PATTERNS.md](https://github.com/koreshield/koreshield/blob/main/koreshield/docs/DETECTION_PATTERNS.md).

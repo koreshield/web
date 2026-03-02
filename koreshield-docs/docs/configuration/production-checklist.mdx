@@ -1,0 +1,39 @@
+---
+title: Production Checklist
+description: Checklist for going to production.
+slug: /configuration/production-checklist
+---
+
+# Production Checklist
+
+Use this checklist before launching KoreShield in production.
+
+## Security
+
+- Set `KORESHIELD_API_KEY` and require it on clients
+- Enable `security.policy_enforcement` and choose a `default_action`
+- Validate provider keys are stored in a secrets manager
+
+## Configuration
+
+- Use a production `config.yaml` (not the example file)
+- Set `json_logs: true` for structured logs
+- Set `container_mode: true` for containerized deployments
+
+## Networking
+
+- Terminate TLS at a trusted load balancer
+- Restrict inbound access to trusted networks or gateways
+- Confirm `/health` is reachable for health checks
+
+## Observability
+
+- Scrape `/metrics` if you use Prometheus
+- Configure alerting rules for attack spikes and provider outages
+- Validate log shipping to your monitoring stack
+
+## Reliability
+
+- Enable Redis for distributed rate limiting
+- Run a load test to validate latency and throughput
+- Verify failover behavior if providers are unavailable

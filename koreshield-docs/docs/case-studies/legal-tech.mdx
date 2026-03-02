@@ -1,0 +1,95 @@
+---
+title: Legal Tech Security
+description: Protecting attorney-client privilege in AI-powered legal applications.
+published: true
+---
+
+# Legal Tech: Protecting Privilege
+
+How a legal technology provider secured AI-assisted drafting and research while preserving confidentiality.
+
+## Challenge
+
+The platform supported:
+
+- contract analysis and clause suggestions
+- case law research summaries
+- drafting and redlining assistance
+
+**Critical requirements:**
+- preserve attorney-client privilege and confidentiality
+- isolate case context across firms and matters
+- prevent leakage of confidential facts in outputs
+
+## Solution
+
+Koreshield scanned prompts and outputs with strict policies and enforced per-matter isolation.
+
+```typescript
+import { Koreshield } from 'Koreshield-sdk';
+
+const Koreshield = new Koreshield({
+	apiKey: process.env.KORESHIELD_API_KEY,
+	sensitivity: 'high',
+});
+
+async function secureLegalAssist(userId: string, matterId: string, prompt: string) {
+	const scan = await Koreshield.scan({
+		content: prompt,
+		userId,
+		metadata: { matterId, domain: 'legal' },
+	});
+
+	if (scan.threat_detected) {
+		return { error: 'Blocked unsafe legal request' };
+	}
+
+	const draft = await generateLegalDraft(prompt);
+
+	const outputScan = await Koreshield.scan({
+		content: draft,
+		metadata: { matterId, output: true },
+	});
+
+	if (outputScan.threat_detected) {
+		return { error: 'Output failed privilege checks' };
+	}
+
+	return { draft };
+}
+```
+
+## Matter Isolation Strategy
+
+Every request included a matter identifier and tenant boundary:
+
+- **Tenant scoping:** firm and matter IDs enforced per request.
+- **RAG partitioning:** retrieval limited to the matter workspace.
+- **Token boundaries:** outputs limited to the scoped context.
+
+## Privilege Controls
+
+- **Matter isolation:** prompts and retrieved docs scoped per matter.
+- **PII/privilege redaction:** removed sensitive entities from logs.
+- **Audit trails:** every prompt and response recorded for compliance.
+- **Human review:** high-risk responses queued for attorney approval.
+
+## Review and Compliance Workflow
+
+- **Redaction checks:** flagged privileged entities before output.
+- **Versioning:** stored drafts with immutable audit metadata.
+- **Access reviews:** periodic verification of matter access lists.
+
+## Results
+
+- Reduced risk of privileged data exposure
+- Improved consistency of legal output quality
+- Clear compliance posture for enterprise clients
+
+## Related Documentation
+
+## Related Documentation
+
+- [Security](/docs/features/security)
+- [Configuration](/docs/configuration)
+- [Monitoring & Alerting](/docs/integrations/monitoring)

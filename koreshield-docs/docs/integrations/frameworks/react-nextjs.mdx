@@ -1,0 +1,478 @@
+---
+title: React/Next.js Integration
+description: Integrate Koreshield SDK with React and Next.js applications
+sidebar_position: 12
+---
+
+# React/Next.js Integration
+
+Learn how to integrate Koreshield's JavaScript SDK with React and Next.js applications for secure AI interactions.
+
+## Installation
+
+```bash
+npm install Koreshield
+# or
+yarn add Koreshield
+# or
+pnpm add Koreshield
+```
+
+## Basic Setup
+
+### Environment Variables
+
+Create a `.env.local` file in your Next.js project:
+
+```bash
+Koreshield_BASE_URL=https://your-Koreshield-instance.com
+Koreshield_API_KEY=your-api-key-here
+```
+
+### Client Configuration
+
+Create a `lib/Koreshield.ts` file:
+
+```typescript
+import { createClient } from 'Koreshield';
+
+export const Koreshield = createClient({
+    baseURL: process.env.Koreshield_BASE_URL!,
+    apiKey: process.env.Koreshield_API_KEY,
+    debug: process.env.NODE_ENV === 'development'
+});
+```
+
+## React Hooks
+
+### useChat Hook
+
+Create a custom hook for chat functionality:
+
+```typescript
+import { useState, useCallback } from 'react';
+import { Koreshield } from '@/lib/Koreshield';
+import type { ChatCompletionRequest, ChatCompletionResponse } from 'Koreshield';
+
+export function useChat() {
+    const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const sendMessage = useCallback(async (content: string) => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const newMessages = [...messages, { role: 'user', content }];
+            setMessages(newMessages);
+
+            const response = await Koreshield.createChatCompletion({
+                model: 'gpt-3.5-turbo',
+                messages: newMessages
+            });
+
+            const assistantMessage = response.choices[0]?.message;
+            if (assistantMessage) {
+                setMessages([...newMessages, assistantMessage]);
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [messages]);
+
+    return {
+        messages,
+        isLoading,
+        error,
+        sendMessage,
+        clearMessages: () => setMessages([])
+    };
+}
+```
+
+### Usage in Component
+
+```tsx
+import { useChat } from '@/hooks/useChat';
+
+export default function ChatComponent() {
+    const { messages, isLoading, error, sendMessage, clearMessages } = useChat();
+    const [input, setInput] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (input.trim()) {
+            await sendMessage(input.trim());
+            setInput('');
+        }
+    };
+
+    return (
+        <div className="chat-container">
+            <div className="messages">
+                {messages.map((msg, index) => (
+                    <div key={index} className={`message ${msg.role}`}>
+                        <strong>{msg.role}:</strong> {msg.content}
+                    </div>
+                ))}
+            </div>
+
+            {error && (
+                <div className="error">
+                    Error: {error}
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Type your message..."
+                    disabled={isLoading}
+                />
+                <button type="submit" disabled={isLoading || !input.trim()}>
+                    {isLoading ? 'Sending...' : 'Send'}
+                </button>
+                <button type="button" onClick={clearMessages}>
+                    Clear
+                </button>
+            </form>
+        </div>
+    );
+}
+```
+
+## Next.js API Routes
+
+### Protected API Route
+
+Create secure API routes with Koreshield protection:
+
+```typescript
+// pages/api/chat.ts or app/api/chat/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { Koreshield } from '@/lib/Koreshield';
+
+export async function POST(request: NextRequest) {
+    try {
+        const { messages, model = 'gpt-3.5-turbo' } = await request.json();
+
+        const response = await Koreshield.createChatCompletion({
+            model,
+            messages
+        });
+
+        return NextResponse.json(response);
+    } catch (error) {
+        console.error('Chat API error:', error);
+
+        if (error.code === 'SECURITY_VIOLATION') {
+            return NextResponse.json(
+                { error: 'Security violation detected', details: error.details },
+                { status: 400 }
+            );
+        }
+
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
+}
+```
+
+### Client-Side API Call
+
+```tsx
+import { useState } from 'react';
+
+export default function ChatPage() {
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const sendMessage = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: [...messages, { role: 'user', content: input }]
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setMessages(data.choices[0].message.content);
+            } else {
+                console.error('API Error:', data.error);
+            }
+        } catch (error) {
+            console.error('Network error:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div>
+            {/* Your chat UI */}
+        </div>
+    );
+}
+```
+
+## Server-Side Rendering (SSR)
+
+### Data Fetching with Koreshield
+
+```tsx
+// pages/chat.tsx
+import { GetServerSideProps } from 'next';
+import { Koreshield } from '@/lib/Koreshield';
+
+interface ChatPageProps {
+    initialResponse?: string;
+    error?: string;
+}
+
+export const getServerSideProps: GetServerSideProps<ChatPageProps> = async () => {
+    try {
+        const response = await Koreshield.createChatCompletion({
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: 'Hello! Introduce yourself briefly.' }]
+        });
+
+        return {
+            props: {
+                initialResponse: response.choices[0]?.message?.content || 'No response'
+            }
+        };
+    } catch (error) {
+        return {
+            props: {
+                error: error.message
+            }
+        };
+    }
+};
+
+export default function ChatPage({ initialResponse, error }: ChatPageProps) {
+    return (
+        <div>
+            <h1>AI Chat</h1>
+            {error ? (
+                <p>Error: {error}</p>
+            ) : (
+                <p>AI: {initialResponse}</p>
+            )}
+        </div>
+    );
+}
+```
+
+## Error Handling
+
+### Global Error Boundary
+
+```tsx
+// components/ErrorBoundary.tsx
+import React from 'react';
+
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error, errorInfo) {
+        // Log to Koreshield monitoring
+        console.error('React Error Boundary:', error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="error-boundary">
+                    <h2>Something went wrong</h2>
+                    <p>Please try refreshing the page</p>
+                    <button onClick={() => window.location.reload()}>
+                        Refresh Page
+                    </button>
+                </div>
+            );
+        }
+
+        return this.props.children;
+    }
+}
+
+export default ErrorBoundary;
+```
+
+### Security Event Handling
+
+```tsx
+import { useEffect } from 'react';
+import { Koreshield } from '@/lib/Koreshield';
+
+export function useSecurityMonitoring() {
+    useEffect(() => {
+        const checkSecurityEvents = async () => {
+            try {
+                const events = await Koreshield.getSecurityEvents({
+                    limit: 5,
+                    severity: 'high'
+                });
+
+                if (events.length > 0) {
+                    // Handle security events
+                    console.warn('Security events detected:', events);
+                    // Show user notification, log to monitoring service, etc.
+                }
+            } catch (error) {
+                console.error('Failed to check security events:', error);
+            }
+        };
+
+        // Check every 30 seconds
+        const interval = setInterval(checkSecurityEvents, 30000);
+        return () => clearInterval(interval);
+    }, []);
+}
+```
+
+## Performance Optimization
+
+### React.memo for Chat Components
+
+```tsx
+import { memo } from 'react';
+
+const Message = memo(({ message, role }) => (
+    <div className={`message ${role}`}>
+        <strong>{role}:</strong> {message}
+    </div>
+));
+
+Message.displayName = 'Message';
+```
+
+### Suspense for Loading States
+
+```tsx
+import { Suspense } from 'react';
+
+function ChatMessages({ messages }) {
+    return (
+        <Suspense fallback={<div>Loading messages...</div>}>
+            {messages.map((msg, index) => (
+                <Message key={index} message={msg.content} role={msg.role} />
+            ))}
+        </Suspense>
+    );
+}
+```
+
+## Deployment Considerations
+
+### Environment Variables
+
+Ensure these environment variables are set in your deployment platform:
+
+```bash
+Koreshield_BASE_URL=https://your-Koreshield-instance.com
+Koreshield_API_KEY=your-production-api-key
+```
+
+### Build Configuration
+
+Add to your `next.config.js`:
+
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    env: {
+        Koreshield_BASE_URL: process.env.Koreshield_BASE_URL,
+    },
+    // Ensure API routes can access environment variables
+    serverRuntimeConfig: {
+        KoreshieldApiKey: process.env.Koreshield_API_KEY,
+    },
+};
+
+module.exports = nextConfig;
+```
+
+## Testing
+
+### Unit Tests
+
+```typescript
+// __tests__/useChat.test.tsx
+import { renderHook, act } from '@testing-library/react';
+import { useChat } from '@/hooks/useChat';
+
+jest.mock('@/lib/Koreshield', () => ({
+    Koreshield: {
+        createChatCompletion: jest.fn()
+    }
+}));
+
+describe('useChat', () => {
+    it('should send message and update state', async () => {
+        const mockResponse = {
+            choices: [{ message: { role: 'assistant', content: 'Hello!' } }]
+        };
+
+        const { result } = renderHook(() => useChat());
+
+        await act(async () => {
+            await result.current.sendMessage('Hi');
+        });
+
+        expect(result.current.messages).toHaveLength(2);
+        expect(result.current.messages[1].content).toBe('Hello!');
+    });
+});
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**CORS Errors**
+- Ensure your Koreshield instance allows requests from your domain
+- Check CORS configuration in your deployment
+
+**API Key Exposure**
+- Never commit API keys to version control
+- Use environment variables for all secrets
+- Rotate keys regularly
+
+**Rate Limiting**
+- Implement client-side rate limiting
+- Handle 429 responses gracefully
+- Consider caching responses
+
+**Memory Leaks**
+- Clean up event listeners in useEffect
+- Avoid storing large objects in component state
+- Use React DevTools to monitor memory usage
+
+## Next Steps
+
+- 📖 [SDK Reference](https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk)
+- 🎯 [OpenAI Compatibility Guide](/docs/integrations/models/openai)
+- 🔒 [Security Best Practices](/docs/features/security)
+- 📊 [Monitoring Setup](/docs/integrations/monitoring)

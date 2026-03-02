@@ -1,0 +1,77 @@
+---
+title: GDPR Compliance
+description: GDPR considerations when deploying Koreshield.
+slug: /compliance/gdpr
+---
+
+# GDPR Compliance
+
+This page outlines how Koreshield can support GDPR-aligned practices when processing personal data in LLM workflows. It is not legal advice and does not guarantee compliance on its own. Always consult your privacy and legal teams.
+
+## GDPR Scope and Roles
+
+Under GDPR, your organization is typically the data controller, while infrastructure or model providers may be processors. Koreshield can be deployed to reduce exposure and enforce policies, but you remain responsible for lawful processing.
+
+## Key GDPR Principles and How to Implement Them
+
+### 1) Lawfulness, Fairness, and Transparency
+
+Document the legal basis for processing personal data and disclose AI usage where required. Ensure users understand what data is processed and why.
+
+### 2) Data Minimization
+
+Only send the minimum personal data needed to complete a task.
+
+**Practical guidance:**
+
+- remove direct identifiers from prompts when possible
+- avoid sending entire records if summaries suffice
+- avoid logging full prompts with personal data
+
+### 3) Purpose Limitation
+
+Use the data only for the specific purpose for which it was collected. Avoid reusing prompts or outputs for unrelated analytics without a legal basis.
+
+### 4) Accuracy and Quality
+
+Enforce policies to reduce unsafe or misleading outputs. Use human review for high-impact decisions.
+
+### 5) Storage Limitation
+
+Define retention windows for prompts, logs, and outputs. Delete or anonymize data when it is no longer needed.
+
+### 6) Integrity and Confidentiality
+
+Apply security controls to prevent unauthorized access.
+
+**Operational guidance:**
+
+```yaml
+logging:
+  json_logs: true
+  container_mode: true
+```
+
+Implement role-based access, secrets management, and TLS for data in transit. Restrict access to logs and monitoring dashboards.
+
+## Data Subject Rights
+
+Support deletion, access, and correction requests by:
+
+- storing trace IDs to locate related prompts and outputs
+- minimizing or avoiding long-term storage of personal data
+- applying data deletion workflows in your application stack
+
+## International Transfers
+
+If requests are sent to providers in other jurisdictions, ensure appropriate transfer mechanisms are in place (for example, SCCs).
+
+## DPA Considerations
+
+If you process personal data through third parties, ensure DPAs are signed and your vendor list is up to date.
+
+## Related Documentation
+
+- [Security](/docs/features/security)
+- [Configuration](/docs/configuration)
+- [Monitoring & Alerting](/docs/integrations/monitoring)

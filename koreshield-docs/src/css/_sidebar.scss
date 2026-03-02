@@ -1,0 +1,62 @@
+/* Sidebar Styles */
+.theme-doc-sidebar-container {
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--color-gray-12);
+  
+  .menu {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+.theme-doc-sidebar-menu {
+  font-size: 14px;
+  
+  .menu__link {
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: var(--bg-tertiary);
+    }
+    
+    &--active {
+      background-color: var(--ifm-color-primary-lightest);
+      color: var(--ifm-color-primary-darkest);
+      font-weight: 600;
+      
+      &:hover {
+        background-color: var(--ifm-color-primary-lighter);
+      }
+    }
+  }
+  
+  .menu__list-item-collapsible {
+    &:hover {
+      background-color: var(--bg-tertiary);
+      border-radius: 6px;
+    }
+  }
+}
+
+/* Collapsed sidebar button */
+button[class*='collapseSidebarButton'] {
+  background-color: var(--bg-tertiary);
+  
+  &:hover {
+    background-color: var(--color-gray-16);
+  }
+}
+
+[data-theme='dark'] {
+  .theme-doc-sidebar-container {
+    background-color: var(--bg-secondary);
+    border-right-color: var(--color-gray-16);
+  }
+  
+  .theme-doc-sidebar-menu {
+    .menu__link--active {
+      background-color: var(--ifm-color-primary-darkest);
+      color: var(--ifm-color-primary-lightest);
+    }
+  }
+}

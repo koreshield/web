@@ -1,0 +1,71 @@
+---
+title: Svelte
+description: Integrating Koreshield with Svelte.
+sidebar_position: 13
+slug: /integrations/svelte
+---
+
+# Svelte
+
+Use a server route to proxy LLM requests through KoreShield. This keeps provider keys on the KoreShield server and your app only uses the Koreshield API key.
+
+## Environment Variables
+
+```bash
+KORESHIELD_BASE_URL=https://your-koreshield-instance.com
+KORESHIELD_API_KEY=your-koreshield-api-key
+```
+
+## SvelteKit Example
+
+Create a server route at `src/routes/api/chat/+server.ts`:
+
+```typescript
+import type { RequestHandler } from "@sveltejs/kit";
+
+export const POST: RequestHandler = async ({ request }) => {
+	const body = await request.json();
+
+	const response = await fetch(
+		`${process.env.KORESHIELD_BASE_URL}/v1/chat/completions`,
+		{
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
+				authorization: `Bearer ${process.env.KORESHIELD_API_KEY}`,
+			},
+			body: JSON.stringify({
+				model: "gpt-5-mini",
+				messages: body.messages,
+			}),
+		}
+	);
+
+	const data = await response.json();
+	return new Response(JSON.stringify(data), {
+		status: response.status,
+		headers: { "content-type": "application/json" },
+	});
+};
+```
+
+## Client Usage
+
+```typescript
+const response = await fetch("/api/chat", {
+	method: "POST",
+	headers: { "content-type": "application/json" },
+	body: JSON.stringify({
+		messages: [{ role: "user", content: "Summarize the report" }],
+	}),
+});
+
+const data = await response.json();
+console.log(data.choices[0].message.content);
+```
+
+## Operational Tips
+
+- Keep provider API keys on the KoreShield server
+- Add request timeouts for long or streaming responses
+- Tune security in [/configuration/](/docs/configuration)
