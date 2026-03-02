@@ -1,6 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { analyzeTheat, PRESET_ATTACKS, type ThreatLogEntry, type ThreatResult } from '../lib/threat-engine';
+import * as LucideIcons from 'lucide-react';
+
+const Icon = ({ name, className }: { name: string; className?: string }) => {
+	const LucideIcon = (LucideIcons as any)[name];
+	if (!LucideIcon) return null;
+	return <LucideIcon className={className} />;
+};
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -122,8 +129,12 @@ function FirewallPane({ result, state }: { result: ThreatResult | null; state: S
 						<div className={`rounded-xl px-4 py-3 border ${result.blocked
 							? 'border-red-500/40 bg-red-500/10'
 							: 'border-emerald-500/40 bg-emerald-500/10'}`}>
-							<div className={`text-2xl font-bold ${result.blocked ? 'text-red-400' : 'text-emerald-400'}`}>
-								{result.blocked ? '🔴 BLOCKED' : '✅ ALLOWED'}
+							<div className={`text-2xl font-bold flex items-center justify-center gap-2 ${result.blocked ? 'text-red-400' : 'text-emerald-400'}`}>
+								{result.blocked ? (
+									<><LucideIcons.XCircle className="w-6 h-6" /> BLOCKED</>
+								) : (
+									<><LucideIcons.CheckCircle2 className="w-6 h-6" /> ALLOWED</>
+								)}
 							</div>
 							<div className={`text-xs mt-1 font-mono ${result.blocked ? 'text-red-400/70' : 'text-emerald-400/70'}`}>
 								Rule {result.ruleId} • {result.processingMs}ms
@@ -181,8 +192,8 @@ function ThreatLogPane({ entries }: { entries: ThreatLogEntry[] }) {
 							: 'border-emerald-500/30 bg-emerald-500/5'}`}
 					>
 						<div className="flex items-center justify-between">
-							<span className={entry.blocked ? 'text-red-400 font-bold' : 'text-emerald-400 font-bold'}>
-								{entry.blocked ? '● BLOCKED' : '● ALLOWED'}
+							<span className={entry.blocked ? 'text-red-400 font-bold flex items-center gap-1.5' : 'text-emerald-400 font-bold flex items-center gap-1.5'}>
+								{entry.blocked ? <><LucideIcons.XCircle className="w-3.5 h-3.5" /> BLOCKED</> : <><LucideIcons.CheckCircle2 className="w-3.5 h-3.5" /> ALLOWED</>}
 							</span>
 							<span className="text-slate-600 text-[10px]">
 								{entry.timestamp.toLocaleTimeString()}
@@ -242,9 +253,10 @@ function ChatPane({
 								key={preset.label}
 								disabled={isScanning}
 								onClick={() => onSubmit(preset.prompt)}
-								className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${preset.color}`}
+								className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 ${preset.color}`}
 							>
-								{preset.emoji} {preset.label}
+								{preset.iconName && <Icon name={preset.iconName} className="w-3.5 h-3.5" />}
+								{preset.label}
 							</button>
 						))}
 					</div>
@@ -344,10 +356,7 @@ export default function DemoPage() {
 				</Link>
 				<div className="w-px h-4 bg-slate-700" />
 				<div className="flex items-center gap-2">
-					<div
-						className="w-6 h-6 rounded flex items-center justify-center text-white text-xs font-bold"
-						style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
-					>K</div>
+					<img src="/logo/SVG/White.svg" alt="KoreShield Logo" className="w-6 h-6" />
 					<span className="text-sm font-semibold text-slate-200">KoreShield Live Demo</span>
 				</div>
 				<div className="ml-auto flex items-center gap-3 text-xs">

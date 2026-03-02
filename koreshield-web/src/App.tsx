@@ -493,7 +493,7 @@ function App() {
 	return (
 		<ErrorBoundary>
 			<HelmetProvider>
-				<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+				<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
 					<ToastProvider>
 						<Suspense fallback={<PageLoader />}>
 							<AppContent />
