@@ -20,6 +20,7 @@ const VsLLMGuardPage = lazy(() => import('./pages/VsLLMGuardPage'));
 const VsBuildYourselfPage = lazy(() => import('./pages/VsBuildYourselfPage'));
 const WhyKoreShieldPage = lazy(() => import('./pages/WhyKoreShieldPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const DemoPage = lazy(() => import('./pages/DemoPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })));
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
@@ -460,6 +461,16 @@ function AppContent() {
 									<ProtectedRoute>
 										<AuditLogsPage />
 									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/demo"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<DemoPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}
