@@ -7,56 +7,56 @@ export default defineType({
 	fields: [
 		defineField({
 			name: 'name',
-			title: 'Name',
+			title: 'Full Name',
 			type: 'string',
-			validation: (Rule) => Rule.required(),
+			validation: Rule => Rule.required(),
+		}),
+		defineField({
+			name: 'slug',
+			title: 'Slug (ID)',
+			type: 'slug',
+			options: { source: 'name' },
+			validation: Rule => Rule.required(),
 		}),
 		defineField({
 			name: 'role',
-			title: 'Role',
+			title: 'Role / Title',
 			type: 'string',
 		}),
 		defineField({
 			name: 'bio',
 			title: 'Bio',
 			type: 'text',
+			rows: 4,
 		}),
 		defineField({
 			name: 'avatar',
 			title: 'Avatar',
 			type: 'image',
-			options: {
-				hotspot: true,
-			},
-			fields: [
-				{
-					name: 'alt',
-					type: 'string',
-					title: 'Alternative text',
-				}
-			]
+			options: { hotspot: true },
 		}),
 		defineField({
 			name: 'twitter',
-			title: 'Twitter Handle / URL',
+			title: 'Twitter Handle',
 			type: 'string',
 		}),
 		defineField({
 			name: 'github',
-			title: 'GitHub URL',
-			type: 'url',
+			title: 'GitHub Username',
+			type: 'string',
 		}),
 		defineField({
 			name: 'linkedin',
 			title: 'LinkedIn URL',
 			type: 'url',
 		}),
+		defineField({
+			name: 'website',
+			title: 'Website',
+			type: 'url',
+		}),
 	],
 	preview: {
-		select: {
-			title: 'name',
-			subtitle: 'role',
-			media: 'avatar',
-		},
+		select: { title: 'name', subtitle: 'role', media: 'avatar' },
 	},
 })

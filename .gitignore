@@ -1,5 +1,5 @@
-# Planning docs (local only - kept in docs/planning/)
-docs/planning/
+# Planning docs (local only - kept in personal-docs/planning/)
+personal-docs/planning/
 DEPLOYMENT_RECOMMENDATIONS.md
 POLAR_SETUP.md
 DEPLOYMENT_GUIDE.md
@@ -283,20 +283,20 @@ build_output*.txt
 FRONTEND_SPEC.md
 
 # Explicitly include important documentation
-!docs/RAG_INTEGRATION_GUIDE.md
+!personal-docs/RAG_INTEGRATION_GUIDE.md
 !koreshield-python-sdk/examples/
 !koreshield-python-sdk/docs/
 !koreshield-js-sdk/examples/
 !koreshield-js-sdk/docs/
-docs/SYSTEM_DESIGN.md
+personal-docs/SYSTEM_DESIGN.md
 .DS_Store
 !koreshield-web/src/lib/
 koreshield-js-sdk/.npmrc
 
-docs/*.md
+personal-docs/*.md
 MIGRATION_GUIDE.md
 PHASE_3_SUMMARY.md
-*.md files in docs/
+*.md files in personal-docs/
 SECURITY_*.md
 PROJECT_ANALYSIS.md
 koreshield-web/how-to.md
