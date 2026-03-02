@@ -8,7 +8,7 @@ import { siteConfig, profileConfig, postConfig } from "@/config";
 import { getSortedPosts, type PostForList } from "@utils/content";
 import { formatDateToYYYYMMDD } from "@utils/date";
 import { getPostUrlBySlug, removeFileExtension } from "@utils/url";
-import { urlFor } from "@lib/sanity";
+import { urlFor } from "../../lib/sanity";
 import PasswordProtection from "@components/common/passwordProtection.astro";
 import AuthorCard from "@components/common/author-card.astro";
 import SocialShare from "@components/common/social-share.astro";
@@ -288,6 +288,18 @@ const jsonLd = {
 							entry.data.author.bio ||
 							"",
 						avatar:
+							entry.data.author
+								.avatar &&
+							typeof entry.data.author
+								.avatar ===
+								"object"
+								? urlFor(
+										entry
+											.data
+											.author
+											.avatar,
+									).url()
+								: entry.data
 										.author
 										.image
 										?.asset
