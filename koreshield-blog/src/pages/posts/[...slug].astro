@@ -172,16 +172,17 @@ const jsonLd = {
 				>BLOG</a
 			>
 			{
-				entry.data.category && (
-					<>
-						<span class="mx-3 text-gray-700">
-							/
-						</span>
-						<span class="text-sm font-mono text-electric-blue">
-							{entry.data.category.title?.toUpperCase()}
-						</span>
-					</>
-				)
+				entry.data.category &&
+					entry.data.category.title && (
+						<>
+							<span class="mx-3 text-gray-700">
+								/
+							</span>
+							<span class="text-sm font-mono text-electric-blue">
+								{entry.data.category.title.toUpperCase()}
+							</span>
+						</>
+					)
 			}
 		</div>
 
