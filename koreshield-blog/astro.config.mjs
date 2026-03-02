@@ -41,11 +41,11 @@ export default defineConfig({
 		markdoc(),
 		svelte(),
 		icon(),
-		sanity({
+		/* sanity({
 			projectId: process.env.PUBLIC_SANITY_PROJECT_ID || 'rdas6fhs',
 			dataset: process.env.PUBLIC_SANITY_DATASET || 'production',
 			useCdn: false,
-		}),
+		}), */
 	],
 
 	// adapter: cloudflare(),
