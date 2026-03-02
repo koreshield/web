@@ -1,0 +1,2860 @@
+<!DOCTYPE html><html lang="en" class="bg-[var(--page-bg)] text-[14px] md:text-[16px] is-loading" data-astro-cid-tnnyocjb style="--bannerOffset: 18vh;--banner-height-home: 66vh;--banner-height: 30vh;--configHue: 217;--page-width: 90rem;"> <head><meta charset="UTF-8"><!-- Resource Preconnect --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://code.iconify.design"><!-- Font Loader --><!-- Font Loading --><link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" as="style"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap"><!-- Apply Global Font Family --><style is:global>
+    :root {
+        --font-family-fallback: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        --global-font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    /* Apply to body as default */
+    body {
+        font-family: var(--global-font-family);
+    }
+
+    /* Generate specific classes for each font*/
+    
+        .font-Manrope,
+        .font-Manrope * {
+            font-family: "Manrope", var(--font-family-fallback) !important;
+        }
+    
+</style><!-- title --><title>Why We Built KoreShield: Securing the New Intelligence Layer - KoreShield Blog - Security Intelligence for the AI Era</title><!-- description --><meta name="description" content="Traditional firewalls don't speak LLM. Here's why the AI revolution requires a fundamentally new approach to enterprise security."><!-- keywords --><!-- author --><meta name="author" content="KoreShield"><!-- Open Graph --><meta property="og:site_name" content="KoreShield Blog - Security Intelligence for the AI Era"><meta property="og:url" content="http://localhost:4321/posts/why-we-built-koreshield/"><meta property="og:title" content="Why We Built KoreShield: Securing the New Intelligence Layer - KoreShield Blog - Security Intelligence for the AI Era"><meta property="og:description" content="Traditional firewalls don't speak LLM. Here's why the AI revolution requires a fundamentally new approach to enterprise security."><meta property="og:type" content="article"><meta property="article:published_time" content="2026-03-02T21:54:06.351Z"><meta property="article:author" content="KoreShield"><meta property="article:section" content="Technology"><meta property="article:tag" content="Security"><meta property="article:tag" content="AI"><meta property="article:tag" content="LLM"><!-- Twitter --><meta name="twitter:card" content="summary_large_image"><meta property="twitter:url" content="http://localhost:4321/posts/why-we-built-koreshield/"><meta name="twitter:title" content="Why We Built KoreShield: Securing the New Intelligence Layer - KoreShield Blog - Security Intelligence for the AI Era"><meta name="twitter:description" content="Traditional firewalls don't speak LLM. Here's why the AI revolution requires a fundamentally new approach to enterprise security."><meta name="twitter:site" content="@koreshield"><meta name="twitter:creator" content="@koreshield"><style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/passwordProtection.astro?astro&#38;type=style&#38;index=0&#38;lang.css">.password-protection[data-astro-cid-isrenuqs]{display:flex;justify-content:center;align-items:center;min-height:40vh;padding:2rem}.password-container[data-astro-cid-isrenuqs]{text-align:center;max-width:400px;width:100%;padding:2.5rem;border-radius:1rem;background:var(--card-bg);border:1px solid var(--line-divider);box-shadow:0 10px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1)}.lock-icon[data-astro-cid-isrenuqs]{margin-bottom:1.5rem;color:var(--primary);display:flex;justify-content:center}.password-container[data-astro-cid-isrenuqs] h2[data-astro-cid-isrenuqs]{margin-bottom:0.75rem;font-size:1.5rem;font-weight:700}.password-container[data-astro-cid-isrenuqs] p[data-astro-cid-isrenuqs]{margin-bottom:2rem;font-size:0.95rem;line-height:1.5}.password-input-group[data-astro-cid-isrenuqs]{display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1rem}.password-input-wrapper[data-astro-cid-isrenuqs]{position:relative;width:100%}.password-input[data-astro-cid-isrenuqs]{width:100%;padding:0.75rem 3rem 0.75rem 1rem;border:1px solid var(--line-divider);border-radius:0.5rem;background:var(--card-bg);font-size:1rem;transition:all 0.2s ease}.password-input[data-astro-cid-isrenuqs]::-ms-reveal,.password-input[data-astro-cid-isrenuqs]::-ms-clear{display:none}.toggle-password-btn[data-astro-cid-isrenuqs]{position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;padding:0.25rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color 0.2s ease}.toggle-password-btn[data-astro-cid-isrenuqs]:hover{color:var(--primary)}.password-input[data-astro-cid-isrenuqs]::placeholder{color:var(--content-meta);opacity:0.7}.password-input[data-astro-cid-isrenuqs]:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}.unlock-button[data-astro-cid-isrenuqs]{width:100%;padding:0.75rem 1.5rem;background:var(--primary);color:white;border:none;border-radius:0.5rem;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s ease}.unlock-button[data-astro-cid-isrenuqs]:hover{background:var(--primary-hover);transform:translateY(-1px)}.unlock-button[data-astro-cid-isrenuqs]:active{transform:translateY(0)}.error-message[data-astro-cid-isrenuqs]{color:#ef4444;font-size:0.875rem;margin-top:0.75rem;font-weight:500}.decrypted-content[data-astro-cid-isrenuqs]{animation:fadeIn 0.5s ease-out}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@media (max-width: 768px){.password-protection[data-astro-cid-isrenuqs]{padding:1rem;min-height:30vh}.password-container[data-astro-cid-isrenuqs]{padding:1.5rem}}</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro?astro&#38;type=style&#38;index=0&#38;lang.css">.social-share[data-astro-cid-zhg6jltl] a[data-astro-cid-zhg6jltl]{transition:all 0.2s ease-in-out}.social-share[data-astro-cid-zhg6jltl] a[data-astro-cid-zhg6jltl]:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.15)}</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/tocButton.astro?astro&#38;type=style&#38;index=0&#38;lang.css">.toc-floating-container[data-astro-cid-isfta2rr]{position:fixed;right:1rem;bottom:6.78rem;z-index:90;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);pointer-events:none}.toc-floating-btn-wrapper[data-astro-cid-isfta2rr]{width:3rem;height:3rem;pointer-events:auto;background-color:rgba(15,22,35,0.8);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);border-radius:9999px;color:var(--primary);box-shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06)}.toc-floating-btn[data-astro-cid-isfta2rr]{width:100%;height:100%;cursor:pointer;color:inherit;border:none;transition:transform 0.2s,background-color 0.2s;border-radius:9999px}.toc-floating-btn[data-astro-cid-isfta2rr]:active{transform:scale(0.9)}.toc-floating-panel[data-astro-cid-isfta2rr]{position:absolute;bottom:100%;right:0;margin-bottom:1rem;width:16rem;max-height:60vh;overflow-y:auto;background-color:rgba(15,22,35,0.95);backdrop-filter:blur(10px);border-radius:1rem;padding:0.75rem;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);border:1px solid rgba(255,255,255,0.1);transition:all 0.3s cubic-bezier(0.4,0,0.2,1);z-index:91;pointer-events:auto;scrollbar-width:thin;scrollbar-color:var(--toc-btn-hover) transparent}.toc-panel-header[data-astro-cid-isfta2rr]{display:flex;align-items:center;gap:0.5rem;padding:0.25rem 0.5rem 0.75rem 0.5rem;border-bottom:1px solid var(--btn-regular-bg);margin-bottom:0.5rem}.toc-floating-panel[data-astro-cid-isfta2rr]::-webkit-scrollbar{width:4px}.toc-floating-panel[data-astro-cid-isfta2rr]::-webkit-scrollbar-track{background:transparent}.toc-floating-panel[data-astro-cid-isfta2rr]::-webkit-scrollbar-thumb{background:var(--toc-btn-hover);border-radius:10px}.toc-floating-container[data-astro-cid-isfta2rr].move-up{transform:translateY(-4rem)}.toc-floating-container[data-astro-cid-isfta2rr].toc-hide{transform:translateY(2rem) scale(0.9);opacity:0;pointer-events:none}@media (max-width: 768px){.toc-floating-container[data-astro-cid-isfta2rr]{bottom:5.5rem;right:0.5rem}}.toc-floating-panel .toc-inner-content a.visible .text-50,.toc-floating-panel .toc-inner-content a.visible .text-30{color:var(--primary);font-weight:500}</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/back2TopButton.astro?astro&#38;type=style&#38;index=0&#38;lang.css">.back-to-top-wrapper[data-astro-cid-zdqm26mj]{width:3rem;height:3rem;position:absolute;right:0;top:0;pointer-events:none}.back-to-top-btn[data-astro-cid-zdqm26mj]{color:var(--primary);font-size:2.25rem;font-weight:bold;border:1px solid rgba(255,255,255,0.1);position:fixed;bottom:6.78rem;opacity:1;right:1rem;cursor:pointer;transform:translateY(0);pointer-events:auto;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);background-color:rgba(15,22,35,0.8);backdrop-filter:blur(10px);border-radius:9999px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}.back-to-top-btn[data-astro-cid-zdqm26mj] button[data-astro-cid-zdqm26mj]{width:3rem;height:3rem}.back-to-top-btn[data-astro-cid-zdqm26mj] i[data-astro-cid-zdqm26mj]{font-size:1.75rem}.back-to-top-btn[data-astro-cid-zdqm26mj].hide{transform:translateY(2rem) scale(0.9);opacity:0;pointer-events:none}.back-to-top-btn[data-astro-cid-zdqm26mj]:active{transform:scale(0.9)}@media (max-width: 768px){.back-to-top-btn[data-astro-cid-zdqm26mj]{bottom:5.5rem;right:0.5rem;font-size:2rem}.back-to-top-btn[data-astro-cid-zdqm26mj].hide{transform:translateY(2rem) scale(0.9)}.back-to-top-btn[data-astro-cid-zdqm26mj]:active{transform:scale(0.9)}}</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/katex.css">/* stylelint-disable font-family-no-missing-generic-family-keyword */
+@font-face {
+  font-family: "KaTeX_AMS";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_AMS-Regular.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_AMS-Regular.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_AMS-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Caligraphic";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Bold.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Caligraphic";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Regular.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Fraktur";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Fraktur-Bold.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Fraktur-Bold.ttf) format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Fraktur";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Fraktur-Regular.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Fraktur-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Main";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-Bold.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-Bold.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-Bold.ttf) format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Main";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-BoldItalic.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-BoldItalic.ttf) format("truetype");
+  font-weight: bold;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Main";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-Italic.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-Italic.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-Italic.ttf) format("truetype");
+  font-weight: normal;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Main";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-Regular.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-Regular.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Main-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Math";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Math-BoldItalic.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Math-BoldItalic.ttf) format("truetype");
+  font-weight: bold;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Math";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Math-Italic.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Math-Italic.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Math-Italic.ttf) format("truetype");
+  font-weight: normal;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_SansSerif";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_SansSerif-Bold.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_SansSerif-Bold.ttf) format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_SansSerif";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_SansSerif-Italic.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_SansSerif-Italic.ttf) format("truetype");
+  font-weight: normal;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_SansSerif";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_SansSerif-Regular.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_SansSerif-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Script";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Script-Regular.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Script-Regular.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Script-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Size1";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size1-Regular.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size1-Regular.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size1-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Size2";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size2-Regular.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size2-Regular.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size2-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Size3";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size3-Regular.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size3-Regular.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size3-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Size4";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size4-Regular.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size4-Regular.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Size4-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "KaTeX_Typewriter";
+  src: url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Typewriter-Regular.woff) format("woff"), url(/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/fonts/KaTeX_Typewriter-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+/* stylelint-disable font-family-no-missing-generic-family-keyword */
+.katex {
+  font: normal 1.21em KaTeX_Main, Times New Roman, serif;
+  line-height: 1.2;
+  text-indent: 0;
+  text-rendering: auto;
+}
+.katex * {
+  -ms-high-contrast-adjust: none !important;
+  border-color: currentColor;
+}
+.katex .katex-version::after {
+  content: "0.16.33";
+}
+.katex .katex-mathml {
+  /* Accessibility hack to only show to screen readers
+   Found at: http://a11yproject.com/posts/how-to-hide-content/ */
+  position: absolute;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 0;
+  border: 0;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+}
+.katex .katex-html {
+  /* \newline is an empty block at top level, between .base elements */
+}
+.katex .katex-html > .newline {
+  display: block;
+}
+.katex .base {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  width: min-content;
+}
+.katex .strut {
+  display: inline-block;
+}
+.katex .textbf {
+  font-weight: bold;
+}
+.katex .textit {
+  font-style: italic;
+}
+.katex .textrm {
+  font-family: KaTeX_Main;
+}
+.katex .textsf {
+  font-family: KaTeX_SansSerif;
+}
+.katex .texttt {
+  font-family: KaTeX_Typewriter;
+}
+.katex .mathnormal {
+  font-family: KaTeX_Math;
+  font-style: italic;
+}
+.katex .mathit {
+  font-family: KaTeX_Main;
+  font-style: italic;
+}
+.katex .mathrm {
+  font-style: normal;
+}
+.katex .mathbf {
+  font-family: KaTeX_Main;
+  font-weight: bold;
+}
+.katex .boldsymbol {
+  font-family: KaTeX_Math;
+  font-weight: bold;
+  font-style: italic;
+}
+.katex .amsrm {
+  font-family: KaTeX_AMS;
+}
+.katex .mathbb,
+.katex .textbb {
+  font-family: KaTeX_AMS;
+}
+.katex .mathcal {
+  font-family: KaTeX_Caligraphic;
+}
+.katex .mathfrak,
+.katex .textfrak {
+  font-family: KaTeX_Fraktur;
+}
+.katex .mathboldfrak,
+.katex .textboldfrak {
+  font-family: KaTeX_Fraktur;
+  font-weight: bold;
+}
+.katex .mathtt {
+  font-family: KaTeX_Typewriter;
+}
+.katex .mathscr,
+.katex .textscr {
+  font-family: KaTeX_Script;
+}
+.katex .mathsf,
+.katex .textsf {
+  font-family: KaTeX_SansSerif;
+}
+.katex .mathboldsf,
+.katex .textboldsf {
+  font-family: KaTeX_SansSerif;
+  font-weight: bold;
+}
+.katex .mathsfit,
+.katex .mathitsf,
+.katex .textitsf {
+  font-family: KaTeX_SansSerif;
+  font-style: italic;
+}
+.katex .mainrm {
+  font-family: KaTeX_Main;
+  font-style: normal;
+}
+.katex .vlist-t {
+  display: inline-table;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.katex .vlist-r {
+  display: table-row;
+}
+.katex .vlist {
+  display: table-cell;
+  vertical-align: bottom;
+  position: relative;
+}
+.katex .vlist > span {
+  display: block;
+  height: 0;
+  position: relative;
+}
+.katex .vlist > span > span {
+  display: inline-block;
+}
+.katex .vlist > span > .pstrut {
+  overflow: hidden;
+  width: 0;
+}
+.katex .vlist-t2 {
+  margin-right: -2px;
+}
+.katex .vlist-s {
+  display: table-cell;
+  vertical-align: bottom;
+  font-size: 1px;
+  width: 2px;
+  min-width: 2px;
+}
+.katex .vbox {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: baseline;
+}
+.katex .hbox {
+  display: inline-flex;
+  flex-direction: row;
+  width: 100%;
+}
+.katex .thinbox {
+  display: inline-flex;
+  flex-direction: row;
+  width: 0;
+  max-width: 0;
+}
+.katex .msupsub {
+  text-align: left;
+}
+.katex .mfrac > span > span {
+  text-align: center;
+}
+.katex .mfrac .frac-line {
+  display: inline-block;
+  width: 100%;
+  border-bottom-style: solid;
+}
+.katex .mfrac .frac-line,
+.katex .overline .overline-line,
+.katex .underline .underline-line,
+.katex .hline,
+.katex .hdashline,
+.katex .rule {
+  min-height: 1px;
+}
+.katex .mspace {
+  display: inline-block;
+}
+.katex .llap,
+.katex .rlap,
+.katex .clap {
+  width: 0;
+  position: relative;
+}
+.katex .llap > .inner,
+.katex .rlap > .inner,
+.katex .clap > .inner {
+  position: absolute;
+}
+.katex .llap > .fix,
+.katex .rlap > .fix,
+.katex .clap > .fix {
+  display: inline-block;
+}
+.katex .llap > .inner {
+  right: 0;
+}
+.katex .rlap > .inner,
+.katex .clap > .inner {
+  left: 0;
+}
+.katex .clap > .inner > span {
+  margin-left: -50%;
+  margin-right: 50%;
+}
+.katex .rule {
+  display: inline-block;
+  border: solid 0;
+  position: relative;
+}
+.katex .overline .overline-line,
+.katex .underline .underline-line,
+.katex .hline {
+  display: inline-block;
+  width: 100%;
+  border-bottom-style: solid;
+}
+.katex .hdashline {
+  display: inline-block;
+  width: 100%;
+  border-bottom-style: dashed;
+}
+.katex .sqrt > .root {
+  /* These values are taken from the definition of `\r@@t`,
+   `\mkern 5mu` and `\mkern -10mu`. */
+  margin-left: 0.2777777778em;
+  margin-right: -0.5555555556em;
+}
+.katex .sizing.reset-size1.size1,
+.katex .fontsize-ensurer.reset-size1.size1 {
+  /* stylelint-disable-next-line */
+  font-size: 1em;
+}
+.katex .sizing.reset-size1.size2,
+.katex .fontsize-ensurer.reset-size1.size2 {
+  /* stylelint-disable-next-line */
+  font-size: 1.2em;
+}
+.katex .sizing.reset-size1.size3,
+.katex .fontsize-ensurer.reset-size1.size3 {
+  /* stylelint-disable-next-line */
+  font-size: 1.4em;
+}
+.katex .sizing.reset-size1.size4,
+.katex .fontsize-ensurer.reset-size1.size4 {
+  /* stylelint-disable-next-line */
+  font-size: 1.6em;
+}
+.katex .sizing.reset-size1.size5,
+.katex .fontsize-ensurer.reset-size1.size5 {
+  /* stylelint-disable-next-line */
+  font-size: 1.8em;
+}
+.katex .sizing.reset-size1.size6,
+.katex .fontsize-ensurer.reset-size1.size6 {
+  /* stylelint-disable-next-line */
+  font-size: 2em;
+}
+.katex .sizing.reset-size1.size7,
+.katex .fontsize-ensurer.reset-size1.size7 {
+  /* stylelint-disable-next-line */
+  font-size: 2.4em;
+}
+.katex .sizing.reset-size1.size8,
+.katex .fontsize-ensurer.reset-size1.size8 {
+  /* stylelint-disable-next-line */
+  font-size: 2.88em;
+}
+.katex .sizing.reset-size1.size9,
+.katex .fontsize-ensurer.reset-size1.size9 {
+  /* stylelint-disable-next-line */
+  font-size: 3.456em;
+}
+.katex .sizing.reset-size1.size10,
+.katex .fontsize-ensurer.reset-size1.size10 {
+  /* stylelint-disable-next-line */
+  font-size: 4.148em;
+}
+.katex .sizing.reset-size1.size11,
+.katex .fontsize-ensurer.reset-size1.size11 {
+  /* stylelint-disable-next-line */
+  font-size: 4.976em;
+}
+.katex .sizing.reset-size2.size1,
+.katex .fontsize-ensurer.reset-size2.size1 {
+  /* stylelint-disable-next-line */
+  font-size: 0.8333333333em;
+}
+.katex .sizing.reset-size2.size2,
+.katex .fontsize-ensurer.reset-size2.size2 {
+  /* stylelint-disable-next-line */
+  font-size: 1em;
+}
+.katex .sizing.reset-size2.size3,
+.katex .fontsize-ensurer.reset-size2.size3 {
+  /* stylelint-disable-next-line */
+  font-size: 1.1666666667em;
+}
+.katex .sizing.reset-size2.size4,
+.katex .fontsize-ensurer.reset-size2.size4 {
+  /* stylelint-disable-next-line */
+  font-size: 1.3333333333em;
+}
+.katex .sizing.reset-size2.size5,
+.katex .fontsize-ensurer.reset-size2.size5 {
+  /* stylelint-disable-next-line */
+  font-size: 1.5em;
+}
+.katex .sizing.reset-size2.size6,
+.katex .fontsize-ensurer.reset-size2.size6 {
+  /* stylelint-disable-next-line */
+  font-size: 1.6666666667em;
+}
+.katex .sizing.reset-size2.size7,
+.katex .fontsize-ensurer.reset-size2.size7 {
+  /* stylelint-disable-next-line */
+  font-size: 2em;
+}
+.katex .sizing.reset-size2.size8,
+.katex .fontsize-ensurer.reset-size2.size8 {
+  /* stylelint-disable-next-line */
+  font-size: 2.4em;
+}
+.katex .sizing.reset-size2.size9,
+.katex .fontsize-ensurer.reset-size2.size9 {
+  /* stylelint-disable-next-line */
+  font-size: 2.88em;
+}
+.katex .sizing.reset-size2.size10,
+.katex .fontsize-ensurer.reset-size2.size10 {
+  /* stylelint-disable-next-line */
+  font-size: 3.4566666667em;
+}
+.katex .sizing.reset-size2.size11,
+.katex .fontsize-ensurer.reset-size2.size11 {
+  /* stylelint-disable-next-line */
+  font-size: 4.1466666667em;
+}
+.katex .sizing.reset-size3.size1,
+.katex .fontsize-ensurer.reset-size3.size1 {
+  /* stylelint-disable-next-line */
+  font-size: 0.7142857143em;
+}
+.katex .sizing.reset-size3.size2,
+.katex .fontsize-ensurer.reset-size3.size2 {
+  /* stylelint-disable-next-line */
+  font-size: 0.8571428571em;
+}
+.katex .sizing.reset-size3.size3,
+.katex .fontsize-ensurer.reset-size3.size3 {
+  /* stylelint-disable-next-line */
+  font-size: 1em;
+}
+.katex .sizing.reset-size3.size4,
+.katex .fontsize-ensurer.reset-size3.size4 {
+  /* stylelint-disable-next-line */
+  font-size: 1.1428571429em;
+}
+.katex .sizing.reset-size3.size5,
+.katex .fontsize-ensurer.reset-size3.size5 {
+  /* stylelint-disable-next-line */
+  font-size: 1.2857142857em;
+}
+.katex .sizing.reset-size3.size6,
+.katex .fontsize-ensurer.reset-size3.size6 {
+  /* stylelint-disable-next-line */
+  font-size: 1.4285714286em;
+}
+.katex .sizing.reset-size3.size7,
+.katex .fontsize-ensurer.reset-size3.size7 {
+  /* stylelint-disable-next-line */
+  font-size: 1.7142857143em;
+}
+.katex .sizing.reset-size3.size8,
+.katex .fontsize-ensurer.reset-size3.size8 {
+  /* stylelint-disable-next-line */
+  font-size: 2.0571428571em;
+}
+.katex .sizing.reset-size3.size9,
+.katex .fontsize-ensurer.reset-size3.size9 {
+  /* stylelint-disable-next-line */
+  font-size: 2.4685714286em;
+}
+.katex .sizing.reset-size3.size10,
+.katex .fontsize-ensurer.reset-size3.size10 {
+  /* stylelint-disable-next-line */
+  font-size: 2.9628571429em;
+}
+.katex .sizing.reset-size3.size11,
+.katex .fontsize-ensurer.reset-size3.size11 {
+  /* stylelint-disable-next-line */
+  font-size: 3.5542857143em;
+}
+.katex .sizing.reset-size4.size1,
+.katex .fontsize-ensurer.reset-size4.size1 {
+  /* stylelint-disable-next-line */
+  font-size: 0.625em;
+}
+.katex .sizing.reset-size4.size2,
+.katex .fontsize-ensurer.reset-size4.size2 {
+  /* stylelint-disable-next-line */
+  font-size: 0.75em;
+}
+.katex .sizing.reset-size4.size3,
+.katex .fontsize-ensurer.reset-size4.size3 {
+  /* stylelint-disable-next-line */
+  font-size: 0.875em;
+}
+.katex .sizing.reset-size4.size4,
+.katex .fontsize-ensurer.reset-size4.size4 {
+  /* stylelint-disable-next-line */
+  font-size: 1em;
+}
+.katex .sizing.reset-size4.size5,
+.katex .fontsize-ensurer.reset-size4.size5 {
+  /* stylelint-disable-next-line */
+  font-size: 1.125em;
+}
+.katex .sizing.reset-size4.size6,
+.katex .fontsize-ensurer.reset-size4.size6 {
+  /* stylelint-disable-next-line */
+  font-size: 1.25em;
+}
+.katex .sizing.reset-size4.size7,
+.katex .fontsize-ensurer.reset-size4.size7 {
+  /* stylelint-disable-next-line */
+  font-size: 1.5em;
+}
+.katex .sizing.reset-size4.size8,
+.katex .fontsize-ensurer.reset-size4.size8 {
+  /* stylelint-disable-next-line */
+  font-size: 1.8em;
+}
+.katex .sizing.reset-size4.size9,
+.katex .fontsize-ensurer.reset-size4.size9 {
+  /* stylelint-disable-next-line */
+  font-size: 2.16em;
+}
+.katex .sizing.reset-size4.size10,
+.katex .fontsize-ensurer.reset-size4.size10 {
+  /* stylelint-disable-next-line */
+  font-size: 2.5925em;
+}
+.katex .sizing.reset-size4.size11,
+.katex .fontsize-ensurer.reset-size4.size11 {
+  /* stylelint-disable-next-line */
+  font-size: 3.11em;
+}
+.katex .sizing.reset-size5.size1,
+.katex .fontsize-ensurer.reset-size5.size1 {
+  /* stylelint-disable-next-line */
+  font-size: 0.5555555556em;
+}
+.katex .sizing.reset-size5.size2,
+.katex .fontsize-ensurer.reset-size5.size2 {
+  /* stylelint-disable-next-line */
+  font-size: 0.6666666667em;
+}
+.katex .sizing.reset-size5.size3,
+.katex .fontsize-ensurer.reset-size5.size3 {
+  /* stylelint-disable-next-line */
+  font-size: 0.7777777778em;
+}
+.katex .sizing.reset-size5.size4,
+.katex .fontsize-ensurer.reset-size5.size4 {
+  /* stylelint-disable-next-line */
+  font-size: 0.8888888889em;
+}
+.katex .sizing.reset-size5.size5,
+.katex .fontsize-ensurer.reset-size5.size5 {
+  /* stylelint-disable-next-line */
+  font-size: 1em;
+}
+.katex .sizing.reset-size5.size6,
+.katex .fontsize-ensurer.reset-size5.size6 {
+  /* stylelint-disable-next-line */
+  font-size: 1.1111111111em;
+}
+.katex .sizing.reset-size5.size7,
+.katex .fontsize-ensurer.reset-size5.size7 {
+  /* stylelint-disable-next-line */
+  font-size: 1.3333333333em;
+}
+.katex .sizing.reset-size5.size8,
+.katex .fontsize-ensurer.reset-size5.size8 {
+  /* stylelint-disable-next-line */
+  font-size: 1.6em;
+}
+.katex .sizing.reset-size5.size9,
+.katex .fontsize-ensurer.reset-size5.size9 {
+  /* stylelint-disable-next-line */
+  font-size: 1.92em;
+}
+.katex .sizing.reset-size5.size10,
+.katex .fontsize-ensurer.reset-size5.size10 {
+  /* stylelint-disable-next-line */
+  font-size: 2.3044444444em;
+}
+.katex .sizing.reset-size5.size11,
+.katex .fontsize-ensurer.reset-size5.size11 {
+  /* stylelint-disable-next-line */
+  font-size: 2.7644444444em;
+}
+.katex .sizing.reset-size6.size1,
+.katex .fontsize-ensurer.reset-size6.size1 {
+  /* stylelint-disable-next-line */
+  font-size: 0.5em;
+}
+.katex .sizing.reset-size6.size2,
+.katex .fontsize-ensurer.reset-size6.size2 {
+  /* stylelint-disable-next-line */
+  font-size: 0.6em;
+}
+.katex .sizing.reset-size6.size3,
+.katex .fontsize-ensurer.reset-size6.size3 {
+  /* stylelint-disable-next-line */
+  font-size: 0.7em;
+}
+.katex .sizing.reset-size6.size4,
+.katex .fontsize-ensurer.reset-size6.size4 {
+  /* stylelint-disable-next-line */
+  font-size: 0.8em;
+}
+.katex .sizing.reset-size6.size5,
+.katex .fontsize-ensurer.reset-size6.size5 {
+  /* stylelint-disable-next-line */
+  font-size: 0.9em;
+}
+.katex .sizing.reset-size6.size6,
+.katex .fontsize-ensurer.reset-size6.size6 {
+  /* stylelint-disable-next-line */
+  font-size: 1em;
+}
+.katex .sizing.reset-size6.size7,
+.katex .fontsize-ensurer.reset-size6.size7 {
+  /* stylelint-disable-next-line */
+  font-size: 1.2em;
+}
+.katex .sizing.reset-size6.size8,
+.katex .fontsize-ensurer.reset-size6.size8 {
+  /* stylelint-disable-next-line */
+  font-size: 1.44em;
+}
+.katex .sizing.reset-size6.size9,
+.katex .fontsize-ensurer.reset-size6.size9 {
+  /* stylelint-disable-next-line */
+  font-size: 1.728em;
+}
+.katex .sizing.reset-size6.size10,
+.katex .fontsize-ensurer.reset-size6.size10 {
+  /* stylelint-disable-next-line */
+  font-size: 2.074em;
+}
+.katex .sizing.reset-size6.size11,
+.katex .fontsize-ensurer.reset-size6.size11 {
+  /* stylelint-disable-next-line */
+  font-size: 2.488em;
+}
+.katex .sizing.reset-size7.size1,
+.katex .fontsize-ensurer.reset-size7.size1 {
+  /* stylelint-disable-next-line */
+  font-size: 0.4166666667em;
+}
+.katex .sizing.reset-size7.size2,
+.katex .fontsize-ensurer.reset-size7.size2 {
+  /* stylelint-disable-next-line */
+  font-size: 0.5em;
+}
+.katex .sizing.reset-size7.size3,
+.katex .fontsize-ensurer.reset-size7.size3 {
+  /* stylelint-disable-next-line */
+  font-size: 0.5833333333em;
+}
+.katex .sizing.reset-size7.size4,
+.katex .fontsize-ensurer.reset-size7.size4 {
+  /* stylelint-disable-next-line */
+  font-size: 0.6666666667em;
+}
+.katex .sizing.reset-size7.size5,
+.katex .fontsize-ensurer.reset-size7.size5 {
+  /* stylelint-disable-next-line */
+  font-size: 0.75em;
+}
+.katex .sizing.reset-size7.size6,
+.katex .fontsize-ensurer.reset-size7.size6 {
+  /* stylelint-disable-next-line */
+  font-size: 0.8333333333em;
+}
+.katex .sizing.reset-size7.size7,
+.katex .fontsize-ensurer.reset-size7.size7 {
+  /* stylelint-disable-next-line */
+  font-size: 1em;
+}
+.katex .sizing.reset-size7.size8,
+.katex .fontsize-ensurer.reset-size7.size8 {
+  /* stylelint-disable-next-line */
+  font-size: 1.2em;
+}
+.katex .sizing.reset-size7.size9,
+.katex .fontsize-ensurer.reset-size7.size9 {
+  /* stylelint-disable-next-line */
+  font-size: 1.44em;
+}
+.katex .sizing.reset-size7.size10,
+.katex .fontsize-ensurer.reset-size7.size10 {
+  /* stylelint-disable-next-line */
+  font-size: 1.7283333333em;
+}
+.katex .sizing.reset-size7.size11,
+.katex .fontsize-ensurer.reset-size7.size11 {
+  /* stylelint-disable-next-line */
+  font-size: 2.0733333333em;
+}
+.katex .sizing.reset-size8.size1,
+.katex .fontsize-ensurer.reset-size8.size1 {
+  /* stylelint-disable-next-line */
+  font-size: 0.3472222222em;
+}
+.katex .sizing.reset-size8.size2,
+.katex .fontsize-ensurer.reset-size8.size2 {
+  /* stylelint-disable-next-line */
+  font-size: 0.4166666667em;
+}
+.katex .sizing.reset-size8.size3,
+.katex .fontsize-ensurer.reset-size8.size3 {
+  /* stylelint-disable-next-line */
+  font-size: 0.4861111111em;
+}
+.katex .sizing.reset-size8.size4,
+.katex .fontsize-ensurer.reset-size8.size4 {
+  /* stylelint-disable-next-line */
+  font-size: 0.5555555556em;
+}
+.katex .sizing.reset-size8.size5,
+.katex .fontsize-ensurer.reset-size8.size5 {
+  /* stylelint-disable-next-line */
+  font-size: 0.625em;
+}
+.katex .sizing.reset-size8.size6,
+.katex .fontsize-ensurer.reset-size8.size6 {
+  /* stylelint-disable-next-line */
+  font-size: 0.6944444444em;
+}
+.katex .sizing.reset-size8.size7,
+.katex .fontsize-ensurer.reset-size8.size7 {
+  /* stylelint-disable-next-line */
+  font-size: 0.8333333333em;
+}
+.katex .sizing.reset-size8.size8,
+.katex .fontsize-ensurer.reset-size8.size8 {
+  /* stylelint-disable-next-line */
+  font-size: 1em;
+}
+.katex .sizing.reset-size8.size9,
+.katex .fontsize-ensurer.reset-size8.size9 {
+  /* stylelint-disable-next-line */
+  font-size: 1.2em;
+}
+.katex .sizing.reset-size8.size10,
+.katex .fontsize-ensurer.reset-size8.size10 {
+  /* stylelint-disable-next-line */
+  font-size: 1.4402777778em;
+}
+.katex .sizing.reset-size8.size11,
+.katex .fontsize-ensurer.reset-size8.size11 {
+  /* stylelint-disable-next-line */
+  font-size: 1.7277777778em;
+}
+.katex .sizing.reset-size9.size1,
+.katex .fontsize-ensurer.reset-size9.size1 {
+  /* stylelint-disable-next-line */
+  font-size: 0.2893518519em;
+}
+.katex .sizing.reset-size9.size2,
+.katex .fontsize-ensurer.reset-size9.size2 {
+  /* stylelint-disable-next-line */
+  font-size: 0.3472222222em;
+}
+.katex .sizing.reset-size9.size3,
+.katex .fontsize-ensurer.reset-size9.size3 {
+  /* stylelint-disable-next-line */
+  font-size: 0.4050925926em;
+}
+.katex .sizing.reset-size9.size4,
+.katex .fontsize-ensurer.reset-size9.size4 {
+  /* stylelint-disable-next-line */
+  font-size: 0.462962963em;
+}
+.katex .sizing.reset-size9.size5,
+.katex .fontsize-ensurer.reset-size9.size5 {
+  /* stylelint-disable-next-line */
+  font-size: 0.5208333333em;
+}
+.katex .sizing.reset-size9.size6,
+.katex .fontsize-ensurer.reset-size9.size6 {
+  /* stylelint-disable-next-line */
+  font-size: 0.5787037037em;
+}
+.katex .sizing.reset-size9.size7,
+.katex .fontsize-ensurer.reset-size9.size7 {
+  /* stylelint-disable-next-line */
+  font-size: 0.6944444444em;
+}
+.katex .sizing.reset-size9.size8,
+.katex .fontsize-ensurer.reset-size9.size8 {
+  /* stylelint-disable-next-line */
+  font-size: 0.8333333333em;
+}
+.katex .sizing.reset-size9.size9,
+.katex .fontsize-ensurer.reset-size9.size9 {
+  /* stylelint-disable-next-line */
+  font-size: 1em;
+}
+.katex .sizing.reset-size9.size10,
+.katex .fontsize-ensurer.reset-size9.size10 {
+  /* stylelint-disable-next-line */
+  font-size: 1.2002314815em;
+}
+.katex .sizing.reset-size9.size11,
+.katex .fontsize-ensurer.reset-size9.size11 {
+  /* stylelint-disable-next-line */
+  font-size: 1.4398148148em;
+}
+.katex .sizing.reset-size10.size1,
+.katex .fontsize-ensurer.reset-size10.size1 {
+  /* stylelint-disable-next-line */
+  font-size: 0.2410800386em;
+}
+.katex .sizing.reset-size10.size2,
+.katex .fontsize-ensurer.reset-size10.size2 {
+  /* stylelint-disable-next-line */
+  font-size: 0.2892960463em;
+}
+.katex .sizing.reset-size10.size3,
+.katex .fontsize-ensurer.reset-size10.size3 {
+  /* stylelint-disable-next-line */
+  font-size: 0.337512054em;
+}
+.katex .sizing.reset-size10.size4,
+.katex .fontsize-ensurer.reset-size10.size4 {
+  /* stylelint-disable-next-line */
+  font-size: 0.3857280617em;
+}
+.katex .sizing.reset-size10.size5,
+.katex .fontsize-ensurer.reset-size10.size5 {
+  /* stylelint-disable-next-line */
+  font-size: 0.4339440694em;
+}
+.katex .sizing.reset-size10.size6,
+.katex .fontsize-ensurer.reset-size10.size6 {
+  /* stylelint-disable-next-line */
+  font-size: 0.4821600771em;
+}
+.katex .sizing.reset-size10.size7,
+.katex .fontsize-ensurer.reset-size10.size7 {
+  /* stylelint-disable-next-line */
+  font-size: 0.5785920926em;
+}
+.katex .sizing.reset-size10.size8,
+.katex .fontsize-ensurer.reset-size10.size8 {
+  /* stylelint-disable-next-line */
+  font-size: 0.6943105111em;
+}
+.katex .sizing.reset-size10.size9,
+.katex .fontsize-ensurer.reset-size10.size9 {
+  /* stylelint-disable-next-line */
+  font-size: 0.8331726133em;
+}
+.katex .sizing.reset-size10.size10,
+.katex .fontsize-ensurer.reset-size10.size10 {
+  /* stylelint-disable-next-line */
+  font-size: 1em;
+}
+.katex .sizing.reset-size10.size11,
+.katex .fontsize-ensurer.reset-size10.size11 {
+  /* stylelint-disable-next-line */
+  font-size: 1.1996142719em;
+}
+.katex .sizing.reset-size11.size1,
+.katex .fontsize-ensurer.reset-size11.size1 {
+  /* stylelint-disable-next-line */
+  font-size: 0.2009646302em;
+}
+.katex .sizing.reset-size11.size2,
+.katex .fontsize-ensurer.reset-size11.size2 {
+  /* stylelint-disable-next-line */
+  font-size: 0.2411575563em;
+}
+.katex .sizing.reset-size11.size3,
+.katex .fontsize-ensurer.reset-size11.size3 {
+  /* stylelint-disable-next-line */
+  font-size: 0.2813504823em;
+}
+.katex .sizing.reset-size11.size4,
+.katex .fontsize-ensurer.reset-size11.size4 {
+  /* stylelint-disable-next-line */
+  font-size: 0.3215434084em;
+}
+.katex .sizing.reset-size11.size5,
+.katex .fontsize-ensurer.reset-size11.size5 {
+  /* stylelint-disable-next-line */
+  font-size: 0.3617363344em;
+}
+.katex .sizing.reset-size11.size6,
+.katex .fontsize-ensurer.reset-size11.size6 {
+  /* stylelint-disable-next-line */
+  font-size: 0.4019292605em;
+}
+.katex .sizing.reset-size11.size7,
+.katex .fontsize-ensurer.reset-size11.size7 {
+  /* stylelint-disable-next-line */
+  font-size: 0.4823151125em;
+}
+.katex .sizing.reset-size11.size8,
+.katex .fontsize-ensurer.reset-size11.size8 {
+  /* stylelint-disable-next-line */
+  font-size: 0.578778135em;
+}
+.katex .sizing.reset-size11.size9,
+.katex .fontsize-ensurer.reset-size11.size9 {
+  /* stylelint-disable-next-line */
+  font-size: 0.6945337621em;
+}
+.katex .sizing.reset-size11.size10,
+.katex .fontsize-ensurer.reset-size11.size10 {
+  /* stylelint-disable-next-line */
+  font-size: 0.8336012862em;
+}
+.katex .sizing.reset-size11.size11,
+.katex .fontsize-ensurer.reset-size11.size11 {
+  /* stylelint-disable-next-line */
+  font-size: 1em;
+}
+.katex .delimsizing.size1 {
+  font-family: KaTeX_Size1;
+}
+.katex .delimsizing.size2 {
+  font-family: KaTeX_Size2;
+}
+.katex .delimsizing.size3 {
+  font-family: KaTeX_Size3;
+}
+.katex .delimsizing.size4 {
+  font-family: KaTeX_Size4;
+}
+.katex .delimsizing.mult .delim-size1 > span {
+  font-family: KaTeX_Size1;
+}
+.katex .delimsizing.mult .delim-size4 > span {
+  font-family: KaTeX_Size4;
+}
+.katex .nulldelimiter {
+  display: inline-block;
+  width: 0.12em;
+}
+.katex .delimcenter {
+  position: relative;
+}
+.katex .op-symbol {
+  position: relative;
+}
+.katex .op-symbol.small-op {
+  font-family: KaTeX_Size1;
+}
+.katex .op-symbol.large-op {
+  font-family: KaTeX_Size2;
+}
+.katex .op-limits > .vlist-t {
+  text-align: center;
+}
+.katex .accent > .vlist-t {
+  text-align: center;
+}
+.katex .accent .accent-body {
+  position: relative;
+}
+.katex .accent .accent-body:not(.accent-full) {
+  width: 0;
+}
+.katex .overlay {
+  display: block;
+}
+.katex .mtable .vertical-separator {
+  display: inline-block;
+  min-width: 1px;
+}
+.katex .mtable .arraycolsep {
+  display: inline-block;
+}
+.katex .mtable .col-align-c > .vlist-t {
+  text-align: center;
+}
+.katex .mtable .col-align-l > .vlist-t {
+  text-align: left;
+}
+.katex .mtable .col-align-r > .vlist-t {
+  text-align: right;
+}
+.katex .svg-align {
+  text-align: left;
+}
+.katex svg {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: inherit;
+  fill: currentColor;
+  stroke: currentColor;
+}
+.katex svg path {
+  stroke: none;
+}
+.katex svg {
+  fill-rule: nonzero;
+  fill-opacity: 1;
+  stroke-width: 1;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+  stroke-miterlimit: 4;
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+  stroke-opacity: 1;
+}
+.katex img {
+  border-style: none;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+}
+.katex .stretchy {
+  width: 100%;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+.katex .stretchy::before, .katex .stretchy::after {
+  content: "";
+}
+.katex .hide-tail {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.katex .halfarrow-left {
+  position: absolute;
+  left: 0;
+  width: 50.2%;
+  overflow: hidden;
+}
+.katex .halfarrow-right {
+  position: absolute;
+  right: 0;
+  width: 50.2%;
+  overflow: hidden;
+}
+.katex .brace-left {
+  position: absolute;
+  left: 0;
+  width: 25.1%;
+  overflow: hidden;
+}
+.katex .brace-center {
+  position: absolute;
+  left: 25%;
+  width: 50%;
+  overflow: hidden;
+}
+.katex .brace-right {
+  position: absolute;
+  right: 0;
+  width: 25.1%;
+  overflow: hidden;
+}
+.katex .x-arrow-pad {
+  padding: 0 0.5em;
+}
+.katex .cd-arrow-pad {
+  padding: 0 0.55556em 0 0.27778em;
+}
+.katex .x-arrow,
+.katex .mover,
+.katex .munder {
+  text-align: center;
+}
+.katex .boxpad {
+  padding: 0 0.3em;
+}
+.katex .fbox,
+.katex .fcolorbox {
+  box-sizing: border-box;
+  border: 0.04em solid;
+}
+.katex .cancel-pad {
+  padding: 0 0.2em;
+}
+.katex .cancel-lap {
+  margin-left: -0.2em;
+  margin-right: -0.2em;
+}
+.katex .sout {
+  border-bottom-style: solid;
+  border-bottom-width: 0.08em;
+}
+.katex .angl {
+  box-sizing: border-box;
+  border-top: 0.049em solid;
+  border-right: 0.049em solid;
+  margin-right: 0.03889em;
+}
+.katex .anglpad {
+  padding: 0 0.03889em;
+}
+.katex .eqn-num::before {
+  counter-increment: katexEqnNo;
+  content: "(" counter(katexEqnNo) ")";
+}
+.katex .mml-eqn-num::before {
+  counter-increment: mmlEqnNo;
+  content: "(" counter(mmlEqnNo) ")";
+}
+.katex .mtr-glue {
+  width: 50%;
+}
+.katex .cd-vert-arrow {
+  display: inline-block;
+  position: relative;
+}
+.katex .cd-label-left {
+  display: inline-block;
+  position: absolute;
+  right: calc(50% + 0.3em);
+  text-align: left;
+}
+.katex .cd-label-right {
+  display: inline-block;
+  position: absolute;
+  left: calc(50% + 0.3em);
+  text-align: right;
+}
+.katex-display {
+  display: block;
+  margin: 1em 0;
+  text-align: center;
+}
+.katex-display > .katex {
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+}
+.katex-display > .katex > .katex-html {
+  display: block;
+  position: relative;
+}
+.katex-display > .katex > .katex-html > .tag {
+  position: absolute;
+  right: 0;
+}
+.katex-display.leqno > .katex > .katex-html > .tag {
+  left: 0;
+  right: auto;
+}
+.katex-display.fleqn > .katex {
+  text-align: left;
+  padding-left: 2em;
+}
+body {
+  counter-reset: katexEqnNo mmlEqnNo;
+}
+</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/loadingOverlay.astro?astro&#38;type=style&#38;index=0&#38;lang.css">@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes spinner-glow{0%,100%{box-shadow:0 0 12px var(--primary);border-top-color:var(--primary)}50%{box-shadow:0 0 24px var(--primary);border-top-color:var(--primary)}}.loading-spinner[data-astro-cid-zwfdok6v]{width:48px;height:48px;border:3px solid color-mix(in oklch,var(--primary) 10%,transparent);border-top:3px solid var(--primary);border-radius:50%;animation:spin var(--spinnerInterval) linear infinite,spinner-glow var(--spinnerInterval) ease-in-out infinite}@keyframes text-glow{0%,100%{opacity:0.6;text-shadow:0 0 12px var(--primary)}50%{opacity:1;text-shadow:0 0 24px var(--primary)}}.loading-title[data-astro-cid-zwfdok6v]{animation:text-glow var(--titleInterval) ease-in-out infinite}#loading-overlay[data-astro-cid-zwfdok6v].fade-out{opacity:0;pointer-events:none}html:not(.is-loading) #loading-overlay[data-astro-cid-zwfdok6v]{opacity:0;pointer-events:none}</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/styles/musicplayer.css">.orb-player {
+    position: relative;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.orb-player::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, var(--primary), transparent, var(--primary));
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.orb-player:hover::before {
+    opacity: 0.3;
+    animation: rotate 2s linear infinite;
+}
+.orb-player .animate-pulse {
+    animation: musicWave 1.5s ease-in-out infinite;
+}
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+@keyframes musicWave {
+    0%, 100% { transform: scaleY(0.5); }
+    50% { transform: scaleY(1); }
+}
+.music-player {
+    max-width: 320px;
+    user-select: none;
+}
+.expanded-player {
+    width: 320px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+.progress-section div:hover,
+.bottom-controls > div:hover {
+    transform: scaleY(1.2);
+    transition: transform 0.2s ease;
+}
+@media (max-width: 768px) {
+    .music-player {
+        max-width: 280px;
+        /*left: 8px !important;*/
+        bottom: 8px !important;
+        right: 8px !important;
+    }
+    .music-player.expanded {
+        width: calc(100vw - 16px);
+        max-width: none;
+        /*left: 8px !important;*/
+        right: 8px !important;
+    }
+    .playlist-panel {
+        width: calc(100vw - 16px) !important;
+        /*left: 8px !important;*/
+        right: 8px !important;
+        max-width: none;
+    }
+    .controls {
+        gap: 8px;
+    }
+    .controls button {
+        width: 36px;
+        height: 36px;
+    }
+    .controls button:nth-child(3) {
+        width: 44px;
+        height: 44px;
+    }
+}
+@media (max-width: 480px) {
+    .music-player {
+        max-width: 260px;
+    }
+    .song-title {
+        font-size: 14px;
+    }
+    .song-artist {
+        font-size: 12px;
+    }
+    .controls {
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+    .controls button {
+        width: 32px;
+        height: 32px;
+    }
+    .controls button:nth-child(3) {
+        width: 40px;
+        height: 40px;
+    }
+    .playlist-item {
+        padding: 8px 12px;
+    }
+    .playlist-item .w-10 {
+        width: 32px;
+        height: 32px;
+    }
+}
+@keyframes slide-up {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+.animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+}
+@media (hover: none) and (pointer: coarse) {
+    .music-player button,
+    .playlist-item {
+        min-height: 44px;
+    }
+    .progress-section > div,
+    .bottom-controls > div:nth-child(2) {
+        height: 12px;
+    }
+}
+/* 自定义旋转动画，停止时保持当前位置 */
+@keyframes spin-continuous {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+.cover-container img {
+    animation: spin-continuous 3s linear infinite;
+    animation-play-state: paused;
+}
+.cover-container img.spinning {
+    animation-play-state: running;
+}
+/* 让主题色按钮更有视觉反馈 */
+button.bg-\[var\(--primary\)\] {
+    box-shadow: 0 0 0 2px var(--primary);
+    border: none;
+}</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/pio.svelte?svelte&#38;type=style&#38;lang.css">
+  /* Pio 相关样式将通过外部CSS文件加载 */
+ .s-R4XiZ2KCp3p8{}</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/styles/navbar.css">/*
+ * 导航栏半透明效果样式
+ * Navbar Translucent Effects Styles
+ * 只有当页面启用banner时才应用半透明效果
+*/
+
+
+/* 导航区域基础布局样式（避免 flex 子项溢出） */
+
+
+.navbar-nav-links {
+    min-width: 0;
+    flex-shrink: 1;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s, gap 0.3s ease;
+}
+
+
+/* 按钮区域基础布局样式（避免 flex 子项溢出） */
+
+
+.navbar-buttons {
+    min-width: 0;
+    flex-shrink: 0;
+}
+
+
+/* 无banner时使用原始card-base样式，不添加额外的透明效果 */
+
+
+/* 确保导航栏在没有banner时有基本的背景色和圆角（低优先级，不覆盖card-base） */
+
+
+#navbar > div {
+    background: var(--card-bg);
+    border-radius: var(--radius-large);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* 半透明模式 - 在有banner时启用 */
+
+
+:is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #navbar[data-transparent-mode="semi"] > div {
+    backdrop-filter: blur(20px) !important;
+    background: rgba(255, 255, 255, 0.55) !important;
+    border: 1px solid rgba(255, 255, 255, 0.55) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+
+/* 半透明模式 - 在有banner时启用 - 暗色主题 */
+
+
+:root.dark :is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #navbar[data-transparent-mode="semi"] > div {
+    background: rgba(0, 0, 0, 0.55) !important;
+    border: 1px solid rgba(0, 0, 0, 0.55) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+
+/* 完全透明模式 - 在有banner时启用 */
+
+
+:is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #navbar[data-transparent-mode="full"] > div {
+    backdrop-filter: none !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+
+/* 完全透明模式 - 在有banner时启用 - 暗色主题 */
+
+
+:root.dark :is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #navbar[data-transparent-mode="full"] > div {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+
+/* 半完全透明模式 - 在有banner时启用 - 默认状态：页面顶部时完全透明 */
+
+
+:is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #navbar[data-transparent-mode="semifull"] > div {
+    backdrop-filter: none !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+
+/* 半完全透明模式 - 在有banner时启用 - 默认状态：页面顶部时完全透明 - 暗色主题 */
+
+
+:root.dark :is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #navbar[data-transparent-mode="semifull"] > div {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+
+/* 半完全透明模式 - 在有banner时启用 - 滚动状态：下滑后变为半透明圆角 */
+
+
+:is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #navbar[data-transparent-mode="semifull"].scrolled > div {
+    backdrop-filter: blur(20px) !important;
+    background: rgba(255, 255, 255, 0.55) !important;
+    border: 1px solid rgba(255, 255, 255, 0.55) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+
+/* 半完全透明模式 - 在有banner时启用 - 滚动状态：下滑后变为半透明圆角 - 暗色主题 */
+
+
+:root.dark :is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #navbar[data-transparent-mode="semifull"].scrolled > div {
+    background: rgba(0, 0, 0, 0.55) !important;
+    border: 1px solid rgba(0, 0, 0, 0.55) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+
+/* 二级菜单、主题色、夜间模式菜单、手机端导航在有banner时启用半透明效果 */
+
+
+:is(#banner-wrapper ~ *, body:has(#banner-wrapper)) .dropdown-content,
+:is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #display-setting,
+:is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #nav-menu-panel,
+:is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #translate-panel,
+:is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #search-panel {
+    backdrop-filter: blur(20px) !important;
+    background: rgba(255, 255, 255, 0.55) !important;
+    border: 1px solid rgba(255, 255, 255, 0.55) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+
+/* 二级菜单、主题色、夜间模式菜单、手机端导航在有banner时启用半透明效果 - 暗色主题 */
+
+
+:root.dark :is(#banner-wrapper ~ *, body:has(#banner-wrapper)) .dropdown-content,
+:root.dark :is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #display-setting,
+:root.dark :is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #nav-menu-panel,
+:root.dark :is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #translate-panel,
+:root.dark :is(#banner-wrapper ~ *, body:has(#banner-wrapper)) #search-panel {
+    background: rgba(0, 0, 0, 0.55) !important;
+    border: 1px solid rgba(0, 0, 0, 0.55) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+
+/* 响应式优化 */
+
+
+/* 桌面端&平板端布局 */
+
+
+@media (min-width: 768px) {
+    /* 使用 Grid 布局确保中间区域在有空间时居中 */
+    #navbar > div {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        justify-content: space-between;
+        align-items: center;
+    }
+    /* 确保左侧 Home 按钮不拉伸并靠左 */
+    #navbar > div > a:first-child {
+        justify-self: start;
+    }
+
+    #navbar .navbar-nav-links {
+        position: static;
+        left: unset;
+        transform: none;
+        justify-self: center;
+        gap: clamp(0.12rem, 1vw, 0.36rem);
+    }
+
+    #navbar .navbar-buttons {
+        justify-self: end;
+        gap: clamp(0.12rem, 1vw, 0.36rem);
+    }
+}
+
+
+/* 非大屏桌面端&平板端优化 */
+
+
+@media (min-width: 768px) and (max-width: 1279px) {
+    #navbar .navbar-nav-links {
+        gap: 0.2rem;
+    }
+
+    #navbar .navbar-buttons {
+        gap: 0.2rem;
+    }
+
+    /* 搜索状态下的避让逻辑以防重叠 */
+    #navbar.is-searching .navbar-nav-links {
+        opacity: 0;
+        transform: scale(0.9);
+        pointer-events: none;
+        visibility: hidden;
+    }
+}
+
+
+/* 手机端导航栏 */
+
+
+@media (max-width: 768px) {
+    #navbar > div {
+        max-width: none !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+
+/* 手机端导航栏 - 小屏 */
+
+
+@media (max-width: 512px) {
+    #navbar > div {
+        border-radius: 0.3rem !important;
+        margin: 0 !important;
+        padding-left: 0.6rem !important;
+        padding-right: 0.6rem !important;
+        max-width: none !important;
+        width: 100% !important;
+    }
+
+    #navbar-buttons {
+        gap: 0.123rem !important;
+    }
+    /* Only size the trigger buttons; do not affect nested buttons inside panels */
+    #navbar-buttons button:not(.float-panel *) {
+        width: 2.4rem !important;
+        height: 2.4rem !important;
+        padding: 0 !important;
+    }
+
+    /* home button */
+    #navbar > div > a:first-child {
+        width: 7.2rem !important;
+        height: 2.4rem !important;
+        padding: 0 !important;
+    }
+}
+
+
+/* 手机端导航栏 - 更小屏 */
+
+
+@media (min-width: 333px) and (max-width: 444px) {
+    #navbar-buttons {
+        gap: 0.111rem !important;
+    }
+    /* Only size the trigger buttons; do not affect nested buttons inside panels */
+    #navbar-buttons button:not(.float-panel *) {
+        width: 2.1rem !important;
+        height: 2.1rem !important;
+        padding: 0 !important;
+    }
+
+    /* home button */
+    #navbar > div > a:first-child {
+        width: 6.3rem !important;
+        height: 2.1rem !important;
+        padding: 0 !important;
+    }
+}
+
+
+/* 手机端导航栏按钮 -超小屏 */
+
+
+@media (max-width: 333px) {
+    #navbar-buttons {
+        gap: 0 !important;
+        justify-content: flex-end !important;
+    }
+
+    /* Hide home button text (keep icon) */
+    #navbar > div > a:first-child > div {
+        font-size: 0 !important;
+    }
+}</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/styles/banner.css">/*
+ * Banner 组件样式
+ * Banner Component Styles
+ * 包含 Banner 模式下的所有响应式样式和动画效果
+ */
+
+/**
+ * 基础样式
+ */
+
+/* 淡入上移动画 */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 初始加载中且未开始恢复时，高度归零；退出 Banner 模式时，高度归零 */
+
+html.is-loading:not(.banner-restoring) #banner-wrapper,
+html.banner-transitioning #banner-wrapper,
+html.banner-hiding #banner-wrapper {
+    height: 0 !important;
+}
+
+/* 退出动画时，强制子组件同步上移，避免主内容区域出现“两段式”位移 */
+
+html.banner-hiding #main-grid {
+    transform: translateY(0) !important;
+}
+
+html.banner-hiding #top-row {
+    height: 0 !important;
+}
+
+html.banner-hiding #sidebar-sticky {
+    top: 1rem !important;
+}
+
+/* 切换模式时隐藏标题，以便后续触发动画 */
+
+html.banner-transitioning .banner-title,
+html.banner-transitioning .banner-subtitle {
+    opacity: 0 !important;
+}
+
+/* 标题样式 */
+
+.banner-title {
+    text-shadow: 0px 3px 12px rgba(0, 0, 0, 0.36), 0 0 24px color-mix(in srgb, var(--primary), transparent 48%);
+    font-weight: bold;
+    opacity: 0;
+}
+
+.banner-subtitle {
+    text-shadow: 0px 3px 6px rgba(0, 0, 0, 0.36), 0 0 12px color-mix(in srgb, var(--primary), transparent 48%);
+    opacity: 0;
+}
+
+/* 标题动画 */
+
+.show-initial-animation .banner-title,
+.show-banner-animation .banner-title {
+    animation: fadeInUp 1s ease-out forwards;
+}
+
+.show-initial-animation .banner-subtitle,
+.show-banner-animation .banner-subtitle {
+    animation: fadeInUp 1s ease-out 0.3s both;
+}
+
+/* 动画结束后的状态 */
+
+html:not(.is-loading):not(.show-initial-animation):not(.show-banner-animation) .banner-title,
+html:not(.is-loading):not(.show-initial-animation):not(.show-banner-animation) .banner-subtitle {
+    opacity: 1;
+}
+
+/* 页面背景平滑过渡（Fullscreen 与 Banner 模式切换时） */
+
+body {
+    transition: background-color 0.6s ease, background-image 0.6s ease;
+}
+
+html.is-wallpaper-transitioning body {
+    transition: background-color 0.6s ease, background-image 0.6s ease !important;
+}
+
+/**
+ *
+ */
+
+/*  Ken Burns 效果 */
+
+@keyframes ken-burns {
+    from {
+        transform: scale(1.0) translateZ(0);
+    }
+    to {
+        transform: scale(1.2) translateZ(0);
+    }
+}
+
+/* 桌面端 */
+
+@media (min-width: 1280px) {
+    .banner-text-overlay {
+        align-items: center !important; /* 垂直居中 */
+        justify-content: center !important; /* 水平居中 */
+        padding: 2rem !important;
+        text-align: center !important; /* 文字居中对齐 */
+    }
+    .banner-text-overlay > div {
+        margin-bottom: 0 !important;
+        width: 75% !important;
+        text-align: center !important; /* 确保文字居中 */
+    }
+
+    /* 确保轮播容器有正确的 overflow 设置 */
+    #banner-carousel {
+        overflow: hidden !important;
+    }
+    /* 图片容器 */
+    .carousel-item img,
+    #banner img {
+        object-position: center center !important; /* 确保图片居中显示 */
+        transition: transform 1.2s ease-out !important;
+    }
+    /* 轮播图片过渡 */
+    .carousel-item {
+        transition: opacity 1.2s ease-in-out !important;
+    }
+    .carousel-item.ken-burns-enabled {
+        transform-origin: center center !important; /* 确保缩放从中心开始 */
+        transform: scale(1.0) translateZ(0);
+    }
+    .carousel-item.ken-burns-enabled.is-animating {
+        animation: ken-burns 12s linear forwards !important;
+    }
+    .carousel-item:not(.ken-burns-enabled) {
+        transform: scale(1.0) translateZ(0); /* 取消默认缩放 */
+    }
+    /* 当前图片缩放效果 */
+    .carousel-item.opacity-100 {
+        opacity: 1 !important;
+    }
+    /* 非当前图片缩放效果 */
+    .carousel-item.opacity-0 {
+        opacity: 0 !important;
+    }
+}
+
+/* 移动端轮播图片 */
+
+@media (max-width: 1279px) {
+    /* 确保轮播容器有正确的 overflow 设置 */
+    #banner-carousel {
+        overflow: hidden !important;
+    }
+    /* 图片容器 */
+    .carousel-item img,
+    #banner img {
+        object-position: center center !important; /* 确保图片居中显示 */
+        transition: transform 1.2s ease-out !important;
+    }
+    /* 轮播图片过渡 */
+    .carousel-item {
+        transition: opacity 1.2s ease-in-out !important;
+    }
+    .carousel-item.ken-burns-enabled {
+        transform-origin: center center !important; /* 确保缩放从中心开始 */
+        transform: scale(1.0);
+    }
+    .carousel-item.ken-burns-enabled.is-animating {
+        animation: ken-burns 12s linear forwards !important;
+    }
+    .carousel-item:not(.ken-burns-enabled) {
+        transform: scale(1.0); /* 取消默认缩放 */
+    }
+    /* 当前图片缩放效果 */
+    .carousel-item.opacity-100 {
+        opacity: 1 !important;
+    }
+    /* 非当前图片缩放效果 */
+    .carousel-item.opacity-0 {
+        opacity: 0 !important;
+    }
+}
+
+/* 移动端 banner 性能 */
+
+@media (max-width: 1279px) {
+    .banner-container {
+        /* 启用硬件加速 */
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        will-change: transform, opacity;
+        /* 渲染性能 */
+        contain: layout style paint;
+        /* 减少重绘 */
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+    }
+    /* 图片 */
+    .banner-container img {
+        /* 图片渲染 */
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        /* 防止图片拖拽 */
+        -webkit-user-drag: none;
+        -khtml-user-drag: none;
+        -moz-user-drag: none;
+        -o-user-drag: none;
+        /* 触摸 */
+        pointer-events: none;
+    }
+
+    .banner-text-overlay {
+        /* 文字渲染 */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        /* 减少重排 */
+        contain: layout style;
+    }
+
+    .carousel-item.ken-burns-enabled {
+        /* 硬件加速与缩放维持 */
+        transform: scale(1.0) translateZ(0);
+        will-change: transform, opacity;
+        /* 触摸响应 */
+        touch-action: pan-y;
+        -webkit-touch-callout: none;
+        user-select: none;
+    }
+    .carousel-item:not(.ken-burns-enabled) {
+        transform: scale(1.0) translateZ(0);
+        will-change: transform, opacity;
+        /* 触摸响应 */
+        touch-action: pan-y;
+        -webkit-touch-callout: none;
+        user-select: none;
+    }
+
+    /* 轮播指示器 */
+    .carousel-indicators {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+    }
+
+    .carousel-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .carousel-indicator.active {
+        background: rgba(255, 255, 255, 0.9);
+        transform: scale(1.2);
+    }
+}
+
+/* 移动端暗色模式 */
+
+@media (max-width: 1279px) and (prefers-color-scheme: dark) {
+    .banner-text-overlay {
+        background: linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.8) 0%,
+            rgba(0, 0, 0, 0.4) 50%,
+            transparent 100%
+        );
+    }
+}
+
+/* 移动端横屏 */
+
+@media (max-width: 1279px) and (orientation: landscape) {
+    .banner-text-overlay {
+        padding: 1rem 1.5rem;
+        align-items: center !important; /* 垂直居中 */
+        justify-content: center !important; /* 水平居中 */
+        text-align: center !important; /* 文字居中对齐 */
+    }
+
+    .banner-title {
+        font-size: 2.2rem !important; /* 增大字体大小 */
+        line-height: 1.3;
+    }
+
+    .banner-subtitle {
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+}
+
+/* 平板 */
+
+@media (min-width: 768px) and (max-width: 1279px) {
+    /* 横幅文本覆盖层 */
+    .banner-text-overlay {
+        align-items: center !important; /* 垂直居中 */
+        justify-content: center !important; /* 水平居中 */
+        padding: 2rem !important;
+        text-align: center !important; /* 文字居中对齐 */
+    }
+    /* 文本容器 */
+    .banner-text-overlay > div {
+        margin-bottom: 0 !important; /* 移除底部边距，保持居中 */
+        width: 85% !important;
+        text-align: center !important; /* 确保文字居中 */
+    }
+
+    /* 标题文本 */
+    .banner-title {
+        font-size: 4rem !important;
+        line-height: 1.1 !important;
+        margin-bottom: 1rem !important;
+    }
+
+    /* 副标题文本 */
+    .banner-subtitle {
+        font-size: 1.5rem !important;
+        line-height: 1.4 !important;
+    }
+}
+
+/* 中屏手机 */
+
+@media (min-width: 513px) and (max-width: 768px) {
+    /* 横幅文本覆盖层 */
+    .banner-text-overlay {
+        align-items: center !important; /* 垂直居中 */
+        justify-content: center !important; /* 水平居中 */
+        padding: 1.5rem !important;
+        text-align: center !important; /* 文字居中对齐 */
+    }
+    /* 文本容器 */
+    .banner-text-overlay > div {
+        margin-bottom: 0 !important; /* 移除底部边距，保持居中 */
+        width: 90% !important;
+        text-align: center !important; /* 确保文字居中 */
+    }
+
+    /* 标题文本 */
+    .banner-title {
+        font-size: 3.8rem !important; /* 增大字体大小 */
+        line-height: 1.1 !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    /* 副标题文本 */
+    .banner-subtitle {
+        font-size: 1.125rem !important;
+        line-height: 1.4 !important;
+    }
+}
+
+/* 小屏手机 */
+
+@media (max-width: 512px) {
+    /* 横幅文本覆盖层 */
+    .banner-text-overlay {
+        align-items: center !important; /* 垂直居中 */
+        justify-content: center !important; /* 水平居中 */
+        padding: 1rem !important;
+        text-align: center !important; /* 文字居中对齐 */
+    }
+    /* 文本容器 */
+    .banner-text-overlay > div {
+        margin-bottom: 0 !important; /* 移除底部边距，保持居中 */
+        width: 95% !important; /* 增加文本宽度利用率 */
+        text-align: center !important; /* 确保文字居中 */
+    }
+
+    /* 标题文本 */
+    .banner-title {
+        font-size: 3.2rem !important; /* 增大字体大小 */
+        line-height: 1.1 !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* 副标题文本 */
+    .banner-subtitle {
+        font-size: 1rem !important;
+        line-height: 1.3 !important;
+    }
+}
+
+/**
+ * 波浪
+ */
+
+/* 波浪动画 */
+
+@keyframes wave {
+    0% {
+        transform: translate3d(-90px, 0, 0);
+    }
+    100% {
+        transform: translate3d(85px, 0, 0);
+    }
+}
+
+/* 波浪与背景同步切换 */
+
+#header-waves {
+    /* 确保波浪容器与页面背景在同一合成层 */
+    isolation: isolate;
+    /* 优化渲染性能 - 移除 strict containment 改用 none */
+    contain: none;
+    /* 精确对齐 */
+    margin-bottom: -1px;
+}
+
+/* 统一波浪动画 */
+
+#header-waves .parallax use {
+    animation-name: wave;
+    animation-duration: 25s;
+    animation-timing-function: cubic-bezier(0.5, 0.5, 0.45, 0.5);
+    animation-iteration-count: infinite;
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* 分层动画时序（替代内联 style） */
+
+#header-waves .parallax use:nth-child(1) {
+    animation-duration: 7s;
+    animation-delay: -2s;
+}
+
+#header-waves .parallax use:nth-child(2) {
+    animation-duration: 10s;
+    animation-delay: -3s;
+}
+
+#header-waves .parallax use:nth-child(3) {
+    animation-duration: 13s;
+    animation-delay: -4s;
+}
+
+#header-waves .parallax use:nth-child(4) {
+    animation-duration: 20s;
+    animation-delay: -5s;
+}
+
+#header-waves .waves {
+    /* 确保 SVG 完整渲染（svg 本身即为 .waves） */
+    width: 100%;
+    height: 100%;
+    display: block;
+    /* 确保水波纹完整显示 */
+    overflow: visible;
+    z-index: 5;
+    /* 硬件加速，确保与背景同步渲染 */
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    /* 优化渲染性能 - 移除 strict containment 改用 none */
+    contain: none;
+}
+
+/* 波浪填充色主题切换 */
+
+#header-waves .waves use {
+    /* 确保填充色与页面背景同步更新 */
+    will-change: fill;
+}
+
+/* 主题切换时的额外保护 */
+
+.theme-changing #header-waves,
+.theme-changing #header-waves svg,
+.theme-changing #header-waves use {
+    /* 在主题切换期间禁用所有可能的渲染延迟 */
+    will-change: auto;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* 移动端水波纹特殊 */
+
+@media (max-width: 1023px) {
+    #header-waves {
+        /* 确保水波纹容器不被裁剪 */
+        overflow: visible;
+        z-index: 5;
+    }
+
+    #header-waves .waves {
+        /* 移动端SVG */
+        min-height: 60px;
+    }
+}</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/styles/fancybox.css">/**
+ * Fancybox 自定义样式
+ */
+
+.fancybox__container {
+    --fancybox-bg: rgba(0, 0, 0, 0.9);
+    --fancybox-thumbs-width: 64px;
+    --fancybox-thumbs-ratio: 1;
+    --fancybox-thumbs-border-radius: 4px;
+}
+
+.fancybox__toolbar {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent);
+    padding: 8px;
+    backdrop-filter: blur(4px);
+}
+
+.fancybox__caption {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: white;
+    font-size: 1rem;
+    padding: 1rem;
+    text-align: center;
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
+    margin: 0 1rem 1rem 1rem;
+}
+
+.fancybox__nav {
+    --carousel-button-svg-width: 24px;
+    --carousel-button-svg-height: 24px;
+}
+
+.fancybox__thumbs {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2px;
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+}
+
+.fancybox__thumb {
+    border-radius: 4px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.fancybox__thumb.is-loading {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.fancybox__thumb:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.fancybox__thumb.is-active {
+    border-color: #fff;
+}
+
+.fancybox__button {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fancybox__button:hover {
+    background: rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.fancybox__button svg {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.fancybox__infobar {
+    color: white;
+    font-size: 0.9rem;
+    padding: 0 8px;
+}
+
+/**
+ * 响应式设计
+ */
+
+@media (max-width: 768px) {
+    .fancybox__toolbar {
+        padding: 4px;
+    }
+
+    .fancybox__button {
+        width: 36px;
+        height: 36px;
+    }
+
+    .fancybox__caption {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+        margin: 0 0.5rem 0.5rem 0.5rem;
+    }
+
+    .fancybox__thumbs {
+        --fancybox-thumbs-width: 48px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fancybox__button {
+        width: 32px;
+        height: 32px;
+    }
+
+    .fancybox__caption {
+        font-size: 0.8rem;
+        padding: 0.4rem;
+    }
+
+    .fancybox__thumbs {
+        --fancybox-thumbs-width: 40px;
+    }
+}</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/layouts/base.astro?astro&#38;type=style&#38;index=0&#38;lang.css">.\!container {
+    width: 100% !important
+}
+.container {
+    width: 100%
+}
+@media (min-width: 640px) {
+    .\!container {
+        max-width: 640px !important
+    }
+    .container {
+        max-width: 640px
+    }
+}
+@media (min-width: 768px) {
+    .\!container {
+        max-width: 768px !important
+    }
+    .container {
+        max-width: 768px
+    }
+}
+@media (min-width: 1024px) {
+    .\!container {
+        max-width: 1024px !important
+    }
+    .container {
+        max-width: 1024px
+    }
+}
+@media (min-width: 1280px) {
+    .\!container {
+        max-width: 1280px !important
+    }
+    .container {
+        max-width: 1280px
+    }
+}
+@media (min-width: 1536px) {
+    .\!container {
+        max-width: 1536px !important
+    }
+    .container {
+        max-width: 1536px
+    }
+}
+.enable-banner.is-home #banner-wrapper {
+    height: var(--banner-height-home);
+    --tw-translate-y: var(--banner-height-extend);
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+.enable-banner #banner-wrapper {
+    height: var(--banner-height-home)
+}
+.enable-banner.is-home #banner {
+    height: var(--banner-height-home);
+    --tw-translate-y: 0px;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+.enable-banner #banner {
+    height: var(--banner-height-home);
+    --tw-translate-y: var(--bannerOffset);
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+.enable-banner.is-home #main-grid {
+    --tw-translate-y: var(--banner-height-extend);
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+.enable-banner #top-row {
+    height: calc(var(--banner-height-home) - 5.5rem)
+}
+.enable-banner.is-home #sidebar-sticky {
+    top: calc(1rem - var(--banner-height-extend))
+}
+.navbar-hidden {
+    --tw-translate-y: -4rem;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+    opacity: 0
+}</style>
+<style data-vite-dev-id="/Users/nsisong/projects/koreshield/koreshield-blog/src/styles/grid.css">/* 当banner被禁用时的布局样式 */
+.no-banner-layout {
+    top: 5.5rem !important;
+    min-height: calc(100vh - 5.5rem) !important;
+}
+/* 隐藏已收起横幅或非横幅模式时的图片版权描述 */
+.no-banner-layout #banner-credit {
+    display: none !important;
+}
+/* 手机端无侧边栏布局优化 */
+@media (max-width: 768px) {
+    .mobile-no-sidebar {
+        display: block !important;
+        width: 100% !important;
+    }
+    .mobile-no-sidebar main {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .mobile-no-sidebar #content-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* 修复双侧边栏模式在移动端的布局问题 */
+    .mobile-both-sidebar {
+        /* 确保在移动端使用单列布局 */
+        grid-template-columns: 1fr !important;
+        /* 确保左右padding对称 */
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    /* 确保移动端主内容区域居中且全宽 */
+    .mobile-both-sidebar main {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+    }
+    /* 移动端footer也要居中 */
+    .mobile-both-sidebar .footer {
+        grid-column: 1 / -1 !important;
+    }
+}
+/* 小屏手机无侧边栏布局优化 */
+@media (max-width: 512px) {/* 修复双侧边栏模式在移动端的布局问题 */
+    .mobile-both-sidebar {
+        /* 确保在移动端使用单列布局 */
+        grid-template-columns: 1fr !important;
+        /* 确保左右padding对称 */
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+    /* 确保移动端主内容区域居中且全宽 */
+    .mobile-both-sidebar main {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+    }
+    /* 移动端footer也要居中 */
+    .mobile-both-sidebar .footer {
+        grid-column: 1 / -1 !important;
+    }
+}</style><script type="module" src="/@vite/client"></script>
+<script type="module" src="/@fs/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro@5.18.0_@types+node@25.3.2_@vercel+functions@2.2.13_jiti@1.21.7_rollup@4.59.0_styl_5d1c7b41d4e62bd74fa3f83230748285/node_modules/astro/dist/runtime/client/dev-toolbar/entrypoint.js?v=8e3d12ea"></script>
+<script>window.__astro_dev_toolbar__ = {"root":"/Users/nsisong/projects/koreshield/koreshield-blog/","version":"5.18.0","debugInfo":"Astro                    v5.18.0\nNode                     v25.6.1\nSystem                   macOS (arm64)\nPackage Manager          npm\nOutput                   static\nAdapter                  none\nIntegrations             astro-expressive-code\n                         @astrojs/react\n                         @astrojs/markdoc\n                         @astrojs/svelte\n                         astro-icon"}</script>
+<script type="module" src="/src/components/common/passwordProtection.astro?astro&type=style&index=0&lang.css"></script>
+<script type="module" src="/src/components/common/social-share.astro?astro&type=style&index=0&lang.css"></script>
+<script type="module" src="/src/components/tocButton.astro?astro&type=style&index=0&lang.css"></script>
+<script type="module" src="/src/components/back2TopButton.astro?astro&type=style&index=0&lang.css"></script>
+<script type="module" src="/node_modules/.pnpm/katex@0.16.33/node_modules/katex/dist/katex.css"></script>
+<script type="module" src="/src/components/loadingOverlay.astro?astro&type=style&index=0&lang.css"></script>
+<script type="module" src="/src/styles/musicplayer.css"></script>
+<script type="module" src="/src/components/pio.svelte?svelte&type=style&lang.css"></script>
+<script type="module" src="/src/styles/navbar.css"></script>
+<script type="module" src="/src/styles/banner.css"></script>
+<script type="module" src="/src/styles/fancybox.css"></script>
+<script type="module" src="/src/layouts/base.astro?astro&type=style&index=0&lang.css"></script>
+<script type="module" src="/src/styles/grid.css"></script></head><button id="back-to-top-btn" class="hide" onclick="backToTop()" data-astro-cid-tnnyocjb style="--bannerOffset: 18vh;--banner-height-home: 66vh;--banner-height: 30vh;--configHue: 217;--page-width: 90rem;" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/layouts/base.astro" data-astro-source-loc="280:73"> <svg width="1em" height="1em" viewBox="0 0 24 24" class="mx-auto w-6 h-6" data-astro-cid-tnnyocjb="true" data-icon="material-symbols:keyboard-arrow-up-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="117:44">  <symbol id="ai:material-symbols:keyboard-arrow-up-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="124:28"><path fill="currentColor" d="m12 10.8l-3.9 3.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.6-4.6q.3-.3.7-.3t.7.3l4.6 4.6q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"/></symbol><use  xlink:href="#ai:material-symbols:keyboard-arrow-up-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="125:10"></use>  </svg> </button> <!-- viewport --> <meta name="viewport" content="width=device-width"> <!-- generator --> <meta name="generator" content="Astro v5.18.0"> <!-- favicons --> <link rel="icon" href="/favicon/icon-light.ico" sizes="96x96" media="(prefers-color-scheme: light)"><link rel="icon" href="/favicon/icon-dark.ico" sizes="96x96" media="(prefers-color-scheme: dark)"> <!-- Set the theme before the page is rendered to avoid a flash --> <script>(function(){const LIGHT_MODE = "light";
+const DARK_MODE = "dark";
+const SYSTEM_MODE = "system";
+const BANNER_HEIGHT_EXTEND = 36;
+const PAGE_WIDTH = 90;
+const NAVBAR_HEIGHT = 88;
+const configHue = 217;
+const defaultTheme = "dark";
+
+		// Load the theme from local storage
+		const theme = localStorage.getItem("theme") || defaultTheme;
+		// Apply the theme to the document
+		let isDark = false;
+		switch (theme) {
+			case LIGHT_MODE:
+				document.documentElement.classList.remove(
+					"dark",
+				);
+				isDark = false;
+				break;
+			case DARK_MODE:
+				document.documentElement.classList.add("dark");
+				isDark = true;
+				break;
+			case SYSTEM_MODE:
+				if (
+					window.matchMedia(
+						"(prefers-color-scheme: dark)",
+					).matches
+				) {
+					document.documentElement.classList.add(
+						"dark",
+					);
+					isDark = true;
+				} else {
+					document.documentElement.classList.remove(
+						"dark",
+					);
+					isDark = false;
+				}
+		}
+		const expressiveTheme = isDark ? "github-dark" : "github-light";
+		document.documentElement.setAttribute(
+			"data-theme",
+			expressiveTheme,
+		);
+		// Load the hue from local storage
+		const hue = localStorage.getItem("hue") || configHue;
+		// Apply the hue to the document
+		document.documentElement.style.setProperty("--hue", hue);
+		// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
+		let offset = Math.floor(
+			window.innerHeight * (BANNER_HEIGHT_EXTEND / 100),
+		);
+		offset = offset - (offset % 4);
+		document.documentElement.style.setProperty(
+			"--banner-height-extend",
+			`${offset}px`,
+		);
+	})();</script> <!-- defines global css variables. This will be applied to <html> <body> and some other elements idk why -->  <!-- custom head -->  <!-- Pio 看板娘样式 - 仅在启用时加载 -->  <!-- rss feed --> <link rel="alternate" type="application/rss+xml" title="KoreShield" href="https://blog.koreshield.com/rss.xml"> <!-- Umami Analytics -->  <!-- 页面加载动画 --> <div id="loading-overlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--page-bg)] transition-opacity duration-600" data-astro-cid-zwfdok6v style="--spinnerInterval: 1.5s;--titleInterval: 1.5s;" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/loadingOverlay.astro" data-astro-source-loc="18:2"><div class="flex flex-col items-center" data-astro-cid-zwfdok6v style="--spinnerInterval: 1.5s;--titleInterval: 1.5s;" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/loadingOverlay.astro" data-astro-source-loc="19:45"><!-- loading icon --><div class="loading-spinner mb-4" data-astro-cid-zwfdok6v style="--spinnerInterval: 1.5s;--titleInterval: 1.5s;" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/loadingOverlay.astro" data-astro-source-loc="21:26"></div><!-- loading title --><div class="loading-title text-[var(--primary)] font-medium tracking-widest" data-astro-cid-zwfdok6v style="--spinnerInterval: 1.5s;--titleInterval: 1.5s;" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/loadingOverlay.astro" data-astro-source-loc="26:10">LOADING</div></div></div> <!-- 全局配置载体 --> <!-- 全局配置载体 --><div id="config-carrier" data-hue="217" data-lang="en" data-theme="dark" data-wallpaper-mode="banner" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/configCarrier.astro" data-astro-source-loc="12:2"></div> <!-- 页面顶部渐变高光效果 - 只在full和semifull模式下显示 --> <div class="top-gradient-highlight" data-astro-cid-tnnyocjb style="--bannerOffset: 18vh;--banner-height-home: 66vh;--banner-height: 30vh;--configHue: 217;--page-width: 90rem;" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/layouts/base.astro" data-astro-source-loc="414:6"></div> <!-- 页面内容 -->   <!-- Iconify图标库加载器 --><script>(function(){const preloadIcons = [];
+const timeout = 10000;
+const retryCount = 3;
+
+    // 全局图标加载逻辑
+    (function() {
+        'use strict';
+
+        // 避免重复加载
+        if (window.__iconifyLoaderInitialized) {
+            return;
+        }
+        window.__iconifyLoaderInitialized = true;
+
+        // 图标加载器类
+        class IconifyLoader {
+            constructor() {
+                this.isLoaded = false;
+                this.isLoading = false;
+                this.loadPromise = null;
+                this.observers = new Set();
+                this.preloadQueue = new Set();
+            }
+
+            async load(options = {}) {
+                const { timeout: loadTimeout = timeout, retryCount: maxRetries = retryCount } = options;
+
+                if (this.isLoaded) {
+                    return Promise.resolve();
+                }
+
+                if (this.isLoading && this.loadPromise) {
+                    return this.loadPromise;
+                }
+
+                this.isLoading = true;
+                this.loadPromise = this.loadWithRetry(loadTimeout, maxRetries);
+
+                try {
+                    await this.loadPromise;
+                    this.isLoaded = true;
+                    this.notifyObservers();
+                    await this.processPreloadQueue();
+                } catch (error) {
+                    console.error('Failed to load Iconify:', error);
+                    throw error;
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+
+            async loadWithRetry(timeout, retryCount) {
+                for (let attempt = 1; attempt <= retryCount; attempt++) {
+                    try {
+                        await this.loadScript(timeout);
+                        return;
+                    } catch (error) {
+                        console.warn(`Iconify load attempt ${attempt} failed:`, error);
+                        if (attempt === retryCount) {
+                            throw new Error(`Failed to load Iconify after ${retryCount} attempts`);
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+            }
+
+            loadScript(timeout) {
+                return new Promise((resolve, reject) => {
+                    // 检查是否已经存在
+                    if (this.isIconifyReady()) {
+                        resolve();
+                        return;
+                    }
+
+                    const existingScript = document.querySelector('script[src*="iconify-icon"]');
+                    if (existingScript) {
+                        this.waitForIconifyReady().then(resolve).catch(reject);
+                        return;
+                    }
+
+                    const script = document.createElement('script');
+                    script.src = 'https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js';
+                    script.async = true;
+                    script.crossOrigin = 'anonymous';
+
+                    const timeoutId = setTimeout(() => {
+                        script.remove();
+                        reject(new Error('Script load timeout'));
+                    }, timeout);
+
+                    script.onload = () => {
+                        clearTimeout(timeoutId);
+                        this.waitForIconifyReady().then(resolve).catch(reject);
+                    };
+
+                    script.onerror = () => {
+                        clearTimeout(timeoutId);
+                        script.remove();
+                        reject(new Error('Script load error'));
+                    };
+
+                    document.head.appendChild(script);
+                });
+            }
+
+            waitForIconifyReady(maxWait = 5000) {
+                return new Promise((resolve, reject) => {
+                    const startTime = Date.now();
+
+                    const checkReady = () => {
+                        if (this.isIconifyReady()) {
+                            resolve();
+                            return;
+                        }
+
+                        if (Date.now() - startTime > maxWait) {
+                            reject(new Error('Iconify initialization timeout'));
+                            return;
+                        }
+
+                        setTimeout(checkReady, 50);
+                    };
+
+                    checkReady();
+                });
+            }
+
+            isIconifyReady() {
+                return typeof window !== 'undefined' && 'customElements' in window && customElements.get('iconify-icon') !== undefined;
+            }
+
+            onLoad(callback) {
+                if (this.isLoaded) {
+                    callback();
+                } else {
+                    this.observers.add(callback);
+                }
+            }
+
+            notifyObservers() {
+                this.observers.forEach(callback => {
+                    try {
+                        callback();
+                    } catch (error) {
+                        console.error('Error in icon load observer:', error);
+                    }
+                });
+                this.observers.clear();
+            }
+
+            addToPreloadQueue(icons) {
+                if (Array.isArray(icons)) {
+                    icons.forEach(icon => this.preloadQueue.add(icon));
+                } else {
+                    this.preloadQueue.add(icons);
+                }
+
+                if (this.isLoaded) {
+                    this.processPreloadQueue();
+                }
+            }
+
+            async processPreloadQueue() {
+                if (this.preloadQueue.size === 0) return;
+
+                const iconsToLoad = Array.from(this.preloadQueue);
+                this.preloadQueue.clear();
+
+                await this.preloadIcons(iconsToLoad);
+            }
+
+            async preloadIcons(icons) {
+                if (!this.isLoaded || icons.length === 0) return;
+
+                return new Promise((resolve) => {
+                    let loadedCount = 0;
+                    const totalIcons = icons.length;
+                    const tempElements = [];
+
+                    const cleanup = () => {
+                        tempElements.forEach(el => {
+                            if (el.parentNode) {
+                                el.parentNode.removeChild(el);
+                            }
+                        });
+                    };
+
+                    const checkComplete = () => {
+                        loadedCount++;
+                        if (loadedCount >= totalIcons) {
+                            cleanup();
+                            resolve();
+                        }
+                    };
+
+                    icons.forEach(icon => {
+                        const tempIcon = document.createElement('iconify-icon');
+                        tempIcon.setAttribute('icon', icon);
+                        tempIcon.style.cssText = 'position:absolute;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;';
+
+                        tempIcon.addEventListener('load', checkComplete);
+                        tempIcon.addEventListener('error', checkComplete);
+
+                        tempElements.push(tempIcon);
+                        document.body.appendChild(tempIcon);
+                    });
+
+                    // 设置超时清理
+                    setTimeout(() => {
+                        cleanup();
+                        resolve();
+                    }, 3000);
+                });
+            }
+        }
+
+        // 创建全局实例
+        window.__iconifyLoader = new IconifyLoader();
+
+        // 立即开始加载
+        window.__iconifyLoader.load().catch(error => {
+            console.error('Failed to initialize Iconify:', error);
+        });
+
+        // 如果有预加载图标，添加到队列
+        if (preloadIcons && preloadIcons.length > 0) {
+            window.__iconifyLoader.addToPreloadQueue(preloadIcons);
+        }
+
+        // 导出便捷函数到全局
+        window.loadIconify = () => window.__iconifyLoader.load();
+        window.preloadIcons = (icons) => window.__iconifyLoader.addToPreloadQueue(icons);
+        window.onIconifyReady = (callback) => window.__iconifyLoader.onLoad(callback);
+
+        // 页面可见性变化时重新检查
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && !window.__iconifyLoader.isLoaded) {
+                window.__iconifyLoader.load().catch(console.error);
+            }
+        });
+
+    })();
+})();</script> <!-- 为不支持JavaScript的情况提供备用方案 --><noscript><style>
+        iconify-icon {
+            display: none;
+        }
+        .icon-fallback {
+            display: inline-block;
+        }
+    </style></noscript>   <div class="w-full relative z-30 pointer-events-none mt-4 md:mt-8 mb-16" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/layouts/PostLayout.astro" data-astro-source-loc="38:78"> <div class="relative max-w-4xl mx-auto pointer-events-auto px-4 md:px-6" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/layouts/PostLayout.astro" data-astro-source-loc="41:10"> <main id="swup-container" class="transition-swup-fade" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/layouts/PostLayout.astro" data-astro-source-loc="42:68"> <div id="content-wrapper" class="onload-animation-up transition-leaving" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/layouts/PostLayout.astro" data-astro-source-loc="46:18">    <div class="relative mb-12 pt-8 text-center" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="154:47"> <!-- Background Glows --> <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-electric-blue/10 rounded-full blur-[100px] -z-10 pointer-events-none" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="158:4"></div> <!-- Breadcrumbs (Simplified) --> <div class="flex justify-center mb-8" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="162:41"> <a href="/" class="text-sm font-mono text-gray-500 hover:text-electric-blue transition-colors" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="166:6">HOME</a> <span class="mx-3 text-gray-700" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="168:37">/</span> <a href="/archive" class="text-sm font-mono text-gray-500 hover:text-electric-blue transition-colors" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="172:6">BLOG</a>  </div> <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-6 leading-tight max-w-4xl mx-auto" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="191:4"> Why We Built KoreShield: Securing the New Intelligence Layer </h1> <div class="flex flex-wrap items-center justify-center gap-6 text-gray-400 font-mono text-sm uppercase tracking-wider" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="197:4"> <div class="flex items-center gap-2" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="198:41"> <svg width="1em" height="1em" viewBox="0 0 24 24" class="w-4 h-4" data-icon="material-symbols:calendar-today-outline-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="117:44">  <symbol id="ai:material-symbols:calendar-today-outline-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="124:28"><path fill="currentColor" d="M5 22q-.825 0-1.412-.587T3 20V6q0-.825.588-1.412T5 4h1V3q0-.425.288-.712T7 2t.713.288T8 3v1h8V3q0-.425.288-.712T17 2t.713.288T18 3v1h1q.825 0 1.413.588T21 6v14q0 .825-.587 1.413T19 22zm0-2h14V10H5zM5 8h14V6H5zm0 0V6z"/></symbol><use  xlink:href="#ai:material-symbols:calendar-today-outline-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="125:10"></use>  </svg> 2026-03-02 </div> <div class="flex items-center gap-2" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="205:41"> <svg width="1em" height="1em" viewBox="0 0 24 24" class="w-4 h-4" data-icon="material-symbols:schedule-outline-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="117:44">  <symbol id="ai:material-symbols:schedule-outline-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="124:28"><path fill="currentColor" d="M13 11.6V8q0-.425-.288-.712T12 7t-.712.288T11 8v3.975q0 .2.075.388t.225.337l3.3 3.3q.275.275.7.275T16 16t.275-.7t-.275-.7zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.325 0 5.663-2.337T20 12t-2.337-5.663T12 4T6.337 6.338T4 12t2.338 5.663T12 20"/></symbol><use  xlink:href="#ai:material-symbols:schedule-outline-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="125:10"></use>  </svg> 181 Words
+</div> <div class="flex items-center gap-2" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="212:41"> <svg width="1em" height="1em" viewBox="0 0 24 24" class="w-4 h-4" data-icon="material-symbols:timer-outline-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="117:44">  <symbol id="ai:material-symbols:timer-outline-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="124:28"><path fill="currentColor" d="M10 3q-.425 0-.712-.288T9 2t.288-.712T10 1h4q.425 0 .713.288T15 2t-.288.713T14 3zm2.713 10.713Q13 13.425 13 13V9q0-.425-.288-.712T12 8t-.712.288T11 9v4q0 .425.288.713T12 14t.713-.288m-4.2 7.576q-1.638-.713-2.863-1.938t-1.937-2.863T3 13t.713-3.488T5.65 6.65t2.863-1.937T12 4q1.55 0 2.975.5t2.675 1.45l.7-.7q.275-.275.7-.275t.7.275t.275.7t-.275.7l-.7.7Q20 8.6 20.5 10.025T21 13q0 1.85-.713 3.488T18.35 19.35t-2.863 1.938T12 22t-3.488-.712m8.438-3.338Q19 15.9 19 13t-2.05-4.95T12 6T7.05 8.05T5 13t2.05 4.95T12 20t4.95-2.05M12 13"/></symbol><use  xlink:href="#ai:material-symbols:timer-outline-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="125:10"></use>  </svg> 1 Min Read
+</div> </div> </div>  <div class="w-full max-w-3xl mx-auto" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="223:40"> <!-- Featured Image -->  <!-- Article Content --> <article class="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-electric-blue prose-img:rounded-xl prose-code:text-cyber-purple prose-pre:bg-[#0f1623] prose-pre:border prose-pre:border-white/5" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="242:4">  <p></p><h3>The Paradigm Shift in Security Infrastructure</h3><p>For the last two decades, enterprise security was structurally straightforward: build a perimeter, inspect the packets, lock down the endpoints, and manage identity. If a payload contained known malware signatures or originated from a blacklisted IP, you blocked it.</p><p>But with the rapid adoption of Large Language Models (LLMs) and Generative AI, that deterministic perimeter has completely evaporated.</p><p>Today, the payload isn&#x27;t a malicious binary; it&#x27;s natural language. A perfectly valid English sentence, typed by an authorized user, can trick an AI agent into dropping tables, exfiltrating sensitive PII, or hallucinating harmful actions. Traditional WAFs (Web Application Firewalls) and DLP (Data Loss Prevention) scanners don&#x27;t speak LLM. They look for SQL syntax and predictable patterns, completely blind to semantic manipulation and prompt injection.</p><p>As CTO, when I looked at the security landscape for companies racing to build AI applications, I realized we were about to hit a massive wall. Enterprises want the power of AI, but they cannot accept the catastrophic risk of an unconstrained intelligence layer operating with access to their private data.</p><p>That is why we built KoreShield.</p>  </article> <!-- Post Footer: License, Tags, Share --> <div class="mt-16 pt-8 border-t border-white/10" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="252:52"> <div class="flex flex-wrap gap-2 mb-8" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="255:45"> <a href="/tags/engineering" class="px-3 py-1 rounded-md bg-white/5 hover:bg-white/10 text-sm text-gray-300 transition-colors" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="260:9">
+#Engineering </a><a href="/tags/data privacy" class="px-3 py-1 rounded-md bg-white/5 hover:bg-white/10 text-sm text-gray-300 transition-colors" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="260:9">
+#Data Privacy </a><a href="/tags/prompt injection" class="px-3 py-1 rounded-md bg-white/5 hover:bg-white/10 text-sm text-gray-300 transition-colors" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="260:9">
+#Prompt Injection </a><a href="/tags/llm" class="px-3 py-1 rounded-md bg-white/5 hover:bg-white/10 text-sm text-gray-300 transition-colors" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="260:9">
+#LLM </a><a href="/tags/ai security" class="px-3 py-1 rounded-md bg-white/5 hover:bg-white/10 text-sm text-gray-300 transition-colors" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="260:9">
+#AI Security </a> </div> <div class="social-share flex flex-wrap gap-2 mt-6" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="25:53"> <span class="text-sm text-gray-600 dark:text-gray-400 mr-2 flex items-center" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="26:83"> <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="27:75"> <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="28:14"></path> </svg>
+Share:
+</span> <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fblog.koreshield.com%2Fposts%2Fwhy-we-built-koreshield&text=Why%20We%20Built%20KoreShield%3A%20Securing%20the%20New%20Intelligence%20Layer&hashtags=KoreShield,LLMSecurity,Engineering,Data Privacy,Prompt Injection,LLM,AI Security" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors duration-200" aria-label="Share on Twitter" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="39:6"> <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="40:75"> <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="41:14"></path> </svg>
+Twitter
+</a> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.koreshield.com%2Fposts%2Fwhy-we-built-koreshield" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors duration-200" aria-label="Share on LinkedIn" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="52:6"> <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="53:75"> <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="54:14"></path> </svg>
+LinkedIn
+</a> <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.koreshield.com%2Fposts%2Fwhy-we-built-koreshield" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors duration-200" aria-label="Share on Facebook" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="65:6"> <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="66:75"> <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="67:14"></path> </svg>
+Facebook
+</a> <a href="https://reddit.com/submit?url=https%3A%2F%2Fblog.koreshield.com%2Fposts%2Fwhy-we-built-koreshield&title=Why%20We%20Built%20KoreShield%3A%20Securing%20the%20New%20Intelligence%20Layer" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors duration-200" aria-label="Share on Reddit" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="78:6"> <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="79:75"> <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.283-.822.52-1.741.653-2.73.145-.99.098-1.963-.141-2.986-.24-.961-.592-1.962-.951-2.986-.176-.541-.392-1.192-.373-1.987.171-.772.478-1.102 1.134-1.102zm-2.722 3.36c.339 0 .67.026.995.08.353.058.696.15 1.025.284.329.133.653.313.968.54.315.227.635.496.93.803.294.307.63.653.927 1.023.297.37.63.773.913 1.198.282.425.58.866.785 1.334.204.468.4.955.588 1.46.188.505.357 1.024.51 1.554.152.53.302 1.054.442 1.572.14.518.28 1.026.441 1.52.161.494.33.968.51 1.42.18.452.36.876.547 1.271.187.395.38.766.58 1.11.2.344.4.655.602.93.202.275.407.52.61.732.203.212.407.387.614.525.207.138.41.24.613.302.203.062.41.09.624.09.213 0 .42-.028.624-.09.204-.062.407-.164.613-.302.206-.138.41-.313.614-.525.204-.212.407-.436.61-.732.203-.295.4-.606.602-.93.202-.324.38-.748.547-1.271.167-.523.33-.992.51-1.42.18-.428.36-.902.547-1.334.187-.432.357-.951.51-1.46.153-.509.302-1.024.442-1.572.14-.548.28-1.056.441-1.52.161-.464.33-.938.51-1.334.18-.396.36-.82.547-1.198.187-.378.357-.797.51-1.198.153-.401.302-.82.442-1.223.14-.403.28-.807.441-1.198.161-.391.33-.765.51-1.11.18-.345.36-.689.547-1.023.187-.334.357-.668.51-.992.153-.324.302-.647.442-.96.14-.313.28-.616.441-.9.161-.284.33-.547.51-.78.18-.233.36-.436.547-.6.187-.164.357-.307.51-.42.153-.113.302-.2.442-.26.14-.06.28-.09.441-.09z" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="80:14"></path> </svg>
+Reddit
+</a> <a href="mailto:?subject=Why%20We%20Built%20KoreShield%3A%20Securing%20the%20New%20Intelligence%20Layer&#38;body=Traditional%20firewalls%20don't%20speak%20LLM.%20Here's%20why%20the%20AI%20revolution%20requires%20a%20fundamentally%20new%20approach%20to%20enterprise%20security.%0A%0Ahttps%3A%2F%2Fblog.koreshield.com%2Fposts%2Fwhy-we-built-koreshield" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200" aria-label="Share via Email" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="89:6"> <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="90:89"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" data-astro-cid-zhg6jltl data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/social-share.astro" data-astro-source-loc="91:14"></path> </svg>
+Email
+</a> </div>  </div> <div class="author-card glass-panel border border-white/10 rounded-2xl p-6 md:p-8 mt-12 mb-8 hover:border-electric-blue/30 transition-all duration-300" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/author-card.astro" data-astro-source-loc="24:153"> <div class="flex flex-col md:flex-row gap-6" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/author-card.astro" data-astro-source-loc="25:48"> <!-- Avatar --> <div class="flex-shrink-0" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/author-card.astro" data-astro-source-loc="27:32"> <img src="https://cdn.sanity.io/images/rdas6fhs/production/e0f9bdda6b0641edc281b024c7c2b9afbe85c148-460x460.jpg" alt="Isaac Emmanuel" class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-electric-blue/30" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/author-card.astro" data-astro-source-loc="29:10"> </div> <!-- Author Info --> <div class="flex-grow" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/author-card.astro" data-astro-source-loc="42:28"> <div class="mb-3" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/author-card.astro" data-astro-source-loc="43:25"> <h3 class="text-2xl font-bold text-white mb-1" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/author-card.astro" data-astro-source-loc="44:56">Isaac Emmanuel</h3> <p class="text-sm text-electric-blue font-medium" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/author-card.astro" data-astro-source-loc="46:61"> CTO  </p>  </div> <p class="text-gray-400 leading-relaxed mb-4" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/author-card.astro" data-astro-source-loc="59:53"> Software Developer. Mathematician. Computer Scientist. CTO of Koreshield </p> <!-- Social Links -->  </div> </div> <!-- Decorative corner accent --> <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-electric-blue/5 to-transparent rounded-2xl pointer-events-none" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/author-card.astro" data-astro-source-loc="114:4"></div> </div> <!-- Navigation --> <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="323:60"> <a href="/posts/hi/" class="group flex flex-col p-6 rounded-xl bg-white/5 border border-white/5 hover:border-electric-blue/30 hover:bg-white/10 transition-all" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="331:7"> <span class="text-xs text-gray-500 font-mono mb-2 group-hover:text-electric-blue" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="332:89">
+PREVIOUS POST
+</span> <span class="text-white font-bold group-hover:translate-x-1 transition-transform" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="335:89"> Hi Koreshield! </span> </a>  </div> <!-- Related Posts --> <div class="mt-20" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="361:22"> <h3 class="text-2xl font-bold text-white mb-8" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="362:51">
+Related Intelligence
+</h3> <div class="mt-12 mb-8" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/related-posts.astro" data-astro-source-loc="53:27"><h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-3" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/related-posts.astro" data-astro-source-loc="54:75"><svg class="w-6 h-6 text-electric-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/related-posts.astro" data-astro-source-loc="60:6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/related-posts.astro" data-astro-source-loc="61:7"></path></svg>
+Related Articles
+</h2><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/related-posts.astro" data-astro-source-loc="71:70"><div class="group relative overflow-hidden rounded-2xl bg-[var(--color-fd-card)] border border-[var(--color-fd-border)] hover:border-electric-blue/30 transition-all duration-500 h-full flex flex-col shadow-lg shadow-black/20 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] hover:-translate-y-1" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="28:2">  <div class="p-6 flex flex-col flex-grow relative z-10" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="44:58"> <div class="mb-4 flex items-center gap-4" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="45:47"> <div class="flex items-center gap-2" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="46:44"> <span class="inline-block h-1.5 w-1.5 rounded-full bg-electric-blue shadow-[0_0_8px_rgba(59,130,246,0.8)]" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="47:10"></span> <span class="text-xs font-mono text-gray-400 uppercase tracking-wider" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="51:12">March 2, 2026</span> </div> <div class="flex items-center gap-2" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="56:48"> <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="62:14"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="63:16"></path> </svg> <span class="text-xs font-mono text-gray-400 uppercase tracking-wider" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="70:84"> 1 min read
+</span> </div> </div> <h3 class="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight group-hover:text-electric-blue transition-colors" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="80:6"> <a href="/posts/hi" class="focus:outline-none" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="81:61"> <span class="absolute inset-0" aria-hidden="true" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="82:10"></span> Hi Koreshield! </a> </h3> <!-- Tags and Category -->  <div class="mt-auto pt-4 flex items-center text-electric-blue text-sm font-medium opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="119:6">
+Read Analysis
+<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="126:8"> <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/BlogCard.astro" data-astro-source-loc="127:10"></path> </svg> </div> </div> </div></div></div> </div> <div class="mt-12" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/pages/posts/[...slug].astro" data-astro-source-loc="373:22"> <div class="relative overflow-hidden rounded-2xl bg-[#0f1623] border border-electric-blue/20 p-8 md:p-12 mb-16 group" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="7:2"> <!-- Background Effects --> <div class="absolute top-0 right-0 w-64 h-64 bg-electric-blue/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none group-hover:bg-electric-blue/10 transition-colors duration-700" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="11:6"></div> <div class="absolute bottom-0 left-0 w-48 h-48 bg-cyber-purple/5 rounded-full blur-[60px] translate-y-1/2 -translate-x-1/2 pointer-events-none group-hover:bg-cyber-purple/10 transition-colors duration-700" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="15:6"></div> <div class="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="20:6"> <div class="max-w-lg" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="21:31"> <div class="flex items-center gap-2 mb-3 text-electric-blue font-mono text-sm tracking-wider" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="24:14"> <svg width="1em" height="1em" viewBox="0 0 24 24" class="w-5 h-5" data-icon="material-symbols:mark-email-unread-outline" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="117:44">  <symbol id="ai:material-symbols:mark-email-unread-outline" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="124:28"><path fill="currentColor" d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h10.1q-.1.5-.1 1t.1 1H4l8 5l3.65-2.275q.35.325.763.563t.862.412L12 13L4 8v10h16V9.9q.575-.125 1.075-.35T22 9v9q0 .825-.587 1.413T20 20zM4 6v12zm12.875 1.125Q16 6.25 16 5t.875-2.125T19 2t2.125.875T22 5t-.875 2.125T19 8t-2.125-.875"/></symbol><use  xlink:href="#ai:material-symbols:mark-email-unread-outline" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="125:10"></use>  </svg> <span data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="29:23">STAY SECURE</span> </div> <h3 class="text-2xl font-bold text-white mb-3" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="31:60">
+Get the Latest LLM Security Intelligence
+</h3> <p class="text-gray-400 leading-relaxed" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="34:54">
+Join our security researchers and receive weekly updates on
+                prompt injection threats, jailbreak analysis, and defense
+                strategies.
+</p> </div> <form class="w-full md:w-auto flex flex-col gap-3" onsubmit="event.preventDefault(); console.log('Newsletter signup:', this.email.value); this.reset(); alert('Thanks for subscribing!');" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="44:10"> <div class="relative group/input" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="45:47"> <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 group-focus-within/input:text-electric-blue transition-colors" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="48:18"> <svg width="1em" height="1em" viewBox="0 0 24 24" class="w-5 h-5" data-icon="material-symbols:mail-outline" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="117:44">  <symbol id="ai:material-symbols:mail-outline" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="124:28"><path fill="currentColor" d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm8-7L4 8v10h16V8zm0-2l8-5H4zM4 8V6v12z"/></symbol><use  xlink:href="#ai:material-symbols:mail-outline" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="125:10"></use>  </svg> </div> <input type="email" name="email" placeholder="Enter your work email" required class="w-full pl-10 pr-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-electric-blue/50 focus:ring-1 focus:ring-electric-blue/50 transition-all font-mono text-sm" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="54:18"> </div> <button type="submit" class="w-full py-3 px-6 bg-electric-blue text-white rounded-lg font-bold hover:bg-electric-blue/90 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-electric-blue/20 flex items-center justify-center gap-2" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="65:14"> <span data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="66:23">Subscribe via Email</span> <svg width="1em" height="1em" viewBox="0 0 24 24" class="w-5 h-5" data-icon="material-symbols:arrow-right-alt-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="117:44">  <symbol id="ai:material-symbols:arrow-right-alt-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="124:28"><path fill="currentColor" d="M16.15 13H5q-.425 0-.712-.288T4 12t.288-.712T5 11h11.15L13.3 8.15q-.3-.3-.288-.7t.288-.7q.3-.3.713-.312t.712.287L19.3 11.3q.15.15.213.325t.062.375t-.062.375t-.213.325l-4.575 4.575q-.3.3-.712.288t-.713-.313q-.275-.3-.288-.7t.288-.7z"/></symbol><use  xlink:href="#ai:material-symbols:arrow-right-alt-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="125:10"></use>  </svg> </button> <p class="text-xs text-center text-gray-600" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="72:58">
+Start your <span class="text-gray-500" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/common/newsletter.astro" data-astro-source-loc="73:56">Free Subscription</span> today.
+                No spam.
+</p> </form> </div> </div>  </div> </div>  </div> </main> <!-- Footer --> <div class="mt-20 border-t border-white/5 pt-8" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/layouts/PostLayout.astro" data-astro-source-loc="52:61"> <div class="mt-24 border-t border-orange-500/30 pt-8 pb-12" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/footer.astro" data-astro-source-loc="36:61"> <div class="max-w-[var(--page-width)] mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/footer.astro" data-astro-source-loc="39:6"> <div class="text-neutral-500 text-sm" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/footer.astro" data-astro-source-loc="40:47">
+&copy; 2026 KoreShield. All rights reserved.
+</div> <div class="flex gap-8 text-sm" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/footer.astro" data-astro-source-loc="43:41"> <a href="/privacy-policy" class="text-neutral-500 hover:text-neutral-300 underline underline-offset-4 decoration-neutral-700 hover:decoration-neutral-500 transition-all" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/footer.astro" data-astro-source-loc="47:18">Privacy Policy</a> <a href="/terms-of-service" class="text-neutral-500 hover:text-neutral-300 underline underline-offset-4 decoration-neutral-700 hover:decoration-neutral-500 transition-all" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/footer.astro" data-astro-source-loc="52:18">Terms of Service</a> </div> </div> </div> </div> </div> </div> <table-of-contents data-is-floating="true" data-navbar-height="88" data-astro-cid-isfta2rr="true" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/tocButton.astro"> <div class="toc-floating-container" data-astro-cid-isfta2rr data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/tocButton.astro" data-astro-source-loc="21:41"> <div class="toc-floating-btn-wrapper rounded-2xl overflow-hidden transition" data-astro-cid-isfta2rr data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/tocButton.astro" data-astro-source-loc="24:10"> <button class="toc-floating-btn btn-card rounded-2xl p-0 flex items-center justify-center" aria-label="Table of Contents" data-astro-cid-isfta2rr data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/tocButton.astro" data-astro-source-loc="28:14"> <svg width="24" height="24" viewBox="0 0 24 24" data-astro-cid-isfta2rr="true" data-icon="material-symbols:format-list-bulleted-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="117:44">  <symbol id="ai:material-symbols:format-list-bulleted-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="124:28"><path fill="currentColor" d="M10 19q-.425 0-.712-.288T9 18t.288-.712T10 17h10q.425 0 .713.288T21 18t-.288.713T20 19zm0-6q-.425 0-.712-.288T9 12t.288-.712T10 11h10q.425 0 .713.288T21 12t-.288.713T20 13zm0-6q-.425 0-.712-.288T9 6t.288-.712T10 5h10q.425 0 .713.288T21 6t-.288.713T20 7zM5 20q-.825 0-1.412-.587T3 18t.588-1.412T5 16t1.413.588T7 18t-.587 1.413T5 20m0-6q-.825 0-1.412-.587T3 12t.588-1.412T5 10t1.413.588T7 12t-.587 1.413T5 14M3.588 7.413Q3 6.825 3 6t.588-1.412T5 4t1.413.588T7 6t-.587 1.413T5 8t-1.412-.587"/></symbol><use  xlink:href="#ai:material-symbols:format-list-bulleted-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="125:10"></use>  </svg> </button> </div> <div class="toc-floating-panel hidden opacity-0 translate-y-4 pointer-events-none" data-astro-cid-isfta2rr data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/tocButton.astro" data-astro-source-loc="37:10"> <div class="toc-panel-header" data-astro-cid-isfta2rr data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/tocButton.astro" data-astro-source-loc="38:43"> <svg width="20" height="20" viewBox="0 0 24 24" class="text-[var(--primary)]" data-astro-cid-isfta2rr="true" data-icon="material-symbols:format-list-bulleted-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="117:44">  <use  xlink:href="#ai:material-symbols:format-list-bulleted-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="125:10"></use>  </svg> <span class="text-sm font-bold text-75" data-astro-cid-isfta2rr data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/tocButton.astro" data-astro-source-loc="45:22">Table of Contents</span> </div> <div class="toc-inner-content relative" data-astro-cid-isfta2rr data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/tocButton.astro" data-astro-source-loc="48:14"></div> </div> </div> </table-of-contents> <script type="module" src="/src/components/tocButton.astro?astro&type=script&index=0&lang.ts"></script>  <!-- There can't be a filter on parent element, or it will break `fixed` --><div class="back-to-top-wrapper block" data-astro-cid-zdqm26mj data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/back2TopButton.astro" data-astro-source-loc="6:40"> <div id="back-to-top-btn" class="back-to-top-btn z-[100] hide flex items-center rounded-2xl overflow-hidden transition" onclick="backToTop()" data-astro-cid-zdqm26mj data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/back2TopButton.astro" data-astro-source-loc="11:6"> <button aria-label="Back to Top" class="btn-card h-full w-full" data-astro-cid-zdqm26mj data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/components/back2TopButton.astro" data-astro-source-loc="12:73"> <svg width="1em" height="1em" viewBox="0 0 24 24" class="mx-auto" data-astro-cid-zdqm26mj="true" data-icon="material-symbols:keyboard-arrow-up-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="117:44">  <use  xlink:href="#ai:material-symbols:keyboard-arrow-up-rounded" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/node_modules/.pnpm/astro-icon@1.1.1/node_modules/astro-icon/components/Icon.astro" data-astro-source-loc="125:10"></use>  </svg> </button> </div> </div>  <script>
+    function backToTop() {
+        // 直接使用原生滚动，避免OverlayScrollbars冲突
+        window.scroll({ top: 0, behavior: "smooth" });
+    }
+</script>  <!-- Music Player - 仅在启用时加载 --> <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var l=(n,t)=>{let i=async()=>{await(await n())()},e=typeof t.value=="object"?t.value:void 0,s={timeout:e==null?void 0:e.timeout};"requestIdleCallback"in window?window.requestIdleCallback(i,s):setTimeout(i,s.timeout||200)};(self.Astro||(self.Astro={})).idle=l;window.dispatchEvent(new Event("astro:idle"));})();</script><script>(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var l=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>y(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[h,e]=t;return h in i?i[h](e):void 0},a=t=>t.map(o),y=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([h,e])=>[h,o(e)]));class f extends HTMLElement{constructor(){super(...arguments);l(this,"Component");l(this,"hydrator");l(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},p=this.querySelectorAll("template[data-astro-template]");for(let r of p){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("name")||"default"]=r.innerHTML)}let u;try{u=this.hasAttribute("props")?y(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&&(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let d,m=this.hydrator(this);d=performance.now(),await m(this.Component,u,n,{client:this.getAttribute("client")}),d&&this.setAttribute("client-render-time",(performance.now()-d).toString()),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});l(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&&this.lastChild.nodeValue==="astro:end"&&(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&&await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[p,{default:u}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),d=this.getAttribute("component-export")||"default";if(!d.includes("."))this.Component=p[d];else{this.Component=p;for(let m of d.split("."))this.Component=this.Component[m]}return this.hydrator=u,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}l(f,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",f)}})();</script><astro-island uid="GuB6N" component-url="/src/components/musicPlayer.svelte" component-export="default" renderer-url="/node_modules/.vite/deps/@astrojs_svelte_client__js.js?v=cdab86db" props="{&quot;data-astro-cid-tnnyocjb&quot;:[0,true]}" ssr client="idle" before-hydration-url="/@id/astro:scripts/before-hydration.js" opts="{&quot;name&quot;:&quot;MusicPlayer&quot;,&quot;value&quot;:true}" server-render-time="1.7432910000206903" await-children><!--[--><!--[--><!--[!--><!--]--> <div class="music-player fixed bottom-4 right-4 z-[101] transition-all duration-300 ease-in-out onload-animation-up collapsed"><div class="orb-player w-12 h-12 bg-[var(--primary)] rounded-full shadow-lg cursor-pointer transition-all duration-500 ease-in-out flex items-center justify-center hover:scale-110 active:scale-95" role="button" tabindex="0" aria-label="展开音乐播放器"><!--[!--><!--[!--><!--]--><!----><!--]--></div> <div class="expanded-player card-base bg-[var(--float-panel-bg)] shadow-xl rounded-2xl p-4 transition-all duration-500 ease-in-out opacity-0 scale-95 pointer-events-none"><div class="flex items-center gap-4 mb-4"><div class="cover-container relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0"><img src="/favicon/icon-light.ico" alt="封面" class="w-full h-full object-cover transition-transform duration-300"/></div> <div class="flex-1 min-w-0"><div class="song-title text-lg font-bold text-90 truncate mb-1">Music</div> <div class="song-artist text-sm text-50 truncate">Artist</div> <div class="text-xs text-30 mt-1">0:00 / 0:00</div></div> <div class="flex items-center gap-1"><button class="btn-plain w-8 h-8 rounded-lg flex items-center justify-center" title="切换到 Local 模式"><!--[!--><!--]--><!----></button> <button class="btn-plain w-8 h-8 rounded-lg flex items-center justify-center" title="播放列表"><!--[!--><!--]--><!----></button></div></div> <div class="progress-section mb-4"><div class="progress-bar flex-1 h-2 bg-[var(--btn-regular-bg)] rounded-full cursor-pointer" role="slider" tabindex="0" aria-label="播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="h-full bg-[var(--primary)] rounded-full transition-all duration-100" style="width: 0%"></div></div></div> <div class="controls flex items-center justify-center gap-2 mb-4"><button class="w-10 h-10 rounded-lg btn-plain" disabled=""><!--[!--><!--]--><!----></button> <button class="btn-plain w-10 h-10 rounded-lg" disabled=""><!--[!--><!--]--><!----></button> <button class="btn-regular w-12 h-12 rounded-full"><!--[!--><!--[!--><!--]--><!----><!--]--></button> <button class="btn-plain w-10 h-10 rounded-lg" disabled=""><!--[!--><!--]--><!----></button> <button class="w-10 h-10 rounded-lg btn-plain"><!--[!--><!--[!--><!--]--><!----><!--]--></button></div> <div class="bottom-controls flex items-center gap-2"><button class="btn-plain w-8 h-8 rounded-lg"><!--[!--><!--[!--><!--]--><!----><!--]--></button> <div class="flex-1 h-2 bg-[var(--btn-regular-bg)] rounded-full cursor-pointer" role="slider" tabindex="0" aria-label="音量控制" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75"><div class="h-full bg-[var(--primary)] rounded-full transition-all duration-100" style="width: 75%"></div></div> <button class="btn-plain w-8 h-8 rounded-lg flex items-center justify-center" title="折叠播放器"><!--[!--><!--]--><!----></button></div></div> <!--[!--><!--]--></div><!--]--><!--]--><!--astro:end--></astro-island> <!-- Pio 看板娘组件 - 如果启用了侧边栏，可能需要调整 z-index -->  <!-- increase the page height during page transition to prevent the scrolling animation from jumping --> <div id="page-height-extend" class="hidden h-[300vh]" data-astro-cid-tnnyocjb style="--bannerOffset: 18vh;--banner-height-home: 66vh;--banner-height: 30vh;--configHue: 217;--page-width: 90rem;" data-astro-source-file="/Users/nsisong/projects/koreshield/koreshield-blog/src/layouts/base.astro" data-astro-source-loc="424:4"></div>  <script type="module" src="/src/layouts/base.astro?astro&type=script&index=0&lang.ts"></script></html>
