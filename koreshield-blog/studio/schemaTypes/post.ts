@@ -2,95 +2,117 @@ import { defineField, defineType } from 'sanity'
 
 export default defineType({
 	name: 'post',
-	title: 'Post',
+	title: 'Blog Post',
 	type: 'document',
 	fields: [
 		defineField({
 			name: 'title',
 			title: 'Title',
 			type: 'string',
-			validation: (Rule) => Rule.required(),
+			validation: Rule => Rule.required(),
 		}),
 		defineField({
 			name: 'slug',
 			title: 'Slug',
 			type: 'slug',
-			options: {
-				source: 'title',
-				maxLength: 96,
-			},
-			validation: (Rule) => Rule.required(),
+			options: { source: 'title', maxLength: 96 },
+			validation: Rule => Rule.required(),
 		}),
 		defineField({
-			name: 'published',
-			title: 'Published Date',
-			type: 'datetime',
-			validation: (Rule) => Rule.required(),
+			name: 'author',
+			title: 'Author',
+			type: 'reference',
+			to: [{ type: 'author' }],
 		}),
 		defineField({
-			name: 'updated',
-			title: 'Updated Date',
-			type: 'datetime',
-		}),
-		defineField({
-			name: 'draft',
-			title: 'Is Draft?',
-			type: 'boolean',
-			initialValue: false,
+			name: 'coverImage',
+			title: 'Cover Image',
+			type: 'image',
+			options: { hotspot: true },
+			fields: [
+				defineField({
+					name: 'alt',
+					title: 'Alt Text',
+					type: 'string',
+				}),
+			],
 		}),
 		defineField({
 			name: 'description',
-			title: 'Description',
+			title: 'Description / Excerpt',
 			type: 'text',
+			rows: 3,
 		}),
 		defineField({
-			name: 'cover',
-			title: 'Cover Image',
-			type: 'image',
-			options: {
-				hotspot: true,
-			},
-			fields: [
+			name: 'body',
+			title: 'Body',
+			type: 'array',
+			of: [
+				{ type: 'block' },
 				{
-					name: 'alt',
-					type: 'string',
-					title: 'Alternative text',
-				}
-			]
+					type: 'image',
+					options: { hotspot: true },
+					fields: [
+						defineField({ name: 'alt', title: 'Alt Text', type: 'string' }),
+						defineField({ name: 'caption', title: 'Caption', type: 'string' }),
+					],
+				},
+				{
+					type: 'code',
+					options: { withFilename: true },
+				},
+			],
+		}),
+		defineField({
+			name: 'category',
+			title: 'Category',
+			type: 'string',
+			options: {
+				list: [
+					{ title: 'Security', value: 'Security' },
+					{ title: 'Engineering', value: 'Engineering' },
+					{ title: 'Research', value: 'Research' },
+					{ title: 'Product', value: 'Product' },
+					{ title: 'News', value: 'News' },
+					{ title: 'Tutorial', value: 'Tutorial' },
+				],
+			},
 		}),
 		defineField({
 			name: 'tags',
 			title: 'Tags',
 			type: 'array',
 			of: [{ type: 'string' }],
+			options: { layout: 'tags' },
 		}),
 		defineField({
-			name: 'category',
-			title: 'Category',
-			type: 'reference',
-			to: { type: 'category' },
+			name: 'published',
+			title: 'Published At',
+			type: 'datetime',
+			validation: Rule => Rule.required(),
+		}),
+		defineField({
+			name: 'updated',
+			title: 'Last Updated',
+			type: 'datetime',
+		}),
+		defineField({
+			name: 'draft',
+			title: 'Draft',
+			type: 'boolean',
+			initialValue: false,
+		}),
+		defineField({
+			name: 'pinned',
+			title: 'Pinned',
+			type: 'boolean',
+			initialValue: false,
 		}),
 		defineField({
 			name: 'lang',
 			title: 'Language',
 			type: 'string',
-		}),
-		defineField({
-			name: 'pinned',
-			title: 'Is Pinned?',
-			type: 'boolean',
-			initialValue: false,
-		}),
-		defineField({
-			name: 'author',
-			title: 'Author',
-			type: 'reference',
-			to: { type: 'author' },
-		}),
-		defineField({
-			name: 'sourceLink',
-			title: 'Source Link',
-			type: 'url',
+			initialValue: 'en',
 		}),
 		defineField({
 			name: 'licenseName',
@@ -103,36 +125,31 @@ export default defineType({
 			type: 'url',
 		}),
 		defineField({
-			name: 'encrypted',
-			title: 'Is Encrypted?',
-			type: 'boolean',
-			initialValue: false,
-		}),
-		defineField({
-			name: 'password',
-			title: 'Password',
-			type: 'string',
-		}),
-		defineField({
-			name: 'routeName',
-			title: 'Custom Route Name',
-			type: 'string',
-		}),
-		defineField({
-			name: 'body',
-			title: 'Body',
-			type: 'blockContent',
+			name: 'sourceLink',
+			title: 'Source Link',
+			type: 'url',
 		}),
 	],
 	preview: {
 		select: {
 			title: 'title',
 			author: 'author.name',
-			media: 'cover',
+			media: 'coverImage',
+			draft: 'draft',
 		},
-		prepare(selection) {
-			const { author } = selection
-			return { ...selection, subtitle: author && `by ${author}` }
+		prepare({ title, author, media, draft }) {
+			return {
+				title: `${draft ? '[DRAFT] ' : ''}${title}`,
+				subtitle: author ? `by ${author}` : 'No author',
+				media,
+			}
 		},
 	},
+	orderings: [
+		{
+			title: 'Published At, Newest',
+			name: 'publishedAtDesc',
+			by: [{ field: 'published', direction: 'desc' }],
+		},
+	],
 })

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Check, Copy, Github } from 'lucide-react';
+import { ArrowRight, Check, Copy, Github, Play } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import TerminalAnimation from './TerminalAnimation';
 
 const INSTALL_CMD = 'pip install koreshield';
@@ -50,6 +51,17 @@ function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.6 }}
 					>
+						{/* Live Demo CTA */}
+						<Link
+							to="/demo"
+							className="group relative font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg w-full sm:w-auto overflow-hidden text-white"
+							style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
+						>
+							<Play className="w-4 h-4 fill-white" />
+							<span>See Live Demo</span>
+							<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+						</Link>
+
 						{/* Shimmer CTA button */}
 						<a
 							href="https://docs.koreshield.com"
