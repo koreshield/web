@@ -347,41 +347,41 @@ export default function DemoPage() {
       `}</style>
 
 			{/* Top Bar */}
-			<div className="border-b border-slate-800/80 px-6 py-4 flex items-center gap-4">
-				<Link to="/" className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 text-sm">
+			<div className="border-b border-slate-800/80 px-4 md:px-6 py-3 md:py-4 flex flex-wrap items-center gap-3">
+				<Link to="/" className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 text-sm shrink-0">
 					<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
 					</svg>
-					Back to site
+					<span className="hidden sm:inline">Back to site</span>
 				</Link>
-				<div className="w-px h-4 bg-slate-700" />
-				<div className="flex items-center gap-2">
-					<img src="/logo/SVG/White.svg" alt="KoreShield Logo" className="w-6 h-6" />
+				<div className="w-px h-4 bg-slate-700 hidden sm:block" />
+				<div className="flex items-center gap-2 shrink-0">
+					<img src="/logo/SVG/White.svg" alt="KoreShield Logo" className="w-5 h-5 md:w-6 md:h-6" />
 					<span className="text-sm font-semibold text-slate-200">KoreShield Live Demo</span>
 				</div>
-				<div className="ml-auto flex items-center gap-3 text-xs">
+				<div className="ml-auto flex items-center gap-2 md:gap-3 text-xs shrink-0">
 					<div className="flex items-center gap-1.5 text-emerald-400">
 						<div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-						Firewall Active
+						<span className="hidden sm:inline">Firewall Active</span>
 					</div>
-					<div className="flex items-center gap-4 text-slate-500 font-mono">
-						<span><span className="text-white font-bold">{stats.total}</span> Total</span>
-						<span><span className="text-red-400 font-bold">{stats.blocked}</span> Blocked</span>
-						<span><span className="text-emerald-400 font-bold">{stats.allowed}</span> Allowed</span>
+					<div className="flex items-center gap-2 md:gap-4 text-slate-500 font-mono">
+						<span><span className="text-white font-bold">{stats.total}</span> <span className="hidden sm:inline">Total</span></span>
+						<span><span className="text-red-400 font-bold">{stats.blocked}</span> <span className="hidden sm:inline">Blocked</span></span>
+						<span><span className="text-emerald-400 font-bold">{stats.allowed}</span> <span className="hidden sm:inline">Allowed</span></span>
 					</div>
 				</div>
 			</div>
 
 			{/* Hero */}
-			<div className="text-center py-10 px-6">
+			<div className="text-center py-8 md:py-10 px-4 md:px-6">
 				<div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 text-xs font-medium mb-4">
 					<div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
 					Interactive Sandbox — No signup required
 				</div>
-				<h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white via-blue-100 to-blue-400 bg-clip-text text-transparent">
+				<h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-white via-blue-100 to-blue-400 bg-clip-text text-transparent">
 					See KoreShield Stop Real AI Attacks
 				</h1>
-				<p className="text-slate-400 text-lg max-w-xl mx-auto">
+				<p className="text-slate-400 text-base md:text-lg max-w-xl mx-auto">
 					Type any prompt below or pick a preset attack. Watch the firewall intercept threats in real time.
 				</p>
 			</div>
@@ -395,20 +395,20 @@ export default function DemoPage() {
 				</div>
 
 				{/* Footer CTA */}
-				<div className="mt-10 text-center py-8 px-6 rounded-2xl border border-slate-800 bg-slate-900/40">
-					<p className="text-slate-300 font-semibold text-lg mb-2">Ready to protect your AI app in production?</p>
+				<div className="mt-10 text-center py-8 px-4 md:px-6 rounded-2xl border border-slate-800 bg-slate-900/40">
+					<p className="text-slate-300 font-semibold text-base md:text-lg mb-2">Ready to protect your AI app in production?</p>
 					<p className="text-slate-500 text-sm mb-5">KoreShield installs in under 5 minutes. No infrastructure changes required.</p>
-					<div className="flex items-center justify-center gap-4">
+					<div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
 						<Link
 							to="/signup"
-							className="px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:scale-105"
+							className="w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:scale-105 text-center"
 							style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
 						>
 							Get Started Free →
 						</Link>
 						<Link
 							to="/contact"
-							className="px-6 py-3 rounded-xl font-semibold text-sm border border-slate-700 text-slate-300 hover:border-slate-500 transition-all"
+							className="w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-sm border border-slate-700 text-slate-300 hover:border-slate-500 transition-all text-center"
 						>
 							Talk to Sales
 						</Link>

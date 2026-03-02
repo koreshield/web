@@ -3,76 +3,81 @@ import { Icon } from "astro-icon/components";
 ---
 
 <div
-    class="relative overflow-hidden rounded-2xl bg-[#0f1623] border border-electric-blue/20 p-8 md:p-12 mb-16 group"
+	class="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#0d1526] to-[#080f1e] border border-white/10 px-6 py-16 md:px-12 md:py-20 mb-16 shadow-2xl text-center group"
 >
-    <!-- Background Effects -->
-    <div
-        class="absolute top-0 right-0 w-64 h-64 bg-electric-blue/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none group-hover:bg-electric-blue/10 transition-colors duration-700"
-    >
-    </div>
-    <div
-        class="absolute bottom-0 left-0 w-48 h-48 bg-cyber-purple/5 rounded-full blur-[60px] translate-y-1/2 -translate-x-1/2 pointer-events-none group-hover:bg-cyber-purple/10 transition-colors duration-700"
-    >
-    </div>
+	<!-- Background Effects -->
+	<div
+		class="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-electric-blue/15 rounded-full blur-[100px] pointer-events-none"
+	>
+	</div>
+	<div
+		class="absolute bottom-0 right-0 w-64 h-64 bg-cyber-purple/10 rounded-full blur-[80px] pointer-events-none"
+	>
+	</div>
 
-    <div
-        class="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between"
-    >
-        <div class="max-w-lg">
-            <div
-                class="flex items-center gap-2 mb-3 text-electric-blue font-mono text-sm tracking-wider"
-            >
-                <Icon
-                    name="material-symbols:mark-email-unread-outline"
-                    class="w-5 h-5"
-                />
-                <span>STAY SECURE</span>
-            </div>
-            <h3 class="text-2xl font-bold text-white mb-3">
-                Get the Latest LLM Security Intelligence
-            </h3>
-            <p class="text-gray-400 leading-relaxed">
-                Join our security researchers and receive weekly updates on
-                prompt injection threats, jailbreak analysis, and defense
-                strategies.
-            </p>
-        </div>
+	<div class="relative z-10 max-w-2xl mx-auto">
+		<!-- Badge -->
+		<div
+			class="inline-flex items-center gap-2 mb-6 text-electric-blue font-mono text-xs tracking-widest font-bold bg-electric-blue/10 px-4 py-2 rounded-full border border-electric-blue/20 uppercase"
+		>
+			<Icon
+				name="material-symbols:mark-email-unread-outline"
+				class="w-4 h-4"
+			/>
+			Stay Secure
+		</div>
 
-        <form
-            class="w-full md:w-auto flex flex-col gap-3"
-            onsubmit="event.preventDefault(); console.log('Newsletter signup:', this.email.value); this.reset(); alert('Thanks for subscribing!');"
-        >
-            <div class="relative group/input">
-                <div
-                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 group-focus-within/input:text-electric-blue transition-colors"
-                >
-                    <Icon
-                        name="material-symbols:mail-outline"
-                        class="w-5 h-5"
-                    />
-                </div>
-                <input
-                    type="email"
-                    name="email"
-                    placeholder="Enter your work email"
-                    required
-                    class="w-full pl-10 pr-4 py-3 bg-black/20 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-electric-blue/50 focus:ring-1 focus:ring-electric-blue/50 transition-all font-mono text-sm"
-                />
-            </div>
-            <button
-                type="submit"
-                class="w-full py-3 px-6 bg-electric-blue text-white rounded-lg font-bold hover:bg-electric-blue/90 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-electric-blue/20 flex items-center justify-center gap-2"
-            >
-                <span>Subscribe via Email</span>
-                <Icon
-                    name="material-symbols:arrow-right-alt-rounded"
-                    class="w-5 h-5"
-                />
-            </button>
-            <p class="text-xs text-center text-gray-600">
-                Start your <span class="text-gray-500">Free Subscription</span> today.
-                No spam.
-            </p>
-        </form>
-    </div>
+		<!-- Heading -->
+		<h3
+			class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight leading-tight"
+		>
+			Get the Latest LLM Security Intelligence
+		</h3>
+
+		<!-- Subtitle -->
+		<p
+			class="text-gray-400 text-base md:text-lg leading-relaxed mb-10 max-w-xl mx-auto"
+		>
+			Join our security researchers and receive weekly updates
+			on prompt injection threats, jailbreak analysis, and
+			defense strategies.
+		</p>
+
+		<!-- Form -->
+		<form
+			class="w-full max-w-md mx-auto flex flex-col gap-3"
+			onsubmit="event.preventDefault(); this.reset(); alert('Thanks for subscribing! 🔐');"
+		>
+			<div class="relative group/input">
+				<div
+					class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within/input:text-electric-blue transition-colors"
+				>
+					<Icon
+						name="material-symbols:mail-outline"
+						class="w-5 h-5"
+					/>
+				</div>
+				<input
+					type="email"
+					name="email"
+					placeholder="Enter your work email"
+					required
+					class="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-electric-blue focus:ring-1 focus:ring-electric-blue/50 transition-all text-base"
+				/>
+			</div>
+			<button
+				type="submit"
+				class="w-full py-4 px-8 bg-electric-blue text-white rounded-xl font-bold text-base hover:bg-blue-500 transition-all hover:-translate-y-0.5 shadow-lg shadow-electric-blue/25 flex items-center justify-center gap-2 group/btn"
+			>
+				<span>Subscribe for Free</span>
+				<Icon
+					name="material-symbols:arrow-right-alt-rounded"
+					class="w-5 h-5 transition-transform group-hover/btn:translate-x-1"
+				/>
+			</button>
+			<p class="text-sm text-gray-500 mt-1">
+				No spam. Unsubscribe anytime.
+			</p>
+		</form>
+	</div>
 </div>

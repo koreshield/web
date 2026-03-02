@@ -98,7 +98,7 @@
     <!-- Header -->
     <div class="mb-16">
         <h1
-            class="text-4xl md:text-5xl font-bold text-white mb-12 tracking-tight"
+            class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-8 md:mb-12 tracking-tight"
         >
             Article library
         </h1>
