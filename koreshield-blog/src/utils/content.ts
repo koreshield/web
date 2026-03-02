@@ -1,4 +1,4 @@
-import { sanityClient } from "sanity:client";
+import { sanityClient } from "../lib/sanity";
 import { getCategoryUrl } from "@utils/url";
 import { i18n } from "@i18n/translation";
 import I18nKey from "@i18n/i18nKey";
