@@ -1,0 +1,33 @@
+---
+title: Rate Limiting
+description: Rate limiting configuration.
+slug: /configuration/rate-limiting
+---
+
+# Rate Limiting
+
+KoreShield uses Redis for distributed rate limiting and shared statistics. When Redis is enabled, multiple proxy instances can enforce consistent limits.
+
+## Enable Redis
+
+```yaml
+redis:
+	enabled: true
+	url: "redis://localhost:6379/0"
+```
+
+## Production Guidance
+
+- Use a managed Redis service with TLS enabled
+- Ensure all proxy instances point to the same Redis
+- Monitor Redis memory and set appropriate eviction policies
+
+## Validation
+
+- Confirm Redis connectivity in logs at startup
+- Load test to verify requests are throttled consistently
+
+## Related Docs
+
+- Redis setup in [/integrations/databases/redis](/docs/integrations/databases/redis)
+- Global settings in [/configuration/settings](/docs/configuration/settings)

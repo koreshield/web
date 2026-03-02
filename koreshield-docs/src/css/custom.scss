@@ -1,0 +1,267 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* Import modular SCSS files */
+@use 'colors';
+@use 'sidebar';
+@use 'navigation';
+@use 'footer';
+@use 'components';
+@use 'intro';
+
+/* You can override the default Infima variables here. */
+:root {
+  /* Primary color - Koreshield brand color */
+  --ifm-color-primary: #111827;
+  --ifm-color-primary-dark: #0f172a;
+  --ifm-color-primary-darker: #0b1220;
+  --ifm-color-primary-darkest: #05070c;
+  --ifm-color-primary-light: #1f2937;
+  --ifm-color-primary-lighter: #374151;
+  --ifm-color-primary-lightest: #4b5563;
+  
+  /* Font settings */
+  --ifm-code-font-size: 95%;
+  --ifm-font-size-base: 16px;
+  --ifm-font-weight-base: 400;
+  --ifm-heading-font-weight: 600;
+  --ifm-font-weight-semibold: 600;
+  --ifm-font-family-base: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --ifm-heading-font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --ifm-font-family-monospace: 'Fira Code', 'Courier New', Courier, monospace;
+  
+  /* Spacing */
+  --ifm-spacing-horizontal: 1.5rem;
+  --ifm-spacing-vertical: 1.5rem;
+  
+  /* Navbar */
+  --ifm-navbar-height: 60px;
+  --ifm-navbar-padding-horizontal: 1rem;
+  --ifm-navbar-padding-vertical: 0.5rem;
+  
+  /* Backgrounds */
+  --ifm-background-color: #f0f0f5;
+  --ifm-background-surface-color: #f0f0f5;
+  --ifm-navbar-background-color: #f0f0f5;
+  --ifm-footer-background-color: #f0f0f5;
+
+  /* Code blocks */
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* Code block readability improvements */
+div[class^='codeBlockContainer'] {
+  background-color: #e3e3e3;
+  border: 1px solid #d0d0d0;
+}
+
+pre code,
+.prism-code,
+.prism-code span {
+  font-weight: 600 !important;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #f3f4f6;
+  --ifm-color-primary-dark: #e5e7eb;
+  --ifm-color-primary-darker: #d1d5db;
+  --ifm-color-primary-darkest: #9ca3af;
+  --ifm-color-primary-light: #f9fafb;
+  --ifm-color-primary-lighter: #ffffff;
+  --ifm-color-primary-lightest: #ffffff;
+  
+  --ifm-background-color: #1a1a26;
+  --ifm-background-surface-color: #1a1a26;
+  --ifm-navbar-background-color: #1a1a26;
+  --ifm-footer-background-color: #1a1a26;
+  
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] div[class^='codeBlockContainer'] {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+}
+
+/* Footer spacing and icons */
+.footer {
+  padding: 1.5rem 0;
+}
+
+.footer__links {
+  margin-bottom: 0.75rem;
+}
+
+.footer__col {
+  margin-bottom: 0.75rem;
+}
+
+.footer__bottom {
+  margin-top: 0.75rem;
+}
+
+.footer-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: #0f172a;
+  opacity: 1;
+  transition: opacity 150ms ease;
+}
+
+.footer-icon-link:hover {
+  opacity: 1;
+}
+
+.footer-icon-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+[data-theme='dark'] .footer-icon-link {
+  color: #e2e8f0;
+}
+
+/* Hide heading hash links */
+.hash-link {
+  display: none !important;
+}
+
+/* Table readability */
+.markdown table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #f7f7fb;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.markdown table th,
+.markdown table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #d0d0d0;
+  vertical-align: top;
+}
+
+.markdown table thead th {
+  background-color: #e4e4ea;
+  font-weight: 600;
+  color: #111827;
+}
+
+.markdown table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+[data-theme='dark'] .markdown table {
+  background-color: #202032;
+  border-color: #2c2c40;
+}
+
+[data-theme='dark'] .markdown table th,
+[data-theme='dark'] .markdown table td {
+  border-bottom: 1px solid #2c2c40;
+}
+
+[data-theme='dark'] .markdown table thead th {
+  background-color: #26263a;
+  color: #f3f4f6;
+}
+
+
+
+/* GitHub icon in navbar */
+.header-github-link:hover {
+  opacity: 0.6;
+}
+
+.header-github-link::before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  display: flex;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='currentColor' d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
+    no-repeat;
+}
+
+[data-theme='dark'] .header-github-link::before {
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='white' d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
+    no-repeat;
+}
+
+/* Custom scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Utility classes */
+.no-underline {
+  text-decoration: none !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.margin-top--lg {
+  margin-top: 2rem !important;
+}
+
+.margin-bottom--lg {
+  margin-bottom: 2rem !important;
+}
+
+
+.doc-feedback-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.doc-edit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #111827;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.doc-edit-link svg {
+  width: 0.95em;
+  height: 0.95em;
+}
+
+.doc-edit-link:hover {
+  color: #0f172a;
+  text-decoration: none;
+}
+
+.doc-last-updated {
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+[data-theme='dark'] {
+  .doc-edit-link {
+    color: #e2e8f0;
+  }
+
+  .doc-edit-link:hover {
+    color: #ffffff;
+  }
+
+  .doc-last-updated {
+    color: #94a3b8;
+  }
+}

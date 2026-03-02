@@ -1,0 +1,88 @@
+---
+title: Prometheus Monitoring
+description: Scrape KoreShield metrics from the built-in Prometheus endpoint.
+---
+
+# Prometheus Monitoring
+
+KoreShield exposes Prometheus-compatible metrics at `/metrics`. You can scrape this endpoint and build alerts based on request volume, block rates, and provider latency.
+
+## Use Cases
+
+- Real-time monitoring of LLM proxy traffic
+- SLOs for latency and error rates
+- Alerting on attack spikes and blocked requests
+
+## Enable Monitoring
+
+Monitoring is enabled by default. Confirm in config:
+
+```yaml
+monitoring:
+  enabled: true
+  check_interval_seconds: 60
+```
+
+## Metrics Endpoint
+
+KoreShield exposes metrics at:
+
+```
+http://<koreshield-host>:8000/metrics
+```
+
+The endpoint is implemented in the server and returns Prometheus text format.
+
+## Example Prometheus Scrape Config
+
+```yaml
+scrape_configs:
+  - job_name: "koreshield"
+    static_configs:
+      - targets: ["koreshield.example.com:8000"]
+```
+
+## Key Metrics
+
+These are some of the metrics exported by KoreShield:
+
+- `koreshield_requests_total` (labels: `method`, `endpoint`, `status`)
+- `koreshield_requests_duration_seconds` (labels: `method`, `endpoint`)
+- `koreshield_attacks_detected_total` (labels: `attack_type`, `severity`)
+- `koreshield_requests_blocked_total` (labels: `reason`)
+- `koreshield_provider_requests_total` (labels: `provider`, `status`)
+- `koreshield_provider_latency_seconds` (labels: `provider`)
+- `koreshield_active_connections`
+- `koreshield_memory_usage_bytes`
+- `koreshield_cpu_usage_percent`
+
+## Alert Examples
+
+```promql
+# High error rate (5m)
+sum(rate(koreshield_requests_total{status=~"5.."}[5m]))
+  /
+sum(rate(koreshield_requests_total[5m]))
+> 0.05
+
+# Blocked request spike
+rate(koreshield_requests_blocked_total[5m]) > 5
+```
+
+## Security Notes
+
+- Restrict access to `/metrics` with network controls or a reverse proxy.
+- Use TLS for production scraping.
+
+## Troubleshooting
+
+- 404 on `/metrics`: confirm monitoring is enabled in config
+- Scrape failures: check firewall rules and service discovery
+- Missing metrics: confirm the proxy is receiving traffic
+
+## Next Steps
+
+- Create dashboards in [grafana.mdx](grafana.mdx)
+- Configure policies in [/configuration/](/docs/configuration)
+
+

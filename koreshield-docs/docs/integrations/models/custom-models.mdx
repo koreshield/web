@@ -1,0 +1,82 @@
+---
+title: Custom Models Integration
+description: Route any OpenAI-compatible API through Koreshield with streaming support.
+sidebar_position: 3
+published: true
+---
+
+# Custom Models Integration
+
+KoreShield can proxy any OpenAI-compatible API endpoint. This is useful for self-hosted models, gateways, or third-party providers that expose OpenAI-style endpoints.
+
+## Basic Request (TypeScript)
+
+```typescript
+const response = await fetch("http://localhost:8000/v1/chat/completions", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    model: "your-model-name",
+    messages: [{ role: "user", content: "Summarize the audit log." }]
+  })
+});
+```
+
+## Basic Request (Python)
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/v1/chat/completions",
+    json={
+        "model": "your-model-name",
+        "messages": [{"role": "user", "content": "Summarize the audit log."}]
+    }
+)
+```
+
+## Streaming
+
+```typescript
+const response = await fetch("http://localhost:8000/v1/chat/completions", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    model: "your-model-name",
+    stream: true,
+    messages: [{ role: "user", content: "Generate a short summary." }]
+  })
+});
+```
+
+```python
+response = requests.post(
+    "http://localhost:8000/v1/chat/completions",
+    json={
+        "model": "your-model-name",
+        "stream": True,
+        "messages": [{"role": "user", "content": "Generate a short summary."}]
+    },
+    stream=True
+)
+
+for line in response.iter_lines():
+    if line:
+        print(line.decode("utf-8"))
+```
+
+## Compatibility Notes
+
+- The environment variable must match the provider name (uppercased + `_API_KEY`).
+- If the upstream API expects additional headers, configure them in your gateway or extend the provider adapter.
+
+## Error Handling
+
+- `403` indicates a blocked request due to policy enforcement.
+- `429` or `5xx` typically indicates provider or rate-limit issues.
+
+## Next Steps
+
+- Configure providers in [/configuration/](/docs/configuration)
+- Review OpenAI-compatible routing in [openai.mdx](openai.mdx)

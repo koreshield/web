@@ -1,0 +1,65 @@
+---
+title: FastAPI
+description: Integrate Koreshield with FastAPI applications
+sidebar_position: 6
+icon: LayoutDashboard
+---
+
+# FastAPI Integration Guide
+
+Koreshield integrates seamlessly with **FastAPI** applications, allowing you to protect your endpoints with minimal code changes.
+
+## Overview
+
+There are two primary ways to integrate Koreshield with FastAPI:
+
+1.  **Middleware approach**: Protects all or specific routes automatically.
+2.  **Dependency injection**: Allows fine-grained control inside route handlers.
+
+## Option 1: Dependency Injection (Recommended)
+
+Using dependency injection gives you access to the Koreshield client within your route, allowing you to handle blocked requests gracefully or return custom error responses.
+
+```python
+from fastapi import FastAPI, Depends, HTTPException
+from Koreshield.client import KoreshieldClient
+import os
+
+app = FastAPI()
+
+def get_Koreshield():
+    # Configure with your Koreshield Proxy URL
+    return KoreshieldClient(base_url=os.getenv("Koreshield_URL", "http://localhost:8000"))
+
+@app.post("/chat")
+async def chat(message: str, ks: KoreshieldClient = Depends(get_Koreshield)):
+    # 1. Guard the input
+    result = await ks.guard(message)
+    
+    if not result.is_safe:
+        # 2. Handle unsafe content
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "Content blocked",
+                "reason": result.reason,
+                "details": result.details
+            }
+        )
+        
+    # 3. Process safe content
+    return {"response": "Processed successfully"}
+```
+
+## Option 2: Middleware
+
+(Coming soon) We are working on a standard ASGI middleware package for drop-in protection.
+
+## Configuration
+
+Ensure your Koreshield Proxy is running and accessible. By default, the client connects to `http://localhost:8000`. You can configure this via environment variables or constructor arguments.
+
+| Environment Variable | Description | Default |
+|----------------------|-------------|---------|
+| `Koreshield_URL` | URL of the Koreshield Proxy | `http://localhost:8000` |
+| `Koreshield_API_KEY` | API Key (if auth enabled) | None |

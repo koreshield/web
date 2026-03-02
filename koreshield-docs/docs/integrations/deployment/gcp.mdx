@@ -1,0 +1,134 @@
+---
+title: GCP Deployment
+description: Deploy the KoreShield proxy on Google Cloud using Compute Engine or Cloud Run.
+---
+
+# GCP Deployment
+
+This guide covers two common options: Compute Engine with Docker and serverless Cloud Run.
+
+## Use Cases
+
+- Serverless scaling with Cloud Run for spiky workloads
+- Private VPC deployments with Compute Engine
+- Compliance needs that require regional data control
+
+## Architecture Choices
+
+- Compute Engine + Docker for full control
+- Cloud Run for managed autoscaling and TLS
+
+## Option A: Compute Engine + Docker
+
+### 1. Create a VM
+
+- Use Debian 12 or Ubuntu 22.04
+- Allow HTTP traffic if you plan to expose port 8000
+
+### 2. Install Docker
+
+```bash
+sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+```
+
+### 3. Configure KoreShield
+
+```bash
+# On the VM
+git clone https://github.com/koreshield/koreshield.git
+cd koreshield/koreshield
+cp config/config.example.yaml config/config.yaml
+```
+
+Set provider API keys:
+
+```bash
+export OPENAI_API_KEY=your-api-key
+# or other provider keys
+```
+
+### 4. Run with Docker
+
+```bash
+docker build -t koreshield .
+
+docker run -d \
+  -p 8000:8000 \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -v $(pwd)/config/config.yaml:/app/config/config.yaml \
+  koreshield
+
+### 5. Verify health
+
+```bash
+curl http://<vm-ip>:8000/health
+```
+```
+
+## Option B: Cloud Run
+
+### 1. Build and push to Artifact Registry
+
+```bash
+gcloud artifacts repositories create koreshield \
+  --repository-format=docker \
+  --location=us-central1
+
+gcloud auth configure-docker us-central1-docker.pkg.dev
+
+docker build -t koreshield .
+docker tag koreshield:latest us-central1-docker.pkg.dev/<project-id>/koreshield/koreshield:latest
+
+docker push us-central1-docker.pkg.dev/<project-id>/koreshield/koreshield:latest
+```
+
+### 2. Deploy to Cloud Run
+
+```bash
+gcloud run deploy koreshield \
+  --image us-central1-docker.pkg.dev/<project-id>/koreshield/koreshield:latest \
+  --port 8000 \
+  --set-env-vars OPENAI_API_KEY=your-api-key \
+  --allow-unauthenticated
+
+## Secrets and Config
+
+- Use Secret Manager for provider keys
+- Use `CONFIG_FILE` if you mount a custom config path
+- Prefer Cloud Run secrets for managed deployments
+
+## Networking and TLS
+
+- Cloud Run provides managed TLS and public endpoints
+- Use Cloud Armor for WAF and rate protection
+- Restrict ingress to internal for private services
+
+## Observability
+
+- Enable `json_logs: true` and ship logs to Cloud Logging
+- Scrape `/metrics` with Prometheus or use Cloud Monitoring
+- Create alerts for error rate and latency
+```
+
+## Security Notes
+
+- Store API keys in Secret Manager.
+- Use `json_logs: true` and export logs to Cloud Logging.
+- Restrict ingress to your app or private VPC where possible.
+
+## Troubleshooting
+
+- 401 responses: verify `KORESHIELD_API_KEY` on client requests
+- Cloud Run errors: confirm service account access to secrets
+- Timeouts: increase Cloud Run request timeout for streaming
+- Provider errors: confirm VPC egress or NAT to reach providers
+
+## Next Steps
+
+- Configure providers in [/configuration/](/docs/configuration)
+- Add monitoring in [../monitoring/prometheus.mdx](../monitoring/prometheus.mdx)
+
+

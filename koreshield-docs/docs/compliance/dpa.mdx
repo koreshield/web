@@ -1,0 +1,67 @@
+---
+title: UK Data Protection Act (DPA 2018)
+description: Practical guidance for UK Data Protection Act compliance with Koreshield.
+slug: /compliance/dpa
+---
+
+# UK Data Protection Act (DPA 2018)
+
+This page provides practical guidance for aligning LLM workflows with the UK Data Protection Act 2018 (DPA 2018) when using Koreshield. It is not legal advice. Always consult your legal team for compliance decisions.
+
+## DPA 2018 and UK GDPR
+
+DPA 2018 sits alongside the UK GDPR and provides the UK legal framework for data protection. In most commercial contexts, UK GDPR obligations apply in parallel. Koreshield can help implement technical safeguards, but you remain responsible for lawful processing and governance.
+
+## Key Requirements and How Koreshield Helps
+
+### 1) Lawfulness, Fairness, and Transparency
+
+Define a lawful basis for processing and provide clear notice to users. Koreshield supports data minimization to reduce exposure in prompts and outputs.
+
+### 2) Data Minimization
+
+Only process the minimum personal data required to fulfill a task.
+
+**Practical guidance:**
+
+- remove direct identifiers from prompts when possible
+- avoid storing raw prompts that include personal data
+- keep identifiers in metadata rather than free-form content
+
+### 3) Security and Integrity
+
+Apply controls that prevent unauthorized access and reduce leakage risk.
+
+```yaml
+logging:
+  json_logs: true
+  container_mode: true
+```
+
+Use role-based access, secret management, and TLS for data in transit. Restrict access to logs and monitoring data.
+
+### 4) Purpose Limitation and Retention
+
+Use personal data only for the specified purpose and define retention windows for prompts, logs, and outputs.
+
+### 5) Data Subject Rights
+
+Support access, deletion, and correction requests by keeping trace IDs that allow you to locate and remove data when required.
+
+## International Transfers
+
+If data is transferred outside the UK, ensure appropriate safeguards are in place (for example, SCCs or the UK IDTA where required).
+
+## Operational Checklist
+
+- document data flows and processing purposes
+- apply least-privilege access controls for operators
+- implement retention and deletion policies
+- log security events with trace IDs for audits
+- review subprocessors and vendor agreements
+
+## Related Documentation
+
+- [GDPR Compliance](/docs/compliance/gdpr)
+- [Security](/docs/features/security)
+- [Configuration](/docs/configuration)

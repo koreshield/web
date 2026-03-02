@@ -1,0 +1,363 @@
+---
+title: DeepSeek Integration
+description: Integrate Koreshield with DeepSeek for secure AI applications
+sidebar_position: 4
+published: true
+---
+
+# DeepSeek Integration
+
+Protect your DeepSeek-powered applications from prompt injection and security threats.
+
+## Installation
+
+```bash
+pip install Koreshield-sdk openai  # DeepSeek uses OpenAI-compatible API
+```
+
+## Basic Integration
+
+```python
+from Koreshield_sdk import Koreshield
+from openai import OpenAI
+
+Koreshield = Koreshield(api_key="ks_live_xxxxxxxxxxxx")
+
+client = OpenAI(
+    api_key="your_deepseek_api_key",
+    base_url="https://api.deepseek.com"
+)
+
+def secure_deepseek_chat(user_message: str) -> str:
+    # Scan input
+    scan = Koreshield.scan(content=user_message, user_id="user-123")
+    
+    if scan.threat_detected:
+        raise ValueError(f"Threat detected: {scan.threat_type}")
+    
+    # Call DeepSeek
+    response = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[{"role": "user", "content": user_message}]
+    )
+    
+    return response.choices[0].message.content
+```
+
+## Proxy Mode
+
+```python
+client = OpenAI(
+    api_key="your_deepseek_api_key",
+    base_url="https://api.Koreshield.com/v1/proxy/deepseek",
+    default_headers={
+        "X-Koreshield-API-Key": "ks_live_xxxxxxxxxxxx"
+    }
+)
+
+# Automatic protection
+response = client.chat.completions.create(
+    model="deepseek-chat",
+    messages=[{"role": "user", "content": user_message}]
+)
+```
+
+## DeepSeek Coder
+
+```python
+def secure_code_generation(prompt: str) -> str:
+    # Scan prompt
+    scan = Koreshield.scan(content=prompt)
+    
+    if scan.threat_detected:
+        raise ValueError("Threat detected in code prompt")
+    
+    response = client.chat.completions.create(
+        model="deepseek-coder",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=4096
+    )
+    
+    return response.choices[0].message.content
+```
+
+## Streaming
+
+```python
+def secure_stream(user_message: str):
+    # Scan first
+    scan = Koreshield.scan(content=user_message)
+    
+    if scan.threat_detected:
+        raise ValueError("Threat detected")
+    
+    # Stream response
+    stream = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[{"role": "user", "content": user_message}],
+        stream=True
+    )
+    
+    for chunk in stream:
+        if chunk.choices[0].delta.content:
+            print(chunk.choices[0].delta.content, end="")
+```
+
+## Function Calling
+
+```python
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search_code",
+            "description": "Search codebase",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"}
+                },
+                "required": ["query"]
+            }
+        }
+    }
+]
+
+def secure_function_call(user_message: str):
+    # Scan message
+    scan = Koreshield.scan(content=user_message)
+    
+    if scan.threat_detected:
+        raise ValueError("Threat detected")
+    
+    response = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[{"role": "user", "content": user_message}],
+        tools=tools
+    )
+    
+    tool_call = response.choices[0].message.tool_calls[0] if response.choices[0].message.tool_calls else None
+    
+    if tool_call:
+        # Scan function arguments
+        args_scan = Koreshield.scan(content=tool_call.function.arguments)
+        
+        if args_scan.threat_detected:
+            raise ValueError("Malicious function arguments")
+        
+        # Execute function
+        result = execute_search(tool_call.function.arguments)
+        return result
+```
+
+## FastAPI Integration
+
+```python
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class ChatRequest(BaseModel):
+    message: str
+    model: str = "deepseek-chat"
+
+@app.post("/api/chat")
+async def chat(request: ChatRequest):
+    try:
+        # Scan with Koreshield
+        scan = Koreshield.scan(content=request.message)
+        
+        if scan.threat_detected:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Security threat: {scan.threat_type}"
+            )
+        
+        # Call DeepSeek
+        response = client.chat.completions.create(
+            model=request.model,
+            messages=[{"role": "user", "content": request.message}]
+        )
+        
+        return {"response": response.choices[0].message.content}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+```
+
+## Multi-Turn Conversations
+
+```python
+def secure_conversation(messages: list[dict], new_message: str) -> str:
+    # Scan new message
+    scan = Koreshield.scan(content=new_message)
+    
+    if scan.threat_detected:
+        raise ValueError("Threat detected")
+    
+    # Build conversation
+    all_messages = messages + [{"role": "user", "content": new_message}]
+    
+    response = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=all_messages
+    )
+    
+    return response.choices[0].message.content
+```
+
+## Temperature & Top-P
+
+```python
+def secure_with_params(user_message: str, temperature: float = 0.7) -> str:
+    scan = Koreshield.scan(content=user_message)
+    
+    if scan.threat_detected:
+        raise ValueError("Threat detected")
+    
+    response = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[{"role": "user", "content": user_message}],
+        temperature=temperature,
+        top_p=0.9
+    )
+    
+    return response.choices[0].message.content
+```
+
+## Rate Limiting
+
+```python
+from functools import wraps
+from time import time
+from collections import defaultdict
+
+rate_limits = defaultdict(list)
+
+def rate_limit(max_calls: int, period: int):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(user_id: str, *args, **kwargs):
+            now = time()
+            calls = rate_limits[user_id]
+            
+            # Remove old calls
+            calls[:] = [t for t in calls if now - t < period]
+            
+            if len(calls) >= max_calls:
+                raise ValueError("Rate limit exceeded")
+            
+            calls.append(now)
+            return func(user_id, *args, **kwargs)
+        
+        return wrapper
+    return decorator
+
+@rate_limit(max_calls=10, period=60)
+def rate_limited_chat(user_id: str, message: str) -> str:
+    scan = Koreshield.scan(content=message, user_id=user_id)
+    
+    if scan.threat_detected:
+        raise ValueError("Threat detected")
+    
+    response = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[{"role": "user", "content": message}]
+    )
+    
+    return response.choices[0].message.content
+```
+
+## Batch Processing
+
+```python
+def secure_batch(messages: list[str]) -> list[str]:
+    # Scan all messages
+    scans = Koreshield.batch_scan(
+        items=[{"id": str(i), "content": msg} for i, msg in enumerate(messages)]
+    )
+    
+    threats = [s for s in scans.results if s.threat_detected]
+    
+    if threats:
+        print(f"Filtered {len(threats)} threats")
+    
+    # Process safe messages
+    safe_messages = [msg for i, msg in enumerate(messages) 
+                     if not scans.results[i].threat_detected]
+    
+    responses = []
+    for msg in safe_messages:
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[{"role": "user", "content": msg}]
+        )
+        responses.append(response.choices[0].message.content)
+    
+    return responses
+```
+
+## Error Handling
+
+```python
+import asyncio
+
+async def robust_deepseek(message: str) -> dict:
+    try:
+        # Scan with timeout
+        scan_task = asyncio.create_task(
+            Koreshield.scan_async(content=message)
+        )
+        scan = await asyncio.wait_for(scan_task, timeout=5.0)
+        
+        if scan.threat_detected:
+            return {"error": "Threat detected", "threat": scan.threat_type}
+        
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[{"role": "user", "content": message}]
+        )
+        
+        return {"response": response.choices[0].message.content}
+    
+    except asyncio.TimeoutError:
+        # Fail open with logging
+        print("Koreshield timeout, proceeding without scan")
+        
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[{"role": "user", "content": message}]
+        )
+        
+        return {"response": response.choices[0].message.content}
+```
+
+## LangChain Integration
+
+```python
+from langchain_openai import ChatOpenAI
+from langchain.callbacks.base import BaseCallbackHandler
+
+class KoreshieldCallback(BaseCallbackHandler):
+    def on_llm_start(self, serialized, prompts, **kwargs):
+        for prompt in prompts:
+            scan = Koreshield.scan(content=prompt)
+            if scan.threat_detected:
+                raise ValueError(f"Threat detected: {scan.threat_type}")
+
+llm = ChatOpenAI(
+    model="deepseek-chat",
+    openai_api_key="your_deepseek_api_key",
+    openai_api_base="https://api.deepseek.com",
+    callbacks=[KoreshieldCallback()]
+)
+
+response = llm.invoke("Tell me about Python")
+```
+
+## Related Documentation
+
+- [Python SDK](https://github.com/koreshield/koreshield/tree/main/koreshield-python-sdk)
+- [OpenAI Integration](/docs/integrations/models/openai)
+- [LangChain Integration](/docs/integrations/frameworks/langchain)

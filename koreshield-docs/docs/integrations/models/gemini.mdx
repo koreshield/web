@@ -1,0 +1,151 @@
+---
+title: Google Gemini Integration
+description: Route Gemini requests through Koreshield with streaming support.
+sidebar_position: 5
+published: true
+---
+
+# Google Gemini Integration
+
+KoreShield proxies Gemini requests through the OpenAI-compatible endpoint and applies sanitization and policy enforcement before forwarding to Gemini.
+
+## Installation
+
+```bash
+npm install koreshield
+```
+
+```bash
+pip install koreshield
+```
+
+## Basic Request (TypeScript)
+
+```typescript
+import { Koreshield } from "koreshield";
+
+const koreshield = new Koreshield({
+  apiKey: process.env.KORESHIELD_API_KEY
+});
+
+const scan = await koreshield.scan({
+  content: "Summarize the quarterly update."
+});
+
+if (scan.threat_detected) {
+  throw new Error("Threat detected");
+}
+
+const response = await fetch("http://localhost:8000/v1/chat/completions", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    model: "gemini-2.5-pro",
+    messages: [{ role: "user", content: "Summarize the quarterly update." }]
+  })
+});
+```
+
+## Basic Request (Python)
+
+```python
+import os
+import requests
+from koreshield import KoreShieldClient
+
+koreshield = KoreShieldClient(api_key=os.environ["KORESHIELD_API_KEY"])
+
+scan = koreshield.scan_prompt("Summarize the quarterly update.")
+if not scan.is_safe:
+    raise Exception("Threat detected")
+
+response = requests.post(
+    "http://localhost:8000/v1/chat/completions",
+    json={
+        "model": "gemini-2.5-pro",
+        "messages": [{"role": "user", "content": "Summarize the quarterly update."}]
+    }
+)
+```
+
+## Streaming
+
+```typescript
+const response = await fetch("http://localhost:8000/v1/chat/completions", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    model: "gemini-2.5-pro",
+    stream: true,
+    messages: [{ role: "user", content: "Write a release summary." }]
+  })
+});
+```
+
+```python
+response = requests.post(
+    "http://localhost:8000/v1/chat/completions",
+    json={
+        "model": "gemini-2.5-pro",
+        "stream": True,
+        "messages": [{"role": "user", "content": "Write a release summary."}]
+    },
+    stream=True
+)
+
+for line in response.iter_lines():
+    if line:
+        print(line.decode("utf-8"))
+```
+
+## System Prompts and Multi-Turn
+
+```json
+{
+  "model": "gemini-2.5-pro",
+  "messages": [
+    {"role": "system", "content": "You are a product analyst."},
+    {"role": "user", "content": "Summarize the update."},
+    {"role": "assistant", "content": "Summary..."},
+    {"role": "user", "content": "List risks."}
+  ]
+}
+```
+
+```python
+payload = {
+    "model": "gemini-2.5-pro",
+    "messages": [
+        {"role": "system", "content": "You are a product analyst."},
+        {"role": "user", "content": "Summarize the update."},
+        {"role": "assistant", "content": "Summary..."},
+        {"role": "user", "content": "List risks."}
+    ]
+}
+```
+
+## Compatibility Notes
+
+KoreShield forwards OpenAI-compatible payloads to the Gemini provider adapter. Validate any advanced fields with your Gemini setup before using in production.
+
+## Error Handling
+
+- `403` indicates a blocked request due to policy enforcement.
+- `429` or `5xx` typically indicates provider or rate-limit issues.
+
+## Security Controls
+
+```yaml
+security:
+  sensitivity: medium
+  default_action: block
+  features:
+    sanitization: true
+    detection: true
+    policy_enforcement: true
+```
+
+## Next Steps
+
+- Configure providers in [/configuration/](/docs/configuration)
+- Use the SDKs in [https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk) or [https://github.com/koreshield/koreshield/tree/main/koreshield-python-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-python-sdk)

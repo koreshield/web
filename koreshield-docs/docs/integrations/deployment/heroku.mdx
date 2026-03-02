@@ -1,0 +1,91 @@
+---
+title: Heroku Deployment
+description: Deploy the KoreShield proxy on Heroku using Docker.
+---
+
+# Heroku Deployment
+
+KoreShield can run on Heroku using the Heroku Container Registry. This approach keeps configuration in environment variables and avoids managing a VM.
+
+## Use Cases
+
+- Rapid deployment for small teams
+- Managed TLS and simple config via Heroku
+- Prototyping or staging environments
+
+## Prerequisites
+
+- Heroku CLI installed and authenticated
+- A running KoreShield config file in your repo
+
+## Build and Push the Image
+
+```bash
+# From the repo root
+cd koreshield
+
+heroku create your-koreshield-app
+
+heroku container:login
+heroku container:push web --app your-koreshield-app
+heroku container:release web --app your-koreshield-app
+```
+
+## Configure Environment Variables
+
+```bash
+heroku config:set OPENAI_API_KEY=your-api-key --app your-koreshield-app
+```
+
+If you need other providers:
+
+```bash
+heroku config:set ANTHROPIC_API_KEY=your-api-key --app your-koreshield-app
+heroku config:set GOOGLE_API_KEY=your-api-key --app your-koreshield-app
+heroku config:set AZURE_OPENAI_API_KEY=your-api-key --app your-koreshield-app
+```
+
+## Set the Config Path (Optional)
+
+If you use a custom config file, set the environment variable:
+
+```bash
+heroku config:set CONFIG_FILE=config/config.yaml --app your-koreshield-app
+```
+
+## Verify Health
+
+```bash
+curl https://your-koreshield-app.herokuapp.com/health
+```
+
+## Scaling and Performance
+
+- Use Standard or Performance dynos for production traffic
+- Scale horizontally with `heroku ps:scale web=2`
+- Increase request timeout for streaming workloads
+
+## Observability
+
+- Enable `json_logs: true` and forward logs to your monitoring stack
+- Use the Heroku log drains for Datadog, Splunk, or Grafana Cloud
+- Scrape `/metrics` from a private endpoint if supported
+
+## Security Notes
+
+- Use `json_logs: true` in config for production.
+- Keep provider keys in Heroku config vars, not in source control.
+- Restrict inbound access to trusted networks when possible.
+
+## Troubleshooting
+
+- 401 responses: confirm `KORESHIELD_API_KEY` header from clients
+- App crashes: inspect logs with `heroku logs --tail`
+- Provider errors: confirm provider keys are set in config vars
+
+## Next Steps
+
+- Configure providers in [/configuration/](/docs/configuration)
+- Add monitoring in [../monitoring/prometheus.mdx](../monitoring/prometheus.mdx)
+
+

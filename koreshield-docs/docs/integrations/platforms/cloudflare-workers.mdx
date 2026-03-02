@@ -1,0 +1,79 @@
+---
+title: Cloudflare Workers Integration
+description: Run KoreShield-protected requests on Cloudflare's edge network.
+---
+
+# Cloudflare Workers Integration
+
+Cloudflare Workers can call a remote KoreShield proxy to secure LLM requests at the edge. Keep provider keys on the KoreShield server and use the Worker as a thin routing layer.
+
+## Use Cases
+
+- Global edge routing for low-latency LLM calls
+- Simple public APIs that still need policy enforcement
+- Edge caching and request shaping before the proxy
+
+## Prerequisites
+
+- A running KoreShield instance reachable from Cloudflare
+- Provider API key configured on the KoreShield server
+
+## Environment Variables
+
+Set these in your Worker settings or `wrangler.toml`:
+
+```toml
+[vars]
+KORESHIELD_BASE_URL = "https://your-koreshield-instance.com"
+KORESHIELD_API_KEY = "your-koreshield-api-key"
+```
+
+## Example Worker
+
+```typescript
+import { createClient } from "koreshield";
+
+export interface Env {
+  KORESHIELD_BASE_URL: string;
+  KORESHIELD_API_KEY: string;
+}
+
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const client = createClient({
+      baseURL: env.KORESHIELD_BASE_URL,
+      apiKey: env.KORESHIELD_API_KEY
+    });
+
+    const body = await request.json();
+
+    const result = await client.createChatCompletion({
+      model: "gpt-5-mini",
+      messages: body.messages
+    });
+
+    return new Response(JSON.stringify(result), {
+      headers: { "content-type": "application/json" }
+    });
+  }
+};
+```
+
+## Operational Tips
+
+- Use a regional KoreShield deployment close to your Worker locations.
+- Keep provider API keys on the KoreShield server.
+- Adjust policies in [/configuration/](/docs/configuration).
+
+## Troubleshooting
+
+- 401 responses: confirm `KORESHIELD_API_KEY` is set in vars
+- Network errors: verify the proxy endpoint is reachable from Workers
+- Timeouts: increase fetch timeout and enable streaming on client
+
+## Next Steps
+
+- Review SDK usage in [https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk)
+- Configure providers in [/configuration/](/docs/configuration)
+
+

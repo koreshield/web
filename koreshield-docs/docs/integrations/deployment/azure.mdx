@@ -1,0 +1,139 @@
+---
+title: Azure Deployment
+description: Deploy the KoreShield proxy on Azure using Container Apps or VM Docker.
+---
+
+# Azure Deployment
+
+This guide covers Azure Container Apps for managed deployment and a VM-based Docker setup for more control.
+
+## Use Cases
+
+- Managed autoscaling for production traffic
+- Private networking with VNet integration
+- Fast pilot environments with minimal ops overhead
+
+## Architecture Choices
+
+- Azure Container Apps for managed ingress and autoscaling
+- Azure VM + Docker for full control and custom networking
+
+## Option A: Azure Container Apps
+
+### 1. Build and push an image
+
+```bash
+# Build locally
+docker build -t koreshield .
+
+# Tag for Azure Container Registry
+docker tag koreshield:latest <registry-name>.azurecr.io/koreshield:latest
+
+# Push
+az acr login --name <registry-name>
+docker push <registry-name>.azurecr.io/koreshield:latest
+```
+
+### 2. Create the Container App
+
+```bash
+az containerapp create \
+  --name koreshield \
+  --resource-group <resource-group> \
+  --environment <env-name> \
+  --image <registry-name>.azurecr.io/koreshield:latest \
+  --target-port 8000 \
+  --ingress external \
+  --env-vars OPENAI_API_KEY=your-api-key
+```
+
+### 3. Configure secrets (recommended)
+
+Use secrets for API keys instead of inline env vars:
+
+```bash
+az containerapp secret set \
+  --name koreshield \
+  --resource-group <resource-group> \
+  --secrets OPENAI_API_KEY=your-api-key
+```
+
+Then reference the secret in your app configuration.
+
+### 4. Verify health
+
+```bash
+curl https://<app-url>/health
+```
+
+## Option B: Azure VM + Docker
+
+### 1. Create a VM
+
+- Ubuntu 22.04 recommended
+- Open inbound port 8000 or front with a reverse proxy
+
+### 2. Install Docker
+
+```bash
+sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+```
+
+### 3. Run KoreShield
+
+```bash
+git clone https://github.com/koreshield/koreshield.git
+cd koreshield/koreshield
+cp config/config.example.yaml config/config.yaml
+
+export OPENAI_API_KEY=your-api-key
+
+docker build -t koreshield .
+
+docker run -d \
+  -p 8000:8000 \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -v $(pwd)/config/config.yaml:/app/config/config.yaml \
+  koreshield
+```
+
+## Secrets and Config
+
+- Use Azure Key Vault for provider keys
+- Reference Key Vault secrets in Container Apps
+- Use `CONFIG_FILE` if you mount a custom config path
+
+## Networking and TLS
+
+- Terminate TLS with Azure Front Door or Application Gateway
+- Restrict ingress to trusted IPs or private endpoints
+- Use VNet integration for private services
+
+## Observability
+
+- Ship logs to Azure Monitor or Log Analytics
+- Enable `json_logs: true` for structured logs
+- Scrape `/metrics` with Prometheus or a managed monitor
+
+## Security Notes
+
+- Use Azure Key Vault for API keys.
+- Enable `json_logs: true` and ship logs to Azure Monitor.
+- Restrict inbound access to trusted networks.
+
+## Troubleshooting
+
+- 401 responses: verify `KORESHIELD_API_KEY` header on clients
+- Container Apps not starting: confirm image pull permissions for ACR
+- Timeouts: increase ingress timeout and client timeouts for streaming
+- Provider errors: confirm Key Vault secrets are injected into the app
+
+## Next Steps
+
+- Configure providers in [/configuration/](/docs/configuration)
+- Add monitoring in [../monitoring/prometheus.mdx](../monitoring/prometheus.mdx)
+
+

@@ -1,0 +1,80 @@
+---
+title: Astro Integration
+description: Secure Astro server routes by proxying LLM requests through KoreShield.
+sidebar_position: 1
+---
+
+# Astro Integration
+
+Use KoreShield as a security proxy for LLM requests made from Astro server routes. Keep provider API keys on the KoreShield server and send requests to the proxy endpoint.
+
+## Use Cases
+
+- Secure server routes that call LLMs for SSR or API responses
+- Centralize policy enforcement for multiple Astro sites
+- Hide provider keys from frontend code
+
+## Prerequisites
+
+- A running KoreShield instance
+- Provider API key configured on the KoreShield server
+
+## Environment Variables
+
+```bash
+KORESHIELD_BASE_URL=http://localhost:8000
+KORESHIELD_API_KEY=your-koreshield-api-key
+```
+
+## Example: Astro API Route
+
+Create an API route at `src/pages/api/chat.ts`:
+
+```typescript
+import type { APIRoute } from "astro";
+
+export const POST: APIRoute = async ({ request }) => {
+  const body = await request.json();
+
+  const response = await fetch(
+    `${process.env.KORESHIELD_BASE_URL}/v1/chat/completions`,
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${process.env.KORESHIELD_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-5-mini",
+        messages: body.messages,
+      }),
+    },
+  );
+
+  const data = await response.json();
+  return new Response(JSON.stringify(data), {
+    status: response.status,
+    headers: { "content-type": "application/json" },
+  });
+};
+```
+
+## Operational Tips
+
+- Keep provider API keys on the KoreShield server.
+- Route all LLM traffic through the proxy for consistent policy enforcement.
+- Add timeouts for streaming and long responses.
+- Tune security settings in [/configuration/](/docs/configuration).
+
+## Troubleshooting
+
+- 401 responses: confirm `KORESHIELD_API_KEY` header
+- CORS errors: enable allowed origins on the KoreShield server
+- Provider errors: verify provider keys on the proxy
+
+## Next Steps
+
+- Review SDK usage in [https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk)
+- Configure providers in [/configuration/](/docs/configuration)
+
+

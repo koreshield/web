@@ -1,0 +1,293 @@
+---
+title: OpenAI Integration
+description: Integrate Koreshield with OpenAI for secure LLM interactions.
+sidebar_position: 6
+published: true
+---
+
+# OpenAI Integration
+
+Protect OpenAI usage from prompt injection and policy violations by scanning inputs with Koreshield and routing requests through the proxy.
+
+## Installation
+
+```bash
+npm install koreshield openai
+```
+
+```bash
+pip install koreshield openai
+```
+
+## Basic Integration (TypeScript)
+
+```typescript
+import { Koreshield } from "koreshield";
+import OpenAI from "openai";
+
+const koreshield = new Koreshield({
+  apiKey: process.env.KORESHIELD_API_KEY
+});
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+export async function secureChat(userMessage: string) {
+  const scan = await koreshield.scan({
+    content: userMessage,
+    userId: "user-123"
+  });
+
+  if (scan.threat_detected) {
+    throw new Error(`Threat detected: ${scan.threat_type}`);
+  }
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-5-mini",
+    messages: [{ role: "user", content: userMessage }]
+  });
+
+  return response.choices[0].message.content;
+}
+```
+
+## Basic Integration (Python)
+
+```python
+import os
+from koreshield import KoreShieldClient
+from openai import OpenAI
+
+koreshield = KoreShieldClient(api_key=os.environ["KORESHIELD_API_KEY"])
+openai = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+
+def secure_chat(user_message: str) -> str:
+    scan = koreshield.scan_prompt(user_message)
+    if not scan.is_safe:
+        raise Exception(f"Threat detected: {scan.threat_level}")
+
+    response = openai.chat.completions.create(
+        model="gpt-5-mini",
+        messages=[{"role": "user", "content": user_message}]
+    )
+
+    return response.choices[0].message.content
+```
+
+## Proxy Mode (Recommended)
+
+Route OpenAI-compatible requests through Koreshield:
+
+```typescript
+const response = await fetch("http://localhost:8000/v1/chat/completions", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    model: "gpt-5-mini",
+    messages: [{ role: "user", content: "Summarize the report." }]
+  })
+});
+
+const data = await response.json();
+console.log(data.choices[0].message.content);
+```
+
+```python
+import requests
+
+response = requests.post(
+  "http://localhost:8000/v1/chat/completions",
+  json={
+    "model": "gpt-5-mini",
+    "messages": [{"role": "user", "content": "Summarize the report."}]
+  }
+)
+
+data = response.json()
+print(data["choices"][0]["message"]["content"])
+```
+
+## Streaming
+
+```typescript
+const stream = await openai.chat.completions.create({
+  model: "gpt-5-mini",
+  messages: [{ role: "user", content: "Write a release note." }],
+  stream: true
+});
+
+for await (const chunk of stream) {
+  const delta = chunk.choices[0]?.delta?.content || "";
+  process.stdout.write(delta);
+}
+```
+
+```python
+stream = openai.chat.completions.create(
+    model="gpt-5-mini",
+    messages=[{"role": "user", "content": "Write a release note."}],
+    stream=True
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta.content or ""
+    print(delta, end="")
+```
+
+## Tool Use (Function Calling)
+
+```typescript
+const tools: OpenAI.Chat.ChatCompletionTool[] = [
+  {
+    type: "function",
+    function: {
+      name: "search_database",
+      description: "Search the database",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string" }
+        },
+        required: ["query"]
+      }
+    }
+  }
+];
+
+const response = await openai.chat.completions.create({
+  model: "gpt-5-mini",
+  messages: [{ role: "user", content: "Search for user 123" }],
+  tools
+});
+```
+
+```python
+tools = [
+  {
+    "type": "function",
+    "function": {
+      "name": "search_database",
+      "description": "Search the database",
+      "parameters": {
+        "type": "object",
+        "properties": {"query": {"type": "string"}},
+        "required": ["query"]
+      }
+    }
+  }
+]
+
+response = openai.chat.completions.create(
+  model="gpt-5-mini",
+  messages=[{"role": "user", "content": "Search for user 123"}],
+  tools=tools
+)
+```
+
+## Embeddings
+
+```typescript
+const response = await openai.embeddings.create({
+  model: "text-embedding-3-small",
+  input: ["Document text", "Another chunk"]
+});
+
+const vectors = response.data.map(d => d.embedding);
+```
+
+```python
+response = openai.embeddings.create(
+  model="text-embedding-3-small",
+  input=["Document text", "Another chunk"]
+)
+
+vectors = [item.embedding for item in response.data]
+```
+
+## Assistants API (Threads)
+
+```typescript
+await openai.beta.threads.messages.create("thread_id", {
+  role: "user",
+  content: "Summarize the incident"
+});
+
+const run = await openai.beta.threads.runs.create("thread_id", {
+  assistant_id: "asst_xxxxx"
+});
+
+let status = await openai.beta.threads.runs.retrieve("thread_id", run.id);
+while (status.status !== "completed") {
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  status = await openai.beta.threads.runs.retrieve("thread_id", run.id);
+}
+```
+
+```python
+openai.beta.threads.messages.create(
+  "thread_id",
+  role="user",
+  content="Summarize the incident"
+)
+
+run = openai.beta.threads.runs.create(
+  "thread_id",
+  assistant_id="asst_xxxxx"
+)
+
+status = openai.beta.threads.runs.retrieve("thread_id", run.id)
+while status.status != "completed":
+  import time
+  time.sleep(1)
+  status = openai.beta.threads.runs.retrieve("thread_id", run.id)
+```
+
+## System Prompts and Multi-Turn
+
+```json
+{
+  "model": "gpt-5-mini",
+  "messages": [
+    {"role": "system", "content": "You are a security analyst."},
+    {"role": "user", "content": "Summarize the incident."},
+    {"role": "assistant", "content": "Summary..."},
+    {"role": "user", "content": "List next steps."}
+  ]
+}
+```
+
+```python
+payload = {
+    "model": "gpt-5-mini",
+    "messages": [
+        {"role": "system", "content": "You are a security analyst."},
+        {"role": "user", "content": "Summarize the incident."},
+        {"role": "assistant", "content": "Summary..."},
+        {"role": "user", "content": "List next steps."}
+    ]
+}
+```
+
+## Error Handling
+
+- `403` indicates a blocked request due to policy enforcement.
+- `429` or `5xx` typically indicates provider or rate-limit issues.
+- Use retries with exponential backoff on transient errors.
+
+## Security Controls
+
+```yaml
+security:
+  sensitivity: medium
+  default_action: block
+  features:
+    sanitization: true
+    detection: true
+    policy_enforcement: true
+```
+
+## Next Steps
+
+- Configure providers in [/configuration/](/docs/configuration)
+- Use the SDKs in [https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk) or [https://github.com/koreshield/koreshield/tree/main/koreshield-python-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-python-sdk)

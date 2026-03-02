@@ -1,0 +1,100 @@
+---
+title: Code Generation Security
+description: Preventing malicious code injection and secret leakage in coding assistants.
+published: true
+---
+
+# Code Generation Security
+
+How a developer platform secured AI code completion and refactoring at scale without slowing teams down.
+
+## Challenge
+
+An engineering organization rolled out an AI coding assistant to:
+
+- generate boilerplate and tests
+- refactor legacy services
+- draft infrastructure changes
+
+**Critical requirements:**
+- block insecure code patterns (RCE, SSRF, deserialization)
+- prevent secret leakage in prompts and outputs
+- ensure generated code respects internal policies
+- maintain developer velocity
+
+## Solution
+
+Koreshield scanned both prompts and model outputs. Suspicious requests were blocked, and risky outputs were flagged for review.
+
+```typescript
+import { Koreshield } from 'Koreshield-sdk';
+
+const Koreshield = new Koreshield({
+	apiKey: process.env.KORESHIELD_API_KEY,
+	sensitivity: 'high',
+});
+
+async function secureCodeGen(request: string) {
+	const inputScan = await Koreshield.scan({
+		content: request,
+		metadata: { domain: 'code-gen', repo: 'core-platform' },
+	});
+
+	if (inputScan.threat_detected) {
+		return { error: 'Blocked unsafe request' };
+	}
+
+	const output = await generateCode(request);
+
+	const outputScan = await Koreshield.scan({
+		content: output,
+		metadata: { domain: 'code-gen', output: true },
+	});
+
+	if (outputScan.threat_detected) {
+		return { error: 'Generated code failed security checks' };
+	}
+
+	return { output };
+}
+```
+
+## Threat Model
+
+The security team focused on:
+
+- prompt injection that requests secrets or internal code
+- unsafe code patterns (command injection, SSRF, crypto misuse)
+- licensing violations in suggested code snippets
+- data exfiltration through generated scripts
+
+## Secure-by-Default Controls
+
+- **Secret redaction:** removed API keys and tokens before logging.
+- **Unsafe pattern checks:** blocked code with known exploit signatures.
+- **Policy scopes:** enforced repo-specific constraints.
+- **Review gates:** flagged high-risk outputs for security review.
+
+## CI and Developer Workflow
+
+- **Pre-commit checks:** optional scan on generated diffs.
+- **IDE integration:** warnings inline for risky suggestions.
+- **Sandbox execution:** code executed in isolated test runners.
+
+## Results
+
+- Reduced vulnerable code suggestions in production repos
+- Maintained code-assist latency targets with minimal overhead
+- Centralized audit trail for compliance and change control
+
+## Lessons Learned
+
+- Output scanning is critical for guarding against novel exploit patterns.
+- Keeping policies repo-specific improves developer trust.
+- Review gates should be rare and explainable to avoid friction.
+
+## Related Documentation
+
+- [Attack Detection](/docs/features/attack-detection)
+- [Security](/docs/features/security)
+- [Configuration](/docs/configuration)

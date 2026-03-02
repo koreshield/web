@@ -1,0 +1,93 @@
+---
+title: Customer Service Chatbots
+description: Deploying safe and reliable public-facing support bots.
+published: true
+---
+
+# Customer Service Chatbots
+
+How a global SaaS company secured a high-volume support bot without sacrificing deflection rates.
+
+## Challenge
+
+The support team used an AI chatbot to resolve tier-1 requests:
+
+- billing and subscription questions
+- account recovery and access issues
+- product troubleshooting
+
+**Critical requirements:**
+
+- prevent jailbreaks that expose internal policies
+- avoid sensitive data exposure in public channels
+- maintain response quality across millions of chats
+
+## Solution
+
+Koreshield scanned incoming messages and applied policy enforcement before any model call. Risky requests were routed to human agents.
+
+```typescript
+import { Koreshield } from "Koreshield-sdk";
+
+const Koreshield = new Koreshield({
+  apiKey: process.env.KORESHIELD_API_KEY,
+  sensitivity: "medium",
+});
+
+async function secureSupportChat(userId: string, message: string) {
+  const scan = await Koreshield.scan({
+    content: message,
+    userId,
+    metadata: { channel: "support", tier: "public" },
+  });
+
+  if (scan.threat_detected) {
+    return {
+      handoff: true,
+      reason: scan.threat_type,
+    };
+  }
+
+  return await respondWithBot(message);
+}
+```
+
+## Threat Model
+
+The team focused on common public-channel risks:
+
+- jailbreaks that request internal policies or system prompts
+- impersonation attempts to reset accounts without verification
+- prompt injection in attachments or previous chat history
+- requests to disclose private customer data
+
+## Operational Controls
+
+- **PII masking:** redacted emails, addresses, and account IDs.
+- **Policy scopes:** separate rules for billing, security, and product.
+- **Safe response templates:** constrained output for high-risk topics.
+- **Escalation:** automatic human handoff for blocked or ambiguous intents.
+
+## Routing and Escalation
+
+- **Tiered workflows:** low-risk intents stayed with the bot.
+- **Verification gates:** account changes required verified sessions.
+- **Human review:** security-sensitive prompts were queued for agents.
+
+## Quality and Safety Loop
+
+Weekly reviews of blocked requests helped adjust sensitivity and reduce false positives. The team also maintained a small allowlist of brand-safe phrases for common billing questions.
+
+## Results
+
+- Reduced prompt-injection incidents in public channels
+- Improved agent handoff accuracy for sensitive issues
+- Maintained high deflection without compromising safety
+
+## Related Documentation
+
+## Related Documentation
+
+- [Security](/docs/features/security)
+- [Rate Limiting](/docs/configuration/rate-limiting)
+- [Monitoring & Alerting](/docs/integrations/monitoring)

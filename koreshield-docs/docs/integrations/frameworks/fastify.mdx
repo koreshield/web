@@ -1,0 +1,77 @@
+---
+title: Fastify Integration
+description: Secure Fastify routes with the KoreShield JS SDK.
+sidebar_position: 7
+---
+
+# Fastify Integration
+
+Use the KoreShield JavaScript SDK inside your Fastify server to route LLM traffic through the proxy with security policies applied.
+
+## Use Cases
+
+- API gateways that must enforce LLM policies
+- Multi-tenant apps using centralized security controls
+- Low-latency server routes with audit logs
+
+## Install
+
+```bash
+npm install koreshield
+```
+
+## Configure Environment Variables
+
+```bash
+export KORESHIELD_BASE_URL=http://localhost:8000
+export KORESHIELD_API_KEY=your-koreshield-api-key
+```
+
+## Example: Fastify Route
+
+```typescript
+import Fastify from "fastify";
+import { createClient } from "koreshield";
+
+const app = Fastify({ logger: true });
+
+const client = createClient({
+  baseURL: process.env.KORESHIELD_BASE_URL,
+  apiKey: process.env.KORESHIELD_API_KEY,
+});
+
+app.post("/chat", async (request, reply) => {
+  const body = request.body as {
+    messages: Array<{ role: string; content: string }>;
+  };
+
+  const result = await client.createChatCompletion({
+    model: "gpt-5-mini",
+    messages: body.messages,
+  });
+
+  reply.send(result);
+});
+
+app.listen({ port: 3000, host: "0.0.0.0" });
+```
+
+## Operational Tips
+
+- Keep provider API keys on the KoreShield server.
+- Use the proxy endpoint in all LLM calls for consistent policy enforcement.
+- Add request timeouts for streaming responses.
+- Tune security settings in [/configuration/](/docs/configuration).
+
+## Troubleshooting
+
+- 401 responses: confirm `KORESHIELD_API_KEY`
+- Slow responses: enable streaming and increase timeouts
+- Provider errors: verify provider keys on the proxy
+
+## Next Steps
+
+- Review SDK usage in [https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk)
+- Configure providers in [/configuration/](/docs/configuration)
+
+

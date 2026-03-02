@@ -1,0 +1,83 @@
+---
+title: AutoGen Integration
+description: Secure multi-agent workflows in AutoGen with KoreShield.
+sidebar_position: 2
+---
+
+# AutoGen Integration
+
+Use KoreShield as a proxy for AutoGen agent requests to enforce sanitization, detection, and policy controls before traffic reaches your provider.
+
+## Use Cases
+
+- Multi-agent workflows with strict safety policies
+- Centralized auditing for agent traffic
+- Shared rate limiting across agent fleets
+
+## Prerequisites
+
+- A running KoreShield instance
+- Provider API key configured on the KoreShield server
+- AutoGen installed in your Python app
+
+## Environment Variables
+
+```bash
+KORESHIELD_BASE_URL=http://localhost:8000
+KORESHIELD_API_KEY=your-koreshield-api-key
+```
+
+## Example: AutoGen Agents with KoreShield
+
+```python
+import autogen
+
+llm_config = {
+    "config_list": [
+        {
+            "model": "gpt-5-mini",
+            "api_key": "unused",
+            "base_url": "http://localhost:8000",
+            "default_headers": {
+                "Authorization": "Bearer your-koreshield-api-key"
+            }
+        }
+    ],
+    "temperature": 0.2
+}
+
+assistant = autogen.AssistantAgent(
+    name="assistant",
+    llm_config=llm_config
+)
+
+user_proxy = autogen.UserProxyAgent(
+    name="user",
+    human_input_mode="NEVER",
+    max_consecutive_auto_reply=3
+)
+
+user_proxy.initiate_chat(
+    assistant,
+    message="Summarize the incident report and flag risky items."
+)
+```
+
+## Security Notes
+
+- Keep provider API keys on the KoreShield server.
+- Use a Koreshield API key for client access when needed.
+- Tune policies in [/configuration/](/docs/configuration).
+
+## Troubleshooting
+
+- 401 responses: confirm `Authorization: Bearer <KORESHIELD_API_KEY>`
+- Agent errors: confirm AutoGen uses the proxy `base_url`
+- Provider failures: verify provider keys on the KoreShield server
+
+## Next Steps
+
+- Review SDK usage in [https://github.com/koreshield/koreshield/tree/main/koreshield-python-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-python-sdk)
+- Configure providers in [/configuration/](/docs/configuration)
+
+

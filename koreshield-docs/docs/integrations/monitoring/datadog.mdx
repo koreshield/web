@@ -1,0 +1,77 @@
+---
+title: Datadog Monitoring
+description: Export KoreShield metrics to Datadog using Prometheus scraping.
+---
+
+# Datadog Monitoring
+
+KoreShield exposes Prometheus metrics at `/metrics`. Datadog can scrape these metrics using the Prometheus integration or OpenMetrics check.
+
+## Use Cases
+
+- Unified observability across infra and app layers
+- Alerting on safety policy outcomes
+- Correlating errors with provider latency
+
+## Prerequisites
+
+- KoreShield running with `/metrics` reachable
+- Datadog Agent installed on the host or as a sidecar
+
+## Enable Prometheus Metrics
+
+KoreShield exposes metrics by default at:
+
+```
+http://<koreshield-host>:8000/metrics
+```
+
+## Datadog Agent Configuration
+
+Create a Prometheus/OpenMetrics check config:
+
+```yaml
+init_config:
+
+instances:
+  - prometheus_url: http://<koreshield-host>:8000/metrics
+    namespace: koreshield
+    metrics:
+      - koreshield_requests_total
+      - koreshield_requests_duration_seconds
+      - koreshield_requests_blocked_total
+      - koreshield_attacks_detected_total
+      - koreshield_provider_requests_total
+      - koreshield_provider_latency_seconds
+```
+
+## Suggested Dashboards
+
+- Requests per second
+- Blocked request rate
+- Attack detections
+- Provider latency
+
+## Logs and Traces
+
+- Enable `json_logs: true` and ship logs via Datadog Agent
+- Add a service name tag for the KoreShield proxy
+- Use log correlation to trace incidents back to requests
+
+## Security Notes
+
+- Restrict access to `/metrics` with network controls.
+- Use TLS for traffic between the Agent and KoreShield.
+
+## Troubleshooting
+
+- Missing metrics: confirm the Agent can reach `/metrics`
+- High-cardinality tags: avoid injecting dynamic labels
+- No logs: confirm container log integration is enabled
+
+## Next Steps
+
+- Verify Prometheus metrics in [prometheus.mdx](prometheus.mdx)
+- Configure policies in [/configuration/](/docs/configuration)
+
+

@@ -1,0 +1,247 @@
+---
+title: Anthropic Claude Integration
+description: Secure Claude requests through Koreshield with streaming and tool support.
+sidebar_position: 1
+published: true
+---
+
+# Anthropic Claude Integration
+
+Protect Claude workflows by scanning inputs with Koreshield and routing requests through the proxy.
+
+## Installation
+
+```bash
+npm install koreshield @anthropic-ai/sdk
+```
+
+```bash
+pip install koreshield anthropic
+```
+
+## Basic Integration (TypeScript)
+
+```typescript
+import { Koreshield } from "koreshield";
+import Anthropic from "@anthropic-ai/sdk";
+
+const koreshield = new Koreshield({
+  apiKey: process.env.KORESHIELD_API_KEY
+});
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY
+});
+
+export async function secureClaude(userMessage: string) {
+  const scan = await koreshield.scan({ content: userMessage });
+  if (scan.threat_detected) {
+    throw new Error(`Threat: ${scan.threat_type}`);
+  }
+
+  const message = await anthropic.messages.create({
+    model: "claude-3-5-sonnet-20241022",
+    max_tokens: 1024,
+    messages: [{ role: "user", content: userMessage }]
+  });
+
+  return message.content[0].text;
+}
+```
+
+## Basic Integration (Python)
+
+```python
+import os
+from koreshield import KoreShieldClient
+from anthropic import Anthropic
+
+koreshield = KoreShieldClient(api_key=os.environ["KORESHIELD_API_KEY"])
+anthropic = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+
+def secure_claude(user_message: str) -> str:
+    scan = koreshield.scan_prompt(user_message)
+    if not scan.is_safe:
+        raise Exception(f"Threat: {scan.threat_level}")
+
+    message = anthropic.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": user_message}]
+    )
+
+    return message.content[0].text
+```
+
+## Proxy Mode
+
+```typescript
+const response = await fetch("http://localhost:8000/v1/chat/completions", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    model: "claude-3-5-sonnet-20241022",
+    messages: [{ role: "user", content: "Summarize the incident." }]
+  })
+});
+```
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/v1/chat/completions",
+    json={
+        "model": "claude-3-5-sonnet-20241022",
+        "messages": [{"role": "user", "content": "Summarize the incident."}]
+    }
+)
+```
+
+## Proxy Mode (Streaming)
+
+```typescript
+const response = await fetch("http://localhost:8000/v1/chat/completions", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+  model: "claude-3-5-sonnet-20241022",
+  stream: true,
+  messages: [{ role: "user", content: "Draft a compliance summary." }]
+  })
+});
+```
+
+```python
+response = requests.post(
+  "http://localhost:8000/v1/chat/completions",
+  json={
+    "model": "claude-3-5-sonnet-20241022",
+    "stream": True,
+    "messages": [{"role": "user", "content": "Draft a compliance summary."}]
+  },
+  stream=True
+)
+
+for line in response.iter_lines():
+  if line:
+    print(line.decode("utf-8"))
+```
+
+## Streaming
+
+```typescript
+const stream = await anthropic.messages.stream({
+  model: "claude-3-5-sonnet-20241022",
+  max_tokens: 1024,
+  messages: [{ role: "user", content: "Draft a security summary." }]
+});
+
+for await (const event of stream) {
+  if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+    process.stdout.write(event.delta.text);
+  }
+}
+```
+
+```python
+with anthropic.messages.stream(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Draft a security summary."}]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="")
+```
+
+## Tool Use
+
+```typescript
+const tools: Anthropic.Tool[] = [
+  {
+    name: "search_database",
+    description: "Search the database",
+    input_schema: {
+      type: "object",
+      properties: { query: { type: "string" } },
+      required: ["query"]
+    }
+  }
+];
+
+const message = await anthropic.messages.create({
+  model: "claude-3-5-sonnet-20241022",
+  max_tokens: 1024,
+  messages: [{ role: "user", content: "Search for user 123" }],
+  tools
+});
+```
+
+```python
+tools = [
+  {
+    "name": "search_database",
+    "description": "Search the database",
+    "input_schema": {
+      "type": "object",
+      "properties": {"query": {"type": "string"}},
+      "required": ["query"]
+    }
+  }
+]
+
+message = anthropic.messages.create(
+  model="claude-3-5-sonnet-20241022",
+  max_tokens=1024,
+  messages=[{"role": "user", "content": "Search for user 123"}],
+  tools=tools
+)
+```
+
+## System Prompts and Multi-Turn
+
+```json
+{
+  "model": "claude-3-5-sonnet-20241022",
+  "messages": [
+    {"role": "system", "content": "You are a compliance assistant."},
+    {"role": "user", "content": "Summarize the incident."},
+    {"role": "assistant", "content": "Summary..."},
+    {"role": "user", "content": "List next steps."}
+  ]
+}
+```
+
+```python
+payload = {
+    "model": "claude-3-5-sonnet-20241022",
+    "messages": [
+        {"role": "system", "content": "You are a compliance assistant."},
+        {"role": "user", "content": "Summarize the incident."},
+        {"role": "assistant", "content": "Summary..."},
+        {"role": "user", "content": "List next steps."}
+    ]
+}
+```
+
+## Error Handling
+
+- `403` indicates a blocked request due to policy enforcement.
+- `429` or `5xx` typically indicates provider or rate-limit issues.
+
+## Security Controls
+
+```yaml
+security:
+  sensitivity: high
+  default_action: block
+  features:
+    sanitization: true
+    detection: true
+    policy_enforcement: true
+```
+
+## Next Steps
+
+- Configure providers in [/configuration/](/docs/configuration)
+- Try RAG protections in [https://github.com/koreshield/koreshield/tree/main/koreshield-python-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-python-sdk)

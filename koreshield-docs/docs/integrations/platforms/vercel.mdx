@@ -1,0 +1,100 @@
+---
+title: Vercel Integration
+description: Deploy Koreshield-protected apps on Vercel with edge and serverless support.
+---
+
+# Vercel Integration
+
+Use KoreShield as a security proxy in front of your LLM requests from Vercel. You can deploy the KoreShield server separately and point your Vercel functions or edge handlers at it.
+
+## Use Cases
+
+- Edge and serverless LLM APIs with centralized security
+- Multi-tenant apps that share one proxy deployment
+- Rapid deployments with minimal infrastructure
+
+## Architecture
+
+- Vercel app (Edge Functions or Serverless Functions)
+- KoreShield proxy (self-hosted or cloud)
+- LLM provider (OpenAI, Anthropic, Gemini, Azure OpenAI, DeepSeek)
+
+## Prerequisites
+
+- A running KoreShield instance
+- Provider API key configured on the KoreShield server
+
+## Configure Environment Variables
+
+Set these in your Vercel project:
+
+```bash
+KORESHIELD_BASE_URL=https://your-koreshield-instance.com
+KORESHIELD_API_KEY=your-koreshield-api-key
+```
+
+## Example: Edge Function
+
+```typescript
+import { createClient } from "koreshield";
+
+const client = createClient({
+  baseURL: process.env.KORESHIELD_BASE_URL,
+  apiKey: process.env.KORESHIELD_API_KEY,
+});
+
+export const config = { runtime: "edge" };
+
+export default async function handler(request: Request): Promise<Response> {
+  const body = await request.json();
+
+  const result = await client.createChatCompletion({
+    model: "gpt-5-mini",
+    messages: body.messages,
+  });
+
+  return new Response(JSON.stringify(result), {
+    headers: { "content-type": "application/json" },
+  });
+}
+```
+
+## Example: Serverless Function
+
+```typescript
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { createClient } from "koreshield";
+
+const client = createClient({
+  baseURL: process.env.KORESHIELD_BASE_URL,
+  apiKey: process.env.KORESHIELD_API_KEY,
+});
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const result = await client.createChatCompletion({
+    model: "gpt-5-mini",
+    messages: req.body.messages,
+  });
+
+  res.status(200).json(result);
+}
+```
+
+## Operational Tips
+
+- Use `KORESHIELD_BASE_URL` for the proxy endpoint, not the provider endpoint.
+- Keep provider keys on the KoreShield server, not in the Vercel app.
+- Adjust security policies in [/configuration/](/docs/configuration).
+
+## Troubleshooting
+
+- 401 responses: confirm `KORESHIELD_API_KEY` is set in Vercel
+- Edge runtime errors: verify SDK compatibility with Edge runtime
+- Timeouts: increase function timeout for long responses
+
+## Next Steps
+
+- Review SDK usage in [https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk)
+- Configure providers in [/configuration/](/docs/configuration)
+
+

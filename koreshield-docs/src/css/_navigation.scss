@@ -1,0 +1,150 @@
+/* Navigation Bar Styles */
+.navbar {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  
+  &__inner {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  &__title {
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+  
+  &__item {
+    &--search {
+      .DocSearch-Button {
+        border-radius: 8px;
+        background-color: #ffffff;
+        border: 1px solid var(--ifm-color-primary);
+        color: var(--ifm-color-primary);
+        box-shadow: 0 1px 2px rgba(17, 24, 39, 0.12);
+        
+        &:hover {
+          background-color: var(--ifm-color-primary-lightest);
+          box-shadow: 0 2px 6px rgba(17, 24, 39, 0.16);
+        }
+
+        &:active {
+          transform: translateY(1px);
+        }
+      }
+
+      .DocSearch-Button,
+      .navbar__search-input {
+        width: 240px;
+        min-width: 240px;
+        padding: 0 12px;
+        justify-content: space-between;
+      }
+
+      .DocSearch-Button-Placeholder {
+        display: inline;
+        color: #0b1220;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        font-size: 0.95rem;
+      }
+
+      .DocSearch-Button-Key {
+        display: inline-flex;
+        color: #0b1220;
+        font-weight: 800;
+        background-color: #ffffff;
+        border: 1px solid #0b1220;
+        font-size: 0.85rem;
+        height: 20px;
+        line-height: 20px;
+        box-shadow: none;
+      }
+
+      .navbar__search-input::placeholder {
+        color: #0f172a;
+        opacity: 0.9;
+        font-weight: 600;
+      }
+    }
+  }
+  
+  &__link {
+    font-weight: 500;
+    transition: color 0.2s ease;
+    
+    &:hover {
+      color: var(--ifm-color-primary);
+      text-decoration: none;
+    }
+    
+    &--active {
+      color: var(--ifm-color-primary);
+      font-weight: 600;
+    }
+  }
+}
+
+/* Navbar dropdown */
+.navbar__dropdown {
+  .dropdown__menu {
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    padding: 0.5rem;
+    
+    .dropdown__link {
+      border-radius: 4px;
+      padding: 0.5rem 0.75rem;
+      
+      &:hover {
+        background-color: var(--bg-tertiary);
+      }
+      
+      &--active {
+        background-color: var(--ifm-color-primary-lightest);
+        color: var(--ifm-color-primary-darkest);
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+[data-theme='dark'] {
+  .navbar {
+    box-shadow: 0 1px 3px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .navbar__item--search {
+    .DocSearch-Button {
+      background-color: var(--ifm-background-surface-color);
+      border-color: var(--ifm-color-primary-light);
+      color: var(--ifm-color-primary-light);
+      box-shadow: 0 1px 2px rgba(255, 255, 255, 0.08);
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 2px 6px rgba(255, 255, 255, 0.12);
+      }
+    }
+
+    .DocSearch-Button-Placeholder {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .DocSearch-Button-Key {
+      color: #ffffff;
+      background-color: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.9);
+      font-weight: 800;
+    }
+
+    .navbar__search-input::placeholder {
+      color: #f8fafc;
+      opacity: 0.95;
+    }
+  }
+  
+  .navbar__dropdown .dropdown__menu .dropdown__link--active {
+    background-color: var(--ifm-color-primary-darkest);
+    color: var(--ifm-color-primary-lightest);
+  }
+}

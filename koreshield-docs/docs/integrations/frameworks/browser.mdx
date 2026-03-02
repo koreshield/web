@@ -1,0 +1,628 @@
+---
+title: Browser Integration
+description: Direct browser integration with Koreshield SDK
+sidebar_position: 3
+---
+
+# Browser Integration
+
+Integrate Koreshield directly in the browser without build tools or frameworks. Perfect for static sites, vanilla JavaScript applications, or when you need minimal dependencies.
+
+## Quick Start
+
+### CDN Installation
+
+Add Koreshield to your HTML page:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My App with Koreshield</title>
+</head>
+<body>
+    <div id="app">
+        <h1>Secure AI Chat</h1>
+        <div id="messages"></div>
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <!-- Koreshield SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/Koreshield@latest/dist/browser/index.global.js"></script>
+
+    <script>
+        // Initialize Koreshield
+        const Koreshield = Koreshield.createClient({
+            baseURL: 'https://your-Koreshield-instance.com',
+            apiKey: 'your-api-key'
+        });
+
+        let messages = [];
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const messageText = input.value.trim();
+
+            if (!messageText) return;
+
+            // Add user message
+            messages.push({ role: 'user', content: messageText });
+            displayMessage('user', messageText);
+            input.value = '';
+
+            try {
+                // Send to Koreshield
+                const response = await Koreshield.createChatCompletion({
+                    model: 'gpt-3.5-turbo',
+                    messages: messages
+                });
+
+                const aiMessage = response.choices[0].message.content;
+                messages.push({ role: 'assistant', content: aiMessage });
+                displayMessage('assistant', aiMessage);
+
+            } catch (error) {
+                displayMessage('error', `Error: ${error.message}`);
+            }
+        }
+
+        function displayMessage(role, content) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            messageDiv.innerHTML = `<strong>${role}:</strong> ${content}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
+```
+
+## Alternative CDN Options
+
+### jsDelivr (Recommended)
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/Koreshield@latest/dist/browser/index.global.js"></script>
+```
+
+### UNPKG
+
+```html
+<script src="https://unpkg.com/Koreshield@latest/dist/browser/index.global.js"></script>
+```
+
+### Specific Version
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/Koreshield@1.0.0/dist/browser/index.global.js"></script>
+```
+
+## Configuration
+
+### Basic Configuration
+
+```javascript
+const Koreshield = Koreshield.createClient({
+    baseURL: 'https://your-Koreshield-instance.com', // Required
+    apiKey: 'your-api-key',                          // Optional
+    timeout: 30000,                                  // Request timeout
+    debug: false                                     // Debug logging
+});
+```
+
+### Environment Variables
+
+For client-side applications, avoid hardcoding secrets. Use a configuration endpoint:
+
+```javascript
+// Fetch config from your server
+async function initializeKoreshield() {
+    try {
+        const configResponse = await fetch('/api/config');
+        const config = await configResponse.json();
+
+        return Koreshield.createClient({
+            baseURL: config.KoreshieldUrl,
+            apiKey: config.apiKey,
+            debug: config.debug
+        });
+    } catch (error) {
+        console.error('Failed to initialize Koreshield:', error);
+        throw error;
+    }
+}
+```
+
+## Core API Usage
+
+### Chat Completions
+
+```javascript
+async function chat(message) {
+    try {
+        const response = await Koreshield.createChatCompletion({
+            model: 'gpt-3.5-turbo',
+            messages: [
+                { role: 'system', content: 'You are a helpful assistant.' },
+                { role: 'user', content: message }
+            ]
+        });
+
+        return response.choices[0].message.content;
+    } catch (error) {
+        console.error('Chat error:', error);
+        throw error;
+    }
+}
+```
+
+### Security Options
+
+```javascript
+const response = await Koreshield.createChatCompletion({
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: 'Hello!' }]
+}, {
+    sensitivity: 'high'  // 'low', 'medium', 'high'
+});
+```
+
+### Monitoring
+
+```javascript
+// Get security metrics
+async function checkMetrics() {
+    try {
+        const metrics = await Koreshield.getMetrics();
+        console.log('Total requests:', metrics.totalRequests);
+        console.log('Security violations:', metrics.securityViolations);
+    } catch (error) {
+        console.error('Metrics error:', error);
+    }
+}
+
+// Get security events
+async function checkSecurityEvents() {
+    try {
+        const events = await Koreshield.getSecurityEvents({
+            limit: 10,
+            severity: 'high'
+        });
+
+        if (events.length > 0) {
+            console.warn('Security events detected:', events);
+            // Handle security events (show notification, etc.)
+        }
+    } catch (error) {
+        console.error('Security events error:', error);
+    }
+}
+```
+
+## OpenAI Compatibility
+
+Use Koreshield as a drop-in replacement for OpenAI:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/Koreshield@latest/dist/browser/index.global.js"></script>
+<script>
+const openai = new Koreshield.KoreshieldOpenAI({
+    baseURL: 'https://your-Koreshield-instance.com',
+    apiKey: 'your-api-key'
+});
+
+// Use exactly like OpenAI SDK
+async function chat() {
+    const completion = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: 'Hello!' }]
+    });
+
+    console.log(completion.choices[0].message.content);
+}
+</script>
+```
+
+## Complete Chat Application
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koreshield Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .chat-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .message.user {
+            background: #007bff;
+            color: white;
+            margin-left: 20%;
+        }
+        .message.assistant {
+            background: #f8f9fa;
+            margin-right: 20%;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+        input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 16px;
+            margin-left: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔒 Secure AI Chat</h1>
+    <div class="chat-container">
+        <div id="messages" class="messages"></div>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Type your message...">
+            <button onclick="sendMessage()" id="sendButton">Send</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/Koreshield@latest/dist/browser/index.global.js"></script>
+    <script>
+        let Koreshield;
+        let messages = [];
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+
+        // Initialize Koreshield
+        async function init() {
+            try {
+                Koreshield = Koreshield.createClient({
+                    baseURL: 'https://your-Koreshield-instance.com', // Replace with your instance
+                    apiKey: 'your-api-key', // Replace with your key
+                    debug: true
+                });
+
+                displayMessage('system', 'Koreshield initialized successfully! 🔒');
+            } catch (error) {
+                displayMessage('error', `Failed to initialize: ${error.message}`);
+            }
+        }
+
+        // Send message
+        async function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (!messageText || !Koreshield) return;
+
+            // Add user message
+            messages.push({ role: 'user', content: messageText });
+            displayMessage('user', messageText);
+            messageInput.value = '';
+            sendButton.disabled = true;
+            sendButton.textContent = 'Sending...';
+
+            try {
+                const response = await Koreshield.createChatCompletion({
+                    model: 'gpt-3.5-turbo',
+                    messages: messages
+                });
+
+                const aiMessage = response.choices[0].message.content;
+                messages.push({ role: 'assistant', content: aiMessage });
+                displayMessage('assistant', aiMessage);
+
+            } catch (error) {
+                let errorMessage = 'An error occurred';
+
+                if (error.code === 'SECURITY_VIOLATION') {
+                    errorMessage = `Security violation: ${error.details || 'Content blocked'}`;
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+
+                displayMessage('error', errorMessage);
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send';
+            }
+        }
+
+        // Display message
+        function displayMessage(role, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            if (role === 'user') {
+                messageDiv.textContent = content;
+            } else if (role === 'assistant') {
+                messageDiv.innerHTML = `<strong>AI:</strong> ${content}`;
+            } else if (role === 'system') {
+                messageDiv.innerHTML = `<em>${content}</em>`;
+            } else {
+                messageDiv.innerHTML = `<strong>Error:</strong> ${content}`;
+            }
+
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Handle Enter key
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !sendButton.disabled) {
+                sendMessage();
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
+```
+
+## Error Handling
+
+### Global Error Handling
+
+```javascript
+window.addEventListener('error', function(e) {
+    console.error('Global error:', e.error);
+    // Report to monitoring service
+});
+
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('Unhandled promise rejection:', e.reason);
+    // Report to monitoring service
+});
+```
+
+### Network Error Handling
+
+```javascript
+async function safeApiCall(apiFunction) {
+    try {
+        return await apiFunction();
+    } catch (error) {
+        if (error.code === 'NETWORK_ERROR') {
+            // Handle network issues
+            showOfflineMessage();
+        } else if (error.code === 'SECURITY_VIOLATION') {
+            // Handle security violations
+            showSecurityWarning(error.details);
+        } else {
+            // Handle other errors
+            showGenericError(error.message);
+        }
+        throw error;
+    }
+}
+```
+
+## Performance Optimization
+
+### Connection Pooling
+
+```javascript
+// Reuse Koreshield instance
+let KoreshieldInstance;
+
+function getKoreshield() {
+    if (!KoreshieldInstance) {
+        KoreshieldInstance = Koreshield.createClient({
+            baseURL: 'https://your-Koreshield-instance.com',
+            apiKey: 'your-api-key'
+        });
+    }
+    return KoreshieldInstance;
+}
+```
+
+### Request Debouncing
+
+```javascript
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+const debouncedSendMessage = debounce(sendMessage, 300);
+```
+
+### Caching
+
+```javascript
+const responseCache = new Map();
+
+async function cachedChat(messages) {
+    const cacheKey = JSON.stringify(messages);
+
+    if (responseCache.has(cacheKey)) {
+        return responseCache.get(cacheKey);
+    }
+
+    const response = await Koreshield.createChatCompletion({
+        model: 'gpt-3.5-turbo',
+        messages
+    });
+
+    responseCache.set(cacheKey, response);
+    return response;
+}
+```
+
+## Security Considerations
+
+### API Key Protection
+
+Never expose API keys in client-side code:
+
+```javascript
+// ❌ Bad - API key in client code
+const Koreshield = Koreshield.createClient({
+    baseURL: 'https://api.example.com',
+    apiKey: 'sk-1234567890abcdef' // Exposed to users!
+});
+
+// ✅ Good - Fetch from server
+async function init() {
+    const config = await fetch('/api/Koreshield-config').then(r => r.json());
+    return Koreshield.createClient(config);
+}
+```
+
+### Content Security Policy
+
+Add CSP headers to protect against XSS:
+
+```html
+<meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://cdn.jsdelivr.net;
+    connect-src 'self' https://your-Koreshield-instance.com;
+">
+```
+
+### Input Validation
+
+Always validate user input before sending:
+
+```javascript
+function validateMessage(message) {
+    if (!message || typeof message !== 'string') {
+        throw new Error('Invalid message');
+    }
+
+    if (message.length > 10000) {
+        throw new Error('Message too long');
+    }
+
+    // Additional validation logic
+    return message.trim();
+}
+```
+
+## Browser Compatibility
+
+Koreshield SDK supports all modern browsers:
+
+- Chrome 70+
+- Firefox 65+
+- Safari 12+
+- Edge 79+
+
+For older browsers, consider using a polyfill:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.32.0/index.js"></script>
+```
+
+## Troubleshooting
+
+### CORS Issues
+
+If you encounter CORS errors:
+
+1. Ensure your Koreshield instance allows your domain
+2. Check server CORS configuration
+3. Use a proxy endpoint on your server
+
+### Network Errors
+
+Common network issues:
+
+- **Timeout**: Increase timeout value or check network connectivity
+- **DNS Resolution**: Verify domain name resolution
+- **SSL/TLS**: Ensure HTTPS is properly configured
+
+### Debug Mode
+
+Enable debug logging for troubleshooting:
+
+```javascript
+const Koreshield = Koreshield.createClient({
+    baseURL: 'https://your-Koreshield-instance.com',
+    debug: true
+});
+```
+
+Check browser console for detailed logs.
+
+## Deployment
+
+### Static Hosting
+
+Deploy to any static host (Netlify, Vercel, GitHub Pages):
+
+```html
+<!-- index.html -->
+<script src="https://cdn.jsdelivr.net/npm/Koreshield@latest/dist/browser/index.global.js"></script>
+```
+
+### CDN Integration
+
+For better performance, host the SDK on your CDN:
+
+```html
+<script src="https://your-cdn.com/Koreshield/index.global.js"></script>
+```
+
+## Next Steps
+
+- 📖 [SDK Reference](https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk)
+- 🎯 [Framework Integrations](/docs/integrations)
+- 🔒 [Security Best Practices](/docs/features/security)
+- 📊 [Monitoring Guide](/docs/integrations/monitoring)

@@ -1,0 +1,81 @@
+---
+title: Grafana Monitoring
+description: Visualize KoreShield metrics with Grafana dashboards.
+---
+
+# Grafana Monitoring
+
+Grafana can visualize KoreShield metrics by connecting to Prometheus and building dashboards around request volume, block rate, and provider latency.
+
+## Use Cases
+
+- Operator dashboards for LLM proxy health
+- Executive reporting on safety outcomes
+- Latency analysis per provider and model
+
+## Prerequisites
+
+- Prometheus scraping KoreShield metrics at `/metrics`
+- Grafana connected to your Prometheus data source
+
+## Add Prometheus Data Source
+
+In Grafana:
+
+1. Configuration -> Data sources
+2. Add data source -> Prometheus
+3. Set the URL to your Prometheus server
+4. Save and test
+
+## Suggested Panels
+
+Create panels using the following PromQL queries:
+
+- Requests per minute:
+
+```promql
+rate(koreshield_requests_total[1m])
+```
+
+- Blocked requests per minute:
+
+```promql
+rate(koreshield_requests_blocked_total[1m])
+```
+
+- Attack detections per minute:
+
+```promql
+rate(koreshield_attacks_detected_total[1m])
+```
+
+- P95 request latency:
+
+```promql
+histogram_quantile(0.95, sum(rate(koreshield_requests_duration_seconds_bucket[5m])) by (le))
+```
+
+- Provider latency by provider:
+
+```promql
+histogram_quantile(0.95, sum(rate(koreshield_provider_latency_seconds_bucket[5m])) by (le, provider))
+```
+
+## Alert Ideas
+
+- High block rate
+- Sudden spike in attacks detected
+- Provider latency above threshold
+
+## Troubleshooting
+
+- No data: confirm Prometheus scrape targets are healthy
+- Wrong labels: review scrape config and relabeling rules
+- Slow panels: increase Prometheus resources or narrow query ranges
+
+## Next Steps
+
+- Ensure Prometheus is configured in [prometheus.mdx](prometheus.mdx)
+- Configure policies in [/configuration/](/docs/configuration)
+
+

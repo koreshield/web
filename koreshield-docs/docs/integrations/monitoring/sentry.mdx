@@ -1,0 +1,52 @@
+---
+title: Sentry Monitoring
+description: Track KoreShield errors and security context with Sentry.
+---
+
+# Sentry Monitoring
+
+Use Sentry to track errors from your KoreShield deployment and correlate incidents with security events. Sentry is typically configured in your hosting environment and application stack.
+
+## Use Cases
+
+- Error tracking for production proxy traffic
+- Incident correlation with request IDs and policy outcomes
+- Alerting on deployment regressions
+
+## Configure Sentry in Your Environment
+
+Set the DSN in your runtime environment (example):
+
+```bash
+SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
+```
+
+## Container Deployment (Example)
+
+```bash
+docker run -d \
+  -p 8000:8000 \
+  -e SENTRY_DSN=$SENTRY_DSN \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -v $(pwd)/config/config.yaml:/app/config/config.yaml \
+  koreshield
+```
+
+## Operational Tips
+
+- Add Sentry to your reverse proxy or sidecar if you centralize error capture.
+- Correlate errors with Koreshield logs and security events.
+- Use `json_logs: true` for structured log ingestion.
+
+## Troubleshooting
+
+- Missing events: confirm DSN is set in runtime environment
+- No stack traces: ensure debug symbols are available if needed
+- High volume: adjust sampling and alert thresholds
+
+## Next Steps
+
+- Review logging and policy config in [/configuration/](/docs/configuration)
+- Add metrics in [prometheus.mdx](prometheus.mdx)
+
+

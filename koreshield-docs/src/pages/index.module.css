@@ -1,0 +1,151 @@
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.heroBanner {
+  padding: 5rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--ifm-background-color);
+  color: var(--ifm-color-content);
+}
+
+.heroBanner h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.heroBanner :global(.hero__subtitle) {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 3rem 1rem;
+  }
+  
+  .heroBanner h1 {
+    font-size: 2rem;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Feature Section */
+.features {
+  padding: 5rem 0;
+  background-color: var(--ifm-background-color);
+}
+
+.features h3 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.features p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Quick Start Section */
+.quickstart {
+  padding: 5rem 0;
+  background-color: var(--ifm-background-color);
+}
+
+.quickstart h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.quickstart p {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.codeExample {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+.codeExample pre {
+  margin: 0;
+  background: transparent;
+}
+
+.codeExample code {
+  color: #d4d4d4;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Use Cases Section */
+.usecases {
+  padding: 5rem 0;
+  background-color: var(--ifm-background-color);
+}
+
+.usecases h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.usecases h3 {
+  margin-bottom: 1rem;
+  font-size: 1.35rem;
+}
+
+.usecaseGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem 3rem;
+}
+
+.usecaseItem {
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.usecaseItem h3 {
+  margin-bottom: 0.75rem;
+}
+
+.usecaseItem p {
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+}
+
+@media screen and (max-width: 996px) {
+  .usecaseGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-width: 996px) {
+  .quickstart :global(.row) {
+    flex-direction: column-reverse;
+  }
+  
+  .quickstart :global(.col) {
+    max-width: 100% !important;
+    margin-bottom: 2rem;
+  }
+}

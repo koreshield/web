@@ -1,0 +1,501 @@
+---
+title: Kubernetes Deployment
+description: Deploy and scale Koreshield on Kubernetes with Helm charts
+published: true
+---
+
+# Kubernetes Deployment
+
+Deploy Koreshield on Kubernetes for production-grade scalability and reliability.
+
+## Quick Start with Helm
+
+```bash
+# Add Helm repository
+helm repo add Koreshield https://charts.Koreshield.com
+helm repo update
+
+# Install Koreshield
+helm install Koreshield Koreshield/Koreshield \
+  --set apiKey=ks_prod_xxxxxxxxxxxx \
+  --set ingress.enabled=true \
+  --set ingress.host=Koreshield.yourdomain.com
+```
+
+## Manual Deployment
+
+### Namespace
+
+```yaml
+# namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: Koreshield
+```
+
+### ConfigMap
+
+```yaml
+# configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: Koreshield-config
+  namespace: Koreshield
+data:
+  config.yaml: |
+    sensitivity: medium
+    log_level: info
+    prometheus_enabled: true
+```
+
+### Secret
+
+```yaml
+# secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: Koreshield-secrets
+  namespace: Koreshield
+type: Opaque
+stringData:
+  api-key: ks_prod_xxxxxxxxxxxx
+  database-url: postgresql://user:pass@postgres:5432/Koreshield
+  redis-url: redis://redis:6379
+```
+
+### Deployment
+
+```yaml
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: Koreshield
+  namespace: Koreshield
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: Koreshield
+  template:
+    metadata:
+      labels:
+        app: Koreshield
+        version: v2.0.0
+    spec:
+      containers:
+        - name: Koreshield
+          image: Koreshield/Koreshield:2.0.0
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9090
+              name: metrics
+          env:
+            - name: Koreshield_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: Koreshield-secrets
+                  key: api-key
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: Koreshield-secrets
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: Koreshield-secrets
+                  key: redis-url
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: Koreshield-config
+```
+
+### Service
+
+```yaml
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: Koreshield
+  namespace: Koreshield
+  labels:
+    app: Koreshield
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: metrics
+  selector:
+    app: Koreshield
+```
+
+### Ingress
+
+```yaml
+# ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: Koreshield
+  namespace: Koreshield
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - Koreshield.yourdomain.com
+      secretName: Koreshield-tls
+  rules:
+    - host: Koreshield.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: Koreshield
+                port:
+                  number: 80
+```
+
+## Helm Values
+
+```yaml
+# values.yaml
+replicaCount: 3
+
+image:
+  repository: Koreshield/Koreshield
+  tag: "2.0.0"
+  pullPolicy: IfNotPresent
+
+apiKey: "" # Set via --set or secrets
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  host: Koreshield.yourdomain.com
+  tls:
+    enabled: true
+    secretName: Koreshield-tls
+
+resources:
+  requests:
+    memory: 2Gi
+    cpu: 1
+  limits:
+    memory: 4Gi
+    cpu: 2
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+postgresql:
+  enabled: true
+  auth:
+    database: Koreshield
+    username: Koreshield
+
+redis:
+  enabled: true
+  architecture: standalone
+
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+```
+
+## Auto-Scaling
+
+### Horizontal Pod Autoscaler
+
+```yaml
+# hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: Koreshield
+  namespace: Koreshield
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: Koreshield
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+```
+
+### Vertical Pod Autoscaler
+
+```yaml
+# vpa.yaml
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: Koreshield
+  namespace: Koreshield
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: Koreshield
+  updatePolicy:
+    updateMode: "Auto"
+```
+
+## Monitoring
+
+### ServiceMonitor for Prometheus
+
+```yaml
+# servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: Koreshield
+  namespace: Koreshield
+spec:
+  selector:
+    matchLabels:
+      app: Koreshield
+  endpoints:
+    - port: metrics
+      interval: 30s
+```
+
+## Storage
+
+### Persistent Volume Claim
+
+```yaml
+# pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: Koreshield-data
+  namespace: Koreshield
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: fast-ssd
+```
+
+## Security
+
+### Network Policy
+
+```yaml
+# networkpolicy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: Koreshield
+  namespace: Koreshield
+spec:
+  podSelector:
+    matchLabels:
+      app: Koreshield
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+```
+
+### Pod Security Policy
+
+```yaml
+# psp.yaml
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: Koreshield
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - configMap
+    - secret
+    - emptyDir
+    - persistentVolumeClaim
+  runAsUser:
+    rule: MustRunAsNonRoot
+  seLinux:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+```
+
+## Multi-Region Deployment
+
+```yaml
+# Cluster 1 (us-east)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: Koreshield-us-east
+spec:
+  replicas: 3
+  template:
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - us-east-1
+
+---
+# Cluster 2 (eu-west)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: Koreshield-eu-west
+spec:
+  replicas: 3
+  template:
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - eu-west-1
+```
+
+## Upgrade Strategy
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+```
+
+## Commands
+
+```bash
+# Deploy
+kubectl apply -f namespace.yaml
+kubectl apply -f secret.yaml
+kubectl apply -f configmap.yaml
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+kubectl apply -f ingress.yaml
+
+# Check status
+kubectl get pods -n Koreshield
+kubectl get svc -n Koreshield
+kubectl logs -f deployment/Koreshield -n Koreshield
+
+# Scale
+kubectl scale deployment Koreshield --replicas=5 -n Koreshield
+
+# Update
+kubectl set image deployment/Koreshield Koreshield=Koreshield/Koreshield:2.1.0 -n Koreshield
+
+# Delete
+kubectl delete namespace Koreshield
+```
+
+## Related Documentation
+
+- [Docker Deployment](/docs/integrations/deployment/docker)
+- [Production Checklist](/docs/configuration/production-checklist)
+- [Monitoring](/docs/integrations/monitoring)

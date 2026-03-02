@@ -1,0 +1,74 @@
+---
+title: AWS Lambda Integration
+description: Secure AWS Lambda-based LLM calls with the KoreShield proxy.
+---
+
+# AWS Lambda Integration
+
+Use KoreShield as a security proxy for LLM requests made from AWS Lambda. Deploy KoreShield separately and route requests through its OpenAI-compatible endpoint.
+
+## Use Cases
+
+- Serverless APIs that need LLM safety controls
+- Event-driven flows (SQS, API Gateway) with centralized policy enforcement
+- Multi-tenant apps that require request auditing
+
+## Prerequisites
+
+- A running KoreShield instance
+- Provider API key configured on the KoreShield server
+
+## Environment Variables
+
+Set these in your Lambda configuration:
+
+```bash
+KORESHIELD_BASE_URL=https://your-koreshield-instance.com
+KORESHIELD_API_KEY=your-koreshield-api-key
+```
+
+## Example Lambda (Node.js)
+
+```typescript
+import { createClient } from "koreshield";
+
+const client = createClient({
+  baseURL: process.env.KORESHIELD_BASE_URL,
+  apiKey: process.env.KORESHIELD_API_KEY
+});
+
+export const handler = async (event: any) => {
+  const body = typeof event.body === "string" ? JSON.parse(event.body) : event.body;
+
+  const result = await client.createChatCompletion({
+    model: "gpt-5-mini",
+    messages: body.messages
+  });
+
+  return {
+    statusCode: 200,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(result)
+  };
+};
+```
+
+## Operational Tips
+
+- Keep provider API keys on the KoreShield server, not inside the Lambda.
+- Use VPC or private networking if your KoreShield endpoint is private.
+- Increase Lambda timeout for streaming responses.
+- Adjust policies in [/configuration/](/docs/configuration).
+
+## Troubleshooting
+
+- 401 responses: confirm `KORESHIELD_API_KEY` in Lambda env
+- Timeouts: raise Lambda timeout and enable streaming
+- Network errors: check VPC egress and NAT configuration
+
+## Next Steps
+
+- Review SDK usage in [https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk)
+- Configure providers in [/configuration/](/docs/configuration)
+
+
