@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Shield, Zap, Code, Users, TrendingUp, Lock, Globe, Heart, ExternalLink } from 'lucide-react';
+import { Shield, Zap, Code, Users, TrendingUp, Lock, Globe, Heart, ExternalLink, Cloud, Building2, Wrench } from 'lucide-react';
 import { SEOMeta } from '../components/SEOMeta';
 
 export default function WhyKoreShieldPage() {
@@ -171,7 +171,7 @@ export default function WhyKoreShieldPage() {
 					<h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-8 text-center">Deploy Your Way</h2>
 					<div className="grid md:grid-cols-3 gap-6">
 						<div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-6 border border-blue-200 dark:border-blue-900">
-							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">☁️ Managed Cloud</h3>
+							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><Cloud className="w-5 h-5 text-blue-500" /> Managed Cloud</h3>
 							<p className="text-gray-700 dark:text-gray-300 mb-4">
 								Let us handle infrastructure, scaling, and updates. Focus on your product.
 							</p>
@@ -184,7 +184,7 @@ export default function WhyKoreShieldPage() {
 						</div>
 
 						<div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl p-6 border border-green-200 dark:border-green-900">
-							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">🏢 Self-Hosted</h3>
+							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><Building2 className="w-5 h-5 text-green-500" /> Self-Hosted</h3>
 							<p className="text-gray-700 dark:text-gray-300 mb-4">
 								Deploy on your infrastructure for complete control and data sovereignty.
 							</p>
@@ -197,7 +197,7 @@ export default function WhyKoreShieldPage() {
 						</div>
 
 						<div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-xl p-6 border border-purple-200 dark:border-purple-900">
-							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">🔧 Hybrid</h3>
+							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><Wrench className="w-5 h-5 text-purple-500" /> Hybrid</h3>
 							<p className="text-gray-700 dark:text-gray-300 mb-4">
 								Mix cloud and self-hosted for the best of both worlds.
 							</p>
