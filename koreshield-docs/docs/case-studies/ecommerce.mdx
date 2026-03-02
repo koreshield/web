@@ -1,0 +1,89 @@
+---
+title: E-commerce Assistants
+description: Ensuring safe shopping experiences with AI agents.
+published: true
+---
+
+# E-commerce Assistants
+
+How a large retailer protected shopping assistants from price manipulation and brand risk.
+
+## Challenge
+
+An AI shopping assistant handled:
+
+- product discovery and recommendations
+- order status and returns
+- promotion and pricing guidance
+
+**Critical requirements:**
+
+- prevent coupon abuse and price overrides
+- block prompt injection in user reviews and Q&A content
+- keep responses compliant with brand and legal guidelines
+
+## Solution
+
+Koreshield scanned user inputs and retrieved product content before the model saw it. High-risk actions were limited to verified flows.
+
+```typescript
+import { Koreshield } from "Koreshield-sdk";
+
+const Koreshield = new Koreshield({
+  apiKey: process.env.KORESHIELD_API_KEY,
+  sensitivity: "medium",
+});
+
+async function secureShoppingAssistant(
+  userId: string,
+  query: string,
+  productId: string,
+) {
+  const scan = await Koreshield.scan({
+    content: query,
+    userId,
+    metadata: { productId, channel: "web" },
+  });
+
+  if (scan.threat_detected) {
+    return { error: "Request blocked for safety" };
+  }
+
+  return await generateShoppingResponse(query, productId);
+}
+```
+
+## RAG Safety Pipeline
+
+Product reviews, Q&A, and catalog content were scanned before being added to the prompt:
+
+- remove hidden instructions or injected system text
+- strip external URLs and unsafe markup
+- normalize pricing content to avoid manipulation
+
+## Risk Controls
+
+- **Promotion guardrails:** restricted discount and pricing responses.
+- **RAG filtering:** sanitized product reviews and Q&A content.
+- **Brand policy rules:** blocked disallowed claims and guarantees.
+- **Fraud signals:** flagged suspicious sequences for review.
+
+## Checkout and Returns Protection
+
+- **Verified flows:** checkout actions required signed sessions.
+- **Refund safety:** returns and refunds validated against policy.
+- **Sensitive topics:** medical or regulated products routed to human review.
+
+## Results
+
+- Reduced abuse of promotional flows
+- Prevented review-based prompt injection in recommendations
+- Improved compliance with brand and legal constraints
+
+## Related Documentation
+
+## Related Documentation
+
+- [RAG Security](/docs/advanced/rag-security)
+- [Security](/docs/features/security)
+- [Monitoring & Alerting](/docs/integrations/monitoring)

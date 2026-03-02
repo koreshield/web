@@ -1,0 +1,104 @@
+---
+title: Netlify Integration
+description: Secure Netlify Functions and edge handlers with KoreShield.
+---
+
+# Netlify Integration
+
+Use KoreShield as a security proxy for LLM calls made from Netlify Functions or Edge Functions. Deploy KoreShield separately and point your Netlify code to its base URL.
+
+## Use Cases
+
+- Serverless APIs for content moderation or prompt sanitization
+- Edge functions that need consistent policy enforcement
+- Multi-site deployments sharing one proxy
+
+## Architecture
+
+- Netlify app (Functions or Edge Functions)
+- KoreShield proxy (self-hosted or cloud)
+- LLM provider (OpenAI, Anthropic, Gemini, Azure OpenAI, DeepSeek)
+
+## Prerequisites
+
+- A running KoreShield instance
+- Provider API key configured on the KoreShield server
+
+## Configure Environment Variables
+
+Set these in your Netlify project:
+
+```bash
+KORESHIELD_BASE_URL=https://your-koreshield-instance.com
+KORESHIELD_API_KEY=your-koreshield-api-key
+```
+
+## Example: Netlify Function
+
+```typescript
+import { Handler } from "@netlify/functions";
+import { createClient } from "koreshield";
+
+const client = createClient({
+  baseURL: process.env.KORESHIELD_BASE_URL,
+  apiKey: process.env.KORESHIELD_API_KEY,
+});
+
+export const handler: Handler = async (event) => {
+  const body = JSON.parse(event.body || "{}");
+
+  const result = await client.createChatCompletion({
+    model: "gpt-5-mini",
+    messages: body.messages,
+  });
+
+  return {
+    statusCode: 200,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(result),
+  };
+};
+```
+
+## Example: Netlify Edge Function
+
+```typescript
+import { createClient } from "koreshield";
+
+const client = createClient({
+  baseURL: process.env.KORESHIELD_BASE_URL,
+  apiKey: process.env.KORESHIELD_API_KEY,
+});
+
+export default async (request: Request): Promise<Response> => {
+  const body = await request.json();
+
+  const result = await client.createChatCompletion({
+    model: "gpt-5-mini",
+    messages: body.messages,
+  });
+
+  return new Response(JSON.stringify(result), {
+    headers: { "content-type": "application/json" },
+  });
+};
+```
+
+## Operational Tips
+
+- Route all LLM requests through KoreShield to enforce policies.
+- Keep provider API keys on the KoreShield server, not in the Netlify app.
+- Tune policies in [/configuration/](/docs/configuration).
+
+## Troubleshooting
+
+- 401 responses: confirm `KORESHIELD_API_KEY` is set
+- Timeouts: increase function timeout for streaming responses
+- Network errors: verify the proxy URL and allowed outbound access
+
+## Next Steps
+
+- Review SDK usage in [https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk)
+- Configure providers in [/configuration/](/docs/configuration)
+
+

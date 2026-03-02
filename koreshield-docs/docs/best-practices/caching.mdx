@@ -1,0 +1,74 @@
+---
+title: Caching
+description: Caching best practices.
+slug: /best-practices/caching
+---
+
+# Caching
+
+Caching can reduce latency and cost, but it must be implemented carefully to avoid leaking sensitive content or serving stale results. This guide outlines safe, practical caching patterns for LLM security workflows.
+
+## What to Cache (and What Not To)
+
+**Good candidates:**
+
+- deterministic scan results for identical inputs
+- allowlist and blocklist lookups
+- policy configurations that change infrequently
+
+**Avoid caching:**
+
+- raw prompts that contain personal data or PHI
+- full model responses for public or multi-tenant systems
+- anything tied to a specific user session unless scoped carefully
+
+## Cache Key Strategy
+
+Use a stable, privacy-safe key:
+
+- hash input content instead of storing raw content
+- include policy version and sensitivity in the key
+- include tenant or environment identifiers
+
+Example key format:
+
+```
+scan:{tenant}:{policyVersion}:{hash(content)}
+```
+
+## TTL and Invalidation
+
+- use short TTLs for user-generated content
+- invalidate caches when policies change
+- avoid long-lived caches for security decisions
+
+## Redis for Distributed Caching
+
+If you use Redis, keep it private and secured. Configure it as part of your infrastructure:
+
+```yaml
+redis:
+	enabled: true
+	url: "redis://localhost:6379/0"
+```
+
+Use network restrictions and TLS where supported by your Redis deployment.
+
+## Safety Guidelines
+
+- cache only the minimum data needed for the decision
+- never cache secrets or credentials
+- do not store PHI or PII in cache values
+- monitor cache hit rates and eviction behavior
+
+## Testing and Monitoring
+
+- validate that cached decisions match live results
+- track cache hit ratio and latency impact
+- log cache errors without exposing sensitive input
+
+## Related Documentation
+
+- [Configuration](/docs/configuration)
+- [Rate Limiting](/docs/configuration/rate-limiting)
+- [Security](/docs/features/security)

@@ -1,0 +1,88 @@
+---
+title: Railway Deployment
+description: Deploy the KoreShield proxy on Railway using a Docker image.
+---
+
+# Railway Deployment
+
+Deploy KoreShield to Railway using a Docker image from this repo. Railway handles build, deploy, and TLS for you.
+
+## Use Cases
+
+- Fast production deploys with minimal ops
+- Staging environments for LLM policy changes
+- Small to mid-scale workloads with managed hosting
+
+## Prerequisites
+
+- Railway account
+- KoreShield repo or a Docker image in a registry
+- Provider API keys available as Railway variables
+
+## Option A: Deploy from GitHub Repo
+
+1. Create a new Railway project
+2. Connect your GitHub repo
+3. Select the `koreshield` service
+4. Railway will detect the `Dockerfile`
+
+## Option B: Deploy from a Docker Image
+
+1. Build and push a Docker image
+
+```bash
+docker build -t koreshield .
+docker tag koreshield:latest <registry>/koreshield:latest
+docker push <registry>/koreshield:latest
+```
+
+2. In Railway, create a service from the image
+
+## Configure Environment Variables
+
+Set these Railway variables:
+
+```bash
+OPENAI_API_KEY=your-api-key
+KORESHIELD_API_KEY=your-koreshield-api-key
+```
+
+If you use a custom config path:
+
+```bash
+CONFIG_FILE=/app/config/config.yaml
+```
+
+## Mount Config (Optional)
+
+Railway supports volumes. If you mount a config file, make sure the path matches your `CONFIG_FILE` value.
+
+## Health Check
+
+```bash
+curl https://<railway-domain>/health
+```
+
+## Observability
+
+- Enable `json_logs: true` for structured logging
+- Scrape `/metrics` from an internal monitor or a private endpoint
+- Watch Railway logs for startup and provider errors
+
+## Security Notes
+
+- Keep provider keys in Railway variables, not in code
+- Use `KORESHIELD_API_KEY` to protect access to the proxy
+- Restrict access with a private domain or gateway if needed
+
+## Troubleshooting
+
+- 401 responses: confirm `KORESHIELD_API_KEY` on clients
+- Build failures: verify the Dockerfile path and build context
+- Provider errors: confirm provider keys are present in variables
+- Timeouts: increase client timeouts for streaming responses
+
+## Next Steps
+
+- Configure providers in [/configuration/](/docs/configuration)
+- Add monitoring in [../monitoring/prometheus.mdx](../monitoring/prometheus.mdx)

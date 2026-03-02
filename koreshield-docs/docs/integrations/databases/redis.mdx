@@ -1,0 +1,61 @@
+---
+title: Redis Integration
+description: Use Redis for caching, rate limiting, and distributed state.
+---
+
+# Redis Integration
+
+KoreShield uses Redis for distributed rate limiting and statistics. Enable Redis in the server config and provide a connection URL.
+
+## Use Cases
+
+- Consistent rate limiting across multiple proxy instances
+- Shared counters and policy state for horizontal scaling
+- Low-latency caching for request metadata
+
+## Enable Redis
+
+Edit your server config:
+
+```yaml
+redis:
+  enabled: true
+  url: "redis://localhost:6379/0"
+```
+
+## Common Redis URLs
+
+```text
+redis://localhost:6379/0
+redis://:password@redis.example.com:6379/0
+redis://redis.example.com:6380/0
+```
+
+## Deployment Notes
+
+- Use a managed Redis service in production.
+- Enable TLS where supported.
+- Size memory for rate-limiting keys and metrics.
+
+## High Availability
+
+- Use Redis Sentinel or a managed HA offering
+- Configure replicas to reduce failover impact
+- Set key TTLs to avoid unbounded growth
+
+## Verification
+
+If Redis is unavailable, KoreShield will continue to run but rate limiting and distributed stats may be degraded. Check logs for connectivity errors.
+
+## Troubleshooting
+
+- Connection errors: verify network access and TLS settings
+- High memory: check TTLs on rate limit keys
+- Rate limits not enforced: ensure all instances point to the same Redis
+
+## Next Steps
+
+- Configure policies in [/configuration/](/docs/configuration)
+- Persist events in [postgresql.mdx](postgresql.mdx)
+
+

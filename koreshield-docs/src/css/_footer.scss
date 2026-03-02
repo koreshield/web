@@ -1,0 +1,49 @@
+/* Footer Styles */
+.footer {
+  background-color: var(--bg-secondary);
+  padding: 2rem 0;
+  border-top: 1px solid var(--color-gray-12);
+  
+  &__title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+  
+  &__item {
+    margin-bottom: 0.5rem;
+  }
+  
+  &__link-item {
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+    
+    &:hover {
+      color: var(--ifm-color-primary);
+      text-decoration: none;
+    }
+  }
+  
+  &__copyright {
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-gray-12);
+  }
+}
+
+[data-theme='dark'] {
+  .footer {
+    background-color: var(--bg-secondary);
+    border-top-color: var(--color-gray-16);
+    
+    &__copyright {
+      border-top-color: var(--color-gray-16);
+    }
+  }
+}

@@ -1,0 +1,101 @@
+---
+title: PostgreSQL Integration
+description: Store KoreShield security events and metrics in PostgreSQL.
+---
+
+# PostgreSQL Integration
+
+Use PostgreSQL to persist security events, metrics, and audit data. This guide outlines a typical setup and schema direction for storing KoreShield outputs.
+
+## Use Cases
+
+- Compliance and audit trails with long retention
+- Security analytics with SQL and BI tools
+- Incident investigations and model safety reporting
+
+## When to Use PostgreSQL
+
+- Long-term audit trails
+- Advanced analytics and reporting
+- Compliance and retention requirements
+
+## Recommended Architecture
+
+- KoreShield writes structured logs (JSON)
+- A log shipper or worker ingests events into PostgreSQL
+- Dashboards or BI tools read from PostgreSQL
+
+## Ingestion Patterns
+
+- Log shipper (Fluent Bit, Vector, Logstash) into Postgres
+- Kafka or queue -> worker -> Postgres
+- App-side hook that writes events after each request
+
+## Example Table Schema
+
+```sql
+CREATE TABLE koreshield_events (
+  id BIGSERIAL PRIMARY KEY,
+  event_time TIMESTAMPTZ NOT NULL,
+  event_type TEXT NOT NULL,
+  severity TEXT NOT NULL,
+  provider TEXT,
+  model TEXT,
+  request_id TEXT,
+  blocked BOOLEAN NOT NULL,
+  taxonomy JSONB,
+  metadata JSONB
+);
+
+CREATE INDEX idx_koreshield_events_time ON koreshield_events (event_time);
+CREATE INDEX idx_koreshield_events_type ON koreshield_events (event_type);
+```
+
+## Query Examples
+
+```sql
+-- Blocked requests by day
+SELECT date_trunc('day', event_time) AS day, count(*) AS blocked
+FROM koreshield_events
+WHERE blocked = true
+GROUP BY day
+ORDER BY day;
+
+-- Top attack types
+SELECT taxonomy->>'type' AS attack_type, count(*)
+FROM koreshield_events
+GROUP BY attack_type
+ORDER BY count DESC;
+```
+
+## Ingestion Options
+
+- Log exporter (Fluent Bit, Vector, Logstash)
+- A lightweight worker that reads KoreShield logs and inserts rows
+- Server-side hooks in your app if you already capture LLM traffic
+
+## Operational Tips
+
+- Enable JSON logs in config:
+
+```yaml
+logging:
+  json_logs: true
+```
+
+- Use partitioning for large volumes.
+- Store taxonomy in `JSONB` for flexible querying.
+- Add retention jobs for old data and indexes
+
+## Troubleshooting
+
+- Missing rows: confirm your shipper is reading container stdout
+- High latency: add indexes on `event_time` and `event_type`
+- Large tables: partition by month or week
+
+## Next Steps
+
+- Configure policies in [/configuration/](/docs/configuration)
+- Add caching with [redis.mdx](redis.mdx)
+
+

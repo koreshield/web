@@ -1,0 +1,119 @@
+---
+title: Azure OpenAI Integration
+description: Route Azure OpenAI traffic through Koreshield with streaming support.
+sidebar_position: 2
+published: true
+---
+
+# Azure OpenAI Integration
+
+KoreShield can proxy Azure OpenAI requests to apply sanitization, detection, and policy enforcement before requests reach your Azure endpoint.
+
+## Model Names
+
+In Azure OpenAI, the `model` field usually maps to your deployment name, not the base model name.
+
+## Basic Request (TypeScript)
+
+```typescript
+const response = await fetch("http://localhost:8000/v1/chat/completions", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    model: "gpt-5-mini",
+    messages: [{ role: "user", content: "Summarize the ticket backlog." }]
+  })
+});
+```
+
+## Basic Request (Python)
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/v1/chat/completions",
+    json={
+        "model": "gpt-5-mini",
+        "messages": [{"role": "user", "content": "Summarize the ticket backlog."}]
+    }
+)
+```
+
+## Streaming
+
+```typescript
+const response = await fetch("http://localhost:8000/v1/chat/completions", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    model: "gpt-5-mini",
+    stream: true,
+    messages: [{ role: "user", content: "Write an executive summary." }]
+  })
+});
+```
+
+```python
+response = requests.post(
+    "http://localhost:8000/v1/chat/completions",
+    json={
+        "model": "gpt-5-mini",
+        "stream": True,
+        "messages": [{"role": "user", "content": "Write an executive summary."}]
+    },
+    stream=True
+)
+
+for line in response.iter_lines():
+    if line:
+        print(line.decode("utf-8"))
+```
+
+## System Prompts and Multi-Turn
+
+```json
+{
+  "model": "gpt-5-mini",
+  "messages": [
+    {"role": "system", "content": "You are a support analyst."},
+    {"role": "user", "content": "Summarize the backlog."},
+    {"role": "assistant", "content": "Summary..."},
+    {"role": "user", "content": "Highlight top risks."}
+  ]
+}
+```
+
+```python
+payload = {
+    "model": "gpt-5-mini",
+    "messages": [
+        {"role": "system", "content": "You are a support analyst."},
+        {"role": "user", "content": "Summarize the backlog."},
+        {"role": "assistant", "content": "Summary..."},
+        {"role": "user", "content": "Highlight top risks."}
+    ]
+}
+```
+
+## Error Handling
+
+- `403` indicates a blocked request due to policy enforcement.
+- `429` or `5xx` typically indicates provider or rate-limit issues.
+
+## Security Controls
+
+```yaml
+security:
+  sensitivity: medium
+  default_action: block
+  features:
+    sanitization: true
+    detection: true
+    policy_enforcement: true
+```
+
+## Next Steps
+
+- Configure providers in [/configuration/](/docs/configuration)
+- See SDK usage in [https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk](https://github.com/koreshield/koreshield/tree/main/koreshield-js-sdk)

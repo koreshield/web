@@ -1,0 +1,9 @@
+{
+  "title": "Advanced Topics",
+  "pages": [
+    "rag-security",
+    "performance",
+    "compliance",
+    "troubleshooting"
+  ]
+}
