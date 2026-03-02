@@ -1,7 +1,6 @@
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { visionTool } from '@sanity/vision'
-import { codeInput } from '@sanity/code-input'
 import { schemaTypes } from './schemaTypes'
 
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID || 'rdas6fhs'
@@ -42,7 +41,6 @@ export default defineConfig({
 					]),
 		}),
 		visionTool(),
-		codeInput(),
 	],
 
 	schema: {
