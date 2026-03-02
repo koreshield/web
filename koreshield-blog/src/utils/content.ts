@@ -68,6 +68,8 @@ async function getRawSortedPosts(): Promise<PostForList[]> {
 		data: {
 			...post,
 			slug: post.slug?.current,
+			published: post.published ? new Date(post.published) : new Date(),
+			updated: post.updated ? new Date(post.updated) : undefined,
 		},
 		body: post.body
 	}));
