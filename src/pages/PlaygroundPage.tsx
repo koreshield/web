@@ -381,8 +381,8 @@ export default function PlaygroundPage() {
 										key={category}
 										onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
 										className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${selectedCategory === category
-												? 'bg-purple-600 text-white'
-												: 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'
+											? 'bg-purple-600 text-white'
+											: 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'
 											}`}
 									>
 										<div className="flex items-center justify-between">
@@ -511,7 +511,7 @@ export default function PlaygroundPage() {
 											)}
 											<div className="flex-1">
 												<h3 className="text-xl font-bold mb-2">
-													{result.blocked ? '🚨 Threat Detected & Blocked' : '✅ Prompt Approved'}
+													{result.blocked ? 'Threat Detected & Blocked' : 'Prompt Approved'}
 												</h3>
 												<p className="text-sm opacity-90">{result.details}</p>
 											</div>
