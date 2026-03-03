@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Shield, Zap, Code, Users, TrendingUp, Lock, Globe, Heart, ExternalLink, Cloud, Building2, Wrench } from 'lucide-react';
+import { Shield, Zap, Code, Users, TrendingUp, Lock, Globe, Heart, ExternalLink, Cloud, Building2, Wrench, Check } from 'lucide-react';
 import { SEOMeta } from '../components/SEOMeta';
 
 export default function WhyKoreShieldPage() {
@@ -98,10 +98,10 @@ export default function WhyKoreShieldPage() {
 									We don't rely on a single detection method. KoreShield uses 8 layers of security: sanitization, heuristic detection, ML-based analysis, custom rules, blocklists/allowlists, policy enforcement, RBAC, and provider validation.
 								</p>
 								<ul className="space-y-2 text-gray-700 dark:text-gray-300">
-									<li>✓ Pattern matching with 50+ attack signatures</li>
-									<li>✓ ML-based anomaly detection</li>
-									<li>✓ Custom DSL for flexible rules</li>
-									<li>✓ RAG-specific protections</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Pattern matching with 50+ attack signatures</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> ML-based anomaly detection</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Custom DSL for flexible rules</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> RAG-specific protections</li>
 								</ul>
 							</div>
 						</div>
@@ -116,10 +116,10 @@ export default function WhyKoreShieldPage() {
 									Unlike competitors locked to specific providers, KoreShield works seamlessly with OpenAI, Anthropic, Google Gemini, DeepSeek, Azure OpenAI, and any OpenAI-compatible API.
 								</p>
 								<ul className="space-y-2 text-gray-700 dark:text-gray-300">
-									<li>✓ Unified security across all LLM providers</li>
-									<li>✓ No vendor lock-in</li>
-									<li>✓ Easy provider switching</li>
-									<li>✓ Multi-provider routing and failover</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Unified security across all LLM providers</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> No vendor lock-in</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Easy provider switching</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Multi-provider routing and failover</li>
 								</ul>
 							</div>
 						</div>
@@ -134,10 +134,10 @@ export default function WhyKoreShieldPage() {
 									Our open-source community contributes attack patterns, detection improvements, and integrations. Every user benefits from collective intelligence and shared threat data.
 								</p>
 								<ul className="space-y-2 text-gray-700 dark:text-gray-300">
-									<li>✓ Active GitHub community</li>
-									<li>✓ Weekly pattern updates</li>
-									<li>✓ Community-submitted attack examples</li>
-									<li>✓ Collaborative threat research</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Active GitHub community</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Weekly pattern updates</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Community-submitted attack examples</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Collaborative threat research</li>
 								</ul>
 							</div>
 						</div>
@@ -152,10 +152,10 @@ export default function WhyKoreShieldPage() {
 									KoreShield is built on published academic research on prompt injection taxonomy and RAG system security. We don't just block attacks—we understand them deeply.
 								</p>
 								<ul className="space-y-2 text-gray-700 dark:text-gray-300">
-									<li>✓ Published research papers</li>
-									<li>✓ Novel attack taxonomy</li>
-									<li>✓ Peer-reviewed detection methods</li>
-									<li>✓ Academic partnerships</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Published research papers</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Novel attack taxonomy</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Peer-reviewed detection methods</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Academic partnerships</li>
 								</ul>
 							</div>
 						</div>

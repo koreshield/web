@@ -83,7 +83,7 @@ function FirewallPane({ result, state }: { result: ThreatResult | null; state: S
 			<div className="px-5 py-4 border-b border-slate-700/50 flex items-center gap-3">
 				<div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
 				<span className="text-sm font-semibold text-slate-200">KoreShield Firewall</span>
-				<span className="ml-auto text-xs text-slate-500 font-mono">v2.4.1</span>
+				<span className="ml-auto text-xs text-slate-500 font-mono">v3.0.0</span>
 			</div>
 
 			<div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 py-8">
@@ -113,7 +113,7 @@ function FirewallPane({ result, state }: { result: ThreatResult | null; state: S
 						<p className="text-blue-400 text-sm font-mono">Analyzing threat signatures...</p>
 						<ScanAnimation />
 						<div className="grid grid-cols-2 gap-2 text-xs text-slate-500 font-mono text-left">
-							{['Prompt Injection → Checking', 'Jailbreak Patterns → Checking', 'PII Signals → Checking', 'SQL Injection → Checking'].map(t => (
+							{['Prompt Injection → Checking', 'Jailbreak Patterns → Checking', 'Token Smuggling → Checking', 'Privilege Escalation → Checking', 'Social Engineering → Checking', 'Entropy Analysis → Running'].map(t => (
 								<div key={t} className="flex items-center gap-1.5">
 									<div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
 									{t}
@@ -137,23 +137,51 @@ function FirewallPane({ result, state }: { result: ThreatResult | null; state: S
 								)}
 							</div>
 							<div className={`text-xs mt-1 font-mono ${result.blocked ? 'text-red-400/70' : 'text-emerald-400/70'}`}>
-								Rule {result.ruleId} • {result.processingMs}ms
+								Rule {result.ruleId} • {result.processingMs}ms • {result.signalCount} signal{result.signalCount !== 1 ? 's' : ''}
 							</div>
 						</div>
 
 						{/* Score Ring */}
 						<ScoreRing score={result.score} blocked={result.blocked} />
 
-						{/* Category + Severity */}
+						{/* Category + Severity + Confidence */}
 						<div className="space-y-2">
 							<div className="text-slate-200 font-semibold">{result.category}</div>
-							<SeverityBadge severity={result.severity} />
+							<div className="flex items-center justify-center gap-2 flex-wrap">
+								<SeverityBadge severity={result.severity} />
+								<span className={`text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider ${result.confidence === 'definite' ? 'bg-blue-600 text-white' :
+									result.confidence === 'high' ? 'bg-sky-600 text-white' :
+										result.confidence === 'moderate' ? 'bg-slate-600 text-white' :
+											'bg-slate-700 text-slate-300'
+									}`}>{result.confidence}</span>
+								{result.entropyFlag && (
+									<span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-600 text-white uppercase tracking-wider flex items-center gap-1">
+										<LucideIcons.AlertTriangle className="w-3.5 h-3.5" /> High Entropy
+									</span>
+								)}
+							</div>
 						</div>
 
 						{/* Explanation */}
 						<p className="text-slate-400 text-xs leading-relaxed text-left bg-slate-800/40 rounded-lg p-3 border border-slate-700/40">
 							{result.explanation}
 						</p>
+
+						{/* Remediation + MITRE Ref */}
+						{result.blocked && (
+							<div className="text-left space-y-2">
+								<div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-3">
+									<div className="text-[10px] text-blue-400 uppercase tracking-widest font-bold mb-1">Remediation</div>
+									<p className="text-slate-400 text-xs leading-relaxed">{result.remediation}</p>
+								</div>
+								<div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+									<span>Ref: {result.mitreRef}</span>
+									{result.signalCount > 1 && (
+										<span className="text-amber-400">• {result.signalCount} cross-category signals detected</span>
+									)}
+								</div>
+							</div>
+						)}
 					</div>
 				)}
 			</div>
@@ -292,7 +320,9 @@ function ChatPane({
 								Scanning...
 							</span>
 						) : (
-							'⚡ Analyze Threat  (Ctrl+Enter)'
+							<span className="flex items-center justify-center gap-2">
+								<LucideIcons.Zap className="w-4 h-4" /> Analyze Threat (Ctrl+Enter)
+							</span>
 						)}
 					</button>
 				</div>
