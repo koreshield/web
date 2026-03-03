@@ -150,12 +150,14 @@ function FirewallPane({ result, state }: { result: ThreatResult | null; state: S
 							<div className="flex items-center justify-center gap-2 flex-wrap">
 								<SeverityBadge severity={result.severity} />
 								<span className={`text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider ${result.confidence === 'definite' ? 'bg-blue-600 text-white' :
-										result.confidence === 'high' ? 'bg-sky-600 text-white' :
-											result.confidence === 'moderate' ? 'bg-slate-600 text-white' :
-												'bg-slate-700 text-slate-300'
+									result.confidence === 'high' ? 'bg-sky-600 text-white' :
+										result.confidence === 'moderate' ? 'bg-slate-600 text-white' :
+											'bg-slate-700 text-slate-300'
 									}`}>{result.confidence}</span>
 								{result.entropyFlag && (
-									<span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-600 text-white uppercase tracking-wider">⚠ High Entropy</span>
+									<span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-600 text-white uppercase tracking-wider flex items-center gap-1">
+										<LucideIcons.AlertTriangle className="w-3.5 h-3.5" /> High Entropy
+									</span>
 								)}
 							</div>
 						</div>
@@ -318,7 +320,9 @@ function ChatPane({
 								Scanning...
 							</span>
 						) : (
-							'⚡ Analyze Threat  (Ctrl+Enter)'
+							<span className="flex items-center justify-center gap-2">
+								<LucideIcons.Zap className="w-4 h-4" /> Analyze Threat (Ctrl+Enter)
+							</span>
 						)}
 					</button>
 				</div>
