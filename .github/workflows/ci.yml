@@ -79,20 +79,16 @@ jobs:
         
         echo "Waiting for service to be healthy..."
         # Loop check health endpoint
-        timeout 120s bash -c 'until curl -sf http://localhost:8000/health; do sleep 5; done'
-        
-        echo "Service is UP. API Health Check Passed."
-        
-        # Determine success
-        if [ $? -eq 0 ]; then
+        if timeout 180s bash -c 'until curl -sf http://localhost:8000/health; do sleep 5; done'; then
+          echo "Service is UP. API Health Check Passed."
           echo "Integration Test Passed"
+          docker compose down
         else
-          echo "Integration Test Failed"
-          docker compose logs
+          echo "Integration Test Failed - dumping container logs"
+          docker compose logs koreshield postgres redis
+          docker compose down
           exit 1
         fi
-        
-        docker compose down
 
   frontend-check:
     runs-on: ubuntu-latest
