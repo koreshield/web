@@ -31,8 +31,8 @@ We recommend using a Python middleware (e.g., in AWS Lambda or Heroku) to scan d
 
 ```python
 from simple_salesforce import Salesforce
-from Koreshield import AsyncKoreshieldClient
-from Koreshield.crm_templates.salesforce import SALESFORCE_TEMPLATE
+from koreshield_sdk import AsyncKoreShieldClient
+from koreshield.crm_templates.salesforce import SALESFORCE_TEMPLATE
 
 # 1. Connect
 sf = Salesforce(username='...', password='...', security_token='...')

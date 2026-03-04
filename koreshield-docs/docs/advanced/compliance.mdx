@@ -1,63 +1,36 @@
 ---
-title: Compliance & Certifications
-description: Guide to meeting regulatory requirements with Koreshield (SOC2, HIPAA, GDPR).
+title: Compliance Guide
+description: How to use KoreShield controls to support compliance programs.
 published: true
 ---
 
-# Compliance & Certifications
+# Compliance Guide
 
-Koreshield is designed to help organizations meet strict security and privacy standards. This guide outlines how our architecture supports compliance with major frameworks.
+KoreShield provides security controls and audit data you can map into your compliance program.
 
-## SOC 2 Type II
+This page is technical guidance, not legal advice.
 
-Koreshield creates an audit trail that is essential for SOC 2 controls.
+## What The Codebase Provides Today
 
-### Security Controls
-- **Access Control**: Role-Based Access Control (RBAC) ensures only authorized users can modify security policies.
-- **Monitoring**: Real-time logging of all security events and policy violations.
-- **Change Management**: Versioned policy configurations allow for safe rollbacks and change tracking.
+- Authenticated management APIs (`/v1/management/*`)
+- JWT validation with strict `iss`/`aud` checks
+- API-key support with revocation/expiry checks
+- Request/security logging pipeline
+- Policy/rule management and audit report endpoints
 
-## HIPAA Compliance
+## Controls You Can Implement
 
-For healthcare organizations handling Protected Health Information (PHI).
+- Access control: use role-gated endpoints and least privilege.
+- Audit trail: retain request and security logs from reports/log APIs.
+- Data minimization: avoid sending unnecessary PII in prompts.
+- Incident response: monitor and alert on blocked or suspicious activity.
 
-### PHI Protection
-- **Redaction**: Automatically detect and redact PHI (names, SSNs, medical record numbers) before data leaves your boundary.
-- **Encryption**: All data is encrypted in transit and at rest.
-- **BAA**: Enterprise plans include a Business Associate Agreement (BAA).
+## Evidence Collection Suggestions
 
-```typescript
-// Example: Configuring PHI Redaction
-const Koreshield = new Koreshield({
-  apiKey: process.env.KEY,
-  policy: {
-    pii: {
-      action: 'redact',
-      types: ['us_ssn', 'medical_record_number', 'patient_name']
-    }
-  }
-});
-```
+- Export report data via `/v1/reports*`.
+- Track auth failures and API key misuse attempts from logs.
+- Record deployment config and JWT settings at release time.
 
-## GDPR Considerations
+## Important Scope Note
 
-### Data Sovereignty
-- **Region Locking**: Configure Koreshield to process data only within specific EU regions.
-- **Right to Erasure**: API endpoints to delete all data associated with a specific user ID.
-- **Data Minimization**: We strictly limit data retention periods based on your configuration.
-
-## PCI-DSS Requirements
-
-For handling payment card information.
-
-- **PCI Masking**: Automatically mask credit card numbers in logs and prompts.
-- **Audit Logging**: Immutable logs of all access to cardholder data flows.
-
-## FedRAMP (Government)
-
-Koreshield's GovCloud deployment option ensures:
-- **FIPS 140-2 Validated Encryption**
-- **US Persons Only Support**
-- **GovCloud Hosting**
-
-*Contact sales for FedRAMP High package availability.*
+KoreShield does not automatically grant certifications. Your organization must implement the required operational controls and complete formal audits.
