@@ -3,6 +3,7 @@ import { getSortedPostsList } from "@utils/content";
 import GridLayout from "@layouts/grid.astro";
 import BlogCard from "@components/BlogCard.astro";
 import Breadcrumbs from "@components/common/breadcrumbs.astro";
+import { slugifyTag } from "@utils/url";
 
 export const prerender = true;
 
@@ -19,7 +20,7 @@ export async function getStaticPaths() {
 
 	// Create paths for each tag
 	const paths = Array.from(allTags).map((tag) => ({
-		params: { tag: tag.toLowerCase().replace(/\s+/g, "-") },
+		params: { tag: slugifyTag(tag) },
 		props: {
 			tag,
 			posts: posts.filter((post) =>

@@ -1,7 +1,7 @@
 import type { CollectionEntry } from "astro:content";
 
-import { i18n } from "@i18n/translation";
 import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
 
 
 export function pathsEqual(path1: string, path2: string) {
@@ -45,6 +45,15 @@ export function getPostUrl(post: any): string {
 export function getTagUrl(tag: string): string {
     if (!tag) return url("/archive/");
     return url(`/archive/?tag=${encodeURIComponent(tag.trim())}`);
+}
+
+export function slugifyTag(tag: string): string {
+    return tag
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
 }
 
 export function getCategoryUrl(category: string | null): string {

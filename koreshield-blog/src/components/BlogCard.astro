@@ -1,4 +1,6 @@
 ---
+import { slugifyTag } from "@utils/url";
+
 interface Props {
   title: string;
   slug: string;
@@ -99,7 +101,7 @@ const formattedDate = new Date(publishedDate).toLocaleDateString("en-US", {
           {tags &&
             tags.slice(0, 3).map((tag) => (
               <a
-                href={`/tags/${tag.toLowerCase().replace(/\s+/g, "-")}`}
+                href={`/tags/${slugifyTag(tag)}`}
                 class="inline-flex items-center gap-1 px-2 py-1 bg-electric-blue/20 text-electric-blue text-xs font-medium rounded-md hover:bg-electric-blue/30 transition-colors"
               >
                 #{tag}

@@ -189,7 +189,13 @@ button:disabled {
 }
 
 .prose p {
-    @apply text-gray-300 leading-relaxed;
+    @apply text-gray-300 leading-normal;
+}
+
+.prose ul,
+.prose ol,
+.prose li {
+    @apply leading-normal;
 }
 
 .prose strong {
@@ -205,7 +211,7 @@ button:disabled {
 }
 
 .prose blockquote {
-    @apply border-l-electric-blue bg-white/5 not-italic pl-4 py-1 text-gray-400 rounded-r-lg;
+    @apply border-l-electric-blue bg-white/5 not-italic pl-4 py-1 text-gray-400 rounded-r-lg leading-normal;
 }
 
 .prose li::marker {
