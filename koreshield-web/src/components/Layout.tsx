@@ -1,4 +1,5 @@
-import { Github, LogOut, Menu, Moon, SunMedium, User, X } from "lucide-react";
+import { Github, LogOut, Menu, User, X } from "lucide-react";
+// import { Moon, SunMedium } from "lucide-react"; // COMMENTED: theme toggle icons
 import { useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
@@ -10,7 +11,7 @@ export function Layout() {
 	const navigate = useNavigate();
 	const isAuthenticated = authService.isAuthenticated();
 	const user = authService.getCurrentUser();
-	const { theme, toggleTheme } = useTheme();
+	const { theme } = useTheme(); // toggleTheme commented out with theme toggle button
 	const logoSrc = theme === 'light' ? '/logo/SVG/Black.svg' : '/logo/SVG/White.svg';
 
 	const handleLogout = () => {
@@ -46,6 +47,7 @@ export function Layout() {
 							</>
 						)}
 
+						{/* COMMENTED: Desktop theme toggle hidden
 						<button
 							onClick={toggleTheme}
 							className="p-2 rounded-md border border-white/[0.08] hover:border-primary transition-colors bg-card"
@@ -53,6 +55,7 @@ export function Layout() {
 						>
 							{theme === 'light' ? <Moon className="w-5 h-5 text-muted-foreground" /> : <SunMedium className="w-5 h-5 text-muted-foreground" />}
 						</button>
+						COMMENTED */}
 						<a href="https://github.com/koreshield/" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
 							<Github className="w-5 h-5" />
 						</a>
@@ -81,13 +84,15 @@ export function Layout() {
 
 					{/* Mobile Actions */}
 					<div className="flex items-center gap-2 md:hidden">
-						<button
-							onClick={toggleTheme}
-							className="p-2 rounded-md border border-white/[0.08] bg-card text-muted-foreground"
-							aria-label="Toggle color mode"
-						>
-							{theme === 'light' ? <Moon className="w-5 h-5" /> : <SunMedium className="w-5 h-5" />}
-						</button>
+					{/* COMMENTED: Mobile theme toggle hidden
+					<button
+						onClick={toggleTheme}
+						className="p-2 rounded-md border border-white/[0.08] bg-card text-muted-foreground"
+						aria-label="Toggle color mode"
+					>
+						{theme === 'light' ? <Moon className="w-5 h-5" /> : <SunMedium className="w-5 h-5" />}
+					</button>
+					COMMENTED */}
 
 						<button
 							onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
