@@ -1,8 +1,7 @@
-from fastapi import APIRouter, HTTPException, Request, Depends, status
+from fastapi import APIRouter, HTTPException, Request, Depends, Response, status
 from pydantic import BaseModel, EmailStr
 import structlog
 import bcrypt
-import jwt
 import secrets
 import os
 import re
@@ -11,7 +10,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
-from .auth import get_current_admin, get_current_user
+from .auth import AUTH_COOKIE_NAME, get_current_admin, get_current_user, issue_jwt_token
 from ..models.user import User
 from ..models.api_key import APIKey
 from ..services.email import send_welcome_email, send_verification_email
@@ -21,16 +20,6 @@ logger = structlog.get_logger(__name__)
 router = APIRouter(tags=["management"])
 
 from ..database import get_db, AsyncSessionLocal, engine
-
-# JWT Configuration
-JWT_PRIVATE_KEY = os.getenv("JWT_PRIVATE_KEY", "")
-JWT_SHARED_SECRET = os.getenv("JWT_SECRET", "")
-JWT_ALGORITHM = "RS256" if JWT_PRIVATE_KEY else "HS256"
-JWT_SIGNING_KEY = JWT_PRIVATE_KEY or JWT_SHARED_SECRET
-JWT_EXPIRATION_HOURS = 24
-JWT_ISSUER = os.getenv("JWT_ISSUER", "koreshield-auth")
-JWT_AUDIENCE = os.getenv("JWT_AUDIENCE", "koreshield-api")
-
 
 SENSITIVE_KEY_PATTERN = re.compile(
     r"(password|secret|token|private[_-]?key|api[_-]?key|dsn|connection|credential|auth)",
@@ -78,6 +67,15 @@ class SecurityConfigUpdate(BaseModel):
     sensitivity: str | None = None
     default_action: str | None = None
 
+
+@router.get("/me", summary="Current User", tags=["Authentication"])
+async def get_me(
+    current_user: dict = Depends(get_current_user),
+):
+    """Get current authenticated user profile."""
+    return {"user": current_user}
+
+
 @router.post(
     "/signup",
     status_code=status.HTTP_201_CREATED,
@@ -110,7 +108,11 @@ class SecurityConfigUpdate(BaseModel):
     },
     tags=["Authentication"]
 )
-async def signup(request: SignupRequest, db: AsyncSession = Depends(get_db)):
+async def signup(
+    request: SignupRequest,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
     """
     User signup endpoint with email verification.
     
@@ -140,7 +142,7 @@ async def signup(request: SignupRequest, db: AsyncSession = Depends(get_db)):
         
         # Generate verification token
         verification_token = secrets.token_urlsafe(32)
-        verification_expires = datetime.utcnow() + timedelta(hours=24)
+        verification_expires = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
         
         # Create user
         import uuid
@@ -169,26 +171,18 @@ async def signup(request: SignupRequest, db: AsyncSession = Depends(get_db)):
         
         logger.info("user_signup_success", user_id=str(user.id), email=user.email)
         
-        # Generate JWT token
-        if not JWT_SIGNING_KEY:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="JWT signing key not configured",
-            )
+        token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
+        
+        response.set_cookie(
+            key=AUTH_COOKIE_NAME,
+            value=f"Bearer {token}",
+            httponly=True,
+            samesite="lax",
+            secure=os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"},
+            max_age=24 * 60 * 60,
+            path="/",
+        )
 
-        token_payload = {
-            'sub': str(user.id),
-            'user_id': str(user.id),
-            'email': user.email,
-            'role': user.role,
-            'iss': JWT_ISSUER,
-            'aud': JWT_AUDIENCE,
-            'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS),
-            'iat': datetime.utcnow()
-        }
-        
-        token = jwt.encode(token_payload, JWT_SIGNING_KEY, algorithm=JWT_ALGORITHM)
-        
         return {
             "user": user.to_dict(),
             "token": token,
@@ -236,7 +230,11 @@ async def signup(request: SignupRequest, db: AsyncSession = Depends(get_db)):
     },
     tags=["Authentication"]
 )
-async def admin_login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
+async def admin_login(
+    request: LoginRequest,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
     """
     User login endpoint with rate limiting to prevent brute force attacks.
     
@@ -271,28 +269,19 @@ async def admin_login(request: LoginRequest, db: AsyncSession = Depends(get_db))
             )
         
         # Update last login
-        user.last_login_at = datetime.utcnow()
+        user.last_login_at = datetime.now(timezone.utc).replace(tzinfo=None)
         await db.commit()
         
-        # Generate JWT token
-        if not JWT_SIGNING_KEY:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="JWT signing key not configured",
-            )
-
-        token_payload = {
-            'sub': str(user.id),
-            'user_id': str(user.id),
-            'email': user.email,
-            'role': user.role,
-            'iss': JWT_ISSUER,
-            'aud': JWT_AUDIENCE,
-            'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS),
-            'iat': datetime.utcnow()
-        }
-        
-        token = jwt.encode(token_payload, JWT_SIGNING_KEY, algorithm=JWT_ALGORITHM)
+        token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
+        response.set_cookie(
+            key=AUTH_COOKIE_NAME,
+            value=f"Bearer {token}",
+            httponly=True,
+            samesite="lax",
+            secure=os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"},
+            max_age=24 * 60 * 60,
+            path="/",
+        )
         
         logger.info("login_success", user_id=str(user.id), email=user.email)
         
@@ -311,8 +300,9 @@ async def admin_login(request: LoginRequest, db: AsyncSession = Depends(get_db))
         )
 
 @router.post("/logout")
-async def admin_logout(current_user: dict = Depends(get_current_admin)):
+async def admin_logout(response: Response, current_user: dict = Depends(get_current_admin)):
     """Admin logout endpoint (stateless - just returns success)."""
+    response.delete_cookie(key=AUTH_COOKIE_NAME, path="/")
     logger.info("admin_logout", user_id=current_user.get("id"), email=current_user.get("email"))
     return {"status": "logged_out"}
 
@@ -518,7 +508,7 @@ async def generate_api_key(
         
         # Calculate expiration
         # Calculate expiration
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
         expires_at = None
         
         if request.expires_at is not None:
@@ -702,6 +692,3 @@ async def get_api_key(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get API key"
         )
-
-
-

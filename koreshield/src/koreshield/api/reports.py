@@ -11,7 +11,7 @@ from typing import List, Optional, Dict
 from enum import Enum
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -62,8 +62,7 @@ class ReportSchema(BaseModel):
     filters: dict
     file_url: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ReportCreate(BaseModel):
     name: str
@@ -87,8 +86,7 @@ class ReportTemplateSchema(BaseModel):
     category: Optional[str]
     available_metrics: List[str]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Helper to seed templates
 async def _seed_templates(session: AsyncSession):

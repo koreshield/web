@@ -4,11 +4,16 @@ API Key database models for authentication.
 import uuid
 import secrets
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from .base import Base
+
+
+def utcnow_naive() -> datetime:
+    """UTC now as naive datetime for existing DB schema compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class APIKey(Base):
@@ -23,8 +28,8 @@ class APIKey(Base):
     last_used_at = Column(DateTime)
     expires_at = Column(DateTime)
     is_revoked = Column(Boolean, nullable=False, default=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=utcnow_naive)
+    updated_at = Column(DateTime, nullable=False, default=utcnow_naive, onupdate=utcnow_naive)
     
     @staticmethod
     def generate_key() -> tuple[str, str, str]:
@@ -80,10 +85,10 @@ class APIKey(Base):
         """Check if API key is valid (not revoked and not expired)."""
         if self.is_revoked:
             return False
-        if self.expires_at and self.expires_at < datetime.utcnow():
+        if self.expires_at and self.expires_at < utcnow_naive():
             return False
         return True
     
     def mark_used(self):
         """Update last_used_at timestamp."""
-        self.last_used_at = datetime.utcnow()
+        self.last_used_at = utcnow_naive()
