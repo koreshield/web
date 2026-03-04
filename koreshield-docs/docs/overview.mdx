@@ -1,178 +1,45 @@
 ---
 title: Documentation
-description: Welcome to the Koreshield documentation
+description: Welcome to the KoreShield documentation
 icon: House
 ---
 
-Koreshield is an open-source security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It acts as a transparent security layer between your application and LLM API providers (DeepSeek, OpenAI, Anthropic, etc.), sanitizing inputs, detecting threats, and enforcing policies before requests reach the model.
+KoreShield is an LLM security gateway that sits between your app and model providers. It scans prompts and RAG context, applies policy decisions, and blocks unsafe requests before they reach providers.
 
-## Why Koreshield?
+## What It Protects
 
-Prompt injection attacks pose a critical security risk for LLM-integrated systems. Attackers can:
+- direct prompt injection attempts
+- indirect/RAG injection hidden in retrieved documents
+- policy and compliance violations based on configured rules
 
-- Override system instructions
-- Extract sensitive data
-- Bypass security controls
-- Manipulate AI behavior
-- Exfiltrate proprietary information
+## Current Provider Support
 
-Koreshield provides defense-in-depth protection with four core security components:
+- DeepSeek
+- OpenAI
+- Anthropic
+- Gemini
+- Azure OpenAI
 
-- **Input Sanitization**: Cleans and normalizes prompts to remove potentially malicious content
-- **Attack Detection**: Analyzes prompts and responses for signs of prompt injection and other attacks
-- **Policy Enforcement**: Applies configurable security rules and determines how to handle suspicious requests
-- **Audit Logging**: Records all security events and decisions for compliance and monitoring
+## Core Runtime Endpoints
 
-## Supported LLM Providers
+- `POST /v1/chat/completions` (protected)
+- `POST /v1/rag/scan` (protected)
+- `GET /health`, `GET /status`, `GET /metrics`
+- management and admin APIs under `/v1/management/*`
 
-Koreshield supports multiple LLM providers through its proxy architecture:
+## Authentication
 
-- **DeepSeek** - High-performance models with OpenAI-compatible API
-- **OpenAI** - GPT-3.5, GPT-4, and other models
-- **Anthropic** - Claude models (Claude 3.5 Sonnet, etc.)
-- **Google Gemini** - Coming soon
-- **Azure OpenAI** - Coming soon
+Protected endpoints accept:
 
-## Getting Started
+1. `Authorization: Bearer <jwt>`
+2. `X-API-Key: ks_...`
+3. `ks_access_token` httpOnly cookie
 
-### Quick Install
+JWT validation enforces `iss`, `aud`, signature, and expiration checks.
 
-**Python SDK:**
+## Start Here
 
-```bash
-pip install Koreshield
-```
-
-**JavaScript/TypeScript SDK:**
-
-```bash
-npm install Koreshield
-```
-
-### Deployment Options
-
-Koreshield offers flexible deployment options:
-
-### 1. Proxy Mode (Recommended)
-
-Deploy Koreshield as a standalone security proxy service. Your application sends LLM requests to Koreshield, which validates them before forwarding to your provider. This offers the best security isolation and works with any programming language.
-
-```bash
-# Docker deployment
-docker run -p 8000:8000 \
-  -e DEEPSEEK_API_KEY=your-key \
-  Koreshield/Koreshield
-
-# Railway deployment
-railway up
-```
-
-### 2. SDK Mode
-
-Use the `Koreshield` Python or JavaScript SDK to communicate with your Koreshield proxy or integrate security features directly into your application.
-
-```python
-from Koreshield import KoreshieldClient
-
-client = KoreshieldClient(base_url="http://localhost:8000")
-result = client.scan_prompt("Hello, how are you?")
-```
-
-## Architecture (Proxy Mode)
-
-When running in Proxy Mode, Koreshield sits transparently between your application and LLM providers:
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Application   │───▶│ Input Sanitizer │───▶│ Attack Detector │───▶│  Policy Engine  │───▶│   LLM Provider  │
-│                 │    │                 │    │                 │    │                 │    │  (DeepSeek/     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘    │   OpenAI/etc)   │
-                                                                                   │        └─────────────────┘
-                                                                                   ▼
-                                                                    ┌─────────────────┐
-                                                                    │  Audit Logger   │
-                                                                    └─────────────────┘
-```
-
-## Key Features
-
-- **Multi-Provider Support**: Works with OpenAI, Anthropic, Google Gemini, Azure OpenAI, and any OpenAI-compatible API
-- **Real-time Protection**: Sub-millisecond latency with comprehensive security scanning
-- **Configurable Policies**: Adjust sensitivity levels and response actions based on your security requirements
-- **Enterprise Ready**: SOC 2 compliant with comprehensive audit trails and compliance reporting
-- **Easy Integration**: Drop-in replacement for existing LLM API calls
-- **Open Source**: Transparent security with community-driven improvements
-
-## Next Steps
-
-<div className="row">
-  <div className="col col--6" style={{ marginBottom: "1rem" }}>
-    <div className="card">
-      <div className="card__header">
-        <h3>Installation</h3>
-      </div>
-      <div className="card__body">
-        <p>Get up and running with Koreshield in minutes.</p>
-      </div>
-      <div className="card__footer">
-        <a
-          href="/docs/getting-started/installation"
-          className="button button--primary button--block"
-        >
-          Get Started
-        </a>
-      </div>
-    </div>
-  </div>
-  <div className="col col--6" style={{ marginBottom: "1rem" }}>
-    <div className="card">
-      <div className="card__header">
-        <h3>Quick Start</h3>
-      </div>
-      <div className="card__body">
-        <p>Learn how to secure your first LLM integration.</p>
-      </div>
-      <div className="card__footer">
-        <a
-          href="/docs/getting-started/quick-start"
-          className="button button--primary button--block"
-        >
-          Learn More
-        </a>
-      </div>
-    </div>
-  </div>
-  <div className="col col--6" style={{ marginBottom: "1rem" }}>
-    <div className="card">
-      <div className="card__header">
-        <h3>Configuration</h3>
-      </div>
-      <div className="card__body">
-        <p>Configure security policies and provider settings.</p>
-      </div>
-      <div className="card__footer">
-        <a
-          href="/docs/configuration"
-          className="button button--primary button--block"
-        >
-          Configure
-        </a>
-      </div>
-    </div>
-  </div>
-  <div className="col col--6" style={{ marginBottom: "1rem" }}>
-    <div className="card">
-      <div className="card__header">
-        <h3>API Reference</h3>
-      </div>
-      <div className="card__body">
-        <p>Explore the complete Koreshield API.</p>
-      </div>
-      <div className="card__footer">
-        <a href="/docs/api" className="button button--primary button--block">
-          View API
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
+- [Getting Started](/docs/getting-started/quick-start)
+- [Installation](/docs/getting-started/installation)
+- [Configuration](/docs/configuration)
+- [API Reference](/docs/api)

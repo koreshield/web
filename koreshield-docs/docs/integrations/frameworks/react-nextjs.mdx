@@ -11,11 +11,11 @@ Learn how to integrate Koreshield's JavaScript SDK with React and Next.js applic
 ## Installation
 
 ```bash
-npm install Koreshield
+npm install koreshield
 # or
-yarn add Koreshield
+yarn add koreshield
 # or
-pnpm add Koreshield
+pnpm add koreshield
 ```
 
 ## Basic Setup
@@ -25,8 +25,8 @@ pnpm add Koreshield
 Create a `.env.local` file in your Next.js project:
 
 ```bash
-Koreshield_BASE_URL=https://your-Koreshield-instance.com
-Koreshield_API_KEY=your-api-key-here
+KORESHIELD_BASE_URL=https://your-koreshield-instance.com
+KORESHIELD_API_KEY=your-api-key-here
 ```
 
 ### Client Configuration
@@ -34,11 +34,11 @@ Koreshield_API_KEY=your-api-key-here
 Create a `lib/Koreshield.ts` file:
 
 ```typescript
-import { createClient } from 'Koreshield';
+import { createClient } from 'koreshield';
 
 export const Koreshield = createClient({
-    baseURL: process.env.Koreshield_BASE_URL!,
-    apiKey: process.env.Koreshield_API_KEY,
+    baseURL: process.env.KORESHIELD_BASE_URL!,
+    apiKey: process.env.KORESHIELD_API_KEY,
     debug: process.env.NODE_ENV === 'development'
 });
 ```
@@ -391,8 +391,8 @@ function ChatMessages({ messages }) {
 Ensure these environment variables are set in your deployment platform:
 
 ```bash
-Koreshield_BASE_URL=https://your-Koreshield-instance.com
-Koreshield_API_KEY=your-production-api-key
+KORESHIELD_BASE_URL=https://your-koreshield-instance.com
+KORESHIELD_API_KEY=your-production-api-key
 ```
 
 ### Build Configuration
@@ -403,11 +403,11 @@ Add to your `next.config.js`:
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     env: {
-        Koreshield_BASE_URL: process.env.Koreshield_BASE_URL,
+        KORESHIELD_BASE_URL: process.env.KORESHIELD_BASE_URL,
     },
     // Ensure API routes can access environment variables
     serverRuntimeConfig: {
-        KoreshieldApiKey: process.env.Koreshield_API_KEY,
+        KoreshieldApiKey: process.env.KORESHIELD_API_KEY,
     },
 };
 

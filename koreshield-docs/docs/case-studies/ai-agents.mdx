@@ -1,112 +1,17 @@
 ---
-title: Autonomous AI Agents
-description: Securing agentic workflows with tool use, approvals, and guardrails.
-published: true
+title: AI Agents
+description: Securing autonomous agent interactions with KoreShield.
 ---
 
-# Autonomous AI Agents
+# AI Agents
 
-How a SaaS operations team secured agent-driven workflows that can execute tools, browse data, and trigger production changes.
+Agent orchestration should place KoreShield at the model boundary:
 
-## Challenge
+- Agent planner/tool prompts -> `/v1/chat/completions`
+- Retrieved tool context/docs -> `/v1/rag/scan` before model call
 
-An internal operations platform used autonomous agents to:
+Recommended controls:
 
-- triage incidents and open tickets
-- query logs and metrics
-- run controlled remediation scripts
-- summarize root causes for postmortems
-
-**Critical requirements:**
-
-- prevent agents from executing unsafe commands
-- restrict tool access by user role and environment
-- maintain an audit trail for every tool invocation
-- reduce false positives without slowing down incident response
-
-## Solution
-
-Koreshield was inserted before any tool call or external API request. Each tool request was scanned, policy-checked, and either allowed, queued for approval, or blocked.
-
-```typescript
-import { Koreshield } from "Koreshield-sdk";
-
-const Koreshield = new Koreshield({
-  apiKey: process.env.KORESHIELD_API_KEY,
-  sensitivity: "high",
-});
-
-async function guardToolCall(agentId: string, tool: string, args: string) {
-  const scan = await Koreshield.scan({
-    content: args,
-    userId: agentId,
-    metadata: {
-      tool,
-      environment: "prod",
-      risk: "elevated",
-    },
-  });
-
-  if (scan.threat_detected) {
-    return { allowed: false, reason: scan.threat_type };
-  }
-
-  if (tool === "runShell" || tool === "deployService") {
-    return { allowed: false, reason: "Requires approval" };
-  }
-
-  return { allowed: true };
-}
-```
-
-## Agent Workflow
-
-The agent pipeline was split into deterministic stages to reduce ambiguity:
-
-1. **Plan**: generate a step-by-step plan and required tools.
-2. **Authorize**: validate tool use against allowlists and risk tiers.
-3. **Execute**: run tools with scoped credentials and time limits.
-4. **Review**: summarize actions and store the audit trail.
-
-This kept each decision observable and enforced policy at every stage.
-
-## Guardrail Design
-
-- **Tool allowlist:** only approved tools were exposed to agents.
-- **Risk tiers:** sensitive tools required human approval.
-- **Context scopes:** tokens limited to a single incident or service.
-- **Rate limits:** per-agent limits to prevent runaway loops.
-
-## Approval Workflow
-
-High-risk tools triggered an approval queue with a human operator:
-
-- **Required approvals:** deploy, rollback, and shell execution.
-- **Allowed with warnings:** read-only diagnostics.
-- **Auto-blocked:** network scans, data exports, or privilege changes.
-
-All approvals recorded the user, tool, args hash, and timestamp.
-
-## Monitoring and Auditing
-
-- **Structured logs:** tool calls captured as JSON for SIEM ingestion.
-- **Per-agent limits:** daily caps for tool usage and tokens.
-- **Traceability:** each response linked to the tool calls that produced it.
-
-## Results
-
-- Eliminated unsafe tool calls in production workflows
-- Reduced incident response time with safe, automated triage
-- Full auditability for tool usage and model outputs
-
-## Lessons Learned
-
-- Agents are safest when tool access is narrow and explicit.
-- Approval queues should be fast and templated for on-call teams.
-- Policy tuning improves over time with real-world incident data.
-
-## Related Documentation
-
-- [Security](/docs/features/security)
-- [Monitoring & Alerting](/docs/integrations/monitoring)
-- [RAG Security](/docs/advanced/rag-security)
+- Require JWT or API key for all agent calls
+- Log blocked interactions for incident response
+- Keep policy defaults conservative (`default_action: block`) for high-risk tools

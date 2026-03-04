@@ -14,7 +14,7 @@ Protect your **Flask** applications from LLM attacks using Koreshield decorators
 Install the package:
 
 ```bash
-pip install Koreshield flask
+pip install koreshield flask
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ The most idiomatic way to use Koreshield in Flask is via a **decorator**.
 
 ```python
 from flask import Flask, request, abort
-from Koreshield.client import KoreshieldClient
+from koreshield_sdk import KoreShieldClient
 from functools import wraps
 
 app = Flask(__name__)
