@@ -101,10 +101,11 @@ class TestFrameworkIntegrations:
         request.method = "POST"
         request.url.path = "/api/chat"
         request.headers = {"content-type": "application/json"}
+        request.body = AsyncMock(return_value=b'{"prompt":"hello"}')
 
         # Mock call_next
-        async def call_next():
-            return Mock(status_code=200)
+        async def call_next(_request):
+            return Mock(status_code=200, headers={})
 
         # Call middleware
         response = await middleware(request, call_next)
@@ -129,8 +130,8 @@ class TestFrameworkIntegrations:
         request.method = "GET"
         request.url.path = "/health"
 
-        async def call_next():
-            return Mock(status_code=200)
+        async def call_next(_request):
+            return Mock(status_code=200, headers={})
 
         response = await middleware(request, call_next)
 
@@ -147,19 +148,18 @@ class TestFrameworkIntegrations:
             block_on_threat=False
         )
 
-        # Mock Flask app context
-        with patch('koreshield_sdk.integrations.frameworks.g') as mock_g:
-            # Mock request
-            request = Mock()
-            request.method = "POST"
-            request.path = "/api/chat"
-            request.content_type = "application/json"
+        mock_request = Mock()
+        mock_request.method = "POST"
+        mock_request.path = "/api/chat"
+        mock_request.is_json = True
+        mock_request.get_json.return_value = {"prompt": "hello"}
 
-            # Call middleware
+        with patch('koreshield_sdk.integrations.frameworks.request', mock_request, create=True), \
+             patch('koreshield_sdk.integrations.frameworks.g', Mock(), create=True), \
+             patch('koreshield_sdk.integrations.frameworks.jsonify', Mock(), create=True):
             middleware()
 
-            # Should have scanned (this would be called before request)
-            # In real Flask, this would set attributes on g
+        mock_client.scan_prompt.assert_called_once()
 
     @pytest.mark.skipif(not django_available, reason="Django not installed")
     def test_django_middleware_scanning(self, mock_client):
@@ -234,15 +234,16 @@ class TestFrameworkIntegrations:
         request = Mock()
         request.method = "POST"
         request.url.path = "/api/chat"
+        request.body = AsyncMock(return_value=b'{"prompt":"hello"}')
 
-        async def call_next():
-            return Mock(status_code=200)
+        async def call_next(_request):
+            return Mock(status_code=200, headers={})
 
         response = await middleware(request, call_next)
 
         # Should block the request
         assert response.status_code == 403
-        assert "blocked" in response.body.decode().lower()
+        assert "security threat detected" in response.body.decode().lower()
 
     def test_flask_middleware_blocking(self, mock_client):
         """Test Flask middleware threat blocking."""
@@ -260,14 +261,15 @@ class TestFrameworkIntegrations:
             block_on_threat=True
         )
 
-        with patch('koreshield_sdk.integrations.frameworks.g') as mock_g:
-            # Mock request
-            request = Mock()
-            request.method = "POST"
-            request.path = "/api/chat"
+        mock_request = Mock()
+        mock_request.method = "POST"
+        mock_request.path = "/api/chat"
+        mock_request.is_json = True
+        mock_request.get_json.return_value = {"prompt": "hello"}
 
-            # Call middleware
-            middleware()
+        with patch('koreshield_sdk.integrations.frameworks.request', mock_request, create=True), \
+             patch('koreshield_sdk.integrations.frameworks.g', Mock(), create=True), \
+             patch('koreshield_sdk.integrations.frameworks.jsonify', Mock(return_value={"error": "Security threat detected"}), create=True):
+            result = middleware()
 
-            # Should have set blocked flag on g
-            # In real Flask, this would cause the route to return early
+        assert result is not None
