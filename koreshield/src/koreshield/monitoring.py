@@ -3,6 +3,7 @@ Monitoring and alerting system for KoreShield.
 """
 
 import asyncio
+import ast
 import json
 import smtplib
 import time
@@ -19,6 +20,107 @@ import structlog
 from .config import AlertingConfig, MonitoringConfig
 
 logger = structlog.get_logger(__name__)
+
+
+def evaluate_alert_condition(condition: str, metrics_data: Dict[str, Any]) -> bool:
+    """
+    Safely evaluate alert-condition DSL using a restricted AST.
+
+    Supported:
+    - boolean logic: and/or/not
+    - comparisons: == != > >= < <= in not in
+    - arithmetic: + - * / %
+    - literals and metric variables by name
+    - simple subscripts: requests["failed"]
+    """
+    try:
+        tree = ast.parse(condition, mode="eval")
+    except SyntaxError as exc:
+        raise ValueError(f"Invalid condition syntax: {exc}") from exc
+
+    def _eval(node):
+        if isinstance(node, ast.Expression):
+            return _eval(node.body)
+
+        if isinstance(node, ast.BoolOp):
+            values = [_eval(v) for v in node.values]
+            if isinstance(node.op, ast.And):
+                return all(values)
+            if isinstance(node.op, ast.Or):
+                return any(values)
+            raise ValueError("Unsupported boolean operator")
+
+        if isinstance(node, ast.UnaryOp):
+            if isinstance(node.op, ast.Not):
+                return not _eval(node.operand)
+            if isinstance(node.op, ast.USub):
+                return -_eval(node.operand)
+            raise ValueError("Unsupported unary operator")
+
+        if isinstance(node, ast.BinOp):
+            left = _eval(node.left)
+            right = _eval(node.right)
+            if isinstance(node.op, ast.Add):
+                return left + right
+            if isinstance(node.op, ast.Sub):
+                return left - right
+            if isinstance(node.op, ast.Mult):
+                return left * right
+            if isinstance(node.op, ast.Div):
+                return left / right
+            if isinstance(node.op, ast.Mod):
+                return left % right
+            raise ValueError("Unsupported arithmetic operator")
+
+        if isinstance(node, ast.Compare):
+            left = _eval(node.left)
+            for op, comparator in zip(node.ops, node.comparators):
+                right = _eval(comparator)
+                if isinstance(op, ast.Eq):
+                    is_ok = left == right
+                elif isinstance(op, ast.NotEq):
+                    is_ok = left != right
+                elif isinstance(op, ast.Gt):
+                    is_ok = left > right
+                elif isinstance(op, ast.GtE):
+                    is_ok = left >= right
+                elif isinstance(op, ast.Lt):
+                    is_ok = left < right
+                elif isinstance(op, ast.LtE):
+                    is_ok = left <= right
+                elif isinstance(op, ast.In):
+                    is_ok = left in right
+                elif isinstance(op, ast.NotIn):
+                    is_ok = left not in right
+                else:
+                    raise ValueError("Unsupported comparison operator")
+
+                if not is_ok:
+                    return False
+                left = right
+            return True
+
+        if isinstance(node, ast.Name):
+            if node.id not in metrics_data:
+                raise ValueError(f"Unknown metric '{node.id}'")
+            return metrics_data[node.id]
+
+        if isinstance(node, ast.Constant):
+            return node.value
+
+        if isinstance(node, ast.Subscript):
+            value = _eval(node.value)
+            key = _eval(node.slice)
+            if isinstance(value, (dict, list, tuple)):
+                return value[key]
+            raise ValueError("Subscript target is not indexable")
+
+        raise ValueError(f"Unsupported expression element: {type(node).__name__}")
+
+    result = _eval(tree)
+    if not isinstance(result, bool):
+        raise ValueError("Condition must evaluate to a boolean")
+    return result
 
 
 class AlertSeverity(Enum):
@@ -185,8 +287,7 @@ class AlertManager:
                 continue
 
             try:
-                # Evaluate condition (be careful with eval!)
-                if eval(rule.condition, {"__builtins__": {}}, metrics_data):
+                if evaluate_alert_condition(rule.condition, metrics_data):
                     alert = Alert(
                         rule_name=rule.name,
                         severity=rule.severity,
