@@ -3,36 +3,32 @@ import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 import { SEOConfig } from '../lib/seo-config';
 
+/* COMMENTED: Stats data hidden
 const stats = [
 	{ label: 'Detection Accuracy', value: '95%+' },
 	{ label: 'Open Source Contributors', value: '500+' },
 	{ label: 'Organizations Protected', value: '1,200+' },
 	{ label: 'Attacks Blocked', value: '10M+' },
 ];
+COMMENTED */
 
 const team = [
 	{
-		name: 'Dr. Sarah Chen',
-		role: 'Founder & CEO',
-		bio: 'PhD in AI Security from Imperial College London. Previously led security research at a major AI lab.',
+		name: 'Teslim O. Kazeem',
+		role: 'Co-founder & CEO',
+		bio: 'MSc Data Science. Leading the vision for enterprise-grade LLM security.',
 		image: null,
 	},
 	{
-		name: 'Michael Roberts',
-		role: 'CTO',
-		bio: '15 years in cybersecurity. Former Principal Engineer at Cloudflare.',
+		name: 'Isaac Emmanuel',
+		role: 'Co-founder & CTO',
+		bio: '15+ years full-stack engineering. Architecting scalable security infrastructure.',
 		image: null,
 	},
 	{
-		name: 'Dr. Aisha Patel',
-		role: 'Head of Research',
-		bio: 'Published 20+ papers on adversarial ML. Ex-DeepMind research scientist.',
-		image: null,
-	},
-	{
-		name: 'James Wilson',
-		role: 'Head of Engineering',
-		bio: 'Built security infrastructure at scale. Ex-senior engineer at Auth0.',
+		name: 'Victor Emmanuel',
+		role: 'Frontend Engineer & Designer',
+		bio: 'Crafting intuitive interfaces for complex security workflows.',
 		image: null,
 	},
 ];
@@ -145,7 +141,7 @@ export default function AboutPage() {
 						</p>
 					</motion.div>
 
-					{/* Stats */}
+					{/* COMMENTED: Stats grid hidden
 					<div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
 						{stats.map((stat, index) => (
 							<motion.div
@@ -162,6 +158,7 @@ export default function AboutPage() {
 							</motion.div>
 						))}
 					</div>
+					COMMENTED */}
 				</div>
 			</section>
 
@@ -216,6 +213,7 @@ export default function AboutPage() {
 						</div>
 					</div>
 
+{/* COMMENTED: Economic Impact hidden
 					<div className="mt-12 p-8 bg-blue-50 dark:bg-blue-950/20 rounded-xl">
 						<h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
 							Economic Impact & Job Creation
@@ -238,6 +236,7 @@ export default function AboutPage() {
 							</div>
 						</div>
 					</div>
+COMMENTED */}
 				</div>
 			</section>
 
@@ -247,7 +246,7 @@ export default function AboutPage() {
 					<h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
 						Our Values
 					</h2>
-					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 						{values.map((value, index) => (
 							<motion.div
 								key={value.title}
@@ -320,7 +319,7 @@ export default function AboutPage() {
 				</div>
 			</section>
 
-			{/* Timeline */}
+{false && (
 			<section className="py-20 px-4">
 				<div className="max-w-5xl mx-auto">
 					<h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
@@ -361,8 +360,9 @@ export default function AboutPage() {
 					</div>
 				</div>
 			</section>
+)}
 
-			{/* Research & Academic Credentials */}
+{false && (
 			<section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
 				<div className="max-w-6xl mx-auto">
 					<h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
@@ -543,23 +543,26 @@ export default function AboutPage() {
 					</div>
 				</div>
 			</section>
+)}
 
 			{/* CTA */}
 			<section className="py-20 px-4">
 				<div className="max-w-4xl mx-auto text-center">
 					<h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-						Join Us in Securing AI
+						Join Us in Securing AI Systems
 					</h2>
 					<p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
 						Whether you're a developer, researcher, or enterprise customer, we'd love to hear from you.
 					</p>
 					<div className="flex flex-wrap gap-4 justify-center">
-						<Link
-							to="https://docs.koreshield.com/installation"
+						<a
+							href="https://docs.koreshield.com/"
+							target="_blank"
+							rel="noreferrer"
 							className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
 						>
 							Get Started
-						</Link>
+						</a>
 						<Link
 							to="/contact"
 							className="px-8 py-4 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 font-medium rounded-lg transition-colors"
