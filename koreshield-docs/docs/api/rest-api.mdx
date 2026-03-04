@@ -10,8 +10,7 @@ KoreShield's REST API contract is generated from the live FastAPI app.
 
 - Interactive docs (Swagger UI): `GET /docs`
 - ReDoc: `GET /redoc`
-- OpenAPI JSON: [`/openapi.json`](/openapi.json)
-- Docs bundle copy (for static/site review): [`/openapi.json`](/openapi.json)
+- OpenAPI JSON: `GET /openapi.json`
 
 ## Authentication Model
 
@@ -52,13 +51,3 @@ Use:
 
 - Header auth: `Authorization: Bearer <jwt>`
 - Or cookie auth: `ks_access_token`
-
-## Regenerating the Spec
-
-From repository root:
-
-```bash
-npm --prefix koreshield-docs run sync:openapi
-```
-
-This command regenerates `koreshield-docs/static/openapi.json` from `koreshield/src/koreshield/proxy.py`.
