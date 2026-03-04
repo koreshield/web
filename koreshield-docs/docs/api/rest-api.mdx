@@ -1,6 +1,6 @@
 ---
 title: REST API
-description: Generated OpenAPI contract and authentication model for KoreShield APIs.
+description: Generated OpenAPI contract, authentication model, and endpoint reference for KoreShield APIs.
 slug: /api/rest-api
 ---
 
@@ -14,16 +14,11 @@ KoreShield's REST API contract is generated from the live FastAPI app.
 
 ## Authentication Model
 
-These endpoints require authentication in runtime:
+Protected endpoints require authentication via one of these methods:
 
-- `POST /v1/chat/completions`
-- `POST /v1/rag/scan`
-
-Accepted auth methods:
-
-1. `Authorization: Bearer <jwt>`
-2. `X-API-Key: ks_...`
-3. `ks_access_token` httpOnly cookie (JWT)
+1. `Authorization: Bearer <jwt>` — JWT issued via `/v1/management/login`
+2. `X-API-Key: ks_...` — API key provisioned through the management API
+3. `ks_access_token` httpOnly cookie — JWT set during login
 
 JWT validation is strict:
 
@@ -34,20 +29,65 @@ JWT validation is strict:
 
 ## Core Endpoint Groups
 
-- Health: `/health`, `/status`, `/metrics`, `/health/providers`
-- Chat security proxy: `/v1/chat/completions`, `/v1/rag/scan`
-- Management: `/v1/management/*`
-- RBAC: `/v1/rbac/*`
-- Analytics: `/v1/analytics/*`
-- Teams: `/v1/teams/*`
-- Reports: `/v1/reports*`
-- Rules and alerts: `/v1/management/rules*`, `/v1/management/alerts/*`
+### Health & Monitoring
 
-## WebSocket Note
+| Endpoint | Method | Auth | Description |
+|---|---|---|---|
+| `/health` | GET | None | Basic health check |
+| `/health/providers` | GET | None | Per-provider health status |
+| `/status` | GET | None | Full status with statistics and provider info |
+| `/metrics` | GET | None | Prometheus-format metrics |
 
-`/ws/events` is implemented for real-time events but is not part of the OpenAPI document (OpenAPI does not describe WebSocket handlers directly in this app).
+### Security Proxy
 
-Use:
+| Endpoint | Method | Auth | Description |
+|---|---|---|---|
+| `/v1/chat/completions` | POST | Required | OpenAI-compatible chat endpoint with security scanning |
+| `/v1/rag/scan` | POST | Required | RAG context scanning for indirect injection |
 
-- Header auth: `Authorization: Bearer <jwt>`
-- Or cookie auth: `ks_access_token`
+Both proxy endpoints are rate-limited via SlowAPI (default: `60/minute`, configurable via `security.rate_limit` in config).
+
+### Management
+
+| Endpoint | Method | Auth | Description |
+|---|---|---|---|
+| `/v1/management/signup` | POST | None | Create account |
+| `/v1/management/login` | POST | None | Login and receive JWT |
+| `/v1/management/config` | GET | Required | View server config (dev environments only, values redacted) |
+| `/v1/management/rules/*` | Various | Required | Manage custom detection rules |
+| `/v1/management/alerts/*` | Various | Required | Manage alert rules and channels |
+
+### RBAC
+
+| Endpoint | Method | Auth | Description |
+|---|---|---|---|
+| `/v1/rbac/*` | Various | Required | Role and permission management |
+
+### Teams
+
+| Endpoint | Method | Auth | Description |
+|---|---|---|---|
+| `/v1/teams/*` | Various | Required | Team creation and membership management |
+
+### Analytics & Reports
+
+| Endpoint | Method | Auth | Description |
+|---|---|---|---|
+| `/v1/analytics/*` | Various | Required | Usage and security analytics |
+| `/v1/reports/*` | Various | Required | Generate and download reports |
+
+## WebSocket
+
+`/ws/events` provides real-time event streaming for dashboards and monitoring.
+
+Auth via:
+- Header: `Authorization: Bearer <jwt>`
+- Cookie: `ks_access_token`
+
+:::note
+WebSocket endpoints are not part of the OpenAPI document, as OpenAPI does not describe WebSocket handlers in this framework.
+:::
+
+## Rate Limiting
+
+All protected proxy endpoints use [SlowAPI](https://github.com/laurentS/slowapi) with Redis-backed storage. The default rate limit is `60/minute` and is configurable via `security.rate_limit` in `config.yaml`.
