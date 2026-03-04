@@ -8,7 +8,7 @@
 
 ## About
 
-KoreShield is an open-source security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It sits transparently between your application and LLM API providers (OpenAI, Anthropic, Google Gemini, etc.), sanitizing inputs, detecting threats, and enforcing security policies before requests reach the model.
+KoreShield is a research-backed security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It sits transparently between your application and LLM API providers (OpenAI, Anthropic, Google Gemini, etc.), sanitizing inputs, detecting threats, and enforcing security policies before requests reach the model.
 
 This project is unified under the KoreShield brand, with all resources, SDKs, and documentation available at [koreshield.com](https://koreshield.com).
 
@@ -21,6 +21,7 @@ The goal is for KoreShield to be the "security layer" for any LLM-powered enterp
 ## Why KoreShield?
 
 Prompt injection is a critical security risk for LLM-integrated systems. Attackers can:
+
 - Override system instructions
 - Extract sensitive data
 - Bypass controls
@@ -28,6 +29,7 @@ Prompt injection is a critical security risk for LLM-integrated systems. Attacke
 - Exfiltrate proprietary information
 
 KoreShield provides defense-in-depth:
+
 - **Sanitization**: Cleans and normalizes inputs
 - **Detection**: Heuristic and behavioral analysis for attacks
 - **Policy Enforcement**: Configurable rules and sensitivity levels
@@ -56,6 +58,7 @@ Application → KoreShield → LLM API Provider
 ```
 
 ### Component Overview
+
 - **KoreShield Proxy**: Orchestrates security pipeline, handles HTTP requests, tracks metrics
 - **Sanitization Engine**: Cleans and normalizes prompts, detects basic threats
 - **Attack Detector**: Heuristic and behavioral analysis for prompt injection
@@ -66,17 +69,21 @@ Application → KoreShield → LLM API Provider
 ## API Reference (KoreShield)
 
 ### Health Check
+
 `GET /health`
 Returns status and version.
 
 ### Chat Completions (OpenAI Compatible)
+
 `POST /v1/chat/completions`
 Proxy endpoint for OpenAI chat completions with security checks.
+
 - Sanitizes and analyzes prompts
 - Blocks malicious requests (403)
 - Forwards safe requests
 
 ### Status
+
 `GET /status`
 Returns firewall statistics and health.
 
@@ -111,6 +118,7 @@ API keys are set via environment variables (e.g., `OPENAI_API_KEY`).
 ## Usage
 
 ### Quick Start
+
 ```bash
 # Clone the repository
 git clone https://github.com/koreshield/koreshield.git
@@ -132,6 +140,7 @@ python -m src.firewall.cli start
 ```
 
 ### Example Request
+
 ```python
 import requests
 response = requests.post(
@@ -172,13 +181,16 @@ pytest
 ```
 
 ## Documentation
+
 - Configuration Guide: config/config.example.yaml
 - Examples: examples/
 - Research Notes: research/
 - Official website: [koreshield.com](https://koreshield.com)
 
 ## License
+
 MIT License
 
 ## Contact
+
 For questions or feedback, visit [koreshield.com](https://koreshield.com) or open an issue on GitHub.

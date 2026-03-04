@@ -1,14 +1,14 @@
 import {
-    SYSTEM_MODE,
-    DARK_MODE,
-    LIGHT_MODE,
-} from "@constants/constants";
+    siteConfig,
+} from "@/config";
 import type {
     LIGHT_DARK_MODE,
 } from "@/types/config";
 import {
-    siteConfig,
-} from "@/config";
+    DARK_MODE,
+    LIGHT_MODE,
+    SYSTEM_MODE,
+} from "@constants/constants";
 
 
 // Function to apply theme to document
@@ -96,13 +96,15 @@ export function getStoredTheme(): LIGHT_DARK_MODE {
 // Function to initialize theme from local storage or default
 export function initTheme(): void {
     if (typeof window === "undefined") return;
-    const storedTheme = getStoredTheme();
-    applyThemeToDocument(storedTheme, true);
-    // 监听系统主题变化
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-        const currentStored = getStoredTheme();
-        if (currentStored === SYSTEM_MODE) {
-            applyThemeToDocument(SYSTEM_MODE);
-        }
-    });
+    // COMMENTED: light mode support disabled — always dark
+    // const storedTheme = getStoredTheme();
+    // applyThemeToDocument(storedTheme, true);
+    applyThemeToDocument(DARK_MODE, true);
+    // COMMENTED: system theme listener disabled — dark only
+    // window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    //     const currentStored = getStoredTheme();
+    //     if (currentStored === SYSTEM_MODE) {
+    //         applyThemeToDocument(SYSTEM_MODE);
+    //     }
+    // });
 }
