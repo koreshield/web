@@ -1,6 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Search, Database, Cloud, Box, Globe, Cpu, Layers, Terminal, Code2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Box, Cloud, Code2, Cpu, Database, Layers, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { SEOMeta } from '../components/SEOMeta';
 
 interface Integration {
@@ -21,7 +20,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'CRM',
 		description: 'Secure Einstein Bots and Email RAG pipelines.',
 		icon: Cloud,
-		link: 'https://docs.koreshield.com/integrations/salesforce',
+		link: 'https://docs.koreshield.com/docs/integrations/crm/salesforce/',
 		featured: true
 	},
 	{
@@ -30,16 +29,8 @@ const INTEGRATIONS: Integration[] = [
 		category: 'CRM',
 		description: 'Protect Chatflows and ticketing workflows.',
 		icon: Database,
-		link: 'https://docs.koreshield.com/integrations/hubspot',
+		link: 'https://docs.koreshield.com/docs/integrations/crm/hubspot/',
 		featured: true
-	},
-	{
-		id: 'zendesk',
-		name: 'Zendesk',
-		category: 'CRM',
-		description: 'Guard Answer Bot and help center articles.',
-		icon: Globe,
-		link: 'https://docs.koreshield.com/integrations/zendesk'
 	},
 
 	// LLM Providers
@@ -47,25 +38,36 @@ const INTEGRATIONS: Integration[] = [
 		id: 'openai',
 		name: 'OpenAI',
 		category: 'LLM',
-		description: 'Proxy support for GPT-3.5, GPT-4, and embeddings.',
+		description: 'Proxy support for GPT-5, GPT-4o, and embeddings.',
 		icon: Cpu,
-		link: 'https://docs.koreshield.com/reference/protocols'
+		link: 'https://docs.koreshield.com/docs/integrations/models/openai/',
+		featured: true
 	},
 	{
 		id: 'anthropic',
 		name: 'Anthropic',
 		category: 'LLM',
-		description: 'Secure Claude 2 and Claude 3 deployments.',
+		description: 'Secure Claude 4.5 Sonnet, Claude 4.5 Opus, and Claude 4.6 deployments.',
 		icon: Box,
-		link: 'https://docs.koreshield.com/reference/protocols'
+		link: 'https://docs.koreshield.com/docs/integrations/models/anthropic/',
+		featured: true
 	},
 	{
-		id: 'deepseek',
-		name: 'DeepSeek',
+		id: 'gemini',
+		name: 'Google Gemini',
 		category: 'LLM',
-		description: 'Optimized support for DeepSeek Coder and Chat.',
-		icon: Terminal,
-		link: 'https://docs.koreshield.com/reference/protocols'
+		description: 'Full support for Gemini Pro and Ultra models.',
+		icon: Cpu,
+		link: 'https://docs.koreshield.com/docs/integrations/models/gemini/',
+		featured: true
+	},
+	{
+		id: 'azure-openai',
+		name: 'Azure OpenAI',
+		category: 'LLM',
+		description: 'Enterprise Azure OpenAI Service integration.',
+		icon: Cloud,
+		link: 'https://docs.koreshield.com/docs/integrations/models/azure-openai/'
 	},
 
 	// Frameworks
@@ -75,7 +77,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'Framework',
 		description: 'Drop-in callbacks for chains and agents.',
 		icon: Layers,
-		link: 'https://docs.koreshield.com/integrations/langchain',
+		link: 'https://docs.koreshield.com/docs/integrations/frameworks/langchain/',
 		featured: true
 	},
 	{
@@ -84,7 +86,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'Framework',
 		description: 'Secure RAG query engines and retrievers.',
 		icon: Database,
-		link: 'https://docs.koreshield.com/integrations/llamaindex'
+		link: 'https://docs.koreshield.com/docs/integrations/frameworks/llamaindex/'
 	},
 	{
 		id: 'python',
@@ -92,7 +94,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'Framework',
 		description: 'Async client for FastAPI/Django/Flask apps.',
 		icon: Code2,
-		link: 'https://docs.koreshield.com/reference/python-sdk'
+		link: 'https://docs.koreshield.com/docs/integrations/frameworks/python-sdk/'
 	},
 	{
 		id: 'javascript',
@@ -100,7 +102,25 @@ const INTEGRATIONS: Integration[] = [
 		category: 'Framework',
 		description: 'Client for Node.js, Next.js, and browser.',
 		icon: Code2,
-		link: 'https://docs.koreshield.com/reference/javascript-sdk'
+		link: 'https://docs.koreshield.com/docs/integrations/frameworks/javascript-sdk/'
+	},
+
+	// Deployment
+	{
+		id: 'docker',
+		name: 'Docker',
+		category: 'Deployment',
+		description: 'Official Docker images for quick self-hosted deployment.',
+		icon: Box,
+		link: 'https://docs.koreshield.com/docs/integrations/deployment/docker/'
+	},
+	{
+		id: 'aws',
+		name: 'AWS',
+		category: 'Deployment',
+		description: 'Deploy on ECS, EKS, or Lambda with one-click templates.',
+		icon: Cloud,
+		link: 'https://docs.koreshield.com/docs/integrations/deployment/aws/'
 	},
 ];
 
@@ -167,9 +187,11 @@ function IntegrationsPage() {
 				{/* Grid */}
 				<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{filteredIntegrations.map((item) => (
-						<Link
+						<a
 							key={item.id}
-							to={item.link}
+							href={item.link}
+							target="_blank"
+							rel="noreferrer"
 							className="bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-electric-green transition-all duration-300 group no-underline"
 						>
 							<div className="flex items-start justify-between mb-4">
@@ -187,7 +209,7 @@ function IntegrationsPage() {
 							<div className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-widest">
 								{item.category}
 							</div>
-						</Link>
+						</a>
 					))}
 				</div>
 
@@ -203,6 +225,21 @@ function IntegrationsPage() {
 						</button>
 					</div>
 				)}
+
+				{/* Partial list note */}
+				<div className="text-center mt-12 py-8 border-t border-slate-800">
+					<p className="text-gray-400 text-sm">
+						This is a selection of our most popular integrations. View the full list in our{' '}
+						<a
+							href="https://docs.koreshield.com/docs/category/integrations/"
+							target="_blank"
+							rel="noreferrer"
+							className="text-electric-green hover:underline"
+						>
+							documentation
+						</a>.
+					</p>
+				</div>
 			</div>
 		</div>
 	);
