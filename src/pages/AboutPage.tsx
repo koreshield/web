@@ -11,7 +11,6 @@ const stats = [
 	{ label: 'Attacks Blocked', value: '10M+' },
 ];
 COMMENTED */
-const stats: { label: string; value: string }[] = [];
 
 const team = [
 	{
@@ -237,7 +236,7 @@ export default function AboutPage() {
 							</div>
 						</div>
 					</div>
-COMMENTED */}					</div>
+COMMENTED */}
 				</div>
 			</section>
 
@@ -321,7 +320,6 @@ COMMENTED */}					</div>
 			</section>
 
 {false && (
-			{/* Timeline */}
 			<section className="py-20 px-4">
 				<div className="max-w-5xl mx-auto">
 					<h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
@@ -365,7 +363,6 @@ COMMENTED */}					</div>
 )}
 
 {false && (
-			{/* Research & Academic Credentials */}
 			<section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
 				<div className="max-w-6xl mx-auto">
 					<h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
