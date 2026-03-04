@@ -11,25 +11,29 @@
 	--ifm-color-primary-dark: #0ea370;
 	--ifm-color-primary-darker: #0d9666;
 	--ifm-color-primary-darkest: #0a7a52;
-	--ifm-color-primary-light: #13cB8e;
+	--ifm-color-primary-light: #13cb8e;
 	--ifm-color-primary-lighter: #26d99d;
 	--ifm-color-primary-lightest: #52e3b3;
 
-	/* Backgrounds */
-	--ifm-background-color: #ffffff;
-	--ifm-background-surface-color: #f9fafb;
-	--ifm-navbar-background-color: rgba(255, 255, 255, 0.8);
+	/* Pure near-black background - matches koreshield.com */
+	--ifm-background-color: #060606;
+	--ifm-background-surface-color: #0e0e0e;
+	--ifm-navbar-background-color: rgba(6, 6, 6, 0.8);
 
-	/* Typography */
+	/* Typography – off-white as on main site */
 	--ifm-font-family-base: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
 	--ifm-heading-font-family: 'Geist', system-ui, -apple-system, sans-serif;
 	--ifm-font-family-monospace: 'Geist Mono', 'JetBrains Mono', 'Fira Code', monospace;
 	--ifm-font-size-base: 16px;
-	--ifm-font-color-base: #111111;
-	--ifm-heading-color: #050505;
+	--ifm-font-color-base: #e4e4e7;
+	--ifm-heading-color: #f2f2f2;
 	--ifm-heading-font-weight: 600;
 	--ifm-font-weight-bold: 600;
 	--ifm-code-font-size: 92%;
+
+	/* Sidebar */
+	--ifm-menu-color: #71717a;
+	--ifm-menu-color-active: #10b77f;
 
 	/* Navbar */
 	--ifm-navbar-height: 58px;
@@ -41,35 +45,6 @@
 	--ifm-pre-border-radius: 8px;
 	--ifm-alert-border-radius: 8px;
 
-	/* Sidebar */
-	--ifm-menu-color: #4b5563;
-	--ifm-menu-color-active: var(--ifm-color-primary);
-
-	--docusaurus-highlighted-code-line-bg: rgba(16, 183, 127, 0.08);
-}
-
-/* ─── DARK MODE — matches koreshield.com ─────────────── */
-[data-theme='dark'] {
-	/* Emerald palette stays identical */
-	--ifm-color-primary: #10b77f;
-	--ifm-color-primary-dark: #0ea370;
-	--ifm-color-primary-darker: #0d9666;
-	--ifm-color-primary-darkest: #0a7a52;
-	--ifm-color-primary-light: #13cb8e;
-	--ifm-color-primary-lighter: #26d99d;
-	--ifm-color-primary-lightest: #52e3b3;
-
-	/* Pure near-black background */
-	--ifm-background-color: #060606;
-	--ifm-background-surface-color: #0e0e0e;
-	--ifm-navbar-background-color: rgba(6, 6, 6, 0.8);
-
-	/* Typography – off-white as on main site */
-	--ifm-font-color-base: #e4e4e7;
-	--ifm-heading-color: #f2f2f2;
-	--ifm-menu-color: #71717a;
-	--ifm-menu-color-active: #10b77f;
-
 	/* Borders */
 	--ifm-hr-border-color: #27272a;
 	--ifm-color-emphasis-200: rgba(255, 255, 255, 0.04);
@@ -77,6 +52,24 @@
 
 	--docusaurus-highlighted-code-line-bg: rgba(16, 183, 127, 0.1);
 }
+
+/* Light mode fallback (unused but kept for system completeness) */
+[data-theme='light'] {
+	--ifm-background-color: #ffffff;
+	--ifm-background-surface-color: #f9fafb;
+	--ifm-navbar-background-color: rgba(255, 255, 255, 0.8);
+	--ifm-font-color-base: #111111;
+	--ifm-heading-color: #050505;
+	--ifm-menu-color: #4b5563;
+}
+
+[data-theme='dark'] {
+	/* Mirror :root to ensure consistency */
+	--ifm-background-color: #060606;
+}
+
+/* ─── DARK MODE — matches koreshield.com ─────────────── */
+
 
 /* ─── BASE ───────────────────────────────────────────── */
 html {
