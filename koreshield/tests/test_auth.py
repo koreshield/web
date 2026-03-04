@@ -8,29 +8,49 @@ from unittest.mock import patch
 import jwt
 import pytest
 from fastapi.security import HTTPAuthorizationCredentials
+from starlette.requests import Request
 
 from src.koreshield.api.auth import (
     get_current_admin,
     init_jwt_config,
+    issue_jwt_token,
     verify_jwt_token,
     verify_session_token,
 )
 
 
+def _request(headers: dict[str, str] | None = None, path: str = "/test") -> Request:
+    raw_headers = []
+    for key, value in (headers or {}).items():
+        raw_headers.append((key.lower().encode("utf-8"), value.encode("utf-8")))
+    scope = {"type": "http", "path": path, "headers": raw_headers, "query_string": b""}
+    return Request(scope)
+
+
 class TestJWTConfig:
     def test_init_jwt_config_with_secret_env(self):
         config = {"jwt": {}}
-        with patch.dict("os.environ", {"JWT_SECRET": "env-secret"}, clear=True):
+        env = {
+            "JWT_SECRET": "env-secret-with-minimum-32-characters!!",
+            "JWT_ISSUER": "koreshield-auth",
+            "JWT_AUDIENCE": "koreshield-api",
+        }
+        with patch.dict("os.environ", env, clear=True):
             init_jwt_config(config)
             with patch("jwt.decode") as mock_decode:
                 mock_decode.return_value = {"sub": "user-1"}
                 assert verify_jwt_token("test.token") == {"sub": "user-1"}
 
-    def test_init_jwt_config_missing_key(self):
-        config = {"jwt": {}}
+    def test_init_jwt_config_missing_key_raises(self):
+        config = {"jwt": {"issuer": "koreshield-auth", "audience": "koreshield-api"}}
         with patch.dict("os.environ", {}, clear=True):
+            with pytest.raises(RuntimeError, match="verification key"):
+                init_jwt_config(config)
+
+    def test_init_jwt_config_rejects_weak_secret(self):
+        config = {"jwt": {"secret": "short-secret", "issuer": "koreshield-auth", "audience": "koreshield-api"}}
+        with pytest.raises(RuntimeError, match="at least 32"):
             init_jwt_config(config)
-            assert verify_jwt_token("test.token") is None
 
 
 class TestJWTVerification:
@@ -50,7 +70,7 @@ class TestJWTVerification:
         init_jwt_config(
             {
                 "jwt": {
-                    "secret": "test-secret",
+                    "secret": "test-secret-with-minimum-32-characters!!",
                     "issuer": "koreshield-auth",
                     "audience": "koreshield-api",
                 }
@@ -62,12 +82,28 @@ class TestJWTVerification:
             mock_decode.assert_called_once()
 
     def test_verify_expired_jwt_token(self):
-        init_jwt_config({"jwt": {"secret": "test-secret"}})
+        init_jwt_config(
+            {
+                "jwt": {
+                    "secret": "test-secret-with-minimum-32-characters!!",
+                    "issuer": "koreshield-auth",
+                    "audience": "koreshield-api",
+                }
+            }
+        )
         with patch("jwt.decode", side_effect=jwt.ExpiredSignatureError("expired")):
             assert verify_jwt_token("expired.jwt.token") is None
 
     def test_verify_invalid_jwt_token(self):
-        init_jwt_config({"jwt": {"secret": "test-secret"}})
+        init_jwt_config(
+            {
+                "jwt": {
+                    "secret": "test-secret-with-minimum-32-characters!!",
+                    "issuer": "koreshield-auth",
+                    "audience": "koreshield-api",
+                }
+            }
+        )
         with patch("jwt.decode", side_effect=jwt.InvalidTokenError("invalid")):
             assert verify_jwt_token("invalid.jwt.token") is None
 
@@ -86,7 +122,7 @@ class TestFastAPIDependencies:
             "role": "admin",
         }
         with patch("src.koreshield.api.auth.verify_jwt_token", return_value=payload):
-            result = await get_current_admin(credentials)
+            result = await get_current_admin(_request(), credentials)
             assert result["id"] == "user123"
             assert result["role"] == "admin"
 
@@ -98,7 +134,7 @@ class TestFastAPIDependencies:
         )
         with patch("src.koreshield.api.auth.verify_jwt_token", return_value=None):
             with pytest.raises(Exception) as exc_info:
-                await get_current_admin(credentials)
+                await get_current_admin(_request(), credentials)
             assert exc_info.value.status_code == 401
 
     @pytest.mark.asyncio
@@ -115,8 +151,29 @@ class TestFastAPIDependencies:
         }
         with patch("src.koreshield.api.auth.verify_jwt_token", return_value=payload):
             with pytest.raises(Exception) as exc_info:
-                await get_current_admin(credentials)
+                await get_current_admin(_request(), credentials)
             assert exc_info.value.status_code == 403
+
+
+def test_issue_jwt_token_uses_initialized_config():
+    init_jwt_config(
+        {
+            "jwt": {
+                "secret": "test-secret-with-minimum-32-characters!!",
+                "issuer": "koreshield-auth",
+                "audience": "koreshield-api",
+            }
+        }
+    )
+    token = issue_jwt_token(user_id="user-1", email="u@example.com", role="admin")
+    decoded = jwt.decode(
+        token,
+        "test-secret-with-minimum-32-characters!!",
+        algorithms=["HS256"],
+        issuer="koreshield-auth",
+        audience="koreshield-api",
+    )
+    assert decoded["sub"] == "user-1"
 
 
 def test_verify_session_token_delegates_to_jwt():

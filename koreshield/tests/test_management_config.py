@@ -2,17 +2,26 @@
 Integration tests for management configuration endpoint security behavior.
 """
 
-from datetime import datetime, timedelta
+import os
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import jwt
 from fastapi.testclient import TestClient
 
+# Ensure predictable JWT env during module import.
+os.environ.pop("JWT_PUBLIC_KEY", None)
+os.environ.pop("JWT_PRIVATE_KEY", None)
+os.environ.setdefault("JWT_ISSUER", "koreshield-auth")
+os.environ.setdefault("JWT_AUDIENCE", "koreshield-api")
+os.environ.setdefault("JWT_SECRET", "test-secret-with-minimum-32-characters!!")
+os.environ.setdefault("KORESHIELD_EAGER_APP_INIT", "false")
+
 from src.koreshield.proxy import KoreShieldProxy
 
 
 def _build_admin_headers(secret: str) -> dict:
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     token = jwt.encode(
         {
             "sub": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
@@ -44,7 +53,16 @@ def test_management_config_dev_returns_redacted_values():
         },
     }
 
-    with patch.dict("os.environ", {"ENVIRONMENT": "development", "JWT_SECRET": secret}, clear=True):
+    with patch.dict(
+        "os.environ",
+        {
+            "ENVIRONMENT": "development",
+            "JWT_SECRET": secret,
+            "JWT_ISSUER": "koreshield-auth",
+            "JWT_AUDIENCE": "koreshield-api",
+        },
+        clear=True,
+    ):
         with patch.object(KoreShieldProxy, "_init_providers"):
             proxy = KoreShieldProxy(config)
             client = TestClient(proxy.app)
@@ -65,10 +83,46 @@ def test_management_config_non_dev_returns_404():
         "providers": {"openai": {"enabled": False}},
     }
 
-    with patch.dict("os.environ", {"ENVIRONMENT": "production", "JWT_SECRET": secret}, clear=True):
+    with patch.dict(
+        "os.environ",
+        {
+            "ENVIRONMENT": "production",
+            "JWT_SECRET": secret,
+            "JWT_ISSUER": "koreshield-auth",
+            "JWT_AUDIENCE": "koreshield-api",
+        },
+        clear=True,
+    ):
         with patch.object(KoreShieldProxy, "_init_providers"):
             proxy = KoreShieldProxy(config)
             client = TestClient(proxy.app)
             response = client.get("/v1/management/config", headers=_build_admin_headers(secret))
             assert response.status_code == 404
             assert "disabled" in response.json()["detail"].lower()
+
+
+def test_management_me_endpoint_returns_authenticated_user():
+    secret = "dev-secret-with-minimum-length-32chars!!"
+    config = {
+        "server": {"environment": "development"},
+        "security": {"sensitivity": "high", "default_action": "block"},
+        "providers": {"openai": {"enabled": False}},
+    }
+
+    with patch.dict(
+        "os.environ",
+        {
+            "ENVIRONMENT": "development",
+            "JWT_SECRET": secret,
+            "JWT_ISSUER": "koreshield-auth",
+            "JWT_AUDIENCE": "koreshield-api",
+        },
+        clear=True,
+    ):
+        with patch.object(KoreShieldProxy, "_init_providers"):
+            proxy = KoreShieldProxy(config)
+            client = TestClient(proxy.app)
+            response = client.get("/v1/management/me", headers=_build_admin_headers(secret))
+            assert response.status_code == 200
+            assert "user" in response.json()
+            assert response.json()["user"]["email"] == "admin@example.com"

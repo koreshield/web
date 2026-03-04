@@ -76,8 +76,7 @@ class WebSocketClient {
      */
     connect() {
         // Don't connect if user is not authenticated
-        const token = authService.getToken();
-        if (!token) {
+        if (!authService.isAuthenticated()) {
             console.warn('[WebSocket] No auth token available. Skipping connection.');
             return;
         }
@@ -86,8 +85,8 @@ class WebSocketClient {
         this.disconnect();
 
         try {
-            const wsUrl = `${WS_BASE_URL}/ws/events?token=${token}`;
-            console.log(`[WebSocket] Connecting to ${wsUrl.replace(token, '***')}`);
+            const wsUrl = `${WS_BASE_URL}/ws/events`;
+            console.log(`[WebSocket] Connecting to ${wsUrl} using secure auth flow`);
 
             this.ws = new WebSocket(wsUrl);
             this.isIntentionalDisconnect = false;
@@ -362,8 +361,8 @@ class WebSocketClient {
 // Export singleton instance
 export const wsClient = new WebSocketClient();
 
-// Auto-connect when auth token is available
-if (authService.getToken()) {
+// Auto-connect when a user session is available
+if (authService.isAuthenticated()) {
     wsClient.connect();
 }
 

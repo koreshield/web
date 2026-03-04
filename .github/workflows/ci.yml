@@ -45,6 +45,14 @@ jobs:
         # Note: We append || true to avoid failing the build immediately while we tune it.
         # Once specific issues are fixed, we can remove || true.
 
+    - name: Security/Auth Test Gate
+      env:
+        JWT_SECRET: "ci-jwt-secret-with-minimum-32-characters!!"
+        JWT_ISSUER: "koreshield-auth"
+        JWT_AUDIENCE: "koreshield-api"
+      run: |
+        pytest -q tests/test_auth.py tests/test_proxy.py tests/test_management_config.py tests/test_rag_proxy.py tests/test_websocket_auth.py
+
   integration-test:
     runs-on: ubuntu-latest
     needs: backend-test
@@ -58,7 +66,9 @@ jobs:
         DATABASE_URL: "postgresql://postgres:postgres@db:5432/koreshield"
         REDIS_URL: "redis://redis:6379/0"
         SECRET_KEY: "ci_secret_key_very_secure"
-        JWT_SECRET: "ci_jwt_secret_key_very_secure"
+        JWT_SECRET: "ci-jwt-secret-with-minimum-32-characters!!"
+        JWT_ISSUER: "koreshield-auth"
+        JWT_AUDIENCE: "koreshield-api"
         POSTGRES_USER: "postgres"
         POSTGRES_PASSWORD: "postgres"
         POSTGRES_DB: "koreshield"
