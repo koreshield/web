@@ -1,11 +1,20 @@
 ---
 title: Integration Overview
-description: Browse Koreshield integration documentation by category.
+description: Browse KoreShield integration docs with current server API contract notes.
 ---
 
 # Integration Overview
 
-Use the categories below to navigate the Integration Section.
+Use these integration guides as implementation patterns, with this runtime contract as source of truth:
+
+- Protected endpoints: `POST /v1/chat/completions`, `POST /v1/rag/scan`
+- Auth: Bearer JWT, `X-API-Key`, or `ks_access_token` cookie
+- Management APIs: `/v1/management/*`
+
+If any snippet conflicts with the API reference, follow:
+
+- [/docs/api/rest-api](/docs/api/rest-api)
+- [/docs/configuration/settings](/docs/configuration/settings)
 
 ## [Models](/docs/integrations/models)
 
