@@ -9,7 +9,6 @@ import type {
     PostConfig,
     FooterConfig,
     ParticleConfig,
-    MusicPlayerConfig,
     PioConfig,
     NavbarLink,
 } from "./types/config";
@@ -34,7 +33,6 @@ type ConfigFile = {
     post: PostConfig;
     footer: FooterConfig;
     particle: ParticleConfig;
-    musicPlayer: MusicPlayerConfig;
     pio: PioConfig;
 };
 
@@ -124,9 +122,6 @@ export const footerConfig: FooterConfig = config.footer;
 
 // 粒子特效配置
 export const particleConfig: ParticleConfig = config.particle;
-
-// 音乐播放器配置
-export const musicPlayerConfig: MusicPlayerConfig = config.musicPlayer;
 
 // 看板娘配置
 export const pioConfig: PioConfig = config.pio;
