@@ -12,7 +12,12 @@ Based on the LLM-Firewall research paper's multi-dimensional taxonomy:
 from enum import Enum
 from typing import List, Optional, Dict, Any
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
+
+
+def utcnow_aware() -> datetime:
+    """Timezone-aware UTC timestamp."""
+    return datetime.now(timezone.utc)
 
 
 class InjectionVector(str, Enum):
@@ -183,7 +188,7 @@ class RAGDetectionResult:
     
     # Metadata
     scan_id: Optional[str] = None
-    scan_timestamp: datetime = field(default_factory=datetime.utcnow)
+    scan_timestamp: datetime = field(default_factory=utcnow_aware)
     processing_time_ms: float = 0.0
     metadata: Dict[str, Any] = field(default_factory=dict)
     
@@ -257,3 +262,6 @@ class RetrievedDocument:
             raise ValueError("Document ID cannot be empty")
         if not self.content:
             raise ValueError("Document content cannot be empty")
+def utcnow_aware() -> datetime:
+    """Timezone-aware UTC timestamp."""
+    return datetime.now(timezone.utc)

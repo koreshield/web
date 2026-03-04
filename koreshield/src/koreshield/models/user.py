@@ -2,10 +2,15 @@
 User database models for authentication.
 """
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, String, Boolean, DateTime, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from .base import Base
+
+
+def utcnow_naive() -> datetime:
+    """UTC now as naive datetime for existing DB schema compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class User(Base):
     __tablename__ = 'users'
@@ -22,8 +27,8 @@ class User(Base):
     reset_password_token = Column(String(255), index=True)
     reset_password_expires_at = Column(DateTime)
     last_login_at = Column(DateTime)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=utcnow_naive)
+    updated_at = Column(DateTime, nullable=False, default=utcnow_naive, onupdate=utcnow_naive)
     user_metadata = Column(JSON, default={})
 
     # Relationships

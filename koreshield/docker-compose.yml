@@ -38,7 +38,9 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/koreshield
       - SECRET_KEY=dev_secret
-      - JWT_SECRET=dev_jwt_secret
+      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-with-minimum-32-characters!!}
+      - JWT_ISSUER=${JWT_ISSUER:-koreshield-auth}
+      - JWT_AUDIENCE=${JWT_AUDIENCE:-koreshield-api}
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=koreshield
