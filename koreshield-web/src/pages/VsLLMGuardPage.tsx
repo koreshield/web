@@ -157,11 +157,13 @@ export default function VsLLMGuardPage() {
 										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
 										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
 									</tr>
-									<tr>
-										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Cost (Self-Hosted)</td>
-										<td className="py-4 px-4 text-center text-gray-900 dark:text-white font-semibold">Free</td>
-										<td className="py-4 px-4 text-center text-gray-900 dark:text-white font-semibold">Free</td>
-									</tr>
+								{/* COMMENTED: Cost row hidden
+								<tr>
+									<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Cost (Self-Hosted)</td>
+									<td className="py-4 px-4 text-center text-gray-900 dark:text-white font-semibold">Free</td>
+									<td className="py-4 px-4 text-center text-gray-900 dark:text-white font-semibold">Free</td>
+								</tr>
+								COMMENTED */}
 								</tbody>
 							</table>
 						</div>
