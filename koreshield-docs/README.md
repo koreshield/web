@@ -70,8 +70,8 @@ Contributions to improve the documentation are welcome! Please:
 
 ## 🔗 Links
 
-- **Main Repository**: [github.com/Koreshield/Koreshield](https://github.com/Koreshield/Koreshield)
-- **Documentation Site**: [docs.Koreshield.com](https://docs.Koreshield.com)
+- **Main Repository**: [github.com/koreshield/koreshield](https://github.com/koreshield/koreshield)
+- **Documentation Site**: [docs.koreshield.com](https://docs.koreshield.com)
 - **Discord Community**: [discord.gg/Koreshield](https://discord.gg/Koreshield)
 
 ## 📄 License

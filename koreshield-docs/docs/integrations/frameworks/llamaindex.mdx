@@ -21,7 +21,7 @@ Create a custom LLM class:
 from typing import Any
 from llama_index.core.llms import CustomLLM, CompletionResponse
 from llama_index.core.llms.callbacks import llm_completion_callback
-from Koreshield.client import KoreshieldClient
+from koreshield_sdk import KoreShieldClient
 import asyncio
 
 class KoreshieldLLM(CustomLLM):
