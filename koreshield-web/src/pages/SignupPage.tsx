@@ -23,6 +23,7 @@ export function SignupPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify(formData),
             });
 
@@ -32,9 +33,8 @@ export function SignupPage() {
                 throw new Error(data.detail || 'Signup failed');
             }
 
-            // Store token
-            localStorage.setItem('koreshield_token', data.token);
-            localStorage.setItem('koreshield_user', JSON.stringify(data.user));
+            // Persist user metadata in session storage; auth cookie is HttpOnly.
+            sessionStorage.setItem('admin_user', JSON.stringify(data.user));
 
             // Redirect to dashboard
             navigate('/dashboard');
