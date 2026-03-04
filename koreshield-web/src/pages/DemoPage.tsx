@@ -1,7 +1,7 @@
 import * as LucideIcons from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { analyzeTheat, PRESET_ATTACKS, type ThreatLogEntry, type ThreatResult } from '../lib/threat-engine';
+import { analyzeThreat, PRESET_ATTACKS, type ThreatLogEntry, type ThreatResult } from '../lib/threat-engine';
 
 const Icon = ({ name, className }: { name: string; className?: string }) => {
 	const LucideIcon = (LucideIcons as any)[name];
@@ -348,7 +348,7 @@ export default function DemoPage() {
 		// Simulate processing delay for dramatic effect
 		await new Promise((r) => setTimeout(r, 1400));
 
-		const result = analyzeTheat(prompt);
+		const result = analyzeThreat(prompt);
 		setCurrentResult(result);
 		setScanState('done');
 
