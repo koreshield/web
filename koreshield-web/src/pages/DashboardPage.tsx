@@ -177,7 +177,7 @@ export function DashboardPage() {
 											<h3 className="font-semibold text-sm sm:text-base">Get Your Token</h3>
 										</div>
 										<p className="text-xs sm:text-sm text-muted-foreground mb-3">
-											Your JWT token is ready to use. Copy it from the browser's localStorage or generate an API key.
+											Your session is active via secure HttpOnly cookie. Use API keys for server-to-server integrations.
 										</p>
 									</div>
 
