@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle, Minus, ExternalLink, Shield, DollarSign, Code } from 'lucide-react';
+import { CheckCircle, Code, DollarSign, ExternalLink, Minus, Shield, XCircle } from 'lucide-react';
 import { SEOMeta } from '../components/SEOMeta';
 
 export default function VsLakeraPage() {
@@ -183,10 +183,9 @@ export default function VsLakeraPage() {
 						<div>
 							<h3 className="text-xl font-semibold text-blue-600 dark:text-blue-400 mb-4">KoreShield</h3>
 							<ul className="space-y-3 text-gray-600 dark:text-gray-400">
-								<li>• <strong>Free:</strong> Open-source community edition</li>
-								<li>• <strong>$299/mo:</strong> Cloud Starter (10K requests/mo)</li>
-								<li>• <strong>$999/mo:</strong> Cloud Pro (100K requests/mo)</li>
-								<li>• <strong>$50K+/year:</strong> Enterprise self-hosted</li>
+							<li>• <strong>$299/mo:</strong> Startup (1M requests/mo)</li>
+							<li>• <strong>$1,999/mo:</strong> Growth (10M requests/mo)</li>
+							<li>• <strong>Custom:</strong> Enterprise self-hosted</li>
 								<li>• <strong>50-70% cost savings</strong> vs competitors</li>
 							</ul>
 						</div>
@@ -312,19 +311,17 @@ export default function VsLakeraPage() {
 					transition={{ delay: 0.6 }}
 					className="bg-blue-600 dark:bg-blue-900 rounded-xl p-8 text-center text-white"
 				>
-					<h2 className="text-3xl font-bold mb-4">Try KoreShield Free</h2>
+					<h2 className="text-3xl font-bold mb-4">Upgrade to KoreShield</h2>
 					<p className="text-xl mb-6 text-blue-100">
-						Start with our open-source edition or get a free trial of our cloud platform
+						Get enterprise-ready security with the same open-source values
 					</p>
 					<div className="flex flex-wrap justify-center gap-4">
 						<a
-							href="https://docs.koreshield.com/getting-started/installation"
-							target="_blank"
-							rel="noreferrer"
+							href="/pricing"
 							className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
 						>
 							<Code className="w-5 h-5" />
-							Quick Start Guide
+							Upgrade Now
 						</a>
 						<a
 							href="/playground"

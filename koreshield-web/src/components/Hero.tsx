@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Check, Copy, Github, Play } from 'lucide-react';
+import { ArrowRight, Play } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import TerminalAnimation from './TerminalAnimation';
@@ -76,6 +76,7 @@ function Hero() {
 							</span>
 						</a>
 
+						{/* COMMENTED: GitHub button hidden
 						<a
 							href="https://github.com/koreshield/"
 							target="_blank"
@@ -85,9 +86,10 @@ function Hero() {
 							<Github className="w-4 h-4 sm:w-5 sm:h-5" />
 							<span>View on GitHub</span>
 						</a>
+						COMMENTED */}
 					</motion.div>
 
-					{/* Install command with copy */}
+					{/* COMMENTED: pip install command hidden
 					<motion.div
 						className="inline-flex items-center gap-3 bg-card/80 dark:bg-[#18181B]/80 border border-white/10 dark:border-white/8 rounded-lg px-4 py-2.5 font-mono text-sm text-muted-foreground backdrop-blur-sm"
 						initial={{ opacity: 0, y: 20 }}
@@ -108,6 +110,7 @@ function Hero() {
 							)}
 						</button>
 					</motion.div>
+					COMMENTED */}
 				</motion.div>
 
 				{/* Right: Interactive terminal */}
