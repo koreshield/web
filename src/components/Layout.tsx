@@ -32,8 +32,7 @@ export function Layout() {
 					<nav className="hidden md:flex items-center gap-6">
 						{!isAuthenticated && (
 							<>
-								<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Docs</a>
-								<Link to="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Pricing</Link>
+								<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Docs</a>						<a href="https://blog.koreshield.com" target="_blank" rel="noreferrer" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Blog</a>								<Link to="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Pricing</Link>
 								<Link to="/changelog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Changelog</Link>
 							</>
 						)}
@@ -109,8 +108,7 @@ export function Layout() {
 					<div className="md:hidden border-t border-white/[0.06] bg-background/95 backdrop-blur-xl p-6 flex flex-col gap-4 h-[calc(100vh-4rem)] overflow-y-auto">
 						{!isAuthenticated && (
 							<>
-						<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-lg font-medium py-3 border-b border-white/[0.06] text-muted-foreground hover:text-foreground transition-colors">Docs</a>
-						<Link to="/pricing" className="text-lg font-medium py-3 border-b border-white/[0.06] text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+						<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-lg font-medium py-3 border-b border-white/[0.06] text-muted-foreground hover:text-foreground transition-colors">Docs</a>					<a href="https://blog.koreshield.com" target="_blank" rel="noreferrer" className="text-lg font-medium py-3 border-b border-white/[0.06] text-muted-foreground hover:text-foreground transition-colors">Blog</a>						<Link to="/pricing" className="text-lg font-medium py-3 border-b border-white/[0.06] text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
 						<Link to="/changelog" className="text-lg font-medium py-3 border-b border-white/[0.06] text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>Changelog</Link>
 							</>
 						)}
