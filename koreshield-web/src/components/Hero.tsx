@@ -1,19 +1,9 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Check, Copy, Github, Play } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import TerminalAnimation from './TerminalAnimation';
 
-const INSTALL_CMD = 'pip install koreshield';
-
 function Hero() {
-	const [copied, setCopied] = useState(false);
-
-	const handleCopy = () => {
-		navigator.clipboard.writeText(INSTALL_CMD);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
-	};
 
 	return (
 		<section className="relative min-h-[90vh] flex items-center justify-center px-6 py-28 overflow-hidden bg-background transition-colors ambient-glow">
@@ -54,8 +44,7 @@ function Hero() {
 						{/* Live Demo CTA */}
 						<Link
 							to="/demo"
-							className="group relative font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg w-full sm:w-auto overflow-hidden text-white"
-							style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
+							className="group relative bg-primary hover:bg-emerald-bright text-primary-foreground font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 w-full sm:w-auto overflow-hidden"
 						>
 							<Play className="w-4 h-4 fill-white" />
 							<span>See Live Demo</span>
@@ -76,6 +65,7 @@ function Hero() {
 							</span>
 						</a>
 
+						{/* COMMENTED: GitHub button hidden
 						<a
 							href="https://github.com/koreshield/"
 							target="_blank"
@@ -85,9 +75,10 @@ function Hero() {
 							<Github className="w-4 h-4 sm:w-5 sm:h-5" />
 							<span>View on GitHub</span>
 						</a>
+						COMMENTED */}
 					</motion.div>
 
-					{/* Install command with copy */}
+					{/* COMMENTED: pip install command hidden
 					<motion.div
 						className="inline-flex items-center gap-3 bg-card/80 dark:bg-[#18181B]/80 border border-white/10 dark:border-white/8 rounded-lg px-4 py-2.5 font-mono text-sm text-muted-foreground backdrop-blur-sm"
 						initial={{ opacity: 0, y: 20 }}
@@ -108,6 +99,7 @@ function Hero() {
 							)}
 						</button>
 					</motion.div>
+					COMMENTED */}
 				</motion.div>
 
 				{/* Right: Interactive terminal */}

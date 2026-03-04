@@ -7,7 +7,7 @@ import { PortableText } from "@portabletext/react";
 import { siteConfig, profileConfig, postConfig } from "@/config";
 import { getSortedPosts, type PostForList } from "@utils/content";
 import { formatDateToYYYYMMDD } from "@utils/date";
-import { getPostUrlBySlug, removeFileExtension } from "@utils/url";
+import { getPostUrlBySlug, removeFileExtension, slugifyTag } from "@utils/url";
 import { urlFor } from "../../lib/sanity";
 import PasswordProtection from "@components/common/passwordProtection.astro";
 import AuthorCard from "@components/common/author-card.astro";
@@ -257,7 +257,7 @@ const jsonLd = {
 					<div class="flex flex-wrap gap-2 mb-8">
 						{entry.data.tags.map((tag) => (
 							<a
-								href={`/tags/${tag.toLowerCase()}`}
+								href={`/tags/${slugifyTag(tag)}`}
 								class="px-3 py-1 rounded-md bg-white/5 hover:bg-white/10 text-sm text-gray-300 transition-colors"
 							>
 								#{tag}
