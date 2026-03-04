@@ -49,10 +49,7 @@ class TestAlertManager:
     @pytest.fixture
     def alert_config(self):
         """Create a mock alerting config."""
-        config = MagicMock()
-        config.rules = []
-        config.get.return_value = {}
-        return config
+        return AlertingConfig(enabled=True, rules=[])
 
     @pytest.fixture
     def alert_manager(self, alert_config):
@@ -171,7 +168,7 @@ class TestAlertManager:
             timestamp=time.time()
         )
 
-        alert_manager.config.get.return_value = {"email": {"enabled": False}}
+        alert_manager.config.channels.email.enabled = False
 
         result = await alert_manager.send_alert(alert, AlertChannel.EMAIL)
         assert result is False
@@ -188,19 +185,13 @@ class TestAlertManager:
             timestamp=time.time()
         )
 
-        # Mock config
-        alert_manager.config.get.return_value = {
-            "email": {
-                "enabled": True,
-                "from_address": "test@example.com",
-                "recipients": ["admin@example.com"],
-                "smtp_server": "smtp.example.com",
-                "smtp_port": 587,
-                "use_tls": True,
-                "username": "user",
-                "password": "pass"
-            }
-        }
+        alert_manager.config.channels.email.enabled = True
+        alert_manager.config.channels.email.from_address = "test@example.com"
+        alert_manager.config.channels.email.to_addresses = ["admin@example.com"]
+        alert_manager.config.channels.email.smtp_server = "smtp.example.com"
+        alert_manager.config.channels.email.smtp_port = 587
+        alert_manager.config.channels.email.username = "user"
+        alert_manager.config.channels.email.password = "pass"
 
         mock_server = MagicMock()
         mock_smtp.return_value = mock_server
@@ -226,12 +217,8 @@ class TestAlertManager:
             timestamp=time.time()
         )
 
-        alert_manager.config.get.return_value = {
-            "webhook": {
-                "enabled": True,
-                "url": "https://example.com/webhook"
-            }
-        }
+        alert_manager.config.channels.webhook.enabled = True
+        alert_manager.config.channels.webhook.url = "https://example.com/webhook"
 
         # Mock HTTP response
         mock_response = MagicMock()
@@ -257,12 +244,8 @@ class TestAlertManager:
             timestamp=time.time()
         )
 
-        alert_manager.config.get.return_value = {
-            "slack": {
-                "enabled": True,
-                "webhook_url": "https://hooks.slack.com/test"
-            }
-        }
+        alert_manager.config.channels.slack.enabled = True
+        alert_manager.config.channels.slack.webhook_url = "https://hooks.slack.com/test"
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -288,12 +271,8 @@ class TestAlertManager:
             timestamp=time.time()
         )
 
-        alert_manager.config.get.return_value = {
-            "teams": {
-                "enabled": True,
-                "webhook_url": "https://outlook.office.com/test"
-            }
-        }
+        alert_manager.config.channels.teams.enabled = True
+        alert_manager.config.channels.teams.webhook_url = "https://outlook.office.com/test"
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -319,12 +298,8 @@ class TestAlertManager:
             timestamp=time.time()
         )
 
-        alert_manager.config.get.return_value = {
-            "pagerduty": {
-                "enabled": True,
-                "routing_key": "test-key"
-            }
-        }
+        alert_manager.config.channels.pagerduty.enabled = True
+        alert_manager.config.channels.pagerduty.integration_key = "test-key"
 
         mock_response = MagicMock()
         mock_response.status_code = 202
