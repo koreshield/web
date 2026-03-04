@@ -112,11 +112,13 @@ export default function VsLakeraPage() {
 									</tr>
 								</thead>
 								<tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-									<tr>
-										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Open Source</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
-									</tr>
+								{/* COMMENTED: Open Source row hidden
+								<tr>
+									<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Open Source</td>
+									<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
+									<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
+								</tr>
+								COMMENTED */}
 									<tr>
 										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Detection Accuracy</td>
 										<td className="py-4 px-4 text-center text-gray-900 dark:text-white">95%+</td>
