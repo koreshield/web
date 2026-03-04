@@ -1,109 +1,106 @@
 ---
 title: Settings
-description: Koreshield configuration settings.
+description: Runtime settings for KoreShield server.
 slug: /configuration/settings
 ---
 
 # Settings
 
-This page summarizes the key settings in `config.yaml`.
+This page mirrors `koreshield/config/config.yaml` and current auth hardening behavior.
 
 ## Server
 
 ```yaml
 server:
-	host: "0.0.0.0"
-	port: 8000
+  host: "0.0.0.0"
+  port: 8000
 ```
 
 ## Logging
 
 ```yaml
 logging:
-	level: INFO
-	json_logs: false
-	container_mode: false
-	file: logs/koreshield.log
+  level: INFO
+  json_logs: true
+  container_mode: true
+  file: logs/koreshield.log
 ```
-
-Recommended for production:
-
-- `json_logs: true`
-- `container_mode: true` when running in containers
 
 ## Security
 
 ```yaml
 security:
-	sensitivity: medium
-	default_action: block
-	features:
-		sanitization: true
-		detection: true
-		policy_enforcement: true
+  sensitivity: medium
+  default_action: block
+  features:
+    sanitization: true
+    detection: true
+    policy_enforcement: true
 ```
 
 ## Providers
 
 ```yaml
 providers:
-	deepseek:
-		enabled: true
-		base_url: "https://api.deepseek.com/v1"
-	openai:
-		enabled: false
-		base_url: "https://api.openai.com/v1"
-	anthropic:
-		enabled: false
-		base_url: "https://api.anthropic.com/v1"
-	gemini:
-		enabled: false
-		base_url: "https://generativelanguage.googleapis.com/v1beta"
-	azure_openai:
-		enabled: false
-		base_url: "https://your-resource-name.openai.azure.com"
+  deepseek:
+    enabled: true
+    base_url: "https://api.deepseek.com/v1"
+  openai:
+    enabled: false
+    base_url: "https://api.openai.com/v1"
+  anthropic:
+    enabled: false
+    base_url: "https://api.anthropic.com/v1"
+  gemini:
+    enabled: false
+    base_url: "https://generativelanguage.googleapis.com/v1beta"
+  azure_openai:
+    enabled: false
+    base_url: "https://your-resource-name.openai.azure.com"
 ```
 
-Provider keys are set via environment variables:
-
-- `DEEPSEEK_API_KEY`
-- `OPENAI_API_KEY`
-- `ANTHROPIC_API_KEY`
-- `GOOGLE_API_KEY`
-- `AZURE_OPENAI_API_KEY`
+Set provider keys with env vars (`DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, etc).
 
 ## Redis
 
 ```yaml
 redis:
-	enabled: true
-	url: "redis://localhost:6379/0"
+  enabled: true
+  url: "${REDIS_URL}"
 ```
+
+## JWT (Required)
+
+```yaml
+jwt:
+  issuer: "koreshield-auth"
+  audience: "koreshield-api"
+```
+
+Runtime requirements:
+
+1. `JWT_ISSUER` and `JWT_AUDIENCE` must be configured.
+2. Choose one key mode only:
+- HS256: `JWT_SECRET` (minimum 32 chars)
+- RS256: `JWT_PUBLIC_KEY` + `JWT_PRIVATE_KEY`
+3. Do not set shared secret and RSA keys together.
 
 ## Alerting
 
-```yaml
-alerting:
-	enabled: false
-	rules:
-		- name: "High Attack Rate"
-			condition: "attacks_detected > 10"
-			severity: "warning"
-			channels: ["email", "slack"]
-			cooldown_minutes: 5
-			description: "Alert when attack detection rate is high"
-			enabled: true
-```
+`alerting.rules[].condition` now uses a safe parser/DSL (no `eval`). Keep conditions simple and explicit, for example:
 
-## Monitoring
+- `attacks_detected > 10`
+- `healthy_providers == 0`
 
-```yaml
-monitoring:
-	enabled: true
-	check_interval_seconds: 60
-```
+## Management Config Endpoint
+
+`GET /v1/management/config` behavior:
+
+- disabled outside development-like environments (`404`)
+- values are redacted for sensitive key names (`password`, `secret`, `token`, `api_key`, etc)
 
 ## Related Docs
 
-- Policy settings in [policies.mdx](policies.mdx)
-- Rate limiting in [Rate Limiting](/docs/configuration/rate-limiting)
+- [Policies](/docs/configuration/policies)
+- [Rate Limiting](/docs/configuration/rate-limiting)
+- [REST API](/docs/api/rest-api)

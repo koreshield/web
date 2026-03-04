@@ -1,9 +1,64 @@
 ---
 title: REST API
-description: API reference for Koreshield.
+description: Generated OpenAPI contract and authentication model for KoreShield APIs.
 slug: /api/rest-api
 ---
 
 # REST API
 
-Coming soon...
+KoreShield's REST API contract is generated from the live FastAPI app.
+
+- Interactive docs (Swagger UI): `GET /docs`
+- ReDoc: `GET /redoc`
+- OpenAPI JSON: [`/openapi.json`](/openapi.json)
+- Docs bundle copy (for static/site review): [`/openapi.json`](/openapi.json)
+
+## Authentication Model
+
+These endpoints require authentication in runtime:
+
+- `POST /v1/chat/completions`
+- `POST /v1/rag/scan`
+
+Accepted auth methods:
+
+1. `Authorization: Bearer <jwt>`
+2. `X-API-Key: ks_...`
+3. `ks_access_token` httpOnly cookie (JWT)
+
+JWT validation is strict:
+
+- issuer (`iss`) is required and verified
+- audience (`aud`) is required and verified
+- expiry (`exp`) and issued-at (`iat`) are verified
+- key policy enforces either `HS256` secret mode or `RS256` keypair mode
+
+## Core Endpoint Groups
+
+- Health: `/health`, `/status`, `/metrics`, `/health/providers`
+- Chat security proxy: `/v1/chat/completions`, `/v1/rag/scan`
+- Management: `/v1/management/*`
+- RBAC: `/v1/rbac/*`
+- Analytics: `/v1/analytics/*`
+- Teams: `/v1/teams/*`
+- Reports: `/v1/reports*`
+- Rules and alerts: `/v1/management/rules*`, `/v1/management/alerts/*`
+
+## WebSocket Note
+
+`/ws/events` is implemented for real-time events but is not part of the OpenAPI document (OpenAPI does not describe WebSocket handlers directly in this app).
+
+Use:
+
+- Header auth: `Authorization: Bearer <jwt>`
+- Or cookie auth: `ks_access_token`
+
+## Regenerating the Spec
+
+From repository root:
+
+```bash
+npm --prefix koreshield-docs run sync:openapi
+```
+
+This command regenerates `koreshield-docs/static/openapi.json` from `koreshield/src/koreshield/proxy.py`.
