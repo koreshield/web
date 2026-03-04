@@ -10,7 +10,7 @@ Use this checklist before launching KoreShield in production.
 
 ## Security
 
-- Set `KORESHIELD_API_KEY` and require it on clients
+- Require authenticated client access (JWT bearer or `X-API-Key`)
 - Enable `security.policy_enforcement` and choose a `default_action`
 - Validate provider keys are stored in a secrets manager
 

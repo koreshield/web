@@ -29,7 +29,7 @@ Use the `scan_rag_context` method in our SDKs to protect your pipeline.
 ### Python
 
 ```python
-from Koreshield import AsyncKoreshieldClient
+from koreshield_sdk import AsyncKoreShieldClient
 
 client = AsyncKoreshieldClient(api_key="ks_...")
 
@@ -58,7 +58,7 @@ else:
 ```typescript
 import { Koreshield } from "Koreshield";
 
-const client = new Koreshield({ apiKey: process.env.Koreshield_API_KEY });
+const client = new Koreshield({ apiKey: process.env.KORESHIELD_API_KEY });
 
 const result = await client.scanRAGContext("Summarize the reports", [
   "Quarterly report...",
