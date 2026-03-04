@@ -80,8 +80,8 @@ const config: Config = {
 		image: 'img/Koreshield-social-card.jpg',
 		colorMode: {
 			defaultMode: 'dark',
-			disableSwitch: false,
-			respectPrefersColorScheme: true,
+			disableSwitch: true,
+			respectPrefersColorScheme: false,
 		},
 		docs: {
 			sidebar: {
