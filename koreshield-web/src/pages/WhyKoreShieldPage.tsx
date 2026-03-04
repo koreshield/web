@@ -11,7 +11,7 @@ export default function WhyKoreShieldPage() {
 			/>
 
 			{/* Hero */}
-			<section className="py-20 px-4 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-pink-950/20">
+			<section className="py-20 px-4 bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 dark:from-blue-950/20 dark:via-cyan-950/20 dark:to-teal-950/20">
 				<div className="max-w-7xl mx-auto">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
@@ -58,8 +58,8 @@ export default function WhyKoreShieldPage() {
 						</div>
 
 						<div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-6">
-							<div className="bg-purple-600/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-								<Zap className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+							<div className="bg-cyan-600/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+								<Zap className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
 							</div>
 							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Lightning Fast</h3>
 							<p className="text-gray-600 dark:text-gray-400">
@@ -125,8 +125,8 @@ export default function WhyKoreShieldPage() {
 						</div>
 
 						<div className="flex gap-6">
-							<div className="bg-purple-600/10 w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0">
-								<Heart className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+							<div className="bg-cyan-600/10 w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0">
+								<Heart className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
 							</div>
 							<div>
 								<h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Community-Driven Innovation</h3>
@@ -196,8 +196,8 @@ export default function WhyKoreShieldPage() {
 							</ul>
 						</div>
 
-						<div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-xl p-6 border border-purple-200 dark:border-purple-900">
-							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><Wrench className="w-5 h-5 text-purple-500" /> Hybrid</h3>
+						<div className="bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-950/20 dark:to-teal-950/20 rounded-xl p-6 border border-cyan-200 dark:border-cyan-900">
+							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><Wrench className="w-5 h-5 text-cyan-500" /> Hybrid</h3>
 							<p className="text-gray-700 dark:text-gray-300 mb-4">
 								Mix cloud and self-hosted for the best of both worlds.
 							</p>
@@ -216,7 +216,7 @@ export default function WhyKoreShieldPage() {
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.4 }}
-					className="bg-gradient-to-br from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 rounded-xl p-12 text-white"
+					className="bg-gradient-to-br from-blue-600 to-cyan-600 dark:from-blue-900 dark:to-cyan-900 rounded-xl p-12 text-white"
 				>
 					<h2 className="text-4xl font-bold mb-12 text-center">KoreShield by the Numbers</h2>
 					<div className="grid md:grid-cols-4 gap-8 text-center">
@@ -265,7 +265,8 @@ export default function WhyKoreShieldPage() {
 				{/* What Our Users Say Link */}
 
 				{/* What Our Users Say */}
-				<motion.div
+				{false && (
+<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.5 }}
@@ -333,13 +334,14 @@ export default function WhyKoreShieldPage() {
 						</div>
 					</div>
 				</motion.div>
+)}
 
 				{/* Final CTA */}
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.6 }}
-					className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 rounded-xl p-12 text-center text-white"
+					className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-900 dark:to-cyan-900 rounded-xl p-12 text-center text-white"
 				>
 					<h2 className="text-4xl font-bold mb-4">Ready to Secure Your LLM Applications?</h2>
 					<p className="text-xl mb-8 text-blue-100">
@@ -347,11 +349,11 @@ export default function WhyKoreShieldPage() {
 					</p>
 					<div className="flex flex-wrap justify-center gap-4">
 						<a
-							href="https://docs.koreshield.com/getting-started/installation"
+							href="/signup"
 							className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-lg"
 						>
 							<Code className="w-6 h-6" />
-							Get Started Free
+							Get Started
 						</a>
 						<a
 							href="/playground"
