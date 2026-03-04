@@ -15,11 +15,5 @@ This section tracks the current backend implementation.
 
 ## OpenAPI Source of Truth
 
-- Primary: runtime spec from FastAPI `GET /openapi.json`
-- Synced copy in docs: [`/openapi.json`](/openapi.json)
-
-When backend endpoints/auth rules change, regenerate the docs copy:
-
-```bash
-npm --prefix koreshield-docs run sync:openapi
-```
+- Runtime spec from FastAPI: `GET /openapi.json`
+- Interactive API docs: `GET /docs`
