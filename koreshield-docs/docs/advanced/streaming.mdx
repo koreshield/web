@@ -29,7 +29,7 @@ const response = await fetch("http://localhost:8000/v1/chat/completions", {
   method: "POST",
   headers: { "content-type": "application/json" },
   body: JSON.stringify({
-    model: "gpt-5-mini",
+    model: "deepseek-chat",
     stream: true,
     messages: [{ role: "user", content: "Draft an incident summary." }]
   })
@@ -55,7 +55,7 @@ import requests
 response = requests.post(
     "http://localhost:8000/v1/chat/completions",
     json={
-        "model": "gpt-5-mini",
+        "model": "deepseek-chat",
         "stream": True,
         "messages": [{"role": "user", "content": "Draft an incident summary."}]
     },

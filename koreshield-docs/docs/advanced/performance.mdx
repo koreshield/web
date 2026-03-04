@@ -1,459 +1,56 @@
 ---
-title: Performance Optimization
-description: Optimize Koreshield for low latency and high throughput
+title: Performance Tuning
+description: Practical performance guidance for self-hosted KoreShield.
 published: true
 ---
 
-# Performance Optimization
+# Performance Tuning
 
-Best practices for achieving low latency and high throughput with Koreshield.
+This guide is scoped to the current self-hosted server in this repository.
 
-## Caching Strategies
+## Hot Paths
 
-### Response Caching
+Primary request paths to monitor:
 
-```typescript
-import { Koreshield } from 'Koreshield-sdk';
-import Redis from 'ioredis';
+- `POST /v1/chat/completions`
+- `POST /v1/rag/scan`
 
-const redis = new Redis(process.env.REDIS_URL);
-const Koreshield = new Koreshield({ apiKey: process.env.Koreshield_API_KEY });
+Related health/ops paths:
 
-async function cachedScan(content: string) {
-  // Generate cache key
-  const cacheKey = `scan:${Buffer.from(content).toString('base64')}`;
+- `GET /health`
+- `GET /status`
+- `GET /metrics`
 
-  // Check cache
-  const cached = await redis.get(cacheKey);
-  if (cached) {
-    return JSON.parse(cached);
-  }
+## Deployment Baseline
 
-  // Scan with Koreshield
-  const scan = await Koreshield.scan({ content });
+Use Docker Compose baseline from `koreshield/docker-compose.yml` with:
 
-  // Cache result (5 minutes)
-  await redis.setex(cacheKey, 300, JSON.stringify(scan));
+- Redis enabled
+- Postgres enabled
+- App health checks configured
 
-  return scan;
-}
-```
+## Practical Tuning Checklist
 
-### LRU Cache
+1. Set Redis to a low-latency instance near app nodes.
+2. Keep Postgres connection capacity sized for peak write volume.
+3. Use provider timeouts and retries conservatively to avoid queue buildup.
+4. Keep `security.sensitivity` aligned with your threat model and latency target.
+5. Track p95/p99 latency from `/metrics` and tune before scaling out.
 
-```typescript
-import LRU from 'lru-cache';
+## Rate Limiting
 
-const cache = new LRU<string, any>({
-  max: 10000,
-  ttl: 1000 * 60 * 5, // 5 minutes
-  updateAgeOnGet: true,
-});
+Rate limiting is configured from server security settings (`rate_limit`), applied on chat and rag routes.
 
-async function lruCachedScan(content: string) {
-  const key = hashContent(content);
+Use stricter limits for untrusted/high-volume clients.
 
-  if (cache.has(key)) {
-    return cache.get(key);
-  }
+## Observability
 
-  const scan = await Koreshield.scan({ content });
-  cache.set(key, scan);
+- Scrape Prometheus metrics at `/metrics`.
+- Alert on latency spikes, error rate growth, and provider health deterioration.
+- Use `/health/providers` to detect provider-side instability quickly.
 
-  return scan;
-}
+## Scale Strategy
 
-function hashContent(content: string): string {
-  return require('crypto')
-    .createHash('sha256')
-    .update(content)
-    .digest('hex');
-}
-```
-
-## Batch Processing
-
-### Batch Scanning
-
-```typescript
-async function optimizedBatch(messages: string[]) {
-  // Process in chunks
-  const CHUNK_SIZE = 100;
-  const results = [];
-
-  for (let i = 0; i < messages.length; i += CHUNK_SIZE) {
-    const chunk = messages.slice(i, i + CHUNK_SIZE);
-
-    const batchResult = await Koreshield.batchScan({
-      items: chunk.map((content, idx) => ({
-        id: `${i + idx}`,
-        content,
-      })),
-    });
-
-    results.push(...batchResult.results);
-  }
-
-  return results;
-}
-```
-
-### Parallel Processing
-
-```typescript
-async function parallelScan(messages: string[]) {
-  const CONCURRENCY = 10;
-
-  const results = await Promise.all(
-    chunk(messages, CONCURRENCY).map(async batch =>
-      Promise.all(
-        batch.map(content => Koreshield.scan({ content }))
-      )
-    )
-  );
-
-  return results.flat();
-}
-
-function chunk<T>(array: T[], size: number): T[][] {
-  return Array.from({ length: Math.ceil(array.length / size) }, (_, i) =>
-    array.slice(i * size, i * size + size)
-  );
-}
-```
-
-## Connection Pooling
-
-```typescript
-import { Agent } from 'https';
-
-const agent = new Agent({
-  keepAlive: true,
-  maxSockets: 50,
-  maxFreeSockets: 10,
-  timeout: 60000,
-});
-
-const Koreshield = new Koreshield({
-  apiKey: process.env.Koreshield_API_KEY,
-  httpAgent: agent,
-});
-```
-
-## Request Deduplication
-
-```typescript
-class DedupedScanner {
-  private pending = new Map<string, Promise<any>>();
-
-  async scan(content: string) {
-    const key = hashContent(content);
-
-    if (this.pending.has(key)) {
-      return this.pending.get(key);
-    }
-
-    const promise = Koreshield.scan({ content }).finally(() => {
-      this.pending.delete(key);
-    });
-
-    this.pending.set(key, promise);
-
-    return promise;
-  }
-}
-
-const scanner = new DedupedScanner();
-
-// Multiple simultaneous requests for same content only trigger one API call
-const [result1, result2, result3] = await Promise.all([
-  scanner.scan('hello'),
-  scanner.scan('hello'),
-  scanner.scan('hello'),
-]);
-```
-
-## Timeouts & Retries
-
-```typescript
-import pRetry from 'p-retry';
-import pTimeout from 'p-timeout';
-
-async function resilientScan(content: string) {
-  return pRetry(
-    async () => {
-      return pTimeout(
-        Koreshield.scan({ content }),
-        {
-          milliseconds: 5000,
-          message: 'Scan timeout',
-        }
-      );
-    },
-    {
-      retries: 3,
-      factor: 2,
-      minTimeout: 1000,
-      onFailedAttempt: error => {
-        console.log(
-          `Attempt ${error.attemptNumber} failed. ${error.retriesLeft} retries left.`
-        );
-      },
-    }
-  );
-}
-```
-
-## Lazy Loading
-
-```typescript
-class LazyKoreshield {
-  private instance: Koreshield | null = null;
-
-  private getInstance() {
-    if (!this.instance) {
-      this.instance = new Koreshield({
-        apiKey: process.env.Koreshield_API_KEY,
-      });
-    }
-    return this.instance;
-  }
-
-  async scan(content: string) {
-    return this.getInstance().scan({ content });
-  }
-}
-
-// Only initialize when first scan is requested
-const Koreshield = new LazyKoreshield();
-```
-
-## Compression
-
-```typescript
-import { gzip, ungzip } from 'node:zlib';
-import { promisify } from 'node:util';
-
-const gzipAsync = promisify(gzip);
-const ungzipAsync = promisify(ungzip);
-
-async function compressedScan(content: string) {
-  // Compress content
-  const compressed = await gzipAsync(Buffer.from(content));
-
-  // Send compressed
-  const scan = await Koreshield.scan({
-    content: compressed.toString('base64'),
-    encoding: 'gzip-base64',
-  });
-
-  return scan;
-}
-```
-
-## Edge Computing
-
-### Cloudflare Workers
-
-```typescript
-export default {
-  async fetch(request: Request, env: Env) {
-    const Koreshield = new Koreshield({ apiKey: env.Koreshield_API_KEY });
-
-    const { message } = await request.json();
-
-    const scan = await Koreshield.scan({ content: message });
-
-    return Response.json({ safe: !scan.threat_detected });
-  },
-};
-```
-
-### Vercel Edge Functions
-
-```typescript
-export const config = { runtime: 'edge' };
-
-const Koreshield = new Koreshield({
-  apiKey: process.env.Koreshield_API_KEY,
-});
-
-export default async function handler(req: Request) {
-  const { message } = await req.json();
-
-  const scan = await Koreshield.scan({ content: message });
-
-  return Response.json({ safe: !scan.threat_detected });
-}
-```
-
-## Database Optimization
-
-### Indexed Scans
-
-```typescript
-import { Prisma, PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-
-async function trackScans(userId: string, content: string, scan: any) {
-  await prisma.scan.create({
-    data: {
-      userId,
-      content,
-      threatDetected: scan.threat_detected,
-      threatType: scan.threat_type,
-      confidence: scan.confidence,
-      timestamp: new Date(),
-    },
-  });
-}
-
-// Create indexes
-// @@index([userId, timestamp])
-// @@index([threatDetected])
-```
-
-### Aggregate Queries
-
-```typescript
-async function getUserStats(userId: string) {
-  const stats = await prisma.scan.aggregate({
-    where: { userId },
-    _count: { id: true },
-    _sum: { confidence: true },
-  });
-
-  return {
-    totalScans: stats._count.id,
-    avgConfidence: stats._sum.confidence / stats._count.id,
-  };
-}
-```
-
-## Load Balancing
-
-```typescript
-class LoadBalancedScanner {
-  private endpoints = [
-    'https://api-us.Koreshield.com',
-    'https://api-eu.Koreshield.com',
-    'https://api-asia.Koreshield.com',
-  ];
-
-  private currentIndex = 0;
-
-  private getNextEndpoint() {
-    const endpoint = this.endpoints[this.currentIndex];
-    this.currentIndex = (this.currentIndex + 1) % this.endpoints.length;
-    return endpoint;
-  }
-
-  async scan(content: string) {
-    const endpoint = this.getNextEndpoint();
-
-    const Koreshield = new Koreshield({
-      apiKey: process.env.Koreshield_API_KEY,
-      baseURL: endpoint,
-    });
-
-    return Koreshield.scan({ content });
-  }
-}
-```
-
-## Monitoring Performance
-
-```typescript
-import { Histogram } from 'prom-client';
-
-const scanDuration = new Histogram({
-  name: 'Koreshield_scan_duration_ms',
-  help: 'Koreshield scan duration in milliseconds',
-  buckets: [10, 50, 100, 200, 500, 1000, 2000],
-});
-
-async function monitoredScan(content: string) {
-  const start = Date.now();
-
-  try {
-    const scan = await Koreshield.scan({ content });
-    const duration = Date.now() - start;
-
-    scanDuration.observe(duration);
-
-    return scan;
-  } catch (error) {
-    const duration = Date.now() - start;
-    scanDuration.observe(duration);
-    throw error;
-  }
-}
-```
-
-## Benchmarking
-
-```typescript
-async function benchmark(iterations: number = 1000) {
-  const testContent = 'Hello, world!';
-  const results: number[] = [];
-
-  for (let i = 0; i < iterations; i++) {
-    const start = performance.now();
-    await Koreshield.scan({ content: testContent });
-    const duration = performance.now() - start;
-    results.push(duration);
-  }
-
-  const sorted = results.sort((a, b) => a - b);
-
-  console.log('Benchmark Results:');
-  console.log(`  Iterations: ${iterations}`);
-  console.log(`  P50: ${sorted[Math.floor(iterations * 0.5)].toFixed(2)}ms`);
-  console.log(`  P95: ${sorted[Math.floor(iterations * 0.95)].toFixed(2)}ms`);
-  console.log(`  P99: ${sorted[Math.floor(iterations * 0.99)].toFixed(2)}ms`);
-  console.log(`  Max: ${sorted[iterations - 1].toFixed(2)}ms`);
-}
-```
-
-## Best Practices
-
-### Use SDK Built-in Caching
-
-```typescript
-const Koreshield = new Koreshield({
-  apiKey: process.env.Koreshield_API_KEY,
-  cache: {
-    enabled: true,
-    ttl: 300,
-    maxSize: 10000,
-  },
-});
-```
-
-### Fail Fast
-
-```typescript
-const scan = await Promise.race([
-  Koreshield.scan({ content }),
-  new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Timeout')), 2000)
-  ),
-]);
-```
-
-### Optimize Payloads
-
-```typescript
-// Bad: Sending entire document
-const scan = await Koreshield.scan({ content: longDocument });
-
-// Good: Send only user input
-const scan = await Koreshield.scan({ content: userInput });
-```
-
-## Related Documentation
-
-- [Monitoring & Alerting](/docs/integrations/monitoring)
-- [Troubleshooting](/docs/advanced/troubleshooting)
-- [Caching Strategies](/docs/advanced/performance#caching-strategies)
+1. Vertical: increase CPU/memory for detector/policy workloads.
+2. Horizontal: multiple app replicas behind a load balancer.
+3. Shared state: keep Redis/Postgres externalized for multi-replica deployments.

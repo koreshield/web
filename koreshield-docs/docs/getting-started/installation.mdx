@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: How to install Koreshield
+description: Install and run KoreShield server.
 icon: Terminal
 sidebar_position: 2
 slug: /getting-started/installation
@@ -8,48 +8,60 @@ slug: /getting-started/installation
 
 # Installation
 
-Koreshield can be used in two ways: as a **standalone proxy** (recommended for production) or as an **SDK** integrated directly into your application code.
+## Prerequisites
 
-## 1. Proxy Installation (Docker)
+- Python 3.10+
+- Redis (recommended for production)
+- At least one LLM provider API key
 
-The standalone proxy sits between your application and LLM providers. This is the **most secure** deployment method as it operates independently of your application logic.
-
-```bash
-docker pull Koreshield/Koreshield
-docker run -p 8000:8000 Koreshield/Koreshield
-```
-
-## 2. SDK Installation
-
-The SDKs allow you to integrate Koreshield features (sanitization, scanning) directly into your codebase or interact with a deployed Koreshield Proxy.
-
-### Python SDK
+## Local Server Install
 
 ```bash
-pip install Koreshield
+git clone https://github.com/koreshield/koreshield.git
+cd koreshield/koreshield
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+cp config/config.example.yaml config/config.yaml
 ```
 
-### JavaScript/TypeScript SDK
+Set required auth env:
 
 ```bash
-npm install Koreshield
+export JWT_SECRET='replace-with-32+char-secret'
+export JWT_ISSUER='koreshield-auth'
+export JWT_AUDIENCE='koreshield-api'
 ```
 
-## Verification
-
-To verify that the **Python SDK** has been installed successfully:
+Set at least one provider key:
 
 ```bash
-python -c "import Koreshield; print(Koreshield.__version__)"
+export DEEPSEEK_API_KEY='...'
 ```
 
-## System Requirements (Proxy)
+Start server:
 
-- **Docker**: Engine 20.10+
-- **Memory**: 512MB recommended
-- **Network**: Outbound HTTPS access to LLM providers
+```bash
+koreshield start --config config/config.yaml
+```
+
+## Docker Compose (Repository)
+
+From `koreshield/`:
+
+```bash
+docker compose up --build
+```
+
+## Verify
+
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/openapi.json | head
+```
 
 ## Next Steps
 
-- **[Quick Start](/docs/getting-started/quick-start)**: Secure your first LLM integration.
-- **[Configuration](/docs/configuration)**: Configure security policies.
+- [Quick Start](/docs/getting-started/quick-start)
+- [Configuration](/docs/configuration)
+- [REST API](/docs/api/rest-api)

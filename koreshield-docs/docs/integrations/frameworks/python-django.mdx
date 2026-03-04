@@ -12,7 +12,7 @@ Koreshield can protect **Django** applications using middleware to intercept and
 ## Installation
 
 ```bash
-pip install Koreshield django
+pip install koreshield django
 ```
 
 ## Middleware Setup
@@ -24,7 +24,7 @@ import asyncio
 import json
 from django.http import JsonResponse
 from django.conf import settings
-from Koreshield.client import KoreshieldClient
+from koreshield_sdk import KoreShieldClient
 
 class KoreshieldMiddleware:
     def __init__(self, get_response):
