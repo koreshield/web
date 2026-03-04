@@ -45,8 +45,8 @@ import { Icon } from "astro-icon/components";
 
 		<!-- Form -->
 		<form
+			id="newsletter-form"
 			class="w-full max-w-md mx-auto flex flex-col gap-3"
-			onsubmit="event.preventDefault(); this.reset(); alert('Thanks for subscribing! 🔐');"
 		>
 			<div class="relative group/input">
 				<div
@@ -60,6 +60,7 @@ import { Icon } from "astro-icon/components";
 				<input
 					type="email"
 					name="email"
+					id="newsletter-email"
 					placeholder="Enter your work email"
 					required
 					class="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-electric-blue focus:ring-1 focus:ring-electric-blue/50 transition-all text-base"
@@ -67,17 +68,82 @@ import { Icon } from "astro-icon/components";
 			</div>
 			<button
 				type="submit"
+				id="newsletter-btn"
 				class="w-full py-4 px-8 bg-electric-blue text-white rounded-xl font-bold text-base hover:bg-blue-500 transition-all hover:-translate-y-0.5 shadow-lg shadow-electric-blue/25 flex items-center justify-center gap-2 group/btn"
 			>
-				<span>Subscribe for Free</span>
+				<span id="newsletter-btn-text">Subscribe for Free</span>
 				<Icon
 					name="material-symbols:arrow-right-alt-rounded"
 					class="w-5 h-5 transition-transform group-hover/btn:translate-x-1"
 				/>
 			</button>
+			<p id="newsletter-msg" class="text-sm mt-1 hidden"></p>
 			<p class="text-sm text-gray-500 mt-1">
 				No spam. Unsubscribe anytime.
 			</p>
 		</form>
 	</div>
 </div>
+
+<script>
+// Zoho Campaigns newsletter subscription
+// TODO: Replace placeholder values with your actual Zoho Campaigns credentials:
+//   ZOHO_SUBSCRIBE_URL  — e.g. https://zcampaigns.zoho.com/api/v1.1/subscribeemail
+//   ZOHO_LIST_KEY       — your mailing list key from Zoho Campaigns → Lists → <List> → Subscribe Form
+const ZOHO_SUBSCRIBE_URL = import.meta.env.PUBLIC_ZOHO_SUBSCRIBE_URL || '';
+const ZOHO_LIST_KEY = import.meta.env.PUBLIC_ZOHO_LIST_KEY || '';
+
+const form = document.getElementById('newsletter-form') as HTMLFormElement | null;
+const emailInput = document.getElementById('newsletter-email') as HTMLInputElement | null;
+const btn = document.getElementById('newsletter-btn') as HTMLButtonElement | null;
+const btnText = document.getElementById('newsletter-btn-text');
+const msg = document.getElementById('newsletter-msg');
+
+form?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!emailInput || !btn || !btnText || !msg) return;
+
+  const email = emailInput.value.trim();
+  if (!email) return;
+
+  btn.disabled = true;
+  btnText.textContent = 'Subscribing...';
+  msg.className = 'text-sm mt-1 hidden';
+
+  try {
+    if (!ZOHO_SUBSCRIBE_URL || !ZOHO_LIST_KEY) {
+      // Placeholder mode — Zoho credentials not yet configured
+      throw new Error('ZOHO_SUBSCRIBE_URL or ZOHO_LIST_KEY not configured. Add them to .env as PUBLIC_ZOHO_SUBSCRIBE_URL and PUBLIC_ZOHO_LIST_KEY.');
+    }
+
+    const payload = new URLSearchParams({
+      resfmt: 'JSON',
+      listkey: ZOHO_LIST_KEY,
+      CONTACT_EMAIL: email,
+    });
+
+    const res = await fetch(ZOHO_SUBSCRIBE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: payload.toString(),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data?.status !== 'error') {
+      msg.textContent = 'You\'re subscribed! Check your inbox to confirm.';
+      msg.className = 'text-sm mt-1 text-electric-blue';
+      form.reset();
+    } else {
+      throw new Error(data?.message || 'Subscription failed. Please try again.');
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+    msg.textContent = message;
+    msg.className = 'text-sm mt-1 text-red-400';
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = 'Subscribe for Free';
+  }
+});
+</script>
