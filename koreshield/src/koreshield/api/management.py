@@ -5,6 +5,7 @@ import bcrypt
 import jwt
 import secrets
 import os
+import re
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
@@ -22,9 +23,47 @@ router = APIRouter(tags=["management"])
 from ..database import get_db, AsyncSessionLocal, engine
 
 # JWT Configuration
-JWT_SECRET = os.getenv("JWT_PRIVATE_KEY") or os.getenv("JWT_PUBLIC_KEY") or os.getenv("JWT_SECRET", "")
-JWT_ALGORITHM = "RS256" if "BEGIN" in JWT_SECRET else "HS256"
+JWT_PRIVATE_KEY = os.getenv("JWT_PRIVATE_KEY", "")
+JWT_SHARED_SECRET = os.getenv("JWT_SECRET", "")
+JWT_ALGORITHM = "RS256" if JWT_PRIVATE_KEY else "HS256"
+JWT_SIGNING_KEY = JWT_PRIVATE_KEY or JWT_SHARED_SECRET
 JWT_EXPIRATION_HOURS = 24
+JWT_ISSUER = os.getenv("JWT_ISSUER", "koreshield-auth")
+JWT_AUDIENCE = os.getenv("JWT_AUDIENCE", "koreshield-api")
+
+
+SENSITIVE_KEY_PATTERN = re.compile(
+    r"(password|secret|token|private[_-]?key|api[_-]?key|dsn|connection|credential|auth)",
+    re.IGNORECASE,
+)
+
+
+def _is_dev_mode(config: dict | None = None) -> bool:
+    env_candidates = [
+        os.getenv("ENVIRONMENT"),
+        os.getenv("APP_ENV"),
+    ]
+    if config and isinstance(config, dict):
+        server_config = config.get("server", {})
+        if isinstance(server_config, dict):
+            env_candidates.append(server_config.get("environment"))
+
+    normalized = {(value or "").strip().lower() for value in env_candidates}
+    return any(value in {"dev", "development", "local", "test"} for value in normalized)
+
+
+def _redact_sensitive(value):
+    if isinstance(value, dict):
+        redacted = {}
+        for key, item in value.items():
+            if SENSITIVE_KEY_PATTERN.search(str(key)):
+                redacted[key] = "***redacted***"
+            else:
+                redacted[key] = _redact_sensitive(item)
+        return redacted
+    if isinstance(value, list):
+        return [_redact_sensitive(item) for item in value]
+    return value
 
 class SignupRequest(BaseModel):
     email: EmailStr
@@ -131,15 +170,24 @@ async def signup(request: SignupRequest, db: AsyncSession = Depends(get_db)):
         logger.info("user_signup_success", user_id=str(user.id), email=user.email)
         
         # Generate JWT token
+        if not JWT_SIGNING_KEY:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="JWT signing key not configured",
+            )
+
         token_payload = {
+            'sub': str(user.id),
             'user_id': str(user.id),
             'email': user.email,
             'role': user.role,
+            'iss': JWT_ISSUER,
+            'aud': JWT_AUDIENCE,
             'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS),
             'iat': datetime.utcnow()
         }
         
-        token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        token = jwt.encode(token_payload, JWT_SIGNING_KEY, algorithm=JWT_ALGORITHM)
         
         return {
             "user": user.to_dict(),
@@ -227,15 +275,24 @@ async def admin_login(request: LoginRequest, db: AsyncSession = Depends(get_db))
         await db.commit()
         
         # Generate JWT token
+        if not JWT_SIGNING_KEY:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="JWT signing key not configured",
+            )
+
         token_payload = {
+            'sub': str(user.id),
             'user_id': str(user.id),
             'email': user.email,
             'role': user.role,
+            'iss': JWT_ISSUER,
+            'aud': JWT_AUDIENCE,
             'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS),
             'iat': datetime.utcnow()
         }
         
-        token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        token = jwt.encode(token_payload, JWT_SIGNING_KEY, algorithm=JWT_ALGORITHM)
         
         logger.info("login_success", user_id=str(user.id), email=user.email)
         
@@ -271,7 +328,13 @@ async def get_stats(request: Request, current_user: dict = Depends(get_current_u
 async def get_config(request: Request, current_user: dict = Depends(get_current_admin)):
     """Get current configuration."""
     if hasattr(request.app.state, "config"):
-        return request.app.state.config
+        current_config = request.app.state.config
+        if not _is_dev_mode(current_config):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Configuration endpoint is disabled outside development environments",
+            )
+        return _redact_sensitive(current_config)
     return {"error": "Config not available"}
 
 @router.patch("/config/security")
@@ -505,6 +568,8 @@ async def generate_api_key(
         
         return response_data
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("Failed to generate API key", error=str(e))
         raise HTTPException(
@@ -637,7 +702,6 @@ async def get_api_key(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get API key"
         )
-
 
 
 

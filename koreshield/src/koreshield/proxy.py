@@ -16,6 +16,7 @@ import structlog
 import redis
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
+from sqlalchemy import select, or_
 
 from .detector import AttackDetector
 from .logger import FirewallLogger
@@ -27,6 +28,8 @@ from .rag_taxonomy import RetrievedDocument
 from .rag_taxonomy import RetrievedDocument
 from .database import AsyncSessionLocal
 from .models.request_log import RequestLog
+from .models.api_key import APIKey
+from .api.auth import verify_jwt_token
 
 logger = structlog.get_logger(__name__)
 
@@ -442,6 +445,57 @@ class KoreShieldProxy:
         except Exception as e:
             logger.error("Failed to log request to DB", error=str(e))
 
+    async def _authenticate_request(self, request: Request) -> dict:
+        """
+        Authenticate request using either Bearer JWT or X-API-Key.
+        Returns principal info if authenticated, raises HTTPException otherwise.
+        """
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header.split(" ", 1)[1].strip()
+            payload = verify_jwt_token(token)
+            if payload:
+                user_id = payload.get("sub") or payload.get("user_id")
+                try:
+                    user_id = uuid.UUID(str(user_id)) if user_id else None
+                except (ValueError, TypeError):
+                    user_id = None
+                return {
+                    "auth_type": "jwt",
+                    "user_id": user_id,
+                    "email": payload.get("email"),
+                    "role": payload.get("role"),
+                }
+
+        api_key_value = request.headers.get("X-API-Key")
+        if api_key_value and AsyncSessionLocal:
+            key_hash = APIKey.hash_key(api_key_value)
+            now = datetime.utcnow()
+            async with AsyncSessionLocal() as session:
+                result = await session.execute(
+                    select(APIKey).where(
+                        APIKey.key_hash == key_hash,
+                        APIKey.is_revoked.is_(False),
+                        or_(APIKey.expires_at.is_(None), APIKey.expires_at > now),
+                    )
+                )
+                api_key = result.scalar_one_or_none()
+                if api_key:
+                    api_key.last_used_at = now
+                    await session.commit()
+                    return {
+                        "auth_type": "api_key",
+                        "user_id": api_key.user_id,
+                        "api_key_id": api_key.id,
+                        "key_prefix": api_key.key_prefix,
+                    }
+
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication required. Provide a valid Bearer token or X-API-Key.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     async def _handle_chat_completion(self, request: Request) -> Response:
         """
         Handle OpenAI chat completion requests with security checks.
@@ -465,6 +519,8 @@ class KoreShieldProxy:
         request_id = str(uuid.uuid4())
 
         try:
+            principal = await self._authenticate_request(request)
+
             # Parse request body
             try:
                 body = await request.json()
@@ -623,6 +679,8 @@ class KoreShieldProxy:
                     },
                     "ip_address": request.client.host if request.client else None,
                     "user_agent": request.headers.get("user-agent"),
+                    "user_id": principal.get("user_id"),
+                    "api_key_id": principal.get("api_key_id"),
                 }
                 asyncio.create_task(self._log_request_async(log_data))
 
@@ -691,6 +749,8 @@ class KoreShieldProxy:
                     "is_blocked": False,
                     "ip_address": request.client.host if request.client else None,
                     "user_agent": request.headers.get("user-agent"),
+                    "user_id": principal.get("user_id"),
+                    "api_key_id": principal.get("api_key_id"),
                 }
                 asyncio.create_task(self._log_request_async(log_data))
 
@@ -762,6 +822,8 @@ class KoreShieldProxy:
         logger.info("RAG scan request received", request_id=request_id)
         
         try:
+            _ = await self._authenticate_request(request)
+
             # Parse request body
             try:
                 body = await request.json()
