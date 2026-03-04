@@ -2,7 +2,8 @@
 Tests for the proxy server.
 """
 
-from datetime import datetime, timedelta
+import os
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, patch, MagicMock
 from types import SimpleNamespace
 import uuid
@@ -10,6 +11,14 @@ import uuid
 import pytest
 import jwt
 from fastapi.testclient import TestClient
+
+# Ensure predictable JWT env during module import.
+os.environ.pop("JWT_PUBLIC_KEY", None)
+os.environ.pop("JWT_PRIVATE_KEY", None)
+os.environ.setdefault("JWT_ISSUER", "koreshield-auth")
+os.environ.setdefault("JWT_AUDIENCE", "koreshield-api")
+os.environ.setdefault("JWT_SECRET", "test-secret-with-minimum-32-characters!!")
+os.environ.setdefault("KORESHIELD_EAGER_APP_INIT", "false")
 
 from src.koreshield.proxy import KoreShieldProxy
 
@@ -26,7 +35,15 @@ def mock_config():
 @pytest.fixture
 def proxy(mock_config):
     """Create a proxy instance for testing."""
-    with patch.dict("os.environ", {"JWT_SECRET": "test-secret"}, clear=False):
+    with patch.dict(
+        "os.environ",
+        {
+            "JWT_SECRET": "test-secret-with-minimum-32-characters!!",
+            "JWT_ISSUER": "koreshield-auth",
+            "JWT_AUDIENCE": "koreshield-api",
+        },
+        clear=False,
+    ):
         with patch.object(KoreShieldProxy, '_init_providers'):
             proxy = KoreShieldProxy(mock_config)
             return proxy
@@ -34,7 +51,7 @@ def proxy(mock_config):
 
 @pytest.fixture
 def auth_headers():
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     token = jwt.encode(
         {
             "sub": "11111111-1111-1111-1111-111111111111",
@@ -45,7 +62,7 @@ def auth_headers():
             "iat": now,
             "exp": now + timedelta(hours=1),
         },
-        "test-secret",
+        "test-secret-with-minimum-32-characters!!",
         algorithm="HS256",
     )
     return {"Authorization": f"Bearer {token}"}

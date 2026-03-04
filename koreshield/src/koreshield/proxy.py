@@ -6,9 +6,11 @@ import json
 import os
 import sys
 import uuid
+import contextlib
 from pathlib import Path
+from contextlib import asynccontextmanager
 from typing import List, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import asyncio
 
 import httpx
@@ -29,7 +31,7 @@ from .rag_taxonomy import RetrievedDocument
 from .database import AsyncSessionLocal
 from .models.request_log import RequestLog
 from .models.api_key import APIKey
-from .api.auth import verify_jwt_token
+from .api.auth import get_request_token, verify_jwt_token
 
 logger = structlog.get_logger(__name__)
 
@@ -119,7 +121,8 @@ class KoreShieldProxy:
             license_info={
                 "name": "Proprietary",
                 "url": "https://koreshield.com/terms"
-            }
+            },
+            lifespan=self._lifespan,
         )
 
         # Initialize Redis connection for rate limiting and statistics
@@ -346,15 +349,19 @@ class KoreShieldProxy:
         """Stop the monitoring system."""
         await self.monitoring.stop_monitoring()
 
+    @asynccontextmanager
+    async def _lifespan(self, app: FastAPI):
+        monitor_task = asyncio.create_task(self.health_monitor.start_monitoring())
+        try:
+            yield
+        finally:
+            monitor_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await monitor_task
+
     def _setup_routes(self):
         """Set up FastAPI routes."""
-        
-        # Startup event to initialize health monitoring
-        @self.app.on_event("startup")
-        async def startup_event():
-            import asyncio
-            asyncio.create_task(self.health_monitor.start_monitoring())
-        
+
         rate_limit = self.config.get("security", {}).get("rate_limit", "60/minute")
 
         # Health check endpoint
@@ -451,8 +458,8 @@ class KoreShieldProxy:
         Returns principal info if authenticated, raises HTTPException otherwise.
         """
         auth_header = request.headers.get("Authorization", "")
-        if auth_header.startswith("Bearer "):
-            token = auth_header.split(" ", 1)[1].strip()
+        token = get_request_token(request)
+        if token:
             payload = verify_jwt_token(token)
             if payload:
                 user_id = payload.get("sub") or payload.get("user_id")
@@ -466,11 +473,24 @@ class KoreShieldProxy:
                     "email": payload.get("email"),
                     "role": payload.get("role"),
                 }
+            logger.warning(
+                "security_auth_failure",
+                reason="invalid_jwt",
+                path=str(request.url.path),
+                client_ip=request.client.host if request.client else None,
+            )
 
         api_key_value = request.headers.get("X-API-Key")
         if api_key_value and AsyncSessionLocal:
+            if not api_key_value.startswith("ks_"):
+                logger.warning(
+                    "security_api_key_misuse",
+                    reason="malformed_api_key_prefix",
+                    path=str(request.url.path),
+                    client_ip=request.client.host if request.client else None,
+                )
             key_hash = APIKey.hash_key(api_key_value)
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             async with AsyncSessionLocal() as session:
                 result = await session.execute(
                     select(APIKey).where(
@@ -489,6 +509,19 @@ class KoreShieldProxy:
                         "api_key_id": api_key.id,
                         "key_prefix": api_key.key_prefix,
                     }
+            logger.warning(
+                "security_api_key_misuse",
+                reason="invalid_or_revoked_api_key",
+                path=str(request.url.path),
+                client_ip=request.client.host if request.client else None,
+            )
+        elif not auth_header:
+            logger.warning(
+                "security_auth_failure",
+                reason="missing_auth_credentials",
+                path=str(request.url.path),
+                client_ip=request.client.host if request.client else None,
+            )
 
         raise HTTPException(
             status_code=401,
@@ -661,7 +694,7 @@ class KoreShieldProxy:
                 # Log to DB
                 log_data = {
                     "request_id": request_id,
-                    "timestamp": datetime.utcnow(),
+                    "timestamp": datetime.now(timezone.utc),
                     "provider": "unknown", # Blocked before provider selection
                     "model": model,
                     "method": request.method,
@@ -736,7 +769,7 @@ class KoreShieldProxy:
                 usage = response.get("usage", {})
                 log_data = {
                     "request_id": request_id,
-                    "timestamp": datetime.utcnow(),
+                    "timestamp": datetime.now(timezone.utc),
                     "provider": provider_name,
                     "model": model,
                     "method": request.method,
@@ -1035,5 +1068,9 @@ def create_app(config_path: Optional[str] = None) -> FastAPI:
     return proxy.app
 
 
-# Global app instance for direct uvicorn usage
-app = create_app()
+# Global app instance for direct uvicorn usage.
+# Tests can disable eager app construction to avoid import-time side effects.
+if os.getenv("KORESHIELD_EAGER_APP_INIT", "true").strip().lower() in {"1", "true", "yes"}:
+    app = create_app()
+else:
+    app = FastAPI()
