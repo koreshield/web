@@ -6,7 +6,7 @@ slug: /configuration/settings
 
 # Settings
 
-This page mirrors `koreshield/config/config.yaml` and current auth hardening behavior.
+This page documents every configuration key accepted by the KoreShield server. The source of truth is `koreshield/config/config.example.yaml`.
 
 ## Server
 
@@ -20,9 +20,9 @@ server:
 
 ```yaml
 logging:
-  level: INFO
-  json_logs: true
-  container_mode: true
+  level: INFO          # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  json_logs: false     # Set to true for structured production logs
+  container_mode: false # stdout-only logging for containers
   file: logs/koreshield.log
 ```
 
@@ -30,13 +30,18 @@ logging:
 
 ```yaml
 security:
-  sensitivity: medium
-  default_action: block
+  sensitivity: medium      # low, medium, high
+  default_action: block    # allow, warn, block
+  rate_limit: "60/minute"  # SlowAPI rate limit for protected endpoints
   features:
     sanitization: true
     detection: true
     policy_enforcement: true
 ```
+
+:::note
+`rate_limit` is enforced by [SlowAPI](https://github.com/laurentS/slowapi) with Redis-backed storage. When Redis is enabled, rate limits are shared across all proxy instances.
+:::
 
 ## Providers
 
@@ -45,29 +50,36 @@ providers:
   deepseek:
     enabled: true
     base_url: "https://api.deepseek.com/v1"
+    # DEEPSEEK_API_KEY env var
   openai:
     enabled: false
     base_url: "https://api.openai.com/v1"
+    # OPENAI_API_KEY env var
   anthropic:
     enabled: false
     base_url: "https://api.anthropic.com/v1"
+    # ANTHROPIC_API_KEY env var
   gemini:
     enabled: false
     base_url: "https://generativelanguage.googleapis.com/v1beta"
+    # GOOGLE_API_KEY env var
   azure_openai:
     enabled: false
     base_url: "https://your-resource-name.openai.azure.com"
+    # AZURE_OPENAI_API_KEY env var
 ```
 
-Set provider keys with env vars (`DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, etc).
+Set API keys via environment variables. Keys are never stored in config files.
 
 ## Redis
 
 ```yaml
 redis:
   enabled: true
-  url: "${REDIS_URL}"
+  url: "redis://localhost:6379/0"
 ```
+
+Used for distributed rate limiting and shared statistics across proxy instances.
 
 ## JWT (Required)
 
@@ -81,23 +93,82 @@ Runtime requirements:
 
 1. `JWT_ISSUER` and `JWT_AUDIENCE` must be configured.
 2. Choose one key mode only:
-- HS256: `JWT_SECRET` (minimum 32 chars)
-- RS256: `JWT_PUBLIC_KEY` + `JWT_PRIVATE_KEY`
+   - HS256: `JWT_SECRET` (minimum 32 chars)
+   - RS256: `JWT_PUBLIC_KEY` + `JWT_PRIVATE_KEY`
 3. Do not set shared secret and RSA keys together.
 
 ## Alerting
 
-`alerting.rules[].condition` now uses a safe parser/DSL (no `eval`). Keep conditions simple and explicit, for example:
+```yaml
+alerting:
+  enabled: false
+
+  rules:
+    - name: "High Attack Rate"
+      condition: "attacks_detected > 10"
+      severity: "warning"
+      channels: ["email", "slack"]
+      cooldown_minutes: 5
+      description: "Alert when attack detection rate is high"
+      enabled: true
+
+    - name: "Provider Down"
+      condition: "healthy_providers == 0"
+      severity: "critical"
+      channels: ["email", "webhook", "pagerduty"]
+      cooldown_minutes: 10
+      description: "Alert when all providers are down"
+      enabled: true
+
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    use_tls: true
+    username: "your-email@gmail.com"
+    from_address: "alerts@koreshield.com"
+    recipients: ["security-team@yourcompany.com"]
+
+  webhook:
+    enabled: false
+    url: "https://your-webhook-url.com/alert"
+
+  slack:
+    enabled: false
+    webhook_url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+
+  teams:
+    enabled: false
+    webhook_url: "https://your-org.webhook.office.com/webhook/YOUR-TEAMS-WEBHOOK"
+
+  pagerduty:
+    enabled: false
+    routing_key: "your-pagerduty-routing-key"
+```
+
+Alert rule conditions use a safe DSL parser (no `eval`). Keep conditions simple:
 
 - `attacks_detected > 10`
 - `healthy_providers == 0`
+
+Supported channels: `email`, `webhook`, `slack`, `teams`, `pagerduty`.
+
+## Monitoring
+
+```yaml
+monitoring:
+  enabled: true
+  check_interval_seconds: 60
+```
+
+When enabled, the monitoring system periodically evaluates alert rules against collected metrics. See [Monitoring](/docs/features/monitoring) for details.
 
 ## Management Config Endpoint
 
 `GET /v1/management/config` behavior:
 
-- disabled outside development-like environments (`404`)
-- values are redacted for sensitive key names (`password`, `secret`, `token`, `api_key`, etc)
+- Disabled outside development-like environments (`404`)
+- Values are redacted for sensitive key names (`password`, `secret`, `token`, `api_key`, etc.)
 
 ## Related Docs
 
