@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle, ExternalLink, Shield, Code, GitBranch } from 'lucide-react';
+import { CheckCircle, Code, ExternalLink, GitBranch, Shield, XCircle } from 'lucide-react';
 import { SEOMeta } from '../components/SEOMeta';
 
 export default function VsLLMGuardPage() {
@@ -293,11 +293,11 @@ export default function VsLLMGuardPage() {
 					</p>
 					<div className="flex flex-wrap justify-center gap-4">
 						<a
-							href="https://docs.koreshield.com/getting-started/installation"
+							href="/pricing"
 							className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
 						>
 							<Code className="w-5 h-5" />
-							Quick Start Guide
+							Upgrade Now
 						</a>
 						<a
 							href="/playground"
