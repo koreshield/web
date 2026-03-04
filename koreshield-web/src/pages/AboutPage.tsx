@@ -267,52 +267,61 @@ COMMENTED */}
 			</section>
 
 			{/* Team */}
-			<section className="py-20 px-4 bg-white dark:bg-gray-900">
+			<section className="py-24 px-4 bg-[#050a14]">
 				<div className="max-w-7xl mx-auto">
-					<h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">
-						Meet the Team
-					</h2>
-					<p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
-						World-class researchers and engineers from leading AI labs and security companies
-					</p>
+					<div className="text-center mb-16">
+						<span className="inline-block text-xs font-mono text-emerald-400 tracking-widest uppercase mb-4 px-3 py-1 rounded-full border border-emerald-400/20 bg-emerald-400/5">
+							The People
+						</span>
+						<h2 className="text-4xl font-bold text-white mb-4">
+							Meet the Team
+						</h2>
+						<p className="text-gray-400 max-w-2xl mx-auto text-lg">
+							World-class researchers and engineers from leading AI labs and security companies
+						</p>
+					</div>
 
-					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+					<div className="flex flex-wrap justify-center gap-8">
 						{team.map((member, index) => (
 							<motion.div
 								key={member.name}
-								initial={{ opacity: 0, y: 20 }}
+								initial={{ opacity: 0, y: 30 }}
 								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.5, delay: index * 0.1 }}
-								className="bg-gray-50 dark:bg-gray-800 rounded-xl shadow p-6 text-center"
+								transition={{ duration: 0.5, delay: index * 0.12 }}
+								className="group relative w-full sm:w-72 bg-white/[0.03] border border-white/[0.07] rounded-2xl p-8 text-center hover:border-emerald-400/30 hover:bg-white/[0.06] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/5"
 							>
-								<div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">
-									{member.name
-										.split(' ')
-										.map((n) => n[0])
-										.join('')}
+								{/* Avatar */}
+								<div className="relative w-20 h-20 mx-auto mb-6">
+									<div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-emerald-500/20">
+										{member.name.split(' ').map((n) => n[0]).join('')}
+									</div>
+									<div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 opacity-20 blur-lg scale-110 group-hover:opacity-40 transition-opacity" />
 								</div>
-								<h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+
+								{/* Name */}
+								<h3 className="text-lg font-bold text-white mb-2">
 									{member.name}
 								</h3>
-								<p className="text-sm text-blue-600 dark:text-blue-400 mb-3">{member.role}</p>
-								<p className="text-sm text-gray-600 dark:text-gray-400">{member.bio}</p>
+
+								{/* Role badge */}
+								<span className="inline-block text-xs font-mono text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-full px-3 py-1 mb-4">
+									{member.role}
+								</span>
+
+								{/* Bio */}
+								<p className="text-sm text-gray-400 leading-relaxed">{member.bio}</p>
 							</motion.div>
 						))}
 					</div>
 
-					<div className="text-center mt-12">
+					<div className="text-center mt-16">
 						<Link
 							to="/contact"
-							className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline font-medium text-lg"
+							className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 hover:bg-emerald-400/20 px-6 py-3 rounded-full transition-all duration-200"
 						>
-							We're hiring! Join our team
-							<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M9 5l7 7-7 7"
-								/>
+							We're hiring — join our team
+							<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
 							</svg>
 						</Link>
 					</div>
