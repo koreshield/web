@@ -1,4 +1,8 @@
 {
-  "label": "Compliance",
-  "position": 50
+	"label": "Compliance",
+	"position": 50,
+	"link": {
+		"type": "doc",
+		"id": "compliance/index"
+	}
 }
