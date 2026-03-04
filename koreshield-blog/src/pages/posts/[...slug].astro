@@ -2,7 +2,7 @@
 import { Icon } from "astro-icon/components";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { PortableText } from "@portabletext/react";
+import { PortableTextRenderer } from "@components/post/PortableTextRenderer"
 
 import { siteConfig, profileConfig, postConfig } from "@/config";
 import { getSortedPosts, type PostForList } from "@utils/content";
@@ -246,7 +246,7 @@ const jsonLd = {
 				isEncrypted={isEncrypted}
 				password={entry.data.password}
 			>
-				<PortableText value={entry.body} />
+				<PortableTextRenderer value={entry.body} />
 			</PasswordProtection>
 		</article>
 
