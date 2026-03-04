@@ -1,9 +1,14 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, String, ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from .base import Base
+
+
+def utcnow_naive() -> datetime:
+    """UTC now as naive datetime for existing DB schema compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class Team(Base):
     """Team/Tenant model for multi-tenancy."""
@@ -14,8 +19,8 @@ class Team(Base):
     slug = Column(String(255), nullable=False, unique=True, index=True)
     
     owner_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utcnow_naive)
+    updated_at = Column(DateTime, default=utcnow_naive, onupdate=utcnow_naive)
 
     # Relationships
     owner = relationship("User", foreign_keys=[owner_id], backref="owned_teams")
@@ -30,7 +35,7 @@ class TeamMember(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     role = Column(String(50), nullable=False, default='member') # owner, admin, member, viewer
     
-    joined_at = Column(DateTime, default=datetime.utcnow)
+    joined_at = Column(DateTime, default=utcnow_naive)
 
     # Relationships
     team = relationship("Team", back_populates="members")
