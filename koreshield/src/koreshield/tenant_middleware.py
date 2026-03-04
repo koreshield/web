@@ -21,6 +21,7 @@ from .tenant_models import TenantContext, Tenant, TenantStatus, TenantTier, Reso
 from .logger import FirewallLogger
 from .tenant_database import get_tenant_db_session
 from .tenant_utils import tenant_context, request_id_context
+from .api.auth import verify_jwt_token
 
 class TenantMiddleware(BaseHTTPMiddleware):
     """
@@ -191,9 +192,9 @@ class TenantMiddleware(BaseHTTPMiddleware):
                 # Check for Admin via Token and create System Context
                 if "token" in tenant_info:
                     try:
-                        import jwt
-                        # Decode without verification (verified later by auth dependency)
-                        payload = jwt.decode(tenant_info["token"], options={"verify_signature": False})
+                        payload = verify_jwt_token(tenant_info["token"])
+                        if not payload:
+                            return None
                         role = payload.get("role")
                         if role in ["admin", "owner", "superuser"]:
                             # Create System Tenant Context

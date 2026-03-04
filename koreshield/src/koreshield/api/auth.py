@@ -7,7 +7,6 @@ The auth service issues signed JWTs, and this firewall only verifies signatures.
 
 import os
 from typing import Optional, Dict, Any
-from datetime import datetime, timezone
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -21,50 +20,75 @@ load_dotenv(".env")
 
 logger = structlog.get_logger(__name__)
 
-# JWT Configuration - will be loaded from config
-JWT_PUBLIC_KEY = None
+# JWT Configuration - loaded from config/env during app startup
+JWT_VERIFY_KEY: Optional[str] = None
 JWT_ALGORITHM = "RS256"
 JWT_ISSUER = "koreshield-auth"
+JWT_AUDIENCE = "koreshield-api"
 
 # Use HTTPBearer for simple JWT token authentication in Swagger UI
-http_bearer = HTTPBearer(scheme_name="Bearer Token", description="Enter your JWT token from the login endpoint")
+http_bearer = HTTPBearer(
+    scheme_name="Bearer Token",
+    description="Enter your JWT token from the login endpoint",
+)
 
 def init_jwt_config(config: dict):
     """Initialize JWT configuration from main config."""
-    global JWT_PUBLIC_KEY, JWT_ALGORITHM, JWT_ISSUER
+    global JWT_VERIFY_KEY, JWT_ALGORITHM, JWT_ISSUER, JWT_AUDIENCE
 
     jwt_config = config.get("jwt", {})
-    JWT_PUBLIC_KEY = jwt_config.get("public_key") or os.getenv("JWT_PUBLIC_KEY") or os.getenv("JWT_PRIVATE_KEY") or os.getenv("JWT_SECRET", "")
-    
-    # Auto-detect algorithm based on key format
-    JWT_ALGORITHM = "RS256" if JWT_PUBLIC_KEY and "BEGIN" in JWT_PUBLIC_KEY else "HS256"
-    JWT_ISSUER = jwt_config.get("issuer", "koreshield-auth")
 
-    if not JWT_PUBLIC_KEY:
-        logger.warning("JWT_PUBLIC_KEY not configured - authentication will fail")
+    # Key separation policy:
+    # - RS256 verification should use a public key only.
+    # - HS256 verification should use a shared secret only.
+    public_key = jwt_config.get("public_key") or os.getenv("JWT_PUBLIC_KEY")
+    shared_secret = jwt_config.get("secret") or os.getenv("JWT_SECRET")
+
+    if public_key:
+        JWT_VERIFY_KEY = public_key
+        JWT_ALGORITHM = "RS256"
+    elif shared_secret:
+        JWT_VERIFY_KEY = shared_secret
+        JWT_ALGORITHM = "HS256"
     else:
-        logger.info("JWT authentication configured", algorithm=JWT_ALGORITHM, issuer=JWT_ISSUER)
+        JWT_VERIFY_KEY = None
+        JWT_ALGORITHM = "RS256"
+
+    JWT_ISSUER = jwt_config.get("issuer") or os.getenv("JWT_ISSUER", "koreshield-auth")
+    JWT_AUDIENCE = jwt_config.get("audience") or os.getenv("JWT_AUDIENCE", "koreshield-api")
+
+    if not JWT_VERIFY_KEY:
+        logger.warning("JWT verification key not configured - authentication will fail")
+    else:
+        logger.info(
+            "JWT authentication configured",
+            algorithm=JWT_ALGORITHM,
+            issuer=JWT_ISSUER,
+            audience=JWT_AUDIENCE,
+        )
 
 def verify_jwt_token(token: str) -> Optional[Dict[str, Any]]:
     """
     Verify JWT token using public key.
     Returns the decoded payload if valid, None otherwise.
     """
-    if not JWT_PUBLIC_KEY:
-        logger.error("JWT_PUBLIC_KEY not configured")
+    if not JWT_VERIFY_KEY:
+        logger.error("JWT verification key not configured")
         return None
 
     try:
         # Decode and verify the JWT
         payload = jwt.decode(
             token,
-            JWT_PUBLIC_KEY,
+            JWT_VERIFY_KEY,
             algorithms=[JWT_ALGORITHM],
+            issuer=JWT_ISSUER,
+            audience=JWT_AUDIENCE,
             options={
                 "verify_exp": True,
                 "verify_iat": True,
-                "verify_iss": False,  # Issuer not included in tokens from management endpoints
-                "verify_aud": False  # We'll handle audience verification manually if needed
+                "verify_iss": True,
+                "verify_aud": True,
             }
         )
 
@@ -92,7 +116,8 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(h
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    payload = verify_jwt_token(credentials.credentials)
+    token = credentials.credentials if hasattr(credentials, "credentials") else str(credentials)
+    payload = verify_jwt_token(token)
     if not payload:
         raise credentials_exception
 
