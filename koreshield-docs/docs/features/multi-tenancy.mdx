@@ -1,0 +1,72 @@
+---
+title: Multi-Tenancy
+description: Tenant isolation, API key management, quotas, and audit logging.
+---
+
+# Multi-Tenancy
+
+KoreShield includes a full multi-tenant system for organizations that need to isolate customers, teams, or environments behind a single deployment.
+
+## Architecture
+
+The multi-tenant layer provides:
+
+- **Tenant CRUD**: create, read, update, and soft-delete tenants
+- **API key management**: per-tenant keys with scoped permissions and rate limit overrides
+- **Configuration isolation**: per-tenant settings stored and retrieved independently
+- **Resource quotas**: rate and storage limits enforced per tenant
+- **Audit logging**: immutable logs of all tenant activity
+
+## API Endpoints
+
+All tenant endpoints live under `/api/v1/tenants`.
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/v1/tenants` | POST | Create a new tenant |
+| `/api/v1/tenants` | GET | List tenants (filter by `status`, `tier`) |
+| `/api/v1/tenants/{tenant_id}` | GET | Get tenant details |
+| `/api/v1/tenants/{tenant_id}` | PUT | Update tenant info |
+| `/api/v1/tenants/{tenant_id}` | DELETE | Soft-delete tenant |
+| `/api/v1/tenants/{tenant_id}/api-keys` | POST | Create an API key |
+| `/api/v1/tenants/{tenant_id}/api-keys` | GET | List API keys |
+| `/api/v1/tenants/{tenant_id}/config` | GET | Get tenant config |
+| `/api/v1/tenants/{tenant_id}/config` | PUT | Update tenant config |
+| `/api/v1/tenants/{tenant_id}/usage` | GET | Get resource usage stats |
+| `/api/v1/tenants/{tenant_id}/audit-logs` | GET | Get audit logs |
+
+## Tenant Tiers
+
+Tenants are assigned a tier that governs their resource quotas:
+
+| Tier | Requests/min | Requests/hour | Requests/day | Tokens/min |
+|---|---|---|---|---|
+| Free | Low | Low | Low | Low |
+| Pro | Medium | Medium | Medium | Medium |
+| Enterprise | High | High | High | High |
+
+Exact limits are set during tenant creation and can be adjusted via the config API.
+
+## API Key Scoping
+
+Each API key can be restricted with:
+
+- **Permissions**: scoped actions the key can perform
+- **Allowed endpoints**: restrict which routes the key can access
+- **Rate limit override**: per-key rate limits independent of the tenant global
+
+## Audit Logging
+
+Every tenant action is recorded with:
+
+- Event type and category
+- Severity level
+- User ID and IP address
+- Timestamp and details payload
+
+Query audit logs with filters: `event_type`, `event_category`, `severity`, `user_id`.
+
+## Related Docs
+
+- [RBAC](/docs/features/rbac) for user and role management
+- [REST API](/docs/api/rest-api) for full endpoint reference
