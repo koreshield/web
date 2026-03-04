@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import * as LucideIcons from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { analyzeTheat, PRESET_ATTACKS, type ThreatLogEntry, type ThreatResult } from '../lib/threat-engine';
-import * as LucideIcons from 'lucide-react';
 
 const Icon = ({ name, className }: { name: string; className?: string }) => {
 	const LucideIcon = (LucideIcons as any)[name];
@@ -434,7 +434,7 @@ export default function DemoPage() {
 							className="w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:scale-105 text-center"
 							style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
 						>
-							Get Started Free →
+							Get Started →
 						</Link>
 						<Link
 							to="/contact"

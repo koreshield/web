@@ -7,6 +7,7 @@ import { useToast } from '../components/ToastNotification';
 import { SEOConfig } from '../lib/seo-config';
 
 const tiers = [
+	/* COMMENTED: Community free tier hidden
 	{
 		name: 'Open Source',
 		id: 'free',
@@ -33,12 +34,13 @@ const tiers = [
 		ctaLink: 'https://docs.koreshield.com/installation',
 		popular: false,
 	},
+	COMMENTED */
 	{
 		name: 'Startup',
 		id: 'startup',
-		monthlyPrice: 199,
-		yearlyPrice: 1910,
-		priceDisplay: '$199',
+		monthlyPrice: 299,
+		yearlyPrice: 2870,
+		priceDisplay: '$299',
 		priceDetail: '/month',
 		description: 'For growing startups and scale-ups',
 		features: [
@@ -52,7 +54,7 @@ const tiers = [
 			'99.9% SLA',
 			'Priority security updates',
 		],
-		cta: 'Start Free Trial',
+		cta: 'Get Started',
 		ctaLink: '#contact-sales',
 		popular: true,
 	},
@@ -109,7 +111,7 @@ const tiers = [
 const faqs = [
 	{
 		question: 'How does the pricing work?',
-		answer: 'Our pricing is based on the number of API requests per month and the level of support you need. The Open Source tier is completely free for self-hosted deployments. Paid tiers include managed hosting, priority support, and advanced features. All pricing is in US Dollars ($). We also accept payments in British Pounds (£). Prices exclude VAT/sales tax.',
+		answer: 'Our pricing is based on the number of API requests per month and the level of support you need. All plans include managed hosting, priority support, and advanced features. All pricing is in US Dollars ($). We also accept payments in British Pounds (£). Prices exclude VAT/sales tax.',
 	},
 	{
 		question: 'What counts as a request?',
@@ -124,8 +126,8 @@ const faqs = [
 		answer: 'You\'ll receive alerts at 80% and 95% of your limit. If you exceed your monthly allocation, we\'ll automatically upgrade you to the next tier (prorated for the remainder of the month). You can also set hard limits to prevent overages.',
 	},
 	{
-		question: 'Is there a free trial?',
-		answer: 'Yes! All paid tiers include a 14-day free trial with no credit card required. You get full access to all features during the trial period. The Open Source tier is free forever.',
+		question: 'Do you offer a trial period?',
+		answer: 'Yes! All paid tiers include a 14-day trial period with no credit card required. You get full access to all features during the trial period.',
 	},
 	{
 		question: 'What payment methods do you accept?',
@@ -140,8 +142,8 @@ const faqs = [
 		answer: 'We offer a 30-day money-back guarantee on annual plans. Monthly plans can be cancelled at any time with no penalty. Unused requests do not roll over to the next billing period.',
 	},
 	{
-		question: 'Can I use KoreShield for commercial projects on the Open Source tier?',
-		answer: 'Yes! Our Open Source tier is licenced under MIT, which allows commercial use. You\'re free to self-host and use it for any purpose, including commercial applications.',
+		question: 'Can I use KoreShield for commercial projects?',
+		answer: 'Yes! KoreShield is licenced under MIT for the open-source core, which allows commercial use. All paid plans include commercial usage rights.',
 	},
 	{
 		question: 'Do you offer regional hosting?',
@@ -175,7 +177,7 @@ export default function PricingPage() {
 							</span>
 						</h1>
 						<p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto font-light">
-							Start free with our Open Source tier. Upgrade when you need managed hosting, priority support, and enterprise features.
+							Simple, usage-based pricing that scales with your needs. Get enterprise-grade LLM security with transparent costs.
 						</p>
 
 						{/* Billing Toggle */}
@@ -201,7 +203,7 @@ export default function PricingPage() {
 					</motion.div>
 
 					{/* Main Pricing Cards (Free, Startup, Growth) */}
-					<div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
+					<div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
 						{tiers.filter(t => t.id !== 'enterprise').map((tier, index) => {
 							const displayPrice = tier.monthlyPrice === null ? tier.priceDisplay :
 								billingPeriod === 'annual' && tier.yearlyPrice ?
@@ -384,32 +386,24 @@ export default function PricingPage() {
 							<tbody className="divide-y divide-border">
 								<tr>
 									<td className="p-4 text-foreground/80">Requests/month</td>
-									<td className="p-4 text-center text-muted-foreground">10K</td>
 									<td className="p-4 text-center text-muted-foreground">1M</td>
 									<td className="p-4 text-center text-muted-foreground">10M</td>
 									<td className="p-4 text-center text-muted-foreground">Unlimited</td>
 								</tr>
 								<tr>
 									<td className="p-4 text-foreground/80">Support</td>
-									<td className="p-4 text-center text-muted-foreground">Community</td>
 									<td className="p-4 text-center text-muted-foreground">Email & Chat</td>
 									<td className="p-4 text-center text-muted-foreground">Dedicated</td>
 									<td className="p-4 text-center text-muted-foreground">24/7 Dedicated</td>
 								</tr>
 								<tr>
 									<td className="p-4 text-foreground/80">SLA</td>
-									<td className="p-4 text-center text-muted-foreground">-</td>
 									<td className="p-4 text-center text-muted-foreground">99.9%</td>
 									<td className="p-4 text-center text-muted-foreground">99.95%</td>
 									<td className="p-4 text-center text-muted-foreground">Custom</td>
 								</tr>
 								<tr>
 									<td className="p-4 text-foreground/80">Custom rules</td>
-									<td className="p-4 text-center">
-										<svg className="w-5 h-5 text-muted-foreground/50 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-										</svg>
-									</td>
 									<td className="p-4 text-center">
 										<svg className="w-5 h-5 text-electric-green mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -428,11 +422,6 @@ export default function PricingPage() {
 								</tr>
 								<tr>
 									<td className="p-4 text-foreground/80">SOC2/ISO 27001</td>
-									<td className="p-4 text-center">
-										<svg className="w-5 h-5 text-muted-foreground/50 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-										</svg>
-									</td>
 									<td className="p-4 text-center">
 										<svg className="w-5 h-5 text-muted-foreground/50 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
