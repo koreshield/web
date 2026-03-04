@@ -1,6 +1,6 @@
 /**
- * Simple authentication system using Koreshield backend
- * No third-party services needed
+ * Authentication service for KoreShield admin UI.
+ * Uses secure HttpOnly cookie sessions with in-memory bearer fallback.
  */
 
 export interface AuthUser {
@@ -12,11 +12,12 @@ export interface AuthUser {
 }
 
 export interface LoginResponse {
-	token: string;
+	token?: string;
 	user: AuthUser;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.koreshield.com";
+const USER_STORAGE_KEY = 'admin_user';
 
 type AuthEventType = 'login' | 'logout';
 type AuthEventHandler = () => void;
@@ -47,15 +48,14 @@ class AuthEventEmitter {
 }
 
 const eventEmitter = new AuthEventEmitter();
+let inMemoryToken: string | null = null;
 
 export const authService = {
-	/**
-	 * Login with Railway backend
-	 */
 	async login(email: string, password: string): Promise<AuthUser> {
 		const response = await fetch(`${API_BASE_URL}/v1/management/login`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
+			credentials: 'include',
 			body: JSON.stringify({ email, password })
 		});
 
@@ -65,82 +65,63 @@ export const authService = {
 		}
 
 		const data: LoginResponse = await response.json();
-
-		// Store token and user info
-		// SECURITY NOTE: Storing tokens in localStorage is susceptible to XSS.
-		// We mitigate this via strict Content-Security-Policy (CSP) headers in index.html.
-		// For higher security, consider refactoring to backend-set HttpOnly cookies.
-		localStorage.setItem('admin_token', data.token);
-		localStorage.setItem('admin_user', JSON.stringify(data.user));
-		// Default token expiration: 24 hours
-		localStorage.setItem('token_expires_at', String(Date.now() + 24 * 60 * 60 * 1000));
-
-		// Emit login event
+		inMemoryToken = data.token ?? null;
+		sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
 		eventEmitter.emit('login');
-
 		return data.user;
 	},
 
-	/**
-	 * Logout - clear stored credentials
-	 */
 	logout(): void {
-		localStorage.removeItem('admin_token');
-		localStorage.removeItem('admin_user');
-		localStorage.removeItem('token_expires_at');
-
-		// Emit logout event
+		inMemoryToken = null;
+		sessionStorage.removeItem(USER_STORAGE_KEY);
+		void fetch(`${API_BASE_URL}/v1/management/logout`, {
+			method: 'POST',
+			credentials: 'include',
+		}).catch(() => undefined);
 		eventEmitter.emit('logout');
 	},
 
-	/**
-	 * Check if user is authenticated
-	 */
 	isAuthenticated(): boolean {
-		const token = localStorage.getItem('admin_token');
-		const expiresAt = localStorage.getItem('token_expires_at');
-
-		if (!token || !expiresAt) {
-			return false;
-		}
-
-		// Check if token is expired
-		if (Date.now() > parseInt(expiresAt)) {
-			this.logout();
-			return false;
-		}
-
-		return true;
+		return Boolean(inMemoryToken || sessionStorage.getItem(USER_STORAGE_KEY));
 	},
 
-	/**
-	 * Get current user info
-	 */
+	async restoreSession(): Promise<boolean> {
+		if (this.isAuthenticated()) {
+			return true;
+		}
+
+		try {
+			const response = await fetch(`${API_BASE_URL}/v1/management/me`, {
+				method: 'GET',
+				credentials: 'include',
+			});
+			if (!response.ok) {
+				return false;
+			}
+			const data = await response.json();
+			if (!data?.user) {
+				return false;
+			}
+			sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+			return true;
+		} catch {
+			return false;
+		}
+	},
+
 	getCurrentUser(): AuthUser | null {
-		const userStr = localStorage.getItem('admin_user');
+		const userStr = sessionStorage.getItem(USER_STORAGE_KEY);
 		return userStr ? JSON.parse(userStr) : null;
 	},
 
-	/**
-	 * Get JWT token for API calls
-	 */
 	getToken(): string | null {
-		if (!this.isAuthenticated()) {
-			return null;
-		}
-		return localStorage.getItem('admin_token');
+		return inMemoryToken;
 	},
 
-	/**
-	 * Register event handler
-	 */
 	on(event: AuthEventType, handler: AuthEventHandler) {
 		eventEmitter.on(event, handler);
 	},
 
-	/**
-	 * Unregister event handler
-	 */
 	off(event: AuthEventType, handler: AuthEventHandler) {
 		eventEmitter.off(event, handler);
 	}

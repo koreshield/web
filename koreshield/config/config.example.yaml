@@ -61,6 +61,14 @@ redis:
   # Alternative format: "redis://:password@localhost:6379/0"
   # For Redis Cluster: "redis://localhost:7000,localhost:7001,localhost:7002"
 
+# JWT Authentication (required for management and protected API endpoints)
+jwt:
+  # Use one mode only:
+  # 1) HS256: set JWT_SECRET env var (minimum 32 chars)
+  # 2) RS256: set JWT_PUBLIC_KEY/JWT_PRIVATE_KEY env vars
+  issuer: "koreshield-auth"
+  audience: "koreshield-api"
+
 # Alerting configuration
 alerting:
   enabled: false
@@ -118,4 +126,3 @@ monitoring:
   enabled: true
   check_interval_seconds: 60
   slack: null
-
