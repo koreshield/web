@@ -5,7 +5,7 @@ import { themes as prismThemes } from 'prism-react-renderer';
 const config: Config = {
 	// === SITE METADATA ===
 	title: 'Koreshield',
-	tagline: 'Open-source security platform protecting LLM applications from prompt injection attacks',
+	tagline: 'Security platform protecting LLM applications from prompt injection attacks',
 	favicon: 'img/favicon.png',
 
 	future: {
@@ -17,7 +17,6 @@ const config: Config = {
 	baseUrl: '/',
 	organizationName: 'Koreshield',
 	projectName: 'Koreshield',
-
 
 	onBrokenLinks: 'throw',
 	trailingSlash: true,
@@ -106,12 +105,22 @@ const config: Config = {
 					position: 'left',
 				},
 				{
-					to: '/docs/api/',
-					label: 'API Reference',
+					to: '/docs/integrations/',
+					label: 'Integrations',
+					position: 'left',
+				},
+				{
+					to: '/docs/features/rag-defense',
+					label: 'Features',
 					position: 'left',
 				},
 				{
 					type: 'search',
+					position: 'right',
+				},
+				{
+					to: '/docs/api/',
+					label: 'API Reference',
 					position: 'right',
 				},
 				{
@@ -127,14 +136,18 @@ const config: Config = {
 			style: 'dark',
 			links: [
 				{
-					title: 'Docs',
+					title: 'Product',
 					items: [
 						{
-							label: 'Getting Started',
+							label: 'Quick Start',
 							to: '/docs/getting-started/quick-start',
 						},
 						{
-							label: 'Core Features',
+							label: 'Installation',
+							to: '/docs/getting-started/installation',
+						},
+						{
+							label: 'Features',
 							to: '/docs/features/',
 						},
 						{
@@ -158,19 +171,32 @@ const config: Config = {
 							label: 'JavaScript SDK',
 							href: 'https://github.com/koreshield/node-sdk',
 						},
+						{
+							label: 'Integrations',
+							to: '/docs/integrations/',
+						},
 					],
 				},
 				{
-					title: 'Community',
+					title: 'Resources',
 					items: [
 						{
 							label: 'Case Studies',
 							to: '/docs/case-studies/',
 						},
 						{
+							label: 'Best Practices',
+							to: '/docs/best-practices/',
+						},
+						{
 							label: 'Support',
 							href: 'mailto:support@koreshield.com',
 						},
+					],
+				},
+				{
+					title: 'Community',
+					items: [
 						{
 							html: `
 								<div class="footer-social-icons">
