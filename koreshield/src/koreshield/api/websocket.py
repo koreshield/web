@@ -10,13 +10,14 @@ Provides real-time updates for:
 
 import json
 import asyncio
+from datetime import datetime, timezone
 from typing import Dict, Any
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, Depends, status
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
 from fastapi.responses import JSONResponse
 import structlog
 import redis.asyncio as aioredis
 
-from .auth import verify_jwt_token
+from .auth import AUTH_COOKIE_NAME, verify_jwt_token
 
 logger = structlog.get_logger(__name__)
 
@@ -33,7 +34,12 @@ class ConnectionManager:
         self.active_connections: Dict[str, WebSocket] = {}
         self.user_subscriptions: Dict[str, set[str]] = {}  # user_id -> set of event types
     
-    async def connect(self, websocket: WebSocket, user_id: str, client_id: str):
+    async def connect(
+        self,
+        websocket: WebSocket,
+        user_id: str,
+        client_id: str,
+    ):
         """Accept and register a new WebSocket connection."""
         await websocket.accept()
         self.active_connections[client_id] = websocket
@@ -104,16 +110,33 @@ async def verify_ws_token(token: str) -> Dict[str, Any]:
         raise
 
 
+def _extract_ws_token(websocket: WebSocket) -> str | None:
+    """
+    Extract auth token from Authorization header, secure cookie, or websocket subprotocol.
+    Returns token if present.
+    """
+    auth_header = websocket.headers.get("authorization", "")
+    if auth_header.startswith("Bearer "):
+        return auth_header.split(" ", 1)[1].strip()
+
+    cookie_token = websocket.cookies.get(AUTH_COOKIE_NAME)
+    if cookie_token:
+        if cookie_token.lower().startswith("bearer "):
+            return cookie_token.split(" ", 1)[1].strip()
+        return cookie_token
+
+    return None
+
+
 @router.websocket("/events")
 async def websocket_events(
     websocket: WebSocket,
-    token: str = Query(..., description="JWT authentication token"),
 ):
     """
     WebSocket endpoint for real-time event streaming.
     
     Authentication:
-        - Requires valid JWT token in query parameter
+        - Requires valid JWT token in Authorization header or auth cookie
         
     Event Types:
         - threat_detected: New threat detection event
@@ -137,8 +160,18 @@ async def websocket_events(
     user_id = None
     
     try:
-        # Verify JWT token
+        token = _extract_ws_token(websocket)
+        if not token:
+            logger.warning("websocket_auth_failed", reason="missing_token")
+            await websocket.close(code=4401)
+            return
+
         user = await verify_ws_token(token)
+        if not user:
+            logger.warning("websocket_auth_failed", reason="invalid_token")
+            await websocket.close(code=4401)
+            return
+
         user_id = user.get("id", "unknown")
         client_id = f"{user_id}_{id(websocket)}"
         
@@ -148,7 +181,7 @@ async def websocket_events(
         # Send welcome message
         await websocket.send_json({
             "type": "connection_established",
-            "timestamp": "2026-02-05T10:00:00Z",  # Will use real timestamp in production
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "data": {
                 "user_id": user_id,
                 "message": "Connected to KoreShield real-time event stream"
@@ -243,7 +276,7 @@ async def publish_event(event_type: str, data: Dict[str, Any]):
     
     event = {
         "type": event_type,
-        "timestamp": "2026-02-05T10:00:00Z",  # Will use datetime.utcnow() in production
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "data": data
     }
     

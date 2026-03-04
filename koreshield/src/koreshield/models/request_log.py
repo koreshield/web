@@ -1,9 +1,14 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, String, Integer, Float, DateTime, Boolean, JSON, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from .base import Base
+
+
+def utcnow_naive() -> datetime:
+    """UTC now as naive datetime for existing DB schema compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class RequestLog(Base):
     """
@@ -13,7 +18,7 @@ class RequestLog(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     request_id = Column(String(255), unique=True, index=True, nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow, index=True, nullable=False)
+    timestamp = Column(DateTime, default=utcnow_naive, index=True, nullable=False)
     
     # Request details
     provider = Column(String(50), nullable=False, index=True)

@@ -5,9 +5,18 @@ Integration tests for RAG scanning endpoint.
 import pytest
 import jwt
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 from fastapi.testclient import TestClient
+
+# Ensure predictable JWT env during module import.
+os.environ.pop("JWT_PUBLIC_KEY", None)
+os.environ.pop("JWT_PRIVATE_KEY", None)
+os.environ.setdefault("JWT_ISSUER", "koreshield-auth")
+os.environ.setdefault("JWT_AUDIENCE", "koreshield-api")
+os.environ.setdefault("JWT_SECRET", "test-secret-with-minimum-32-characters!!")
+os.environ.setdefault("KORESHIELD_EAGER_APP_INIT", "false")
+
 from src.koreshield.proxy import create_app
 
 
@@ -28,7 +37,7 @@ def test_config():
 @pytest.fixture
 def client(test_config):
     """Create a test client."""
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     token = jwt.encode(
         {
             "sub": "11111111-1111-1111-1111-111111111111",
@@ -39,10 +48,18 @@ def client(test_config):
             "iat": now,
             "exp": now + timedelta(hours=1),
         },
-        "test-secret",
+        "test-secret-with-minimum-32-characters!!",
         algorithm="HS256",
     )
-    with patch.dict("os.environ", {"JWT_SECRET": "test-secret"}, clear=False):
+    with patch.dict(
+        "os.environ",
+        {
+            "JWT_SECRET": "test-secret-with-minimum-32-characters!!",
+            "JWT_ISSUER": "koreshield-auth",
+            "JWT_AUDIENCE": "koreshield-api",
+        },
+        clear=False,
+    ):
         app = create_app()
         client = TestClient(app)
         client.headers.update({"Authorization": f"Bearer {token}"})

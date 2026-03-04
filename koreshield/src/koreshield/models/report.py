@@ -1,9 +1,14 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, String, DateTime, Boolean, JSON, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from .base import Base
+
+
+def utcnow_naive() -> datetime:
+    """UTC now as naive datetime for existing DB schema compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class ReportSchedule(str, Enum):
     MANUAL = "manual"
@@ -32,7 +37,7 @@ class ReportTemplate(Base):
     category = Column(String(50)) # Security, Financial, etc.
     available_metrics = Column(JSON, default=[]) # List of metric names
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utcnow_naive)
 
 class Report(Base):
     """Generated or scheduled report."""
@@ -51,7 +56,7 @@ class Report(Base):
     file_url = Column(String(500))
     
     created_by = Column(UUID(as_uuid=True), ForeignKey('users.id'))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utcnow_naive)
     last_run_at = Column(DateTime)
     
     # Relationships

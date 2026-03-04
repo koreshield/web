@@ -150,6 +150,18 @@ alerting:
 
 API keys are set via environment variables (e.g., `OPENAI_API_KEY`).
 
+JWT-protected endpoints require explicit auth settings:
+- `JWT_ISSUER` and `JWT_AUDIENCE` must be configured.
+- Use either HS256 (`JWT_SECRET`, minimum 32 chars) or RS256 (`JWT_PUBLIC_KEY`/`JWT_PRIVATE_KEY`), not both.
+
+### Auth Migration Notes
+- HTTP clients should prefer secure HttpOnly cookie sessions (`credentials: include` for browser `fetch`).
+- Bearer `Authorization` remains supported for non-browser or server-to-server clients.
+- WebSocket query auth is removed: `?token=<jwt>` is no longer accepted.
+- WebSocket clients must use one of:
+  - `Authorization: Bearer <jwt>` (non-browser clients)
+  - Secure auth cookie/session (browser clients)
+
 ## Usage
 
 ### Quick Start
@@ -217,6 +229,7 @@ pytest
 - [System Design](docs/SYSTEM_DESIGN.md) - Comprehensive system architecture and design
 - [Error Codes](docs/ERROR_CODES.md) - Standardized error responses and codes
 - [Detection Patterns](koreshield/docs/DETECTION_PATTERNS.md) - Security pattern documentation
+- [Auth Migration Notes](koreshield/docs/AUTH_MIGRATION.md) - New auth requirements and client migration guide
 - [API Documentation](http://localhost:8000/docs) - Interactive OpenAPI/Swagger docs
 - Configuration Guide: config/config.example.yaml
 - Examples: examples/
