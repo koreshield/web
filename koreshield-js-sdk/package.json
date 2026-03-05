@@ -1,6 +1,6 @@
 {
   "name": "koreshield",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "JavaScript/TypeScript SDK for KoreShield LLM Security Platform - Enhanced with browser optimization, streaming, and framework integrations",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
