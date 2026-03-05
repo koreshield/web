@@ -29,7 +29,7 @@
     const postsPerPage = 6;
 
     // "Recent" adds to the start of categories for UI
-    const uiCategories = ["Recent", ...categories];
+    const uiCategories = $derived(["Recent", ...categories]);
 
     function formatDate(date: Date | string) {
         return new Date(date).toLocaleDateString("en-US", {
