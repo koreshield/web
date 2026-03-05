@@ -61,7 +61,7 @@ class KoreShieldClient:
         self.session.headers.update({
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            "User-Agent": f"koreshield-python-sdk/0.1.0",
+            "User-Agent": f"koreshield-python-sdk/0.3.2",
         })
 
     def scan_prompt(self, prompt: str, **kwargs) -> DetectionResult:
