@@ -39,7 +39,7 @@ function ScoreRing({ score, blocked }: { score: number; blocked: boolean }) {
 	const color = blocked ? (score > 85 ? '#ef4444' : score > 65 ? '#f97316' : '#eab308') : '#10b981';
 
 	return (
-		<div className="relative flex items-center justify-center" style={{ width: 100, height: 100 }}>
+		<div className="relative flex items-center justify-center mx-auto" style={{ width: 100, height: 100 }}>
 			<svg width="100" height="100" className="-rotate-90">
 				<circle cx="50" cy="50" r={r} fill="none" stroke="#1e293b" strokeWidth="8" />
 				<circle
