@@ -44,11 +44,12 @@ function Hero() {
 						{/* Live Demo CTA */}
 						<Link
 							to="/demo"
-							className="group relative bg-primary hover:bg-emerald-bright text-primary-foreground font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 w-full sm:w-auto overflow-hidden"
+							className="group relative bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 w-full sm:w-auto overflow-hidden"
 						>
-							<Play className="w-4 h-4 fill-white" />
-							<span>See Live Demo</span>
-							<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+							<span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-0 animate-shimmer" />
+							<Play className="w-4 h-4 fill-white relative z-10" />
+							<span className="relative z-10">See Live Demo</span>
+							<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10" />
 						</Link>
 
 						{/* Shimmer CTA button */}

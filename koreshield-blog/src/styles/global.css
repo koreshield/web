@@ -195,13 +195,16 @@ button:disabled {
 }
 
 .prose p {
-    @apply text-gray-300 leading-normal;
+    @apply text-gray-300 leading-relaxed mb-5;
 }
 
 .prose ul,
-.prose ol,
+.prose ol {
+    @apply leading-relaxed mb-5 space-y-1 pl-6;
+}
+
 .prose li {
-    @apply leading-normal;
+    @apply leading-relaxed;
 }
 
 .prose strong {
