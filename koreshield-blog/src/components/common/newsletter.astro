@@ -54,6 +54,25 @@ import { Icon } from "astro-icon/components";
 					class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within/input:text-electric-blue transition-colors"
 				>
 					<Icon
+						name="material-symbols:person-outline"
+						class="w-5 h-5"
+					/>
+				</div>
+				<input
+					type="text"
+					name="name"
+					id="newsletter-name"
+					placeholder="Your first name"
+					autocomplete="given-name"
+					required
+					class="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-electric-blue focus:ring-1 focus:ring-electric-blue/50 transition-all text-base"
+				/>
+			</div>
+			<div class="relative group/input">
+				<div
+					class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within/input:text-electric-blue transition-colors"
+				>
+					<Icon
 						name="material-symbols:mail-outline"
 						class="w-5 h-5"
 					/>
@@ -88,6 +107,7 @@ import { Icon } from "astro-icon/components";
 
 <script>
 const form = document.getElementById('newsletter-form') as HTMLFormElement | null;
+const nameInput = document.getElementById('newsletter-name') as HTMLInputElement | null;
 const emailInput = document.getElementById('newsletter-email') as HTMLInputElement | null;
 const btn = document.getElementById('newsletter-btn') as HTMLButtonElement | null;
 const btnText = document.getElementById('newsletter-btn-text');
@@ -100,6 +120,8 @@ form?.addEventListener('submit', async (e) => {
   const email = emailInput.value.trim();
   if (!email) return;
 
+  const name = nameInput?.value.trim() || '';
+
   btn.disabled = true;
   btnText.textContent = 'Subscribing...';
   msg.className = 'text-sm mt-1 hidden';
@@ -109,13 +131,13 @@ form?.addEventListener('submit', async (e) => {
     const res = await fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, name }),
     });
 
     const data = await res.json().catch(() => ({})) as { success?: boolean; error?: string };
 
     if (res.ok && data?.success) {
-      msg.textContent = "You're subscribed! Check your inbox to confirm.";
+      msg.textContent = "You're subscribed — thanks for joining!";
       msg.className = 'text-sm mt-1 text-electric-blue';
       form.reset();
     } else {
