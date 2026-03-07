@@ -28,8 +28,9 @@ export const onRequestOptions = async () => {
 
 export const onRequestPost = async ({ request, env }: { request: Request; env: Env }) => {
   try {
-    const body = await request.json() as { email?: string };
+    const body = await request.json() as { email?: string; name?: string };
     const email = body?.email?.trim();
+    const firstName = body?.name?.trim();
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return new Response(JSON.stringify({ error: "Invalid email address." }), {
@@ -38,6 +39,16 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       });
     }
 
+<<<<<<< HEAD
+    if (!firstName) {
+      return new Response(JSON.stringify({ error: "Please enter your first name." }), {
+        status: 400,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
+
+=======
+>>>>>>> origin/main
     // Use explicit audience ID — falls back to auto-detect if not set
     let audienceId = env.RESEND_AUDIENCE_ID;
     if (!audienceId) {
@@ -63,7 +74,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
           "Content-Type": "application/json",
         },
         // source: "blog" tags this contact so the "Blog" segment filter picks them up
-        body: JSON.stringify({ email, unsubscribed: false, data: { source: "blog" } }),
+        body: JSON.stringify({ email, first_name: firstName, unsubscribed: false, data: { source: "blog" } }),
       }
     );
 
