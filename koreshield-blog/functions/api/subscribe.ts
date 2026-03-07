@@ -39,7 +39,6 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       });
     }
 
-<<<<<<< HEAD
     if (!firstName) {
       return new Response(JSON.stringify({ error: "Please enter your first name." }), {
         status: 400,
@@ -47,8 +46,6 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       });
     }
 
-=======
->>>>>>> origin/main
     // Use explicit audience ID — falls back to auto-detect if not set
     let audienceId = env.RESEND_AUDIENCE_ID;
     if (!audienceId) {
