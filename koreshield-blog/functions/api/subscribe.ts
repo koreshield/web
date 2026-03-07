@@ -8,7 +8,7 @@
 //    - OR call: curl -H "Authorization: Bearer YOUR_API_KEY" https://api.resend.com/audiences
 // 4. In Cloudflare Pages dashboard > your project > Settings > Environment Variables:
 //    Add RESEND_API_KEY = re_your_key_here
-//    Add RESEND_AUDIENCE_ID = your-audience-uuid-here
+//    Add RESEND_AUDIENCE_ID = eaaab766-c52e-41f6-9ce2-ce42f7dfb290  (Blog audience)
 // 5. For local dev: add both values to koreshield-blog/.env (never commit real values)
 
 interface Env {
@@ -22,11 +22,11 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-export const onRequestOptions: PagesFunction = async () => {
+export const onRequestOptions = async () => {
   return new Response(null, { status: 200, headers: CORS_HEADERS });
 };
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestPost = async ({ request, env }: { request: Request; env: Env }) => {
   try {
     const body = await request.json() as { email?: string };
     const email = body?.email?.trim();
@@ -38,7 +38,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       });
     }
 
-    // First try to get the audience ID automatically if not set
+    // Use explicit audience ID — falls back to auto-detect if not set
     let audienceId = env.RESEND_AUDIENCE_ID;
     if (!audienceId) {
       const audiencesRes = await fetch("https://api.resend.com/audiences", {
@@ -62,7 +62,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
           Authorization: `Bearer ${env.RESEND_API_KEY}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, unsubscribed: false }),
+        // source: "blog" tags this contact so the "Blog" segment filter picks them up
+        body: JSON.stringify({ email, unsubscribed: false, data: { source: "blog" } }),
       }
     );
 
