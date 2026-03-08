@@ -14,6 +14,9 @@ services:
       - DATABASE_URL=postgresql://koreshield:koreshield_password@postgres:5432/koreshield
       - REDIS_URL=redis://redis:6379/0
       - ENVIRONMENT=production
+      - JWT_SECRET=koreshield_default_secret_32_chars_long_!!
+      - JWT_ISSUER=koreshield-auth
+      - JWT_AUDIENCE=koreshield-api
       # Add API Keys here or in a .env file on the VPS
       # - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
