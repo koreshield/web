@@ -89,7 +89,7 @@ class AsyncKoreShieldClient:
             headers={
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
-                "User-Agent": f"koreshield-python-sdk/0.2.0",
+                "User-Agent": f"koreshield-python-sdk/0.3.2",
             },
         )
 
@@ -341,7 +341,7 @@ class AsyncKoreShieldClient:
             processing_time_ms=processing_time * 1000,
             request_id=f"stream_{int(time.time())}",
             timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            version="0.2.0"
+            version="0.3.2"
         )
 
     def _create_overlapping_chunks(self, content: str, chunk_size: int, overlap: int) -> List[str]:

@@ -1,12 +1,12 @@
 # KoreShield Python SDK
 
-[![PyPI version](https://badge.fury.io/py/koreshield-python-sdk.svg)](https://pypi.org/project/koreshield-python-sdk/)
-[![Python versions](https://img.shields.io/pypi/pyversions/koreshield-python-sdk)](https://pypi.org/project/koreshield-python-sdk/)
+[![PyPI version](https://badge.fury.io/py/koreshield.svg)](https://pypi.org/project/koreshield/)
+[![Python versions](https://img.shields.io/pypi/pyversions/koreshield)](https://pypi.org/project/koreshield/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A comprehensive Python SDK for integrating KoreShield's LLM security features into your applications with ease.
 
-## New in v0.2.0
+## Highlights in v0.3.x
 
 - **Enhanced Async Support**: Improved async/await patterns with context managers and performance monitoring
 - **Advanced Batch Processing**: Optimized batch scanning with progress callbacks, concurrency control, and batching
@@ -62,12 +62,12 @@ pip install koreshield
 
 For LangChain integration:
 ```bash
-pip install koreshield-python-sdk[langchain]
+pip install koreshield[langchain]
 ```
 
 For framework integrations:
 ```bash
-pip install koreshield-python-sdk[fastapi,flask,django]
+pip install koreshield[fastapi,flask,django]
 ```
 
 ## Quick Start
@@ -75,7 +75,7 @@ pip install koreshield-python-sdk[fastapi,flask,django]
 ### Basic Usage
 
 ```python
-from koreshield import KoreShieldClient
+from koreshield_sdk import KoreShieldClient
 
 # Initialize client
 client = KoreShieldClient(api_key="your-api-key")
@@ -293,7 +293,7 @@ class DetectionResult:
     metadata: Optional[Dict[str, Any]]
 ```
 
-### New Types (v0.2.0)
+### New Types (v0.3.x)
 
 #### StreamingScanResponse
 
@@ -708,8 +708,8 @@ details = client.get_scan_details(scan_id="scan_123")
 ### Setup
 
 ```bash
-git clone https://github.com/koreshield/koreshield-python-sdk.git
-cd koreshield-python-sdk
+git clone https://github.com/koreshield/koreshield.git
+cd koreshield
 pip install -e ".[dev]"
 ```
 
@@ -743,6 +743,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Support
 
 - [Documentation](https://docs.koreshield.com)
-- [Issue Tracker](https://github.com/koreshield/koreshield-python-sdk/issues)
-- [Discussions](https://github.com/koreshield/koreshield-python-sdk/discussions)
+- [Issue Tracker](https://github.com/koreshield/koreshield/issues)
+- [Discussions](https://github.com/koreshield/koreshield/discussions)
 - [Email Support](mailto:support@koreshield.com)
