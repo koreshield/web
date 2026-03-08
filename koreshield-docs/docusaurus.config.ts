@@ -122,6 +122,7 @@ const config: Config = {
 					to: '/docs/api/',
 					label: 'API Reference',
 					position: 'right',
+					className: 'navbar-api-ref',
 				},
 				{
 					href: 'https://github.com/koreshield/koreshield',

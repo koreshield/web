@@ -199,7 +199,7 @@ export class BrowserKoreShieldClient {
   private getHeaders(customHeaders?: Record<string, string>): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'User-Agent': 'KoreShield-JS-Browser/0.2.0',
+      'User-Agent': 'KoreShield-JS-Browser/0.3.2',
       ...this.config.headers,
       ...customHeaders
     };

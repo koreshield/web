@@ -1,6 +1,6 @@
 # KoreShield JavaScript/TypeScript SDK
 
-[![npm version](https://badge.fury.io/js/koreshield-js.svg)](https://badge.fury.io/js/koreshield-js)
+[![npm version](https://badge.fury.io/js/koreshield.svg)](https://badge.fury.io/js/koreshield)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
@@ -56,7 +56,7 @@ console.log(response.choices[0].message.content);
 
 ```html
 <script type="module">
-    import { createClient } from './koreshield-js.browser.js';
+    import { createClient } from './koreshield.browser.js';
 
     const client = createClient({
         baseURL: 'https://your-koreshield-proxy.com'
@@ -69,7 +69,7 @@ console.log(response.choices[0].message.content);
 ### OpenAI-Compatible API
 
 ```javascript
-import { createKoreShieldOpenAI } from 'koreshield-js';
+import { createKoreShieldOpenAI } from 'koreshield';
 
 const openai = createKoreShieldOpenAI({
     baseURL: 'http://localhost:8000',
@@ -114,7 +114,7 @@ const client = createClient({
 ### Input Sanitization
 
 ```typescript
-import { sanitizeInput, formatMessages } from 'koreshield-js';
+import { sanitizeInput, formatMessages } from 'koreshield';
 
 // Sanitize individual input
 const safeInput = sanitizeInput('<script>alert("xss")</script>Hello!');
@@ -128,7 +128,7 @@ const messages = formatMessages([
 ### Response Safety Checking
 
 ```typescript
-import { checkResponseSafety } from 'koreshield-js';
+import { checkResponseSafety } from 'koreshield';
 
 const safetyCheck = checkResponseSafety(aiResponse);
 if (!safetyCheck.safe) {
@@ -161,7 +161,7 @@ KoreShield provides advanced security scanning for RAG (Retrieval-Augmented Gene
 ### Basic RAG Scanning
 
 ```typescript
-import { KoreShieldClient } from 'koreshield-js';
+import { KoreShieldClient } from 'koreshield';
 
 const client = new KoreShieldClient({
     baseURL: 'http://localhost:8000',
@@ -248,7 +248,7 @@ import {
     InjectionVector,
     OperationalTarget,
     ThreatLevel
-} from 'koreshield-js';
+} from 'koreshield';
 
 const documents: RAGDocument[] = [
     {
@@ -313,7 +313,7 @@ console.log(prometheusMetrics);
 ### Error Handling & Retries
 
 ```typescript
-import { retry } from 'koreshield-js';
+import { retry } from 'koreshield';
 
 const response = await retry(
     () => client.createChatCompletion(request),
@@ -423,17 +423,17 @@ npm run test:coverage
 
 ### Node.js (CommonJS)
 ```javascript
-const { createClient } = require('koreshield-js');
+const { createClient } = require('koreshield');
 ```
 
 ### Node.js (ES Modules)
 ```javascript
-import { createClient } from 'koreshield-js';
+import { createClient } from 'koreshield';
 ```
 
 ### Browser (UMD)
 ```html
-<script src="https://unpkg.com/koreshield-js@latest/dist/index.umd.js"></script>
+<script src="https://unpkg.com/koreshield@latest/dist/index.umd.js"></script>
 <script>
     const client = KoreShield.createClient({ baseURL: '...' });
 </script>
@@ -442,7 +442,7 @@ import { createClient } from 'koreshield-js';
 ### Browser (ES Modules)
 ```html
 <script type="module">
-    import { createClient } from 'https://unpkg.com/koreshield-js@latest/dist/index.mjs';
+    import { createClient } from 'https://unpkg.com/koreshield@latest/dist/index.mjs';
 </script>
 ```
 
