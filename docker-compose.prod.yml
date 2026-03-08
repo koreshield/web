@@ -28,6 +28,23 @@ services:
     networks:
       - koreshield-net
 
+  # Frontend Web Service
+  web:
+    build:
+      context: ./koreshield-web
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:8000
+    image: koreshield-web:latest
+    container_name: koreshield-web
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: always
+    networks:
+      - koreshield-net
+
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
