@@ -37,6 +37,12 @@
         min-width: 240px;
         padding: 0 12px;
         justify-content: space-between;
+
+        @media (max-width: 996px) {
+          width: auto;
+          min-width: 0;
+          max-width: 140px;
+        }
       }
 
       .DocSearch-Button-Placeholder {
@@ -45,6 +51,10 @@
         font-weight: 700;
         letter-spacing: 0.02em;
         font-size: 0.95rem;
+
+        @media (max-width: 640px) {
+          display: none;
+        }
       }
 
       .DocSearch-Button-Key {

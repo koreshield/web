@@ -1,8 +1,13 @@
-import { useState } from 'react';
+import emailjs from '@emailjs/browser';
 import { motion } from 'framer-motion';
-import { useToast } from '../components/ToastNotification';
+import { useState } from 'react';
 import { SEOMeta } from '../components/SEOMeta';
+import { useToast } from '../components/ToastNotification';
 import { SEOConfig } from '../lib/seo-config';
+
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string;
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string;
+const TEMPLATE_CONTACT = import.meta.env.VITE_EMAILJS_TEMPLATE_ID_CONTACT as string;
 
 const supportOptions = [
 	{
@@ -72,7 +77,7 @@ const supportOptions = [
 ];
 
 export default function ContactPage() {
-	const [activeTab, setActiveTab] = useState<'general' | 'enterprise' | 'technical'>('general');
+	const [activeTab, setActiveTab] = useState<'general' | 'technical'>('general');
 
 	return (
 		<div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -137,6 +142,36 @@ export default function ContactPage() {
 				</div>
 			</section>
 
+			{/* Enterprise Sales CTA */}
+			<section className="py-12 px-4">
+				<div className="max-w-4xl mx-auto">
+					<motion.div
+						initial={{ opacity: 0, y: 16 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5 }}
+						className="rounded-2xl bg-gray-900 border border-gray-700 p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6"
+					>
+						<div>
+							<p className="text-sm font-semibold text-electric-green uppercase tracking-wider mb-1">Enterprise</p>
+							<h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Scaling AI at enterprise level?</h3>
+							<p className="text-gray-400 max-w-lg">
+								Talk to our sales team about custom volumes, dedicated support, SSO, and compliance requirements.
+								Typical response within 24 hours.
+							</p>
+						</div>
+						<a
+							href="/pricing#contact-sales"
+							className="shrink-0 inline-flex items-center gap-2 bg-electric-green hover:bg-emerald-dark text-white font-semibold px-6 py-3 rounded-lg transition-colors whitespace-nowrap shadow-md hover:shadow-lg border-2 border-emerald-600"
+						>
+							Talk to Sales
+							<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+							</svg>
+						</a>
+					</motion.div>
+				</div>
+			</section>
+
 			{/* Contact Forms */}
 			<section className="py-20 px-4 bg-white dark:bg-gray-900">
 				<div className="max-w-4xl mx-auto">
@@ -156,15 +191,6 @@ export default function ContactPage() {
 							General Enquiry
 						</button>
 						<button
-							onClick={() => setActiveTab('enterprise')}
-							className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'enterprise'
-								? 'border-blue-600 text-blue-600 dark:text-blue-400'
-								: 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-								}`}
-						>
-							Enterprise Sales
-						</button>
-						<button
 							onClick={() => setActiveTab('technical')}
 							className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'technical'
 								? 'border-blue-600 text-blue-600 dark:text-blue-400'
@@ -177,7 +203,6 @@ export default function ContactPage() {
 
 					{/* Form Content */}
 					{activeTab === 'general' && <GeneralContactForm />}
-					{activeTab === 'enterprise' && <EnterpriseContactForm />}
 					{activeTab === 'technical' && <TechnicalSupportForm />}
 				</div>
 			</section>
@@ -201,13 +226,29 @@ function GeneralContactForm() {
 		e.preventDefault();
 		setLoading(true);
 
-		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-
-		toast.success('Message sent!', 'We\'ll get back to you within 24-48 hours.');
-
-		setFormData({ name: '', email: '', subject: '', message: '' });
-		setLoading(false);
+		try {
+			await emailjs.send(
+				EMAILJS_SERVICE_ID,
+				TEMPLATE_CONTACT,
+				{
+					form_type: 'General Enquiry',
+					icon: '👤',
+					from_name: formData.name,
+					from_email: formData.email,
+					reply_to: formData.email,
+					subject_line: formData.subject,
+					details: `Subject: ${formData.subject}\n\nMessage:\n${formData.message}`,
+				},
+				EMAILJS_PUBLIC_KEY
+			);
+			toast.success('Message sent!', "We'll get back to you within 24-48 hours.");
+			setFormData({ name: '', email: '', subject: '', message: '' });
+		} catch (err: any) {
+			const msg = err?.text || err?.message || 'Something went wrong. Please try again or email hello@koreshield.com directly.';
+			toast.error('Failed to send', msg);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -272,165 +313,10 @@ function GeneralContactForm() {
 			<button
 				type="submit"
 				disabled={loading}
-				className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+				className="w-full bg-electric-green hover:bg-emerald-dark text-white font-semibold py-3 px-6 rounded-lg transition-all cursor-pointer shadow-md hover:shadow-lg border-2 border-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				{loading ? 'Sending...' : 'Send Message'}
 			</button>
-		</form>
-	);
-}
-
-function EnterpriseContactForm() {
-	const [formData, setFormData] = useState({
-		name: '',
-		email: '',
-		company: '',
-		companySize: '1-10',
-		role: '',
-		requestVolume: '',
-		message: '',
-	});
-	const [loading, setLoading] = useState(false);
-	const toast = useToast();
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setLoading(true);
-
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-
-		toast.success('Enquiry received!', 'Our enterprise team will contact you within 24 hours.');
-
-		setFormData({
-			name: '',
-			email: '',
-			company: '',
-			companySize: '1-10',
-			role: '',
-			requestVolume: '',
-			message: '',
-		});
-		setLoading(false);
-	};
-
-	return (
-		<form onSubmit={handleSubmit} className="space-y-6">
-			<div className="grid md:grid-cols-2 gap-6">
-				<div>
-					<label htmlFor="ent-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Full Name *
-					</label>
-					<input
-						type="text"
-						id="ent-name"
-						required
-						value={formData.name}
-						onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					/>
-				</div>
-				<div>
-					<label htmlFor="ent-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Work Email *
-					</label>
-					<input
-						type="email"
-						id="ent-email"
-						required
-						value={formData.email}
-						onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					/>
-				</div>
-			</div>
-
-			<div className="grid md:grid-cols-2 gap-6">
-				<div>
-					<label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Company Name *
-					</label>
-					<input
-						type="text"
-						id="company"
-						required
-						value={formData.company}
-						onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					/>
-				</div>
-				<div>
-					<label htmlFor="companySize" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Company Size
-					</label>
-					<select
-						id="companySize"
-						value={formData.companySize}
-						onChange={(e) => setFormData({ ...formData, companySize: e.target.value })}
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					>
-						<option value="1-10">1-10 employees</option>
-						<option value="11-50">11-50 employees</option>
-						<option value="51-200">51-200 employees</option>
-						<option value="201-1000">201-1,000 employees</option>
-						<option value="1000+">1,000+ employees</option>
-					</select>
-				</div>
-			</div>
-
-			<div className="grid md:grid-cols-2 gap-6">
-				<div>
-					<label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Your Role
-					</label>
-					<input
-						type="text"
-						id="role"
-						value={formData.role}
-						onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-						placeholder="e.g. CTO, Engineering Manager"
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					/>
-				</div>
-				<div>
-					<label htmlFor="requestVolume" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Expected Monthly Volume
-					</label>
-					<input
-						type="text"
-						id="requestVolume"
-						value={formData.requestVolume}
-						onChange={(e) => setFormData({ ...formData, requestVolume: e.target.value })}
-						placeholder="e.g. 5M requests/month"
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					/>
-				</div>
-			</div>
-
-			<div>
-				<label htmlFor="ent-message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-					Tell us about your requirements
-				</label>
-				<textarea
-					id="ent-message"
-					rows={6}
-					value={formData.message}
-					onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-					placeholder="What are your security goals? Any compliance requirements? Timeline for deployment?"
-					className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-				/>
-			</div>
-
-			<button
-				type="submit"
-				disabled={loading}
-				className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-			>
-				{loading ? 'Sending...' : 'Request Enterprise Demo'}
-			</button>
-
-			<p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-				Typical response time: Within 24 hours on business days
-			</p>
 		</form>
 	);
 }
@@ -453,21 +339,38 @@ function TechnicalSupportForm() {
 		e.preventDefault();
 		setLoading(true);
 
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-
-		toast.success('Support ticket created!', 'Our technical team will review your issue shortly.');
-
-		setFormData({
-			name: '',
-			email: '',
-			tier: 'open-source',
-			severity: 'low',
-			category: 'bug',
-			subject: '',
-			description: '',
-			environment: '',
-		});
-		setLoading(false);
+		try {
+			await emailjs.send(
+				EMAILJS_SERVICE_ID,
+				TEMPLATE_CONTACT,
+				{
+					form_type: 'Technical Support',
+					icon: '🛠️',
+					from_name: formData.name,
+					from_email: formData.email,
+					reply_to: formData.email,
+					subject_line: `[${formData.severity.toUpperCase()}] ${formData.subject}`,
+					details: `Tier: ${formData.tier}\nSeverity: ${formData.severity}\nCategory: ${formData.category}\nSubject: ${formData.subject}\n\nDescription:\n${formData.description}\n\nEnvironment:\n${formData.environment || 'Not provided'}`,
+				},
+				EMAILJS_PUBLIC_KEY
+			);
+			toast.success('Support ticket created!', 'Our technical team will review your issue shortly.');
+			setFormData({
+				name: '',
+				email: '',
+				tier: 'open-source',
+				severity: 'low',
+				category: 'bug',
+				subject: '',
+				description: '',
+				environment: '',
+			});
+		} catch (err: any) {
+			const msg = err?.text || err?.message || 'Something went wrong. Please try again or email support@koreshield.com directly.';
+			toast.error('Failed to send', msg);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -601,7 +504,7 @@ function TechnicalSupportForm() {
 			<button
 				type="submit"
 				disabled={loading}
-				className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+				className="w-full bg-electric-green hover:bg-emerald-dark text-white font-semibold py-3 px-6 rounded-lg transition-all cursor-pointer shadow-md hover:shadow-lg border-2 border-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				{loading ? 'Submitting...' : 'Submit Support Ticket'}
 			</button>
