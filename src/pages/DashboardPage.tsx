@@ -1,6 +1,6 @@
 import { authService } from '../lib/auth';
 import { useState, useEffect } from 'react';
-import { Activity, Shield, AlertTriangle, CheckCircle, LogOut, Wifi, WifiOff, Rocket, Code, BookOpen, ArrowRight } from 'lucide-react';
+import { Activity, Shield, AlertTriangle, CheckCircle, LogOut, Wifi, WifiOff, Rocket, Code, BookOpen, ArrowRight, Key } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStats, useRecentAttacks } from '../hooks/useApi';
 import { AttackDetailModal } from '../components/AttackDetailModal';
@@ -123,6 +123,16 @@ export function DashboardPage() {
 									)}
 								</div>
 							)}
+							{isAuthenticated && (
+								<Link
+									to="/settings/api-keys"
+									className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors border border-primary/20"
+									aria-label="Manage API Keys"
+								>
+									<Key className="w-4 h-4" />
+									<span className="hidden sm:inline font-medium">API Keys</span>
+								</Link>
+							)}
 							{isAuthenticated ? (
 								<button
 									onClick={handleLogout}
@@ -179,6 +189,12 @@ export function DashboardPage() {
 										<p className="text-xs sm:text-sm text-muted-foreground mb-3">
 											Your session is active via secure HttpOnly cookie. Use API keys for server-to-server integrations.
 										</p>
+										<Link
+											to="/settings/api-keys"
+											className="inline-flex items-center gap-1 text-xs sm:text-sm text-primary hover:underline"
+										>
+											Manage API Keys <ArrowRight className="w-3 h-3" />
+										</Link>
 									</div>
 
 									<div className="bg-card border border-border rounded-lg p-3 sm:p-4">
