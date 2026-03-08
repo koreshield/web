@@ -17,6 +17,7 @@ services:
       - JWT_SECRET=koreshield_default_secret_32_chars_long_!!
       - JWT_ISSUER=koreshield-auth
       - JWT_AUDIENCE=koreshield-api
+      - CORS_ORIGINS=https://koreshield.com,https://www.koreshield.com,https://api.koreshield.com
       # Add API Keys here or in a .env file on the VPS
       # - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
@@ -34,7 +35,7 @@ services:
       context: ./koreshield-web
       dockerfile: Dockerfile
       args:
-        - VITE_API_BASE_URL=http://localhost:8000
+        - VITE_API_BASE_URL=https://api.koreshield.com
     image: koreshield-web:latest
     container_name: koreshield-web
     ports:
