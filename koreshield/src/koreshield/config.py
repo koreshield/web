@@ -173,7 +173,10 @@ class Config:
             raise FileNotFoundError(f"Configuration file not found: {config_file}")
 
         with open(config_file, 'r') as f:
-            data = yaml.safe_load(f) or {}
+            content = f.read()
+            # Support environment variable expansion in YAML: ${VAR_NAME}
+            expanded_content = os.path.expandvars(content)
+            data = yaml.safe_load(expanded_content) or {}
 
         self._config = KoreShieldConfig()
         self._config.load_from_dict(data)
