@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ServerConfig(BaseModel):
@@ -29,12 +29,20 @@ class SecurityConfig(BaseModel):
     sensitivity: str = "medium"
     default_action: str = "block"
 
+    class Lists(BaseModel):
+        storage_path: Optional[str] = None
+
     class Features(BaseModel):
         sanitization: bool = True
         detection: bool = True
         policy_enforcement: bool = True
 
+    lists: Optional[Lists] = None
     features: Features = Features()
+
+    @field_validator("lists", mode="before")
+    def _default_lists(cls, value):
+        return value or {}
 
 
 class ProviderConfig(BaseModel):
