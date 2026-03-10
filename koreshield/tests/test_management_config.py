@@ -43,6 +43,7 @@ def test_management_config_dev_returns_redacted_values():
     config = {
         "server": {"environment": "development"},
         "security": {"sensitivity": "high", "default_action": "block"},
+        "redis": {"enabled": False},
         "database": {
             "password": "super-secret-db-password",
             "url": "postgresql://example/db",
@@ -80,6 +81,7 @@ def test_management_config_non_dev_returns_404():
     config = {
         "server": {"environment": "production"},
         "security": {"sensitivity": "high", "default_action": "block"},
+        "redis": {"enabled": False},
         "providers": {"openai": {"enabled": False}},
     }
 
@@ -106,6 +108,7 @@ def test_management_me_endpoint_returns_authenticated_user():
     config = {
         "server": {"environment": "development"},
         "security": {"sensitivity": "high", "default_action": "block"},
+        "redis": {"enabled": False},
         "providers": {"openai": {"enabled": False}},
     }
 
