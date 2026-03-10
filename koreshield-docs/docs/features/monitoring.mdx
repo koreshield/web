@@ -1,6 +1,8 @@
 ---
 title: Monitoring & Alerting
 description: Prometheus metrics, multi-channel alerting, and real-time monitoring.
+last_update:
+  date: 2026-03-10
 ---
 
 # Monitoring & Alerting
@@ -27,9 +29,10 @@ Access metrics at `GET /metrics` in Prometheus exposition format.
 
 ## Alert Rules
 
-Define alert rules in `config.yaml`. Rules are evaluated periodically against collected metrics.
+Define alert rules in the KoreShield Dashboard (hosted) or your deployment configuration (self-hosted). Rules are evaluated periodically against collected metrics.
 
 ```yaml
+# Self-hosted example
 alerting:
   enabled: true
   rules:

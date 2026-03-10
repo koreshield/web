@@ -57,6 +57,8 @@ def client(test_config):
             "JWT_SECRET": "test-secret-with-minimum-32-characters!!",
             "JWT_ISSUER": "koreshield-auth",
             "JWT_AUDIENCE": "koreshield-api",
+            "JWT_PUBLIC_KEY": "",
+            "JWT_PRIVATE_KEY": "",
         },
         clear=False,
     ):

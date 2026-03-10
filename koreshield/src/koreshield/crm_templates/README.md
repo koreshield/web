@@ -541,4 +541,4 @@ print(f"FP Rate: {false_positive_rate:.2%}")  # Should be <5%
 
 ## License
 
-Same as KoreShield project (MIT License)
+Same as KoreShield core (Proprietary License)

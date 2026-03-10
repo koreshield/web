@@ -72,7 +72,7 @@ function HomepageHero() {
 			<div className={styles.heroInner}>
 				<div className={styles.heroBadge}>
 					<span className={styles.heroBadgeDot} />
-					Open-Source · MIT License
+					Documentation · MIT License
 				</div>
 
 				<h1 className={styles.heroTitle}>
@@ -129,10 +129,21 @@ export default function Home() {
 	return (
 		<Layout
 			title={siteConfig.title}
-			description="Open-source AI firewall for LLM applications. Detect and block prompt injection attacks, PII leakage, and adversarial inputs in real-time."
+			description="Documentation for the KoreShield LLM security platform. The core platform is proprietary."
 		>
 			<main>
 				<HomepageHero />
+				<section className={styles.features}>
+					<div className={styles.featuresInner}>
+						<p className={styles.featuresLabel}>Licensing & IP</p>
+						<h2 className={styles.featuresTitle}>Core proprietary, SDKs and docs MIT-licensed</h2>
+						<p className={styles.featuresSubtitle}>
+							KoreShield core is proprietary software. The SDKs, documentation, website, and blog are MIT-licensed
+							in their respective directories and repositories. Commercial use of the core platform requires a
+							valid license or agreement with KoreShield.
+						</p>
+					</div>
+				</section>
 				<HomepageFeatures />
 			</main>
 		</Layout>
