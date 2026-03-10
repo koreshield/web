@@ -85,6 +85,23 @@ services:
                 networks:
                         - koreshield-net
 
+        # Caddy Reverse Proxy
+        caddy:
+                image: caddy:2-alpine
+                restart: always
+                ports:
+                        - "80:80"
+                        - "443:443"
+                volumes:
+                        - ./Caddyfile:/etc/caddy/Caddyfile
+                        - caddy_data:/data
+                        - caddy_config:/config
+                depends_on:
+                        - api
+                        - web
+                networks:
+                        - koreshield-net
+
 networks:
         koreshield-net:
                 driver: bridge
@@ -92,3 +109,5 @@ networks:
 volumes:
         postgres_data:
         redis_data:
+        caddy_data:
+        caddy_config:
