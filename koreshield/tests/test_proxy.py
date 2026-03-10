@@ -29,6 +29,7 @@ def mock_config():
     return {
         "security": {"sensitivity": "medium", "default_action": "block"},
         "providers": {"openai": {"enabled": True}},
+        "redis": {"enabled": False},
     }
 
 
