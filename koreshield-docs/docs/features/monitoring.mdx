@@ -27,9 +27,10 @@ Access metrics at `GET /metrics` in Prometheus exposition format.
 
 ## Alert Rules
 
-Define alert rules in `config.yaml`. Rules are evaluated periodically against collected metrics.
+Define alert rules in the KoreShield Dashboard (hosted) or your deployment configuration (self-hosted). Rules are evaluated periodically against collected metrics.
 
 ```yaml
+# Self-hosted example
 alerting:
   enabled: true
   rules:
