@@ -18,14 +18,11 @@ KoreShield can run on Heroku using the Heroku Container Registry. This approach 
 ## Prerequisites
 
 - Heroku CLI installed and authenticated
-- A running KoreShield config file in your repo
+- A KoreShield Docker image provided for your account
 
 ## Build and Push the Image
 
 ```bash
-# From the repo root
-cd koreshield
-
 heroku create your-koreshield-app
 
 heroku container:login
@@ -47,13 +44,9 @@ heroku config:set GOOGLE_API_KEY=your-api-key --app your-koreshield-app
 heroku config:set AZURE_OPENAI_API_KEY=your-api-key --app your-koreshield-app
 ```
 
-## Set the Config Path (Optional)
+## Configuration
 
-If you use a custom config file, set the environment variable:
-
-```bash
-heroku config:set CONFIG_FILE=config/config.yaml --app your-koreshield-app
-```
+Use Heroku config vars for JWT, database, Redis, and provider keys.
 
 ## Verify Health
 
@@ -87,7 +80,5 @@ curl https://your-koreshield-app.herokuapp.com/health
 
 ## Next Steps
 
-- Configure providers in [/configuration/](/docs/configuration)
 - Add monitoring in [../monitoring/prometheus.mdx](../monitoring/prometheus.mdx)
-
 

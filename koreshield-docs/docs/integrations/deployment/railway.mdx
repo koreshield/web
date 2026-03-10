@@ -7,7 +7,7 @@ last_update:
 
 # Railway Deployment
 
-Deploy KoreShield to Railway using a Docker image from this repo. Railway handles build, deploy, and TLS for you.
+Deploy KoreShield to Railway using a Docker image provided by KoreShield. Railway handles build, deploy, and TLS for you.
 
 ## Use Cases
 
@@ -18,22 +18,14 @@ Deploy KoreShield to Railway using a Docker image from this repo. Railway handle
 ## Prerequisites
 
 - Railway account
-- KoreShield repo or a Docker image in a registry
+- A KoreShield Docker image in a registry
 - Provider API keys available as Railway variables
 
-## Option A: Deploy from GitHub Repo
-
-1. Create a new Railway project
-2. Connect your GitHub repo
-3. Select the `koreshield` service
-4. Railway will detect the `Dockerfile`
-
-## Option B: Deploy from a Docker Image
+## Deploy from a Docker Image
 
 1. Build and push a Docker image
 
 ```bash
-docker build -t koreshield .
 docker tag koreshield:latest <registry>/koreshield:latest
 docker push <registry>/koreshield:latest
 ```
@@ -49,15 +41,11 @@ OPENAI_API_KEY=your-api-key
 KORESHIELD_API_KEY=your-koreshield-api-key
 ```
 
-If you use a custom config path:
-
-```bash
-CONFIG_FILE=/app/config/config.yaml
-```
+If you need custom settings, use environment variables or managed secrets provided by KoreShield.
 
 ## Mount Config (Optional)
 
-Railway supports volumes. If you mount a config file, make sure the path matches your `CONFIG_FILE` value.
+Use Railway volumes only if your deployment bundle requires it.
 
 ## Health Check
 
@@ -86,5 +74,4 @@ curl https://<railway-domain>/health
 
 ## Next Steps
 
-- Configure providers in [/configuration/](/docs/configuration)
 - Add monitoring in [../monitoring/prometheus.mdx](../monitoring/prometheus.mdx)
