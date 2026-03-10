@@ -182,6 +182,22 @@ export default function AboutPage() {
 				</div>
 			</section>
 
+			{/* Licensing & IP */}
+			<section className="py-16 px-4 bg-white dark:bg-gray-900">
+				<div className="max-w-4xl mx-auto">
+					<h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-6">
+						Licensing & IP
+					</h2>
+					<div className="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
+						<p>
+							KoreShield core is proprietary software. The SDKs, documentation, website, and blog are MIT-licensed
+							in their respective repositories and directories. Commercial use of the core platform requires a valid
+							license or agreement with KoreShield.
+						</p>
+					</div>
+				</div>
+			</section>
+
 			{/* Why UK & Innovation Visa Context */}
 			<section className="py-20 px-4 bg-white dark:bg-gray-900">
 				<div className="max-w-6xl mx-auto">
