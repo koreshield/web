@@ -4,31 +4,31 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/koreshield)](https://pypi.org/project/koreshield/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-A comprehensive Python SDK for integrating KoreShield's LLM security features into your applications with ease.
+A Python SDK for integrating with KoreShield, an LLM security proxy. The SDK routes requests to KoreShield, which enforces server-side policies, detects prompt injection and data leakage, and logs security events.
 
 ## Highlights in v0.3.x
 
-- **Enhanced Async Support**: Improved async/await patterns with context managers and performance monitoring
-- **Advanced Batch Processing**: Optimized batch scanning with progress callbacks, concurrency control, and batching
-- **Streaming Content Scanning**: Real-time scanning of long content with overlapping chunks
-- **Security Policies**: Configurable allowlist/blocklist patterns and custom threat rules
-- **Framework Integrations**: Built-in middleware for FastAPI, Flask, and Django
-- **Performance Monitoring**: Comprehensive metrics collection and analytics
-- **Type Safety**: Full Pydantic models for all data structures
+- **Enhanced Async Support**: Async client with context manager patterns and optional metrics
+- **Batch Processing**: Batch prompt scanning with concurrency controls
+- **Streaming Content Scanning**: Scan long content in chunks (async client)
+- **Security Policies**: Client-side allowlist/blocklist patterns and custom rules (async client)
+- **Framework Integrations**: Middleware for FastAPI, Flask, and Django
+- **Performance Metrics**: Client-side request metrics (async client)
+- **Type Safety**: Pydantic models for all data structures
 
 ## Supported LLM Providers
 
-KoreShield supports multiple LLM providers through its proxy architecture. Configure your preferred provider in the KoreShield API:
+KoreShield supports multiple LLM providers through its proxy architecture. Providers are configured on the KoreShield server:
 
 - **DeepSeek** (OpenAI-compatible API)
 - **OpenAI** (GPT models)
 - **Anthropic** (Claude models)
-- **Google Gemini** (coming soon)
-- **Azure OpenAI** (coming soon)
+- **Google Gemini**
+- **Azure OpenAI**
 
 ### Provider Configuration
 
-Configure providers in your KoreShield `config.yaml`:
+Configure providers in your KoreShield server `config.yaml`:
 
 ```yaml
 providers:
@@ -129,7 +129,10 @@ KoreShield provides advanced scanning for RAG (Retrieval-Augmented Generation) s
 ```python
 from koreshield_sdk import KoreShieldClient
 
-client = KoreShieldClient(api_key="your-api-key", base_url="http://localhost:8000")
+client = KoreShieldClient(
+    api_key="your-api-key",
+    base_url="https://api.koreshield.com"  # or http://localhost:8000 for local dev
+)
 
 # Scan retrieved documents
 result = client.scan_rag_context(
@@ -270,15 +273,14 @@ async with AsyncKoreShieldClient(api_key="your-key") as client:
 
 #### Security Policy Methods
 
-- `set_security_policy(policy: SecurityPolicy) -> None` (async)
+- `apply_security_policy(policy: SecurityPolicy) -> None` (async)
 - `get_security_policy() -> SecurityPolicy` (async)
-- `update_security_policy(**updates) -> SecurityPolicy` (async)
 
 #### Performance Monitoring Methods
 
 - `get_performance_metrics() -> PerformanceMetrics` (async)
 - `reset_metrics() -> None` (async)
-- `enable_metrics(enabled: bool = True) -> None` (async)
+Note: metrics are enabled via the `enable_metrics` constructor flag.
 
 ### DetectionResult
 
@@ -337,11 +339,22 @@ class PerformanceMetrics:
 
 ## Configuration
 
-### Environment Variables
+### Authentication
+
+The SDK authenticates with an API key using the `Authorization: Bearer <key>` header.
+If your deployment requires `X-API-Key`, you can override headers after initialization:
+
+```python
+client = KoreShieldClient(api_key="your-api-key")
+client.session.headers.pop("Authorization", None)
+client.session.headers["X-API-Key"] = "your-api-key"
+```
+
+### Environment Variables (Optional Helper in Your App)
 
 ```bash
 export KORESHIELD_API_KEY="your-api-key"
-export KORESHIELD_BASE_URL="https://api.koreshield.com"  # Optional
+export KORESHIELD_BASE_URL="https://api.koreshield.com"
 ```
 
 ### Client Configuration
@@ -416,11 +429,14 @@ async def main():
         # Get performance metrics
         metrics = await client.get_performance_metrics()
         print(f"Total requests: {metrics.total_requests}")
-        print(".2f"
+        print(f"Avg response time: {metrics.average_response_time:.2f} ms")
+        print(f"Success rate: {metrics.success_rate:.1%}")
 asyncio.run(main())
 ```
 
 ### Security Policies
+
+Security policies in the SDK are client-side filters. KoreShield server policies still apply on the proxy.
 
 ```python
 from koreshield_sdk import AsyncKoreShieldClient
@@ -454,7 +470,7 @@ async def main():
 
         for prompt in test_prompts:
             result = await client.scan_prompt(prompt)
-            status = "✅ ALLOWED" if result.is_safe else "❌ BLOCKED"
+            status = "ALLOWED" if result.is_safe else "BLOCKED"
             print(f"{status}: {prompt}")
 
 asyncio.run(main())
@@ -660,7 +676,8 @@ async with AsyncKoreShieldClient(api_key="your-api-key", enable_metrics=True) as
     # Get comprehensive metrics
     metrics = await client.get_performance_metrics()
     print(f"Total requests: {metrics.total_requests}")
-    print(".2f"    print(".2f"    print(f"Success rate: {metrics.success_rate:.1%}")
+    print(f"Avg response time: {metrics.average_response_time:.2f} ms")
+    print(f"Success rate: {metrics.success_rate:.1%}")
 
     # Reset metrics if needed
     await client.reset_metrics()
@@ -683,10 +700,7 @@ policy = SecurityPolicy(
     ]
 )
 
-await client.set_security_policy(policy)
-
-# Update policy dynamically
-await client.update_security_policy(threat_threshold=ThreatLevel.HIGH)
+await client.apply_security_policy(policy)
 
 # Get current policy
 current_policy = await client.get_security_policy()
