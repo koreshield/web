@@ -20,6 +20,11 @@ services:
       - CORS_ORIGINS=https://koreshield.com,https://www.koreshield.com,https://api.koreshield.com
       # Add API Keys here or in a .env file on the VPS
       # - OPENAI_API_KEY=${OPENAI_API_KEY}
+    healthcheck:
+      test: [ "CMD-SHELL", "python3 -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")'" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     depends_on:
       postgres:
         condition: service_healthy
