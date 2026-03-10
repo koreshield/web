@@ -9,7 +9,7 @@ import smtplib
 import time
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, Awaitable
 from dataclasses import dataclass
 from enum import Enum
 
@@ -518,12 +518,18 @@ Details:
 class MonitoringSystem:
     """Main monitoring and alerting system."""
 
-    def __init__(self, config: MonitoringConfig, stats_getter: Optional[Callable[[], Dict[str, int]]] = None):
+    def __init__(
+        self,
+        config: MonitoringConfig,
+        stats_getter: Optional[Callable[[], Dict[str, int]]] = None,
+        event_publisher: Optional[Callable[[str, Dict[str, Any]], Awaitable[None]]] = None,
+    ):
         self.config = config
         self.metrics = MetricsCollector()
         self.alert_manager = AlertManager(config.alerts)
         self.monitoring_enabled = config.enabled
         self.stats_getter = stats_getter
+        self.event_publisher = event_publisher
 
         # Background monitoring task
         self.monitoring_task: Optional[asyncio.Task] = None
@@ -567,6 +573,25 @@ class MonitoringSystem:
 
                 # Update active alerts
                 self.alert_manager.active_alerts.extend(alerts)
+
+                # Publish cost threshold alerts (if configured)
+                if self.event_publisher and alerts:
+                    for alert in alerts:
+                        rule_name = (alert.rule_name or "").lower()
+                        if "cost" in rule_name or "budget" in rule_name:
+                            try:
+                                await self.event_publisher(
+                                    "cost_threshold_alert",
+                                    {
+                                        "rule_name": alert.rule_name,
+                                        "severity": alert.severity.value,
+                                        "message": alert.message,
+                                        "timestamp": alert.timestamp,
+                                        "details": alert.details,
+                                    },
+                                )
+                            except Exception as e:
+                                logger.error("event_publish_failed", event_type="cost_threshold_alert", error=str(e))
 
             except Exception as e:
                 logger.error(f"Monitoring loop error: {e}")
