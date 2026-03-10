@@ -11,7 +11,10 @@ Simple example showing how to scan retrieved documents for threats:
 ```python
 from koreshield_sdk import KoreShieldClient
 
-client = KoreShieldClient(api_key="your-key", base_url="http://localhost:8000")
+client = KoreShieldClient(
+    api_key="your-key",
+    base_url="https://api.koreshield.com"  # or http://localhost:8000 for local dev
+)
 
 # Scan retrieved documents
 result = client.scan_rag_context(
@@ -186,13 +189,13 @@ if critical_threats:
 
 1. Install dependencies:
 ```bash
-pip install koreshield-sdk langchain chromadb simple-salesforce
+pip install koreshield langchain chromadb simple-salesforce
 ```
 
 2. Set environment variables:
 ```bash
 export KORESHIELD_API_KEY="your-key"
-export KORESHIELD_BASE_URL="http://localhost:8000"
+export KORESHIELD_BASE_URL="https://api.koreshield.com"
 ```
 
 3. Run examples:
