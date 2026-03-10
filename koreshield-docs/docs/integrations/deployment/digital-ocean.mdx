@@ -38,41 +38,17 @@ sudo usermod -aG docker $USER
 
 ### 3. Run KoreShield
 
-```bash
-git clone https://github.com/koreshield/koreshield.git
-cd koreshield/koreshield
-cp config/config.example.yaml config/config.yaml
-
-export OPENAI_API_KEY=your-api-key
-
-docker build -t koreshield .
-
-docker run -d \
-  -p 8000:8000 \
-  -e OPENAI_API_KEY=$OPENAI_API_KEY \
-  -v $(pwd)/config/config.yaml:/app/config/config.yaml \
-  koreshield
-
-### 4. Verify health
-
-```bash
-curl http://<droplet-ip>:8000/health
-```
-```
+Use the KoreShield image provided for your account and pass JWT/provider keys as environment variables.
 
 ## Option B: App Platform
 
-### 1. Build and push to a registry
+### 1. Push to a registry
 
 Use Docker Hub or DigitalOcean Container Registry:
 
 ```bash
-docker build -t koreshield .
-
 docker tag koreshield:latest registry.digitalocean.com/<registry>/koreshield:latest
-
 doctl registry login
-
 docker push registry.digitalocean.com/<registry>/koreshield:latest
 ```
 
@@ -86,7 +62,7 @@ docker push registry.digitalocean.com/<registry>/koreshield:latest
 ## Secrets and Config
 
 - Use App Platform secrets or Droplet environment variables
-- Use `CONFIG_FILE` if you mount a custom config path
+- Use environment variables or managed secrets for configuration
 - Keep provider keys off the Droplet disk when possible
 
 ## Networking and TLS
@@ -115,7 +91,5 @@ docker push registry.digitalocean.com/<registry>/koreshield:latest
 
 ## Next Steps
 
-- Configure providers in [/configuration/](/docs/configuration)
 - Add monitoring in [../monitoring/prometheus.mdx](../monitoring/prometheus.mdx)
-
 

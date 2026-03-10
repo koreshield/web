@@ -9,26 +9,17 @@ last_update:
 
 # Quick Start
 
-This quick start is aligned to the current `koreshield` server code in this repository.
+This quick start is focused on **client integration** with the KoreShield API.
 
-## 1. Start Dependencies and Server
+## 1. Choose Your Path
 
-From `koreshield/`:
-
-```bash
-docker compose up --build
-```
-
-This starts:
-
-- KoreShield API on `http://localhost:8000`
-- Redis
-- Postgres
+- **Hosted customers:** integrate directly with the API and SDKs.
+- **Self-hosted customers:** use the deployment bundle provided by KoreShield.
 
 ## 2. Create an Account and Get JWT
 
 ```bash
-curl -s -X POST http://localhost:8000/v1/management/signup \
+curl -s -X POST https://api.koreshield.com/v1/management/signup \
   -H 'Content-Type: application/json' \
   -d '{"email":"demo@example.com","password":"Str0ngPass!","name":"Demo User"}'
 ```
@@ -36,7 +27,7 @@ curl -s -X POST http://localhost:8000/v1/management/signup \
 Then login:
 
 ```bash
-curl -s -X POST http://localhost:8000/v1/management/login \
+curl -s -X POST https://api.koreshield.com/v1/management/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"demo@example.com","password":"Str0ngPass!"}'
 ```
@@ -46,7 +37,7 @@ Use the returned `token` as bearer auth.
 ## 3. Call Protected Chat Endpoint
 
 ```bash
-curl -s -X POST http://localhost:8000/v1/chat/completions \
+curl -s -X POST https://api.koreshield.com/v1/chat/completions \
   -H "Authorization: Bearer <JWT_TOKEN>" \
   -H 'Content-Type: application/json' \
   -d '{
@@ -58,7 +49,7 @@ curl -s -X POST http://localhost:8000/v1/chat/completions \
 ## 4. Call Protected RAG Scan Endpoint
 
 ```bash
-curl -s -X POST http://localhost:8000/v1/rag/scan \
+curl -s -X POST https://api.koreshield.com/v1/rag/scan \
   -H "Authorization: Bearer <JWT_TOKEN>" \
   -H 'Content-Type: application/json' \
   -d '{
@@ -72,12 +63,12 @@ curl -s -X POST http://localhost:8000/v1/rag/scan \
 ## 5. Check Health and API Schema
 
 ```bash
-curl http://localhost:8000/health
-curl http://localhost:8000/openapi.json
+curl https://api.koreshield.com/health
+curl https://api.koreshield.com/openapi.json
 ```
 
 ## Next
 
-- [/docs/getting-started/installation](/docs/getting-started/installation)
+- [/docs/getting-started/client-integration](/docs/getting-started/client-integration)
 - [/docs/api/rest-api](/docs/api/rest-api)
 - [/docs/integrations](/docs/integrations)

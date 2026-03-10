@@ -30,7 +30,6 @@ docker run -d \
   -p 8000:8000 \
   -e SENTRY_DSN=$SENTRY_DSN \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
-  -v $(pwd)/config/config.yaml:/app/config/config.yaml \
   koreshield
 ```
 
@@ -48,7 +47,5 @@ docker run -d \
 
 ## Next Steps
 
-- Review logging and policy config in [/configuration/](/docs/configuration)
 - Add metrics in [prometheus.mdx](prometheus.mdx)
-
 
