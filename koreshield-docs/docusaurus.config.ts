@@ -55,6 +55,7 @@ const config: Config = {
 					showLastUpdateAuthor: false,
 					showLastUpdateTime: true,
 				},
+				blog: false,
 				theme: {
 					customCss: './src/css/custom.scss',
 				},
