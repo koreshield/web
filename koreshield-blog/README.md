@@ -4,11 +4,10 @@
 [![Lint](https://github.com/koreshield/koreshield/actions/workflows/lint.yml/badge.svg)](https://github.com/koreshield/koreshield/actions/workflows/lint.yml)
 [![Docker](https://github.com/koreshield/koreshield/actions/workflows/docker.yml/badge.svg)](https://github.com/koreshield/koreshield/actions/workflows/docker.yml)
 [![PyPI](https://img.shields.io/pypi/v/koreshield)](https://pypi.org/project/koreshield/)
-[![License](https://img.shields.io/github/license/koreshield/koreshield)](https://github.com/koreshield/koreshield/blob/main/LICENSE)
 
 ## About
 
-KoreShield is a research-backed security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It sits transparently between your application and LLM API providers (OpenAI, Anthropic, Google Gemini, etc.), sanitizing inputs, detecting threats, and enforcing security policies before requests reach the model.
+KoreShield is a research-backed security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It sits transparently between your application and LLM API providers (OpenAI, Anthropic, Google Gemini, etc.), sanitizing inputs, detecting threats, and enforcing security policies before requests reach the model. The KoreShield core is proprietary; this blog is MIT-licensed.
 
 This project is unified under the KoreShield brand, with all resources, SDKs, and documentation available at [koreshield.com](https://koreshield.com).
 
@@ -189,7 +188,7 @@ pytest
 
 ## License
 
-MIT License
+MIT License (blog only). KoreShield core is proprietary.
 
 ## Contact
 

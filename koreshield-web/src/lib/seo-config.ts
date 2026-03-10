@@ -1,7 +1,7 @@
 export const SEOConfig = {
 	home: {
 		title: 'LLM Security & AI Firewall',
-		description: 'Industry-standard LLM security solution protecting AI applications from prompt injection, jailbreaks, and data exfiltration. 95%+ detection accuracy. Open source.',
+		description: 'Industry-standard LLM security solution protecting AI applications from prompt injection, jailbreaks, and data exfiltration. 95%+ detection accuracy.',
 		keywords: 'LLM security, AI security, prompt injection, jailbreak detection, GPT security, OpenAI security, LLM firewall, AI safety, machine learning security',
 		structuredData: {
 			'@context': 'https://schema.org',
@@ -17,7 +17,7 @@ export const SEOConfig = {
 	},
 	pricing: {
 		title: 'Pricing',
-		description: 'Transparent pricing for KoreShield LLM security. Start free with open-source tier. Affordable plans for startups and enterprises. UK-based support.',
+		description: 'Transparent pricing for KoreShield LLM security. Affordable plans for startups and enterprises. UK-based support.',
 		keywords: 'LLM security pricing, AI security cost, prompt injection protection pricing, enterprise LLM security',
 		structuredData: {
 			'@context': 'https://schema.org',
@@ -28,7 +28,7 @@ export const SEOConfig = {
 					name: 'How does the pricing work?',
 					acceptedAnswer: {
 						'@type': 'Answer',
-						text: 'Our pricing is based on the number of API requests per month and the level of support you need. The Open Source tier is completely free for self-hosted deployments.',
+						text: 'Our pricing is based on the number of API requests per month and the level of support you need. Contact us for evaluation or pilot access.',
 					},
 				},
 			],
