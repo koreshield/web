@@ -9,7 +9,7 @@ import { SEOConfig } from '../lib/seo-config';
 const tiers = [
 	/* COMMENTED: Community free tier hidden
 	{
-		name: 'Open Source',
+		name: 'Community',
 		id: 'free',
 		monthlyPrice: 0,
 		yearlyPrice: 0,
@@ -23,7 +23,7 @@ const tiers = [
 			'50+ attack detection patterns',
 			'Multi-provider support',
 			'Basic monitoring',
-			'Open-source licence',
+			'Community license',
 		],
 		limitations: [
 			'Self-managed infrastructure',
@@ -44,7 +44,7 @@ const tiers = [
 		priceDetail: '/month',
 		description: 'For growing startups and scale-ups',
 		features: [
-			'Everything in Open Source',
+			'Everything in Core Platform',
 			'Up to 1M requests/month',
 			'Email & chat support',
 			'Advanced monitoring dashboard',
@@ -143,7 +143,7 @@ const faqs = [
 	},
 	{
 		question: 'Can I use KoreShield for commercial projects?',
-		answer: 'Yes! KoreShield is licenced under MIT for the open-source core, which allows commercial use. All paid plans include commercial usage rights.',
+		answer: 'KoreShield core is proprietary. SDKs and documentation are MIT-licensed. Contact us for evaluation or pilot access.',
 	},
 	{
 		question: 'Do you offer regional hosting?',

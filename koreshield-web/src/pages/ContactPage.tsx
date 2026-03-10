@@ -65,7 +65,7 @@ const supportOptions = [
 			</svg>
 		),
 		title: 'GitHub Issues',
-		description: 'Report bugs, request features, or contribute to the open-source project on GitHub.',
+		description: 'Report bugs, request features, or follow development on GitHub.',
 		cta: 'View on GitHub',
 		link: 'https://github.com/koreshield/',
 	},
@@ -439,7 +439,7 @@ function TechnicalSupportForm() {
 	const [formData, setFormData] = useState({
 		name: '',
 		email: '',
-		tier: 'open-source',
+		tier: 'community',
 		severity: 'low',
 		category: 'bug',
 		subject: '',
@@ -460,7 +460,7 @@ function TechnicalSupportForm() {
 		setFormData({
 			name: '',
 			email: '',
-			tier: 'open-source',
+			tier: 'community',
 			severity: 'low',
 			category: 'bug',
 			subject: '',
@@ -512,7 +512,7 @@ function TechnicalSupportForm() {
 						onChange={(e) => setFormData({ ...formData, tier: e.target.value })}
 						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
 					>
-						<option value="open-source">Open Source</option>
+						<option value="community">Community</option>
 						<option value="startup">Startup</option>
 						<option value="growth">Growth</option>
 						<option value="enterprise">Enterprise</option>

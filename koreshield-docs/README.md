@@ -1,6 +1,6 @@
 # Koreshield Documentation
 
-Official documentation for Koreshield - an open-source security platform protecting LLM applications from prompt injection attacks.
+Official documentation for KoreShield. The documentation is MIT-licensed; the KoreShield core platform is proprietary.
 
 ## About
 
@@ -76,7 +76,7 @@ Contributions to improve the documentation are welcome! Please:
 
 ## 📄 License
 
-This documentation is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+This documentation is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 

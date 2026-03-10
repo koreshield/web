@@ -7,7 +7,7 @@ export default function WhyKoreShieldPage() {
 		<div className="min-h-screen bg-gray-50 dark:bg-gray-950">
 			<SEOMeta
 				title="Why KoreShield"
-				description="Discover what makes KoreShield the best LLM security solution: open-source transparency, 95% detection accuracy, enterprise-ready features, and community-driven innovation."
+				description="Discover what makes KoreShield the best LLM security solution: 95% detection accuracy, enterprise-ready features, and flexible deployment."
 			/>
 
 			{/* Hero */}
@@ -22,7 +22,7 @@ export default function WhyKoreShieldPage() {
 							Why KoreShield?
 						</h1>
 						<p className="text-2xl text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">
-							The only open-source LLM security platform that combines enterprise-grade features with community-driven innovation
+							Enterprise-grade LLM security with proven accuracy and flexible deployment
 						</p>
 					</motion.div>
 				</div>
@@ -51,9 +51,9 @@ export default function WhyKoreShieldPage() {
 							<div className="bg-green-600/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
 								<Code className="w-6 h-6 text-green-600 dark:text-green-400" />
 							</div>
-							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Open Source</h3>
+							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Open SDKs & Docs</h3>
 							<p className="text-gray-600 dark:text-gray-400">
-								Full transparency, no vendor lock-in, audit the code yourself, contribute improvements
+								SDKs and documentation are MIT-licensed for clear integrations and auditability
 							</p>
 						</div>
 
@@ -129,15 +129,15 @@ export default function WhyKoreShieldPage() {
 								<Heart className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
 							</div>
 							<div>
-								<h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Community-Driven Innovation</h3>
+								<h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Research-Driven Innovation</h3>
 								<p className="text-gray-600 dark:text-gray-400 mb-4">
-									Our open-source community contributes attack patterns, detection improvements, and integrations. Every user benefits from collective intelligence and shared threat data.
+									We evolve the threat model with research, production telemetry, and customer feedback to keep defenses current.
 								</p>
 								<ul className="space-y-2 text-gray-700 dark:text-gray-300">
-									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Active GitHub community</li>
-									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Weekly pattern updates</li>
-									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Community-submitted attack examples</li>
-									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Collaborative threat research</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Continuous pattern updates</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Dedicated research pipeline</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Feedback-driven improvements</li>
+									<li className="flex items-start gap-2"><Check className="w-5 h-5 text-green-500 shrink-0" /> Real-world threat intelligence</li>
 								</ul>
 							</div>
 						</div>
@@ -249,7 +249,7 @@ export default function WhyKoreShieldPage() {
 					<div className="grid md:grid-cols-3 gap-6">
 						<a href="/vs/lakera-guard" className="block bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-6 hover:border-blue-500 transition-colors group">
 							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors">Vs. Lakera Guard</h3>
-							<p className="text-gray-600 dark:text-gray-400">See why KoreShield is the open-source alternative to proprietary solutions.</p>
+							<p className="text-gray-600 dark:text-gray-400">See why KoreShield is the enterprise-grade alternative to legacy solutions.</p>
 						</a>
 						<a href="/vs/llm-guard" className="block bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-6 hover:border-blue-500 transition-colors group">
 							<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors">Vs. LLM Guard</h3>
@@ -290,7 +290,7 @@ export default function WhyKoreShieldPage() {
 
 						<div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-6">
 							<p className="text-gray-700 dark:text-gray-300 italic mb-4">
-								"We evaluated 5 LLM security solutions. KoreShield had the best accuracy, pricing, and the open-source model gives us peace of mind."
+								"We evaluated 5 LLM security solutions. KoreShield had the best accuracy, pricing, and deployment flexibility."
 							</p>
 							<div className="flex items-center gap-3">
 								<div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white font-bold">
