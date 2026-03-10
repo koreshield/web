@@ -8,16 +8,11 @@ last_update:
 
 # Kubernetes Deployment
 
-KoreShield does not ship an official Helm chart in this repository today. Use standard Kubernetes manifests with your own image pipeline.
+KoreShield does not ship an official Helm chart today. Use standard Kubernetes manifests with the KoreShield-provided image.
 
-## 1. Build and Publish Image
+## 1. Publish Image
 
-From `koreshield/`:
-
-```bash
-docker build -t ghcr.io/<org>/koreshield:<tag> .
-docker push ghcr.io/<org>/koreshield:<tag>
-```
+Push the KoreShield image provided for your account to your registry.
 
 ## 2. Create Secret
 
