@@ -4,17 +4,18 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-A comprehensive JavaScript/TypeScript SDK for integrating with [KoreShield](https://koreshield.com) LLM Security Proxy. Provides secure, monitored access to AI models with built-in security features, threat detection, and compliance monitoring.
+A JavaScript/TypeScript SDK for integrating with [KoreShield](https://koreshield.com), an LLM security proxy. The SDK routes requests to KoreShield, which enforces server-side policies, detects prompt injection and data leakage, and logs security events. The SDK also includes optional client-side helpers for sanitization and response checks.
 
 ## Features
 
-- **Security First**: Built-in input sanitization, attack detection, and response filtering
-- **Monitoring**: Real-time metrics and security event tracking
-- **OpenAI Compatible**: Drop-in replacement for OpenAI SDK
-- **Universal**: Works in Node.js, browsers, and edge environments
+- **Server-side enforcement**: KoreShield enforces policies and scans on the proxy
+- **Client helpers**: Optional input sanitization and response checks
+- **Monitoring**: Access metrics and security event endpoints
+- **OpenAI-compatible chat wrapper**: Use `/v1/chat/completions` through a familiar interface
+- **Universal**: Works in Node.js and browsers
 - **TypeScript**: Full TypeScript support with comprehensive type definitions
-- **Configurable**: Fine-grained security controls and monitoring options
-- **Production Ready**: Error handling, retries, and connection management
+- **Configurable**: Security options passed per request
+- **Utilities**: Retry helpers and formatting utilities
 
 ## Installation
 
@@ -37,8 +38,8 @@ pnpm add koreshield
 import { createClient } from 'koreshield';
 
 const client = createClient({
-    baseURL: 'https://your-koreshield-instance.com', // Required
-    apiKey: 'your-koreshield-api-key' // Optional, can use KORESHIELD_API_KEY env var
+    baseURL: 'https://api.koreshield.com', // or your self-hosted proxy
+    apiKey: 'your-koreshield-api-key' // Optional, can use KORESHIELD_API_KEY env var (Node.js)
 });
 
 // Secure chat completion
@@ -56,10 +57,10 @@ console.log(response.choices[0].message.content);
 
 ```html
 <script type="module">
-    import { createClient } from './koreshield.browser.js';
+    import { BrowserKoreShieldClient } from './koreshield.browser.js';
 
-    const client = createClient({
-        baseURL: 'https://your-koreshield-proxy.com'
+    const client = new BrowserKoreShieldClient({
+        baseURL: 'https://api.koreshield.com'
     });
 
     // Use the client...
@@ -72,11 +73,11 @@ console.log(response.choices[0].message.content);
 import { createKoreShieldOpenAI } from 'koreshield';
 
 const openai = createKoreShieldOpenAI({
-    baseURL: 'http://localhost:8000',
+    baseURL: 'https://api.koreshield.com', // or http://localhost:8000 for local dev
     apiKey: 'your-api-key'
 });
 
-// Use like regular OpenAI SDK
+// Use the OpenAI-compatible chat interface
 const chat = await openai.chat({});
 const response = await chat.create({
     model: 'gpt-3.5-turbo',
@@ -95,6 +96,16 @@ KORESHIELD_TIMEOUT=30000
 KORESHIELD_DEBUG=true
 ```
 
+The SDK authenticates with an API key using the `Authorization: Bearer <key>` header.
+If your deployment requires `X-API-Key`, pass a custom header in `headers`:
+
+```typescript
+const client = createClient({
+    baseURL: 'https://api.koreshield.com',
+    headers: { 'X-API-Key': 'your-api-key' }
+});
+```
+
 ### Programmatic Configuration
 
 ```typescript
@@ -111,6 +122,8 @@ const client = createClient({
 
 ## Security Features
 
+These helpers run client-side. Server-side enforcement still happens on the KoreShield proxy.
+
 ### Input Sanitization
 
 ```typescript
@@ -125,7 +138,7 @@ const messages = formatMessages([
 ]);
 ```
 
-### Response Safety Checking
+### Response Safety Checking (Client-Side Helper)
 
 ```typescript
 import { checkResponseSafety } from 'koreshield';
@@ -137,7 +150,7 @@ if (!safetyCheck.safe) {
 }
 ```
 
-### Custom Security Options
+### Request Security Options
 
 ```typescript
 const response = await client.createChatCompletion({
@@ -164,7 +177,7 @@ KoreShield provides advanced security scanning for RAG (Retrieval-Augmented Gene
 import { KoreShieldClient } from 'koreshield';
 
 const client = new KoreShieldClient({
-    baseURL: 'http://localhost:8000',
+    baseURL: 'https://api.koreshield.com', // or http://localhost:8000 for local dev
     apiKey: 'your-api-key'
 });
 
@@ -358,7 +371,11 @@ Main client class for interacting with KoreShield proxy.
 
 #### Methods
 
+- `scanPrompt(prompt, options?)` - Scan a prompt for threats
+- `scanBatch(prompts, options?)` - Batch prompt scanning
 - `createChatCompletion(request, securityOptions?)` - Create chat completion
+- `scanRAGContext(userQuery, documents, config?)` - Scan RAG documents
+- `scanRAGContextBatch(items, parallel?, maxConcurrent?)` - Batch RAG scanning
 - `getSecurityEvents(limit?, offset?, type?, severity?)` - Get security events
 - `getMetrics()` - Get security metrics
 - `getPrometheusMetrics()` - Get Prometheus metrics
@@ -435,14 +452,15 @@ import { createClient } from 'koreshield';
 ```html
 <script src="https://unpkg.com/koreshield@latest/dist/index.umd.js"></script>
 <script>
-    const client = KoreShield.createClient({ baseURL: '...' });
+    const client = new KoreShield.BrowserKoreShieldClient({ baseURL: '...' });
 </script>
 ```
 
 ### Browser (ES Modules)
 ```html
 <script type="module">
-    import { createClient } from 'https://unpkg.com/koreshield@latest/dist/index.mjs';
+    import { BrowserKoreShieldClient } from 'https://unpkg.com/koreshield@latest/dist/index.mjs';
+    const client = new BrowserKoreShieldClient({ baseURL: '...' });
 </script>
 ```
 
