@@ -1,6 +1,6 @@
 ---
 title: Docker Deployment
-description: Deploy KoreShield using the repository Dockerfile and Compose stack.
+description: Deploy KoreShield using the provided Docker image and Compose stack.
 published: true
 last_update:
   date: 2026-03-10
@@ -8,20 +8,11 @@ last_update:
 
 # Docker Deployment
 
-This page maps to the current server deployment files in this repository.
+This page describes Docker deployment for **self‑hosted** customers using the KoreShield‑provided image or bundle.
 
-## Source Files
+## Quick Start
 
-- `koreshield/Dockerfile`
-- `koreshield/docker-compose.yml`
-
-## Quick Start (Repository Compose)
-
-From `koreshield/`:
-
-```bash
-docker compose up --build
-```
+Use the Docker Compose file and image provided by the KoreShield team.
 
 Services started:
 
@@ -49,6 +40,5 @@ curl http://localhost:8000/status
 
 ## Notes
 
-- Compose file already includes container health checks.
-- JWT defaults exist for local development, but set explicit production secrets in real deployments.
-- Mount config from `./config` if you need custom policy/security settings.
+- Compose file includes container health checks.
+- Set explicit production secrets in real deployments.

@@ -38,41 +38,15 @@ sudo usermod -aG docker $USER
 
 ### 3. Configure KoreShield
 
-```bash
-# On the VM
-git clone https://github.com/koreshield/koreshield.git
-cd koreshield/koreshield
-cp config/config.example.yaml config/config.yaml
-```
-
-Set provider API keys:
-
-```bash
-export OPENAI_API_KEY=your-api-key
-# or other provider keys
-```
+Self-hosted customers receive a deployment bundle or a prebuilt image from KoreShield. Configure JWT and provider keys via environment variables or Secret Manager.
 
 ### 4. Run with Docker
 
-```bash
-docker build -t koreshield .
-
-docker run -d \
-  -p 8000:8000 \
-  -e OPENAI_API_KEY=$OPENAI_API_KEY \
-  -v $(pwd)/config/config.yaml:/app/config/config.yaml \
-  koreshield
-
-### 5. Verify health
-
-```bash
-curl http://<vm-ip>:8000/health
-```
-```
+Run the KoreShield image provided for your account and pass environment variables (JWT + provider keys).
 
 ## Option B: Cloud Run
 
-### 1. Build and push to Artifact Registry
+### 1. Push to Artifact Registry
 
 ```bash
 gcloud artifacts repositories create koreshield \
@@ -81,7 +55,6 @@ gcloud artifacts repositories create koreshield \
 
 gcloud auth configure-docker us-central1-docker.pkg.dev
 
-docker build -t koreshield .
 docker tag koreshield:latest us-central1-docker.pkg.dev/<project-id>/koreshield/koreshield:latest
 
 docker push us-central1-docker.pkg.dev/<project-id>/koreshield/koreshield:latest
@@ -99,7 +72,7 @@ gcloud run deploy koreshield \
 ## Secrets and Config
 
 - Use Secret Manager for provider keys
-- Use `CONFIG_FILE` if you mount a custom config path
+- Use environment variables or managed secrets for configuration
 - Prefer Cloud Run secrets for managed deployments
 
 ## Networking and TLS
@@ -132,5 +105,4 @@ gcloud run deploy koreshield \
 
 - Configure providers in [/configuration/](/docs/configuration)
 - Add monitoring in [../monitoring/prometheus.mdx](../monitoring/prometheus.mdx)
-
 

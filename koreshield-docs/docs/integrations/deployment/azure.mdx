@@ -86,27 +86,13 @@ sudo usermod -aG docker $USER
 
 ### 3. Run KoreShield
 
-```bash
-git clone https://github.com/koreshield/koreshield.git
-cd koreshield/koreshield
-cp config/config.example.yaml config/config.yaml
-
-export OPENAI_API_KEY=your-api-key
-
-docker build -t koreshield .
-
-docker run -d \
-  -p 8000:8000 \
-  -e OPENAI_API_KEY=$OPENAI_API_KEY \
-  -v $(pwd)/config/config.yaml:/app/config/config.yaml \
-  koreshield
-```
+Use the KoreShield image provided for your account and pass JWT/provider keys as environment variables.
 
 ## Secrets and Config
 
 - Use Azure Key Vault for provider keys
 - Reference Key Vault secrets in Container Apps
-- Use `CONFIG_FILE` if you mount a custom config path
+- Use environment variables or managed secrets for configuration
 
 ## Networking and TLS
 
@@ -135,7 +121,5 @@ docker run -d \
 
 ## Next Steps
 
-- Configure providers in [/configuration/](/docs/configuration)
 - Add monitoring in [../monitoring/prometheus.mdx](../monitoring/prometheus.mdx)
-
 
