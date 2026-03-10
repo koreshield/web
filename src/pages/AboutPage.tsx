@@ -6,7 +6,7 @@ import { SEOConfig } from '../lib/seo-config';
 /* COMMENTED: Stats data hidden
 const stats = [
 	{ label: 'Detection Accuracy', value: '95%+' },
-	{ label: 'Open Source Contributors', value: '500+' },
+	{ label: 'Community Contributors', value: '500+' },
 	{ label: 'Organizations Protected', value: '1,200+' },
 	{ label: 'Attacks Blocked', value: '10M+' },
 ];
@@ -41,8 +41,8 @@ const timeline = [
 	},
 	{
 		year: 'Q1 2024',
-		title: 'Open Source Launch',
-		description: 'Released KoreShield as open-source project. Reached 1,000 GitHub stars in first month.',
+		title: 'Public Platform Launch',
+		description: 'Released KoreShield platform with SDKs and documentation for early adopters.',
 	},
 	{
 		year: 'Q2 2024',
@@ -101,8 +101,8 @@ const values = [
 				/>
 			</svg>
 		),
-		title: 'Open Source',
-		description: 'We believe in the power of community. Our open-source commitment ensures transparency and enables global collaboration.',
+		title: 'Transparency',
+		description: 'We believe trust is earned. We publish clear documentation, SDKs, and security guidance for customer confidence.',
 	},
 	{
 		icon: (
@@ -176,7 +176,23 @@ export default function AboutPage() {
 							KoreShield was founded to solve this problem. We combine cutting-edge AI safety research with enterprise-grade infrastructure to provide comprehensive protection for LLM applications. Our mission is to make AI systems as secure as traditional software, enabling organizations to deploy AI confidently.
 						</p>
 						<p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-							We believe security shouldn't be an afterthought. By providing open-source tools and commercial services, we're democratizing access to world-class LLM security—making it accessible to startups and enterprises alike.
+							We believe security shouldn't be an afterthought. By providing accessible SDKs, clear documentation, and commercial services, we're making world-class LLM security available to startups and enterprises alike.
+						</p>
+					</div>
+				</div>
+			</section>
+
+			{/* Licensing & IP */}
+			<section className="py-16 px-4 bg-white dark:bg-gray-900">
+				<div className="max-w-4xl mx-auto">
+					<h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-6">
+						Licensing & IP
+					</h2>
+					<div className="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
+						<p>
+							KoreShield core is proprietary software. The SDKs, documentation, website, and blog are MIT-licensed
+							in their respective repositories and directories. Commercial use of the core platform requires a valid
+							license or agreement with KoreShield.
 						</p>
 					</div>
 				</div>
