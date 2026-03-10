@@ -115,7 +115,6 @@ const client = createClient({
     headers: { Authorization: 'Bearer <jwt>' }
 });
 ```
-
 ### Programmatic Configuration
 
 ```typescript
