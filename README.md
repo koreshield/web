@@ -258,6 +258,10 @@ pytest
 3. **Open SDKs & Docs** - Open tooling for integration and documentation
 4. **Enterprise Dashboard** - Not just monitoring, full management platform
 
+## Team
+Co-Founder & CEO - Teslim O.
+Co-Founder & CTO - Isaac E.
+
 ## License
 Proprietary License. See [LICENSE](LICENSE). Open-source components are licensed in their respective subdirectories.
 
