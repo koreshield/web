@@ -21,9 +21,14 @@ export function DashboardPage() {
 
 	const loading = statsLoading || attacksLoading;
 	const recentAttacks = (attacksData as any)?.logs || [];
+	const attackTypeCounts = recentAttacks.reduce((acc: Record<string, number>, attack: any) => {
+		const type = attack.threat_type || attack.attack_type || attack.type || 'Unknown';
+		acc[type] = (acc[type] || 0) + 1;
+		return acc;
+	}, {});
 
 	// Check if user is new (no activity yet)
-	const isNewUser = !loading && ((stats as any)?.requests_total === 0 || (stats as any)?.requests_total === undefined);
+	const isNewUser = !loading && (((stats as any)?.statistics?.requests_total ?? 0) === 0);
 
 	// WebSocket real-time updates
 	useEffect(() => {
@@ -378,12 +383,12 @@ const response = await client.chat.completions.create({
 
 						{/* Threat Analytics */}
 						<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-							<ThreatTypeBreakdown data={(stats as any)?.statistics?.attack_types || {}} />
+							<ThreatTypeBreakdown data={attackTypeCounts} />
 							<ThreatSummary
 								totalRequests={(stats as any)?.statistics?.requests_total || 0}
 								blockedRequests={(stats as any)?.statistics?.requests_blocked || 0}
 								attacksDetected={(stats as any)?.statistics?.attacks_detected || 0}
-								topThreatType={getTopThreatType((stats as any)?.statistics?.attack_types || {})}
+								topThreatType={getTopThreatType(attackTypeCounts)}
 							/>
 						</div>
 

@@ -3,6 +3,7 @@ import { FileText, Search, Download, AlertTriangle, Filter, User, Activity } fro
 import { format } from 'date-fns';
 import { useToast } from '../components/ToastNotification';
 import { SEOMeta } from '../components/SEOMeta';
+import { api } from '../lib/api-client';
 
 interface AuditLog {
 	id: string;
@@ -26,79 +27,44 @@ export default function AuditLogsPage() {
 	const [filterSeverity, setFilterSeverity] = useState<string>('all');
 	const [loading, setLoading] = useState(true);
 	const [showFilters, setShowFilters] = useState(false);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const toast = useToast();
 
-	// Mock data for demonstration
 	useEffect(() => {
-		const mockLogs: AuditLog[] = [
-			{
-				id: '1',
-				timestamp: new Date().toISOString(),
-				user_email: 'admin@koreshield.com',
-				action: 'api_key.created',
-				resource_type: 'api_key',
-				resource_id: 'key_abc123',
-				status: 'success',
-				ip_address: '192.168.1.100',
-				user_agent: 'Mozilla/5.0...',
-				details: { key_name: 'Production API Key', scopes: ['read', 'write'] },
-				severity: 'medium',
-			},
-			{
-				id: '2',
-				timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-				user_email: 'user@example.com',
-				action: 'policy.updated',
-				resource_type: 'policy',
-				resource_id: 'policy_def456',
-				status: 'success',
-				ip_address: '10.0.0.50',
-				user_agent: 'Chrome/120.0',
-				details: { policy_name: 'Rate Limiting Policy', changes: ['threshold'] },
-				severity: 'high',
-			},
-			{
-				id: '3',
-				timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-				user_email: 'unauthorized@attacker.com',
-				action: 'login.failed',
-				resource_type: 'auth',
-				resource_id: 'auth_session_123',
-				status: 'failure',
-				ip_address: '203.0.113.5',
-				user_agent: 'curl/7.68.0',
-				details: { reason: 'invalid_credentials', attempts: 5 },
-				severity: 'critical',
-			},
-			{
-				id: '4',
-				timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-				user_email: 'admin@koreshield.com',
-				action: 'tenant.created',
-				resource_type: 'tenant',
-				resource_id: 'tenant_ghi789',
-				status: 'success',
-				ip_address: '192.168.1.100',
-				user_agent: 'Mozilla/5.0...',
-				details: { tenant_name: 'Acme Corp', plan: 'enterprise' },
-				severity: 'medium',
-			},
-			{
-				id: '5',
-				timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-				user_email: 'dev@koreshield.com',
-				action: 'audit_log.exported',
-				resource_type: 'audit_log',
-				resource_id: 'export_jkl012',
-				status: 'success',
-				ip_address: '172.16.0.10',
-				user_agent: 'Firefox/121.0',
-				details: { format: 'csv', record_count: 1500, date_range: '30_days' },
-				severity: 'low',
-			},
-		];
-		setLogs(mockLogs);
-		setLoading(false);
+		const normalize = (entry: any, index: number): AuditLog => {
+			const level = (entry.level || entry.severity || 'info').toString().toLowerCase();
+			const severity = level === 'error' ? 'high' : level === 'warn' ? 'medium' : 'low';
+			return {
+				id: entry.id || entry.request_id || entry.scan_id || entry.event_id || String(index),
+				timestamp: entry.timestamp || entry.time || entry.created_at || new Date().toISOString(),
+				user_email: entry.user_email || entry.email || entry.user || entry.user_id || 'system',
+				action: entry.action || entry.event || entry.message || 'event',
+				resource_type: entry.resource_type || entry.resource || 'system',
+				resource_id: entry.resource_id || entry.id || '-',
+				status: entry.status || (level === 'error' ? 'failure' : 'success'),
+				ip_address: entry.ip || entry.client_ip || entry.user_ip || '-',
+				user_agent: entry.user_agent || entry.ua || '-',
+				details: entry,
+				severity: entry.severity || severity,
+			};
+		};
+
+		const fetchLogs = async () => {
+			setLoading(true);
+			setErrorMessage(null);
+			try {
+				const response = await api.getAuditLogs(200, 0) as any;
+				const entries = (response?.logs || []).map(normalize);
+				setLogs(entries);
+			} catch (error) {
+				console.error('Failed to load audit logs', error);
+				setErrorMessage('Unable to load audit logs from the server.');
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		void fetchLogs();
 	}, []);
 
 	const filteredLogs = logs.filter((log) => {
@@ -170,7 +136,7 @@ export default function AuditLogsPage() {
 							<Activity className="w-5 h-5 text-green-500" />
 						</div>
 						<div className="text-2xl font-bold text-gray-900 dark:text-white">
-							{Math.round((logs.filter(l => l.status === 'success').length / logs.length) * 100)}%
+							{logs.length === 0 ? '0%' : `${Math.round((logs.filter(l => l.status === 'success').length / logs.length) * 100)}%`}
 						</div>
 					</div>
 					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
@@ -291,6 +257,8 @@ export default function AuditLogsPage() {
 				<div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
 					{loading ? (
 						<div className="p-12 text-center text-gray-500">Loading audit logs...</div>
+					) : errorMessage ? (
+						<div className="p-12 text-center text-red-500">{errorMessage}</div>
 					) : filteredLogs.length === 0 ? (
 						<div className="p-12 text-center">
 							<FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />

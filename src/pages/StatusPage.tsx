@@ -280,23 +280,14 @@ export default function StatusPage() {
       try {
         const health = await api.getHealth();
 
-        setComponents(prev => prev.map(c => {
-          let newStatus = c.status;
+        const now = new Date();
+        const overallHealthy = health?.status === 'healthy';
 
-          // Map API health status to component status (with null checks)
-          if (health?.services) {
-            if (c.id === 'database' && health.services.database !== 'up') newStatus = 'major_outage';
-            if (c.id === 'redis' && health.services.redis !== 'up') newStatus = 'partial_outage';
-            if (c.id === 'openai' && health.services.openai_api !== 'up') newStatus = 'degraded';
-            if (c.id === 'anthropic' && health.services.anthropic_api !== 'up') newStatus = 'degraded';
-          }
-
-          return {
-            ...c,
-            status: newStatus,
-            lastChecked: new Date(health.timestamp)
-          };
-        }));
+        setComponents(prev => prev.map(c => ({
+          ...c,
+          status: overallHealthy ? 'operational' : 'degraded',
+          lastChecked: now,
+        })));
       } catch (error) {
         console.error('Failed to fetch health status:', error);
       }
