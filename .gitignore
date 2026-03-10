@@ -317,3 +317,4 @@ larry_assessment/
 content/*.md
 content/*.docx
 content/*.txt
+!koreshield-python-sdk/examples/RAG_EXAMPLES.md

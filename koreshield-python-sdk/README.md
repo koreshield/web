@@ -708,8 +708,8 @@ details = client.get_scan_details(scan_id="scan_123")
 ### Setup
 
 ```bash
-git clone https://github.com/koreshield/koreshield.git
-cd koreshield
+git clone https://github.com/koreshield/python-sdk.git
+cd python-sdk
 pip install -e ".[dev]"
 ```
 
@@ -743,6 +743,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Support
 
 - [Documentation](https://docs.koreshield.com)
-- [Issue Tracker](https://github.com/koreshield/koreshield/issues)
-- [Discussions](https://github.com/koreshield/koreshield/discussions)
+- [Issue Tracker](https://github.com/koreshield/python-sdk/issues)
+- [Discussions](https://github.com/koreshield/python-sdk/discussions)
 - [Email Support](mailto:support@koreshield.com)
