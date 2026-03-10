@@ -16,48 +16,21 @@ This guide is for **self-hosted** KoreShield deployments. Hosted customers can s
 
 ## Prerequisites
 
-- Python 3.10+
-- Redis (recommended for production)
-- At least one LLM provider API key
+- Docker + Docker Compose
+- A KoreShield deployment bundle provided by the KoreShield team
+- Environment values for JWT and provider keys
 
-## Local Server Install
+## Get the Deployment Bundle
 
-```bash
-git clone https://github.com/koreshield/koreshield.git
-cd koreshield/koreshield
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
-cp config/config.example.yaml config/config.yaml
-```
+Your account team will provide a deployment bundle and environment variables. This avoids needing access to the private core repository.
 
-Set required auth env:
+## Configure
 
-```bash
-export JWT_SECRET='replace-with-32+char-secret'
-export JWT_ISSUER='koreshield-auth'
-export JWT_AUDIENCE='koreshield-api'
-```
+Apply the JWT, database, Redis, and provider values provided by KoreShield.
 
-Set at least one provider key:
+## Run
 
-```bash
-export DEEPSEEK_API_KEY='...'
-```
-
-Start server:
-
-```bash
-koreshield start --config config/config.yaml
-```
-
-## Docker Compose (Repository)
-
-From `koreshield/`:
-
-```bash
-docker compose up --build
-```
+Start the container stack included with your deployment bundle.
 
 ## Verify
 
@@ -68,6 +41,6 @@ curl http://localhost:8000/openapi.json | head
 
 ## Next Steps
 
-- [Quick Start](/docs/getting-started/quick-start)
+- [Client Integration Guide](/docs/getting-started/client-integration)
 - [REST API](/docs/api/rest-api)
 - [Integrations](/docs/integrations)
