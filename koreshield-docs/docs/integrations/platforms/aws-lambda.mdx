@@ -43,7 +43,7 @@ export const handler = async (event: any) => {
   const body = typeof event.body === "string" ? JSON.parse(event.body) : event.body;
 
   const result = await client.createChatCompletion({
-    model: "gpt-5-mini",
+    model: "gpt-4o",
     messages: body.messages
   });
 

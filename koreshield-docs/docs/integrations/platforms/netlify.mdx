@@ -50,7 +50,7 @@ export const handler: Handler = async (event) => {
   const body = JSON.parse(event.body || "{}");
 
   const result = await client.createChatCompletion({
-    model: "gpt-5-mini",
+    model: "gpt-4o",
     messages: body.messages,
   });
 
@@ -76,7 +76,7 @@ export default async (request: Request): Promise<Response> => {
   const body = await request.json();
 
   const result = await client.createChatCompletion({
-    model: "gpt-5-mini",
+    model: "gpt-4o",
     messages: body.messages,
   });
 
