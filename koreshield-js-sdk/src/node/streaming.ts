@@ -38,7 +38,7 @@ export class StreamingClient {
       timeout: this.config.timeout,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'KoreShield-JS-Node/0.3.4',
+        'User-Agent': 'KoreShield-JS-Node/0.3.5',
         ...this.config.headers
       }
     });

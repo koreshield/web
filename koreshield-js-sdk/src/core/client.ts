@@ -51,7 +51,7 @@ export class KoreShieldClient {
       timeout: this.config.timeout,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'koreshield-js-sdk/0.3.4',
+        'User-Agent': 'koreshield-js-sdk/0.3.5',
         ...this.config.headers
       }
     });
