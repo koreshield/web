@@ -153,7 +153,7 @@ const config: Config = {
 							to: '/docs/features/',
 						},
 						{
-							label: 'Configuration',
+							label: 'Settings & Policies',
 							to: '/docs/configuration/',
 						},
 					],

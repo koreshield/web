@@ -90,4 +90,4 @@ WebSocket endpoints are not part of the OpenAPI document, as OpenAPI does not de
 
 ## Rate Limiting
 
-All protected proxy endpoints use [SlowAPI](https://github.com/laurentS/slowapi) with Redis-backed storage. The default rate limit is `60/minute` and is configurable via `security.rate_limit` in `config.yaml`.
+All protected proxy endpoints use rate limits. The default limit can be adjusted in your dashboard settings (hosted) or deployment configuration (self-hosted).

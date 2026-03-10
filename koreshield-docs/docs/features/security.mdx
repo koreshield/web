@@ -24,17 +24,7 @@ KoreShield secures LLM traffic by combining sanitization, detection, and policy 
 
 ## Configure Security Defaults
 
-Set defaults in your configuration:
-
-```yaml
-security:
-	sensitivity: medium
-	default_action: block
-	features:
-		sanitization: true
-		detection: true
-		policy_enforcement: true
-```
+Set defaults in the KoreShield Dashboard (hosted) or your deployment settings (self-hosted). Typical settings include sensitivity and default action.
 
 ## Sensitivity Guidance
 
@@ -44,8 +34,8 @@ security:
 
 ## Operational Tips
 
-- Use `json_logs: true` for structured logs in production
-- Enable Redis for distributed rate limiting and stats
+- Use structured logging and alerts to monitor blocks and threats
+- Apply rate limits to protect upstream providers
 - Protect proxy endpoints with JWT or `X-API-Key` auth
 
 ## Related Docs
