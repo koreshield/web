@@ -50,7 +50,7 @@ export default {
     const body = await request.json();
 
     const result = await client.createChatCompletion({
-      model: "gpt-5-mini",
+      model: "gpt-4o",
       messages: body.messages
     });
 
