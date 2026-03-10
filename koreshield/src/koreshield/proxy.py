@@ -334,21 +334,25 @@ class KoreShieldProxy:
 
         # Provider options with priority order (higher index = higher priority)
         provider_options = [
-            ("deepseek", "DEEPSEEK_API_KEY", self.DeepSeekProvider),
-            ("openai", "OPENAI_API_KEY", self.OpenAIProvider),
-            ("anthropic", "ANTHROPIC_API_KEY", self.AnthropicProvider),
-            ("gemini", "GOOGLE_API_KEY", self.GeminiProvider),
-            ("azure_openai", "AZURE_OPENAI_API_KEY", self.AzureOpenAIProvider),
+            ("deepseek", ["DEEPSEEK_API_KEY"], self.DeepSeekProvider),
+            ("openai", ["OPENAI_API_KEY"], self.OpenAIProvider),
+            ("anthropic", ["ANTHROPIC_API_KEY"], self.AnthropicProvider),
+            ("gemini", ["GOOGLE_API_KEY", "GEMINI_API_KEY"], self.GeminiProvider),
+            ("azure_openai", ["AZURE_OPENAI_API_KEY"], self.AzureOpenAIProvider),
         ]
 
         self.providers = []
         self.provider_priority = []
 
-        for provider_name, env_var, provider_class in provider_options:
+        for provider_name, env_vars, provider_class in provider_options:
             provider_cfg = providers_config.get(provider_name, {})
             logger.info(f"Checking provider {provider_name}: enabled={provider_cfg.get('enabled', False)}")
             if provider_cfg.get("enabled", False):
-                api_key = os.getenv(env_var)
+                api_key = None
+                for env_var in env_vars:
+                    api_key = os.getenv(env_var)
+                    if api_key:
+                        break
                 if api_key:
                     try:
                         base_url = provider_cfg.get("base_url")

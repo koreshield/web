@@ -8,7 +8,8 @@ import {
   SecurityOptions,
   ChatCompletionRequest,
   ChatCompletionResponse,
-  SecurityEvent,
+  AuditLogResponse,
+  AuditLogEntry,
   MetricsResponse,
   PerformanceMetrics,
   SecurityPolicy,
@@ -25,6 +26,7 @@ import { validateConfig } from '../utils';
 export class KoreShieldClient {
   private client: AxiosInstance;
   private config: Required<KoreShieldConfig>;
+  private hasCustomAuthorization: boolean;
   private metrics: PerformanceMetrics;
   private securityPolicy: SecurityPolicy | null = null;
   private startTime: number;
@@ -42,18 +44,19 @@ export class KoreShieldClient {
       debug: config.debug || false,
       headers: config.headers || {}
     };
+    this.hasCustomAuthorization = !!this.config.headers['Authorization'];
 
     this.client = axios.create({
       baseURL: this.config.baseURL,
       timeout: this.config.timeout,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'koreshield-js-sdk/0.3.2',
+        'User-Agent': 'koreshield-js-sdk/0.3.4',
         ...this.config.headers
       }
     });
 
-    if (this.config.apiKey) {
+    if (this.config.apiKey && !this.hasCustomAuthorization && !this.client.defaults.headers.common['Authorization']) {
       this.client.defaults.headers.common['Authorization'] = `Bearer ${this.config.apiKey}`;
     }
 
@@ -233,25 +236,23 @@ export class KoreShieldClient {
   }
 
   /**
-   * Get security events/logs
+   * Get audit logs (management endpoint)
    */
-  async getSecurityEvents(
-    limit: number = 50,
+  async getAuditLogs(
+    limit: number = 100,
     offset: number = 0,
-    type?: string,
-    severity?: string
-  ): Promise<SecurityEvent[]> {
+    level?: string
+  ): Promise<AuditLogResponse> {
     try {
       const params = new URLSearchParams({
         limit: limit.toString(),
         offset: offset.toString()
       });
 
-      if (type) params.append('type', type);
-      if (severity) params.append('severity', severity);
+      if (level) params.append('level', level);
 
-      const response: AxiosResponse<SecurityEvent[]> = await this.client.get(
-        `/api/security/events?${params}`
+      const response: AxiosResponse<AuditLogResponse> = await this.client.get(
+        `/v1/management/logs?${params}`
       );
 
       return response.data;
@@ -261,11 +262,23 @@ export class KoreShieldClient {
   }
 
   /**
+   * Backwards-compatible alias for audit logs
+   */
+  async getSecurityEvents(
+    limit: number = 100,
+    offset: number = 0,
+    level?: string
+  ): Promise<AuditLogEntry[]> {
+    const response = await this.getAuditLogs(limit, offset, level);
+    return response.logs;
+  }
+
+  /**
    * Get metrics and statistics
    */
   async getMetrics(): Promise<MetricsResponse> {
     try {
-      const response: AxiosResponse<MetricsResponse> = await this.client.get('/api/metrics');
+      const response: AxiosResponse<MetricsResponse> = await this.client.get('/v1/management/stats');
       return response.data;
     } catch (error: any) {
       throw this.handleError(error);
@@ -303,7 +316,7 @@ export class KoreShieldClient {
    */
   async updateSecurityConfig(options: SecurityOptions): Promise<void> {
     try {
-      await this.client.put('/api/config/security', options);
+      await this.client.patch('/v1/management/config/security', options);
     } catch (error: any) {
       throw this.handleError(error);
     }
