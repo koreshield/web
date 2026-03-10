@@ -288,6 +288,8 @@ FRONTEND_SPEC.md
 !koreshield-python-sdk/docs/
 !koreshield-js-sdk/examples/
 !koreshield-js-sdk/docs/
+!koreshield-blog/src/lib/
+!koreshield-blog/src/lib/**
 personal-docs/SYSTEM_DESIGN.md
 .DS_Store
 !koreshield-web/src/lib/
