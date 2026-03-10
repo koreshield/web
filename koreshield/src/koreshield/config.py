@@ -29,11 +29,15 @@ class SecurityConfig(BaseModel):
     sensitivity: str = "medium"
     default_action: str = "block"
 
+    class Lists(BaseModel):
+        storage_path: Optional[str] = None
+
     class Features(BaseModel):
         sanitization: bool = True
         detection: bool = True
         policy_enforcement: bool = True
 
+    lists: Lists = Lists()
     features: Features = Features()
 
 
