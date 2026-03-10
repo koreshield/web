@@ -222,13 +222,18 @@ class KoreShieldProxy:
             providers=self.providers,
             check_interval=30.0,  # Check every 30 seconds
         )
+        self.health_monitor.add_status_change_callback(self._handle_provider_health_change)
 
         # Initialize monitoring system
         from .monitoring import MonitoringSystem
         from .config import KoreShieldConfig
         kore_config = KoreShieldConfig()
         kore_config.load_from_dict(config)
-        self.monitoring = MonitoringSystem(kore_config.monitoring, stats_getter=self._get_stats_dict)
+        self.monitoring = MonitoringSystem(
+            kore_config.monitoring,
+            stats_getter=self._get_stats_dict,
+            event_publisher=self._publish_event,
+        )
 
         # Initialize JWT authentication
         from .api.auth import init_jwt_config
@@ -251,6 +256,74 @@ class KoreShieldProxy:
             websocket_module.set_redis_client(self.redis_client)        
         # Setup routes LAST (includes catch-all route)
         self._setup_routes()
+
+        # Emit system status updates on lifecycle events
+        @self.app.on_event("startup")
+        async def _startup_event():
+            self._emit_event(
+                "system_status",
+                {
+                    "status": "startup",
+                    "version": self.app.version,
+                },
+            )
+
+        @self.app.on_event("shutdown")
+        async def _shutdown_event():
+            self._emit_event(
+                "system_status",
+                {
+                    "status": "shutdown",
+                    "version": self.app.version,
+                },
+            )
+
+    async def _publish_event(self, event_type: str, data: dict) -> None:
+        """Publish an event over the WebSocket pub/sub channel."""
+        await websocket_module.publish_event(event_type, data)
+
+    def _emit_event(self, event_type: str, data: dict) -> None:
+        """Schedule an event publish without blocking the request path."""
+        try:
+            asyncio.create_task(self._publish_event(event_type, data))
+        except RuntimeError:
+            # No running event loop (e.g., during sync init); skip.
+            logger.debug("event_publish_skipped_no_loop", event_type=event_type)
+
+    def _handle_provider_health_change(self, provider_name, old_status, new_status) -> None:
+        """Publish provider health change events."""
+        self._emit_event(
+            "provider_health_change",
+            {
+                "provider": provider_name,
+                "old_status": getattr(old_status, "value", str(old_status)),
+                "new_status": getattr(new_status, "value", str(new_status)),
+            },
+        )
+
+    def _derive_detection_severity(self, detection_result: dict) -> str:
+        """Infer severity from detection indicators and confidence."""
+        severity_rank = {"low": 0, "medium": 1, "high": 2, "critical": 3}
+        severity = "medium"
+
+        indicators = detection_result.get("indicators") or []
+        for indicator in indicators:
+            indicator_severity = str(indicator.get("severity", "")).lower()
+            if indicator_severity in severity_rank and severity_rank[indicator_severity] > severity_rank[severity]:
+                severity = indicator_severity
+
+        confidence = detection_result.get("confidence")
+        if isinstance(confidence, (int, float)):
+            if confidence >= 0.85:
+                confidence_severity = "high"
+            elif confidence >= 0.6:
+                confidence_severity = "medium"
+            else:
+                confidence_severity = "low"
+            if severity_rank[confidence_severity] > severity_rank[severity]:
+                severity = confidence_severity
+
+        return severity
 
     def _init_providers(self, config: dict):
         """Initialize all enabled LLM providers with priority ordering."""
@@ -664,6 +737,21 @@ class KoreShieldProxy:
                 should_block = is_unsafe and default_action == "block"
                 reason = "Potential prompt injection detected"
 
+            if detection_result.get("is_attack", False):
+                self._emit_event(
+                    "threat_detected",
+                    {
+                        "request_id": request_id,
+                        "endpoint": "/v1/chat/completions",
+                        "attack_type": detection_result.get("attack_type", "prompt_injection"),
+                        "confidence": detection_result.get("confidence"),
+                        "severity": self._derive_detection_severity(detection_result),
+                        "action_taken": "blocked" if should_block else "allowed",
+                        "user_id": principal.get("user_id"),
+                        "api_key_id": principal.get("api_key_id"),
+                    },
+                )
+
             if should_block:
                 # Block the request
                 self._increment_stat("requests_blocked")
@@ -857,7 +945,7 @@ class KoreShieldProxy:
         logger.info("RAG scan request received", request_id=request_id)
         
         try:
-            _ = await self._authenticate_request(request)
+            principal = await self._authenticate_request(request)
 
             # Parse request body
             try:
@@ -975,6 +1063,21 @@ class KoreShieldProxy:
                     attack_type="indirect_injection",
                     severity=rag_scan_result.overall_severity.value
                 ).inc()
+
+                self._emit_event(
+                    "threat_detected",
+                    {
+                        "request_id": request_id,
+                        "endpoint": "/v1/rag/scan",
+                        "scan_id": rag_scan_result.scan_id,
+                        "attack_type": "indirect_injection",
+                        "confidence": rag_scan_result.overall_confidence,
+                        "severity": rag_scan_result.overall_severity.value,
+                        "action_taken": "flagged",
+                        "user_id": principal.get("user_id"),
+                        "api_key_id": principal.get("api_key_id"),
+                    },
+                )
             
             # Build response
             response_data = {

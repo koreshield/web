@@ -29,8 +29,9 @@ def proxy_app():
             "audience": "koreshield-api",
         },
     }
-    with patch.object(KoreShieldProxy, "_init_providers"):
-        return KoreShieldProxy(config).app
+    with patch.dict(os.environ, {"JWT_PUBLIC_KEY": "", "JWT_PRIVATE_KEY": ""}, clear=False):
+        with patch.object(KoreShieldProxy, "_init_providers"):
+            return KoreShieldProxy(config).app
 
 
 def test_websocket_auth_accepts_authorization_header(proxy_app):

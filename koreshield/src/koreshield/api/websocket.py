@@ -23,6 +23,9 @@ logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/ws", tags=["websocket"])
 
+# Close code for unauthenticated/invalid auth, aligned with public docs.
+WS_AUTH_CLOSE_CODE = 4003
+
 # Redis client for pub/sub (will be initialized from main app)
 redis_client: aioredis.Redis | None = None
 
@@ -142,7 +145,7 @@ async def websocket_events(
         - threat_detected: New threat detection event
         - provider_health_change: Provider health status update
         - cost_threshold_alert: Cost threshold exceeded
-        - system_status_update: System component status change
+        - system_status: System component status change
     
     Message Format:
         {
@@ -163,13 +166,13 @@ async def websocket_events(
         token = _extract_ws_token(websocket)
         if not token:
             logger.warning("websocket_auth_failed", reason="missing_token")
-            await websocket.close(code=4401)
+            await websocket.close(code=WS_AUTH_CLOSE_CODE)
             return
 
         user = await verify_ws_token(token)
         if not user:
             logger.warning("websocket_auth_failed", reason="invalid_token")
-            await websocket.close(code=4401)
+            await websocket.close(code=WS_AUTH_CLOSE_CODE)
             return
 
         user_id = user.get("id", "unknown")
