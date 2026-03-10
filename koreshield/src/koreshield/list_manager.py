@@ -99,7 +99,7 @@ class ListManager:
             storage_path: Path to store list data (defaults to ./data/lists/)
         """
         self.config = config or {}
-        list_config = self.config.get("lists", {})
+        list_config = self.config.get("lists") or {}
         self.storage_path = (
             storage_path
             or list_config.get("storage_path")
