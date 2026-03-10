@@ -167,6 +167,8 @@ class KoreShieldProxy:
                 "http://127.0.0.1:3000",
                 "http://127.0.0.1:5173",
                 "https://koreshield.com",
+                "https://www.koreshield.com",
+                "https://api.koreshield.com",
             ]
         
         self.app.add_middleware(
