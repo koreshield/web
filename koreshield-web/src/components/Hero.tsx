@@ -32,7 +32,7 @@ function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.4 }}
 					>
-						The open-source proxy between your app and LLM providers. Prevents prompt injection, jailbreaks, and data exfiltration with <span className="text-electric-green font-semibold">95% detection accuracy</span>.
+						The security proxy between your app and LLM providers. Prevents prompt injection, jailbreaks, and data exfiltration with <span className="text-electric-green font-semibold">95% detection accuracy</span>.
 					</motion.p>
 
 					<motion.div

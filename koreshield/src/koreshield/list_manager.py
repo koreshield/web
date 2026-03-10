@@ -99,7 +99,13 @@ class ListManager:
             storage_path: Path to store list data (defaults to ./data/lists/)
         """
         self.config = config or {}
-        self.storage_path = storage_path or self.config.get("storage_path", os.path.join(os.getcwd(), "data", "lists"))
+        list_config = self.config.get("lists") or {}
+        self.storage_path = (
+            storage_path
+            or list_config.get("storage_path")
+            or self.config.get("storage_path")
+            or os.path.join(os.getcwd(), "data", "lists")
+        )
         self.lists: Dict[str, Dict[str, ListEntry]] = {
             ListType.BLOCKLIST.value: {},
             ListType.ALLOWLIST.value: {},

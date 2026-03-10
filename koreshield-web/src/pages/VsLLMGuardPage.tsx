@@ -7,7 +7,7 @@ export default function VsLLMGuardPage() {
 		<div className="min-h-screen bg-gray-50 dark:bg-gray-950">
 			<SEOMeta
 				title="KoreShield vs LLM Guard"
-				description="Compare KoreShield and LLM Guard (open-source): enterprise features, detection accuracy, support options, and when to choose each solution."
+				description="Compare KoreShield and LLM Guard: enterprise features, detection accuracy, support options, and when to choose each solution."
 			/>
 
 			{/* Hero */}
@@ -22,7 +22,7 @@ export default function VsLLMGuardPage() {
 							KoreShield vs LLM Guard
 						</h1>
 						<p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-							Comparing two open-source LLM security solutions
+							Comparing two LLM security solutions with different deployment models
 						</p>
 					</motion.div>
 				</div>
@@ -42,7 +42,7 @@ export default function VsLLMGuardPage() {
 							<h2 className="text-2xl font-bold text-gray-900 dark:text-white">KoreShield</h2>
 						</div>
 						<p className="text-gray-600 dark:text-gray-400 mb-4">
-							Enterprise-ready open-source LLM security with 95% detection accuracy, professional support, and managed cloud option.
+							Enterprise-ready LLM security with 95% detection accuracy, professional support, and managed cloud option.
 						</p>
 						<div className="space-y-2">
 							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
@@ -70,12 +70,12 @@ export default function VsLLMGuardPage() {
 							<h2 className="text-2xl font-bold text-gray-900 dark:text-white">LLM Guard</h2>
 						</div>
 						<p className="text-gray-600 dark:text-gray-400 mb-4">
-							Community-driven open-source LLM security toolkit with basic detection capabilities and MIT license.
+							Community-driven LLM security toolkit with basic detection capabilities and MIT license.
 						</p>
 						<div className="space-y-2">
 							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
 								<CheckCircle className="w-5 h-5" />
-								<span>100% free and open-source</span>
+								<span>100% free to use</span>
 							</div>
 							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
 								<CheckCircle className="w-5 h-5" />
@@ -291,7 +291,7 @@ export default function VsLLMGuardPage() {
 				>
 					<h2 className="text-3xl font-bold mb-4">Upgrade to KoreShield</h2>
 					<p className="text-xl mb-6 text-blue-100">
-						Get enterprise-ready security with the same open-source values
+						Get enterprise-ready security with the same security-first values
 					</p>
 					<div className="flex flex-wrap justify-center gap-4">
 						<a

@@ -1,0 +1,45 @@
+---
+title: Policies
+description: Koreshield configuration policies.
+slug: /configuration/policies
+---
+
+# Policies
+
+Policies define how KoreShield reacts to detected threats. Use `sensitivity` to tune detection strictness and `default_action` to decide what happens when a threat is detected.
+
+## Core Policy Settings
+
+```yaml
+security:
+	sensitivity: medium
+	default_action: block
+	features:
+		sanitization: true
+		detection: true
+		policy_enforcement: true
+```
+
+## Sensitivity Levels
+
+- `low`: require higher confidence to flag content
+- `medium`: balanced for most production use
+- `high`: strict detection with fewer false negatives
+
+## Actions
+
+- `allow`: permit traffic without restrictions
+- `warn`: allow but log as a security event
+- `block`: reject requests that violate policy
+
+## Custom Rules and Lists
+
+- Custom rules are supported through the detection engine DSL
+- Allowlists and blocklists can reduce false positives or block known risks
+- See [Attack Detection](/docs/features/attack-detection) for rule patterns
+
+## Recommended Defaults
+
+- `sensitivity: medium` for balanced protection
+- `default_action: block` for production environments
+- Enable `sanitization`, `detection`, and `policy_enforcement`

@@ -55,6 +55,7 @@ const config: Config = {
 					showLastUpdateAuthor: false,
 					showLastUpdateTime: true,
 				},
+				blog: false,
 				theme: {
 					customCss: './src/css/custom.scss',
 				},
@@ -152,7 +153,7 @@ const config: Config = {
 							to: '/docs/features/',
 						},
 						{
-							label: 'Configuration',
+							label: 'Settings & Policies',
 							to: '/docs/configuration/',
 						},
 					],
