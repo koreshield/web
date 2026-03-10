@@ -33,21 +33,24 @@ export interface ChatCompletionResponse {
 }
 
 export interface HealthCheckResponse {
-    status: 'ok' | 'error' | 'maintenance';
+    status: string;
     version: string;
-    timestamp: string;
-    services: {
-        database: 'up' | 'down';
-        redis: 'up' | 'down';
-        openai_api: 'up' | 'down';
-        anthropic_api: 'up' | 'down';
-    };
 }
 
 export interface AttackStats {
-    total_requests: number;
-    blocked_requests: number;
-    attack_types: Record<string, number>;
-    latency_p95: number;
-    active_threats: number;
+    status: string;
+    version: string;
+    statistics: {
+        requests_total: number;
+        requests_allowed: number;
+        requests_blocked: number;
+        attacks_detected: number;
+        errors: number;
+    };
+    providers: Record<string, {
+        configured: boolean;
+        priority: number;
+        type: string | null;
+    }>;
+    total_providers: number;
 }
