@@ -6,7 +6,7 @@ A middleware proxy that protects enterprise LLM integrations from prompt injecti
 
 This project is part of a research initiative on **Prompt Injection Defense in Enterprise RAG Systems**, combining:
 - **Research Paper**: A comprehensive taxonomy of indirect prompt injection attacks in RAG systems
-- **Open Source Tool**: This middleware solution for real-world protection
+- **Proprietary Core**: The middleware solution for real-world protection
 
 ## Features
 
@@ -166,11 +166,11 @@ pytest
 
 ## Contributing
 
-Contributions are welcome! This project is in early development. Please check back soon for contribution guidelines.
+Contributions to the SDKs, documentation, website, and blog are welcome. Core changes are handled through KoreShield engineering workflows.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+Proprietary License - see [LICENSE](../LICENSE) for details. Open-source components are licensed in their respective subdirectories.
 
 ## Related Research
 
