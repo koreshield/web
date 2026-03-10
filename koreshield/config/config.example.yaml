@@ -27,6 +27,10 @@ security:
     detection: true
     policy_enforcement: true
 
+  # Allowlist/blocklist storage (optional)
+  lists:
+    # storage_path: /var/lib/koreshield/lists
+
 # Provider configurations
 providers:
   deepseek:

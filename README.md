@@ -4,11 +4,12 @@
 [![Lint](https://github.com/koreshield/koreshield/actions/workflows/lint.yml/badge.svg)](https://github.com/koreshield/koreshield/actions/workflows/lint.yml)
 [![Docker](https://github.com/koreshield/koreshield/actions/workflows/docker.yml/badge.svg)](https://github.com/koreshield/koreshield/actions/workflows/docker.yml)
 [![PyPI](https://img.shields.io/pypi/v/koreshield)](https://pypi.org/project/koreshield/)
-[![License](https://img.shields.io/github/license/koreshield/koreshield)](https://github.com/koreshield/koreshield/blob/main/LICENSE)
 
 ## About
 
-KoreShield is an open-source security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It sits transparently between your application and LLM API providers (OpenAI, Anthropic, Google Gemini, etc.), sanitizing inputs, detecting threats, and enforcing security policies before requests reach the model.
+KoreShield is a proprietary security platform designed to protect enterprise applications that use Large Language Models (LLMs) from prompt injection attacks. It sits transparently between your application and LLM API providers (OpenAI, Anthropic, Google Gemini, etc.), sanitizing inputs, detecting threats, and enforcing security policies before requests reach the model.
+
+The SDKs, documentation, website, and blog are MIT-licensed in their respective directories. The KoreShield core platform is proprietary.
 
 This project is unified under the KoreShield brand, with all resources, SDKs, and documentation available at [koreshield.com](https://koreshield.com).
 
@@ -244,7 +245,7 @@ pytest
 |----------------------------|------------|-----------|
 | Installation               | 1 LOC      | SDK/Agent |
 | Dashboard                  | Full UI    | Limited   |
-| Open Source                | ✓          | ✗         |
+| Open SDKs & Docs           | ✓          | ✗         |
 | RAG Security               | ✓          | ✗         |
 | Multi-tenant               | ✓          | Paid only |
 | Real-time WebSocket        | ✓          | ✗         |
@@ -254,11 +255,11 @@ pytest
 **Unique Features:**
 1. **RAG Security Scanner** - Only solution with 5D taxonomy for RAG attacks
 2. **Zero Code Integration** - Proxy-based, not SDK-based
-3. **Full Open Source** - Fork and customize everything
+3. **Open SDKs & Docs** - Open tooling for integration and documentation
 4. **Enterprise Dashboard** - Not just monitoring, full management platform
 
 ## License
-MIT License
+Proprietary License. See [LICENSE](LICENSE). Open-source components are licensed in their respective subdirectories.
 
 ## Contact
 For questions or feedback, visit [koreshield.com](https://koreshield.com) or open an issue on GitHub.

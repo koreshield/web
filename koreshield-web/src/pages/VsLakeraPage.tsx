@@ -7,7 +7,7 @@ export default function VsLakeraPage() {
 		<div className="min-h-screen bg-gray-50 dark:bg-gray-950">
 			<SEOMeta
 				title="KoreShield vs Lakera Guard"
-				description="Compare KoreShield and Lakera Guard: features, pricing, open-source vs closed-source, and which LLM security solution is right for your needs."
+				description="Compare KoreShield and Lakera Guard: features, pricing, and which LLM security solution is right for your needs."
 			/>
 
 			{/* Hero */}
@@ -42,12 +42,12 @@ export default function VsLakeraPage() {
 							<h2 className="text-2xl font-bold text-gray-900 dark:text-white">KoreShield</h2>
 						</div>
 						<p className="text-gray-600 dark:text-gray-400 mb-4">
-							Open-source LLM security with enterprise features, 95% detection accuracy, and multi-provider support.
+							Enterprise-grade LLM security with 95% detection accuracy and multi-provider support.
 						</p>
 						<div className="space-y-2">
 							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
 								<CheckCircle className="w-5 h-5" />
-								<span>Open-source & transparent</span>
+								<span>Transparent security controls</span>
 							</div>
 							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
 								<CheckCircle className="w-5 h-5" />
@@ -59,7 +59,7 @@ export default function VsLakeraPage() {
 							</div>
 							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
 								<CheckCircle className="w-5 h-5" />
-								<span>Community-driven innovation</span>
+								<span>Research-driven innovation</span>
 							</div>
 						</div>
 					</div>
@@ -112,9 +112,9 @@ export default function VsLakeraPage() {
 									</tr>
 								</thead>
 								<tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-								{/* COMMENTED: Open Source row hidden
+								{/* COMMENTED: Transparency row hidden
 								<tr>
-									<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Open Source</td>
+									<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Transparency</td>
 									<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
 									<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
 								</tr>
@@ -216,7 +216,7 @@ export default function VsLakeraPage() {
 						<ul className="space-y-3">
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Open Source:</strong> Full transparency, no vendor lock-in</span>
+								<span className="text-gray-900 dark:text-white"><strong>Deployment Flexibility:</strong> Self-hosted and managed options</span>
 							</li>
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
@@ -284,7 +284,7 @@ export default function VsLakeraPage() {
 						<div className="bg-white dark:bg-gray-900 rounded-lg p-6">
 							<h3 className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4">Choose KoreShield if:</h3>
 							<ul className="space-y-2 text-gray-700 dark:text-gray-300">
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You value open-source transparency</li>
+								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You value transparency and control</li>
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You want cost-effective enterprise security</li>
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You need self-hosted/air-gapped deployment</li>
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You use multiple LLM providers</li>
@@ -315,7 +315,7 @@ export default function VsLakeraPage() {
 				>
 					<h2 className="text-3xl font-bold mb-4">Upgrade to KoreShield</h2>
 					<p className="text-xl mb-6 text-blue-100">
-						Get enterprise-ready security with the same open-source values
+						Get enterprise-ready security with the same security-first values
 					</p>
 					<div className="flex flex-wrap justify-center gap-4">
 						<a
