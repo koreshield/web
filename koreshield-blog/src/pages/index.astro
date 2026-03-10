@@ -4,6 +4,7 @@ import Header from "../components/Header.astro";
 import ResearchBanner from "../components/ResearchBanner.astro";
 import Footer from "../components/footer.astro";
 import ArchivePanel from "../components/archivePanel.svelte";
+import Newsletter from "../components/common/newsletter.astro";
 import { getSortedPostsList } from "@utils/content";
 
 const posts = await getSortedPostsList();
@@ -126,6 +127,8 @@ const allCategories = [
 					client:load
 				/>
 			</div>
+
+			<Newsletter />
 
 			<ResearchBanner />
 

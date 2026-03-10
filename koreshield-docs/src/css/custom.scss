@@ -148,6 +148,44 @@ html {
 	opacity: 0.7;
 }
 
+/* ─── NAVBAR RIGHT: search widget ───────────────────── */
+/* The search widget must flex-shrink; never push other items off-screen */
+.navbar__item.navbar__search {
+	flex-shrink: 1;
+	min-width: 0;
+}
+
+/* The search input: always allow shrinking */
+:global(.navbar__search-input) {
+	min-width: 0;
+}
+
+/* The @easyops-cn search plugin renders a Ctrl+K hint badge using a
+   CSS-module class whose generated name always contains "searchHintContainer".
+   It's position:absolute inside the input, so when the input is narrow the
+   placeholder text "Search" and the "Ctrl K" badge overlap.
+   The plugin already hides it at ≤576px; we extend that up to 1200px where
+   the navbar is tight and the overlap occurs. */
+@media (max-width: 1200px) {
+	[class*='searchHintContainer'] {
+		display: none !important;
+	}
+
+	/* Without the hint badge, the input no longer needs right padding for it */
+	:global(.navbar__search-input) {
+		padding-right: 2rem !important; /* keep room for the clear (×) button only */
+	}
+}
+
+/* ─── Medium screens (997–1160px): right navbar overflow ─ */
+/* Right side has: Search + API Reference + GitHub — too tight.
+   Hide API Reference from the bar; still accessible via the docs nav. */
+@media (min-width: 997px) and (max-width: 1160px) {
+	.navbar-api-ref {
+		display: none !important;
+	}
+}
+
 /* ─── EDIT THIS PAGE — fix oversized GitHub SVG ─────── */
 /* The "Edit this page" link at the bottom of each doc page
    contains a raw GitHub SVG with no size constraints. */
@@ -577,9 +615,15 @@ div[class^='codeBlockContainer'] {
    ══════════════════════════════════════════════════════════════ */
 
 /* Base: prevent horizontal overflow on any screen ─────────── */
-html,
-body {
+/* NOTE: overflow-x: hidden is on html only — NOT body.
+   Setting overflow-x:hidden on body breaks position:fixed (mobile sidebar)
+   on iOS Safari by creating an implicit scroll container. */
+html {
 	overflow-x: hidden;
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
 	-webkit-text-size-adjust: 100%;
 }
 
@@ -587,35 +631,94 @@ body {
 	box-sizing: border-box;
 }
 
-/* ── Shared mobile nav: bigger tap targets ─ (≤ 996px) ────── */
+/* ── Mobile (≤ 996px): navbar + mobile sidebar drawer ─────── */
 @media (max-width: 996px) {
-	.navbar__item {
-		min-height: 44px;
-		display: flex;
-		align-items: center;
+	/* Override navbar padding CSS variable for mobile */
+	:root {
+		--ifm-navbar-padding-horizontal: 0.75rem;
 	}
 
-	.menu__link {
-		min-height: 40px;
-		display: flex;
-		align-items: center;
-		padding: 0.5rem 0.85rem;
+	/* Top navbar bar ─────────────────────────────────────────────
+	   future.v4:true wraps Infima in CSS @layer. Unlayered author CSS
+	   beats layered CSS regardless of specificity, so Infima's own
+	   display:none on desktop .navbar__item silently loses.
+	   Re-declare it here (unlayered) to be authoritative. */
+	.navbar__items .navbar__item {
+		display: none !important;
 	}
 
-	/* Sidebar drawer width */
-	.navbar-sidebar {
-		width: min(320px, 90vw);
-		max-width: 320px;
+	/* Keep only: toggle button + search widget in the top bar */
+	.navbar__toggle {
+		display: flex !important;
+	}
+
+	.navbar__items .navbar__item.navbar__search {
+		display: flex !important;
+		flex-shrink: 1;
+		min-width: 0;
 	}
 
 	.navbar {
-		padding-left: 1rem;
-		padding-right: 1rem;
+		padding-left: 0.75rem;
+		padding-right: 0.75rem;
+	}
+
+	/* Mobile sidebar drawer ──────────────────────────────────────
+	   The drawer inherits --ifm-navbar-background-color which is
+	   semi-transparent (#060606 at 80% opacity). Override with a
+	   fully opaque background so the page content never shows through. */
+	.navbar-sidebar {
+		background-color: #060606 !important;
+		width: min(300px, 88vw);
+		max-width: 300px;
+		height: 100vh;
+		height: 100dvh; /* dynamic viewport height — avoids iOS address-bar gap */
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		border-right: 1px solid #1a1a1a;
+		box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
+	}
+
+	[data-theme='light'] .navbar-sidebar {
+		background-color: #ffffff !important;
+		border-right-color: rgba(0, 0, 0, 0.1);
+		box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+	}
+
+	/* Sidebar header row (brand + close button) */
+	.navbar-sidebar__brand {
+		padding: 0.75rem 1rem;
+		border-bottom: 1px solid #1a1a1a;
+		background-color: #060606;
+	}
+
+	[data-theme='light'] .navbar-sidebar__brand {
+		background-color: #ffffff;
+		border-bottom-color: rgba(0, 0, 0, 0.1);
+	}
+
+	/* Sidebar items container */
+	.navbar-sidebar__items {
+		padding: 0.5rem 0;
+	}
+
+	/* Each link in the sidebar: proper touch target */
+	.navbar-sidebar .menu__link {
+		min-height: 44px;
+		padding: 0.6rem 1rem;
+		border-radius: 6px;
+	}
+
+	/* Dimming backdrop */
+	.navbar-sidebar__backdrop {
+		background-color: rgba(0, 0, 0, 0.55);
 	}
 }
 
 /* ── iPad landscape / small laptop (≤ 1024px) ─────────────── */
-@media (max-width: 1024px) {
+@media (min-width: 997px) and (max-width: 1024px) {
+	/* Only apply sidebar width tweak on tablet landscape, not on mobile
+	   (<= 996px) where Docusaurus hides the sidebar entirely. */
 	.theme-doc-sidebar-container {
 		width: 260px !important;
 	}
