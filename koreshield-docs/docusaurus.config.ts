@@ -126,7 +126,7 @@ const config: Config = {
 					className: 'navbar-api-ref',
 				},
 				{
-					href: 'https://github.com/koreshield/koreshield',
+					href: 'https://github.com/koreshield',
 					position: 'right',
 					className: 'header-github-link',
 					'aria-label': 'GitHub repository',

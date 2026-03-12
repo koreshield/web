@@ -26,8 +26,9 @@ KoreShield is an LLM security gateway that sits between your app and model provi
 
 - `POST /v1/chat/completions` (protected)
 - `POST /v1/rag/scan` (protected)
+- `POST /v1/scan` and `POST /v1/scan/batch` (protected)
+- `GET /v1/scans` (protected)
 - `GET /health`, `GET /status`, `GET /metrics`
-- management and admin APIs under `/v1/management/*`
 
 ## Authentication
 
@@ -41,7 +42,7 @@ JWT validation enforces `iss`, `aud`, signature, and expiration checks.
 
 ## Start Here
 
-- [Client Integration Guide](/docs/getting-started/client-integration)
+- [Client Integration Guide](/docs/client-integration)
 - [Quick Start](/docs/getting-started/quick-start)
 - [Installation](/docs/getting-started/installation)
 - [API Reference](/docs/api)

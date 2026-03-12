@@ -18,8 +18,8 @@ KoreShield's REST API contract is generated from the live FastAPI app.
 
 Protected endpoints require authentication via one of these methods:
 
-1. `Authorization: Bearer <jwt>` — JWT issued via `/v1/management/login`
-2. `X-API-Key: ks_...` — API key provisioned through the management API
+1. `Authorization: Bearer <jwt>` — JWT issued via the dashboard login
+2. `X-API-Key: ks_...` — API key provisioned via the dashboard
 3. `ks_access_token` httpOnly cookie — JWT set during login
 
 JWT validation is strict:
@@ -46,30 +46,12 @@ JWT validation is strict:
 |---|---|---|---|
 | `/v1/chat/completions` | POST | Required | OpenAI-compatible chat endpoint with security scanning |
 | `/v1/rag/scan` | POST | Required | RAG context scanning for indirect injection |
+| `/v1/scan` | POST | Required | Scan a single prompt or message |
+| `/v1/scan/batch` | POST | Required | Scan multiple inputs in one request |
+| `/v1/scans` | GET | Required | List recent scan results |
+| `/v1/scans/{scan_id}` | GET | Required | Fetch a single scan result |
 
-Both proxy endpoints are rate-limited via SlowAPI (default: `60/minute`, configurable via `security.rate_limit` in config).
-
-### Management
-
-| Endpoint | Method | Auth | Description |
-|---|---|---|---|
-| `/v1/management/signup` | POST | None | Create account |
-| `/v1/management/login` | POST | None | Login and receive JWT |
-| `/v1/management/config` | GET | Required | View server config (dev environments only, values redacted) |
-| `/v1/management/rules/*` | Various | Required | Manage custom detection rules |
-| `/v1/management/alerts/*` | Various | Required | Manage alert rules and channels |
-
-### RBAC
-
-| Endpoint | Method | Auth | Description |
-|---|---|---|---|
-| `/v1/rbac/*` | Various | Required | Role and permission management |
-
-### Teams
-
-| Endpoint | Method | Auth | Description |
-|---|---|---|---|
-| `/v1/teams/*` | Various | Required | Team creation and membership management |
+All protected proxy endpoints are rate-limited via SlowAPI (default: `60/minute`, configurable via `security.rate_limit` in config).
 
 ### Analytics & Reports
 

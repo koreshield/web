@@ -12,7 +12,7 @@ Use KoreShield as a security proxy in front of your LLM requests from Vercel. Yo
 ## Use Cases
 
 - Edge and serverless LLM APIs with centralized security
-- Multi-tenant apps that share one proxy deployment
+- Shared deployments that use one proxy endpoint
 - Rapid deployments with minimal infrastructure
 
 ## Architecture
@@ -98,5 +98,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 - Review SDK usage in [https://github.com/koreshield/node-sdk](https://github.com/koreshield/node-sdk)
 - Configure providers in [/configuration/](/docs/configuration)
-
 
