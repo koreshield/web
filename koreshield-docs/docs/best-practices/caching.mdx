@@ -21,7 +21,7 @@ Caching can reduce latency and cost, but it must be implemented carefully to avo
 **Avoid caching:**
 
 - raw prompts that contain personal data or PHI
-- full model responses for public or multi-tenant systems
+- full model responses for public or shared systems
 - anything tied to a specific user session unless scoped carefully
 
 ## Cache Key Strategy
@@ -30,12 +30,12 @@ Use a stable, privacy-safe key:
 
 - hash input content instead of storing raw content
 - include policy version and sensitivity in the key
-- include tenant or environment identifiers
+- include account or environment identifiers
 
 Example key format:
 
 ```
-scan:{tenant}:{policyVersion}:{hash(content)}
+scan:{account}:{policyVersion}:{hash(content)}
 ```
 
 ## TTL and Invalidation

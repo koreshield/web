@@ -61,7 +61,7 @@ const features = [
 			</svg>
 		),
 		title: 'Enterprise Ready',
-		desc: 'Multi-tenancy, RBAC, Redis-backed rate limiting, and Helm chart for Kubernetes. SOC-2 complaint architecture.',
+		desc: 'RBAC, Redis-backed rate limiting, and Helm chart for Kubernetes. SOC 2-aligned architecture.',
 	},
 ];
 
@@ -91,7 +91,7 @@ function HomepageHero() {
 					</Link>
 					<Link
 						className={styles.ctaSecondary}
-						href="https://github.com/koreshield/koreshield"
+						href="https://github.com/koreshield"
 					>
 						View on GitHub
 					</Link>

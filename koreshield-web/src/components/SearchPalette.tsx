@@ -24,7 +24,6 @@ const searchIndex: SearchItem[] = [
   { title: 'Python SDK', path: '/docs/getting-started/python', content: 'Python SDK', category: 'Getting Started' },
   { title: 'Attack Detection', path: '/docs/attack-detection', content: 'Prompt injection threats', category: 'Platform Features', tags: ['security'] },
   { title: 'Policy Engine', path: '/docs/policy-engine', content: 'RBAC policies', category: 'Platform Features', tags: ['policies'] },
-  { title: 'Multi-Tenancy', path: '/docs/multi-tenancy', content: 'Tenant isolation', category: 'Platform Features', tags: ['tenants'] },
   { title: 'Monitoring', path: '/docs/monitoring-alerting', content: 'Prometheus Grafana', category: 'Platform Features', tags: ['monitoring'] },
   { title: 'Custom Rules', path: '/docs/custom-rules', content: 'Security rules DSL', category: 'Platform Features', tags: ['rules'] },
   { title: 'React/Next.js', path: '/docs/integrations/react-nextjs', content: 'React Next.js', category: 'Integrations', tags: ['react', 'nextjs'] },
@@ -42,9 +41,8 @@ const searchIndex: SearchItem[] = [
   { title: 'Compliance', path: '/docs/advanced/compliance', content: 'SOC2 HIPAA GDPR', category: 'Advanced', tags: ['compliance', 'soc2', 'hipaa'] },
   { title: 'Financial Services', path: '/docs/case-studies/financial-services', content: 'Finance banking security', category: 'Case Studies', tags: ['finance'] },
   { title: 'Healthcare', path: '/docs/case-studies/healthcare', content: 'Medical PHI HIPAA', category: 'Case Studies', tags: ['healthcare'] },
-  { title: 'SaaS Multi-Tenancy', path: '/docs/case-studies/saas', content: 'SaaS security architecture', category: 'Case Studies', tags: ['saas'] },
   { title: 'E-commerce', path: '/docs/case-studies/ecommerce', content: 'Shopping assistant protection', category: 'Case Studies', tags: ['ecommerce'] },
-  { title: 'RAG Protection', path: '/docs/case-studies/rag-protection', content: 'RAG specific attacks', category: 'Case Studies', tags: ['rag'] },
+  { title: 'AI Agents', path: '/docs/case-studies/ai-agents', content: 'Agent workflows', category: 'Case Studies', tags: ['agents'] },
   { title: 'Code Generation', path: '/docs/case-studies/code-generation', content: 'Code assistant security', category: 'Case Studies', tags: ['code'] },
 ];
 

@@ -1,6 +1,5 @@
 {
     "pages": [
-        "rest-api",
-        "cli"
+        "rest-api"
     ]
 }
