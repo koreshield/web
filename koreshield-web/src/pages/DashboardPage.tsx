@@ -227,7 +227,7 @@ export function DashboardPage() {
 											Route your LLM requests through KoreShield's proxy.
 										</p>
 										<a
-											href="https://docs.koreshield.com/getting-started"
+											href="https://docs.koreshield.com/docs/getting-started/quick-start/"
 											target="_blank"
 											rel="noreferrer"
 											className="inline-flex items-center gap-1 text-xs sm:text-sm text-primary hover:underline"
