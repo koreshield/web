@@ -146,8 +146,8 @@ export function ThreatDashboard() {
             </div>
 
             {/* Chart */}
-            <div className="h-56 md:h-64 w-full bg-muted/40 dark:bg-white/[0.03] rounded-xl p-4 mb-6 border border-white/[0.06] relative overflow-hidden">
-                <ResponsiveContainer width="100%" height="100%">
+            <div className="h-56 md:h-64 min-h-[220px] w-full bg-muted/40 dark:bg-white/[0.03] rounded-xl p-4 mb-6 border border-white/[0.06] relative overflow-hidden">
+                <ResponsiveContainer width="100%" height={220} minHeight={220} minWidth={0}>
                     <LineChart data={data}>
                         <Tooltip
                             contentStyle={{
