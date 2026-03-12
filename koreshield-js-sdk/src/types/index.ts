@@ -84,22 +84,29 @@ export interface ChatCompletionResponse {
   };
 }
 
-export interface SecurityEvent {
-  id: string;
-  timestamp: string;
-  type: 'attack_detected' | 'request_blocked' | 'sanitization_applied';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
-  details?: Record<string, any>;
-  requestId?: string;
+export interface AuditLogEntry {
+  timestamp?: string;
+  level?: string;
+  event?: string;
+  message?: string;
+  [key: string]: any;
 }
+
+export interface AuditLogResponse {
+  logs: AuditLogEntry[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export type SecurityEvent = AuditLogEntry;
 
 export interface MetricsResponse {
   requests_total: number;
+  requests_allowed?: number;
   requests_blocked: number;
   attacks_detected: number;
-  average_response_time_ms: number;
-  uptime_seconds: number;
+  errors?: number;
 }
 
 export interface PerformanceMetrics {

@@ -136,15 +136,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
                 If this problem persists, please{' '}
-                <a
-                  href="https://github.com/koreshield/koreshield/issues"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  report an issue
-                </a>{' '}
-                or contact support at{' '}
+                contact support at{' '}
                 <a
                   href="mailto:support@koreshield.com"
                   className="text-blue-600 dark:text-blue-400 hover:underline"

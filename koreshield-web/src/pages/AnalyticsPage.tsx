@@ -75,9 +75,9 @@ export function AnalyticsPage() {
                                 <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                             </div>
                             <div className="min-w-0">
-                                <h1 className="text-lg sm:text-2xl font-bold truncate">Multi-Tenant Analytics</h1>
+                                <h1 className="text-lg sm:text-2xl font-bold truncate">Usage Analytics</h1>
                                 <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                                    Cross-tenant insights and performance comparisons
+                                    Account-level insights and performance comparisons
                                 </p>
                             </div>
                         </div>
@@ -107,7 +107,7 @@ export function AnalyticsPage() {
                             <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                         </div>
                         <div className="text-xl sm:text-3xl font-bold">{totalRequests.toLocaleString()}</div>
-                        <div className="text-xs text-muted-foreground mt-1 hidden sm:block">Across all tenants</div>
+                        <div className="text-xs text-muted-foreground mt-1 hidden sm:block">Across all accounts</div>
                     </div>
 
                     <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
@@ -143,7 +143,7 @@ export function AnalyticsPage() {
                 {/* Metric Selector */}
                 <div className="bg-card border border-border rounded-lg p-6 mb-8">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold">Tenant Comparison</h3>
+                        <h3 className="text-lg font-semibold">Account Comparison</h3>
                         <div className="flex items-center gap-2">
                             <Filter className="w-4 h-4 text-muted-foreground" />
                             <select
@@ -190,11 +190,11 @@ export function AnalyticsPage() {
                     )}
                 </div>
 
-                {/* Tier Distribution & Top Tenants */}
+                {/* Tier Distribution & Top Accounts */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Tier Distribution */}
                     <div className="bg-card border border-border rounded-lg p-6">
-                        <h3 className="text-lg font-semibold mb-4">Tenant Tier Distribution</h3>
+                        <h3 className="text-lg font-semibold mb-4">Account Tier Distribution</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <RechartsPie>
                                 <Pie
@@ -216,9 +216,9 @@ export function AnalyticsPage() {
                         </ResponsiveContainer>
                     </div>
 
-                    {/* Top Tenants by Activity */}
+                    {/* Top Accounts by Activity */}
                     <div className="bg-card border border-border rounded-lg p-6">
-                        <h3 className="text-lg font-semibold mb-4">Top Tenants by Activity</h3>
+                        <h3 className="text-lg font-semibold mb-4">Top Accounts by Activity</h3>
                         <div className="space-y-4">
                             {analytics
                                 .sort((a, b) => b.requests_total - a.requests_total)
@@ -255,13 +255,13 @@ export function AnalyticsPage() {
                 {/* Detailed Tenant Table */}
                 <div className="bg-card border border-border rounded-lg overflow-hidden">
                     <div className="px-6 py-4 border-b border-border">
-                        <h3 className="text-lg font-semibold">All Tenants Performance</h3>
+                        <h3 className="text-lg font-semibold">All Accounts Performance</h3>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead className="bg-muted border-b border-border">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Tenant</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Account</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Tier</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Requests</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Blocked</th>
