@@ -1,14 +1,8 @@
 import { createClient } from '@sanity/client'
 import { createImageUrlBuilder } from '@sanity/image-url'
 
-const sanityProjectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID
-const sanityDataset = import.meta.env.PUBLIC_SANITY_DATASET
-
-if (!sanityProjectId || !sanityDataset) {
-	throw new Error(
-		'Missing Sanity configuration. Set PUBLIC_SANITY_PROJECT_ID and PUBLIC_SANITY_DATASET.'
-	)
-}
+const sanityProjectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID || 'rdas6fhs'
+const sanityDataset = import.meta.env.PUBLIC_SANITY_DATASET || 'production'
 
 export const sanityClient = createClient({
 	projectId: sanityProjectId,
