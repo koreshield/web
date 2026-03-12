@@ -54,7 +54,7 @@ export function ThreatTypeBreakdown({ data }: ThreatTypeBreakdownProps) {
                 </div>
             </div>
 
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
                 <PieChart>
                     <Pie
                         data={chartData}

@@ -164,7 +164,7 @@ export function AnalyticsPage() {
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                         </div>
                     ) : (
-                        <ResponsiveContainer width="100%" height={350}>
+                        <ResponsiveContainer width="100%" height={350} minHeight={350} minWidth={0}>
                             <BarChart data={tenantComparisonData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                                 <XAxis 
@@ -195,7 +195,7 @@ export function AnalyticsPage() {
                     {/* Tier Distribution */}
                     <div className="bg-card border border-border rounded-lg p-6">
                         <h3 className="text-lg font-semibold mb-4">Account Tier Distribution</h3>
-                        <ResponsiveContainer width="100%" height={300}>
+                        <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
                             <RechartsPie>
                                 <Pie
                                     data={tierDistributionData}
