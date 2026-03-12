@@ -1,7 +1,10 @@
 import * as LucideIcons from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { analyzeThreat, PRESET_ATTACKS, type ThreatLogEntry, type ThreatResult } from '../lib/threat-engine';
+import { useToast } from '../components/ToastNotification';
+import { api } from '../lib/api-client';
+import { authService } from '../lib/auth';
+import { PRESET_ATTACKS, type ThreatLogEntry, type ThreatResult, type ThreatSignal } from '../lib/threat-engine';
 
 const Icon = ({ name, className }: { name: string; className?: string }) => {
 	const LucideIcon = (LucideIcons as any)[name];
@@ -12,6 +15,117 @@ const Icon = ({ name, className }: { name: string; className?: string }) => {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ScanState = 'idle' | 'scanning' | 'done';
+
+type ScanApiIndicator = {
+	type: string;
+	severity: string;
+	confidence: number;
+	description: string;
+	metadata?: Record<string, any>;
+};
+
+type ScanApiResult = {
+	is_safe: boolean;
+	threat_level: string;
+	confidence: number;
+	indicators: ScanApiIndicator[];
+	processing_time_ms: number;
+	metadata: Record<string, any>;
+	scan_id?: string;
+};
+
+type ScanApiResponse = {
+	result: ScanApiResult;
+	request_id: string;
+	timestamp: string;
+	version: string;
+};
+
+const threatLevelToSeverity: Record<string, ThreatResult['severity']> = {
+	safe: 'none',
+	low: 'low',
+	medium: 'medium',
+	high: 'high',
+	critical: 'critical',
+};
+
+const indicatorTypeToCategory: Record<string, ThreatResult['category']> = {
+	keyword: 'Prompt Injection',
+	rule: 'Prompt Injection',
+	blocklist: 'Data Exfiltration',
+	allowlist: 'Clean',
+	ml: 'Adversarial Input',
+	code_block_injection: 'Prompt Injection',
+	role_manipulation: 'Jailbreak Attempt',
+	encoding_attempt: 'Payload Obfuscation',
+	prompt_leaking: 'System Prompt Leak',
+	data_exfiltration: 'Data Exfiltration',
+};
+
+const mapConfidenceLevel = (confidence: number): ThreatResult['confidence'] => {
+	if (confidence >= 0.9) return 'definite';
+	if (confidence >= 0.75) return 'high';
+	if (confidence >= 0.5) return 'moderate';
+	return 'low';
+};
+
+const remediationBySeverity: Record<ThreatResult['severity'], string> = {
+	critical: 'Block the request, isolate the payload, and require a new user session. Audit downstream access immediately.',
+	high: 'Block the request and require re-authentication or a clean prompt rewrite before retrying.',
+	medium: 'Require user confirmation and sanitize prompt/context before forwarding.',
+	low: 'Log the signal and allow with monitoring. Consider adding a policy rule if it repeats.',
+	none: 'No remediation required. Continue monitoring with standard policies.',
+};
+
+const mitreRefBySeverity: Record<ThreatResult['severity'], string> = {
+	critical: 'ATLAS AML.T0051',
+	high: 'ATLAS AML.T0051',
+	medium: 'ATLAS AML.T0051',
+	low: 'ATLAS AML.T0000',
+	none: 'ATLAS AML.T0000',
+};
+
+const buildThreatResult = (scan: ScanApiResult): ThreatResult => {
+	const indicators = scan.indicators || [];
+	const severity = threatLevelToSeverity[scan.threat_level] || (scan.is_safe ? 'none' : 'low');
+	const signals: ThreatSignal[] = indicators.map((indicator, index) => {
+		const rawType = indicator.metadata?.type || indicator.type;
+		const category = indicatorTypeToCategory[rawType] || indicatorTypeToCategory[indicator.type] || (scan.is_safe ? 'Clean' : 'Adversarial Input');
+		const ruleId = indicator.metadata?.rule_id || indicator.metadata?.keyword || `KRS-${String(index + 1).padStart(3, '0')}`;
+		return {
+			ruleId,
+			category,
+			severity,
+			score: Math.round((indicator.confidence ?? scan.confidence) * 100),
+			matchedPattern: indicator.description || indicator.type,
+			explanation: `Matched indicator: ${indicator.description || indicator.type}.`,
+			remediation: remediationBySeverity[severity],
+			mitreRef: mitreRefBySeverity[severity],
+		};
+	});
+
+	const primarySignal = signals[0];
+	const scanIdShort = scan.scan_id ? `SCAN-${scan.scan_id.slice(0, 6).toUpperCase()}` : 'SCAN-000';
+
+	return {
+		blocked: !scan.is_safe,
+		category: primarySignal?.category || (scan.is_safe ? 'Clean' : 'Adversarial Input'),
+		severity,
+		score: Math.round(scan.confidence * 100),
+		confidence: mapConfidenceLevel(scan.confidence),
+		explanation: scan.is_safe
+			? 'No threats detected. Prompt cleared for downstream processing.'
+			: `Detected ${signals.length} indicator${signals.length === 1 ? '' : 's'} across ${scan.threat_level} severity.`,
+		matchedPattern: primarySignal?.matchedPattern || null,
+		processingMs: Math.round(scan.processing_time_ms),
+		ruleId: primarySignal?.ruleId || scanIdShort,
+		signalCount: signals.length,
+		signals,
+		remediation: remediationBySeverity[severity],
+		mitreRef: mitreRefBySeverity[severity],
+		entropyFlag: indicators.some((indicator) => indicator.type === 'ml' || indicator.metadata?.type === 'ml_detection'),
+	};
+};
 
 // ─── Severity Badge ───────────────────────────────────────────────────────────
 
@@ -251,15 +365,17 @@ function ThreatLogPane({ entries }: { entries: ThreatLogEntry[] }) {
 function ChatPane({
 	onSubmit,
 	isScanning,
+	disabled,
 }: {
 	onSubmit: (prompt: string) => void;
 	isScanning: boolean;
+	disabled: boolean;
 }) {
 	const [input, setInput] = useState('');
 
 	const handleSubmit = () => {
 		const trimmed = input.trim();
-		if (!trimmed || isScanning) return;
+		if (!trimmed || isScanning || disabled) return;
 		onSubmit(trimmed);
 		setInput('');
 	};
@@ -279,7 +395,7 @@ function ChatPane({
 						{PRESET_ATTACKS.map((preset) => (
 							<button
 								key={preset.label}
-								disabled={isScanning}
+								disabled={isScanning || disabled}
 								onClick={() => onSubmit(preset.prompt)}
 								className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 ${preset.color}`}
 							>
@@ -301,10 +417,11 @@ function ChatPane({
 						onKeyDown={(e) => {
 							if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleSubmit();
 						}}
+						disabled={disabled}
 					/>
 					<button
 						onClick={handleSubmit}
-						disabled={!input.trim() || isScanning}
+						disabled={!input.trim() || isScanning || disabled}
 						className="w-full py-3 px-6 rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
 						style={{
 							background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
@@ -338,34 +455,46 @@ export default function DemoPage() {
 	const [currentResult, setCurrentResult] = useState<ThreatResult | null>(null);
 	const [log, setLog] = useState<ThreatLogEntry[]>([]);
 	const [stats, setStats] = useState({ total: 0, blocked: 0, allowed: 0 });
+	const { error: showError, info } = useToast();
+	const isAuthenticated = authService.isAuthenticated();
 
 	const handlePrompt = useCallback(async (prompt: string) => {
 		if (scanState === 'scanning') return;
+		if (!authService.isAuthenticated()) {
+			showError('Sign in required', 'Log in to run a live scan against your KoreShield tenant.');
+			return;
+		}
 
 		setScanState('scanning');
 		setCurrentResult(null);
 
-		// Simulate processing delay for dramatic effect
-		await new Promise((r) => setTimeout(r, 1400));
+		try {
+			const response = await api.scanText(prompt);
+			const scanResponse = response as ScanApiResponse;
+			const result = buildThreatResult(scanResponse.result);
+			setCurrentResult(result);
+			setScanState('done');
 
-		const result = analyzeThreat(prompt);
-		setCurrentResult(result);
-		setScanState('done');
+			const entry: ThreatLogEntry = {
+				...result,
+				id: crypto.randomUUID(),
+				prompt,
+				timestamp: new Date(),
+			};
 
-		const entry: ThreatLogEntry = {
-			...result,
-			id: crypto.randomUUID(),
-			prompt,
-			timestamp: new Date(),
-		};
-
-		setLog((prev) => [...prev, entry]);
-		setStats((prev) => ({
-			total: prev.total + 1,
-			blocked: prev.blocked + (result.blocked ? 1 : 0),
-			allowed: prev.allowed + (result.blocked ? 0 : 1),
-		}));
-	}, [scanState]);
+			setLog((prev) => [...prev, entry]);
+			setStats((prev) => ({
+				total: prev.total + 1,
+				blocked: prev.blocked + (result.blocked ? 1 : 0),
+				allowed: prev.allowed + (result.blocked ? 0 : 1),
+			}));
+		} catch (err) {
+			setScanState('idle');
+			setCurrentResult(null);
+			info('Scan failed', 'The API could not complete the scan. Check your session and try again.');
+			console.error('Scan failed', err);
+		}
+	}, [scanState, showError, info]);
 
 	return (
 		<div className="min-h-screen bg-slate-950 text-white">
@@ -394,6 +523,10 @@ export default function DemoPage() {
 						<div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
 						<span className="hidden sm:inline">Firewall Active</span>
 					</div>
+					<div className={`flex items-center gap-1.5 ${isAuthenticated ? 'text-emerald-400' : 'text-amber-300'}`}>
+						<div className={`w-1.5 h-1.5 rounded-full ${isAuthenticated ? 'bg-emerald-400' : 'bg-amber-300'}`} />
+						<span className="hidden sm:inline">{isAuthenticated ? 'Session Authenticated' : 'Guest Session'}</span>
+					</div>
 					<div className="flex items-center gap-2 md:gap-4 text-slate-500 font-mono">
 						<span><span className="text-white font-bold">{stats.total}</span> <span className="hidden sm:inline">Total</span></span>
 						<span><span className="text-red-400 font-bold">{stats.blocked}</span> <span className="hidden sm:inline">Blocked</span></span>
@@ -406,20 +539,25 @@ export default function DemoPage() {
 			<div className="text-center py-8 md:py-10 px-4 md:px-6">
 				<div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 text-xs font-medium mb-4">
 					<div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-					Interactive Sandbox — No signup required
+					Live API Demo — Login required for scans
 				</div>
 				<h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-white via-blue-100 to-blue-400 bg-clip-text text-transparent">
 					See KoreShield Stop Real AI Attacks
 				</h1>
 				<p className="text-slate-400 text-base md:text-lg max-w-xl mx-auto">
-					Type any prompt below or pick a preset attack. Watch the firewall intercept threats in real time.
+					Type any prompt below or pick a preset attack. Watch the firewall intercept threats in real time against your tenant policies.
 				</p>
+				{!isAuthenticated && (
+					<p className="text-amber-300 text-sm mt-4">
+						Sign in to enable live scans. Guest mode keeps the UI visible but disables API calls.
+					</p>
+				)}
 			</div>
 
 			{/* 3-Pane Layout */}
 			<div className="max-w-7xl mx-auto px-6 pb-12">
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ minHeight: '540px' }}>
-					<ChatPane onSubmit={handlePrompt} isScanning={scanState === 'scanning'} />
+					<ChatPane onSubmit={handlePrompt} isScanning={scanState === 'scanning'} disabled={!isAuthenticated} />
 					<FirewallPane result={currentResult} state={scanState} />
 					<ThreatLogPane entries={log} />
 				</div>
