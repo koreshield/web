@@ -53,8 +53,8 @@ export function ApiKeysPage() {
 			setFormData({ name: '', description: '', expires_at: '' });
 			success('API key generated successfully!');
 		},
-		onError: () => {
-			error('Failed to generate API key');
+		onError: (err) => {
+			error('Failed to generate API key', err?.message || 'Please check your input and try again.');
 		},
 	});
 
@@ -78,8 +78,12 @@ export function ApiKeysPage() {
 	};
 
 	const handleCreateKey = () => {
+		if (!formData.name.trim()) {
+			error('Name is required', 'Provide a name for the API key before generating.');
+			return;
+		}
 		const data: any = {
-			name: formData.name,
+			name: formData.name.trim(),
 			description: formData.description || undefined,
 		};
 
