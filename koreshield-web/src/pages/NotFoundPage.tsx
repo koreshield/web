@@ -172,12 +172,12 @@ export default function NotFoundPage() {
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-8">
             Still can't find what you're looking for?{' '}
             <a
-              href="https://github.com/koreshield/koreshield/issues"
+              href="mailto:support@koreshield.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:underline"
             >
-              Report an issue
+              Contact support
             </a>{' '}
             or join our{' '}
             <a

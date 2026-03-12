@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Activity, Database, Globe, Network, Shield, Users } from 'lucide-react';
+import { Activity, Database, Globe, Network, Shield, FileText } from 'lucide-react';
 
 const features = [
     {
@@ -27,9 +27,9 @@ const features = [
         highlight: false,
     },
     {
-        icon: Users,
-        title: 'Tenant Isolation',
-        description: 'Built for SaaS. Separate quotas, RBAC, and policies per tenant.',
+        icon: FileText,
+        title: 'Audit Trails',
+        description: 'Structured logs and security events for compliance, incident response, and monitoring.',
         highlight: false,
     },
     {

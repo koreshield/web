@@ -106,6 +106,15 @@ const client = createClient({
 });
 ```
 
+Management endpoints (stats, logs, config) require a JWT. To call those endpoints,
+omit `apiKey` and pass the JWT as `Authorization`:
+
+```typescript
+const client = createClient({
+    baseURL: 'https://api.koreshield.com',
+    headers: { Authorization: 'Bearer <jwt>' }
+});
+```
 ### Programmatic Configuration
 
 ```typescript
@@ -289,28 +298,34 @@ if (result.overall_severity === ThreatLevel.HIGH) {
 
 ## Monitoring & Analytics
 
-### Get Security Metrics
+### Get Proxy Stats (Management)
 
 ```typescript
 const metrics = await client.getMetrics();
 console.log({
     totalRequests: metrics.requests_total,
+    allowedRequests: metrics.requests_allowed,
     blockedRequests: metrics.requests_blocked,
     attacksDetected: metrics.attacks_detected,
-    avgResponseTime: metrics.avg_response_time,
-    activeConnections: metrics.active_connections
+    errors: metrics.errors
 });
 ```
 
-### Security Events
+### Audit Logs (Management)
 
 ```typescript
-// Get recent security events
-const events = await client.getSecurityEvents(50, 0, 'attack_detected', 'high');
+// Get recent audit logs (requires management JWT)
+const logs = await client.getAuditLogs(50, 0, 'info');
 
-events.forEach(event => {
-    console.log(`${event.type}: ${event.description} (${event.severity})`);
-    console.log(`Time: ${new Date(event.timestamp).toLocaleString()}`);
+logs.logs.forEach(entry => {
+    console.log(`${entry.level}: ${entry.message || entry.event}`);
+    console.log(`Time: ${entry.timestamp}`);
+});
+
+// Or fetch just the log entries
+const entries = await client.getSecurityEvents(50, 0, 'info');
+entries.forEach(entry => {
+    console.log(`${entry.level}: ${entry.message || entry.event}`);
 });
 ```
 
@@ -376,11 +391,12 @@ Main client class for interacting with KoreShield proxy.
 - `createChatCompletion(request, securityOptions?)` - Create chat completion
 - `scanRAGContext(userQuery, documents, config?)` - Scan RAG documents
 - `scanRAGContextBatch(items, parallel?, maxConcurrent?)` - Batch RAG scanning
-- `getSecurityEvents(limit?, offset?, type?, severity?)` - Get security events
-- `getMetrics()` - Get security metrics
+- `getAuditLogs(limit?, offset?, level?)` - Get audit logs with pagination (management endpoint)
+- `getSecurityEvents(limit?, offset?, level?)` - Returns log entries only
+- `getMetrics()` - Get proxy stats (management endpoint)
 - `getPrometheusMetrics()` - Get Prometheus metrics
 - `health()` - Health check
-- `updateSecurityConfig(options)` - Update security configuration
+- `updateSecurityConfig(options)` - Update security configuration (management endpoint)
 - `testConnection()` - Test connection
 
 ### Utility Functions

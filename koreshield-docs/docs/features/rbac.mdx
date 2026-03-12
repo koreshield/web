@@ -7,7 +7,7 @@ last_update:
 
 # Role-Based Access Control (RBAC)
 
-KoreShield provides a built-in RBAC system for managing who can access what within your deployment. All RBAC endpoints require admin authentication.
+KoreShield provides a built-in RBAC system for managing who can access what within your deployment. RBAC is managed through the dashboard for hosted customers.
 
 ## Built-in Roles
 
@@ -28,35 +28,6 @@ Permissions are organized by category:
 - **analytics**: view dashboards, run reports
 - **system**: server configuration, provider management
 
-## API Endpoints
-
-All RBAC endpoints live under `/v1/rbac`.
-
-### Users
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/v1/rbac/users` | GET | List users (search by name/email, filter by role) |
-| `/v1/rbac/users/{user_id}` | GET | Get user details |
-| `/v1/rbac/users` | POST | Create a new user |
-| `/v1/rbac/users/{user_id}` | PUT | Update user (name, role, status) |
-| `/v1/rbac/users/{user_id}` | DELETE | Delete a user |
-
-### Roles
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/v1/rbac/roles` | GET | List all roles |
-| `/v1/rbac/roles/{role_id}` | GET | Get role details |
-| `/v1/rbac/roles` | POST | Create a custom role |
-| `/v1/rbac/roles/{role_id}` | PUT | Update role permissions |
-
-### Permissions
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/v1/rbac/permissions` | GET | List all permissions (filter by category) |
-
 ## User Statuses
 
 - `active`: user can log in and access resources
@@ -65,5 +36,4 @@ All RBAC endpoints live under `/v1/rbac`.
 
 ## Related Docs
 
-- [Multi-Tenancy](/docs/features/multi-tenancy) for tenant-level isolation
 - [REST API](/docs/api/rest-api) for authentication details
