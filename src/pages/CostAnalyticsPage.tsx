@@ -139,7 +139,7 @@ export function CostAnalyticsPage() {
                             <div className="min-w-0">
                                 <h1 className="text-lg sm:text-2xl font-bold">Cost Analytics</h1>
                                 <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                                    Track spending across providers, tenants, and time periods
+                                    Track spending across providers, accounts, and time periods
                                 </p>
                             </div>
                         </div>
@@ -201,7 +201,7 @@ export function CostAnalyticsPage() {
                                 onChange={(e) => setSelectedTenant(e.target.value)}
                                 className="px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                             >
-                                <option value="all">All Tenants</option>
+                                <option value="all">All Accounts</option>
                                 <option value="tenant1">Acme Corporation</option>
                                 <option value="tenant2">TechStart Inc</option>
                             </select>
@@ -309,7 +309,7 @@ export function CostAnalyticsPage() {
                             </div>
 
                             <div className="bg-card border border-border rounded-lg p-6">
-                                <h2 className="text-lg font-semibold mb-4">Top 10 Tenants by Cost</h2>
+                                <h2 className="text-lg font-semibold mb-4">Top 10 Accounts by Cost</h2>
                                 <ResponsiveContainer width="100%" height={300}>
                                     <BarChart data={tenantCostBreakdown} layout="horizontal">
                                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />

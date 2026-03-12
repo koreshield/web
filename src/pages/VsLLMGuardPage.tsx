@@ -190,8 +190,8 @@ export default function VsLLMGuardPage() {
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
 								<div>
-									<strong className="text-gray-900 dark:text-white">Multi-Tenant SaaS</strong>
-									<p className="text-gray-600 dark:text-gray-400 text-sm">Require tenant isolation and RBAC</p>
+									<strong className="text-gray-900 dark:text-white">SaaS Deployments</strong>
+									<p className="text-gray-600 dark:text-gray-400 text-sm">Require account isolation and RBAC</p>
 								</div>
 							</li>
 							<li className="flex gap-3">
