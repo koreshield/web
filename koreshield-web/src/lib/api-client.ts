@@ -739,6 +739,48 @@ class ApiClient {
 			body: JSON.stringify(params),
 		});
 	}
+
+	async getRagScanHistory(limit = 20, offset = 0) {
+		const params = new URLSearchParams({
+			limit: String(limit),
+			offset: String(offset),
+		});
+		return this.fetch(`/v1/rag/scans?${params.toString()}`);
+	}
+
+	async getRagScan(scanId: string) {
+		return this.fetch(`/v1/rag/scans/${scanId}`);
+	}
+
+	async deleteRagScan(scanId: string) {
+		return this.fetch(`/v1/rag/scans/${scanId}`, {
+			method: 'DELETE',
+		});
+	}
+
+	async clearRagScans() {
+		return this.fetch('/v1/rag/scans', {
+			method: 'DELETE',
+		});
+	}
+
+	async downloadRagScanPack(scanId: string): Promise<Blob> {
+		const url = `${this.baseUrl}/v1/rag/scans/${scanId}/pack`;
+		const headers: Record<string, string> = {};
+		const adminToken = authService.getToken();
+		if (adminToken) {
+			headers['Authorization'] = `Bearer ${adminToken}`;
+		}
+		const response = await fetch(url, {
+			method: 'GET',
+			headers,
+			credentials: 'include',
+		});
+		if (!response.ok) {
+			throw new Error(`Download failed: ${response.statusText}`);
+		}
+		return response.blob();
+	}
 }
 
 export const api = new ApiClient();

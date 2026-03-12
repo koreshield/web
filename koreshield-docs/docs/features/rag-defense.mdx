@@ -103,6 +103,13 @@ curl -s -X POST http://localhost:8000/v1/rag/scan \
 
 See the full request/response shape in the [REST API reference](/docs/api/rest-api).
 
+## Scan History + Export Packs
+
+Every authenticated RAG scan is stored server‑side so you can review results later or export a full scan pack.
+
+- `GET /v1/rag/scans` and `GET /v1/rag/scans/{scan_id}`
+- `GET /v1/rag/scans/{scan_id}/pack` (download request + response bundle)
+
 ## Related
 
 - [REST API](/docs/api/rest-api) for endpoint details

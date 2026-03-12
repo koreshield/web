@@ -3,6 +3,8 @@ Main proxy server that intercepts LLM API requests.
 """
 
 import json
+import io
+import zipfile
 import os
 import sys
 import uuid
@@ -19,7 +21,7 @@ import structlog
 import redis
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, func, delete
 
 from .detector import AttackDetector
 from .logger import FirewallLogger
@@ -31,6 +33,7 @@ from .rag_taxonomy import RetrievedDocument
 from .rag_taxonomy import RetrievedDocument
 from .database import AsyncSessionLocal
 from .models.request_log import RequestLog
+from .models.rag_scan import RagScan
 from .models.api_key import APIKey
 from .api.auth import get_request_token, verify_jwt_token
 
@@ -206,6 +209,9 @@ class KoreShieldProxy:
         # In-memory scan store for /v1/scan endpoints (bounded)
         self.app.state.scan_store = deque(maxlen=1000)
         self.app.state.scan_index = {}
+        # In-memory fallback for RAG scan history when DB is unavailable
+        self.app.state.rag_scan_store = deque(maxlen=250)
+        self.app.state.rag_scan_index = {}
 
         # Initialize security components
         security_config = config.get("security", {})
@@ -475,6 +481,50 @@ class KoreShieldProxy:
         self.app.state.scan_index[scan_id] = scan_response
         self.app.state.scan_store.appendleft(scan_response)
 
+    def _store_rag_scan_fallback(self, scan_id: str, payload: dict) -> None:
+        self.app.state.rag_scan_index[scan_id] = payload
+        self.app.state.rag_scan_store.appendleft(payload)
+
+    async def _store_rag_scan_db(
+        self,
+        principal: dict,
+        scan_id: str,
+        user_query: str | None,
+        documents: list[dict],
+        response_data: dict,
+    ) -> None:
+        if not AsyncSessionLocal:
+            self._store_rag_scan_fallback(scan_id, {
+                "scan_id": scan_id,
+                "user_query": user_query,
+                "documents": documents,
+                "response": response_data,
+                "timestamp": response_data.get("timestamp") or datetime.now(timezone.utc).isoformat(),
+            })
+            return
+
+        is_safe = bool(response_data.get("is_safe", True))
+        total_threats = 0
+        processing_time_ms = float(response_data.get("processing_time_ms", 0.0))
+        context = response_data.get("context_analysis") or {}
+        stats = context.get("statistics") or {}
+        total_threats = int(stats.get("total_threats_found") or context.get("total_threats_found") or 0)
+
+        async with AsyncSessionLocal() as session:
+            entry = RagScan(
+                scan_id=scan_id,
+                user_id=principal.get("user_id"),
+                api_key_id=principal.get("api_key_id"),
+                user_query=user_query,
+                documents=documents,
+                response=response_data,
+                is_safe=is_safe,
+                total_threats_found=total_threats,
+                processing_time_ms=processing_time_ms,
+            )
+            session.add(entry)
+            await session.commit()
+
     @property
     def provider(self):
         """Get the primary (highest priority) provider."""
@@ -576,6 +626,156 @@ class KoreShieldProxy:
         @self.limiter.limit(rate_limit)
         async def rag_scan(request: Request):
             return await self._handle_rag_scan(request)
+
+        @self.app.get("/v1/rag/scans", tags=["Chat"])
+        @self.limiter.limit(rate_limit)
+        async def list_rag_scans(request: Request, limit: int = 50, offset: int = 0):
+            principal = await self._authenticate_request(request)
+
+            if AsyncSessionLocal:
+                async with AsyncSessionLocal() as session:
+                    base_query = select(RagScan)
+                    count_query = select(func.count()).select_from(RagScan)
+
+                    if principal.get("user_id"):
+                        base_query = base_query.where(RagScan.user_id == principal["user_id"])
+                        count_query = count_query.where(RagScan.user_id == principal["user_id"])
+                    elif principal.get("api_key_id"):
+                        base_query = base_query.where(RagScan.api_key_id == principal["api_key_id"])
+                        count_query = count_query.where(RagScan.api_key_id == principal["api_key_id"])
+
+                    base_query = base_query.order_by(RagScan.created_at.desc()).limit(limit).offset(offset)
+                    result = await session.execute(base_query)
+                    scans = [row.to_detail_dict() for row in result.scalars().all()]
+                    total = await session.execute(count_query)
+                    total_count = int(total.scalar() or 0)
+
+                    return {
+                        "scans": scans,
+                        "total": total_count,
+                        "limit": limit,
+                        "offset": offset,
+                    }
+
+            scans = list(self.app.state.rag_scan_store)
+            total = len(scans)
+            return {
+                "scans": scans[offset: offset + limit],
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+            }
+
+        @self.app.get("/v1/rag/scans/{scan_id}", tags=["Chat"])
+        @self.limiter.limit(rate_limit)
+        async def get_rag_scan(scan_id: str, request: Request):
+            principal = await self._authenticate_request(request)
+
+            if AsyncSessionLocal:
+                async with AsyncSessionLocal() as session:
+                    query = select(RagScan).where(RagScan.scan_id == scan_id)
+                    if principal.get("user_id"):
+                        query = query.where(RagScan.user_id == principal["user_id"])
+                    elif principal.get("api_key_id"):
+                        query = query.where(RagScan.api_key_id == principal["api_key_id"])
+                    result = await session.execute(query)
+                    scan = result.scalar_one_or_none()
+                    if not scan:
+                        raise HTTPException(status_code=404, detail="RAG scan not found")
+                    return scan.to_detail_dict()
+
+            scan = self.app.state.rag_scan_index.get(scan_id)
+            if not scan:
+                raise HTTPException(status_code=404, detail="RAG scan not found")
+            return scan
+
+        @self.app.delete("/v1/rag/scans/{scan_id}", tags=["Chat"])
+        @self.limiter.limit(rate_limit)
+        async def delete_rag_scan(scan_id: str, request: Request):
+            principal = await self._authenticate_request(request)
+
+            if not AsyncSessionLocal:
+                self.app.state.rag_scan_index.pop(scan_id, None)
+                self.app.state.rag_scan_store = deque(
+                    [item for item in self.app.state.rag_scan_store if item.get("scan_id") != scan_id],
+                    maxlen=250,
+                )
+                return {"deleted": True}
+
+            async with AsyncSessionLocal() as session:
+                query = delete(RagScan).where(RagScan.scan_id == scan_id)
+                if principal.get("user_id"):
+                    query = query.where(RagScan.user_id == principal["user_id"])
+                elif principal.get("api_key_id"):
+                    query = query.where(RagScan.api_key_id == principal["api_key_id"])
+                result = await session.execute(query)
+                await session.commit()
+                if result.rowcount == 0:
+                    raise HTTPException(status_code=404, detail="RAG scan not found")
+                return {"deleted": True}
+
+        @self.app.delete("/v1/rag/scans", tags=["Chat"])
+        @self.limiter.limit(rate_limit)
+        async def clear_rag_scans(request: Request):
+            principal = await self._authenticate_request(request)
+
+            if not AsyncSessionLocal:
+                self.app.state.rag_scan_index = {}
+                self.app.state.rag_scan_store = deque(maxlen=250)
+                return {"deleted": True}
+
+            async with AsyncSessionLocal() as session:
+                query = delete(RagScan)
+                if principal.get("user_id"):
+                    query = query.where(RagScan.user_id == principal["user_id"])
+                elif principal.get("api_key_id"):
+                    query = query.where(RagScan.api_key_id == principal["api_key_id"])
+                await session.execute(query)
+                await session.commit()
+                return {"deleted": True}
+
+        @self.app.get("/v1/rag/scans/{scan_id}/pack", tags=["Chat"])
+        @self.limiter.limit(rate_limit)
+        async def download_rag_scan_pack(scan_id: str, request: Request):
+            principal = await self._authenticate_request(request)
+
+            scan_detail = None
+            if AsyncSessionLocal:
+                async with AsyncSessionLocal() as session:
+                    query = select(RagScan).where(RagScan.scan_id == scan_id)
+                    if principal.get("user_id"):
+                        query = query.where(RagScan.user_id == principal["user_id"])
+                    elif principal.get("api_key_id"):
+                        query = query.where(RagScan.api_key_id == principal["api_key_id"])
+                    result = await session.execute(query)
+                    scan = result.scalar_one_or_none()
+                    if scan:
+                        scan_detail = scan.to_detail_dict()
+            else:
+                scan_detail = self.app.state.rag_scan_index.get(scan_id)
+
+            if not scan_detail:
+                raise HTTPException(status_code=404, detail="RAG scan not found")
+
+            request_payload = {
+                "scan_id": scan_detail.get("scan_id"),
+                "timestamp": scan_detail.get("timestamp"),
+                "user_query": scan_detail.get("user_query"),
+                "documents": scan_detail.get("documents", []),
+            }
+            response_payload = scan_detail.get("response") or {}
+
+            buffer = io.BytesIO()
+            with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr("request.json", json.dumps(request_payload, indent=2, default=str))
+                archive.writestr("response.json", json.dumps(response_payload, indent=2, default=str))
+                archive.writestr("documents.json", json.dumps(request_payload.get("documents", []), indent=2, default=str))
+
+            buffer.seek(0)
+            headers = {
+                "Content-Disposition": f"attachment; filename=rag-scan-{scan_id}.zip"
+            }
+            return Response(content=buffer.read(), media_type="application/zip", headers=headers)
 
         # Prompt scanning endpoints
         @self.app.post("/v1/scan", tags=["Scan"])
@@ -1177,8 +1377,9 @@ class KoreShieldProxy:
                 )
             
             # Build response
+            scan_id = rag_scan_result.scan_id or request_id
             response_data = {
-                "scan_id": rag_scan_result.scan_id,
+                "scan_id": scan_id,
                 "is_safe": combined_is_safe,
                 "overall_severity": rag_scan_result.overall_severity.value,
                 "overall_confidence": rag_scan_result.overall_confidence,
@@ -1190,6 +1391,17 @@ class KoreShieldProxy:
                 "processing_time_ms": (time.time() - start_time) * 1000,
                 "timestamp": rag_scan_result.scan_timestamp.isoformat(),
             }
+
+            try:
+                await self._store_rag_scan_db(
+                    principal=principal,
+                    scan_id=scan_id,
+                    user_query=user_query or None,
+                    documents=documents_data,
+                    response_data=response_data,
+                )
+            except Exception as e:
+                logger.warning("Failed to persist RAG scan history", error=str(e))
             
             return JSONResponse(content=response_data)
             
