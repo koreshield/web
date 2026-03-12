@@ -78,7 +78,7 @@ const config: Config = {
 			{
 				redirects: [
 					{
-						from: ['/getting-started', '/getting-started/'],
+						from: ['/getting-started'],
 						to: '/docs/getting-started/quick-start/',
 					},
 				],

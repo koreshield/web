@@ -27,6 +27,9 @@ import { SEOMeta } from '../components/SEOMeta';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
 import { authService } from '../lib/auth';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import * as mammoth from 'mammoth/mammoth.browser';
 
 // Types based on backend schema
 interface RetrievedDocument {
@@ -128,24 +131,14 @@ type RAGApiResponse = {
 	request_id?: string;
 };
 
+GlobalWorkerOptions.workerSrc = pdfWorker;
+
 const buildTaxonomyCounts = (values: string[] | undefined): Record<string, number> => {
 	if (!values) return {};
 	return values.reduce<Record<string, number>>((acc, value) => {
 		acc[value] = (acc[value] || 0) + 1;
 		return acc;
 	}, {});
-};
-
-const loadHistory = (key: string): RAGScanHistoryItem[] => {
-	if (typeof window === 'undefined') return [];
-	try {
-		const raw = window.localStorage.getItem(key);
-		if (!raw) return [];
-		const parsed = JSON.parse(raw);
-		return Array.isArray(parsed) ? parsed : [];
-	} catch {
-		return [];
-	}
 };
 
 const normalizeRagResponse = (
@@ -261,7 +254,6 @@ const CRM_TEMPLATES = {
 export function RAGSecurityPage() {
 	const { success, error: showError } = useToast();
 	const currentUser = authService.getCurrentUser();
-	const historyKey = `koreshield_rag_scan_history_${currentUser?.id || 'guest'}`;
 	const [documents, setDocuments] = useState<RetrievedDocument[]>([]);
 	const [userQuery, setUserQuery] = useState('');
 	const [scanResult, setScanResult] = useState<RAGScanResult | null>(null);
@@ -277,13 +269,82 @@ export function RAGSecurityPage() {
 		enable_cross_document_analysis: true,
 		max_excerpt_length: 200
 	});
-	const [scanHistory, setScanHistory] = useState<RAGScanHistoryItem[]>(() => loadHistory(historyKey));
+	const [scanHistory, setScanHistory] = useState<RAGScanHistoryItem[]>([]);
+	const [historyLoading, setHistoryLoading] = useState(false);
+	const [historyError, setHistoryError] = useState<string | null>(null);
 
-	// Persist history locally per user
+	const refreshHistory = async () => {
+		setHistoryLoading(true);
+		setHistoryError(null);
+		try {
+			const response: any = await api.getRagScanHistory(20, 0);
+			const scans = response?.scans || [];
+			const mapped = scans.map((item: any) => {
+				const documentsList = item.documents || [];
+				const responsePayload = item.response || item.result || item;
+				const normalized = normalizeRagResponse(responsePayload, documentsList, item.user_query || '');
+				return {
+					id: item.scan_id || normalized.scan_metadata.scan_id,
+					timestamp: item.timestamp || normalized.scan_metadata.timestamp,
+					documents: documentsList,
+					user_query: item.user_query || '',
+					result: normalized,
+				} as RAGScanHistoryItem;
+			});
+			setScanHistory(mapped);
+		} catch (err: any) {
+			setHistoryError(err.message || 'Failed to load scan history');
+		} finally {
+			setHistoryLoading(false);
+		}
+	};
+
 	useEffect(() => {
-		if (typeof window === 'undefined') return;
-		window.localStorage.setItem(historyKey, JSON.stringify(scanHistory));
-	}, [scanHistory, historyKey]);
+		refreshHistory();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentUser?.id]);
+
+	const maxFileSizeBytes = 10 * 1024 * 1024;
+
+	const extractPdfText = async (file: File): Promise<string> => {
+		const data = await file.arrayBuffer();
+		const pdf = await getDocument({ data }).promise;
+		let text = '';
+		for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex += 1) {
+			const page = await pdf.getPage(pageIndex);
+			const content = await page.getTextContent();
+			const pageText = content.items
+				.map((item: any) => (typeof item.str === 'string' ? item.str : ''))
+				.filter(Boolean)
+				.join(' ');
+			text += `${pageText}\n`;
+		}
+		return text.trim();
+	};
+
+	const extractDocxText = async (file: File): Promise<string> => {
+		const data = await file.arrayBuffer();
+		const result = await mammoth.extractRawText({ arrayBuffer: data });
+		return (result.value || '').trim();
+	};
+
+	const readFileContent = async (file: File): Promise<string> => {
+		const lowerName = file.name.toLowerCase();
+		const isPdf = file.type === 'application/pdf' || lowerName.endsWith('.pdf');
+		const isDocx =
+			file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+			lowerName.endsWith('.docx');
+
+		if (isPdf) {
+			return extractPdfText(file);
+		}
+
+		if (isDocx) {
+			return extractDocxText(file);
+		}
+
+		return file.text();
+	};
 
 	// Handle file upload
 	const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -295,7 +356,15 @@ export function RAGSecurityPage() {
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 			try {
-				const content = await file.text();
+				if (file.size > maxFileSizeBytes) {
+					showError(`File too large (max 10MB): ${file.name}`);
+					continue;
+				}
+				const content = await readFileContent(file);
+				if (!content.trim()) {
+					showError(`No readable text found in: ${file.name}`);
+					continue;
+				}
 				newDocuments.push({
 					id: `file_${Date.now()}_${i}`,
 					content,
@@ -303,7 +372,8 @@ export function RAGSecurityPage() {
 						filename: file.name,
 						type: file.type,
 						size: file.size,
-						lastModified: file.lastModified
+						lastModified: file.lastModified,
+						extracted_at: new Date().toISOString()
 					}
 				});
 			} catch (err) {
@@ -378,8 +448,14 @@ export function RAGSecurityPage() {
 	};
 
 	const handleClearHistory = () => {
-		setScanHistory([]);
-		success('Scan history cleared');
+		api.clearRagScans()
+			.then(() => {
+				setScanHistory([]);
+				success('Scan history cleared');
+			})
+			.catch((err: any) => {
+				showError(err.message || 'Failed to clear history');
+			});
 	};
 
 	const handleLoadHistory = (item: RAGScanHistoryItem) => {
@@ -390,7 +466,30 @@ export function RAGSecurityPage() {
 	};
 
 	const handleDeleteHistory = (id: string) => {
-		setScanHistory((prev) => prev.filter((item) => item.id !== id));
+		api.deleteRagScan(id)
+			.then(() => {
+				setScanHistory((prev) => prev.filter((item) => item.id !== id));
+			})
+			.catch((err: any) => {
+				showError(err.message || 'Failed to delete scan');
+			});
+	};
+
+	const handleDownloadPack = async (scanId: string) => {
+		try {
+			const blob = await api.downloadRagScanPack(scanId);
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `rag-scan-${scanId}.zip`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+			success('Download started');
+		} catch (err: any) {
+			showError(err.message || 'Failed to download scan pack');
+		}
 	};
 
 	// Perform RAG scan
@@ -409,17 +508,7 @@ export function RAGSecurityPage() {
 			});
 			const normalized = normalizeRagResponse(response, documents, userQuery);
 			setScanResult(normalized);
-			setScanHistory((prev) => {
-				const entry: RAGScanHistoryItem = {
-					id: normalized.scan_metadata.scan_id,
-					timestamp: normalized.scan_metadata.timestamp,
-					documents,
-					user_query: userQuery,
-					result: normalized,
-				};
-				const next = [entry, ...prev.filter((item) => item.id !== entry.id)];
-				return next.slice(0, 10);
-			});
+			await refreshHistory();
 
 			if (normalized.is_safe) {
 				success('No threats detected - Documents are safe!');
@@ -558,7 +647,7 @@ export function RAGSecurityPage() {
 											<input
 												type="file"
 												multiple
-												accept=".txt,.md,.json,.csv"
+												accept=".txt,.md,.json,.csv,.pdf,.docx"
 												onChange={handleFileUpload}
 												className="hidden"
 											/>
@@ -566,7 +655,7 @@ export function RAGSecurityPage() {
 												<Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
 												<p className="text-sm font-medium mb-1">Click to upload files</p>
 												<p className="text-xs text-muted-foreground">
-													Supports TXT, MD, JSON, CSV (max 10MB per file)
+													Supports TXT, MD, JSON, CSV, PDF, DOCX (max 10MB per file)
 												</p>
 											</div>
 										</label>
@@ -801,13 +890,22 @@ export function RAGSecurityPage() {
 							<div className="bg-card border border-border rounded-lg p-6 space-y-4">
 								<div className="flex items-center justify-between">
 									<h2 className="text-lg font-semibold">Scan Results</h2>
-									<button
-										onClick={handleExport}
-										className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
-									>
-										<Download className="w-4 h-4" />
-										Export
-									</button>
+									<div className="flex items-center gap-3">
+										<button
+											onClick={() => handleDownloadPack(scanResult.scan_metadata.scan_id)}
+											className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
+										>
+											<Download className="w-4 h-4" />
+											Download Scan Pack
+										</button>
+										<button
+											onClick={handleExport}
+											className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
+										>
+											<Download className="w-4 h-4" />
+											Export
+										</button>
+									</div>
 								</div>
 
 								{/* Overall Status */}
@@ -906,9 +1004,13 @@ export function RAGSecurityPage() {
 								)}
 							</div>
 							<p className="text-xs text-muted-foreground">
-								Stored locally in this browser. Clear history if you are on a shared machine.
+								Stored securely in your account history for future review and downloads.
 							</p>
-							{scanHistory.length === 0 ? (
+							{historyLoading ? (
+								<div className="text-sm text-muted-foreground">Loading scan history...</div>
+							) : historyError ? (
+								<div className="text-sm text-red-500">{historyError}</div>
+							) : scanHistory.length === 0 ? (
 								<div className="text-sm text-muted-foreground">No previous scans yet.</div>
 							) : (
 								<div className="space-y-2">
@@ -929,6 +1031,13 @@ export function RAGSecurityPage() {
 												>
 													<Eye className="w-3 h-3" />
 													View
+												</button>
+												<button
+													onClick={() => handleDownloadPack(item.id)}
+													className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+												>
+													<Download className="w-3 h-3" />
+													Download
 												</button>
 												<button
 													onClick={() => handleDeleteHistory(item.id)}

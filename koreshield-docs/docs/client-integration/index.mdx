@@ -31,9 +31,13 @@ Choose one of the following:
 
 - `POST /v1/chat/completions`
 - `POST /v1/rag/scan`
+- `GET /v1/rag/scans` and `GET /v1/rag/scans/{scan_id}`
+- `GET /v1/rag/scans/{scan_id}/pack` (download request + response bundle)
 - `POST /v1/scan`
 - `POST /v1/scan/batch`
 - `GET /v1/scans` and `GET /v1/scans/{scan_id}`
+
+RAG scan history is persisted server-side for authenticated users, so you can revisit results and export a full scan pack later.
 
 ## Authentication
 
