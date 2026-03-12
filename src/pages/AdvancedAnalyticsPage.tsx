@@ -177,7 +177,7 @@ export function AdvancedAnalyticsPage() {
 
 					<div className="bg-card border border-border rounded-lg p-6">
 						<h2 className="text-xl font-semibold mb-4">Budget Forecast</h2>
-						<ResponsiveContainer width="100%" height={300}>
+						<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
 							<LineChart data={MOCK_BUDGET_FORECAST}>
 								<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
 								<XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
@@ -213,7 +213,7 @@ export function AdvancedAnalyticsPage() {
 							</button>
 						))}
 					</div>
-					<ResponsiveContainer width="100%" height={300}>
+					<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
 						<BarChart data={MOCK_PROVIDER_METRICS}>
 							<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
 							<XAxis dataKey="provider" stroke="hsl(var(--muted-foreground))" />
@@ -240,7 +240,7 @@ export function AdvancedAnalyticsPage() {
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 					<div className="bg-card border border-border rounded-lg p-6">
 						<h2 className="text-xl font-semibold mb-4">Cost Allocation by Team</h2>
-						<ResponsiveContainer width="100%" height={300}>
+						<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
 							<PieChart>
 								<Pie
 									data={MOCK_COST_ALLOCATION}

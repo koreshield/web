@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
 	Upload,
@@ -26,6 +26,7 @@ import {
 import { SEOMeta } from '../components/SEOMeta';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
+import { authService } from '../lib/auth';
 
 // Types based on backend schema
 interface RetrievedDocument {
@@ -102,6 +103,14 @@ interface ScanConfig {
 	max_excerpt_length?: number;
 }
 
+interface RAGScanHistoryItem {
+	id: string;
+	timestamp: string;
+	documents: RetrievedDocument[];
+	user_query: string;
+	result: RAGScanResult;
+}
+
 type RAGApiResponse = {
 	is_safe?: boolean;
 	overall_severity?: string;
@@ -125,6 +134,18 @@ const buildTaxonomyCounts = (values: string[] | undefined): Record<string, numbe
 		acc[value] = (acc[value] || 0) + 1;
 		return acc;
 	}, {});
+};
+
+const loadHistory = (key: string): RAGScanHistoryItem[] => {
+	if (typeof window === 'undefined') return [];
+	try {
+		const raw = window.localStorage.getItem(key);
+		if (!raw) return [];
+		const parsed = JSON.parse(raw);
+		return Array.isArray(parsed) ? parsed : [];
+	} catch {
+		return [];
+	}
 };
 
 const normalizeRagResponse = (
@@ -239,6 +260,8 @@ const CRM_TEMPLATES = {
 
 export function RAGSecurityPage() {
 	const { success, error: showError } = useToast();
+	const currentUser = authService.getCurrentUser();
+	const historyKey = `koreshield_rag_scan_history_${currentUser?.id || 'guest'}`;
 	const [documents, setDocuments] = useState<RetrievedDocument[]>([]);
 	const [userQuery, setUserQuery] = useState('');
 	const [scanResult, setScanResult] = useState<RAGScanResult | null>(null);
@@ -254,6 +277,13 @@ export function RAGSecurityPage() {
 		enable_cross_document_analysis: true,
 		max_excerpt_length: 200
 	});
+	const [scanHistory, setScanHistory] = useState<RAGScanHistoryItem[]>(() => loadHistory(historyKey));
+
+	// Persist history locally per user
+	useEffect(() => {
+		if (typeof window === 'undefined') return;
+		window.localStorage.setItem(historyKey, JSON.stringify(scanHistory));
+	}, [scanHistory, historyKey]);
 
 	// Handle file upload
 	const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -347,6 +377,22 @@ export function RAGSecurityPage() {
 		success('All documents cleared');
 	};
 
+	const handleClearHistory = () => {
+		setScanHistory([]);
+		success('Scan history cleared');
+	};
+
+	const handleLoadHistory = (item: RAGScanHistoryItem) => {
+		setDocuments(item.documents);
+		setUserQuery(item.user_query);
+		setScanResult(item.result);
+		success('Loaded previous scan');
+	};
+
+	const handleDeleteHistory = (id: string) => {
+		setScanHistory((prev) => prev.filter((item) => item.id !== id));
+	};
+
 	// Perform RAG scan
 	const handleScan = async () => {
 		if (documents.length === 0) {
@@ -363,6 +409,17 @@ export function RAGSecurityPage() {
 			});
 			const normalized = normalizeRagResponse(response, documents, userQuery);
 			setScanResult(normalized);
+			setScanHistory((prev) => {
+				const entry: RAGScanHistoryItem = {
+					id: normalized.scan_metadata.scan_id,
+					timestamp: normalized.scan_metadata.timestamp,
+					documents,
+					user_query: userQuery,
+					result: normalized,
+				};
+				const next = [entry, ...prev.filter((item) => item.id !== entry.id)];
+				return next.slice(0, 10);
+			});
 
 			if (normalized.is_safe) {
 				success('No threats detected - Documents are safe!');
@@ -833,6 +890,59 @@ export function RAGSecurityPage() {
 								</div>
 							</div>
 						)}
+
+						{/* Scan History */}
+						<div className="bg-card border border-border rounded-lg p-6 space-y-4">
+							<div className="flex items-center justify-between">
+								<h2 className="text-lg font-semibold">Scan History</h2>
+								{scanHistory.length > 0 && (
+									<button
+										onClick={handleClearHistory}
+										className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+									>
+										<Trash2 className="w-3 h-3" />
+										Clear History
+									</button>
+								)}
+							</div>
+							<p className="text-xs text-muted-foreground">
+								Stored locally in this browser. Clear history if you are on a shared machine.
+							</p>
+							{scanHistory.length === 0 ? (
+								<div className="text-sm text-muted-foreground">No previous scans yet.</div>
+							) : (
+								<div className="space-y-2">
+									{scanHistory.map((item) => (
+										<div key={item.id} className="flex items-center justify-between gap-3 p-3 bg-muted/40 rounded-lg border border-border">
+											<div className="min-w-0">
+												<div className="text-sm font-medium truncate">
+													{item.result.total_threats_found} threat(s) • {item.result.scan_metadata.documents_scanned} doc(s)
+												</div>
+												<div className="text-xs text-muted-foreground">
+													{new Date(item.timestamp).toLocaleString()}
+												</div>
+											</div>
+											<div className="flex items-center gap-2">
+												<button
+													onClick={() => handleLoadHistory(item)}
+													className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+												>
+													<Eye className="w-3 h-3" />
+													View
+												</button>
+												<button
+													onClick={() => handleDeleteHistory(item.id)}
+													className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+												>
+													<Trash2 className="w-3 h-3" />
+													Remove
+												</button>
+											</div>
+										</div>
+									))}
+								</div>
+							)}
+						</div>
 
 						{/* Info Card */}
 						<div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-4">
