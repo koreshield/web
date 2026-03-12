@@ -15,7 +15,7 @@ const useCases = [
     {
         icon: Building2,
         title: 'Enterprise SaaS',
-        description: 'Prevent cross-tenant leakage in multi-user AI apps.',
+        description: 'Prevent cross-user leakage in multi-user AI apps.',
     },
 ];
 
