@@ -13,7 +13,7 @@ Use KoreShield as a security proxy for LLM requests made from AWS Lambda. Deploy
 
 - Serverless APIs that need LLM safety controls
 - Event-driven flows (SQS, API Gateway) with centralized policy enforcement
-- Multi-tenant apps that require request auditing
+- Shared deployments that require request auditing
 
 ## Prerequisites
 
@@ -72,5 +72,4 @@ export const handler = async (event: any) => {
 
 - Review SDK usage in [https://github.com/koreshield/node-sdk](https://github.com/koreshield/node-sdk)
 - Configure providers in [/configuration/](/docs/configuration)
-
 

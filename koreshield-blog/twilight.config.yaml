@@ -278,7 +278,7 @@ profile:
     - # GitHub
       name: "GitHub"
       icon: "fa6-brands:github"
-      url: "https://github.com/koreshield/koreshield"
+      url: "https://github.com/koreshield"
     - # Main Website
       name: "Website"
       icon: "fa6-solid:globe"
