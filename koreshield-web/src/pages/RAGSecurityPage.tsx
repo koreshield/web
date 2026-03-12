@@ -102,6 +102,119 @@ interface ScanConfig {
 	max_excerpt_length?: number;
 }
 
+type RAGApiResponse = {
+	is_safe?: boolean;
+	overall_severity?: string;
+	overall_confidence?: number;
+	query_analysis?: {
+		is_attack?: boolean;
+		details?: {
+			attack_type?: string;
+			confidence?: number;
+		};
+	};
+	context_analysis?: any;
+	processing_time_ms?: number;
+	timestamp?: string;
+	request_id?: string;
+};
+
+const buildTaxonomyCounts = (values: string[] | undefined): Record<string, number> => {
+	if (!values) return {};
+	return values.reduce<Record<string, number>>((acc, value) => {
+		acc[value] = (acc[value] || 0) + 1;
+		return acc;
+	}, {});
+};
+
+const normalizeRagResponse = (
+	payload: any,
+	sourceDocuments: RetrievedDocument[],
+	userQueryValue: string
+): RAGScanResult => {
+	// Already normalized
+	if (payload?.scan_metadata) {
+		return payload as RAGScanResult;
+	}
+
+	const apiPayload = payload as RAGApiResponse;
+	const context = apiPayload?.context_analysis || {};
+	const stats = context.statistics || {};
+
+	const documentThreats: DocumentThreat[] = (context.document_threats || []).map((threat: any, index: number) => {
+		const excerpt = threat.excerpts?.[0] || '';
+		return {
+			document_id: threat.document_id || sourceDocuments[index]?.id || `doc_${index}`,
+			threat_type: threat.threat_type || 'unknown',
+			severity: threat.severity || 'low',
+			confidence: threat.confidence || 0,
+			excerpt,
+			location: {
+				start: 0,
+				end: excerpt.length,
+			},
+			taxonomy: {
+				injection_vector: threat.injection_vector || 'unknown',
+				operational_target: threat.operational_target || 'unknown',
+				persistence_mechanism: threat.metadata?.persistence_mechanism || 'unknown',
+				enterprise_context: threat.metadata?.enterprise_context || 'unknown',
+				detection_complexity: threat.metadata?.detection_complexity || context.detection_complexity || 'unknown',
+			},
+			explanation: threat.metadata?.summary || `Detected ${threat.threat_type || 'risk'} in document.`,
+		};
+	});
+
+	const crossDocumentThreats: CrossDocumentThreat[] = (context.cross_document_threats || []).map((threat: any) => ({
+		threat_type: threat.threat_type || 'unknown',
+		severity: threat.severity || 'low',
+		confidence: threat.confidence || 0,
+		involved_documents: threat.document_ids || [],
+		chain_description: threat.description || 'Coordinated multi-document threat detected.',
+		attack_stages: (threat.document_ids || []).map((docId: string, idx: number) => ({
+			stage_number: idx + 1,
+			document_id: docId,
+			component_description: threat.metadata?.stage_summary || 'Correlated indicator detected.',
+		})),
+	}));
+
+	const unsafeDocumentIds = new Set(documentThreats.map((threat) => threat.document_id));
+	const safeDocuments = sourceDocuments
+		.map((doc) => doc.id)
+		.filter((id) => !unsafeDocumentIds.has(id));
+
+	return {
+		is_safe: apiPayload?.is_safe ?? context.is_safe ?? true,
+		total_threats_found: stats.total_threats_found ?? context.total_threats_found ?? documentThreats.length,
+		document_threats: documentThreats,
+		cross_document_threats: crossDocumentThreats,
+		safe_documents: safeDocuments,
+		unsafe_documents: Array.from(unsafeDocumentIds),
+		taxonomy_summary: {
+			injection_vectors: buildTaxonomyCounts(context.injection_vectors),
+			operational_targets: buildTaxonomyCounts(context.operational_targets),
+			persistence_mechanisms: buildTaxonomyCounts(context.persistence_mechanisms),
+			enterprise_contexts: buildTaxonomyCounts(context.enterprise_contexts),
+			detection_complexities: buildTaxonomyCounts(
+				context.detection_complexity ? [context.detection_complexity] : []
+			),
+		},
+		scan_metadata: {
+			scan_id: context.scan_id || apiPayload?.request_id || `scan_${Date.now()}`,
+			timestamp: context.scan_timestamp || apiPayload?.timestamp || new Date().toISOString(),
+			documents_scanned: stats.total_documents_scanned ?? sourceDocuments.length,
+			processing_time_ms: context.processing_time_ms ?? apiPayload?.processing_time_ms ?? 0,
+			user_query_included: Boolean(apiPayload?.query_analysis || userQueryValue.trim()),
+		},
+		query_result: apiPayload?.query_analysis
+			? {
+					is_attack: Boolean(apiPayload.query_analysis.is_attack),
+					attack_type: apiPayload.query_analysis.details?.attack_type || 'unknown',
+					confidence: apiPayload.query_analysis.details?.confidence || 0,
+				}
+			: undefined,
+	};
+};
+
 // CRM Templates
 const CRM_TEMPLATES = {
 	salesforce: {
@@ -247,14 +360,14 @@ export function RAGSecurityPage() {
 				user_query: userQuery.trim() || undefined,
 				documents,
 				config: scanConfig
-			}) as RAGScanResult;
+			});
+			const normalized = normalizeRagResponse(response, documents, userQuery);
+			setScanResult(normalized);
 
-			setScanResult(response);
-
-			if (response.is_safe) {
+			if (normalized.is_safe) {
 				success('No threats detected - Documents are safe!');
 			} else {
-				showError(`${response.total_threats_found} threat(s) detected!`);
+				showError(`${normalized.total_threats_found} threat(s) detected!`);
 			}
 		} catch (err: any) {
 			showError(err.message || 'Failed to scan documents');

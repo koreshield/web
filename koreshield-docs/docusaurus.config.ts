@@ -73,6 +73,17 @@ const config: Config = {
 				docsRouteBasePath: '/docs',
 			},
 		],
+		[
+			require.resolve('@docusaurus/plugin-client-redirects'),
+			{
+				redirects: [
+					{
+						from: ['/getting-started', '/getting-started/'],
+						to: '/docs/getting-started/quick-start/',
+					},
+				],
+			},
+		],
 	],
 
 	// === THEME CONFIGURATION ===
