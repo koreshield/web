@@ -36,9 +36,9 @@ const anthropic = new Anthropic({
 });
 
 export async function secureClaude(userMessage: string) {
-  const scan = await koreshield.scan({ content: userMessage });
-  if (scan.threat_detected) {
-    throw new Error(`Threat: ${scan.threat_type}`);
+  const scan = await koreshield.scanPrompt(userMessage);
+  if (!scan.isSafe) {
+    throw new Error(`Threat: ${scan.threatLevel}`);
   }
 
   const message = await anthropic.messages.create({

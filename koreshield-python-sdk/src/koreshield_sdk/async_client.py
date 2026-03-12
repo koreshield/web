@@ -89,7 +89,7 @@ class AsyncKoreShieldClient:
             headers={
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
-                "User-Agent": f"koreshield-python-sdk/0.3.2",
+                "User-Agent": f"koreshield-python-sdk/0.3.5",
             },
         )
 

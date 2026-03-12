@@ -7,6 +7,7 @@ import os
 import sys
 import uuid
 import contextlib
+from collections import deque
 from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import List, Optional, Any
@@ -200,6 +201,9 @@ class KoreShieldProxy:
         # Store state for API access (keep in-memory copy for backward compatibility)
         self.app.state.config = self.config
         self.app.state.stats = self._get_stats_dict()  # Will be updated dynamically
+        # In-memory scan store for /v1/scan endpoints (bounded)
+        self.app.state.scan_store = deque(maxlen=1000)
+        self.app.state.scan_index = {}
 
         # Initialize security components
         security_config = config.get("security", {})
@@ -334,21 +338,25 @@ class KoreShieldProxy:
 
         # Provider options with priority order (higher index = higher priority)
         provider_options = [
-            ("deepseek", "DEEPSEEK_API_KEY", self.DeepSeekProvider),
-            ("openai", "OPENAI_API_KEY", self.OpenAIProvider),
-            ("anthropic", "ANTHROPIC_API_KEY", self.AnthropicProvider),
-            ("gemini", "GOOGLE_API_KEY", self.GeminiProvider),
-            ("azure_openai", "AZURE_OPENAI_API_KEY", self.AzureOpenAIProvider),
+            ("deepseek", ["DEEPSEEK_API_KEY"], self.DeepSeekProvider),
+            ("openai", ["OPENAI_API_KEY"], self.OpenAIProvider),
+            ("anthropic", ["ANTHROPIC_API_KEY"], self.AnthropicProvider),
+            ("gemini", ["GOOGLE_API_KEY", "GEMINI_API_KEY"], self.GeminiProvider),
+            ("azure_openai", ["AZURE_OPENAI_API_KEY"], self.AzureOpenAIProvider),
         ]
 
         self.providers = []
         self.provider_priority = []
 
-        for provider_name, env_var, provider_class in provider_options:
+        for provider_name, env_vars, provider_class in provider_options:
             provider_cfg = providers_config.get(provider_name, {})
             logger.info(f"Checking provider {provider_name}: enabled={provider_cfg.get('enabled', False)}")
             if provider_cfg.get("enabled", False):
-                api_key = os.getenv(env_var)
+                api_key = None
+                for env_var in env_vars:
+                    api_key = os.getenv(env_var)
+                    if api_key:
+                        break
                 if api_key:
                     try:
                         base_url = provider_cfg.get("base_url")
@@ -410,6 +418,60 @@ class KoreShieldProxy:
             if hasattr(self, 'stats'):
                 self.stats[stat_name] = self.stats.get(stat_name, 0) + amount
                 self.app.state.stats = self.stats
+
+    def _map_threat_level(self, is_attack: bool, confidence: float, indicators: list[dict]) -> str:
+        if not is_attack:
+            return "safe"
+        severities = {i.get("severity") for i in indicators if isinstance(i, dict)}
+        if "high" in severities and confidence >= 0.9:
+            return "critical"
+        if confidence >= 0.85:
+            return "high"
+        if confidence >= 0.7:
+            return "medium"
+        return "low"
+
+    def _map_indicator_type(self, indicator_type: str | None) -> str:
+        mapping = {
+            "keyword_match": "keyword",
+            "rule_match": "rule",
+            "blocklist_match": "blocklist",
+            "allowlist_match": "allowlist",
+            "ml_detection": "ml",
+        }
+        if not indicator_type:
+            return "pattern"
+        return mapping.get(indicator_type, "pattern")
+
+    def _build_scan_result(self, detection: dict, processing_time_ms: float, metadata: dict | None = None) -> dict:
+        indicators = detection.get("indicators", []) if isinstance(detection, dict) else []
+        confidence = float(detection.get("confidence", 0.0)) if isinstance(detection, dict) else 0.0
+        is_attack = bool(detection.get("is_attack")) if isinstance(detection, dict) else False
+        threat_level = self._map_threat_level(is_attack, confidence, indicators)
+
+        normalized_indicators = []
+        for indicator in indicators:
+            indicator_type = indicator.get("type") if isinstance(indicator, dict) else None
+            normalized_indicators.append({
+                "type": self._map_indicator_type(indicator_type),
+                "severity": threat_level if threat_level != "safe" else "low",
+                "confidence": min(max(confidence, 0.0), 1.0),
+                "description": indicator_type or "pattern",
+                "metadata": indicator if isinstance(indicator, dict) else {"raw": indicator},
+            })
+
+        return {
+            "is_safe": not is_attack,
+            "threat_level": threat_level,
+            "confidence": min(max(confidence, 0.0), 1.0),
+            "indicators": normalized_indicators,
+            "processing_time_ms": processing_time_ms,
+            "metadata": metadata or {},
+        }
+
+    def _store_scan(self, scan_id: str, scan_response: dict) -> None:
+        self.app.state.scan_index[scan_id] = scan_response
+        self.app.state.scan_store.appendleft(scan_response)
 
     @property
     def provider(self):
@@ -512,6 +574,39 @@ class KoreShieldProxy:
         @self.limiter.limit(rate_limit)
         async def rag_scan(request: Request):
             return await self._handle_rag_scan(request)
+
+        # Prompt scanning endpoints
+        @self.app.post("/v1/scan", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def scan_prompt(request: Request):
+            return await self._handle_scan(request)
+
+        @self.app.post("/v1/scan/batch", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def scan_prompt_batch(request: Request):
+            return await self._handle_scan_batch(request)
+
+        @self.app.get("/v1/scans", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def list_scans(request: Request, limit: int = 100, offset: int = 0):
+            await self._authenticate_request(request)
+            scans = list(self.app.state.scan_store)
+            total = len(scans)
+            return {
+                "scans": scans[offset: offset + limit],
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+            }
+
+        @self.app.get("/v1/scans/{scan_id}", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def get_scan(scan_id: str, request: Request):
+            await self._authenticate_request(request)
+            scan = self.app.state.scan_index.get(scan_id)
+            if not scan:
+                raise HTTPException(status_code=404, detail="Scan not found")
+            return scan
 
         # Note: Removed catch-all route to prevent interference with specific routes
         # If needed, implement specific proxy endpoints instead
@@ -1107,6 +1202,149 @@ class KoreShieldProxy:
                 error=str(e),
                 exc_info=True
             )
+            raise HTTPException(status_code=500, detail="Internal server error")
+
+    async def _handle_scan(self, request: Request) -> Response:
+        """
+        Handle prompt scanning requests for SDK compatibility.
+        """
+        import time
+        start_time = time.time()
+        request_id = str(uuid.uuid4())
+
+        try:
+            await self._authenticate_request(request)
+
+            try:
+                body = await request.json()
+            except Exception as e:
+                logger.error("Failed to parse JSON", request_id=request_id, error=str(e))
+                raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+
+            if not isinstance(body, dict):
+                raise HTTPException(status_code=400, detail="Request body must be a JSON object")
+
+            prompt = body.get("prompt")
+            if not isinstance(prompt, str) or not prompt.strip():
+                raise HTTPException(status_code=400, detail="'prompt' field is required and must be a string")
+
+            detection = self.detector.detect(prompt, context=body.get("context") or {})
+            processing_time_ms = (time.time() - start_time) * 1000
+            scan_id = str(uuid.uuid4())
+
+            result = self._build_scan_result(
+                detection=detection,
+                processing_time_ms=processing_time_ms,
+                metadata=body.get("metadata"),
+            )
+            result["scan_id"] = scan_id
+
+            response = {
+                "result": result,
+                "request_id": request_id,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "version": "0.1.0",
+            }
+
+            self._store_scan(scan_id, response)
+            self._increment_stat("requests_total")
+            if result["is_safe"]:
+                self._increment_stat("requests_allowed")
+            else:
+                self._increment_stat("requests_blocked")
+                self._increment_stat("attacks_detected")
+
+            return JSONResponse(content=response)
+        except HTTPException:
+            raise
+        except Exception as e:
+            self._increment_stat("errors")
+            logger.error("Scan error", request_id=request_id, error=str(e), exc_info=True)
+            raise HTTPException(status_code=500, detail="Internal server error")
+
+    async def _handle_scan_batch(self, request: Request) -> Response:
+        """
+        Handle batch prompt scanning requests for SDK compatibility.
+        """
+        import time
+        start_time = time.time()
+        request_id = str(uuid.uuid4())
+
+        try:
+            await self._authenticate_request(request)
+
+            try:
+                body = await request.json()
+            except Exception as e:
+                logger.error("Failed to parse JSON", request_id=request_id, error=str(e))
+                raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+
+            if not isinstance(body, dict):
+                raise HTTPException(status_code=400, detail="Request body must be a JSON object")
+
+            requests_payload = body.get("requests", [])
+            if not isinstance(requests_payload, list) or not requests_payload:
+                raise HTTPException(status_code=400, detail="'requests' must be a non-empty list")
+
+            results = []
+            total_safe = 0
+            total_unsafe = 0
+
+            for item in requests_payload:
+                if not isinstance(item, dict):
+                    raise HTTPException(status_code=400, detail="Each request must be an object")
+                prompt = item.get("prompt")
+                if not isinstance(prompt, str) or not prompt.strip():
+                    raise HTTPException(status_code=400, detail="Each request requires a non-empty 'prompt'")
+
+                detection = self.detector.detect(prompt, context=item.get("context") or {})
+                processing_time_ms = (time.time() - start_time) * 1000
+                scan_id = str(uuid.uuid4())
+
+                result = self._build_scan_result(
+                    detection=detection,
+                    processing_time_ms=processing_time_ms,
+                    metadata=item.get("metadata"),
+                )
+                result["scan_id"] = scan_id
+
+                scan_response = {
+                    "result": result,
+                    "request_id": str(uuid.uuid4()),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "version": "0.1.0",
+                }
+
+                self._store_scan(scan_id, scan_response)
+                results.append(scan_response)
+
+                self._increment_stat("requests_total")
+                if result["is_safe"]:
+                    total_safe += 1
+                    self._increment_stat("requests_allowed")
+                else:
+                    total_unsafe += 1
+                    self._increment_stat("requests_blocked")
+                    self._increment_stat("attacks_detected")
+
+            total_processed = len(results)
+            processing_time_ms = (time.time() - start_time) * 1000
+
+            return JSONResponse(content={
+                "results": results,
+                "total_processed": total_processed,
+                "total_safe": total_safe,
+                "total_unsafe": total_unsafe,
+                "processing_time_ms": processing_time_ms,
+                "request_id": request_id,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "version": "0.1.0",
+            })
+        except HTTPException:
+            raise
+        except Exception as e:
+            self._increment_stat("errors")
+            logger.error("Batch scan error", request_id=request_id, error=str(e), exc_info=True)
             raise HTTPException(status_code=500, detail="Internal server error")
 
     async def _handle_request(self, request: Request, path: str) -> Response:

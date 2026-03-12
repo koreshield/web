@@ -54,7 +54,7 @@ Create a custom hook for chat functionality:
 ```typescript
 import { useState, useCallback } from 'react';
 import { Koreshield } from '@/lib/Koreshield';
-import type { ChatCompletionRequest, ChatCompletionResponse } from 'Koreshield';
+import type { ChatCompletionRequest, ChatCompletionResponse } from 'koreshield';
 
 export function useChat() {
     const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);

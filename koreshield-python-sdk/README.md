@@ -326,15 +326,16 @@ class SecurityPolicy:
 ```python
 class PerformanceMetrics:
     total_requests: int
-    total_processing_time: float
-    average_response_time: float
-    min_response_time: float
-    max_response_time: float
-    error_count: int
-    success_rate: float
+    total_processing_time_ms: float
+    average_response_time_ms: float
     requests_per_second: float
-    start_time: datetime
-    last_request_time: Optional[datetime]
+    error_count: int
+    cache_hit_rate: float
+    batch_efficiency: float
+    streaming_chunks_processed: int
+    uptime_seconds: float
+    memory_usage_mb: Optional[float]
+    custom_metrics: Dict[str, Any]
 ```
 
 ## Configuration

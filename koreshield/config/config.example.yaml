@@ -51,7 +51,7 @@ providers:
   gemini:
     enabled: false
     base_url: "https://generativelanguage.googleapis.com/v1beta"
-    # api_key should be set via environment variable: GOOGLE_API_KEY
+    # api_key should be set via environment variable: GOOGLE_API_KEY or GEMINI_API_KEY
   
   azure_openai:
     enabled: false

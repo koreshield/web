@@ -94,6 +94,10 @@ class ApiClient {
 				throw error;
 			}
 
+			const contentType = response.headers.get('content-type') || '';
+			if (contentType.includes('text/plain')) {
+				return await response.text() as unknown as T;
+			}
 			return await response.json();
 		} catch (error) {
 			clearTimeout(timeoutId);
@@ -135,11 +139,13 @@ class ApiClient {
 		return this.fetch<AttackStats>('/status');
 	}
 
-	async getMetrics() {
+	async getMetrics(): Promise<string> {
 		if (!this.isRealAPIMode) {
 			return this.simulateMetrics();
 		}
-		return this.fetch('/metrics');
+		return this.fetch('/metrics', {
+			headers: { Accept: 'text/plain' }
+		});
 	}
 
 	async getProviderHealth() {
@@ -153,7 +159,7 @@ class ApiClient {
 		if (!this.isRealAPIMode) {
 			return this.simulateRecentAttacks(limit);
 		}
-		return this.fetch(`/v1/management/logs?limit=${limit}`);
+		return this.getAuditLogs(limit, 0);
 	}
 
 	async scanText(content: string, metadata?: Record<string, any>) {
@@ -162,8 +168,19 @@ class ApiClient {
 		}
 		return this.fetch('/v1/scan', {
 			method: 'POST',
-			body: JSON.stringify({ content, metadata }),
+			body: JSON.stringify({ prompt: content, metadata }),
 		});
+	}
+
+	async getAuditLogs(limit = 100, offset = 0, level?: string) {
+		const params = new URLSearchParams({
+			limit: String(limit),
+			offset: String(offset),
+		});
+		if (level) {
+			params.append('level', level);
+		}
+		return this.fetch(`/v1/management/logs?${params.toString()}`);
 	}
 
 	// Policy Management
@@ -234,37 +251,36 @@ class ApiClient {
 		};
 	}
 
-	private async simulateMetrics() {
+	private async simulateMetrics(): Promise<string> {
 		await new Promise(resolve => setTimeout(resolve, 300));
-		return {
-			total_requests: 10247 + Math.floor(Math.random() * 100),
-			threats_blocked: 142 + Math.floor(Math.random() * 10),
-			threats_warned: 23 + Math.floor(Math.random() * 5),
-			avg_latency_ms: 125 + Math.floor(Math.random() * 50),
-			uptime_percentage: 99.97,
-			requests_per_second: 15.3 + Math.random() * 5,
-			threat_types: {
-				'Prompt Injection': 58,
-				'Jailbreak': 34,
-				'PII Leakage': 19,
-				'SQL Injection': 15,
-				'Code Injection': 12,
-				'Data Exfiltration': 4
-			}
-		};
+		return [
+			'# HELP koreshield_requests_total Total requests processed',
+			'# TYPE koreshield_requests_total counter',
+			'koreshield_requests_total 10247',
+			'# HELP koreshield_requests_blocked Total requests blocked',
+			'# TYPE koreshield_requests_blocked counter',
+			'koreshield_requests_blocked 142',
+			'# HELP koreshield_attacks_detected Total attacks detected',
+			'# TYPE koreshield_attacks_detected counter',
+			'koreshield_attacks_detected 23',
+			'# HELP koreshield_response_latency_ms Response latency (ms)',
+			'# TYPE koreshield_response_latency_ms gauge',
+			`koreshield_response_latency_ms ${125 + Math.floor(Math.random() * 50)}`,
+		].join('\n');
 	}
 
 	private async simulateProviderHealth() {
 		await new Promise(resolve => setTimeout(resolve, 200));
 		return {
 			providers: {
-				openai: { status: 'operational', latency_ms: 145, last_check: new Date().toISOString(), error_rate: 0.02 },
-				anthropic: { status: 'operational', latency_ms: 132, last_check: new Date().toISOString(), error_rate: 0.01 },
-				gemini: { status: 'operational', latency_ms: 178, last_check: new Date().toISOString(), error_rate: 0.03 },
-				deepseek: { status: 'operational', latency_ms: 156, last_check: new Date().toISOString(), error_rate: 0.02 },
-				azure: { status: 'operational', latency_ms: 163, last_check: new Date().toISOString(), error_rate: 0.01 }
+				openai: { healthy: true, priority: 0, type: 'OpenAIProvider' },
+				anthropic: { healthy: true, priority: 1, type: 'AnthropicProvider' },
+				gemini: { healthy: true, priority: 2, type: 'GeminiProvider' },
+				deepseek: { healthy: true, priority: 3, type: 'DeepSeekProvider' },
+				azure: { healthy: true, priority: 4, type: 'AzureOpenAIProvider' }
 			},
-			overall_status: 'operational'
+			total_providers: 5,
+			healthy_providers: 5
 		};
 	}
 
@@ -332,30 +348,28 @@ class ApiClient {
 
 	private async simulateHealth(): Promise<HealthCheckResponse> {
 		return {
-			status: 'ok',
-			version: '1.0.0',
-			timestamp: new Date().toISOString(),
-			services: {
-				database: 'up',
-				redis: 'up',
-				openai_api: 'up',
-				anthropic_api: 'up'
-			}
+			status: 'healthy',
+			version: '0.1.0',
 		};
 	}
 
 	private async simulateStats(): Promise<AttackStats> {
 		return {
-			total_requests: 10000 + Math.floor(Math.random() * 500),
-			blocked_requests: 120 + Math.floor(Math.random() * 10),
-			attack_types: {
-				'Prompt Injection': 45,
-				'Jailbreak': 30,
-				'PII Leakage': 15,
-				'SQL Injection': 10
+			status: 'healthy',
+			version: '0.1.0',
+			statistics: {
+				requests_total: 10000 + Math.floor(Math.random() * 500),
+				requests_allowed: 9850 + Math.floor(Math.random() * 100),
+				requests_blocked: 120 + Math.floor(Math.random() * 10),
+				attacks_detected: 45 + Math.floor(Math.random() * 10),
+				errors: Math.floor(Math.random() * 3),
 			},
-			latency_p95: 150,
-			active_threats: 2
+			providers: {
+				openai: { configured: true, priority: 0, type: 'OpenAIProvider' },
+				anthropic: { configured: true, priority: 1, type: 'AnthropicProvider' },
+				gemini: { configured: true, priority: 2, type: 'GeminiProvider' },
+			},
+			total_providers: 3,
 		};
 	}
 

@@ -9,7 +9,8 @@ import {
   SecurityOptions,
   ChatCompletionRequest,
   ChatCompletionResponse,
-  SecurityEvent,
+  AuditLogResponse,
+  AuditLogEntry,
   MetricsResponse,
   KoreShieldError
 } from '../types';
@@ -111,28 +112,38 @@ export class BrowserKoreShieldClient {
   /**
    * Get security events/logs
    */
-  async getSecurityEvents(
-    limit: number = 50,
+  async getAuditLogs(
+    limit: number = 100,
     offset: number = 0,
-    type?: string,
-    severity?: string
-  ): Promise<SecurityEvent[]> {
+    level?: string
+  ): Promise<AuditLogResponse> {
     const params = new URLSearchParams({
       limit: limit.toString(),
       offset: offset.toString()
     });
 
-    if (type) params.append('type', type);
-    if (severity) params.append('severity', severity);
+    if (level) params.append('level', level);
 
-    return this.request<SecurityEvent[]>(`/api/security/events?${params}`);
+    return this.request<AuditLogResponse>(`/v1/management/logs?${params}`);
+  }
+
+  /**
+   * Backwards-compatible alias for audit logs
+   */
+  async getSecurityEvents(
+    limit: number = 100,
+    offset: number = 0,
+    level?: string
+  ): Promise<AuditLogEntry[]> {
+    const response = await this.getAuditLogs(limit, offset, level);
+    return response.logs;
   }
 
   /**
    * Get metrics and statistics
    */
   async getMetrics(): Promise<MetricsResponse> {
-    return this.request<MetricsResponse>('/api/metrics');
+    return this.request<MetricsResponse>('/v1/management/stats');
   }
 
   /**
@@ -199,12 +210,12 @@ export class BrowserKoreShieldClient {
   private getHeaders(customHeaders?: Record<string, string>): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'User-Agent': 'KoreShield-JS-Browser/0.3.2',
+      'User-Agent': 'KoreShield-JS-Browser/0.3.5',
       ...this.config.headers,
       ...customHeaders
     };
 
-    if (this.config.apiKey) {
+    if (this.config.apiKey && !headers['Authorization']) {
       headers['Authorization'] = `Bearer ${this.config.apiKey}`;
     }
 

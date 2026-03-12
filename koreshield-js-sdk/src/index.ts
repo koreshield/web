@@ -77,6 +77,8 @@ export type {
   ChatMessage,
   ChatCompletionRequest,
   ChatCompletionResponse,
+  AuditLogEntry,
+  AuditLogResponse,
   SecurityEvent,
   MetricsResponse,
   PerformanceMetrics,

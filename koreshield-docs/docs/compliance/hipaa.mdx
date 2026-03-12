@@ -43,13 +43,13 @@ Only send the minimum PHI required to complete the task. Avoid embedding full pa
 
 ### 2) Access Control and Segmentation
 
-Restrict access to PHI by role and tenant. Ensure requests are scoped to the appropriate patient or case context.
+Restrict access to PHI by role and account. Ensure requests are scoped to the appropriate patient or case context.
 
 **Practical guidance:**
 
 - enforce role-based access controls in your application
 - scope requests by user and patient identifiers
-- isolate data by tenant and environment
+- isolate data by account and environment
 
 ### 3) Audit Logging
 
@@ -89,7 +89,7 @@ If PHI is sent to external LLM providers, ensure you have the proper contractual
 
 This table is a practical mapping, not a legal interpretation:
 
-- **Access control:** application RBAC, tenant isolation, key management
+- **Access control:** application RBAC, account isolation, key management
 - **Audit controls:** structured logging, SIEM integration, trace IDs
 - **Integrity controls:** request validation, policy enforcement, output scanning
 - **Transmission security:** TLS for all in-transit data
