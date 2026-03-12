@@ -158,19 +158,21 @@ class KoreShieldProxy:
         # Add CORS middleware
         # SECURITY NOTE: allow_credentials=True cannot be used with allow_origins=["*"]
         # We default to specific development origins and allow override via env
+        default_origins = [
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173",
+            "https://koreshield.com",
+            "https://www.koreshield.com",
+            "https://api.koreshield.com",
+        ]
         env_origins = os.getenv("CORS_ORIGINS", "")
         if env_origins:
-            origins = [origin.strip() for origin in env_origins.split(",")]
+            env_list = [origin.strip() for origin in env_origins.split(",") if origin.strip()]
+            origins = list(dict.fromkeys(default_origins + env_list))
         else:
-            origins = [
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:5173",
-                "https://koreshield.com",
-                "https://www.koreshield.com",
-                "https://api.koreshield.com",
-            ]
+            origins = default_origins
         
         self.app.add_middleware(
             CORSMiddleware,
