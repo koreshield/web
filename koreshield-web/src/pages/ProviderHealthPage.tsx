@@ -221,7 +221,7 @@ export function ProviderHealthPage() {
 						<Activity className="w-5 h-5" />
 						Provider Priority
 					</h2>
-					<ResponsiveContainer width="100%" height={300}>
+					<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
 						<BarChart data={priorityChartData}>
 							<CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
 							<XAxis dataKey="name" className="text-sm" />
