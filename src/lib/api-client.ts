@@ -73,11 +73,10 @@ class ApiClient {
 
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}));
-				const error: APIError = {
-					message: errorData.error || errorData.message || `HTTP ${response.status}`,
-					code: response.status,
-					details: errorData.details,
-				};
+				const errorMessage = this.getErrorMessage(response.status, errorData);
+				const error = new Error(errorMessage) as Error & APIError;
+				error.code = response.status;
+				error.details = errorData.details || errorData.detail;
 
 				// If 401, logout admin
 				if (response.status === 401 && authService.isAuthenticated()) {
@@ -111,6 +110,21 @@ class ApiClient {
 			console.error(`Request failed: ${endpoint}`, error);
 			throw error;
 		}
+	}
+
+	private getErrorMessage(status: number, errorData: any): string {
+		if (errorData?.error) return errorData.error;
+		if (errorData?.message) return errorData.message;
+		if (typeof errorData?.detail === 'string') return errorData.detail;
+		if (Array.isArray(errorData?.detail)) {
+			const messages = errorData.detail
+				.map((item: any) => item?.msg || item?.message)
+				.filter(Boolean);
+			if (messages.length) {
+				return messages.join('; ');
+			}
+		}
+		return `HTTP ${status}`;
 	}
 
 	async chatCompletion(payload: ChatCompletionRequest): Promise<ChatCompletionResponse> {
@@ -571,45 +585,6 @@ class ApiClient {
 
 	async getApiKey(keyId: string) {
 		return this.fetch(`/v1/management/api-keys/${keyId}`);
-	}
-
-	// Tenant Management APIs
-	async getTenants(params?: { status?: string; tier?: string; limit?: number; offset?: number }) {
-		const queryParams = new URLSearchParams();
-		if (params?.status) queryParams.append('status', params.status);
-		if (params?.tier) queryParams.append('tier', params.tier);
-		if (params?.limit) queryParams.append('limit', params.limit.toString());
-		if (params?.offset) queryParams.append('offset', params.offset.toString());
-		const query = queryParams.toString();
-		return this.fetch(`/api/v1/tenants${query ? `?${query}` : ''}`);
-	}
-
-	async getTenant(tenantId: string) {
-		return this.fetch(`/api/v1/tenants/${tenantId}`);
-	}
-
-	async createTenant(tenantData: any) {
-		return this.fetch('/api/v1/tenants', {
-			method: 'POST',
-			body: JSON.stringify(tenantData),
-		});
-	}
-
-	async updateTenant(tenantId: string, tenantData: any) {
-		return this.fetch(`/api/v1/tenants/${tenantId}`, {
-			method: 'PUT',
-			body: JSON.stringify(tenantData),
-		});
-	}
-
-	async deleteTenant(tenantId: string) {
-		return this.fetch(`/api/v1/tenants/${tenantId}`, {
-			method: 'DELETE',
-		});
-	}
-
-	async getTenantUsageStats(tenantId: string) {
-		return this.fetch(`/api/v1/tenants/${tenantId}/usage`);
 	}
 
 	// Rules Management APIs (custom detection rules)
