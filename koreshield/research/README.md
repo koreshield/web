@@ -10,8 +10,15 @@ This directory contains research materials, notes, and bibliography for the pape
 - `experiments/` - Attack experiments and test results
 - `taxonomy/` - Taxonomy development notes
 - `case-studies/` - Real-world case study documentation
+- `ml/` - Fine-tuning and model evaluation planning
 - `drafts/` - Paper drafts and revisions
 - `bibliography/` - Reference management files
+
+## Current Assets
+
+- Synthetic CRM benchmark fixtures for Salesforce and HubSpot
+- Sanitized case studies for investor, customer, and demo use
+- ML fine-tuning plan describing what adversarial data is still required
 
 ## Next Steps
 
@@ -19,4 +26,3 @@ This directory contains research materials, notes, and bibliography for the pape
 2. Review existing RAG system security research
 3. Document attack examples and patterns
 4. Develop taxonomy framework
-
