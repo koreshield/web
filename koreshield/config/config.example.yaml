@@ -30,6 +30,14 @@ security:
   # Allowlist/blocklist storage (optional)
   lists:
     # storage_path: /var/lib/koreshield/lists
+    # Optional threat intel feeds. Local JSON files are loaded on startup and
+    # merged into the configured list type.
+    feeds:
+      - name: "default-malicious-patterns"
+        enabled: false
+        list_type: "blocklist"
+        default_entry_type: "keyword"
+        source: "config/threat-intel/known_malicious_patterns.json"
 
 # Provider configurations
 providers:
