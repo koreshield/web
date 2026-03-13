@@ -1,6 +1,6 @@
 import { authService } from '../lib/auth';
 import { useState, useEffect } from 'react';
-import { Activity, Shield, AlertTriangle, CheckCircle, LogOut, Wifi, WifiOff, Rocket, Code, BookOpen, ArrowRight, Key } from 'lucide-react';
+import { Activity, Shield, AlertTriangle, CheckCircle, LogOut, Wifi, WifiOff, Rocket, Code, BookOpen, ArrowRight, Key, Users, ScanSearch } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStats, useRecentAttacks } from '../hooks/useApi';
 import { AttackDetailModal } from '../components/AttackDetailModal';
@@ -168,6 +168,48 @@ export function DashboardPage() {
 						<span className="hidden sm:inline">Connected to Koreshield API - Showing real-time data</span>
 						<span className="sm:hidden">Live data from production</span>
 					</span>
+				</div>
+			</div>
+
+			{/* Quick Actions */}
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+				<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+					<Link to="/settings/api-keys" className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors">
+						<div className="flex items-center gap-3">
+							<Key className="w-5 h-5 text-primary" />
+							<div>
+								<div className="font-semibold">API Keys</div>
+								<div className="text-xs text-muted-foreground">Manage server tokens</div>
+							</div>
+						</div>
+					</Link>
+					<Link to="/policies" className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors">
+						<div className="flex items-center gap-3">
+							<Shield className="w-5 h-5 text-primary" />
+							<div>
+								<div className="font-semibold">Policies</div>
+								<div className="text-xs text-muted-foreground">Security rules & actions</div>
+							</div>
+						</div>
+					</Link>
+					<Link to="/rag-security" className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors">
+						<div className="flex items-center gap-3">
+							<ScanSearch className="w-5 h-5 text-primary" />
+							<div>
+								<div className="font-semibold">RAG Scanner</div>
+								<div className="text-xs text-muted-foreground">Scan retrieved docs</div>
+							</div>
+						</div>
+					</Link>
+					<Link to="/teams" className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors">
+						<div className="flex items-center gap-3">
+							<Users className="w-5 h-5 text-primary" />
+							<div>
+								<div className="font-semibold">Teams</div>
+								<div className="text-xs text-muted-foreground">Manage collaborators</div>
+							</div>
+						</div>
+					</Link>
 				</div>
 			</div>
 
