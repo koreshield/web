@@ -42,9 +42,9 @@ const tiers = [
 		yearlyPrice: 2870,
 		priceDisplay: '$299',
 		priceDetail: '/month',
-		description: 'For growing startups and scale-ups',
+		description: 'Managed SaaS for growing startups and scale-ups',
 		features: [
-			'Everything in Core Platform',
+			'Managed hosted KoreShield platform',
 			'Up to 1M requests/month',
 			'Email & chat support',
 			'Advanced monitoring dashboard',
@@ -65,7 +65,7 @@ const tiers = [
 		yearlyPrice: 19190,
 		priceDisplay: '$1,999',
 		priceDetail: '/month',
-		description: 'For established businesses scaling AI',
+		description: 'Managed SaaS for established businesses scaling AI',
 		features: [
 			'Everything in Startup',
 			'Up to 10M requests/month',
@@ -88,14 +88,15 @@ const tiers = [
 		monthlyPrice: null,
 		yearlyPrice: null,
 		priceDisplay: 'Custom',
-		description: 'For large-scale deployments with custom requirements',
+		description: 'Annual licensing for self-hosted or private deployments with custom requirements',
 		features: [
 			'Everything in Growth',
-			'Unlimited requests',
+			'Annual enterprise license',
+			'Private or self-hosted deployment',
+			'Usage bands or custom volume terms',
 			'24/7 dedicated support',
-			'Private deployment options',
 			'Custom SLA agreements',
-			'On-premise deployment',
+			'On-premise or VPC deployment',
 			'Advanced compliance (SOC2, ISO 27001, HIPAA)',
 			'Custom AI model support',
 			'Dedicated account manager',
@@ -111,7 +112,7 @@ const tiers = [
 const faqs = [
 	{
 		question: 'How does the pricing work?',
-		answer: 'Our pricing is based on the number of API requests per month and the level of support you need. All plans include managed hosting, priority support, and advanced features. All pricing is in US Dollars ($). We also accept payments in British Pounds (£). Prices exclude VAT/sales tax.',
+		answer: 'Startup and Growth are managed SaaS plans priced by protected API requests per month, with higher tiers unlocking more support and operational features. Enterprise is priced separately as an annual commercial license for self-hosted or private deployment, with support and SLA terms tailored to the customer. All pricing is in US Dollars ($). We also accept payments in British Pounds (£). Prices exclude VAT and sales tax.',
 	},
 	{
 		question: 'What counts as a request?',
@@ -119,19 +120,19 @@ const faqs = [
 	},
 	{
 		question: 'Can I switch between tiers?',
-		answer: 'Yes! You can upgrade or downgrade at any time. Upgrades take effect immediately, whilst downgrades apply at the start of your next billing cycle. There are no long-term contracts for Startup and Growth tiers.',
+		answer: 'Yes. Hosted Startup and Growth customers can upgrade or downgrade between SaaS tiers as usage changes. Enterprise licensing is scoped separately because deployment model, support, and commercial terms are agreed in contract.',
 	},
 	{
 		question: 'What happens if I exceed my request limit?',
-		answer: 'You\'ll receive alerts at 80% and 95% of your limit. If you exceed your monthly allocation, we\'ll automatically upgrade you to the next tier (prorated for the remainder of the month). You can also set hard limits to prevent overages.',
+		answer: 'Hosted customers receive alerts as they approach their monthly protected request limit. You can move up to the next SaaS tier or agree an overage arrangement. Enterprise customers are handled under their annual license terms instead of the standard hosted limits.',
 	},
 	{
 		question: 'Do you offer a trial period?',
-		answer: 'Yes! All paid tiers include a 14-day trial period with no credit card required. You get full access to all features during the trial period.',
+		answer: 'We offer pilot and evaluation access for qualified customers. Hosted trials and enterprise pilots are scoped with our team so we can match the right deployment path and security requirements.',
 	},
 	{
 		question: 'What payment methods do you accept?',
-		answer: 'We accept credit/debit cards (Visa, Mastercard, Amex), bank transfers, and purchase orders for annual contracts. All payments are processed securely through Stripe.',
+		answer: 'Hosted SaaS plans can be paid by card or invoice, depending on account size. Enterprise annual licenses are typically invoiced and can be purchased through bank transfer or purchase order.',
 	},
 	{
 		question: 'Do you offer discounts for non-profits or educational institutions?',
@@ -139,7 +140,7 @@ const faqs = [
 	},
 	{
 		question: 'What is your refund policy?',
-		answer: 'We offer a 30-day money-back guarantee on annual plans. Monthly plans can be cancelled at any time with no penalty. Unused requests do not roll over to the next billing period.',
+		answer: 'Hosted plans can be cancelled at the end of the billing period unless otherwise agreed in writing. Enterprise annual licenses, onboarding, and support terms are handled contractually.',
 	},
 	{
 		question: 'Can I use KoreShield for commercial projects?',
@@ -177,7 +178,7 @@ export default function PricingPage() {
 							</span>
 						</h1>
 						<p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto font-light">
-							Simple, usage-based pricing that scales with your needs. Get enterprise-grade LLM security with transparent costs.
+							Hosted KoreShield is priced by protected request volume with feature-based tiers. Enterprise customers can license KoreShield annually for self-hosted or private deployment.
 						</p>
 
 						{/* Billing Toggle */}
@@ -359,7 +360,7 @@ export default function PricingPage() {
 
 					{/* Enterprise Note */}
 					<p className="text-center text-muted-foreground mt-12">
-						All prices are in US Dollars ($). We also accept British Pounds (£). Prices exclude VAT/sales tax. Annual plans save 20%.
+						Startup and Growth are managed SaaS plans. Enterprise is sold on annual license with support and SLA terms. All prices are in US Dollars ($). We also accept British Pounds (£). Prices exclude VAT and sales tax.
 					</p>
 				</div>
 			</section>
@@ -388,7 +389,13 @@ export default function PricingPage() {
 									<td className="p-4 text-foreground/80">Requests/month</td>
 									<td className="p-4 text-center text-muted-foreground">1M</td>
 									<td className="p-4 text-center text-muted-foreground">10M</td>
-									<td className="p-4 text-center text-muted-foreground">Unlimited</td>
+									<td className="p-4 text-center text-muted-foreground">Contracted</td>
+								</tr>
+								<tr>
+									<td className="p-4 text-foreground/80">Deployment model</td>
+									<td className="p-4 text-center text-muted-foreground">Managed SaaS</td>
+									<td className="p-4 text-center text-muted-foreground">Managed SaaS</td>
+									<td className="p-4 text-center text-muted-foreground">Self-hosted / Private</td>
 								</tr>
 								<tr>
 									<td className="p-4 text-foreground/80">Support</td>

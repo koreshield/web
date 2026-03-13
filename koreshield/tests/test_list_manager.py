@@ -5,6 +5,7 @@ Tests for the blocklist/allowlist manager.
 import pytest
 import tempfile
 import os
+import json
 from datetime import datetime, timedelta
 from src.koreshield.list_manager import ListManager, ListType, ListEntry
 
@@ -216,3 +217,51 @@ class TestListManager:
         # Verify imported entries
         assert manager2.check_entry(ListType.BLOCKLIST, "export1.com") is not None
         assert manager2.check_entry(ListType.BLOCKLIST, "export2.com") is not None
+
+    def test_loads_local_threat_intel_feed(self):
+        """Threat intel feeds should populate the configured list on startup."""
+        feed_path = os.path.join(self.temp_dir, "feed.json")
+        with open(feed_path, "w") as feed_file:
+            json.dump(
+                {
+                    "entries": [
+                        {
+                            "value": "ignore previous instructions",
+                            "entry_type": "keyword",
+                            "reason": "Known jailbreak phrase",
+                        },
+                        {
+                            "value": "malicious.example",
+                            "entry_type": "domain",
+                        },
+                    ]
+                },
+                feed_file,
+            )
+
+        manager = ListManager(
+            {
+                "storage_path": self.temp_dir,
+                "lists": {
+                    "feeds": [
+                        {
+                            "name": "unit-test-feed",
+                            "source": feed_path,
+                            "list_type": "blocklist",
+                            "default_entry_type": "keyword",
+                        }
+                    ]
+                },
+            }
+        )
+
+        keyword_entry = manager.check_entry(
+            ListType.BLOCKLIST,
+            "ignore previous instructions",
+        )
+        domain_entry = manager.check_entry(ListType.BLOCKLIST, "malicious.example")
+
+        assert keyword_entry is not None
+        assert keyword_entry.added_by == "threat_intel:unit-test-feed"
+        assert keyword_entry.metadata["feed_name"] == "unit-test-feed"
+        assert domain_entry is not None
