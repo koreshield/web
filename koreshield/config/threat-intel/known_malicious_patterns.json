@@ -1,0 +1,31 @@
+{
+  "entries": [
+    {
+      "value": "ignore previous instructions",
+      "entry_type": "keyword",
+      "reason": "Common jailbreak and instruction override phrase",
+      "metadata": {
+        "category": "prompt-injection",
+        "source_type": "seed-feed"
+      }
+    },
+    {
+      "value": "reveal the system prompt",
+      "entry_type": "keyword",
+      "reason": "Prompt leakage attempt",
+      "metadata": {
+        "category": "prompt-leakage",
+        "source_type": "seed-feed"
+      }
+    },
+    {
+      "value": "export all records",
+      "entry_type": "keyword",
+      "reason": "High-risk bulk data extraction pattern",
+      "metadata": {
+        "category": "data-exfiltration",
+        "source_type": "seed-feed"
+      }
+    }
+  ]
+}

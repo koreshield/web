@@ -11,6 +11,17 @@ KoreShield is a proprietary security platform designed to protect enterprise app
 
 The SDKs, documentation, website, and blog are MIT-licensed in their respective directories. The KoreShield core platform is proprietary.
 
+## Commercial Licensing
+
+KoreShield is commercial software with a hybrid delivery model:
+
+- **Hosted SaaS**: managed KoreShield priced by protected request volume and feature tier
+- **Enterprise self-hosted**: annual commercial license with support and SLA terms
+
+The open SDKs, docs, website, and blog are designed to reduce adoption friction. They are not a grant of rights to use the proprietary KoreShield core platform outside an evaluation, pilot, or commercial agreement.
+
+Detailed commercial packaging and licensing terms are still being finalized. For pilots, evaluation access, and enterprise licensing, contact the KoreShield team directly.
+
 This project is unified under the KoreShield brand, with all resources, SDKs, and documentation available at [koreshield.com](https://koreshield.com).
 
 The goal is for KoreShield to be the "security layer" for any LLM-powered enterprise system—easy to integrate, highly configurable, and always up-to-date with the latest defenses and best practices.
@@ -86,6 +97,8 @@ if not result.is_safe:
 - [RAG Integration Guide](docs/RAG_INTEGRATION_GUIDE.md) - Complete integration guide
 - [CRM Security Templates](koreshield/src/koreshield/crm_templates/README.md) - Platform-specific configurations
 - [Research Paper](https://www.academia.edu/145685538/_Preprint_LLM_Firewall_A_Novel_Taxonomy_of_Indirect_Prompt_Injection_Attacks_in_Enterprise_RAG_Systems) - Academic foundation
+- [CRM Benchmark Fixtures](koreshield/research/experiments/crm-benchmarks/README.md) - Synthetic Salesforce and HubSpot evaluation assets
+- [Case Studies](koreshield/research/case-studies/README.md) - Sanitized attack walkthroughs for sales and validation
 
 ## Architecture
 
