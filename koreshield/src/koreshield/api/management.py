@@ -173,12 +173,20 @@ async def signup(
         
         token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
         
+        cookie_samesite = os.getenv("COOKIE_SAMESITE")
+        if not cookie_samesite:
+            env = os.getenv("ENVIRONMENT", "").lower()
+            cookie_samesite = "none" if env in {"production", "staging"} else "lax"
+        cookie_secure = os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"}
+        if cookie_samesite == "none":
+            cookie_secure = True
+
         response.set_cookie(
             key=AUTH_COOKIE_NAME,
             value=f"Bearer {token}",
             httponly=True,
-            samesite="lax",
-            secure=os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"},
+            samesite=cookie_samesite,
+            secure=cookie_secure,
             max_age=24 * 60 * 60,
             path="/",
         )
@@ -273,12 +281,20 @@ async def admin_login(
         await db.commit()
         
         token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
+        cookie_samesite = os.getenv("COOKIE_SAMESITE")
+        if not cookie_samesite:
+            env = os.getenv("ENVIRONMENT", "").lower()
+            cookie_samesite = "none" if env in {"production", "staging"} else "lax"
+        cookie_secure = os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"}
+        if cookie_samesite == "none":
+            cookie_secure = True
+
         response.set_cookie(
             key=AUTH_COOKIE_NAME,
             value=f"Bearer {token}",
             httponly=True,
-            samesite="lax",
-            secure=os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"},
+            samesite=cookie_samesite,
+            secure=cookie_secure,
             max_age=24 * 60 * 60,
             path="/",
         )
