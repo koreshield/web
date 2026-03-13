@@ -25,7 +25,7 @@ export function TeamsPage() {
 	const queryClient = useQueryClient();
 
 	// Fetch Teams
-	const { data: teams = [], isLoading } = useQuery<Team[]>({
+	const { data: teams = [], isLoading, isError, error: teamsError, refetch } = useQuery<Team[]>({
 		queryKey: ['teams'],
 		queryFn: () => api.getTeams() as Promise<Team[]>,
 	});
@@ -93,6 +93,21 @@ export function TeamsPage() {
 				{isLoading ? (
 					<div className="flex items-center justify-center py-12">
 						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+					</div>
+				) : isError ? (
+					<div className="bg-card border border-border rounded-lg p-6 text-center">
+						<p className="text-sm text-muted-foreground mb-4">
+							Failed to load teams. This is usually a network or backend connectivity issue.
+						</p>
+						<p className="text-xs text-muted-foreground mb-6">
+							{(teamsError as any)?.message || 'Unable to reach the KoreShield API.'}
+						</p>
+						<button
+							onClick={() => refetch()}
+							className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+						>
+							Retry
+						</button>
 					</div>
 				) : teams.length === 0 ? (
 					<div className="bg-card border border-border rounded-lg p-12 text-center">
@@ -216,5 +231,4 @@ export function TeamsPage() {
 		</div>
 	);
 }
-
 
