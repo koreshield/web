@@ -22,7 +22,7 @@ COPY alembic.ini ./
 COPY alembic/ ./alembic/
 
 # Create startup script
-RUN echo '#!/bin/bash\nset -e\necho "Running database migrations..."\nalembic upgrade head\necho "Starting server..."\nexec uvicorn src.koreshield.main:app --host 0.0.0.0 --port 8000' > /app/start.sh && \
+RUN echo '#!/bin/bash\nset -e\necho "Running database migrations..."\nalembic upgrade head\necho "Starting server..."\nexec uvicorn src.koreshield.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips=\"*\"' > /app/start.sh && \
 	chmod +x /app/start.sh
 
 # Create non-root user
