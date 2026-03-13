@@ -53,6 +53,31 @@ curl -s -X POST https://api.koreshield.com/v1/rag/scan \
   }'
 ```
 
+### RAG History + Download Packs
+
+RAG scans are persisted server‑side so you can retrieve past results and export full scan packs later:
+
+```bash
+# List recent scans
+curl -s -H "Authorization: Bearer <JWT_TOKEN>" \
+  https://api.koreshield.com/v1/rag/scans
+
+# Download a scan pack (request + response bundle)
+curl -L -H "Authorization: Bearer <JWT_TOKEN>" \
+  https://api.koreshield.com/v1/rag/scans/<scan_id>/pack \
+  -o rag-scan-pack.zip
+```
+
+### Supported Document Types
+
+The RAG scan accepts **plain text content**. If you are uploading files in the dashboard, text is extracted from:
+
+- `.txt`, `.md`, `.json`, `.csv`
+- `.pdf` (text‑extractable PDFs)
+- `.docx` (Word documents)
+
+For scanned images inside PDFs, OCR is still required before upload.
+
 ## Next
 
 - [/docs/api/rest-api](/docs/api/rest-api)
