@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
 	Upload,
@@ -26,6 +26,10 @@ import {
 import { SEOMeta } from '../components/SEOMeta';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
+import { authService } from '../lib/auth';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import * as mammoth from 'mammoth/mammoth.browser';
 
 // Types based on backend schema
 interface RetrievedDocument {
@@ -102,6 +106,129 @@ interface ScanConfig {
 	max_excerpt_length?: number;
 }
 
+interface RAGScanHistoryItem {
+	id: string;
+	timestamp: string;
+	documents: RetrievedDocument[];
+	user_query: string;
+	result: RAGScanResult;
+}
+
+type RAGApiResponse = {
+	is_safe?: boolean;
+	overall_severity?: string;
+	overall_confidence?: number;
+	query_analysis?: {
+		is_attack?: boolean;
+		details?: {
+			attack_type?: string;
+			confidence?: number;
+		};
+	};
+	context_analysis?: any;
+	processing_time_ms?: number;
+	timestamp?: string;
+	request_id?: string;
+};
+
+GlobalWorkerOptions.workerSrc = pdfWorker;
+
+const buildTaxonomyCounts = (values: string[] | undefined): Record<string, number> => {
+	if (!values) return {};
+	return values.reduce<Record<string, number>>((acc, value) => {
+		acc[value] = (acc[value] || 0) + 1;
+		return acc;
+	}, {});
+};
+
+const normalizeRagResponse = (
+	payload: any,
+	sourceDocuments: RetrievedDocument[],
+	userQueryValue: string
+): RAGScanResult => {
+	// Already normalized
+	if (payload?.scan_metadata) {
+		return payload as RAGScanResult;
+	}
+
+	const apiPayload = payload as RAGApiResponse;
+	const context = apiPayload?.context_analysis || {};
+	const stats = context.statistics || {};
+
+	const documentThreats: DocumentThreat[] = (context.document_threats || []).map((threat: any, index: number) => {
+		const excerpt = threat.excerpts?.[0] || '';
+		return {
+			document_id: threat.document_id || sourceDocuments[index]?.id || `doc_${index}`,
+			threat_type: threat.threat_type || 'unknown',
+			severity: threat.severity || 'low',
+			confidence: threat.confidence || 0,
+			excerpt,
+			location: {
+				start: 0,
+				end: excerpt.length,
+			},
+			taxonomy: {
+				injection_vector: threat.injection_vector || 'unknown',
+				operational_target: threat.operational_target || 'unknown',
+				persistence_mechanism: threat.metadata?.persistence_mechanism || 'unknown',
+				enterprise_context: threat.metadata?.enterprise_context || 'unknown',
+				detection_complexity: threat.metadata?.detection_complexity || context.detection_complexity || 'unknown',
+			},
+			explanation: threat.metadata?.summary || `Detected ${threat.threat_type || 'risk'} in document.`,
+		};
+	});
+
+	const crossDocumentThreats: CrossDocumentThreat[] = (context.cross_document_threats || []).map((threat: any) => ({
+		threat_type: threat.threat_type || 'unknown',
+		severity: threat.severity || 'low',
+		confidence: threat.confidence || 0,
+		involved_documents: threat.document_ids || [],
+		chain_description: threat.description || 'Coordinated multi-document threat detected.',
+		attack_stages: (threat.document_ids || []).map((docId: string, idx: number) => ({
+			stage_number: idx + 1,
+			document_id: docId,
+			component_description: threat.metadata?.stage_summary || 'Correlated indicator detected.',
+		})),
+	}));
+
+	const unsafeDocumentIds = new Set(documentThreats.map((threat) => threat.document_id));
+	const safeDocuments = sourceDocuments
+		.map((doc) => doc.id)
+		.filter((id) => !unsafeDocumentIds.has(id));
+
+	return {
+		is_safe: apiPayload?.is_safe ?? context.is_safe ?? true,
+		total_threats_found: stats.total_threats_found ?? context.total_threats_found ?? documentThreats.length,
+		document_threats: documentThreats,
+		cross_document_threats: crossDocumentThreats,
+		safe_documents: safeDocuments,
+		unsafe_documents: Array.from(unsafeDocumentIds),
+		taxonomy_summary: {
+			injection_vectors: buildTaxonomyCounts(context.injection_vectors),
+			operational_targets: buildTaxonomyCounts(context.operational_targets),
+			persistence_mechanisms: buildTaxonomyCounts(context.persistence_mechanisms),
+			enterprise_contexts: buildTaxonomyCounts(context.enterprise_contexts),
+			detection_complexities: buildTaxonomyCounts(
+				context.detection_complexity ? [context.detection_complexity] : []
+			),
+		},
+		scan_metadata: {
+			scan_id: context.scan_id || apiPayload?.request_id || `scan_${Date.now()}`,
+			timestamp: context.scan_timestamp || apiPayload?.timestamp || new Date().toISOString(),
+			documents_scanned: stats.total_documents_scanned ?? sourceDocuments.length,
+			processing_time_ms: context.processing_time_ms ?? apiPayload?.processing_time_ms ?? 0,
+			user_query_included: Boolean(apiPayload?.query_analysis || userQueryValue.trim()),
+		},
+		query_result: apiPayload?.query_analysis
+			? {
+					is_attack: Boolean(apiPayload.query_analysis.is_attack),
+					attack_type: apiPayload.query_analysis.details?.attack_type || 'unknown',
+					confidence: apiPayload.query_analysis.details?.confidence || 0,
+				}
+			: undefined,
+	};
+};
+
 // CRM Templates
 const CRM_TEMPLATES = {
 	salesforce: {
@@ -126,6 +253,7 @@ const CRM_TEMPLATES = {
 
 export function RAGSecurityPage() {
 	const { success, error: showError } = useToast();
+	const currentUser = authService.getCurrentUser();
 	const [documents, setDocuments] = useState<RetrievedDocument[]>([]);
 	const [userQuery, setUserQuery] = useState('');
 	const [scanResult, setScanResult] = useState<RAGScanResult | null>(null);
@@ -141,6 +269,82 @@ export function RAGSecurityPage() {
 		enable_cross_document_analysis: true,
 		max_excerpt_length: 200
 	});
+	const [scanHistory, setScanHistory] = useState<RAGScanHistoryItem[]>([]);
+	const [historyLoading, setHistoryLoading] = useState(false);
+	const [historyError, setHistoryError] = useState<string | null>(null);
+
+	const refreshHistory = async () => {
+		setHistoryLoading(true);
+		setHistoryError(null);
+		try {
+			const response: any = await api.getRagScanHistory(20, 0);
+			const scans = response?.scans || [];
+			const mapped = scans.map((item: any) => {
+				const documentsList = item.documents || [];
+				const responsePayload = item.response || item.result || item;
+				const normalized = normalizeRagResponse(responsePayload, documentsList, item.user_query || '');
+				return {
+					id: item.scan_id || normalized.scan_metadata.scan_id,
+					timestamp: item.timestamp || normalized.scan_metadata.timestamp,
+					documents: documentsList,
+					user_query: item.user_query || '',
+					result: normalized,
+				} as RAGScanHistoryItem;
+			});
+			setScanHistory(mapped);
+		} catch (err: any) {
+			setHistoryError(err.message || 'Failed to load scan history');
+		} finally {
+			setHistoryLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		refreshHistory();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentUser?.id]);
+
+	const maxFileSizeBytes = 10 * 1024 * 1024;
+
+	const extractPdfText = async (file: File): Promise<string> => {
+		const data = await file.arrayBuffer();
+		const pdf = await getDocument({ data }).promise;
+		let text = '';
+		for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex += 1) {
+			const page = await pdf.getPage(pageIndex);
+			const content = await page.getTextContent();
+			const pageText = content.items
+				.map((item: any) => (typeof item.str === 'string' ? item.str : ''))
+				.filter(Boolean)
+				.join(' ');
+			text += `${pageText}\n`;
+		}
+		return text.trim();
+	};
+
+	const extractDocxText = async (file: File): Promise<string> => {
+		const data = await file.arrayBuffer();
+		const result = await mammoth.extractRawText({ arrayBuffer: data });
+		return (result.value || '').trim();
+	};
+
+	const readFileContent = async (file: File): Promise<string> => {
+		const lowerName = file.name.toLowerCase();
+		const isPdf = file.type === 'application/pdf' || lowerName.endsWith('.pdf');
+		const isDocx =
+			file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+			lowerName.endsWith('.docx');
+
+		if (isPdf) {
+			return extractPdfText(file);
+		}
+
+		if (isDocx) {
+			return extractDocxText(file);
+		}
+
+		return file.text();
+	};
 
 	// Handle file upload
 	const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,7 +356,15 @@ export function RAGSecurityPage() {
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 			try {
-				const content = await file.text();
+				if (file.size > maxFileSizeBytes) {
+					showError(`File too large (max 10MB): ${file.name}`);
+					continue;
+				}
+				const content = await readFileContent(file);
+				if (!content.trim()) {
+					showError(`No readable text found in: ${file.name}`);
+					continue;
+				}
 				newDocuments.push({
 					id: `file_${Date.now()}_${i}`,
 					content,
@@ -160,7 +372,8 @@ export function RAGSecurityPage() {
 						filename: file.name,
 						type: file.type,
 						size: file.size,
-						lastModified: file.lastModified
+						lastModified: file.lastModified,
+						extracted_at: new Date().toISOString()
 					}
 				});
 			} catch (err) {
@@ -234,6 +447,51 @@ export function RAGSecurityPage() {
 		success('All documents cleared');
 	};
 
+	const handleClearHistory = () => {
+		api.clearRagScans()
+			.then(() => {
+				setScanHistory([]);
+				success('Scan history cleared');
+			})
+			.catch((err: any) => {
+				showError(err.message || 'Failed to clear history');
+			});
+	};
+
+	const handleLoadHistory = (item: RAGScanHistoryItem) => {
+		setDocuments(item.documents);
+		setUserQuery(item.user_query);
+		setScanResult(item.result);
+		success('Loaded previous scan');
+	};
+
+	const handleDeleteHistory = (id: string) => {
+		api.deleteRagScan(id)
+			.then(() => {
+				setScanHistory((prev) => prev.filter((item) => item.id !== id));
+			})
+			.catch((err: any) => {
+				showError(err.message || 'Failed to delete scan');
+			});
+	};
+
+	const handleDownloadPack = async (scanId: string) => {
+		try {
+			const blob = await api.downloadRagScanPack(scanId);
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `rag-scan-${scanId}.zip`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+			success('Download started');
+		} catch (err: any) {
+			showError(err.message || 'Failed to download scan pack');
+		}
+	};
+
 	// Perform RAG scan
 	const handleScan = async () => {
 		if (documents.length === 0) {
@@ -247,14 +505,15 @@ export function RAGSecurityPage() {
 				user_query: userQuery.trim() || undefined,
 				documents,
 				config: scanConfig
-			}) as RAGScanResult;
+			});
+			const normalized = normalizeRagResponse(response, documents, userQuery);
+			setScanResult(normalized);
+			await refreshHistory();
 
-			setScanResult(response);
-
-			if (response.is_safe) {
+			if (normalized.is_safe) {
 				success('No threats detected - Documents are safe!');
 			} else {
-				showError(`${response.total_threats_found} threat(s) detected!`);
+				showError(`${normalized.total_threats_found} threat(s) detected!`);
 			}
 		} catch (err: any) {
 			showError(err.message || 'Failed to scan documents');
@@ -388,7 +647,7 @@ export function RAGSecurityPage() {
 											<input
 												type="file"
 												multiple
-												accept=".txt,.md,.json,.csv"
+												accept=".txt,.md,.json,.csv,.pdf,.docx"
 												onChange={handleFileUpload}
 												className="hidden"
 											/>
@@ -396,7 +655,7 @@ export function RAGSecurityPage() {
 												<Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
 												<p className="text-sm font-medium mb-1">Click to upload files</p>
 												<p className="text-xs text-muted-foreground">
-													Supports TXT, MD, JSON, CSV (max 10MB per file)
+													Supports TXT, MD, JSON, CSV, PDF, DOCX (max 10MB per file)
 												</p>
 											</div>
 										</label>
@@ -631,13 +890,22 @@ export function RAGSecurityPage() {
 							<div className="bg-card border border-border rounded-lg p-6 space-y-4">
 								<div className="flex items-center justify-between">
 									<h2 className="text-lg font-semibold">Scan Results</h2>
-									<button
-										onClick={handleExport}
-										className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
-									>
-										<Download className="w-4 h-4" />
-										Export
-									</button>
+									<div className="flex items-center gap-3">
+										<button
+											onClick={() => handleDownloadPack(scanResult.scan_metadata.scan_id)}
+											className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
+										>
+											<Download className="w-4 h-4" />
+											Download Scan Pack
+										</button>
+										<button
+											onClick={handleExport}
+											className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
+										>
+											<Download className="w-4 h-4" />
+											Export
+										</button>
+									</div>
 								</div>
 
 								{/* Overall Status */}
@@ -720,6 +988,70 @@ export function RAGSecurityPage() {
 								</div>
 							</div>
 						)}
+
+						{/* Scan History */}
+						<div className="bg-card border border-border rounded-lg p-6 space-y-4">
+							<div className="flex items-center justify-between">
+								<h2 className="text-lg font-semibold">Scan History</h2>
+								{scanHistory.length > 0 && (
+									<button
+										onClick={handleClearHistory}
+										className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+									>
+										<Trash2 className="w-3 h-3" />
+										Clear History
+									</button>
+								)}
+							</div>
+							<p className="text-xs text-muted-foreground">
+								Stored securely in your account history for future review and downloads.
+							</p>
+							{historyLoading ? (
+								<div className="text-sm text-muted-foreground">Loading scan history...</div>
+							) : historyError ? (
+								<div className="text-sm text-red-500">{historyError}</div>
+							) : scanHistory.length === 0 ? (
+								<div className="text-sm text-muted-foreground">No previous scans yet.</div>
+							) : (
+								<div className="space-y-2">
+									{scanHistory.map((item) => (
+										<div key={item.id} className="flex items-center justify-between gap-3 p-3 bg-muted/40 rounded-lg border border-border">
+											<div className="min-w-0">
+												<div className="text-sm font-medium truncate">
+													{item.result.total_threats_found} threat(s) • {item.result.scan_metadata.documents_scanned} doc(s)
+												</div>
+												<div className="text-xs text-muted-foreground">
+													{new Date(item.timestamp).toLocaleString()}
+												</div>
+											</div>
+											<div className="flex items-center gap-2">
+												<button
+													onClick={() => handleLoadHistory(item)}
+													className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+												>
+													<Eye className="w-3 h-3" />
+													View
+												</button>
+												<button
+													onClick={() => handleDownloadPack(item.id)}
+													className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+												>
+													<Download className="w-3 h-3" />
+													Download
+												</button>
+												<button
+													onClick={() => handleDeleteHistory(item.id)}
+													className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+												>
+													<Trash2 className="w-3 h-3" />
+													Remove
+												</button>
+											</div>
+										</div>
+									))}
+								</div>
+							)}
+						</div>
 
 						{/* Info Card */}
 						<div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-4">

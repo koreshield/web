@@ -261,7 +261,7 @@ export function CostAnalyticsPage() {
                         {/* Cost Trend Chart */}
                         <div className="bg-card border border-border rounded-lg p-6 mb-8">
                             <h2 className="text-lg font-semibold mb-4">Cost Trend Over Time</h2>
-                            <ResponsiveContainer width="100%" height={300}>
+                            <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
                                 <LineChart data={costData}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                                     <XAxis dataKey="period" stroke="#9ca3af" />
@@ -280,7 +280,7 @@ export function CostAnalyticsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                             <div className="bg-card border border-border rounded-lg p-6">
                                 <h2 className="text-lg font-semibold mb-4">Cost by Provider</h2>
-                                <ResponsiveContainer width="100%" height={300}>
+                                <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
                                     <PieChart>
                                         <Pie
                                             data={providerCostBreakdown}
@@ -310,7 +310,7 @@ export function CostAnalyticsPage() {
 
                             <div className="bg-card border border-border rounded-lg p-6">
                                 <h2 className="text-lg font-semibold mb-4">Top 10 Accounts by Cost</h2>
-                                <ResponsiveContainer width="100%" height={300}>
+                                <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
                                     <BarChart data={tenantCostBreakdown} layout="horizontal">
                                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                                         <XAxis type="number" stroke="#9ca3af" />
