@@ -30,7 +30,15 @@ class SecurityConfig(BaseModel):
     default_action: str = "block"
 
     class Lists(BaseModel):
+        class FeedSource(BaseModel):
+            name: str
+            source: str
+            enabled: bool = True
+            list_type: str = "blocklist"
+            default_entry_type: str = "keyword"
+
         storage_path: Optional[str] = None
+        feeds: List[FeedSource] = Field(default_factory=list)
 
     class Features(BaseModel):
         sanitization: bool = True

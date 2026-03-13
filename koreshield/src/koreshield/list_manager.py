@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Set, Any
 import structlog
 import json
 import os
+from pathlib import Path
 from datetime import datetime, timedelta
 from enum import Enum
 
@@ -116,6 +117,7 @@ class ListManager:
 
         # Load existing lists
         self._load_lists()
+        self._load_threat_intel_feeds()
 
         # Clean up expired entries on startup
         self._cleanup_expired_entries()
@@ -167,6 +169,65 @@ class ListManager:
 
         if total_removed > 0:
             logger.info("Cleaned up expired entries", count=total_removed)
+
+    def _read_feed_source(self, source: str) -> Dict[str, Any]:
+        """Read a local threat intel feed from disk."""
+        resolved_source = Path(source).expanduser().resolve()
+        with open(resolved_source, "r") as feed_file:
+            return json.load(feed_file)
+
+    def _load_threat_intel_feeds(self):
+        """Load configured threat intel feeds into managed lists."""
+        list_config = self.config.get("lists") or {}
+        feed_configs = list_config.get("feeds") or []
+        for feed_config in feed_configs:
+            if not feed_config.get("enabled", True):
+                continue
+
+            feed_name = feed_config.get("name", "unnamed-feed")
+            try:
+                feed_data = self._read_feed_source(feed_config["source"])
+                raw_entries = feed_data.get("entries", [])
+                normalized_entries = []
+                for entry in raw_entries:
+                    normalized_entries.append(
+                        {
+                            "value": entry["value"],
+                            "entry_type": entry.get(
+                                "entry_type",
+                                feed_config.get("default_entry_type", "keyword"),
+                            ),
+                            "reason": entry.get(
+                                "reason",
+                                f"Loaded from threat intel feed {feed_name}",
+                            ),
+                            "metadata": {
+                                **entry.get("metadata", {}),
+                                "feed_name": feed_name,
+                                "feed_source": feed_config["source"],
+                            },
+                        }
+                    )
+
+                list_type = ListType(feed_config.get("list_type", ListType.BLOCKLIST.value))
+                result = self.bulk_add_entries(
+                    list_type,
+                    normalized_entries,
+                    added_by=f"threat_intel:{feed_name}",
+                )
+                logger.info(
+                    "Threat intel feed loaded",
+                    feed_name=feed_name,
+                    list_type=list_type.value,
+                    success=result["success"],
+                    failure=result["failure"],
+                )
+            except Exception as e:
+                logger.warning(
+                    "Failed to load threat intel feed",
+                    feed_name=feed_name,
+                    error=str(e),
+                )
 
     def add_entry(
         self,
