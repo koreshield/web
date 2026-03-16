@@ -1,4 +1,5 @@
-import { User, Mail, Shield, Building } from 'lucide-react';
+import { User, Mail, Shield, Building, CreditCard } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { authService } from '../lib/auth';
 
 export function ProfilePage() {
@@ -79,6 +80,26 @@ export function ProfilePage() {
 								</div>
 							</div>
 						</div>
+					</div>
+				</div>
+
+				<div className="mt-6 bg-card border border-border rounded-lg shadow-sm p-6">
+					<div className="flex items-start justify-between gap-4 flex-wrap">
+						<div>
+							<h2 className="text-lg font-semibold flex items-center gap-2">
+								<CreditCard className="w-5 h-5 text-primary" />
+								Billing
+							</h2>
+							<p className="text-sm text-muted-foreground mt-1">
+								Manage your subscription, invoices, and Polar customer portal access.
+							</p>
+						</div>
+						<Link
+							to="/billing"
+							className="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+						>
+							Open billing
+						</Link>
 					</div>
 				</div>
 			</main>
