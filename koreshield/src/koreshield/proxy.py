@@ -47,6 +47,7 @@ from .api.reports import router as reports_router
 from .api.teams import router as teams_router
 from .api.rules import router as rules_router
 from .api.alerts import router as alerts_router
+from .api.billing import router as billing_router
 from .api import websocket as websocket_module
 from .api.websocket import router as websocket_router
 
@@ -261,6 +262,7 @@ class KoreShieldProxy:
         self.app.include_router(teams_router, prefix="/v1")
         self.app.include_router(rules_router, prefix="/v1")
         self.app.include_router(alerts_router, prefix="/v1")
+        self.app.include_router(billing_router, prefix="/v1")
         self.app.include_router(websocket_router) # Prefix is already /ws defined in router
 
         # Set Redis client for WebSocket module
