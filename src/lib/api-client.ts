@@ -209,6 +209,35 @@ class ApiClient {
 		});
 	}
 
+	async getBillingAccount() {
+		return this.fetch('/v1/billing/account');
+	}
+
+	async syncBillingAccount() {
+		return this.fetch('/v1/billing/sync', {
+			method: 'POST',
+		});
+	}
+
+	async createBillingCheckout(productId: string, successUrl?: string) {
+		return this.fetch('/v1/billing/checkout', {
+			method: 'POST',
+			body: JSON.stringify({
+				product_id: productId,
+				success_url: successUrl,
+			}),
+		});
+	}
+
+	async createBillingPortal(returnUrl?: string) {
+		return this.fetch('/v1/billing/portal', {
+			method: 'POST',
+			body: JSON.stringify({
+				return_url: returnUrl,
+			}),
+		});
+	}
+
 	async deletePolicy(policyId: string) {
 		return this.fetch(`/v1/management/policies/${policyId}`, {
 			method: 'DELETE',
