@@ -35,7 +35,7 @@ class BillingAccount(Base):
     cancel_at_period_end = Column(Boolean, nullable=False, default=False)
     current_period_end = Column(DateTime)
     billing_email = Column(String(255))
-    metadata = Column(JSON, default=dict)
+    billing_metadata = Column("metadata", JSON, default=dict)
     created_at = Column(DateTime, nullable=False, default=utcnow_naive)
     updated_at = Column(DateTime, nullable=False, default=utcnow_naive, onupdate=utcnow_naive)
 

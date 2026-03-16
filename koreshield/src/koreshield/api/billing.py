@@ -76,7 +76,7 @@ def serialize_account(account: BillingAccount) -> BillingAccountResponse:
         billing_email=account.billing_email,
         external_customer_id=account.external_customer_id,
         polar_customer_id=account.polar_customer_id,
-        metadata=account.metadata or {},
+        metadata=account.billing_metadata or {},
         polar_customer_state=account.polar_customer_state or {},
     )
 
@@ -125,7 +125,7 @@ async def get_or_create_billing_account(
         team_id=default_team.id if default_team else None,
         billing_email=user.email,
         external_customer_id=external_customer_id,
-        metadata={
+        billing_metadata={
             "owner_email": user.email,
             "owner_name": user.name,
             "scope": "team" if default_team else "user",
@@ -193,8 +193,8 @@ async def sync_account_from_polar(account: BillingAccount, db: AsyncSession) -> 
     account.currency = snapshot["currency"]
     account.cancel_at_period_end = snapshot["cancel_at_period_end"]
     account.current_period_end = parse_datetime(snapshot["current_period_end"])
-    account.metadata = {
-        **(account.metadata or {}),
+    account.billing_metadata = {
+        **(account.billing_metadata or {}),
         **snapshot["metadata"],
     }
     account.updated_at = utcnow_naive()
@@ -241,7 +241,7 @@ async def create_checkout_session(
         "external_customer_id": account.external_customer_id,
         "success_url": request.success_url,
         "metadata": {
-            **(account.metadata or {}),
+            **(account.billing_metadata or {}),
             "owner_user_id": str(account.owner_user_id),
             "team_id": str(account.team_id) if account.team_id else None,
         },
@@ -391,8 +391,8 @@ async def polar_webhook(
             billing_account.currency = snapshot["currency"]
             billing_account.cancel_at_period_end = snapshot["cancel_at_period_end"]
             billing_account.current_period_end = parse_datetime(snapshot["current_period_end"])
-            billing_account.metadata = {
-                **(billing_account.metadata or {}),
+            billing_account.billing_metadata = {
+                **(billing_account.billing_metadata or {}),
                 **snapshot["metadata"],
             }
 
