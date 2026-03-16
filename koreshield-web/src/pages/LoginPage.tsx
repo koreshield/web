@@ -14,7 +14,8 @@ export function LoginPage() {
     // Redirect if already authenticated
     useEffect(() => {
         if (authService.isAuthenticated()) {
-            const from = (location.state as any)?.from?.pathname || '/dashboard';
+            const fromLocation = (location.state as any)?.from;
+            const from = fromLocation ? `${fromLocation.pathname}${fromLocation.search || ''}` : '/dashboard';
             navigate(from, { replace: true });
         }
     }, [navigate, location]);
@@ -26,7 +27,8 @@ export function LoginPage() {
 
         try {
             await authService.login(email, password);
-            const from = (location.state as any)?.from?.pathname || '/dashboard';
+            const fromLocation = (location.state as any)?.from;
+            const from = fromLocation ? `${fromLocation.pathname}${fromLocation.search || ''}` : '/dashboard';
             navigate(from, { replace: true });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Invalid email or password');
@@ -99,7 +101,7 @@ export function LoginPage() {
                     {/* Signup Link */}
                     <div className="text-center text-sm">
                         <span className="text-muted-foreground">Don't have an account? </span>
-                        <Link to="/signup" className="text-primary hover:underline font-medium">
+                        <Link to={{ pathname: '/signup', search: location.search }} state={location.state} className="text-primary hover:underline font-medium">
                             Sign up
                         </Link>
                     </div>
