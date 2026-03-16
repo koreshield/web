@@ -22,6 +22,20 @@ logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/billing", tags=["Billing"])
 
+STATE_REFRESH_EVENTS = {
+    "customer.state_changed",
+    "subscription.created",
+    "subscription.updated",
+    "subscription.active",
+    "subscription.canceled",
+    "subscription.uncanceled",
+    "subscription.revoked",
+    "subscription.past_due",
+    "order.created",
+    "order.paid",
+    "order.refunded",
+}
+
 
 def utcnow_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
@@ -94,6 +108,7 @@ async def get_default_billing_team(db: AsyncSession, user_id: UUID) -> Team | No
         select(Team)
         .join(TeamMember, TeamMember.team_id == Team.id)
         .where(TeamMember.user_id == user_id)
+        .where(TeamMember.role.in_(["owner", "admin"]))
         .order_by(Team.created_at.asc())
     )
     result = await db.execute(query)
@@ -377,7 +392,7 @@ async def polar_webhook(
     db.add(webhook_event)
 
     try:
-        if billing_account and event_type.startswith("customer."):
+        if billing_account and event_type == "customer.state_changed":
             billing_account.polar_customer_state = data
             if customer:
                 billing_account.polar_customer_id = customer.get("id") or billing_account.polar_customer_id
@@ -395,6 +410,10 @@ async def polar_webhook(
                 **(billing_account.billing_metadata or {}),
                 **snapshot["metadata"],
             }
+        elif billing_account and event_type in STATE_REFRESH_EVENTS:
+            await sync_account_from_polar(billing_account, db)
+        elif billing_account and event_type.startswith("customer.") and customer:
+            billing_account.polar_customer_id = customer.get("id") or billing_account.polar_customer_id
 
         webhook_event.processed = True
         webhook_event.processed_at = utcnow_naive()
