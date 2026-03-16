@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight, CheckCircle } from 'lucide-react';
 
 export function SignupPage() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [searchParams] = useSearchParams();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -36,7 +38,19 @@ export function SignupPage() {
             // Persist user metadata in session storage; auth cookie is HttpOnly.
             sessionStorage.setItem('admin_user', JSON.stringify(data.user));
 
-            // Redirect to dashboard
+            const fromLocation = (location.state as any)?.from;
+            if (fromLocation) {
+                navigate(`${fromLocation.pathname}${fromLocation.search || ''}`, { replace: true });
+                return;
+            }
+
+            const plan = searchParams.get('plan');
+            const period = searchParams.get('period');
+            if (plan && period) {
+                navigate(`/billing?plan=${encodeURIComponent(plan)}&period=${encodeURIComponent(period)}&checkout=1`, { replace: true });
+                return;
+            }
+
             navigate('/dashboard');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Signup failed');
@@ -157,7 +171,7 @@ export function SignupPage() {
                         {/* Login Link */}
                         <div className="text-center text-sm">
                             <span className="text-muted-foreground">Already have an account? </span>
-                            <Link to="/login" className="text-primary hover:underline font-medium">
+                            <Link to={{ pathname: '/login', search: location.search }} state={location.state} className="text-primary hover:underline font-medium">
                                 Sign in
                             </Link>
                         </div>

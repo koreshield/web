@@ -1,9 +1,10 @@
 import emailjs from '@emailjs/browser';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 import { useToast } from '../components/ToastNotification';
+import { authService } from '../lib/auth';
 import { SEOConfig } from '../lib/seo-config';
 
 const tiers = [
@@ -78,7 +79,7 @@ const tiers = [
 			'Quarterly security reviews',
 			'Custom training sessions',
 		],
-		cta: 'Contact Sales',
+		cta: 'Choose Growth',
 		ctaLink: '#contact-sales',
 		popular: false,
 	},
@@ -153,11 +154,26 @@ const faqs = [
 ];
 
 export default function PricingPage() {
+	const navigate = useNavigate();
 	const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
 	const [openFaq, setOpenFaq] = useState<number | null>(null);
 
 	const handleContactSales = () => {
 		document.getElementById('contact-sales')?.scrollIntoView({ behavior: 'smooth' });
+	};
+
+	const handlePlanAction = (planId: string) => {
+		if (planId === 'enterprise') {
+			handleContactSales();
+			return;
+		}
+
+		const target = `/billing?plan=${encodeURIComponent(planId)}&period=${encodeURIComponent(billingPeriod)}&checkout=1`;
+		if (authService.isAuthenticated()) {
+			navigate(target);
+			return;
+		}
+		navigate(`/signup?plan=${encodeURIComponent(planId)}&period=${encodeURIComponent(billingPeriod)}`);
 	};
 
 	return (
@@ -279,18 +295,19 @@ export default function PricingPage() {
 
 									{tier.ctaLink.startsWith('#') ? (
 										<button
-											onClick={handleContactSales}
+											onClick={() => handlePlanAction(tier.id)}
 											className="w-full py-3 px-6 rounded-lg font-semibold transition-all cursor-pointer bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600"
 										>
 											{tier.cta}
 										</button>
 									) : (
-										<Link
-											to={tier.ctaLink}
+										<button
+											type="button"
+											onClick={() => handlePlanAction(tier.id)}
 											className="w-full py-3 px-6 rounded-lg font-semibold transition-all text-center block cursor-pointer bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600"
 										>
 											{tier.cta}
-										</Link>
+										</button>
 									)}
 								</motion.div>
 							);
