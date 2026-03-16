@@ -318,3 +318,5 @@ content/*.md
 content/*.docx
 content/*.txt
 !koreshield-python-sdk/examples/RAG_EXAMPLES.md
+personal-docs/answers/2026-03-14-client-ready-babymomsi-pitch.docx
+personal-docs/answers/2026-03-14-client-ready-midddleman-pitch.docx

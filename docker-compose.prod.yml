@@ -18,6 +18,12 @@ services:
                         - JWT_ISSUER=koreshield-auth
                         - JWT_AUDIENCE=koreshield-api
                         - CORS_ORIGINS=https://koreshield.com,https://www.koreshield.com,https://api.koreshield.com
+                        - POLAR_SERVER=${POLAR_SERVER:-production}
+                        - POLAR_ACCESS_TOKEN=${POLAR_ACCESS_TOKEN}
+                        - POLAR_WEBHOOK_SECRET=${POLAR_WEBHOOK_SECRET}
+                        - POLAR_ORGANIZATION_SLUG=${POLAR_ORGANIZATION_SLUG:-koreshield}
+                        - POLAR_ORGANIZATION_ID=${POLAR_ORGANIZATION_ID}
+                        - POLAR_DEFAULT_CURRENCY=${POLAR_DEFAULT_CURRENCY:-GBP}
                         # Add API Keys here or in a .env file on the VPS
                         # - OPENAI_API_KEY=${OPENAI_API_KEY}
                 healthcheck:
@@ -41,6 +47,10 @@ services:
                         dockerfile: Dockerfile
                         args:
                                 - VITE_API_BASE_URL=https://api.koreshield.com
+                                - VITE_POLAR_STARTUP_PRODUCT_ID=${VITE_POLAR_STARTUP_PRODUCT_ID}
+                                - VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID=${VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID}
+                                - VITE_POLAR_GROWTH_PRODUCT_ID=${VITE_POLAR_GROWTH_PRODUCT_ID}
+                                - VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID=${VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID}
                 image: koreshield-web:latest
                 container_name: koreshield-web
                 ports:
