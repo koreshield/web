@@ -168,6 +168,21 @@ def test_detector_detects_obfuscated_prompt_injection_after_normalization():
     assert any(indicator["type"] == "instruction_override" for indicator in result["indicators"])
 
 
+def test_detector_reports_performance_budget_metadata():
+    """Test that detector returns explicit performance budget details."""
+    detector = AttackDetector()
+
+    result = detector.detect("Summarize the quarterly revenue and pipeline notes.")
+
+    assert "processing_time_ms" in result
+    assert "performance_budget" in result
+    budget = result["performance_budget"]
+    assert budget["target_p50_ms"] <= budget["target_p95_ms"]
+    assert budget["prompt_chars"] > 0
+    assert budget["normalized_chars"] > 0
+    assert "within_budget" in budget
+
+
 def test_detector_custom_rule_management():
     """Test custom rule management methods."""
     detector = AttackDetector()

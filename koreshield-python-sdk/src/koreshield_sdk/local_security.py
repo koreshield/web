@@ -18,7 +18,9 @@ from .types import (
     RAGPreflightDocumentResult,
     RAGPreflightResult,
     ThreatLevel,
+    ToolCapability,
     ToolCallPreflightResult,
+    ToolRiskClass,
 )
 
 INVISIBLE_RE = re.compile(r"[\u200B\u200C\u200D\uFEFF\u00AD\u034F\u061C\u2060\u2061\u2062\u2063\u2064]")
@@ -143,6 +145,38 @@ def _max_severity(indicators: list[DetectionIndicator]) -> ThreatLevel:
     return max(indicators, key=lambda indicator: _severity_weight(indicator.severity)).severity
 
 
+def _tool_capabilities(tool_name: str, serialized_args: str) -> list[ToolCapability]:
+    lowered = f"{tool_name} {serialized_args}".lower()
+    capabilities: list[ToolCapability] = []
+    patterns = (
+        (ToolCapability.EXECUTION, ("bash", "shell", "terminal", "exec", "run", "command")),
+        (ToolCapability.NETWORK, ("fetch", "http", "request", "webhook", "url", "download", "upload")),
+        (ToolCapability.DATABASE, ("sql", "database", "query", "postgres", "mysql")),
+        (ToolCapability.WRITE, ("write", "delete", "update", "modify", "save")),
+        (ToolCapability.READ, ("read", "cat", "open", "list", "search")),
+        (ToolCapability.CREDENTIAL_ACCESS, ("secret", "token", "password", "credential", "ssh", "key")),
+    )
+    for capability, keywords in patterns:
+        if any(keyword in lowered for keyword in keywords):
+            capabilities.append(capability)
+    return capabilities
+
+
+def _risk_class(capabilities: list[ToolCapability], prompt_result: LocalPreflightResult) -> ToolRiskClass:
+    if (
+        prompt_result.threat_level in {ThreatLevel.HIGH, ThreatLevel.CRITICAL}
+        and any(capability in capabilities for capability in (ToolCapability.EXECUTION, ToolCapability.NETWORK, ToolCapability.CREDENTIAL_ACCESS))
+    ):
+        return ToolRiskClass.CRITICAL
+    if prompt_result.threat_level in {ThreatLevel.HIGH, ThreatLevel.CRITICAL} or any(
+        capability in capabilities for capability in (ToolCapability.EXECUTION, ToolCapability.CREDENTIAL_ACCESS)
+    ):
+        return ToolRiskClass.HIGH
+    if capabilities:
+        return ToolRiskClass.MEDIUM
+    return ToolRiskClass.LOW
+
+
 def preflight_scan_prompt(prompt: str) -> LocalPreflightResult:
     """Scan a prompt locally before sending it to KoreShield."""
     normalization = normalize_text(prompt)
@@ -221,17 +255,26 @@ def preflight_scan_tool_call(tool_name: str, args: object) -> ToolCallPreflightR
     serialized = args if isinstance(args, str) else json.dumps(args or {}, sort_keys=True)
     prompt_result = preflight_scan_prompt(f"{tool_name} {serialized}")
     risky_tool = any(candidate in tool_name.lower() for candidate in RISKY_TOOLS)
+    capabilities = _tool_capabilities(tool_name, serialized)
+    risk_class = _risk_class(capabilities, prompt_result)
     reasons: list[str] = []
     if risky_tool:
         reasons.append(f'Tool "{tool_name}" is in the higher-risk execution class.')
     if not prompt_result.is_safe:
         reasons.append("Tool arguments contain prompt-injection or exfiltration signals.")
+    if capabilities:
+        reasons.append(
+            "Capability signals: " + ", ".join(capability.value for capability in capabilities)
+        )
 
     return ToolCallPreflightResult(
         **prompt_result.model_dump(),
         tool_name=tool_name,
         risky_tool=risky_tool,
         reasons=reasons,
+        risk_class=risk_class,
+        capability_signals=capabilities,
+        review_required=risk_class in {ToolRiskClass.HIGH, ToolRiskClass.CRITICAL},
     )
 
 

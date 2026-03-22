@@ -152,6 +152,22 @@ export enum DetectionType {
   ALLOWLIST = 'allowlist',
 }
 
+export enum ToolRiskClass {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+export enum ToolCapability {
+  READ = 'read',
+  WRITE = 'write',
+  NETWORK = 'network',
+  EXECUTION = 'execution',
+  DATABASE = 'database',
+  CREDENTIAL_ACCESS = 'credential_access',
+}
+
 export interface SecurityPolicy {
   name: string;
   description?: string;
@@ -189,6 +205,45 @@ export interface ToolCallPreflightResult extends PreflightScanResult {
   toolName: string;
   riskyTool: boolean;
   reasons: string[];
+  riskClass: ToolRiskClass;
+  capabilitySignals: ToolCapability[];
+  reviewRequired: boolean;
+}
+
+export interface DocumentThreatMetadata {
+  base_detection_confidence?: number;
+  rag_pattern_confidence?: number;
+  query_similarity?: number;
+  directive_score?: number;
+  query_mismatch?: boolean;
+  high_directive_density?: boolean;
+  matched_on_normalized_text?: boolean;
+  threat_indicators?: string[];
+  normalization_layers?: string[];
+  document_metadata?: Record<string, any>;
+}
+
+export interface CrossDocumentThreatMetadata {
+  supporting_indicators?: string[];
+  document_count?: number;
+  coordinated?: boolean;
+}
+
+export interface RAGStatistics {
+  total_documents_scanned: number;
+  documents_with_threats: number;
+  total_threats_found: number;
+  documents_with_query_mismatch?: number;
+  documents_with_directive_density?: number;
+  documents_normalized?: number;
+  min_query_similarity?: number | null;
+  max_directive_score?: number | null;
+  [key: string]: any;
+}
+
+export interface QueryAnalysis {
+  is_attack: boolean;
+  details: Record<string, any>;
 }
 
 export interface RAGPreflightDocumentResult extends PreflightScanResult {
@@ -307,18 +362,24 @@ export interface RAGDocument {
 export interface DocumentThreat {
   /** ID of the threatening document */
   document_id: string;
+  /** Optional backend document position */
+  document_index?: number;
+  /** Optional backend threat type */
+  threat_type?: string;
   /** Threat severity */
   severity: ThreatLevel;
   /** Detection confidence (0.0-1.0) */
   confidence: number;
   /** Patterns that were matched */
   patterns_matched: string[];
+  /** Optional excerpts from the document */
+  excerpts?: string[];
   /** Detected injection vectors */
   injection_vectors: InjectionVector[];
   /** Detected operational targets */
   operational_targets: OperationalTarget[];
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: DocumentThreatMetadata;
 }
 
 /**
@@ -338,7 +399,7 @@ export interface CrossDocumentThreat {
   /** Matched patterns */
   patterns: string[];
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: CrossDocumentThreatMetadata;
 }
 
 /**
@@ -366,7 +427,19 @@ export interface ContextAnalysis {
   /** Cross-document threats */
   cross_document_threats: CrossDocumentThreat[];
   /** Processing statistics */
-  statistics: Record<string, any>;
+  statistics: RAGStatistics;
+  is_safe?: boolean;
+  overall_severity?: ThreatLevel;
+  overall_confidence?: number;
+  injection_vectors?: InjectionVector[];
+  operational_targets?: OperationalTarget[];
+  persistence_mechanisms?: PersistenceMechanism[];
+  enterprise_contexts?: EnterpriseContext[];
+  detection_complexity?: DetectionComplexity;
+  scan_id?: string;
+  scan_timestamp?: string;
+  processing_time_ms?: number;
+  metadata?: Record<string, any>;
 }
 
 /**
@@ -387,14 +460,20 @@ export interface RAGScanConfig {
 export interface RAGScanResponse {
   /** Overall safety assessment */
   is_safe: boolean;
+  /** Optional scan identifier */
+  scan_id?: string;
   /** Overall threat severity */
   overall_severity: ThreatLevel;
   /** Overall detection confidence (0.0-1.0) */
   overall_confidence: number;
   /** 5-dimensional taxonomy classification */
-  taxonomy: TaxonomyClassification;
+  taxonomy?: TaxonomyClassification;
   /** Context analysis results */
   context_analysis: ContextAnalysis;
+  /** Top-level query analysis */
+  query_analysis?: QueryAnalysis | null;
+  /** End-to-end processing time */
+  processing_time_ms?: number;
   /** Request ID */
   request_id?: string;
   /** Timestamp */

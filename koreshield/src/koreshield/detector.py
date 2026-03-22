@@ -4,12 +4,20 @@ Attack detection engine for identifying prompt injection attempts.
 
 from typing import Dict, List, Optional
 import re
+import time
 import structlog
 from .rule_engine import RuleEngine
 from .list_manager import ListManager, ListType
 from .normalization import normalize_text
 
 logger = structlog.get_logger(__name__)
+
+DEFAULT_DETECTOR_PERFORMANCE_BUDGETS = {
+    "target_p50_ms": 8.0,
+    "target_p95_ms": 20.0,
+    "max_prompt_chars": 20000,
+    "max_normalized_expansion_ratio": 1.5,
+}
 
 HIGH_RISK_PATTERNS = [
     ("instruction_override", re.compile(r"ignore\s+(?:all\s+)?(?:previous|prior|above|earlier)\s+(?:instructions|rules|prompts|guidelines|context)", re.IGNORECASE), "high", 0.35),
@@ -73,6 +81,7 @@ class AttackDetector:
             - confidence: Confidence score (0-1)
             - indicators: List of attack indicators
         """
+        started_at = time.perf_counter()
         indicators = []
         attack_type = None
         confidence = 0.0
@@ -353,6 +362,17 @@ class AttackDetector:
 
         # Cap confidence at 1.0
         confidence = min(confidence, 1.0)
+        processing_time_ms = (time.perf_counter() - started_at) * 1000
+        budgets = self.config.get("performance_budgets", DEFAULT_DETECTOR_PERFORMANCE_BUDGETS)
+        normalized_ratio = (
+            len(normalized_prompt) / max(len(prompt), 1)
+            if prompt else 1.0
+        )
+        within_budget = (
+            processing_time_ms <= budgets["target_p95_ms"]
+            and len(prompt) <= budgets["max_prompt_chars"]
+            and normalized_ratio <= budgets["max_normalized_expansion_ratio"]
+        )
 
         result = {
             "is_attack": len(threat_indicators) > 0,
@@ -361,9 +381,23 @@ class AttackDetector:
             "indicators": indicators,
             "normalized_prompt": normalized_prompt,
             "normalization_layers": normalization["layers"],
+            "processing_time_ms": processing_time_ms,
+            "performance_budget": {
+                **budgets,
+                "prompt_chars": len(prompt),
+                "normalized_chars": len(normalized_prompt),
+                "normalized_expansion_ratio": round(normalized_ratio, 4),
+                "within_budget": within_budget,
+            },
         }
 
-        logger.debug("Detection complete", is_attack=result["is_attack"], confidence=confidence)
+        logger.debug(
+            "Detection complete",
+            is_attack=result["is_attack"],
+            confidence=confidence,
+            processing_time_ms=processing_time_ms,
+            within_budget=within_budget,
+        )
 
         return result
 
