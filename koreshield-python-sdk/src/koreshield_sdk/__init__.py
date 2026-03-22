@@ -15,6 +15,12 @@ from .exceptions import (
     NetworkError,
     TimeoutError,
 )
+from .local_security import (
+    normalize_text,
+    preflight_scan_prompt,
+    preflight_scan_rag_context,
+    preflight_scan_tool_call,
+)
 from .types import (
     DetectionResult,
     ScanRequest,
@@ -28,6 +34,11 @@ from .types import (
     DetectionIndicator,
     BatchScanRequest,
     BatchScanResponse,
+    LocalPreflightResult,
+    NormalizationResult,
+    RAGPreflightDocumentResult,
+    RAGPreflightResult,
+    ToolCallPreflightResult,
 )
 from .types import (
     RAGDocument,
@@ -48,6 +59,10 @@ __all__ = [
     "ServerError",
     "NetworkError",
     "TimeoutError",
+    "normalize_text",
+    "preflight_scan_prompt",
+    "preflight_scan_rag_context",
+    "preflight_scan_tool_call",
     "DetectionResult",
     "ScanRequest",
     "ScanResponse",
@@ -60,6 +75,11 @@ __all__ = [
     "DetectionIndicator",
     "BatchScanRequest",
     "BatchScanResponse",
+    "LocalPreflightResult",
+    "NormalizationResult",
+    "RAGPreflightDocumentResult",
+    "RAGPreflightResult",
+    "ToolCallPreflightResult",
     "RAGDocument",
     "RAGScanRequest",
     "RAGScanResponse",

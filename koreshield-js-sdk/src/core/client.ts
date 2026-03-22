@@ -20,8 +20,12 @@ import {
   RAGScanResponse,
   RAGScanConfig,
   RAGBatchScanItem,
+  PreflightScanResult,
+  ToolCallPreflightResult,
+  RAGPreflightResult,
 } from '../types';
 import { validateConfig } from '../utils';
+import { preflightScanPrompt, preflightScanRAGContext, preflightScanToolCall } from '../local/security';
 
 export class KoreShieldClient {
   private client: AxiosInstance;
@@ -144,6 +148,27 @@ export class KoreShieldClient {
       this.updateMetrics(processingTime, true);
       throw this.handleError(error);
     }
+  }
+
+  /**
+   * Run a local preflight prompt scan without calling the KoreShield API.
+   */
+  preflightPrompt(prompt: string): PreflightScanResult {
+    return preflightScanPrompt(prompt);
+  }
+
+  /**
+   * Run a local preflight tool-call scan before execution.
+   */
+  preflightToolCall(toolName: string, args: unknown): ToolCallPreflightResult {
+    return preflightScanToolCall(toolName, args);
+  }
+
+  /**
+   * Run a local preflight scan across retrieved RAG documents.
+   */
+  preflightRAGContext(userQuery: string, documents: RAGDocument[]): RAGPreflightResult {
+    return preflightScanRAGContext(userQuery, documents);
   }
 
   /**

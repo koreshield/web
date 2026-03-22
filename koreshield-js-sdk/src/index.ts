@@ -18,6 +18,12 @@ export type { StreamOptions } from './node/streaming';
 
 // Provider wrappers
 export { KoreShieldOpenAI, createKoreShieldOpenAI } from './providers/openai';
+export {
+  normalizeText,
+  preflightScanPrompt,
+  preflightScanToolCall,
+  preflightScanRAGContext,
+} from './local/security';
 
 // Utility functions
 export {
@@ -103,6 +109,12 @@ export type {
   PersistenceMechanism,
   EnterpriseContext,
   DetectionComplexity,
+  NormalizationResult,
+  LocalThreatIndicator,
+  PreflightScanResult,
+  ToolCallPreflightResult,
+  RAGPreflightDocumentResult,
+  RAGPreflightResult,
 } from './types';
 
 // Default export
