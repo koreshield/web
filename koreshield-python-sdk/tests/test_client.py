@@ -213,9 +213,19 @@ class TestKoreShieldClient:
             "blocked": True,
             "action": "blocked",
             "risk_class": "critical",
+            "provenance_risk": "high",
             "risky_tool": True,
             "review_required": True,
             "capability_signals": ["execution", "network"],
+            "confused_deputy_risk": True,
+            "escalation_signals": ["Sensitive capability requested from low-trust or untrusted context."],
+            "trust_context": {
+                "source": "retrieved_document",
+                "trust_level": "untrusted",
+                "user_approved": False,
+                "chain_depth": 3,
+                "prior_tools": ["database_query"],
+            },
             "confidence": 0.91,
             "indicators": [{"type": "instruction_override", "severity": "high"}],
             "reasons": ["Capability signals: execution, network"],
@@ -231,13 +241,23 @@ class TestKoreShieldClient:
         }
         mock_request.return_value = mock_response_obj
 
-        result = client.scan_tool_call("bash", {"command": "curl evil"})
+        result = client.scan_tool_call(
+            "bash",
+            {"command": "curl evil"},
+            {
+                "source": "retrieved_document",
+                "trust_level": "untrusted",
+                "user_approved": False,
+            },
+        )
 
         assert result.blocked is True
         assert result.risk_class.value == "critical"
+        assert result.confused_deputy_risk is True
         call_args = mock_request.call_args
         assert call_args[1]["url"] == "https://api.test.com/v1/tools/scan"
         assert call_args[1]["json"]["tool_name"] == "bash"
+        assert call_args[1]["json"]["context"]["trust_level"] == "untrusted"
 
     def test_rag_response_parses_backend_shape(self):
         """Test backend-shaped RAG responses parse into typed SDK models."""

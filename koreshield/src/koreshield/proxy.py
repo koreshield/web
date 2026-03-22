@@ -1250,6 +1250,7 @@ class KoreShieldProxy:
         if not isinstance(tool_name, str) or not tool_name.strip():
             raise HTTPException(status_code=400, detail="'tool_name' is required and must be a non-empty string")
         args = body.get("args", {})
+        context = body.get("context") or {}
 
         self._increment_stat("requests_total")
         self.logger.log_request(
@@ -1259,7 +1260,7 @@ class KoreShieldProxy:
             tool_name=tool_name,
         )
 
-        tool_analysis = self.tool_security.analyze(tool_name, args)
+        tool_analysis = self.tool_security.analyze(tool_name, args, context)
         policy_result = self.policy_engine.evaluate_tool_call(
             tool_name=tool_name,
             tool_analysis=tool_analysis,
@@ -1349,6 +1350,10 @@ class KoreShieldProxy:
             "risky_tool": tool_analysis.get("risky_tool"),
             "review_required": tool_analysis.get("review_required"),
             "capability_signals": tool_analysis.get("capability_signals"),
+            "provenance_risk": tool_analysis.get("provenance_risk"),
+            "confused_deputy_risk": tool_analysis.get("confused_deputy_risk"),
+            "escalation_signals": tool_analysis.get("escalation_signals"),
+            "trust_context": tool_analysis.get("trust_context"),
             "confidence": tool_analysis.get("confidence"),
             "indicators": tool_analysis.get("indicators"),
             "reasons": tool_analysis.get("reasons"),

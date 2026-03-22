@@ -168,6 +168,20 @@ export enum ToolCapability {
   CREDENTIAL_ACCESS = 'credential_access',
 }
 
+export interface ToolTrustContext {
+  source?: string;
+  trustLevel?: 'trusted' | 'internal' | 'partner' | 'external' | 'untrusted' | 'unknown' | string;
+  trust_level?: 'trusted' | 'internal' | 'partner' | 'external' | 'untrusted' | 'unknown' | string;
+  userApproved?: boolean | null;
+  user_approved?: boolean | null;
+  crossTenant?: boolean;
+  cross_tenant?: boolean;
+  chainDepth?: number;
+  chain_depth?: number;
+  priorTools?: string[];
+  prior_tools?: string[];
+}
+
 export interface SecurityPolicy {
   name: string;
   description?: string;
@@ -206,8 +220,12 @@ export interface ToolCallPreflightResult extends PreflightScanResult {
   riskyTool: boolean;
   reasons: string[];
   riskClass: ToolRiskClass;
+  provenanceRisk: ToolRiskClass;
   capabilitySignals: ToolCapability[];
   reviewRequired: boolean;
+  confusedDeputyRisk: boolean;
+  escalationSignals: string[];
+  trustContext: ToolTrustContext;
 }
 
 export interface ToolScanPolicyResult {
@@ -234,9 +252,13 @@ export interface ToolScanResponse {
   blocked: boolean;
   action: SecurityAction | 'blocked';
   risk_class: ToolRiskClass | string;
+  provenance_risk: ToolRiskClass | string;
   risky_tool: boolean;
   review_required: boolean;
   capability_signals: Array<ToolCapability | string>;
+  confused_deputy_risk: boolean;
+  escalation_signals: string[];
+  trust_context: ToolTrustContext;
   confidence: number;
   indicators: Array<Record<string, any>>;
   reasons: string[];
@@ -534,6 +556,7 @@ export interface RAGScanRequest {
 export interface ToolScanRequest {
   tool_name: string;
   args?: unknown;
+  context?: ToolTrustContext;
 }
 
 /**
