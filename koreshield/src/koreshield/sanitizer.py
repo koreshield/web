@@ -7,6 +7,8 @@ from typing import Dict, List, Optional
 
 import structlog
 
+from .normalization import normalize_text
+
 logger = structlog.get_logger(__name__)
 
 
@@ -39,12 +41,17 @@ class SanitizationEngine:
             r"you\s+are\s+now\s+(a|an)\s+",
             r"system\s*:\s*",
             r"assistant\s*:\s*",
+            r"\[\s*(system|admin|developer|override)\s*:?",
             r"<\|(system|user|assistant)\|>",
             r"\[INST\]",
             r"\[/INST\]",
             r"override\s+(previous|system|instructions)",
             r"bypass\s+(security|restrictions|rules)",
             r"jailbreak",
+            r"developer\s+mode",
+            r"dan\s+mode",
+            r"reveal\s+(your\s+)?system\s+prompt",
+            r"(?:send|upload|transmit|export).*(?:data|credentials|secrets?)",
             r"new\s+instructions?",
             r"pretend\s+to\s+be",
             r"act\s+as\s+if",
@@ -70,25 +77,48 @@ class SanitizationEngine:
         """
         threats = []
         sanitized = prompt
+        normalization = normalize_text(prompt)
+        normalized_prompt = normalization["normalized"]
+        scan_targets = [("raw", prompt)]
+        if normalized_prompt != prompt:
+            scan_targets.append(("normalized", normalized_prompt))
 
         # Check against known patterns
-        for pattern in self.patterns:
-            matches = pattern.findall(prompt)
-            if matches:
-                threats.append(
-                    {"type": "pattern_match", "pattern": pattern.pattern, "matches": matches}
-                )
+        for source, target in scan_targets:
+            for pattern in self.patterns:
+                matches = pattern.findall(target)
+                if matches:
+                    threats.append(
+                        {
+                            "type": "pattern_match",
+                            "pattern": pattern.pattern,
+                            "matches": matches,
+                            "source": source,
+                        }
+                    )
+
+        if normalization["layers"]:
+            threats.append(
+                {
+                    "type": "normalization_applied",
+                    "layers": normalization["layers"],
+                    "source": "normalized",
+                }
+            )
 
         # Calculate confidence score
-        confidence = min(len(threats) * 0.3, 1.0) if threats else 0.0
+        meaningful_threats = [threat for threat in threats if threat["type"] != "normalization_applied"]
+        confidence = min(len(meaningful_threats) * 0.3, 1.0) if meaningful_threats else 0.0
 
-        is_safe = len(threats) == 0
+        is_safe = len(meaningful_threats) == 0
 
         result = {
             "sanitized": sanitized,
+            "normalized": normalized_prompt,
             "is_safe": is_safe,
             "threats": threats,
             "confidence": confidence,
+            "normalization_layers": normalization["layers"],
         }
 
         logger.debug("Sanitization complete", is_safe=is_safe, threat_count=len(threats))
