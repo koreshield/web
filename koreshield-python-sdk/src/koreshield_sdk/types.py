@@ -33,6 +33,13 @@ class DetectionIndicator(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
 
 
+class NormalizationResult(BaseModel):
+    """Normalized text details for local preflight scanning."""
+    original: str
+    normalized: str
+    layers: List[str] = Field(default_factory=list)
+
+
 class DetectionResult(BaseModel):
     """Result of a security scan."""
     is_safe: bool
@@ -42,6 +49,43 @@ class DetectionResult(BaseModel):
     processing_time_ms: float
     scan_id: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
+
+
+class LocalPreflightResult(BaseModel):
+    """Result of local preflight scanning without a network request."""
+    blocked: bool
+    is_safe: bool
+    threat_level: ThreatLevel
+    confidence: float = Field(ge=0.0, le=1.0)
+    normalization: NormalizationResult
+    indicators: List[DetectionIndicator] = Field(default_factory=list)
+    suggested_action: str
+
+
+class ToolCallPreflightResult(LocalPreflightResult):
+    """Result of local tool-call preflight scanning."""
+    tool_name: str
+    risky_tool: bool
+    reasons: List[str] = Field(default_factory=list)
+
+
+class RAGPreflightDocumentResult(LocalPreflightResult):
+    """Local preflight result for an individual retrieved document."""
+    document_id: str
+    query_similarity: float
+    directive_score: float
+    metadata: Optional[Dict[str, Any]] = None
+
+
+class RAGPreflightResult(BaseModel):
+    """Aggregate local preflight result across retrieved documents."""
+    blocked: bool
+    is_safe: bool
+    threat_level: ThreatLevel
+    confidence: float
+    user_query: str
+    documents: List[RAGPreflightDocumentResult]
+    suggested_action: str
 
 
 class ScanRequest(BaseModel):

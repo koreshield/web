@@ -15,6 +15,12 @@ export interface KoreShieldConfig {
   headers?: Record<string, string>;
 }
 
+export interface NormalizationResult {
+  original: string;
+  normalized: string;
+  layers: string[];
+}
+
 export type SensitivityLevel = 'low' | 'medium' | 'high';
 export type SecurityAction = 'allow' | 'warn' | 'block';
 
@@ -159,6 +165,47 @@ export interface SecurityPolicy {
   allowlistPatterns: string[];
   blocklistPatterns: string[];
   metadata?: Record<string, any>;
+}
+
+export interface LocalThreatIndicator {
+  type: DetectionType;
+  severity: ThreatLevel;
+  confidence: number;
+  description: string;
+  metadata?: Record<string, any>;
+}
+
+export interface PreflightScanResult {
+  blocked: boolean;
+  isSafe: boolean;
+  threatLevel: ThreatLevel;
+  confidence: number;
+  normalization: NormalizationResult;
+  indicators: LocalThreatIndicator[];
+  suggestedAction: SecurityAction;
+}
+
+export interface ToolCallPreflightResult extends PreflightScanResult {
+  toolName: string;
+  riskyTool: boolean;
+  reasons: string[];
+}
+
+export interface RAGPreflightDocumentResult extends PreflightScanResult {
+  documentId: string;
+  querySimilarity: number;
+  directiveScore: number;
+  metadata?: Record<string, any>;
+}
+
+export interface RAGPreflightResult {
+  blocked: boolean;
+  isSafe: boolean;
+  threatLevel: ThreatLevel;
+  confidence: number;
+  userQuery: string;
+  documents: RAGPreflightDocumentResult[];
+  suggestedAction: SecurityAction;
 }
 
 export interface KoreShieldError extends Error {
