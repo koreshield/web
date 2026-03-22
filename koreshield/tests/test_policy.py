@@ -285,3 +285,23 @@ def test_tool_call_policy_respects_bypass_permissions():
     assert result["action"] == "warn"
     assert result["bypass_allowed"] is True
     assert result["review_required"] is True
+
+
+def test_tool_call_policy_flags_confused_deputy_review():
+    """Delegated low-trust tool requests should surface a review policy violation."""
+    policy = PolicyEngine({"security": {"tool_call": {"default_action": "block", "review_threshold": "high"}}})
+    policy.set_user_role("user2", UserRole.USER)
+
+    result = policy.evaluate_tool_call(
+        "send_webhook",
+        {
+            "risk_class": "high",
+            "provenance_risk": "high",
+            "capability_signals": ["network"],
+            "confused_deputy_risk": True,
+            "escalation_signals": ["Sensitive capability requested from low-trust or untrusted context."],
+        },
+        user_id="user2",
+    )
+
+    assert any(v["policy"] == "confused_deputy_review" for v in result["policy_violations"])

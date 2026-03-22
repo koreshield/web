@@ -42,6 +42,16 @@ class ToolCapability(str, Enum):
     CREDENTIAL_ACCESS = "credential_access"
 
 
+class ToolTrustContext(BaseModel):
+    """Trust and provenance hints for tool-call analysis."""
+    source: Optional[str] = "unknown"
+    trust_level: Optional[str] = "unknown"
+    user_approved: Optional[bool] = None
+    cross_tenant: bool = False
+    chain_depth: int = 1
+    prior_tools: List[str] = Field(default_factory=list)
+
+
 class DetectionIndicator(BaseModel):
     """Individual detection indicator."""
     type: DetectionType
@@ -86,8 +96,12 @@ class ToolCallPreflightResult(LocalPreflightResult):
     risky_tool: bool
     reasons: List[str] = Field(default_factory=list)
     risk_class: ToolRiskClass = ToolRiskClass.LOW
+    provenance_risk: ToolRiskClass = ToolRiskClass.LOW
     capability_signals: List[ToolCapability] = Field(default_factory=list)
     review_required: bool = False
+    confused_deputy_risk: bool = False
+    escalation_signals: List[str] = Field(default_factory=list)
+    trust_context: ToolTrustContext = Field(default_factory=ToolTrustContext)
 
 
 class ToolScanPolicyViolation(BaseModel):
@@ -119,9 +133,13 @@ class ToolScanResponse(BaseModel):
     blocked: bool
     action: str
     risk_class: ToolRiskClass
+    provenance_risk: ToolRiskClass
     risky_tool: bool
     review_required: bool
     capability_signals: List[ToolCapability] = Field(default_factory=list)
+    confused_deputy_risk: bool = False
+    escalation_signals: List[str] = Field(default_factory=list)
+    trust_context: ToolTrustContext = Field(default_factory=ToolTrustContext)
     confidence: float
     indicators: List[Dict[str, Any]] = Field(default_factory=list)
     reasons: List[str] = Field(default_factory=list)

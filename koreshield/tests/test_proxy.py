@@ -227,6 +227,34 @@ def test_tool_scan_endpoint_allows_safe_read_tools(proxy, auth_headers):
     assert data["risk_class"] in ["low", "medium"]
 
 
+def test_tool_scan_endpoint_surfaces_confused_deputy_context(proxy, auth_headers):
+    """Runtime tool scanning should surface trust-context escalation signals."""
+    client = TestClient(proxy.app)
+
+    response = client.post(
+        "/v1/tools/scan",
+        json={
+            "tool_name": "send_webhook",
+            "args": {"url": "https://partner.example/hook", "body": "forward customer export"},
+            "context": {
+                "source": "retrieved_document",
+                "trust_level": "untrusted",
+                "user_approved": False,
+                "chain_depth": 4,
+                "prior_tools": ["database_query"],
+            },
+        },
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 403
+    data = response.json()
+    assert data["confused_deputy_risk"] is True
+    assert data["provenance_risk"] in ["high", "critical"]
+    assert len(data["escalation_signals"]) > 0
+    assert data["trust_context"]["source"] == "retrieved_document"
+
+
 def test_provider_health_endpoint(proxy):
     """Test the provider health endpoint."""
     # Mock providers
