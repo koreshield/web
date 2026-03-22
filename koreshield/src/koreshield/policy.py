@@ -78,6 +78,27 @@ class PolicyEngine:
                 "severity": "high",
                 "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value, UserRole.GUEST.value],
             },
+            {
+                "id": "tool_execution_review",
+                "name": "Tool Execution Review",
+                "description": "Execution-capable tool calls require runtime review",
+                "severity": "high",
+                "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value, UserRole.GUEST.value],
+            },
+            {
+                "id": "tool_credential_access_review",
+                "name": "Credential Access Review",
+                "description": "Tool calls that touch credentials or secrets must be scrutinized",
+                "severity": "high",
+                "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value, UserRole.GUEST.value],
+            },
+            {
+                "id": "critical_tool_call_block",
+                "name": "Critical Tool Call Block",
+                "description": "Critical-risk tool calls are blocked unless bypassed",
+                "severity": "critical",
+                "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value, UserRole.GUEST.value],
+            },
         ]
 
     def _load_role_permissions(self) -> Dict[str, Set[str]]:
@@ -303,6 +324,96 @@ class PolicyEngine:
         )
 
         return result
+
+    def evaluate_tool_call(
+        self,
+        tool_name: str,
+        tool_analysis: Dict[str, Any],
+        user_id: Optional[str] = None,
+        context: Optional[Dict] = None,
+    ) -> Dict[str, Any]:
+        """Evaluate a server-side tool call against runtime security policies."""
+        violations = []
+        user_role = None
+        user_permissions = []
+        bypass_allowed = False
+
+        if user_id:
+            user_role = self.get_user_role(user_id)
+            user_permissions = list(self.role_permissions.get(user_role.value, set()))
+            bypass_allowed = self.has_permission(user_id, Permission.BYPASS_CHECKS)
+
+        tool_config = self.config.get("security", {}).get("tool_call", {})
+        default_action = tool_config.get("default_action", "block")
+        review_threshold = tool_config.get("review_threshold", "high")
+        risk_class = tool_analysis.get("risk_class", "low")
+        capability_signals = tool_analysis.get("capability_signals", [])
+
+        if risk_class == "critical":
+            policy = self._get_policy_by_id("critical_tool_call_block")
+            if policy and self._check_policy_access(user_id, policy):
+                violations.append(
+                    {
+                        "policy": "critical_tool_call",
+                        "severity": "critical",
+                        "details": {"tool_name": tool_name, "risk_class": risk_class},
+                        "policy_id": policy["id"],
+                    }
+                )
+
+        if "execution" in capability_signals:
+            policy = self._get_policy_by_id("tool_execution_review")
+            if policy and self._check_policy_access(user_id, policy):
+                violations.append(
+                    {
+                        "policy": "tool_execution_review",
+                        "severity": "high",
+                        "details": {"tool_name": tool_name, "capability": "execution"},
+                        "policy_id": policy["id"],
+                    }
+                )
+
+        if "credential_access" in capability_signals:
+            policy = self._get_policy_by_id("tool_credential_access_review")
+            if policy and self._check_policy_access(user_id, policy):
+                violations.append(
+                    {
+                        "policy": "tool_credential_access_review",
+                        "severity": "high",
+                        "details": {"tool_name": tool_name, "capability": "credential_access"},
+                        "policy_id": policy["id"],
+                    }
+                )
+
+        rank_threshold = {"low": 0, "medium": 1, "high": 2, "critical": 3}
+        review_required = rank_threshold.get(risk_class, 0) >= rank_threshold.get(review_threshold, 2)
+
+        if violations and not bypass_allowed:
+            highest = max(v["severity"] for v in violations)
+            if highest in {"critical", "high"}:
+                allowed = False
+                action = default_action
+                reason = f"Tool call blocked by runtime policy: {tool_name}"
+            else:
+                allowed = True
+                action = "warn"
+                reason = f"Tool call requires review: {tool_name}"
+        else:
+            allowed = True
+            action = "warn" if review_required else "allow"
+            reason = "Tool call allowed"
+
+        return {
+            "allowed": allowed,
+            "action": action,
+            "reason": reason,
+            "policy_violations": violations,
+            "user_role": user_role.value if user_role else None,
+            "permissions": user_permissions,
+            "bypass_allowed": bypass_allowed,
+            "review_required": review_required,
+            "risk_class": risk_class,
+        }
 
     def _get_policy_by_id(self, policy_id: str) -> Optional[Dict]:
         """Get a policy by ID."""

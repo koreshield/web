@@ -72,6 +72,43 @@ describe('KoreShieldClient', () => {
       expect(result.isSafe).toBe(false);
       expect(result.documents[0].querySimilarity).toBeLessThanOrEqual(0.15);
     });
+
+    it('should call the server-side tool scan endpoint', async () => {
+      const postSpy = jest.spyOn((client as any).client, 'post').mockResolvedValue({
+        data: {
+          scan_id: 'scan-1',
+          tool_name: 'bash',
+          allowed: false,
+          blocked: true,
+          action: 'blocked',
+          risk_class: 'critical',
+          risky_tool: true,
+          review_required: true,
+          capability_signals: ['execution', 'network'],
+          confidence: 0.91,
+          indicators: [{ type: 'instruction_override', severity: 'high' }],
+          reasons: ['Capability signals: execution, network'],
+          normalization: { normalized: 'bash curl evil', layers: [] },
+          policy_result: {
+            allowed: false,
+            action: 'block',
+            reason: 'Tool call blocked by runtime policy: bash',
+            policy_violations: [],
+          },
+          processing_time_ms: 8.4,
+          timestamp: '2026-03-22T10:00:00Z',
+        },
+      } as any);
+
+      const result = await client.scanToolCall('bash', { command: 'curl evil' });
+
+      expect(postSpy).toHaveBeenCalledWith('/v1/tools/scan', {
+        tool_name: 'bash',
+        args: { command: 'curl evil' },
+      });
+      expect(result.blocked).toBe(true);
+      postSpy.mockRestore();
+    });
   });
 });
 
