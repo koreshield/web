@@ -24,6 +24,7 @@ from .rag_taxonomy import (
     RetrievedDocument,
 )
 from .detector import AttackDetector
+from .normalization import normalize_text
 
 logger = structlog.get_logger(__name__)
 
@@ -66,7 +67,9 @@ class RAGContextDetector:
             "ignore_keywords": 0.3,
             "leak_keywords": 0.35,
             "system_keywords": 0.25,
-            "multiple_keywords": 0.2
+            "multiple_keywords": 0.2,
+            "query_mismatch_directive": 0.2,
+            "high_directive_density": 0.15,
         }
         self.confidence_boosts = self.config.get("confidence_boosts", default_boosts)
         # Merge user-provided boosts with defaults
@@ -188,7 +191,7 @@ class RAGContextDetector:
         # Scan individual documents
         document_threats = []
         for idx, doc in enumerate(documents):
-            threat = self._scan_single_document(doc, idx)
+            threat = self._scan_single_document(doc, idx, user_query)
             if threat:
                 document_threats.append(threat)
         
@@ -222,6 +225,7 @@ class RAGContextDetector:
         self,
         doc: RetrievedDocument,
         index: int,
+        user_query: str,
     ) -> Optional[DocumentThreat]:
         """
         Scan a single document for threats.
@@ -233,9 +237,12 @@ class RAGContextDetector:
         Returns:
             DocumentThreat if threat found, None otherwise
         """
+        normalized = normalize_text(doc.content)
+        normalized_content = normalized["normalized"]
+
         # Use existing attack detector for base patterns
         detection_result = self.attack_detector.detect(
-            doc.content,
+            normalized_content,
             context={"source": "rag_context", "document_id": doc.id}
         )
         
@@ -244,15 +251,15 @@ class RAGContextDetector:
         rag_excerpts = []
         
         for pattern in self.compiled_patterns:
-            matches = pattern.finditer(doc.content)
+            matches = pattern.finditer(normalized_content)
             for match in matches:
                 matched_text = match.group(0)
                 rag_indicators.append(f"rag_pattern_{pattern.pattern[:30]}")
                 
                 # Extract excerpt with context
                 start = max(0, match.start() - 50)
-                end = min(len(doc.content), match.end() + 50)
-                excerpt = doc.content[start:end]
+                end = min(len(normalized_content), match.end() + 50)
+                excerpt = normalized_content[start:end]
                 if len(excerpt) > self.max_excerpt_length:
                     excerpt = excerpt[:self.max_excerpt_length] + "..."
                 rag_excerpts.append(excerpt)
@@ -268,9 +275,11 @@ class RAGContextDetector:
         base_confidence = detection_result.get("confidence", 0.0)
         rag_confidence = min(len(rag_indicators) * 0.2, 0.8)
         combined_confidence = max(base_confidence, rag_confidence)
-        
+        query_similarity = self._calculate_query_similarity(user_query, normalized_content)
+        directive_score = self._calculate_directive_score(normalized_content)
+
         # Boost confidence for high-risk patterns (using configurable values)
-        content_lower = doc.content.lower()
+        content_lower = normalized_content.lower()
         
         # Critical pattern boosts - ignore/bypass/override keywords
         if any(kw in content_lower for kw in ["ignore", "bypass", "override", "disable"]):
@@ -293,7 +302,17 @@ class RAGContextDetector:
         if keyword_count >= 2:
             boost = self.confidence_boosts.get("multiple_keywords", 0.2)
             combined_confidence = min(combined_confidence + boost, 1.0)
-        
+
+        if directive_score >= 0.18:
+            boost = self.confidence_boosts.get("high_directive_density", 0.15)
+            combined_confidence = min(combined_confidence + boost, 1.0)
+            all_indicators.append({"type": "directive_density", "severity": "medium"})
+
+        if query_similarity <= 0.15 and directive_score >= 0.12:
+            boost = self.confidence_boosts.get("query_mismatch_directive", 0.2)
+            combined_confidence = min(combined_confidence + boost, 1.0)
+            all_indicators.append({"type": "query_mismatch_directive", "severity": "high"})
+
         if combined_confidence < self.min_confidence_threshold:
             return None  # No significant threat
         
@@ -320,9 +339,54 @@ class RAGContextDetector:
             metadata={
                 "base_detection_confidence": base_confidence,
                 "rag_pattern_confidence": rag_confidence,
+                "query_similarity": query_similarity,
+                "directive_score": directive_score,
+                "normalization_layers": normalized["layers"],
                 "document_metadata": doc.metadata,
             }
         )
+
+    def _tokenize(self, text: str) -> Set[str]:
+        """Tokenize text for lightweight query/document similarity checks."""
+        return {
+            token
+            for token in re.findall(r"\b[a-z0-9]{3,}\b", text.lower())
+            if token not in {"the", "and", "for", "with", "that", "this", "from"}
+        }
+
+    def _calculate_query_similarity(self, user_query: str, content: str) -> float:
+        """Approximate how related the document is to the user request."""
+        query_tokens = self._tokenize(user_query)
+        content_tokens = self._tokenize(content[:3000])
+        if not query_tokens or not content_tokens:
+            return 0.0
+
+        intersection = len(query_tokens & content_tokens)
+        union = len(query_tokens | content_tokens)
+        return intersection / union if union else 0.0
+
+    def _calculate_directive_score(self, content: str) -> float:
+        """Score directive language density in the document content."""
+        lowered = content.lower()
+        directive_phrases = {
+            "ignore all previous instructions": 0.35,
+            "ignore previous instructions": 0.30,
+            "override": 0.18,
+            "bypass": 0.18,
+            "reveal": 0.18,
+            "leak": 0.18,
+            "from now on": 0.2,
+            "you must": 0.18,
+            "you are now": 0.18,
+            "system:": 0.16,
+            "[system": 0.18,
+            "execute": 0.14,
+            "ignore": 0.08,
+        }
+        hits = sum(weight for phrase, weight in directive_phrases.items() if phrase in lowered)
+        token_count = max(len(re.findall(r"\b\w+\b", lowered)), 1)
+        normalized_score = hits / max(token_count / 30, 1)
+        return min(normalized_score, 1.0)
     
     def _detect_cross_document_threats(
         self,
