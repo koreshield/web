@@ -210,6 +210,45 @@ export interface ToolCallPreflightResult extends PreflightScanResult {
   reviewRequired: boolean;
 }
 
+export interface ToolScanPolicyResult {
+  allowed: boolean;
+  action: SecurityAction | 'blocked';
+  reason: string;
+  policy_violations: Array<{
+    policy: string;
+    severity: string;
+    details: Record<string, any>;
+    policy_id?: string;
+  }>;
+  user_role?: string | null;
+  permissions?: string[];
+  bypass_allowed?: boolean;
+  review_required?: boolean;
+  risk_class?: ToolRiskClass | string;
+}
+
+export interface ToolScanResponse {
+  scan_id: string;
+  tool_name: string;
+  allowed: boolean;
+  blocked: boolean;
+  action: SecurityAction | 'blocked';
+  risk_class: ToolRiskClass | string;
+  risky_tool: boolean;
+  review_required: boolean;
+  capability_signals: Array<ToolCapability | string>;
+  confidence: number;
+  indicators: Array<Record<string, any>>;
+  reasons: string[];
+  normalization: {
+    normalized: string;
+    layers: string[];
+  };
+  policy_result: ToolScanPolicyResult;
+  processing_time_ms: number;
+  timestamp: string;
+}
+
 export interface DocumentThreatMetadata {
   base_detection_confidence?: number;
   rag_pattern_confidence?: number;
@@ -490,6 +529,11 @@ export interface RAGScanRequest {
   documents: RAGDocument[];
   /** Optional configuration */
   config?: RAGScanConfig;
+}
+
+export interface ToolScanRequest {
+  tool_name: string;
+  args?: unknown;
 }
 
 /**

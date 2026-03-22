@@ -23,6 +23,8 @@ import {
   PreflightScanResult,
   ToolCallPreflightResult,
   RAGPreflightResult,
+  ToolScanRequest,
+  ToolScanResponse,
 } from '../types';
 import { validateConfig } from '../utils';
 import { preflightScanPrompt, preflightScanRAGContext, preflightScanToolCall } from '../local/security';
@@ -466,6 +468,28 @@ export class KoreShieldClient {
     }
 
     return results;
+  }
+
+  /**
+   * Scan a tool call server-side before execution.
+   */
+  async scanToolCall(
+    toolName: string,
+    args?: unknown,
+  ): Promise<ToolScanResponse> {
+    try {
+      const payload: ToolScanRequest = {
+        tool_name: toolName,
+        args,
+      };
+      const response: AxiosResponse<ToolScanResponse> = await this.client.post(
+        '/v1/tools/scan',
+        payload,
+      );
+      return response.data;
+    } catch (error: any) {
+      throw this.handleError(error);
+    }
   }
 
   /**

@@ -90,6 +90,47 @@ class ToolCallPreflightResult(LocalPreflightResult):
     review_required: bool = False
 
 
+class ToolScanPolicyViolation(BaseModel):
+    """Policy violation returned from server-side tool scan."""
+    policy: str
+    severity: str
+    details: Dict[str, Any]
+    policy_id: Optional[str] = None
+
+
+class ToolScanPolicyResult(BaseModel):
+    """Policy result for server-side tool-call scanning."""
+    allowed: bool
+    action: str
+    reason: str
+    policy_violations: List[ToolScanPolicyViolation] = Field(default_factory=list)
+    user_role: Optional[str] = None
+    permissions: List[str] = Field(default_factory=list)
+    bypass_allowed: Optional[bool] = None
+    review_required: Optional[bool] = None
+    risk_class: Optional[ToolRiskClass] = None
+
+
+class ToolScanResponse(BaseModel):
+    """Response from server-side tool-call scanning."""
+    scan_id: str
+    tool_name: str
+    allowed: bool
+    blocked: bool
+    action: str
+    risk_class: ToolRiskClass
+    risky_tool: bool
+    review_required: bool
+    capability_signals: List[ToolCapability] = Field(default_factory=list)
+    confidence: float
+    indicators: List[Dict[str, Any]] = Field(default_factory=list)
+    reasons: List[str] = Field(default_factory=list)
+    normalization: Dict[str, Any]
+    policy_result: ToolScanPolicyResult
+    processing_time_ms: float
+    timestamp: str
+
+
 class DocumentThreatMetadata(BaseModel):
     """Structured metadata emitted for document-level RAG threats."""
     base_detection_confidence: Optional[float] = None

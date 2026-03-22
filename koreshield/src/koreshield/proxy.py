@@ -29,8 +29,7 @@ from .policy import PolicyEngine
 from .sanitizer import SanitizationEngine
 from .rag_detector import RAGContextDetector
 from .rag_taxonomy import RetrievedDocument
-
-from .rag_taxonomy import RetrievedDocument
+from .tool_security import ToolCallSecurityAnalyzer
 from .database import AsyncSessionLocal
 from .models.request_log import RequestLog
 from .models.rag_scan import RagScan
@@ -220,6 +219,7 @@ class KoreShieldProxy:
         self.detector = AttackDetector(security_config)
         self.rag_detector = RAGContextDetector(security_config)
         self.policy_engine = PolicyEngine(config)
+        self.tool_security = ToolCallSecurityAnalyzer(self.detector)
         self.logger = FirewallLogger()
 
         # Initialize providers (multiple for failover)
@@ -790,6 +790,11 @@ class KoreShieldProxy:
         async def scan_prompt_batch(request: Request):
             return await self._handle_scan_batch(request)
 
+        @self.app.post("/v1/tools/scan", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def scan_tool_call(request: Request):
+            return await self._handle_tool_scan(request)
+
         @self.app.get("/v1/scans", tags=["Scan"])
         @self.limiter.limit(rate_limit)
         async def list_scans(request: Request, limit: int = 100, offset: int = 0):
@@ -1223,6 +1228,137 @@ class KoreShieldProxy:
                 "Request handling error", request_id=request_id, error=str(e), exc_info=True
             )
             raise HTTPException(status_code=500, detail="Internal server error")
+
+    async def _handle_tool_scan(self, request: Request) -> Response:
+        """Handle server-side tool-call security scanning and runtime policy enforcement."""
+        import time
+
+        start_time = time.time()
+        request_id = str(uuid.uuid4())
+        principal = await self._authenticate_request(request)
+
+        try:
+            body = await request.json()
+        except Exception as e:
+            logger.error("tool_scan_invalid_json", request_id=request_id, error=str(e))
+            raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+
+        if not isinstance(body, dict):
+            raise HTTPException(status_code=400, detail="Request body must be a JSON object")
+
+        tool_name = body.get("tool_name")
+        if not isinstance(tool_name, str) or not tool_name.strip():
+            raise HTTPException(status_code=400, detail="'tool_name' is required and must be a non-empty string")
+        args = body.get("args", {})
+
+        self._increment_stat("requests_total")
+        self.logger.log_request(
+            request_id=request_id,
+            method=request.method,
+            path="/v1/tools/scan",
+            tool_name=tool_name,
+        )
+
+        tool_analysis = self.tool_security.analyze(tool_name, args)
+        policy_result = self.policy_engine.evaluate_tool_call(
+            tool_name=tool_name,
+            tool_analysis=tool_analysis,
+            user_id=str(principal.get("user_id")) if principal.get("user_id") else None,
+            context={"principal": principal},
+        )
+
+        should_block = tool_analysis.get("suggested_action") == "block" or policy_result.get("allowed") is False
+        action_taken = "blocked" if should_block else policy_result.get("action", tool_analysis.get("suggested_action", "allow"))
+        severity = tool_analysis.get("risk_class", "medium")
+
+        self._emit_event(
+            "tool_call_evaluated",
+            {
+                "request_id": request_id,
+                "endpoint": "/v1/tools/scan",
+                "tool_name": tool_name,
+                "risk_class": tool_analysis.get("risk_class"),
+                "action_taken": action_taken,
+                "review_required": tool_analysis.get("review_required"),
+                "user_id": principal.get("user_id"),
+                "api_key_id": principal.get("api_key_id"),
+            },
+        )
+
+        if should_block:
+            self._increment_stat("requests_blocked")
+            self._increment_stat("attacks_detected")
+            self.logger.log_attack(
+                request_id=request_id,
+                attack_type="tool_call_security",
+                details={
+                    "tool_analysis": tool_analysis,
+                    "policy_result": policy_result,
+                },
+            )
+            self.logger.log_blocked(request_id=request_id, reason=policy_result.get("reason", "Tool call blocked"))
+            self._emit_event(
+                "threat_detected",
+                {
+                    "request_id": request_id,
+                    "endpoint": "/v1/tools/scan",
+                    "attack_type": "tool_call_security",
+                    "confidence": tool_analysis.get("confidence"),
+                    "severity": severity,
+                    "action_taken": "blocked",
+                    "user_id": principal.get("user_id"),
+                    "api_key_id": principal.get("api_key_id"),
+                },
+            )
+        else:
+            self._increment_stat("requests_allowed")
+            self.logger.log_allowed(request_id=request_id)
+
+        processing_time_ms = (time.time() - start_time) * 1000
+        log_data = {
+            "request_id": request_id,
+            "timestamp": datetime.now(timezone.utc),
+            "provider": "tooling",
+            "model": tool_name,
+            "method": request.method,
+            "path": "/v1/tools/scan",
+            "status_code": 403 if should_block else 200,
+            "latency_ms": processing_time_ms,
+            "is_blocked": should_block,
+            "block_reason": policy_result.get("reason") if should_block else None,
+            "attack_detected": bool(tool_analysis.get("review_required") or tool_analysis.get("detection", {}).get("is_attack")),
+            "attack_type": "tool_call_security" if (should_block or tool_analysis.get("review_required")) else None,
+            "attack_details": {
+                "tool_analysis": tool_analysis,
+                "policy_result": policy_result,
+            },
+            "ip_address": request.client.host if request.client else None,
+            "user_agent": request.headers.get("user-agent"),
+            "user_id": principal.get("user_id"),
+            "api_key_id": principal.get("api_key_id"),
+        }
+        asyncio.create_task(self._log_request_async(log_data))
+
+        response_payload = {
+            "scan_id": request_id,
+            "tool_name": tool_name,
+            "allowed": not should_block,
+            "blocked": should_block,
+            "action": action_taken,
+            "risk_class": tool_analysis.get("risk_class"),
+            "risky_tool": tool_analysis.get("risky_tool"),
+            "review_required": tool_analysis.get("review_required"),
+            "capability_signals": tool_analysis.get("capability_signals"),
+            "confidence": tool_analysis.get("confidence"),
+            "indicators": tool_analysis.get("indicators"),
+            "reasons": tool_analysis.get("reasons"),
+            "normalization": tool_analysis.get("normalization"),
+            "policy_result": policy_result,
+            "processing_time_ms": processing_time_ms,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+        return JSONResponse(status_code=403 if should_block else 200, content=response_payload)
 
     async def _handle_rag_scan(self, request: Request) -> Response:
         """

@@ -185,6 +185,75 @@ That means:
 - we do not split branding, repos, or platform ownership around MCP yet
 - runtime enforcement becomes Phase 4+ work once proxy, RAG, and embedded controls are stable
 
+## Phase 4: Runtime Enforcement and Auditability
+
+### Scope
+
+- server-side tool-call scanning before execution
+- policy-backed runtime decisions for risky tools
+- audit/event/log support for tool-call decisions
+- SDK access to the server-side runtime scan surface
+- Docker-confirmed local deployment path for the new route
+
+### Checklist
+
+- [x] Add a KoreShield-native tool-call scan endpoint in the backend proxy
+- [x] Reuse the existing policy engine for tool-call review and block decisions
+- [x] Emit audit-friendly events and request logs for tool-call decisions
+- [x] Expose server-side tool-call scanning through the JS SDK
+- [x] Expose server-side tool-call scanning through the Python SDK
+- [x] Add backend and SDK regression coverage for the new runtime path
+- [x] Confirm Docker Compose configuration for the new runtime path
+- [ ] Confirm Docker image build execution with a live local Docker daemon
+- [x] Record the decision gates for Phase 4 rollout
+
+### Landed In
+
+- [tool_security.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/tool_security.py)
+- [policy.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/policy.py)
+- [proxy.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/proxy.py)
+- [koreshield-js-sdk/src/core/client.ts](/Users/nsisong/projects/koreshield/koreshield-js-sdk/src/core/client.ts)
+- [koreshield-python-sdk/src/koreshield_sdk/client.py](/Users/nsisong/projects/koreshield/koreshield-python-sdk/src/koreshield_sdk/client.py)
+- [koreshield-python-sdk/src/koreshield_sdk/async_client.py](/Users/nsisong/projects/koreshield/koreshield-python-sdk/src/koreshield_sdk/async_client.py)
+
+### Phase 4 Decision Gates
+
+#### Gate 1: Product Boundary
+
+Decision: pass.
+
+Tool-call runtime security lands as a KoreShield-native backend capability under `/v1/tools/scan`. We are not introducing a parallel Agent Shield product surface, separate service, or separate policy plane.
+
+#### Gate 2: Policy Reuse
+
+Decision: pass.
+
+Runtime tool-call decisions reuse the existing policy engine instead of forking a second authorization system. New tool-call actions map onto the same allow, review, and block semantics already used elsewhere in KoreShield.
+
+#### Gate 3: Auditability
+
+Decision: pass.
+
+Tool-call decisions now emit request logs and policy-aware events so blocked or review-required decisions can be surfaced in analytics, alerts, and future UI work without redesigning the backend event model.
+
+#### Gate 4: SDK Contract
+
+Decision: pass.
+
+The runtime scan surface is exposed through the JS and Python SDKs so embedded usage can progressively move from local preflight-only behavior toward server-backed enforcement.
+
+#### Gate 5: Docker Delivery Path
+
+Decision: pending local daemon availability.
+
+The existing Docker Compose path remains the delivery model for local backend verification. Compose configuration validates successfully for both the backend stack and the root development stack. The final image build command is still environment-blocked on this machine because the Docker daemon did not expose `~/.docker/run/docker.sock` during verification, even after launching Docker Desktop.
+
+## Remaining From `to-be-considered`
+
+The current, tracked extraction backlog now lives in:
+
+- [TO_BE_CONSIDERED_REMAINING_MAP.md](/Users/nsisong/projects/koreshield/koreshield/docs/TO_BE_CONSIDERED_REMAINING_MAP.md)
+
 ## Verification Requirements
 
 For every Phase 1 and Phase 2 change:
@@ -198,3 +267,15 @@ For every Phase 1 and Phase 2 change:
 - `pytest koreshield/tests/test_sanitizer.py koreshield/tests/test_detector.py koreshield/tests/test_rag_detector.py`
 - `pytest` in [koreshield](/Users/nsisong/projects/koreshield/koreshield)
 - `python -m build` in [koreshield](/Users/nsisong/projects/koreshield/koreshield)
+
+For Phase 4:
+
+- `pytest` in [koreshield](/Users/nsisong/projects/koreshield/koreshield)
+- `python -m build` in [koreshield](/Users/nsisong/projects/koreshield/koreshield)
+- `npm test -- --runInBand` in [koreshield-js-sdk](/Users/nsisong/projects/koreshield/koreshield-js-sdk)
+- `npm run build` in [koreshield-js-sdk](/Users/nsisong/projects/koreshield/koreshield-js-sdk)
+- `pytest` in [koreshield-python-sdk](/Users/nsisong/projects/koreshield/koreshield-python-sdk)
+- `python -m build` in [koreshield-python-sdk](/Users/nsisong/projects/koreshield/koreshield-python-sdk)
+- `docker compose -f /Users/nsisong/projects/koreshield/koreshield/docker-compose.yml config`
+- `docker compose -f /Users/nsisong/projects/koreshield/docker-compose.dev.yml config`
+- `docker compose -f /Users/nsisong/projects/koreshield/koreshield/docker-compose.yml build koreshield`
