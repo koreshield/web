@@ -73,6 +73,18 @@ export {
 } from './integrations/angular';
 
 // Types
+export {
+  ThreatLevel,
+  DetectionType,
+  InjectionVector,
+  OperationalTarget,
+  PersistenceMechanism,
+  EnterpriseContext,
+  DetectionComplexity,
+  ToolRiskClass,
+  ToolCapability,
+} from './types';
+
 export type {
   KoreShieldConfig,
   SecurityOptions,
@@ -89,26 +101,22 @@ export type {
   MetricsResponse,
   PerformanceMetrics,
   SecurityPolicy,
-  ThreatLevel,
-  DetectionType,
   KoreShieldError,
   ProviderType,
   ProviderConfig,
   RAGDocument,
   DocumentThreat,
+  DocumentThreatMetadata,
   CrossDocumentThreat,
+  CrossDocumentThreatMetadata,
   TaxonomyClassification,
   ContextAnalysis,
+  QueryAnalysis,
+  RAGStatistics,
   RAGScanConfig,
   RAGScanResponse,
   RAGScanRequest,
   RAGBatchScanItem,
-  // RAG Enums
-  InjectionVector,
-  OperationalTarget,
-  PersistenceMechanism,
-  EnterpriseContext,
-  DetectionComplexity,
   NormalizationResult,
   LocalThreatIndicator,
   PreflightScanResult,

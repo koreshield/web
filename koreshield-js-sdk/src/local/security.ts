@@ -6,7 +6,9 @@ import {
   type RAGDocument,
   type RAGPreflightDocumentResult,
   type RAGPreflightResult,
+  ToolCapability,
   type ToolCallPreflightResult,
+  ToolRiskClass,
   ThreatLevel,
 } from '../types';
 
@@ -229,6 +231,47 @@ function maxSeverity(indicators: LocalThreatIndicator[]): ThreatLevel {
   ), ThreatLevel.SAFE);
 }
 
+function toolCapabilities(toolName: string, serializedArgs: string): ToolCapability[] {
+  const lowered = `${toolName} ${serializedArgs}`.toLowerCase();
+  const capabilities: ToolCapability[] = [];
+  const patterns: Array<[ToolCapability, string[]]> = [
+    [ToolCapability.EXECUTION, ['bash', 'shell', 'terminal', 'exec', 'run', 'command']],
+    [ToolCapability.NETWORK, ['fetch', 'http', 'request', 'webhook', 'url', 'download', 'upload']],
+    [ToolCapability.DATABASE, ['sql', 'database', 'query', 'postgres', 'mysql']],
+    [ToolCapability.WRITE, ['write', 'delete', 'update', 'modify', 'save']],
+    [ToolCapability.READ, ['read', 'cat', 'open', 'list', 'search']],
+    [ToolCapability.CREDENTIAL_ACCESS, ['secret', 'token', 'password', 'credential', 'ssh', 'key']],
+  ];
+
+  for (const [capability, keywords] of patterns) {
+    if (keywords.some((keyword) => lowered.includes(keyword))) {
+      capabilities.push(capability);
+    }
+  }
+
+  return capabilities;
+}
+
+function toolRiskClass(capabilities: ToolCapability[], promptScan: PreflightScanResult): ToolRiskClass {
+  if (
+    (promptScan.threatLevel === ThreatLevel.HIGH || promptScan.threatLevel === ThreatLevel.CRITICAL)
+    && capabilities.some((capability) => [ToolCapability.EXECUTION, ToolCapability.NETWORK, ToolCapability.CREDENTIAL_ACCESS].includes(capability))
+  ) {
+    return ToolRiskClass.CRITICAL;
+  }
+  if (
+    promptScan.threatLevel === ThreatLevel.HIGH
+    || promptScan.threatLevel === ThreatLevel.CRITICAL
+    || capabilities.some((capability) => [ToolCapability.EXECUTION, ToolCapability.CREDENTIAL_ACCESS].includes(capability))
+  ) {
+    return ToolRiskClass.HIGH;
+  }
+  if (capabilities.length) {
+    return ToolRiskClass.MEDIUM;
+  }
+  return ToolRiskClass.LOW;
+}
+
 function tokenize(text: string): string[] {
   return (text.toLowerCase().match(/\b[a-z0-9]{3,}\b/g) ?? []).filter(
     (token) => !['the', 'and', 'for', 'with', 'this', 'that', 'from'].includes(token),
@@ -349,6 +392,8 @@ export function preflightScanToolCall(toolName: string, args: unknown): ToolCall
   const serializedArgs = typeof args === 'string' ? args : JSON.stringify(args ?? {});
   const promptScan = preflightScanPrompt(`${toolName} ${serializedArgs}`);
   const riskyTool = toolRiskNames.some((candidate) => toolName.toLowerCase().includes(candidate));
+  const capabilitySignals = toolCapabilities(toolName, serializedArgs);
+  const riskClass = toolRiskClass(capabilitySignals, promptScan);
   const reasons: string[] = [];
 
   if (riskyTool) {
@@ -357,12 +402,18 @@ export function preflightScanToolCall(toolName: string, args: unknown): ToolCall
   if (!promptScan.isSafe) {
     reasons.push('Tool arguments contain prompt-injection or exfiltration signals.');
   }
+  if (capabilitySignals.length) {
+    reasons.push(`Capability signals: ${capabilitySignals.join(', ')}`);
+  }
 
   return {
     ...promptScan,
     toolName,
     riskyTool,
     reasons,
+    riskClass,
+    capabilitySignals,
+    reviewRequired: riskClass === ToolRiskClass.HIGH || riskClass === ToolRiskClass.CRITICAL,
   };
 }
 

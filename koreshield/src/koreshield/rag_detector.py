@@ -308,6 +308,7 @@ class RAGContextDetector:
             combined_confidence = min(combined_confidence + boost, 1.0)
             all_indicators.append({"type": "directive_density", "severity": "medium"})
 
+        query_mismatch = query_similarity <= 0.15 and directive_score >= 0.12
         if query_similarity <= 0.15 and directive_score >= 0.12:
             boost = self.confidence_boosts.get("query_mismatch_directive", 0.2)
             combined_confidence = min(combined_confidence + boost, 1.0)
@@ -341,6 +342,10 @@ class RAGContextDetector:
                 "rag_pattern_confidence": rag_confidence,
                 "query_similarity": query_similarity,
                 "directive_score": directive_score,
+                "query_mismatch": query_mismatch,
+                "high_directive_density": directive_score >= 0.18,
+                "matched_on_normalized_text": normalized_content != doc.content,
+                "threat_indicators": indicator_strings,
                 "normalization_layers": normalized["layers"],
                 "document_metadata": doc.metadata,
             }
@@ -694,6 +699,32 @@ class RAGContextDetector:
         
         # Calculate processing time
         processing_time = (datetime.now(UTC) - start_time).total_seconds() * 1000
+        document_metadata = [dt.metadata or {} for dt in document_threats]
+        query_similarities = [
+            metadata["query_similarity"]
+            for metadata in document_metadata
+            if "query_similarity" in metadata
+        ]
+        directive_scores = [
+            metadata["directive_score"]
+            for metadata in document_metadata
+            if "directive_score" in metadata
+        ]
+        normalized_docs = sum(
+            1
+            for metadata in document_metadata
+            if metadata.get("normalization_layers")
+        )
+        query_mismatch_count = sum(
+            1
+            for metadata in document_metadata
+            if metadata.get("query_mismatch")
+        )
+        directive_density_count = sum(
+            1
+            for metadata in document_metadata
+            if metadata.get("high_directive_density")
+        )
         
         return RAGDetectionResult(
             is_safe=(overall_severity == ThreatSeverity.SAFE),
@@ -711,6 +742,14 @@ class RAGContextDetector:
             total_threats_found=len(document_threats) + len(cross_document_threats),
             scan_id=scan_id,
             processing_time_ms=processing_time,
+            metadata={
+                "response_format_version": "2.0",
+                "documents_with_query_mismatch": query_mismatch_count,
+                "documents_with_directive_density": directive_density_count,
+                "documents_normalized": normalized_docs,
+                "min_query_similarity": min(query_similarities) if query_similarities else None,
+                "max_directive_score": max(directive_scores) if directive_scores else None,
+            },
         )
     
     def _calculate_detection_complexity(

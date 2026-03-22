@@ -38,13 +38,24 @@ We are not merging `to-be-considered/` wholesale. We are extracting the highest-
 - [x] Add regression tests for obfuscated prompt injection
 - [x] Add benchmark fixtures for evasive prompt injection cases
 - [x] Add false-positive benchmark fixtures
-- [ ] Define detector performance budgets for future hardening work
+- [x] Define detector performance budgets for future hardening work
 
 ### Landed In
 
 - [detector.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/detector.py)
 - [sanitizer.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/sanitizer.py)
 - [normalization.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/normalization.py)
+
+### Detector Performance Budgets
+
+For current hardening work, the backend detector now carries explicit guardrails for future regressions:
+
+- `target_p50_ms`: 8 ms
+- `target_p95_ms`: 20 ms
+- `max_prompt_chars`: 20,000
+- `max_normalized_expansion_ratio`: 1.5x
+
+These are not hard request limits yet. They are engineering budgets surfaced in detector output so future optimization work can measure drift before it becomes user-visible latency.
 
 ## Phase 2: RAG and External Context Security
 
@@ -86,14 +97,93 @@ Current limits:
 ### Immediate
 
 - [x] Create benchmark fixtures inspired by `to-be-considered/datasets`
-- [ ] Define the merge map for remaining high-value modules
-- [ ] Decide how much of the richer RAG metadata should surface in the API/UI now
+- [x] Define the merge map for remaining high-value modules
+- [x] Decide how much of the richer RAG metadata should surface in the API/UI now
 
 ### After Phase 1 and 2 Stabilize
 
 - [x] Add embedded SDK preflight scanning helpers
-- [ ] Design KoreShield tool-call security model
-- [ ] Decide whether MCP security becomes a first-class KoreShield product area
+- [x] Design KoreShield tool-call security model
+- [x] Decide whether MCP security becomes a first-class KoreShield product area
+
+## Phase 3: Embedded and Runtime Security
+
+### Scope
+
+- local SDK-side preflight enforcement
+- tool-call risk modeling before execution
+- product boundary decisions for future MCP/runtime work
+
+### Checklist
+
+- [x] Add embedded SDK preflight scanning helpers
+- [x] Design KoreShield tool-call security model
+- [x] Decide whether MCP security becomes a first-class KoreShield product area
+
+### Tool-Call Security Model
+
+KoreShield now treats tool calls as a distinct preflight decision surface rather than just another prompt string. The embedded SDK model classifies tools by capability and produces a review recommendation before execution.
+
+Current capability buckets:
+
+- `execution`
+- `network`
+- `database`
+- `write`
+- `read`
+- `credential_access`
+
+Current risk classes:
+
+- `low`: ordinary read-style actions with no strong attack signals
+- `medium`: operational tools with some side effects but no strong injection indicators
+- `high`: execution or credential-sensitive tools, or tool calls with strong prompt-injection signals
+- `critical`: high-risk tools combined with strong prompt-injection or exfiltration indicators
+
+The SDK contract now surfaces:
+
+- capability signals
+- risk class
+- review-required flag
+- recommended block/warn/allow action
+
+This is the Phase 3 baseline model. Server-side enforcement, policy authoring, and audit history for tool calls come next.
+
+### Merge Map
+
+What gets integrated from `to-be-considered/` over time:
+
+- detector normalization and evasive-pattern ideas: [detector.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/detector.py), [normalization.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/normalization.py)
+- RAG and indirect prompt injection scoring: [rag_detector.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/rag_detector.py)
+- embedded preflight protections for app-side usage: [koreshield-js-sdk/src/local/security.ts](/Users/nsisong/projects/koreshield/koreshield-js-sdk/src/local/security.ts), [koreshield-python-sdk/src/koreshield_sdk/local_security.py](/Users/nsisong/projects/koreshield/koreshield-python-sdk/src/koreshield_sdk/local_security.py)
+- benchmark and dataset ideas: [koreshield/tests/fixtures/evasive_prompt_benchmark.json](/Users/nsisong/projects/koreshield/koreshield/tests/fixtures/evasive_prompt_benchmark.json), [koreshield/tests/fixtures/rag_poisoning_benchmark.json](/Users/nsisong/projects/koreshield/koreshield/tests/fixtures/rag_poisoning_benchmark.json)
+
+What does not get integrated wholesale right now:
+
+- standalone GitHub App
+- operator/sidecar runtime platform
+- Terraform/provider sprawl
+- parallel product branding or separate control plane
+
+### RAG Metadata Surface Decision
+
+The current product decision is:
+
+- expose document-level query similarity, directive score, normalization layers, and query-mismatch/directive-density flags in API responses
+- expose aggregate counts and score summaries in `context_analysis.statistics` for UI use
+- keep heavier internal signals and raw matching internals out of the primary UI for now
+
+This keeps the API and SDKs rich enough for dashboards and customer-side handling without overcommitting the frontend to every internal scoring detail.
+
+### MCP and Runtime Security Decision
+
+Decision for now: MCP/runtime security is an explicit KoreShield expansion area, but not yet a first-class standalone product line.
+
+That means:
+
+- we continue integrating MCP-inspired ideas into KoreShield-native policy, SDK, and proxy surfaces
+- we do not split branding, repos, or platform ownership around MCP yet
+- runtime enforcement becomes Phase 4+ work once proxy, RAG, and embedded controls are stable
 
 ## Verification Requirements
 
