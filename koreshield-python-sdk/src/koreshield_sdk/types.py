@@ -2,7 +2,7 @@
 
 from enum import Enum
 from typing import Dict, List, Optional, Any
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import AliasChoices, BaseModel, Field, ConfigDict, model_validator
 
 
 class ThreatLevel(str, Enum):
@@ -22,6 +22,24 @@ class DetectionType(str, Enum):
     ML = "ml"
     BLOCKLIST = "blocklist"
     ALLOWLIST = "allowlist"
+
+
+class ToolRiskClass(str, Enum):
+    """Risk class for local tool-call security decisions."""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+class ToolCapability(str, Enum):
+    """Normalized capability categories for tool-call analysis."""
+    READ = "read"
+    WRITE = "write"
+    NETWORK = "network"
+    EXECUTION = "execution"
+    DATABASE = "database"
+    CREDENTIAL_ACCESS = "credential_access"
 
 
 class DetectionIndicator(BaseModel):
@@ -67,6 +85,62 @@ class ToolCallPreflightResult(LocalPreflightResult):
     tool_name: str
     risky_tool: bool
     reasons: List[str] = Field(default_factory=list)
+    risk_class: ToolRiskClass = ToolRiskClass.LOW
+    capability_signals: List[ToolCapability] = Field(default_factory=list)
+    review_required: bool = False
+
+
+class DocumentThreatMetadata(BaseModel):
+    """Structured metadata emitted for document-level RAG threats."""
+    base_detection_confidence: Optional[float] = None
+    rag_pattern_confidence: Optional[float] = None
+    query_similarity: Optional[float] = None
+    directive_score: Optional[float] = None
+    query_mismatch: bool = False
+    high_directive_density: bool = False
+    matched_on_normalized_text: bool = False
+    threat_indicators: List[str] = Field(default_factory=list)
+    normalization_layers: List[str] = Field(default_factory=list)
+    document_metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class CrossDocumentThreatMetadata(BaseModel):
+    """Structured metadata emitted for cross-document RAG threats."""
+    supporting_indicators: List[str] = Field(default_factory=list)
+    document_count: Optional[int] = None
+    coordinated: Optional[bool] = None
+
+
+class RAGStatistics(BaseModel):
+    """Structured RAG statistics for API/UI consumption."""
+    total_documents_scanned: int = 0
+    documents_with_threats: int = 0
+    total_threats_found: int = 0
+    documents_with_query_mismatch: int = 0
+    documents_with_directive_density: int = 0
+    documents_normalized: int = 0
+    min_query_similarity: Optional[float] = None
+    max_directive_score: Optional[float] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_statistics(cls, value: Any) -> Any:
+        if not isinstance(value, dict):
+            return value
+        data = dict(value)
+        if "total_documents_scanned" not in data and "total_documents" in data:
+            data["total_documents_scanned"] = data["total_documents"]
+        if "documents_with_threats" not in data and "threatening_documents" in data:
+            data["documents_with_threats"] = data["threatening_documents"]
+        if "total_threats_found" not in data and "threats_found" in data:
+            data["total_threats_found"] = data["threats_found"]
+        return data
+
+
+class QueryAnalysis(BaseModel):
+    """Top-level query analysis envelope returned by the API."""
+    is_attack: bool
+    details: Dict[str, Any]
 
 
 class RAGPreflightDocumentResult(LocalPreflightResult):
@@ -202,10 +276,25 @@ class DocumentThreat(BaseModel):
     document_id: str
     severity: ThreatLevel
     confidence: float
-    patterns_matched: List[str]
-    injection_vectors: List[InjectionVector]
-    operational_targets: List[OperationalTarget]
-    metadata: Optional[Dict[str, Any]] = None
+    patterns_matched: List[str] = Field(default_factory=list, validation_alias=AliasChoices("patterns_matched", "indicators"))
+    injection_vectors: List[InjectionVector] = Field(default_factory=list)
+    operational_targets: List[OperationalTarget] = Field(default_factory=list)
+    metadata: Optional[DocumentThreatMetadata] = None
+    document_index: Optional[int] = None
+    threat_type: Optional[str] = None
+    excerpts: List[str] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_document_threat(cls, value: Any) -> Any:
+        if not isinstance(value, dict):
+            return value
+        data = dict(value)
+        if "injection_vectors" not in data and "injection_vector" in data:
+            data["injection_vectors"] = [data["injection_vector"]]
+        if "operational_targets" not in data and "operational_target" in data:
+            data["operational_targets"] = [data["operational_target"]]
+        return data
 
 
 class CrossDocumentThreat(BaseModel):
@@ -216,7 +305,7 @@ class CrossDocumentThreat(BaseModel):
     document_ids: List[str]
     description: str
     patterns: List[str]
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[CrossDocumentThreatMetadata] = None
 
 
 class TaxonomyClassification(BaseModel):
@@ -232,7 +321,19 @@ class ContextAnalysis(BaseModel):
     """RAG context analysis results."""
     document_threats: List[DocumentThreat]
     cross_document_threats: List[CrossDocumentThreat]
-    statistics: Dict[str, Any]
+    statistics: RAGStatistics
+    is_safe: Optional[bool] = None
+    overall_severity: Optional[ThreatLevel] = None
+    overall_confidence: Optional[float] = None
+    injection_vectors: List[InjectionVector] = Field(default_factory=list)
+    operational_targets: List[OperationalTarget] = Field(default_factory=list)
+    persistence_mechanisms: List[PersistenceMechanism] = Field(default_factory=list)
+    enterprise_contexts: List[EnterpriseContext] = Field(default_factory=list)
+    detection_complexity: Optional[DetectionComplexity] = None
+    scan_id: Optional[str] = None
+    scan_timestamp: Optional[str] = None
+    processing_time_ms: Optional[float] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class RAGScanResponse(BaseModel):
@@ -240,10 +341,34 @@ class RAGScanResponse(BaseModel):
     is_safe: bool
     overall_severity: ThreatLevel
     overall_confidence: float
-    taxonomy: TaxonomyClassification
+    taxonomy: Optional[TaxonomyClassification] = None
     context_analysis: ContextAnalysis
+    scan_id: Optional[str] = None
+    processing_time_ms: Optional[float] = None
+    query_analysis: Optional[QueryAnalysis] = None
     request_id: Optional[str] = None
     timestamp: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_rag_response(cls, value: Any) -> Any:
+        if not isinstance(value, dict):
+            return value
+        data = dict(value)
+        context_analysis = data.get("context_analysis")
+        if isinstance(context_analysis, dict):
+            if "taxonomy" not in data:
+                data["taxonomy"] = {
+                    "injection_vectors": context_analysis.get("injection_vectors", []),
+                    "operational_targets": context_analysis.get("operational_targets", []),
+                    "persistence_mechanisms": context_analysis.get("persistence_mechanisms", []),
+                    "enterprise_contexts": context_analysis.get("enterprise_contexts", []),
+                    "detection_complexity": context_analysis.get("detection_complexity", DetectionComplexity.LOW),
+                }
+            context_analysis.setdefault("is_safe", data.get("is_safe"))
+            context_analysis.setdefault("overall_severity", data.get("overall_severity"))
+            context_analysis.setdefault("overall_confidence", data.get("overall_confidence"))
+        return data
 
     def get_threat_document_ids(self) -> List[str]:
         """Get list of document IDs with detected threats."""
