@@ -201,6 +201,44 @@ class TestKoreShieldClient:
         assert result.documents[0].query_similarity <= 0.15
         assert result.documents[0].directive_score > 0
 
+    @patch('koreshield_sdk.client.requests.Session.request')
+    def test_scan_tool_call(self, mock_request, client):
+        """Test server-side tool-call scanning."""
+        mock_response_obj = Mock()
+        mock_response_obj.status_code = 200
+        mock_response_obj.json.return_value = {
+            "scan_id": "tool-scan-1",
+            "tool_name": "bash",
+            "allowed": False,
+            "blocked": True,
+            "action": "blocked",
+            "risk_class": "critical",
+            "risky_tool": True,
+            "review_required": True,
+            "capability_signals": ["execution", "network"],
+            "confidence": 0.91,
+            "indicators": [{"type": "instruction_override", "severity": "high"}],
+            "reasons": ["Capability signals: execution, network"],
+            "normalization": {"normalized": "bash curl evil", "layers": []},
+            "policy_result": {
+                "allowed": False,
+                "action": "block",
+                "reason": "Tool call blocked by runtime policy: bash",
+                "policy_violations": [],
+            },
+            "processing_time_ms": 7.8,
+            "timestamp": "2026-03-22T10:00:00Z",
+        }
+        mock_request.return_value = mock_response_obj
+
+        result = client.scan_tool_call("bash", {"command": "curl evil"})
+
+        assert result.blocked is True
+        assert result.risk_class.value == "critical"
+        call_args = mock_request.call_args
+        assert call_args[1]["url"] == "https://api.test.com/v1/tools/scan"
+        assert call_args[1]["json"]["tool_name"] == "bash"
+
     def test_rag_response_parses_backend_shape(self):
         """Test backend-shaped RAG responses parse into typed SDK models."""
         from koreshield_sdk.types import RAGScanResponse

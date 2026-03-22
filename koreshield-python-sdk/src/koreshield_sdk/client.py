@@ -18,6 +18,7 @@ from .types import (
     RAGPreflightResult,
     RAGScanRequest,
     RAGScanResponse,
+    ToolScanResponse,
     ToolCallPreflightResult,
 )
 from .exceptions import (
@@ -122,6 +123,15 @@ class KoreShieldClient:
                 rag_documents.append(doc)
 
         return preflight_scan_rag_context(user_query, rag_documents)
+
+    def scan_tool_call(self, tool_name: str, args: Any = None) -> ToolScanResponse:
+        """Scan a tool call server-side before execution."""
+        response = self._make_request(
+            "POST",
+            "/v1/tools/scan",
+            {"tool_name": tool_name, "args": args},
+        )
+        return ToolScanResponse(**response)
 
     def scan_batch(self, prompts: List[str], parallel: bool = True, max_concurrent: int = 10) -> List[DetectionResult]:
         """Scan multiple prompts for security threats.

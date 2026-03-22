@@ -26,6 +26,7 @@ from .types import (
     SecurityPolicy,
     PerformanceMetrics,
     ThreatLevel,
+    ToolScanResponse,
     ToolCallPreflightResult,
 )
 from .exceptions import (
@@ -203,6 +204,15 @@ class AsyncKoreShieldClient:
                 rag_documents.append(doc)
 
         return preflight_scan_rag_context(user_query, rag_documents)
+
+    async def scan_tool_call(self, tool_name: str, args: Any = None) -> ToolScanResponse:
+        """Scan a tool call server-side before execution."""
+        response = await self._make_request(
+            "POST",
+            "/v1/tools/scan",
+            {"tool_name": tool_name, "args": args},
+        )
+        return ToolScanResponse(**response)
 
     def _passes_security_policy(self, prompt: str) -> bool:
         """Check if prompt passes the current security policy.

@@ -245,3 +245,43 @@ def test_policy_evaluation_anonymous_user():
     assert result["action"] == "block"
     assert result["user_role"] is None
     assert result["permissions"] == []
+
+
+def test_tool_call_policy_blocks_critical_runtime_requests():
+    """Critical runtime tool calls should be blocked for ordinary users."""
+    policy = PolicyEngine({"security": {"tool_call": {"default_action": "block", "review_threshold": "high"}}})
+    policy.set_user_role("user1", UserRole.USER)
+
+    result = policy.evaluate_tool_call(
+        "bash",
+        {
+            "risk_class": "critical",
+            "capability_signals": ["execution", "credential_access"],
+        },
+        user_id="user1",
+    )
+
+    assert result["allowed"] is False
+    assert result["action"] == "block"
+    assert result["review_required"] is True
+    assert len(result["policy_violations"]) >= 2
+
+
+def test_tool_call_policy_respects_bypass_permissions():
+    """Admins with bypass permission should be warned instead of blocked."""
+    policy = PolicyEngine({"security": {"tool_call": {"default_action": "block", "review_threshold": "high"}}})
+    policy.set_user_role("admin1", UserRole.ADMIN)
+
+    result = policy.evaluate_tool_call(
+        "bash",
+        {
+            "risk_class": "critical",
+            "capability_signals": ["execution"],
+        },
+        user_id="admin1",
+    )
+
+    assert result["allowed"] is True
+    assert result["action"] == "warn"
+    assert result["bypass_allowed"] is True
+    assert result["review_required"] is True

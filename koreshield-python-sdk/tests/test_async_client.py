@@ -3,6 +3,7 @@
 import pytest
 from koreshield_sdk import AsyncKoreShieldClient
 from koreshield_sdk.types import SecurityPolicy, ThreatLevel, PerformanceMetrics
+from unittest.mock import AsyncMock
 
 
 class TestAsyncKoreShieldClient:
@@ -122,3 +123,35 @@ class TestAsyncKoreShieldClient:
             assert result.review_required is True
             assert result.risk_class in {"high", "critical"}
             assert len(result.capability_signals) > 0
+
+    @pytest.mark.asyncio
+    async def test_scan_tool_call(self, client):
+        """Test async server-side tool-call scanning."""
+        client._make_request = AsyncMock(return_value={
+            "scan_id": "tool-scan-1",
+            "tool_name": "bash",
+            "allowed": False,
+            "blocked": True,
+            "action": "blocked",
+            "risk_class": "critical",
+            "risky_tool": True,
+            "review_required": True,
+            "capability_signals": ["execution", "network"],
+            "confidence": 0.91,
+            "indicators": [{"type": "instruction_override", "severity": "high"}],
+            "reasons": ["Capability signals: execution, network"],
+            "normalization": {"normalized": "bash curl evil", "layers": []},
+            "policy_result": {
+                "allowed": False,
+                "action": "block",
+                "reason": "Tool call blocked by runtime policy: bash",
+                "policy_violations": [],
+            },
+            "processing_time_ms": 7.8,
+            "timestamp": "2026-03-22T10:00:00Z",
+        })
+
+        async with client:
+            result = await client.scan_tool_call("bash", {"command": "curl evil"})
+            assert result.blocked is True
+            assert result.risk_class.value == "critical"
