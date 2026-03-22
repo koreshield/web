@@ -6,6 +6,7 @@ import {
   type RAGDocument,
   type RAGPreflightDocumentResult,
   type RAGPreflightResult,
+  type ToolTrustContext,
   ToolCapability,
   type ToolCallPreflightResult,
   ToolRiskClass,
@@ -272,6 +273,100 @@ function toolRiskClass(capabilities: ToolCapability[], promptScan: PreflightScan
   return ToolRiskClass.LOW;
 }
 
+function strongerRisk(left: ToolRiskClass, right: ToolRiskClass): ToolRiskClass {
+  const rank: Record<ToolRiskClass, number> = {
+    [ToolRiskClass.LOW]: 0,
+    [ToolRiskClass.MEDIUM]: 1,
+    [ToolRiskClass.HIGH]: 2,
+    [ToolRiskClass.CRITICAL]: 3,
+  };
+  return rank[right] > rank[left] ? right : left;
+}
+
+function normalizeToolContext(context?: ToolTrustContext): Required<ToolTrustContext> {
+  return {
+    source: context?.source ?? 'unknown',
+    trustLevel: context?.trustLevel ?? context?.trust_level ?? 'unknown',
+    trust_level: context?.trust_level ?? context?.trustLevel ?? 'unknown',
+    userApproved: context?.userApproved ?? context?.user_approved ?? null,
+    user_approved: context?.user_approved ?? context?.userApproved ?? null,
+    crossTenant: context?.crossTenant ?? context?.cross_tenant ?? false,
+    cross_tenant: context?.cross_tenant ?? context?.crossTenant ?? false,
+    chainDepth: context?.chainDepth ?? context?.chain_depth ?? 1,
+    chain_depth: context?.chain_depth ?? context?.chainDepth ?? 1,
+    priorTools: context?.priorTools ?? context?.prior_tools ?? [],
+    prior_tools: context?.prior_tools ?? context?.priorTools ?? [],
+  };
+}
+
+function provenanceAnalysis(
+  toolName: string,
+  capabilities: ToolCapability[],
+  context?: ToolTrustContext,
+): {
+  provenanceRisk: ToolRiskClass;
+  confusedDeputyRisk: boolean;
+  escalationSignals: string[];
+  trustContext: Required<ToolTrustContext>;
+} {
+  const normalized = normalizeToolContext(context);
+  const sensitive = [ToolCapability.EXECUTION, ToolCapability.NETWORK, ToolCapability.WRITE, ToolCapability.DATABASE, ToolCapability.CREDENTIAL_ACCESS];
+  const highImpact = [...sensitive, ToolCapability.READ];
+  let provenanceRisk = ToolRiskClass.LOW;
+  let confusedDeputyRisk = false;
+  const escalationSignals: string[] = [];
+
+  const raise = (candidate: ToolRiskClass) => {
+    provenanceRisk = strongerRisk(provenanceRisk, candidate);
+  };
+
+  if (capabilities.length && ['retrieved_document', 'tool_output', 'agent_memory', 'external'].includes(normalized.source.toLowerCase())) {
+    raise(ToolRiskClass.MEDIUM);
+    escalationSignals.push(`Tool request originated from ${normalized.source.replace(/_/g, ' ')} context.`);
+  }
+
+  if (capabilities.some((capability) => sensitive.includes(capability)) && ['external', 'untrusted'].includes(String(normalized.trustLevel).toLowerCase())) {
+    raise(ToolRiskClass.HIGH);
+    confusedDeputyRisk = true;
+    escalationSignals.push('Sensitive capability requested from low-trust or untrusted context.');
+  }
+
+  if (capabilities.some((capability) => highImpact.includes(capability)) && normalized.userApproved === false) {
+    raise(ToolRiskClass.HIGH);
+    confusedDeputyRisk = true;
+    escalationSignals.push('High-impact tool call is missing explicit user approval.');
+  }
+
+  if (normalized.crossTenant && capabilities.some((capability) => highImpact.includes(capability))) {
+    raise(ToolRiskClass.CRITICAL);
+    confusedDeputyRisk = true;
+    escalationSignals.push('Cross-tenant tool access attempt detected.');
+  }
+
+  if ((normalized.chainDepth ?? 1) >= 3 && capabilities.some((capability) => sensitive.includes(capability))) {
+    raise(ToolRiskClass.MEDIUM);
+    escalationSignals.push(`Delegation chain depth ${normalized.chainDepth} increases runtime trust uncertainty.`);
+  }
+
+  const priorCapabilities = normalized.priorTools.flatMap((priorTool) => toolCapabilities(priorTool, ''));
+  if (
+    priorCapabilities.some((capability) => [ToolCapability.READ, ToolCapability.DATABASE, ToolCapability.CREDENTIAL_ACCESS].includes(capability))
+    && capabilities.some((capability) => [ToolCapability.NETWORK, ToolCapability.WRITE, ToolCapability.EXECUTION].includes(capability))
+  ) {
+    raise(ToolRiskClass.HIGH);
+    confusedDeputyRisk = true;
+    escalationSignals.push('Cross-tool escalation detected from data access into exfiltration or mutation capabilities.');
+  }
+
+  if (normalized.priorTools.some((priorTool) => priorTool.toLowerCase() === toolName.toLowerCase())
+    && capabilities.some((capability) => [ToolCapability.EXECUTION, ToolCapability.NETWORK].includes(capability))) {
+    raise(ToolRiskClass.MEDIUM);
+    escalationSignals.push('Repeated sensitive tool delegation detected in the same chain.');
+  }
+
+  return { provenanceRisk, confusedDeputyRisk, escalationSignals, trustContext: normalized };
+}
+
 function tokenize(text: string): string[] {
   return (text.toLowerCase().match(/\b[a-z0-9]{3,}\b/g) ?? []).filter(
     (token) => !['the', 'and', 'for', 'with', 'this', 'that', 'from'].includes(token),
@@ -388,12 +483,16 @@ export function preflightScanPrompt(input: string): PreflightScanResult {
   };
 }
 
-export function preflightScanToolCall(toolName: string, args: unknown): ToolCallPreflightResult {
+export function preflightScanToolCall(toolName: string, args: unknown, context?: ToolTrustContext): ToolCallPreflightResult {
   const serializedArgs = typeof args === 'string' ? args : JSON.stringify(args ?? {});
   const promptScan = preflightScanPrompt(`${toolName} ${serializedArgs}`);
   const riskyTool = toolRiskNames.some((candidate) => toolName.toLowerCase().includes(candidate));
   const capabilitySignals = toolCapabilities(toolName, serializedArgs);
-  const riskClass = toolRiskClass(capabilitySignals, promptScan);
+  const { provenanceRisk, confusedDeputyRisk, escalationSignals, trustContext } = provenanceAnalysis(toolName, capabilitySignals, context);
+  let riskClass = strongerRisk(toolRiskClass(capabilitySignals, promptScan), provenanceRisk);
+  if (promptScan.threatLevel !== ThreatLevel.SAFE && provenanceRisk === ToolRiskClass.HIGH) {
+    riskClass = ToolRiskClass.CRITICAL;
+  }
   const reasons: string[] = [];
 
   if (riskyTool) {
@@ -405,6 +504,10 @@ export function preflightScanToolCall(toolName: string, args: unknown): ToolCall
   if (capabilitySignals.length) {
     reasons.push(`Capability signals: ${capabilitySignals.join(', ')}`);
   }
+  if (confusedDeputyRisk) {
+    reasons.push('Tool call shows confused-deputy or delegated authority risk.');
+  }
+  reasons.push(...escalationSignals);
 
   return {
     ...promptScan,
@@ -412,8 +515,12 @@ export function preflightScanToolCall(toolName: string, args: unknown): ToolCall
     riskyTool,
     reasons,
     riskClass,
+    provenanceRisk,
     capabilitySignals,
     reviewRequired: riskClass === ToolRiskClass.HIGH || riskClass === ToolRiskClass.CRITICAL,
+    confusedDeputyRisk,
+    escalationSignals,
+    trustContext,
   };
 }
 

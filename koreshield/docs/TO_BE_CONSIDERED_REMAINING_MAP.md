@@ -13,6 +13,8 @@ This document tracks what is still left to evaluate or extract from [`to-be-cons
 - [x] embedded preflight scanning in the Python SDK
 - [x] tool-call capability modeling and review-required semantics
 - [x] server-side tool-call scanning and policy-backed runtime decisions
+- [x] confused-deputy and cross-tool escalation heuristics
+- [x] richer tool provenance and trust-context scoring
 
 ## Next Candidates To Extract
 
@@ -20,8 +22,8 @@ This document tracks what is still left to evaluate or extract from [`to-be-cons
 
 - [ ] Expand the detector corpus with additional `patterns/` ideas that improve recall without materially increasing false positives
 - [ ] Convert more dataset and benchmark-registry scenarios into stable KoreShield regression fixtures
-- [ ] Add confused-deputy and cross-tool escalation heuristics inspired by `src/confused-deputy.js`
-- [ ] Add richer tool provenance and trust-context scoring inspired by `src/mcp-security-runtime.js`
+- [x] Add confused-deputy and cross-tool escalation heuristics inspired by `src/confused-deputy.js`
+- [x] Add richer tool provenance and trust-context scoring inspired by `src/mcp-security-runtime.js`
 - [ ] Surface tool-call decision history and review workflows in the KoreShield web dashboard
 
 ### Platform Extensions

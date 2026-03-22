@@ -120,6 +120,7 @@ export type {
   ToolScanPolicyResult,
   ToolScanRequest,
   ToolScanResponse,
+  ToolTrustContext,
   NormalizationResult,
   LocalThreatIndicator,
   PreflightScanResult,

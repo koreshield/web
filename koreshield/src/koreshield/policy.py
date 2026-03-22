@@ -99,6 +99,13 @@ class PolicyEngine:
                 "severity": "critical",
                 "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value, UserRole.GUEST.value],
             },
+            {
+                "id": "confused_deputy_review",
+                "name": "Confused Deputy Review",
+                "description": "Delegated or low-trust tool calls require runtime review",
+                "severity": "medium",
+                "roles": [UserRole.ADMIN.value, UserRole.MODERATOR.value, UserRole.USER.value, UserRole.GUEST.value],
+            },
         ]
 
     def _load_role_permissions(self) -> Dict[str, Set[str]]:
@@ -381,6 +388,24 @@ class PolicyEngine:
                         "policy": "tool_credential_access_review",
                         "severity": "high",
                         "details": {"tool_name": tool_name, "capability": "credential_access"},
+                        "policy_id": policy["id"],
+                    }
+                )
+
+        if tool_analysis.get("confused_deputy_risk"):
+            policy = self._get_policy_by_id("confused_deputy_review")
+            if policy and self._check_policy_access(user_id, policy):
+                provenance_risk = tool_analysis.get("provenance_risk")
+                severity = "high" if provenance_risk in {"high", "critical"} else "medium"
+                violations.append(
+                    {
+                        "policy": "confused_deputy_review",
+                        "severity": severity,
+                        "details": {
+                            "tool_name": tool_name,
+                            "provenance_risk": provenance_risk,
+                            "escalation_signals": tool_analysis.get("escalation_signals", []),
+                        },
                         "policy_id": policy["id"],
                     }
                 )

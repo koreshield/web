@@ -162,8 +162,8 @@ export class KoreShieldClient {
   /**
    * Run a local preflight tool-call scan before execution.
    */
-  preflightToolCall(toolName: string, args: unknown): ToolCallPreflightResult {
-    return preflightScanToolCall(toolName, args);
+  preflightToolCall(toolName: string, args: unknown, context?: ToolScanRequest['context']): ToolCallPreflightResult {
+    return preflightScanToolCall(toolName, args, context);
   }
 
   /**
@@ -476,11 +476,13 @@ export class KoreShieldClient {
   async scanToolCall(
     toolName: string,
     args?: unknown,
+    context?: ToolScanRequest['context'],
   ): Promise<ToolScanResponse> {
     try {
       const payload: ToolScanRequest = {
         tool_name: toolName,
         args,
+        context,
       };
       const response: AxiosResponse<ToolScanResponse> = await this.client.post(
         '/v1/tools/scan',
