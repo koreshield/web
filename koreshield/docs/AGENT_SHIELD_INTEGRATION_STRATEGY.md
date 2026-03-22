@@ -36,8 +36,8 @@ We are not merging `to-be-considered/` wholesale. We are extracting the highest-
 - [x] Run detector and sanitizer checks against normalized text as well as raw text
 - [x] Port a first set of high-signal instruction override, developer mode, prompt leakage, and exfiltration patterns
 - [x] Add regression tests for obfuscated prompt injection
-- [ ] Add benchmark fixtures for evasive prompt injection cases
-- [ ] Add false-positive benchmark fixtures
+- [x] Add benchmark fixtures for evasive prompt injection cases
+- [x] Add false-positive benchmark fixtures
 - [ ] Define detector performance budgets for future hardening work
 
 ### Landed In
@@ -61,26 +61,37 @@ We are not merging `to-be-considered/` wholesale. We are extracting the highest-
 - [x] Boost risk when instruction-heavy retrieved content is unrelated to the user query
 - [x] Include richer document threat metadata for downstream UI and SDK use
 - [x] Add regression tests for query-mismatch directives and obfuscated RAG content
-- [ ] Build benchmark datasets for chunk poisoning and metadata injection
-- [ ] Update Python and JS SDKs if the RAG result model expands further
-- [ ] Document indirect prompt injection detection behavior and limits
+- [x] Build benchmark datasets for chunk poisoning and metadata injection
+- [x] Update Python and JS SDKs if the RAG result model expands further
+- [x] Document indirect prompt injection detection behavior and limits
 
 ### Landed In
 
 - [rag_detector.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/rag_detector.py)
 - [test_rag_detector.py](/Users/nsisong/projects/koreshield/koreshield/tests/test_rag_detector.py)
 
+### Indirect Prompt Injection Behavior and Limits
+
+KoreShield now treats retrieved content as suspicious when it combines instruction-heavy phrasing with weak relevance to the user query. That means directive density alone is not enough to block content; the detector is intentionally query-aware so it can distinguish between operational text that is genuinely relevant and instructions that appear to be injected into unrelated material.
+
+Current limits:
+
+- Similarity scoring is lexical and heuristic, not semantic-model based.
+- Directive density is phrase-driven and can miss novel attack wording.
+- Metadata injection coverage is benchmarked, but the API and UI do not yet expose every intermediate scoring field.
+- The local SDK preflight layer is designed for early warning and policy gating, not as a substitute for server-side enforcement.
+
 ## Next Priorities
 
 ### Immediate
 
-- [ ] Create benchmark fixtures inspired by `to-be-considered/datasets`
+- [x] Create benchmark fixtures inspired by `to-be-considered/datasets`
 - [ ] Define the merge map for remaining high-value modules
 - [ ] Decide how much of the richer RAG metadata should surface in the API/UI now
 
 ### After Phase 1 and 2 Stabilize
 
-- [ ] Add embedded SDK preflight scanning helpers
+- [x] Add embedded SDK preflight scanning helpers
 - [ ] Design KoreShield tool-call security model
 - [ ] Decide whether MCP security becomes a first-class KoreShield product area
 
