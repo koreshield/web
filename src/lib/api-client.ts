@@ -197,6 +197,29 @@ class ApiClient {
 		return this.fetch(`/v1/management/logs?${params.toString()}`);
 	}
 
+	async getRuntimeReviews(limit = 50, status?: string) {
+		const params = new URLSearchParams({ limit: String(limit) });
+		if (status) {
+			params.append('status', status);
+		}
+		return this.fetch(`/v1/tools/reviews?${params.toString()}`);
+	}
+
+	async decideRuntimeReview(ticketId: string, decision: 'approved' | 'rejected', note?: string) {
+		return this.fetch(`/v1/tools/reviews/${ticketId}/decision`, {
+			method: 'POST',
+			body: JSON.stringify({ decision, note }),
+		});
+	}
+
+	async getRuntimeSessions(limit = 50, status?: string) {
+		const params = new URLSearchParams({ limit: String(limit) });
+		if (status) {
+			params.append('status', status);
+		}
+		return this.fetch(`/v1/tools/sessions?${params.toString()}`);
+	}
+
 	// Policy Management
 	async getPolicies() {
 		return this.fetch('/v1/management/policies');

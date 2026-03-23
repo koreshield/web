@@ -25,8 +25,35 @@ interface AuditLog {
 	summary?: string;
 }
 
+interface RuntimeReview {
+	ticket_id: string;
+	session_id?: string;
+	tool_name?: string;
+	risk_class?: string;
+	action?: string;
+	status: string;
+	reasons: string[];
+	sequence_matches: Array<{ name: string; severity: string }>;
+	created_at: string;
+}
+
+interface RuntimeSession {
+	session_id: string;
+	state: string;
+	agent_id?: string;
+	intent?: string;
+	tool_call_count: number;
+	review_count: number;
+	blocked_count: number;
+	pending_reviews: number;
+	recent_tools: string[];
+}
+
 export default function AuditLogsPage() {
 	const [logs, setLogs] = useState<AuditLog[]>([]);
+	const [reviews, setReviews] = useState<RuntimeReview[]>([]);
+	const [sessions, setSessions] = useState<RuntimeSession[]>([]);
+	const [reviewLoading, setReviewLoading] = useState(true);
 	const [search, setSearch] = useState('');
 	const [filterAction, setFilterAction] = useState<string>('all');
 	const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -75,23 +102,53 @@ export default function AuditLogsPage() {
 			};
 		};
 
-		const fetchLogs = async () => {
+			const fetchLogs = async () => {
 			setLoading(true);
 			setErrorMessage(null);
 			try {
-				const response = await api.getAuditLogs(200, 0) as any;
-				const entries = (response?.logs || []).map(normalize);
+				const [auditResponse, reviewResponse, sessionResponse] = await Promise.all([
+					api.getAuditLogs(200, 0) as Promise<any>,
+					api.getRuntimeReviews(25, 'pending') as Promise<any>,
+					api.getRuntimeSessions(25) as Promise<any>,
+				]);
+				const entries = (auditResponse?.logs || []).map(normalize);
 				setLogs(entries);
+				setReviews(reviewResponse?.reviews || []);
+				setSessions(sessionResponse?.sessions || []);
 			} catch (error) {
 				console.error('Failed to load audit logs', error);
 				setErrorMessage('Unable to load audit logs from the server.');
 			} finally {
 				setLoading(false);
+				setReviewLoading(false);
 			}
 		};
 
 		void fetchLogs();
 	}, []);
+
+	const handleReviewDecision = async (ticketId: string, decision: 'approved' | 'rejected') => {
+		try {
+			const decidedReview = await api.decideRuntimeReview(ticketId, decision, `Decision recorded from audit dashboard: ${decision}`) as any;
+			setReviews((current) => current.filter((review) => review.ticket_id !== ticketId));
+			if (decidedReview?.session_id) {
+				setSessions((current) => current.map((session) => {
+					if (session.session_id !== decidedReview.session_id) {
+						return session;
+					}
+					return {
+						...session,
+						state: decision === 'approved' ? 'active' : 'suspended',
+						pending_reviews: Math.max(0, session.pending_reviews - 1),
+					};
+				}));
+			}
+			toast.success(`Runtime review ${decision}.`);
+		} catch (error) {
+			console.error('Failed to decide runtime review', error);
+			toast.error(`Unable to ${decision} runtime review.`);
+		}
+	};
 
 	const filteredLogs = logs.filter((log) => {
 		const matchesSearch =
@@ -136,6 +193,8 @@ export default function AuditLogsPage() {
 	const runtimeToolLogs = logs.filter((log) => log.is_tool_runtime);
 	const reviewRequiredLogs = runtimeToolLogs.filter((log) => log.review_required);
 	const blockedToolLogs = runtimeToolLogs.filter((log) => log.decision_action === 'blocked' || log.status === 'failure');
+	const activeSessions = sessions.filter((session) => session.state === 'active');
+	const suspendedSessions = sessions.filter((session) => session.state === 'suspended');
 
 	return (
 		<div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-20 pb-12">
@@ -213,6 +272,107 @@ export default function AuditLogsPage() {
 						<div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Unique Actors</div>
 						<div className="text-2xl font-bold text-gray-900 dark:text-white">{new Set(logs.map(l => l.user_email)).size}</div>
 						<p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Includes API-key scoped and user-scoped runtime events.</p>
+					</div>
+				</div>
+
+				<div className="grid lg:grid-cols-2 gap-6 mb-8">
+					<div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+						<div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+							<div>
+								<h2 className="text-lg font-semibold text-gray-900 dark:text-white">Pending Runtime Reviews</h2>
+								<p className="text-sm text-gray-600 dark:text-gray-400">High-risk tool calls waiting for explicit approval or rejection.</p>
+							</div>
+							<span className="inline-flex px-2 py-1 text-xs font-semibold rounded bg-amber-100 text-amber-700">
+								{reviews.length} pending
+							</span>
+						</div>
+						<div className="p-6 space-y-4">
+							{reviewLoading ? (
+								<div className="text-sm text-gray-500">Loading runtime reviews...</div>
+							) : reviews.length === 0 ? (
+								<div className="text-sm text-gray-500">No runtime reviews are waiting right now.</div>
+							) : reviews.map((review) => (
+								<div key={review.ticket_id} className="rounded-lg border border-gray-200 dark:border-gray-800 p-4 bg-gray-50 dark:bg-gray-950/50">
+									<div className="flex items-start justify-between gap-4 mb-3">
+										<div>
+											<div className="font-medium text-gray-900 dark:text-white">{review.tool_name || 'tool call'}</div>
+											<div className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1">{review.ticket_id}</div>
+										</div>
+										<span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${getSeverityColor(review.risk_class || 'medium')}`}>
+											{review.risk_class || 'medium'}
+										</span>
+									</div>
+									<p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+										{review.reasons[0] || 'Runtime review required for this tool call.'}
+									</p>
+									{review.sequence_matches.length > 0 && (
+										<div className="text-xs text-amber-700 dark:text-amber-400 mb-3">
+											Sequence flags: {review.sequence_matches.map((match) => match.name).join(', ')}
+										</div>
+									)}
+									<div className="flex gap-2">
+										<button
+											onClick={() => handleReviewDecision(review.ticket_id, 'approved')}
+											className="px-3 py-2 rounded-lg bg-electric-green hover:bg-electric-green/90 text-black text-sm font-medium transition-colors"
+										>
+											Approve
+										</button>
+										<button
+											onClick={() => handleReviewDecision(review.ticket_id, 'rejected')}
+											className="px-3 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition-colors"
+										>
+											Reject
+										</button>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+
+					<div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+						<div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+							<h2 className="text-lg font-semibold text-gray-900 dark:text-white">Runtime Sessions</h2>
+							<p className="text-sm text-gray-600 dark:text-gray-400">KoreShield session governance for MCP-style or agent-driven tool execution.</p>
+						</div>
+						<div className="p-6">
+							<div className="grid grid-cols-3 gap-4 mb-4">
+								<div>
+									<div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Active</div>
+									<div className="text-2xl font-bold text-gray-900 dark:text-white">{activeSessions.length}</div>
+								</div>
+								<div>
+									<div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Suspended</div>
+									<div className="text-2xl font-bold text-gray-900 dark:text-white">{suspendedSessions.length}</div>
+								</div>
+								<div>
+									<div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Pending Reviews</div>
+									<div className="text-2xl font-bold text-gray-900 dark:text-white">{sessions.reduce((sum, session) => sum + session.pending_reviews, 0)}</div>
+								</div>
+							</div>
+							<div className="space-y-3">
+								{sessions.length === 0 ? (
+									<div className="text-sm text-gray-500">No runtime sessions have been created yet.</div>
+								) : sessions.slice(0, 5).map((session) => (
+									<div key={session.session_id} className="rounded-lg border border-gray-200 dark:border-gray-800 p-4">
+										<div className="flex items-start justify-between gap-4">
+											<div>
+												<div className="font-medium text-gray-900 dark:text-white">{session.agent_id || 'runtime session'}</div>
+												<div className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1">{session.session_id}</div>
+												{session.intent && <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">{session.intent}</div>}
+											</div>
+											<span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${session.state === 'suspended' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+												{session.state}
+											</span>
+										</div>
+										<div className="grid grid-cols-3 gap-3 mt-4 text-sm text-gray-600 dark:text-gray-400">
+											<div>{session.tool_call_count} calls</div>
+											<div>{session.review_count} reviews</div>
+											<div>{session.blocked_count} blocked</div>
+										</div>
+									</div>
+								))}
+							</div>
+						</div>
 					</div>
 				</div>
 
