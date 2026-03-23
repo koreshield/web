@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, Search, Download, AlertTriangle, Filter, User, Activity } from 'lucide-react';
+import { FileText, Search, Download, Filter, User, Activity, Shield, Workflow, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '../components/ToastNotification';
 import { SEOMeta } from '../components/SEOMeta';
@@ -17,6 +17,12 @@ interface AuditLog {
 	user_agent: string;
 	details: Record<string, any>;
 	severity: 'low' | 'medium' | 'high' | 'critical';
+	is_tool_runtime: boolean;
+	tool_name?: string;
+	risk_class?: string;
+	review_required?: boolean;
+	decision_action?: string;
+	summary?: string;
 }
 
 export default function AuditLogsPage() {
@@ -34,18 +40,38 @@ export default function AuditLogsPage() {
 		const normalize = (entry: any, index: number): AuditLog => {
 			const level = (entry.level || entry.severity || 'info').toString().toLowerCase();
 			const severity = level === 'error' ? 'high' : level === 'warn' ? 'medium' : 'low';
+			const details = entry.details || entry.attack_details || entry;
+			const toolAnalysis = details.tool_analysis || {};
+			const policyResult = details.policy_result || {};
+			const isToolRuntime = entry.path === '/v1/tools/scan'
+				|| entry.event === 'tool_call_evaluated'
+				|| entry.attack_type === 'tool_call_security'
+				|| !!toolAnalysis.tool_name;
+			const toolName = toolAnalysis.tool_name || entry.tool_name || entry.model || undefined;
+			const riskClass = toolAnalysis.risk_class || entry.risk_class || policyResult.risk_class || undefined;
+			const reviewRequired = toolAnalysis.review_required ?? entry.review_required ?? policyResult.review_required ?? false;
+			const decisionAction = entry.action_taken || entry.action || policyResult.action || (entry.is_blocked ? 'blocked' : undefined);
+			const summary = isToolRuntime
+				? `${toolName || 'tool'} ${decisionAction || 'evaluated'}${riskClass ? ` · ${riskClass}` : ''}${reviewRequired ? ' · review required' : ''}`
+				: undefined;
 			return {
 				id: entry.id || entry.request_id || entry.scan_id || entry.event_id || String(index),
 				timestamp: entry.timestamp || entry.time || entry.created_at || new Date().toISOString(),
 				user_email: entry.user_email || entry.email || entry.user || entry.user_id || 'system',
-				action: entry.action || entry.event || entry.message || 'event',
-				resource_type: entry.resource_type || entry.resource || 'system',
+				action: isToolRuntime ? 'tool_runtime' : entry.action || entry.event || entry.message || 'event',
+				resource_type: isToolRuntime ? 'tool_call' : entry.resource_type || entry.resource || 'system',
 				resource_id: entry.resource_id || entry.id || '-',
 				status: entry.status || (level === 'error' ? 'failure' : 'success'),
 				ip_address: entry.ip || entry.client_ip || entry.user_ip || '-',
 				user_agent: entry.user_agent || entry.ua || '-',
-				details: entry,
-				severity: entry.severity || severity,
+				details,
+				severity: entry.severity || toolAnalysis.risk_class || severity,
+				is_tool_runtime: isToolRuntime,
+				tool_name: toolName,
+				risk_class: riskClass,
+				review_required: reviewRequired,
+				decision_action: decisionAction,
+				summary,
 			};
 		};
 
@@ -74,7 +100,12 @@ export default function AuditLogsPage() {
 			log.resource_type.toLowerCase().includes(search.toLowerCase()) ||
 			log.ip_address.includes(search);
 
-		const matchesAction = filterAction === 'all' || log.action.includes(filterAction);
+		const matchesAction =
+			filterAction === 'all'
+			|| (filterAction === 'tool_runtime' && log.is_tool_runtime)
+			|| (filterAction === 'review_required' && log.review_required)
+			|| (filterAction === 'blocked' && (log.decision_action === 'blocked' || log.status === 'failure'))
+			|| log.action.includes(filterAction);
 		const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
 		const matchesSeverity = filterSeverity === 'all' || log.severity === filterSeverity;
 
@@ -101,6 +132,10 @@ export default function AuditLogsPage() {
 			default: return 'text-gray-600 bg-gray-50';
 		}
 	};
+
+	const runtimeToolLogs = logs.filter((log) => log.is_tool_runtime);
+	const reviewRequiredLogs = runtimeToolLogs.filter((log) => log.review_required);
+	const blockedToolLogs = runtimeToolLogs.filter((log) => log.decision_action === 'blocked' || log.status === 'failure');
 
 	return (
 		<div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-20 pb-12">
@@ -141,21 +176,43 @@ export default function AuditLogsPage() {
 					</div>
 					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm text-gray-600 dark:text-gray-400">Critical Alerts</span>
-							<AlertTriangle className="w-5 h-5 text-red-500" />
+							<span className="text-sm text-gray-600 dark:text-gray-400">Runtime Tool Events</span>
+							<Workflow className="w-5 h-5 text-amber-500" />
 						</div>
 						<div className="text-2xl font-bold text-gray-900 dark:text-white">
-							{logs.filter(l => l.severity === 'critical').length}
+							{runtimeToolLogs.length}
 						</div>
 					</div>
 					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm text-gray-600 dark:text-gray-400">Unique Users</span>
-							<User className="w-5 h-5 text-purple-500" />
+							<span className="text-sm text-gray-600 dark:text-gray-400">Review Required</span>
+							<Eye className="w-5 h-5 text-purple-500" />
 						</div>
 						<div className="text-2xl font-bold text-gray-900 dark:text-white">
-							{new Set(logs.map(l => l.user_email)).size}
+							{reviewRequiredLogs.length}
 						</div>
+					</div>
+				</div>
+
+				<div className="grid md:grid-cols-3 gap-6 mb-8">
+					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+						<div className="flex items-center gap-3 mb-3">
+							<Shield className="w-5 h-5 text-electric-green" />
+							<h2 className="text-lg font-semibold text-gray-900 dark:text-white">Tool Runtime Focus</h2>
+						</div>
+						<p className="text-sm text-gray-600 dark:text-gray-400">
+							KoreShield now records server-side tool scan decisions here so runtime enforcement is visible alongside normal audit history.
+						</p>
+					</div>
+					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+						<div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Blocked Tool Calls</div>
+						<div className="text-2xl font-bold text-gray-900 dark:text-white">{blockedToolLogs.length}</div>
+						<p className="text-sm text-gray-500 dark:text-gray-400 mt-2">High-trust failures and low-trust delegated tool calls are highlighted here.</p>
+					</div>
+					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+						<div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Unique Actors</div>
+						<div className="text-2xl font-bold text-gray-900 dark:text-white">{new Set(logs.map(l => l.user_email)).size}</div>
+						<p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Includes API-key scoped and user-scoped runtime events.</p>
 					</div>
 				</div>
 
@@ -217,6 +274,9 @@ export default function AuditLogsPage() {
 									<option value="deleted">Deleted</option>
 									<option value="login">Login</option>
 									<option value="exported">Exported</option>
+									<option value="tool_runtime">Tool Runtime</option>
+									<option value="review_required">Review Required</option>
+									<option value="blocked">Blocked Decisions</option>
 								</select>
 							</div>
 							<div>
@@ -282,6 +342,9 @@ export default function AuditLogsPage() {
 											Resource
 										</th>
 										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+											Runtime Summary
+										</th>
+										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
 											Status
 										</th>
 										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -314,7 +377,22 @@ export default function AuditLogsPage() {
 												</code>
 											</td>
 											<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-												{log.resource_type}
+												<div>{log.resource_type}</div>
+												{log.tool_name && <div className="text-xs text-gray-500 dark:text-gray-500 font-mono mt-1">{log.tool_name}</div>}
+											</td>
+											<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+												{log.summary ? (
+													<div className="space-y-1">
+														<div className="font-medium text-gray-900 dark:text-white">{log.summary}</div>
+														{log.risk_class && (
+															<span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${getSeverityColor(log.risk_class)}`}>
+																{log.risk_class}
+															</span>
+														)}
+													</div>
+												) : (
+													<span className="text-gray-400">-</span>
+												)}
 											</td>
 											<td className="px-6 py-4 whitespace-nowrap">
 												<span className={`inline-flex px-2 py-1 text-xs font-semibold rounded border ${getStatusColor(log.status)}`}>
