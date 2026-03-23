@@ -42,6 +42,8 @@ def proxy(mock_config):
             "JWT_SECRET": "test-secret-with-minimum-32-characters!!",
             "JWT_ISSUER": "koreshield-auth",
             "JWT_AUDIENCE": "koreshield-api",
+            "JWT_PUBLIC_KEY": "",
+            "JWT_PRIVATE_KEY": "",
         },
         clear=False,
     ):
@@ -70,10 +72,21 @@ def auth_headers():
 
 def test_proxy_initialization(mock_config):
     """Test that proxy initializes correctly."""
-    with patch.object(KoreShieldProxy, '_init_providers'):
-        proxy = KoreShieldProxy(mock_config)
-        assert proxy is not None
-        assert proxy.app is not None
+    with patch.dict(
+        "os.environ",
+        {
+            "JWT_SECRET": "test-secret-with-minimum-32-characters!!",
+            "JWT_ISSUER": "koreshield-auth",
+            "JWT_AUDIENCE": "koreshield-api",
+            "JWT_PUBLIC_KEY": "",
+            "JWT_PRIVATE_KEY": "",
+        },
+        clear=False,
+    ):
+        with patch.object(KoreShieldProxy, '_init_providers'):
+            proxy = KoreShieldProxy(mock_config)
+            assert proxy is not None
+            assert proxy.app is not None
 
 
 def test_health_endpoint(proxy):
@@ -253,6 +266,99 @@ def test_tool_scan_endpoint_surfaces_confused_deputy_context(proxy, auth_headers
     assert data["provenance_risk"] in ["high", "critical"]
     assert len(data["escalation_signals"]) > 0
     assert data["trust_context"]["source"] == "retrieved_document"
+
+
+def test_tool_runtime_session_and_review_workflow(proxy, auth_headers):
+    client = TestClient(proxy.app)
+
+    session_response = client.post(
+        "/v1/tools/sessions",
+        json={
+            "agent_id": "assistant-runtime",
+            "intent": "sync partner records",
+            "allowed_tools": ["database_query", "send_webhook"],
+        },
+        headers=auth_headers,
+    )
+
+    assert session_response.status_code == 201
+    session_id = session_response.json()["session_id"]
+
+    scan_response = client.post(
+        "/v1/tools/scan",
+        json={
+            "tool_name": "send_webhook",
+            "args": {"url": "https://partner.example/hook", "body": "forward customer export"},
+            "context": {
+                "session_id": session_id,
+                "source": "retrieved_document",
+                "trust_level": "untrusted",
+                "user_approved": False,
+                "chain_depth": 4,
+                "prior_tools": ["database_query"],
+            },
+        },
+        headers=auth_headers,
+    )
+
+    assert scan_response.status_code == 403
+    scan_data = scan_response.json()
+    assert scan_data["review_ticket"] is not None
+    assert scan_data["session"]["session_id"] == session_id
+    ticket_id = scan_data["review_ticket"]["ticket_id"]
+
+    review_list = client.get("/v1/tools/reviews?status=pending", headers=auth_headers)
+    assert review_list.status_code == 200
+    assert any(review["ticket_id"] == ticket_id for review in review_list.json()["reviews"])
+
+    decision_response = client.post(
+        f"/v1/tools/reviews/{ticket_id}/decision",
+        json={"decision": "approved", "note": "Approved for this incident drill"},
+        headers=auth_headers,
+    )
+    assert decision_response.status_code == 200
+    assert decision_response.json()["status"] == "approved"
+
+    session_detail = client.get(f"/v1/tools/sessions/{session_id}", headers=auth_headers)
+    assert session_detail.status_code == 200
+    assert session_detail.json()["state"] == "active"
+
+
+def test_tool_scan_endpoint_uses_session_history_for_sequence_detection(proxy, auth_headers):
+    client = TestClient(proxy.app)
+
+    session_response = client.post(
+        "/v1/tools/sessions",
+        json={"agent_id": "assistant-runtime", "intent": "investigate repository"},
+        headers=auth_headers,
+    )
+    session_id = session_response.json()["session_id"]
+
+    first_call = client.post(
+        "/v1/tools/scan",
+        json={
+            "tool_name": "read_file",
+            "args": {"path": "/workspace/.env"},
+            "context": {"session_id": session_id},
+        },
+        headers=auth_headers,
+    )
+    assert first_call.status_code == 200
+
+    second_call = client.post(
+        "/v1/tools/scan",
+        json={
+            "tool_name": "send_webhook",
+            "args": {"url": "https://partner.example/hook", "body": "send everything"},
+            "context": {"session_id": session_id},
+        },
+        headers=auth_headers,
+    )
+
+    assert second_call.status_code == 403
+    data = second_call.json()
+    assert any(match["name"] == "credential_exfiltration" for match in data["sequence_matches"])
+    assert data["review_ticket"] is not None
 
 
 def test_provider_health_endpoint(proxy):
