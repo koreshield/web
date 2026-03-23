@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Dict, List, Optional
 
 from .detector import AttackDetector
@@ -38,7 +39,13 @@ class ToolCallSecurityAnalyzer:
         capability_signals = self._capability_signals(tool_name, serialized_args)
         trust_context = self._normalize_context(context)
         provenance = self._provenance_analysis(tool_name, capability_signals, trust_context)
-        risk_class = self._risk_class(capability_signals, detection_result, provenance["risk_class"])
+        sequence_matches = self._sequence_analysis(capability_signals, serialized_args, trust_context)
+        risk_class = self._risk_class(
+            capability_signals,
+            detection_result,
+            provenance["risk_class"],
+            sequence_matches,
+        )
         review_required = risk_class in {"high", "critical"}
         reasons: List[str] = []
 
@@ -50,6 +57,11 @@ class ToolCallSecurityAnalyzer:
             reasons.append("Tool call shows confused-deputy or delegated authority risk.")
         if provenance["escalation_signals"]:
             reasons.extend(provenance["escalation_signals"])
+        if sequence_matches:
+            reasons.append(
+                "Suspicious tool sequence detected: "
+                + ", ".join(match["name"] for match in sequence_matches)
+            )
         if risk_class == "critical":
             reasons.append("Critical-risk tool call combines sensitive capabilities with high-confidence attack signals.")
 
@@ -69,6 +81,7 @@ class ToolCallSecurityAnalyzer:
             "indicators": detection_result.get("indicators", []),
             "confused_deputy_risk": provenance["confused_deputy_risk"],
             "escalation_signals": provenance["escalation_signals"],
+            "sequence_matches": sequence_matches,
             "trust_context": trust_context,
             "normalization": {
                 "normalized": detection_result.get("normalized_prompt", combined_input),
@@ -86,7 +99,13 @@ class ToolCallSecurityAnalyzer:
             if any(keyword in lowered for keyword in keywords)
         ]
 
-    def _risk_class(self, capability_signals: List[str], detection_result: Dict[str, Any], provenance_risk: str) -> str:
+    def _risk_class(
+        self,
+        capability_signals: List[str],
+        detection_result: Dict[str, Any],
+        provenance_risk: str,
+        sequence_matches: List[Dict[str, str]],
+    ) -> str:
         attack = bool(detection_result.get("is_attack"))
         confidence = float(detection_result.get("confidence", 0.0) or 0.0)
         base_risk = "low"
@@ -99,6 +118,10 @@ class ToolCallSecurityAnalyzer:
             base_risk = "medium"
 
         max_risk = provenance_risk if RISK_RANK.get(provenance_risk, 0) > RISK_RANK.get(base_risk, 0) else base_risk
+        for match in sequence_matches:
+            severity = str(match.get("severity", "low")).lower()
+            if RISK_RANK.get(severity, 0) > RISK_RANK.get(max_risk, 0):
+                max_risk = severity
         if attack and provenance_risk == "high" and max_risk != "critical":
             return "critical"
         return max_risk
@@ -108,6 +131,9 @@ class ToolCallSecurityAnalyzer:
         prior_tools = data.get("prior_tools", data.get("priorTools"))
         if not isinstance(prior_tools, list):
             prior_tools = []
+        prior_tool_events = data.get("prior_tool_events", data.get("priorToolEvents"))
+        if not isinstance(prior_tool_events, list):
+            prior_tool_events = []
         return {
             "source": str(data.get("source") or "unknown"),
             "trust_level": str(data.get("trust_level", data.get("trustLevel")) or "unknown"),
@@ -115,6 +141,7 @@ class ToolCallSecurityAnalyzer:
             "cross_tenant": bool(data.get("cross_tenant", data.get("crossTenant", False))),
             "chain_depth": int(data.get("chain_depth", data.get("chainDepth", 1)) or 1),
             "prior_tools": [str(tool) for tool in prior_tools if tool],
+            "prior_tool_events": [event for event in prior_tool_events if isinstance(event, dict)],
         }
 
     def _provenance_analysis(
@@ -186,3 +213,90 @@ class ToolCallSecurityAnalyzer:
             "confused_deputy_risk": confused_deputy_risk,
             "escalation_signals": escalation_signals,
         }
+
+    def _sequence_analysis(
+        self,
+        capability_signals: List[str],
+        serialized_args: str,
+        trust_context: Dict[str, Any],
+    ) -> List[Dict[str, str]]:
+        prior_events = trust_context.get("prior_tool_events", [])
+        if not prior_events:
+            return []
+
+        matches: List[Dict[str, str]] = []
+        lowered_args = serialized_args.lower()
+        sensitive_path = re.compile(r"\.env|credential|secret|password|token|key|ssh", re.IGNORECASE)
+        config_path = re.compile(r"config|settings|\.env|system", re.IGNORECASE)
+        delete_terms = re.compile(r"\b(delete|remove|rm|unlink|drop|truncate)\b", re.IGNORECASE)
+        privilege_terms = re.compile(r"\b(chmod|chown|permission|role|grant|sudo)\b", re.IGNORECASE)
+        database_dump_terms = re.compile(r"select\s+\*|dump|export|all", re.IGNORECASE)
+
+        def has_prior(predicate) -> bool:
+            return any(predicate(event) for event in prior_events)
+
+        if any(signal in capability_signals for signal in {"network", "write", "execution"}) and has_prior(
+            lambda event: (
+                {"read", "credential_access"}.intersection(event.get("capability_signals", []))
+                and sensitive_path.search(str(event.get("args", ""))) is not None
+            )
+        ):
+            matches.append(
+                {
+                    "name": "credential_exfiltration",
+                    "severity": "critical",
+                    "description": "Sensitive reads followed by externalization-capable tool usage.",
+                }
+            )
+
+        if delete_terms.search(lowered_args) and has_prior(
+            lambda event: {"read"}.intersection(event.get("capability_signals", []))
+        ):
+            matches.append(
+                {
+                    "name": "reconnaissance_then_delete",
+                    "severity": "critical",
+                    "description": "Reconnaissance-style access followed by destructive mutation.",
+                }
+            )
+
+        if "write" in capability_signals and config_path.search(lowered_args) and has_prior(
+            lambda event: (
+                {"read"}.intersection(event.get("capability_signals", []))
+                and config_path.search(str(event.get("args", ""))) is not None
+            )
+        ):
+            matches.append(
+                {
+                    "name": "read_then_write_config",
+                    "severity": "high",
+                    "description": "Configuration was read before being modified in the same session.",
+                }
+            )
+
+        if any(signal in capability_signals for signal in {"network", "write"}) and has_prior(
+            lambda event: (
+                {"database"}.intersection(event.get("capability_signals", []))
+                and database_dump_terms.search(str(event.get("args", ""))) is not None
+            )
+        ):
+            matches.append(
+                {
+                    "name": "database_dump",
+                    "severity": "critical",
+                    "description": "Bulk database access was followed by exfiltration-capable behavior.",
+                }
+            )
+
+        if "execution" in capability_signals and has_prior(
+            lambda event: privilege_terms.search(str(event.get("args", ""))) is not None
+        ):
+            matches.append(
+                {
+                    "name": "privilege_escalation",
+                    "severity": "critical",
+                    "description": "Permission changes were followed by command execution.",
+                }
+            )
+
+        return matches

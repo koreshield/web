@@ -27,7 +27,10 @@ This document tracks what is still left to evaluate or extract from [`to-be-cons
 - [x] Convert more dataset and benchmark-registry scenarios into stable KoreShield regression fixtures
 - [x] Add confused-deputy and cross-tool escalation heuristics inspired by `src/confused-deputy.js`
 - [x] Add richer tool provenance and trust-context scoring inspired by `src/mcp-security-runtime.js`
-- [ ] Surface tool-call decision history and review workflows in the KoreShield web dashboard
+- [x] Surface tool-call decision history and review workflows in the KoreShield web dashboard
+- [x] Add runtime approval workflows for sensitive tool classes
+- [x] Add basic MCP-style runtime session governance for tool execution
+- [x] Add suspicious tool sequence analysis inspired by `src/tool-guard.js`
 
 ### Platform Extensions
 
@@ -40,9 +43,7 @@ This document tracks what is still left to evaluate or extract from [`to-be-cons
 
 ### Product Surfaces Not Yet Taken
 
-- [ ] MCP-native session governance and agent-to-agent trust modeling
-- [ ] runtime approval workflows for sensitive tool classes
-- [ ] end-user dashboard views for runtime tool-call events
+- [ ] deeper agent-to-agent trust modeling beyond per-session governance
 - [ ] policy authoring UX for runtime capabilities and exceptions
 - [ ] enterprise deployment packaging for runtime controls
 

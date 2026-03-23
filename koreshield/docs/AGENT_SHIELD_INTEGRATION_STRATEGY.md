@@ -248,6 +248,59 @@ Decision: pending local daemon availability.
 
 The existing Docker Compose path remains the delivery model for local backend verification. Compose configuration validates successfully for both the backend stack and the root development stack. The final image build command is still environment-blocked on this machine because the Docker daemon did not expose `~/.docker/run/docker.sock` during verification, even after launching Docker Desktop.
 
+## Phase 5: Runtime Governance and Review Workflows
+
+### Scope
+
+- human approval workflows for risky tool calls
+- runtime session governance for agent or MCP-style execution chains
+- session-aware sequence analysis for suspicious tool usage
+- dashboard surfaces for pending reviews and governed runtime sessions
+
+### Checklist
+
+- [x] Add a KoreShield-native runtime review queue for review-required tool calls
+- [x] Add runtime decision endpoints for approving and rejecting queued tool calls
+- [x] Add basic runtime session creation, listing, detail, and state-transition endpoints
+- [x] Feed runtime session history back into tool-call risk evaluation
+- [x] Add suspicious sequence analysis inspired by `to-be-considered/src/tool-guard.js`
+- [x] Surface pending runtime reviews in the KoreShield dashboard
+- [x] Surface governed runtime session state in the KoreShield dashboard
+- [x] Add regression coverage for runtime sessions, reviews, and sequence-aware blocking
+
+### Landed In
+
+- [runtime_governance.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/runtime_governance.py)
+- [tool_security.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/tool_security.py)
+- [proxy.py](/Users/nsisong/projects/koreshield/koreshield/src/koreshield/proxy.py)
+- [AuditLogsPage.tsx](/Users/nsisong/projects/koreshield/koreshield-web/src/pages/AuditLogsPage.tsx)
+
+### Phase 5 Decision Gates
+
+#### Gate 1: Unified Control Plane
+
+Decision: pass.
+
+Runtime reviews and governed sessions live inside KoreShield’s existing backend and dashboard surfaces. We still are not introducing a separate Agent Shield runtime service or dashboard.
+
+#### Gate 2: Session Governance Scope
+
+Decision: pass, with deliberate limits.
+
+KoreShield now supports MCP-style runtime sessions and state changes for tool execution, but only as a KoreShield-native governance layer. We are not importing a full second auth stack or agent identity framework yet.
+
+#### Gate 3: Review Workflow Usability
+
+Decision: pass.
+
+High-risk and blocked tool calls now produce explicit review tickets that can be listed and decided through backend APIs and the existing audit dashboard.
+
+#### Gate 4: Sequence-Aware Enforcement
+
+Decision: pass.
+
+Tool-call analysis now considers recent governed session history so KoreShield can elevate risk when it sees suspicious multi-step chains rather than only isolated single calls.
+
 ## Remaining From `to-be-considered`
 
 The current, tracked extraction backlog now lives in:
