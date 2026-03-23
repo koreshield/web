@@ -15,13 +15,16 @@ This document tracks what is still left to evaluate or extract from [`to-be-cons
 - [x] server-side tool-call scanning and policy-backed runtime decisions
 - [x] confused-deputy and cross-tool escalation heuristics
 - [x] richer tool provenance and trust-context scoring
+- [x] expanded detector corpus for exfiltration and privileged-tool abuse
+- [x] additional benchmark-registry inspired regression fixtures
+- [x] tool-call decision history surfaced in the audit logs dashboard
 
 ## Next Candidates To Extract
 
 ### Highest Value
 
-- [ ] Expand the detector corpus with additional `patterns/` ideas that improve recall without materially increasing false positives
-- [ ] Convert more dataset and benchmark-registry scenarios into stable KoreShield regression fixtures
+- [x] Expand the detector corpus with additional `patterns/` ideas that improve recall without materially increasing false positives
+- [x] Convert more dataset and benchmark-registry scenarios into stable KoreShield regression fixtures
 - [x] Add confused-deputy and cross-tool escalation heuristics inspired by `src/confused-deputy.js`
 - [x] Add richer tool provenance and trust-context scoring inspired by `src/mcp-security-runtime.js`
 - [ ] Surface tool-call decision history and review workflows in the KoreShield web dashboard
