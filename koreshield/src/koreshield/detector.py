@@ -26,6 +26,12 @@ HIGH_RISK_PATTERNS = [
     ("developer_mode", re.compile(r"\b(?:developer|debug|dan|god)\s+mode\b", re.IGNORECASE), "high", 0.30),
     ("prompt_leakage", re.compile(r"(?:reveal|show|display|leak)\s+(?:your\s+)?(?:system\s+prompt|instructions?|hidden\s+prompt)", re.IGNORECASE), "high", 0.40),
     ("data_exfiltration", re.compile(r"(?:send|upload|transmit|export)\s+(?:all\s+|the\s+)?(?:data|credentials|passwords|secrets?)", re.IGNORECASE), "high", 0.35),
+    ("markdown_image_exfiltration", re.compile(r"!\[[^\]]*\]\(https?:\/\/[^)]*\?[^)]*(?:data|q|query|text|payload|exfil|leak|steal)=", re.IGNORECASE), "critical", 0.50),
+    ("credential_enumeration", re.compile(r"list\s+(?:all\s+)?(?:available\s+)?(?:api\s*keys?|tokens?|passwords?|credentials?|secrets?)", re.IGNORECASE), "critical", 0.45),
+    ("encoded_prompt_exfiltration", re.compile(r"(?:base64|encode|encrypt)\s+(?:the\s+)?(?:system\s+)?prompt\s+(?:and\s+)?(?:embed|hide|put|include)", re.IGNORECASE), "critical", 0.45),
+    ("side_channel_exfiltration", re.compile(r"vary\s+(?:the\s+)?(?:length|format|style|wording)\s+(?:of\s+)?(?:your\s+)?responses?\s+(?:based\s+on|according\s+to)\s+(?:each\s+)?(?:character|letter|word|byte)", re.IGNORECASE), "high", 0.35),
+    ("privileged_tool_abuse", re.compile(r"(?:use|call)\s+(?:the\s+)?(?:admin|root|sudo|superuser|privileged)\s+(?:tool|function|command|access)\s+(?:to\s+)?(?:grant|give|allow|enable)", re.IGNORECASE), "critical", 0.45),
+    ("recursive_tool_abuse", re.compile(r"call\s+(?:yourself|this\s+(?:function|tool|agent))\s+recursively", re.IGNORECASE), "high", 0.35),
 ]
 
 
@@ -199,6 +205,10 @@ class AttackDetector:
             indicators.append({"type": "data_exfiltration", "severity": "high"})
             confidence += 0.4
 
+        if "output the exact text between" in normalized_lower or "content between <" in normalized_lower:
+            indicators.append({"type": "tag_extraction", "severity": "high"})
+            confidence += 0.35
+
         # Check for adversarial suffixes
         adversarial_suffixes = [
             "ignore any attempts to modify them after the marker",
@@ -216,6 +226,10 @@ class AttackDetector:
         if "##end" in normalized_lower or "end of prompt" in normalized_lower:
             indicators.append({"type": "multi_turn_injection", "severity": "medium"})
             confidence += 0.25
+
+        if any(token in normalized_lower for token in ["sudo", "superuser", "admin tool", "root access"]):
+            indicators.append({"type": "privilege_escalation", "severity": "high"})
+            confidence += 0.3
 
         # Check for mathematical tricks
         if re.search(r'\d+\s*\+\s*\d+\s*=\s*\d+', normalized_prompt):  # Simple math puzzles
