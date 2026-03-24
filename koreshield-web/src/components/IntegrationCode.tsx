@@ -48,10 +48,10 @@ function IntegrationCode() {
                     className="text-center mb-14"
                 >
                     <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-foreground tracking-[-0.04em]">
-                        Easy Integration
+                        Two Lines. Full Coverage.
                     </h2>
                     <p className="text-muted-foreground text-lg">
-                        Drop-in replacement for your existing LLM clients
+                        Wrap your existing LLM client. KoreShield handles everything else — no rearchitecting, no new infrastructure.
                     </p>
                 </motion.div>
 

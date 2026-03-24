@@ -6,6 +6,7 @@ import IntegrationCode from '../components/IntegrationCode';
 import { IntegrationTicker } from '../components/IntegrationTicker';
 import { InteractiveDemo } from '../components/InteractiveDemo';
 import { RAGShowcase } from '../components/RAGShowcase';
+import { StatsBanner } from '../components/StatsBanner';
 import { ThreatDashboard } from '../components/ThreatDashboard';
 import { TrustBadges } from '../components/TrustBadges';
 import UseCases from '../components/UseCases';
@@ -41,13 +42,15 @@ function LandingPage() {
 
             <section className="py-28 md:py-36 px-6 relative ambient-glow">
                 <div className="max-w-7xl mx-auto relative z-10">
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4 tracking-[-0.04em]">Live Threat Intelligence</h2>
-                    <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto">Watch KoreShield defend against real attack patterns in real-time. Every blocked threat below is a simulated production scenario.</p>
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4 tracking-[-0.04em]">Threats Blocked. Right Now.</h2>
+                    <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto">Watch KoreShield intercept real attack patterns as they happen. These are the same threats hitting production AI systems today — classified, scored, and stopped.</p>
                     <ErrorBoundary fallback={<div className="h-64 bg-muted/20 border border-white/[0.08] rounded-2xl text-center p-8">Unable to load dashboard</div>}>
                         <ThreatDashboard />
                     </ErrorBoundary>
                 </div>
             </section>
+
+            <StatsBanner />
 
             <section className="py-28 md:py-36 px-6 bg-muted/30 dark:bg-muted/20">
                 <div className="max-w-7xl mx-auto">
@@ -83,10 +86,10 @@ function LandingPage() {
                         className="text-center mb-16"
                     >
                         <h2 className="text-4xl md:text-6xl font-extrabold tracking-[-0.04em] text-foreground mb-6">
-                            Ready to Get Started?
+                            Your AI Is in Production.<br className="hidden md:block" /> Is Your Security?
                         </h2>
                         <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
-                            Deploy KoreShield in under 5 minutes. Protect every LLM request from day one.
+                            Most teams discover their LLM is vulnerable after something goes wrong. KoreShield ships in under 5 minutes. Incidents don't.
                         </p>
                     </motion.div>
 
@@ -115,7 +118,7 @@ function LandingPage() {
                                 <div className="p-3 bg-muted/50 rounded border border-white/[0.06] text-sm font-mono text-muted-foreground">
                                     <span className="text-electric-green">$</span> npm install koreshield
                                 </div>
-                                <p className="text-xs text-muted-foreground">Works with Python &amp; Node.js out of the box.</p>
+                                <p className="text-xs text-muted-foreground">Python and Node.js. Works with your existing code.</p>
                             </div>
                         </motion.div>
 
@@ -146,7 +149,7 @@ function LandingPage() {
                                     </div>
                                     <div>
                                         <h3 className="text-lg font-bold text-foreground">2. Configure</h3>
-                                        <p className="text-sm text-muted-foreground">Point to your provider, set policies</p>
+                                        <p className="text-sm text-muted-foreground">Point to your provider. Set your policies.</p>
                                     </div>
                                 </div>
 

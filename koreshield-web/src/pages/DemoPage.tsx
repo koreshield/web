@@ -138,7 +138,7 @@ function SeverityBadge({ severity }: { severity: string }) {
 		none: 'bg-emerald-600 text-white',
 	};
 	return (
-		<span className={`text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider ${map[severity] || 'bg-gray-600 text-white'}`}>
+		<span className={`text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider ${map[severity] || 'bg-muted text-foreground'}`}>
 			{severity === 'none' ? 'CLEAN' : severity}
 		</span>
 	);
@@ -537,11 +537,11 @@ export default function DemoPage() {
 
 			{/* Hero */}
 			<div className="text-center py-8 md:py-10 px-4 md:px-6">
-				<div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 text-xs font-medium mb-4">
-					<div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+				<div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-electric-green/30 bg-electric-green/10 text-electric-green text-xs font-medium mb-4">
+					<div className="w-1.5 h-1.5 rounded-full bg-electric-green animate-pulse" />
 					Live API Demo — Login required for scans
 				</div>
-				<h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-white via-blue-100 to-blue-400 bg-clip-text text-transparent">
+				<h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 text-foreground">
 					See KoreShield Stop Real AI Attacks
 				</h1>
 				<p className="text-slate-400 text-base md:text-lg max-w-xl mx-auto">
@@ -563,20 +563,19 @@ export default function DemoPage() {
 				</div>
 
 				{/* Footer CTA */}
-				<div className="mt-10 text-center py-8 px-4 md:px-6 rounded-2xl border border-slate-800 bg-slate-900/40">
-					<p className="text-slate-300 font-semibold text-base md:text-lg mb-2">Ready to protect your AI app in production?</p>
-					<p className="text-slate-500 text-sm mb-5">KoreShield installs in under 5 minutes. No infrastructure changes required.</p>
+				<div className="mt-10 text-center py-8 px-4 md:px-6 rounded-2xl border border-white/10 bg-white/[0.03]">
+					<p className="text-foreground font-semibold text-base md:text-lg mb-2">Ready to protect your AI app in production?</p>
+					<p className="text-muted-foreground text-sm mb-5">KoreShield installs in under 5 minutes. No infrastructure changes required.</p>
 					<div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
 						<Link
 							to="/signup"
-							className="w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:scale-105 text-center"
-							style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
+							className="w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-sm bg-electric-green hover:bg-emerald-bright text-white transition-all hover:scale-105 text-center"
 						>
 							Get Started →
 						</Link>
 						<Link
 							to="/contact"
-							className="w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-sm border border-slate-700 text-slate-300 hover:border-slate-500 transition-all text-center"
+							className="w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-sm border border-white/20 text-foreground hover:border-white/40 transition-all text-center"
 						>
 							Talk to Sales
 						</Link>
