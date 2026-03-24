@@ -36,6 +36,7 @@ export function DashboardPage() {
 
 		// Connect to WebSocket
 		wsClient.connect();
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setWsConnected(wsClient.isConnected());
 
 		// Subscribe to threat events

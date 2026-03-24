@@ -301,8 +301,7 @@ export function RAGSecurityPage() {
 
 	useEffect(() => {
 		refreshHistory();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [currentUser?.id]);
+	}, [currentUser?.id, refreshHistory]);
 
 	const maxFileSizeBytes = 10 * 1024 * 1024;
 
@@ -376,7 +375,7 @@ export function RAGSecurityPage() {
 						extracted_at: new Date().toISOString()
 					}
 				});
-			} catch (err) {
+			} catch (_err) {
 				showError(`Failed to read file: ${file.name}`);
 			}
 		}

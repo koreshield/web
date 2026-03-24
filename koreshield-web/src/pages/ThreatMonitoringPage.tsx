@@ -36,6 +36,7 @@ export function ThreatMonitoringPage() {
 	// WebSocket real-time updates
 	useEffect(() => {
 		wsClient.connect();
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setWsConnected(wsClient.isConnected());
 
 		wsClient.subscribe(['threat_detected']);
