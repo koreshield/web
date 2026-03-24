@@ -301,7 +301,8 @@ export function RAGSecurityPage() {
 
 	useEffect(() => {
 		refreshHistory();
-	}, [currentUser?.id, refreshHistory]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentUser?.id]);
 
 	const maxFileSizeBytes = 10 * 1024 * 1024;
 
