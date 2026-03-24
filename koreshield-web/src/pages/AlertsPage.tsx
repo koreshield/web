@@ -207,7 +207,7 @@ export function AlertsPage() {
             } else {
                 showError('Test notification failed');
             }
-        } catch (_err) {
+        } catch {
             showError('Failed to send test notification');
         } finally {
             setTestingChannelId(null);

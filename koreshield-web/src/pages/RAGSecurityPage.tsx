@@ -375,7 +375,7 @@ export function RAGSecurityPage() {
 						extracted_at: new Date().toISOString()
 					}
 				});
-			} catch (_err) {
+			} catch {
 				showError(`Failed to read file: ${file.name}`);
 			}
 		}
