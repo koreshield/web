@@ -138,9 +138,9 @@ export function ThreatMonitoringPage() {
 									<span className="text-sm font-medium text-green-600">Live</span>
 								</div>
 							) : (
-								<div className="flex items-center gap-2 px-3 py-2 bg-gray-500/10 border border-gray-500/50 rounded-lg">
-									<div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-									<span className="text-sm font-medium text-gray-600">Connecting...</span>
+								<div className="flex items-center gap-2 px-3 py-2 bg-muted border border-border rounded-lg">
+									<div className="w-2 h-2 bg-muted-foreground/60 rounded-full"></div>
+									<span className="text-sm font-medium text-muted-foreground">Connecting...</span>
 								</div>
 							)}
 						</div>

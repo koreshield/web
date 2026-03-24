@@ -186,7 +186,7 @@ export default function AuditLogsPage() {
 			case 'high': return 'text-orange-600 bg-orange-50';
 			case 'medium': return 'text-yellow-600 bg-yellow-50';
 			case 'low': return 'text-blue-600 bg-blue-50';
-			default: return 'text-gray-600 bg-gray-50';
+			default: return 'text-muted-foreground bg-muted';
 		}
 	};
 
@@ -197,7 +197,7 @@ export default function AuditLogsPage() {
 	const suspendedSessions = sessions.filter((session) => session.state === 'suspended');
 
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-20 pb-12">
+		<div className="min-h-screen bg-background pt-20 pb-12">
 			<SEOMeta
 				title="Audit & Compliance Logs | KoreShield"
 				description="View and analyze audit logs for compliance and security monitoring"
@@ -208,79 +208,79 @@ export default function AuditLogsPage() {
 				<div className="mb-8">
 					<div className="flex items-center gap-3 mb-4">
 						<FileText className="w-8 h-8 text-electric-green" />
-						<h1 className="text-4xl font-bold text-gray-900 dark:text-white">Audit & Compliance Logs</h1>
+						<h1 className="text-4xl font-bold text-foreground">Audit & Compliance Logs</h1>
 					</div>
-					<p className="text-gray-600 dark:text-gray-400">
+					<p className="text-muted-foreground">
 						Monitor all system activities, track compliance requirements, and detect security anomalies.
 					</p>
 				</div>
 
 				{/* Stats Cards */}
 				<div className="grid md:grid-cols-4 gap-6 mb-8">
-					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+					<div className="bg-card rounded-xl p-6 border border-border">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm text-gray-600 dark:text-gray-400">Total Events</span>
+							<span className="text-sm text-muted-foreground">Total Events</span>
 							<Activity className="w-5 h-5 text-blue-500" />
 						</div>
-						<div className="text-2xl font-bold text-gray-900 dark:text-white">{logs.length}</div>
+						<div className="text-2xl font-bold text-foreground">{logs.length}</div>
 					</div>
-					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+					<div className="bg-card rounded-xl p-6 border border-border">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm text-gray-600 dark:text-gray-400">Success Rate</span>
+							<span className="text-sm text-muted-foreground">Success Rate</span>
 							<Activity className="w-5 h-5 text-green-500" />
 						</div>
-						<div className="text-2xl font-bold text-gray-900 dark:text-white">
+						<div className="text-2xl font-bold text-foreground">
 							{logs.length === 0 ? '0%' : `${Math.round((logs.filter(l => l.status === 'success').length / logs.length) * 100)}%`}
 						</div>
 					</div>
-					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+					<div className="bg-card rounded-xl p-6 border border-border">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm text-gray-600 dark:text-gray-400">Runtime Tool Events</span>
+							<span className="text-sm text-muted-foreground">Runtime Tool Events</span>
 							<Workflow className="w-5 h-5 text-amber-500" />
 						</div>
-						<div className="text-2xl font-bold text-gray-900 dark:text-white">
+						<div className="text-2xl font-bold text-foreground">
 							{runtimeToolLogs.length}
 						</div>
 					</div>
-					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+					<div className="bg-card rounded-xl p-6 border border-border">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm text-gray-600 dark:text-gray-400">Review Required</span>
+							<span className="text-sm text-muted-foreground">Review Required</span>
 							<Eye className="w-5 h-5 text-purple-500" />
 						</div>
-						<div className="text-2xl font-bold text-gray-900 dark:text-white">
+						<div className="text-2xl font-bold text-foreground">
 							{reviewRequiredLogs.length}
 						</div>
 					</div>
 				</div>
 
 				<div className="grid md:grid-cols-3 gap-6 mb-8">
-					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+					<div className="bg-card rounded-xl p-6 border border-border">
 						<div className="flex items-center gap-3 mb-3">
 							<Shield className="w-5 h-5 text-electric-green" />
-							<h2 className="text-lg font-semibold text-gray-900 dark:text-white">Tool Runtime Focus</h2>
+							<h2 className="text-lg font-semibold text-foreground">Tool Runtime Focus</h2>
 						</div>
-						<p className="text-sm text-gray-600 dark:text-gray-400">
+						<p className="text-sm text-muted-foreground">
 							KoreShield now records server-side tool scan decisions here so runtime enforcement is visible alongside normal audit history.
 						</p>
 					</div>
-					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-						<div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Blocked Tool Calls</div>
-						<div className="text-2xl font-bold text-gray-900 dark:text-white">{blockedToolLogs.length}</div>
-						<p className="text-sm text-gray-500 dark:text-gray-400 mt-2">High-trust failures and low-trust delegated tool calls are highlighted here.</p>
+					<div className="bg-card rounded-xl p-6 border border-border">
+						<div className="text-sm text-muted-foreground mb-2">Blocked Tool Calls</div>
+						<div className="text-2xl font-bold text-foreground">{blockedToolLogs.length}</div>
+						<p className="text-sm text-muted-foreground mt-2">High-trust failures and low-trust delegated tool calls are highlighted here.</p>
 					</div>
-					<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-						<div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Unique Actors</div>
-						<div className="text-2xl font-bold text-gray-900 dark:text-white">{new Set(logs.map(l => l.user_email)).size}</div>
-						<p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Includes API-key scoped and user-scoped runtime events.</p>
+					<div className="bg-card rounded-xl p-6 border border-border">
+						<div className="text-sm text-muted-foreground mb-2">Unique Actors</div>
+						<div className="text-2xl font-bold text-foreground">{new Set(logs.map(l => l.user_email)).size}</div>
+						<p className="text-sm text-muted-foreground mt-2">Includes API-key scoped and user-scoped runtime events.</p>
 					</div>
 				</div>
 
 				<div className="grid lg:grid-cols-2 gap-6 mb-8">
-					<div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-						<div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+					<div className="bg-card rounded-xl border border-border overflow-hidden">
+						<div className="px-6 py-4 border-b border-border flex items-center justify-between">
 							<div>
-								<h2 className="text-lg font-semibold text-gray-900 dark:text-white">Pending Runtime Reviews</h2>
-								<p className="text-sm text-gray-600 dark:text-gray-400">High-risk tool calls waiting for explicit approval or rejection.</p>
+								<h2 className="text-lg font-semibold text-foreground">Pending Runtime Reviews</h2>
+								<p className="text-sm text-muted-foreground">High-risk tool calls waiting for explicit approval or rejection.</p>
 							</div>
 							<span className="inline-flex px-2 py-1 text-xs font-semibold rounded bg-amber-100 text-amber-700">
 								{reviews.length} pending
@@ -288,21 +288,21 @@ export default function AuditLogsPage() {
 						</div>
 						<div className="p-6 space-y-4">
 							{reviewLoading ? (
-								<div className="text-sm text-gray-500">Loading runtime reviews...</div>
+								<div className="text-sm text-muted-foreground">Loading runtime reviews...</div>
 							) : reviews.length === 0 ? (
-								<div className="text-sm text-gray-500">No runtime reviews are waiting right now.</div>
+								<div className="text-sm text-muted-foreground">No runtime reviews are waiting right now.</div>
 							) : reviews.map((review) => (
-								<div key={review.ticket_id} className="rounded-lg border border-gray-200 dark:border-gray-800 p-4 bg-gray-50 dark:bg-gray-950/50">
+								<div key={review.ticket_id} className="rounded-lg border border-border p-4 bg-background/50">
 									<div className="flex items-start justify-between gap-4 mb-3">
 										<div>
-											<div className="font-medium text-gray-900 dark:text-white">{review.tool_name || 'tool call'}</div>
-											<div className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1">{review.ticket_id}</div>
+											<div className="font-medium text-foreground">{review.tool_name || 'tool call'}</div>
+											<div className="text-xs text-muted-foreground font-mono mt-1">{review.ticket_id}</div>
 										</div>
 										<span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${getSeverityColor(review.risk_class || 'medium')}`}>
 											{review.risk_class || 'medium'}
 										</span>
 									</div>
-									<p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+									<p className="text-sm text-muted-foreground mb-3">
 										{review.reasons[0] || 'Runtime review required for this tool call.'}
 									</p>
 									{review.sequence_matches.length > 0 && (
@@ -329,42 +329,42 @@ export default function AuditLogsPage() {
 						</div>
 					</div>
 
-					<div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-						<div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-							<h2 className="text-lg font-semibold text-gray-900 dark:text-white">Runtime Sessions</h2>
-							<p className="text-sm text-gray-600 dark:text-gray-400">KoreShield session governance for MCP-style or agent-driven tool execution.</p>
+					<div className="bg-card rounded-xl border border-border overflow-hidden">
+						<div className="px-6 py-4 border-b border-border">
+							<h2 className="text-lg font-semibold text-foreground">Runtime Sessions</h2>
+							<p className="text-sm text-muted-foreground">KoreShield session governance for MCP-style or agent-driven tool execution.</p>
 						</div>
 						<div className="p-6">
 							<div className="grid grid-cols-3 gap-4 mb-4">
 								<div>
-									<div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Active</div>
-									<div className="text-2xl font-bold text-gray-900 dark:text-white">{activeSessions.length}</div>
+									<div className="text-xs uppercase tracking-wide text-muted-foreground">Active</div>
+									<div className="text-2xl font-bold text-foreground">{activeSessions.length}</div>
 								</div>
 								<div>
-									<div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Suspended</div>
-									<div className="text-2xl font-bold text-gray-900 dark:text-white">{suspendedSessions.length}</div>
+									<div className="text-xs uppercase tracking-wide text-muted-foreground">Suspended</div>
+									<div className="text-2xl font-bold text-foreground">{suspendedSessions.length}</div>
 								</div>
 								<div>
-									<div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Pending Reviews</div>
-									<div className="text-2xl font-bold text-gray-900 dark:text-white">{sessions.reduce((sum, session) => sum + session.pending_reviews, 0)}</div>
+									<div className="text-xs uppercase tracking-wide text-muted-foreground">Pending Reviews</div>
+									<div className="text-2xl font-bold text-foreground">{sessions.reduce((sum, session) => sum + session.pending_reviews, 0)}</div>
 								</div>
 							</div>
 							<div className="space-y-3">
 								{sessions.length === 0 ? (
-									<div className="text-sm text-gray-500">No runtime sessions have been created yet.</div>
+									<div className="text-sm text-muted-foreground">No runtime sessions have been created yet.</div>
 								) : sessions.slice(0, 5).map((session) => (
-									<div key={session.session_id} className="rounded-lg border border-gray-200 dark:border-gray-800 p-4">
+									<div key={session.session_id} className="rounded-lg border border-border p-4">
 										<div className="flex items-start justify-between gap-4">
 											<div>
-												<div className="font-medium text-gray-900 dark:text-white">{session.agent_id || 'runtime session'}</div>
-												<div className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1">{session.session_id}</div>
-												{session.intent && <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">{session.intent}</div>}
+												<div className="font-medium text-foreground">{session.agent_id || 'runtime session'}</div>
+												<div className="text-xs text-muted-foreground font-mono mt-1">{session.session_id}</div>
+												{session.intent && <div className="text-sm text-muted-foreground mt-2">{session.intent}</div>}
 											</div>
 											<span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${session.state === 'suspended' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
 												{session.state}
 											</span>
 										</div>
-										<div className="grid grid-cols-3 gap-3 mt-4 text-sm text-gray-600 dark:text-gray-400">
+										<div className="grid grid-cols-3 gap-3 mt-4 text-sm text-muted-foreground">
 											<div>{session.tool_call_count} calls</div>
 											<div>{session.review_count} reviews</div>
 											<div>{session.blocked_count} blocked</div>
@@ -377,22 +377,22 @@ export default function AuditLogsPage() {
 				</div>
 
 				{/* Actions Bar */}
-				<div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 mb-6">
+				<div className="bg-card rounded-xl p-6 border border-border mb-6">
 					<div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
 						<div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
 							<div className="relative w-full sm:w-96">
-								<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+								<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
 								<input
 									type="text"
 									placeholder="Search logs by user, action, IP..."
 									value={search}
 									onChange={(e) => setSearch(e.target.value)}
-									className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-electric-green"
+									className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-electric-green"
 								/>
 							</div>
 							<button
 								onClick={() => setShowFilters(!showFilters)}
-								className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+								className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted/50 transition-colors"
 							>
 								<Filter className="w-5 h-5" />
 								Filters {showFilters && <span className="text-xs">▼</span>}
@@ -401,7 +401,7 @@ export default function AuditLogsPage() {
 						<div className="flex gap-2">
 							<button
 								onClick={() => handleExport('csv')}
-								className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+								className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg hover:bg-muted/50 transition-colors"
 							>
 								<Download className="w-5 h-5" />
 								CSV
@@ -418,15 +418,15 @@ export default function AuditLogsPage() {
 
 					{/* Filters Panel */}
 					{showFilters && (
-						<div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-3 gap-4">
+						<div className="mt-4 pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-4">
 							<div>
-								<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+								<label className="block text-sm font-medium text-muted-foreground mb-2">
 									Action Type
 								</label>
 								<select
 									value={filterAction}
 									onChange={(e) => setFilterAction(e.target.value)}
-									className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-electric-green"
+									className="w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-electric-green"
 								>
 									<option value="all">All Actions</option>
 									<option value="created">Created</option>
@@ -440,13 +440,13 @@ export default function AuditLogsPage() {
 								</select>
 							</div>
 							<div>
-								<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+								<label className="block text-sm font-medium text-muted-foreground mb-2">
 									Status
 								</label>
 								<select
 									value={filterStatus}
 									onChange={(e) => setFilterStatus(e.target.value)}
-									className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-electric-green"
+									className="w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-electric-green"
 								>
 									<option value="all">All Statuses</option>
 									<option value="success">Success</option>
@@ -454,13 +454,13 @@ export default function AuditLogsPage() {
 								</select>
 							</div>
 							<div>
-								<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+								<label className="block text-sm font-medium text-muted-foreground mb-2">
 									Severity
 								</label>
 								<select
 									value={filterSeverity}
 									onChange={(e) => setFilterSeverity(e.target.value)}
-									className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-electric-green"
+									className="w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-electric-green"
 								>
 									<option value="all">All Severities</option>
 									<option value="critical">Critical</option>
@@ -474,76 +474,76 @@ export default function AuditLogsPage() {
 				</div>
 
 				{/* Audit Logs Table */}
-				<div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+				<div className="bg-card rounded-xl border border-border overflow-hidden">
 					{loading ? (
-						<div className="p-12 text-center text-gray-500">Loading audit logs...</div>
+						<div className="p-12 text-center text-muted-foreground">Loading audit logs...</div>
 					) : errorMessage ? (
 						<div className="p-12 text-center text-red-500">{errorMessage}</div>
 					) : filteredLogs.length === 0 ? (
 						<div className="p-12 text-center">
-							<FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-							<p className="text-gray-500">No audit logs found</p>
+							<FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+							<p className="text-muted-foreground">No audit logs found</p>
 						</div>
 					) : (
 						<div className="overflow-x-auto">
 							<table className="w-full">
-								<thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+								<thead className="bg-muted border-b border-border">
 									<tr>
-										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
 											Timestamp
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
 											User
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
 											Action
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
 											Resource
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
 											Runtime Summary
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
 											Status
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
 											Severity
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
 											IP Address
 										</th>
 									</tr>
 								</thead>
-								<tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+								<tbody className="divide-y divide-border">
 									{filteredLogs.map((log) => (
 										<tr
 											key={log.id}
-											className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 ${log.severity === 'critical' ? 'bg-red-50/30 dark:bg-red-900/10' : ''
+											className={`hover:bg-muted/50 ${log.severity === 'critical' ? 'bg-red-50/30 dark:bg-red-900/10' : ''
 												}`}
 										>
-											<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+											<td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
 												{format(new Date(log.timestamp), 'MMM d, HH:mm:ss')}
 											</td>
 											<td className="px-6 py-4 whitespace-nowrap">
 												<div className="flex items-center gap-2">
-													<User className="w-4 h-4 text-gray-400" />
-													<span className="text-sm text-gray-900 dark:text-white">{log.user_email}</span>
+													<User className="w-4 h-4 text-muted-foreground" />
+													<span className="text-sm text-foreground">{log.user_email}</span>
 												</div>
 											</td>
 											<td className="px-6 py-4 whitespace-nowrap">
-												<code className="text-sm text-gray-700 dark:text-gray-300 font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+												<code className="text-sm text-muted-foreground font-mono bg-muted px-2 py-1 rounded">
 													{log.action}
 												</code>
 											</td>
-											<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+											<td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
 												<div>{log.resource_type}</div>
-												{log.tool_name && <div className="text-xs text-gray-500 dark:text-gray-500 font-mono mt-1">{log.tool_name}</div>}
+												{log.tool_name && <div className="text-xs text-muted-foreground font-mono mt-1">{log.tool_name}</div>}
 											</td>
-											<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+											<td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
 												{log.summary ? (
 													<div className="space-y-1">
-														<div className="font-medium text-gray-900 dark:text-white">{log.summary}</div>
+														<div className="font-medium text-foreground">{log.summary}</div>
 														{log.risk_class && (
 															<span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${getSeverityColor(log.risk_class)}`}>
 																{log.risk_class}
@@ -551,7 +551,7 @@ export default function AuditLogsPage() {
 														)}
 													</div>
 												) : (
-													<span className="text-gray-400">-</span>
+													<span className="text-muted-foreground">-</span>
 												)}
 											</td>
 											<td className="px-6 py-4 whitespace-nowrap">
@@ -564,7 +564,7 @@ export default function AuditLogsPage() {
 													{log.severity}
 												</span>
 											</td>
-											<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono">
+											<td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground font-mono">
 												{log.ip_address}
 											</td>
 										</tr>
@@ -576,7 +576,7 @@ export default function AuditLogsPage() {
 				</div>
 
 				{/* Footer Info */}
-				<div className="mt-6 text-sm text-gray-600 dark:text-gray-400">
+				<div className="mt-6 text-sm text-muted-foreground">
 					<p>
 						Showing {filteredLogs.length} of {logs.length} audit log entries.
 						Retention policy: 90 days for standard logs, 365 days for compliance logs.
