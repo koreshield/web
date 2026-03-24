@@ -305,7 +305,8 @@ const RULES: ThreatRule[] = [
 			/<\|end_of_turn\|>/i,
 			/<\|eot_id\|>/i,
 			/<\|start_header_id\|>/i,
-			/\u0000|\u0001|\u0002|\u0003/, // null/control bytes
+			// eslint-disable-next-line no-control-regex
+		/\u0000|\u0001|\u0002|\u0003/, // null/control bytes
 		],
 		explanation:
 			'Token smuggling detected. The input contains special tokens (e.g., <|im_start|>, [INST], <|eot_id|>) that are used internally by LLMs and can manipulate how the model processes the conversation turn structure.',
@@ -326,7 +327,7 @@ const RULES: ThreatRule[] = [
 			/\b5[1-5][0-9]{14}\b/, // Mastercard
 			/\b3[47][0-9]{13}\b/, // Amex
 			/\b6(?:011|5\d{2})\d{12}\b/, // Discover
-			/\b(?:api[_-]?key|secret[_-]?key|access[_-]?token|auth[_-]?token)\s*[:=]\s*[a-zA-Z0-9_\-]{16,}/i,
+			/\b(?:api[_-]?key|secret[_-]?key|access[_-]?token|auth[_-]?token)\s*[:=]\s*[a-zA-Z0-9_-]{16,}/i,
 			/\bsk-[a-zA-Z0-9]{20,}\b/, // OpenAI-style keys
 			/\bgh[ps]_[a-zA-Z0-9]{36,}\b/, // GitHub tokens
 			/\bAKIA[0-9A-Z]{16}\b/, // AWS Access Key
@@ -461,7 +462,7 @@ const RULES: ThreatRule[] = [
 			// Pig latin injection ("ignoreway")
 			/\b\w+way\s+(all|previous|prior)\s+\w+way/i,
 			// Morse code patterns (.. --. -. --- .-. .)
-			/[.\-]{2,}\s+[.\-]{2,}\s+[.\-]{2,}\s+[.\-]{2,}\s+[.\-]{2,}/,
+			/[.-]{2,}\s+[.-]{2,}\s+[.-]{2,}\s+[.-]{2,}\s+[.-]{2,}/,
 		],
 		explanation:
 			'Multi-lingual or encoding-based attack detected. The prompt uses non-English text, Base64, hex encoding, or Unicode tricks to bypass keyword filters and smuggle injection commands.',
@@ -603,7 +604,7 @@ const RULES: ThreatRule[] = [
 		score: 80,
 		patterns: [
 			// Base64-encoded payloads (longer sequences)
-			/[A-Za-z0-9+\/]{40,}={0,2}/,
+			/[A-Za-z0-9+/]{40,}={0,2}/,
 			// URL-encoded sequences
 			/%[0-9a-fA-F]{2}(%[0-9a-fA-F]{2}){5,}/,
 			// Leetspeak variations of "ignore", "system", "override"
