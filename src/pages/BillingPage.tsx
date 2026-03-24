@@ -169,6 +169,7 @@ export default function BillingPage() {
 		const productId = plan ? (period === 'annual' ? plan.annualProductId : plan.monthlyProductId) : undefined;
 		autoCheckoutStarted.current = true;
 		void handleCheckout(productId, planId, period);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [loading, searchParams]);
 
 	return (
