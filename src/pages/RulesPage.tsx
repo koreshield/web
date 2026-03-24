@@ -148,7 +148,7 @@ export function RulesPage() {
                 test_text: testText,
             });
             setTestResult(result as any);
-        } catch (_err) {
+        } catch {
             showError('Pattern test failed');
             setTestResult({ matches: false, message: 'Test failed' });
         } finally {
