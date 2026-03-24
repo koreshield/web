@@ -23,6 +23,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const DemoPage = lazy(() => import('./pages/DemoPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const IntegrationsPage = lazy(() => import('./pages/IntegrationsPage'));
 const ChangelogPage = lazy(() => import('./pages/ChangelogPage'));
@@ -48,6 +49,8 @@ const AdvancedAnalyticsPage = lazy(() => import('./pages/AdvancedAnalyticsPage')
 const ComplianceReportsPage = lazy(() => import('./pages/ComplianceReportsPage').then(m => ({ default: m.ComplianceReportsPage })));
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const BillingPage = lazy(() => import('./pages/BillingPage'));
+const LegalPage = lazy(() => import('./pages/LegalPage'));
+const CareersPage = lazy(() => import('./pages/CareersPage'));
 
 function AppContent() {
 	const { addToast } = useToast();
@@ -216,11 +219,31 @@ function AppContent() {
 						}
 					/>
 					<Route
+						path="/forgot-password"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ForgotPasswordPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
 						path="/signup"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<SignupPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/forgot-password"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ForgotPasswordPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}
@@ -471,6 +494,46 @@ function AppContent() {
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<DemoPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/privacy-policy"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/terms-of-service"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/cookie-policy"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/careers"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<CareersPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}

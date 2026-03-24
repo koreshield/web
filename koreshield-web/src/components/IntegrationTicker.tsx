@@ -75,7 +75,7 @@ export function IntegrationTicker() {
 
             <div className="max-w-7xl mx-auto px-6 mb-6 text-center">
                 <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">
-                    Protecting Data Across Your Stack
+                    Works with the tools your team already uses
                 </p>
             </div>
 

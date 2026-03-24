@@ -58,8 +58,8 @@ export function InteractiveDemo() {
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
 
             <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold mb-2">Try the Firewall</h2>
-                <p className="text-muted-foreground">Test our detection engine with real payload examples.</p>
+                <h2 className="text-2xl font-bold mb-2">Test the Firewall Live</h2>
+                <p className="text-muted-foreground">Paste any prompt and see how KoreShield classifies it. No signup required.</p>
             </div>
 
             <div className="space-y-4 mb-6">

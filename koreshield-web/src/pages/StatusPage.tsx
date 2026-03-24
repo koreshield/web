@@ -299,14 +299,14 @@ export default function StatusPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-background">
       <SEOMeta
         title="System Status"
         description="Real-time status and uptime information for KoreShield services. View current system status, historical incidents, and scheduled maintenance."
       />
 
       {/* Header */}
-      <section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+      <section className="py-20 px-4 bg-card/40">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -315,12 +315,12 @@ export default function StatusPage() {
             className="text-center"
           >
             <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="bg-blue-600/10 p-4 rounded-lg">
-                <Activity className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+              <div className="bg-electric-green/10 p-4 rounded-lg">
+                <Activity className="w-8 h-8 text-electric-green" />
               </div>
-              <h1 className="text-5xl font-bold text-gray-900 dark:text-white">System Status</h1>
+              <h1 className="text-5xl font-bold text-foreground">System Status</h1>
             </div>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
+            <p className="text-lg text-muted-foreground">
               Real-time status and uptime information for all KoreShield services
             </p>
           </motion.div>
@@ -347,12 +347,12 @@ export default function StatusPage() {
                   'bg-red-500 animate-pulse'
                 }`} />
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-2xl font-bold text-foreground">
                   {overallStatus === 'operational' ? 'All Systems Operational' :
                     overallStatus === 'maintenance' ? 'Scheduled Maintenance' :
                       'Service Disruption'}
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-muted-foreground mt-1">
                   Average uptime: {averageUptime}% over last 90 days
                 </p>
               </div>
@@ -361,8 +361,8 @@ export default function StatusPage() {
               <button
                 onClick={() => setSubscribedToAlerts(!subscribedToAlerts)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${subscribedToAlerts
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  ? 'bg-electric-green hover:bg-emerald-bright text-black'
+                  : 'bg-card text-foreground border border-border hover:bg-muted'
                   }`}
               >
                 <Bell className="w-4 h-4" />
@@ -370,7 +370,7 @@ export default function StatusPage() {
               </button>
               <a
                 href="/rss"
-                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-card text-foreground border border-border rounded-lg font-medium hover:bg-muted transition-colors"
               >
                 RSS Feed
                 <ExternalLink className="w-4 h-4" />
@@ -387,7 +387,7 @@ export default function StatusPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mb-12"
           >
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Active Incidents</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-6">Active Incidents</h2>
             <div className="space-y-4">
               {activeIncidents.map((incident) => (
                 <IncidentCard key={incident.id} incident={incident} getSeverityColor={getSeverityColor} />
@@ -404,7 +404,7 @@ export default function StatusPage() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mb-12"
           >
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
               <Calendar className="w-6 h-6" />
               Scheduled Maintenance
             </h2>
@@ -423,8 +423,8 @@ export default function StatusPage() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mb-12"
         >
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Components</h2>
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-800">
+          <h2 className="text-2xl font-bold text-foreground mb-6">Components</h2>
+          <div className="bg-card rounded-xl shadow-lg overflow-hidden border border-border">
             {components.map((component, index) => (
               <ComponentStatusRow
                 key={component.id}
@@ -444,13 +444,13 @@ export default function StatusPage() {
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mb-12"
         >
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
             <TrendingUp className="w-6 h-6" />
             Uptime History (Last 90 Days)
           </h2>
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-800">
+          <div className="bg-card rounded-xl shadow-lg p-8 border border-border">
             <UptimeChart data={uptimeHistory} />
-            <div className="flex justify-between items-center mt-6 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex justify-between items-center mt-6 text-sm text-muted-foreground">
               <span>90 days ago</span>
               <span>Today</span>
             </div>
@@ -464,7 +464,7 @@ export default function StatusPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Recent Incidents</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-6">Recent Incidents</h2>
             <div className="space-y-4">
               {historicalIncidents.map((incident) => (
                 <IncidentCard key={incident.id} incident={incident} getSeverityColor={getSeverityColor} isHistorical />
@@ -494,29 +494,29 @@ function ComponentStatusRow({
   const statusIcon = getStatusIcon(component.status);
 
   return (
-    <div className={!isLast ? 'border-b border-gray-200 dark:border-gray-800' : ''}>
+    <div className={!isLast ? 'border-b border-border' : ''}>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        className="w-full flex items-center justify-between p-6 hover:bg-muted/50 transition-colors"
       >
         <div className="flex-1 text-left">
           <div className="flex items-center gap-3 mb-1">
-            <span className="text-lg font-semibold text-gray-900 dark:text-white">{component.name}</span>
+            <span className="text-lg font-semibold text-foreground">{component.name}</span>
             <span className={`flex items-center gap-2 ${statusColor}`}>
               {statusIcon}
               <span className="capitalize text-sm font-medium">{component.status.replace('_', ' ')}</span>
             </span>
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{component.description}</p>
+          <p className="text-sm text-muted-foreground">{component.description}</p>
         </div>
-        <div className="flex items-center gap-8 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center gap-8 text-sm text-muted-foreground">
           <div className="text-right">
-            <div className="font-semibold text-gray-900 dark:text-white">{component.uptime}%</div>
+            <div className="font-semibold text-foreground">{component.uptime}%</div>
             <div className="text-xs">Uptime</div>
           </div>
           {component.responseTime && (
             <div className="text-right">
-              <div className="font-semibold text-gray-900 dark:text-white">{component.responseTime}ms</div>
+              <div className="font-semibold text-foreground">{component.responseTime}ms</div>
               <div className="text-xs">Response Time</div>
             </div>
           )}
@@ -531,25 +531,25 @@ function ComponentStatusRow({
         </div>
       </button>
       {isExpanded && (
-        <div className="px-6 pb-6 bg-gray-50 dark:bg-gray-800/50">
+        <div className="px-6 pb-6 bg-muted/30">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <div className="text-gray-600 dark:text-gray-400 mb-1">Status</div>
+              <div className="text-muted-foreground mb-1">Status</div>
               <div className={`font-medium capitalize ${statusColor}`}>{component.status.replace('_', ' ')}</div>
             </div>
             <div>
-              <div className="text-gray-600 dark:text-gray-400 mb-1">Uptime (90d)</div>
-              <div className="font-medium text-gray-900 dark:text-white">{component.uptime}%</div>
+              <div className="text-muted-foreground mb-1">Uptime (90d)</div>
+              <div className="font-medium text-foreground">{component.uptime}%</div>
             </div>
             {component.responseTime && (
               <div>
-                <div className="text-gray-600 dark:text-gray-400 mb-1">Avg Response</div>
-                <div className="font-medium text-gray-900 dark:text-white">{component.responseTime}ms</div>
+                <div className="text-muted-foreground mb-1">Avg Response</div>
+                <div className="font-medium text-foreground">{component.responseTime}ms</div>
               </div>
             )}
             <div>
-              <div className="text-gray-600 dark:text-gray-400 mb-1">Last Checked</div>
-              <div className="font-medium text-gray-900 dark:text-white">
+              <div className="text-muted-foreground mb-1">Last Checked</div>
+              <div className="font-medium text-foreground">
                 {new Date(component.lastChecked).toLocaleTimeString()}
               </div>
             </div>
@@ -573,10 +573,10 @@ function IncidentCard({
   const [isExpanded, setIsExpanded] = useState(!isHistorical);
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+    <div className="bg-card rounded-xl shadow-lg border border-border overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-6 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        className="w-full p-6 text-left hover:bg-muted/50 transition-colors"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
@@ -584,12 +584,12 @@ function IncidentCard({
               <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getSeverityColor(incident.severity)}`}>
                 {incident.severity}
               </span>
-              <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+              <span className="text-sm text-muted-foreground capitalize">
                 {incident.status.replace('_', ' ')}
               </span>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{incident.title}</h3>
-            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+            <h3 className="text-lg font-semibold text-foreground mb-2">{incident.title}</h3>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <span>{new Date(incident.createdAt).toLocaleString()}</span>
               {incident.resolvedAt && (
                 <span className="text-green-600 dark:text-green-400">
@@ -599,7 +599,7 @@ function IncidentCard({
             </div>
           </div>
           <svg
-            className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
+            className={`w-5 h-5 text-muted-foreground transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -609,11 +609,11 @@ function IncidentCard({
         </div>
       </button>
       {isExpanded && (
-        <div className="px-6 pb-6 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+        <div className="px-6 pb-6 border-t border-border bg-muted/30">
           <div className="pt-6 space-y-4">
             {incident.updates.map((update, index) => (
               <div key={index} className="flex gap-4">
-                <div className="flex-shrink-0 w-32 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex-shrink-0 w-32 text-sm text-muted-foreground">
                   {new Date(update.timestamp).toLocaleString()}
                 </div>
                 <div className="flex-1">
@@ -622,11 +622,11 @@ function IncidentCard({
                     {update.status === 'monitoring' && <Activity className="w-4 h-4 text-blue-500" />}
                     {update.status === 'identified' && <Info className="w-4 h-4 text-yellow-500" />}
                     {update.status === 'investigating' && <AlertCircle className="w-4 h-4 text-orange-500" />}
-                    <span className="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                    <span className="text-sm font-medium text-foreground capitalize">
                       {update.status.replace('_', ' ')}
                     </span>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300">{update.message}</p>
+                  <p className="text-foreground/80">{update.message}</p>
                 </div>
               </div>
             ))}
@@ -648,13 +648,13 @@ function MaintenanceCard({
   return (
     <div className="bg-blue-50 dark:bg-blue-950/20 rounded-xl p-6 border border-blue-200 dark:border-blue-900">
       <div className="flex items-start gap-4">
-        <div className="bg-blue-600/10 p-3 rounded-lg">
-          <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        <div className="bg-electric-green/10 p-3 rounded-lg">
+          <Calendar className="w-6 h-6 text-electric-green" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{maintenance.title}</h3>
-          <p className="text-gray-700 dark:text-gray-300 mb-4">{maintenance.description}</p>
-          <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
+          <h3 className="text-lg font-semibold text-foreground mb-2">{maintenance.title}</h3>
+          <p className="text-foreground/80 mb-4">{maintenance.description}</p>
+          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
             <div>
               <span className="font-medium">Start:</span> {new Date(maintenance.scheduledStart).toLocaleString()}
             </div>
@@ -699,7 +699,7 @@ function UptimeChart({ data }: { data: UptimeDay[] }) {
             className={`w-full rounded-t transition-all hover:opacity-80 ${getBarColor(day.uptime, day.incidents)}`}
             style={{ height: `${day.uptime}%` }}
           />
-          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-card text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
             <div>{day.date.toLocaleDateString()}</div>
             <div>{day.uptime.toFixed(2)}% uptime</div>
             {day.incidents > 0 && <div className="text-red-300">{day.incidents} incident(s)</div>}
