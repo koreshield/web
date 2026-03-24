@@ -53,7 +53,7 @@ export function PoliciesPage() {
             case 'high': return 'bg-orange-500/10 text-orange-600 border-orange-500/20';
             case 'medium': return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20';
             case 'low': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
-            default: return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
+            default: return 'bg-muted text-muted-foreground border-border';
         }
     };
 
@@ -108,7 +108,7 @@ export function PoliciesPage() {
                     </div>
                     <div className="bg-card border border-border rounded-lg p-6">
                         <div className="text-sm text-muted-foreground mb-1">Disabled</div>
-                        <div className="text-3xl font-bold text-gray-600">
+                        <div className="text-3xl font-bold text-muted-foreground">
                             {policies.filter((p: Policy) => p.enabled === false).length}
                         </div>
                     </div>
@@ -157,7 +157,7 @@ export function PoliciesPage() {
                                                     Enabled
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-500/10 text-gray-600 rounded-full text-xs font-medium">
+                                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-muted text-muted-foreground rounded-full text-xs font-medium">
                                                     <X className="w-3 h-3" />
                                                     Disabled
                                                 </span>
