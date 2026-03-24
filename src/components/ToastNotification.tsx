@@ -23,6 +23,7 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {
@@ -195,10 +196,12 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
 // Standalone toast function for use outside React components
 let globalAddToast: ((toast: Omit<Toast, 'id'>) => void) | null = null;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function setGlobalToast(addToast: (toast: Omit<Toast, 'id'>) => void) {
   globalAddToast = addToast;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const toast = {
   success: (message: string, description?: string) => {
     globalAddToast?.({ type: 'success', message, description });
