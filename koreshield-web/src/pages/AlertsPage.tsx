@@ -304,7 +304,7 @@ export function AlertsPage() {
             case 'high': return 'bg-orange-500/10 text-orange-600';
             case 'medium': return 'bg-yellow-500/10 text-yellow-600';
             case 'low': return 'bg-blue-500/10 text-blue-600';
-            default: return 'bg-gray-500/10 text-gray-600';
+            default: return 'bg-muted text-muted-foreground';
         }
     };
 
@@ -600,7 +600,7 @@ export function AlertsPage() {
                                                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
                                                             rule.enabled 
                                                                 ? 'bg-green-500/10 text-green-600' 
-                                                                : 'bg-gray-500/10 text-gray-600'
+                                                                : 'bg-muted text-muted-foreground'
                                                         }`}>
                                                             {rule.enabled ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                                                             {rule.enabled ? 'Active' : 'Inactive'}
@@ -691,7 +691,7 @@ export function AlertsPage() {
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                                 channel.enabled 
                                                     ? 'bg-green-500/10 text-green-600' 
-                                                    : 'bg-gray-500/10 text-gray-600'
+                                                    : 'bg-muted text-muted-foreground'
                                             }`}>
                                                 {channel.enabled ? 'Active' : 'Inactive'}
                                             </span>
