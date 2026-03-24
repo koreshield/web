@@ -313,7 +313,7 @@ export default function PlaygroundPage() {
 			case 'major': return 'border-orange-500 bg-orange-500/10 text-orange-500';
 			case 'minor': return 'border-yellow-500 bg-yellow-500/10 text-yellow-500';
 			case 'none': return 'border-green-500 bg-green-500/10 text-green-500';
-			default: return 'border-gray-500 bg-gray-500/10';
+			default: return 'border-border bg-muted/30';
 		}
 	};
 
@@ -338,14 +338,14 @@ export default function PlaygroundPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+		<div className="min-h-screen bg-background">
 			<SEOMeta
 				title="Interactive Playground"
 				description="Test KoreShield's LLM security detection engine with real attack examples. Try 20+ preset attacks, compare results, and see how our AI firewall protects your applications."
 			/>
 
 			{/* Header */}
-			<section className="py-20 px-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
+			<section className="py-20 px-4 bg-background relative ambient-glow">
 				<div className="max-w-7xl mx-auto">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
@@ -354,12 +354,12 @@ export default function PlaygroundPage() {
 						className="text-center"
 					>
 						<div className="flex items-center justify-center gap-4 mb-6">
-							<div className="bg-purple-600/10 p-4 rounded-lg">
-								<Send className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+							<div className="bg-electric-green/10 p-4 rounded-lg">
+								<Send className="w-8 h-8 text-electric-green" />
 							</div>
-							<h1 className="text-5xl font-bold text-gray-900 dark:text-white">Interactive Playground</h1>
+							<h1 className="text-5xl font-bold text-foreground">Interactive Playground</h1>
 						</div>
-						<p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+						<p className="text-lg text-muted-foreground max-w-3xl mx-auto">
 							Test our detection engine with real attack examples. See how KoreShield protects against prompt injection, jailbreaks, code injection, and more.
 						</p>
 					</motion.div>
@@ -370,8 +370,8 @@ export default function PlaygroundPage() {
 				<div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 					{/* Left Sidebar - Attack Categories */}
 					<div className="lg:col-span-1">
-						<div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-6 sticky top-6">
-							<h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+						<div className="bg-card rounded-xl shadow-lg border border-border p-6 sticky top-6">
+							<h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
 								<Filter className="w-5 h-5" />
 								Attack Categories
 							</h3>
@@ -381,8 +381,8 @@ export default function PlaygroundPage() {
 										key={category}
 										onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
 										className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${selectedCategory === category
-											? 'bg-purple-600 text-white'
-											: 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'
+											? 'bg-electric-green text-black'
+											: 'bg-muted text-foreground hover:bg-muted/80'
 											}`}
 									>
 										<div className="flex items-center justify-between">
@@ -393,16 +393,16 @@ export default function PlaygroundPage() {
 								))}
 							</div>
 
-							<div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+							<div className="mt-6 pt-6 border-t border-border">
 								<button
 									onClick={() => setShowHistory(!showHistory)}
-									className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+									className="w-full flex items-center justify-between px-4 py-3 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
 								>
-									<span className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+									<span className="font-medium text-foreground flex items-center gap-2">
 										<History className="w-4 h-4" />
 										History
 									</span>
-									<span className="text-xs text-gray-600 dark:text-gray-400">{history.length}</span>
+									<span className="text-xs text-muted-foreground">{history.length}</span>
 								</button>
 							</div>
 						</div>
@@ -415,14 +415,14 @@ export default function PlaygroundPage() {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.5, delay: 0.1 }}
-							className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8"
+							className="bg-card rounded-xl shadow-lg border border-border p-8"
 						>
 							<div className="flex items-center justify-between mb-6">
-								<h2 className="text-2xl font-bold text-gray-900 dark:text-white">Test Security Detection</h2>
+								<h2 className="text-2xl font-bold text-foreground">Test Security Detection</h2>
 								<div className="flex gap-2">
 									<button
 										onClick={resetPlayground}
-										className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-lg transition-colors"
+										className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
 									>
 										<RotateCcw className="w-4 h-4" />
 										Reset
@@ -433,7 +433,7 @@ export default function PlaygroundPage() {
 							{/* Preset Attacks */}
 							{selectedCategory && (
 								<div className="mb-6">
-									<h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+									<h3 className="text-sm font-semibold text-muted-foreground mb-3">
 										{selectedCategory} Examples:
 									</h3>
 									<div className="grid grid-cols-1 gap-3">
@@ -441,15 +441,15 @@ export default function PlaygroundPage() {
 											<button
 												key={i}
 												onClick={() => handlePresetClick(attack.prompt)}
-												className="text-left p-4 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors border border-gray-200 dark:border-gray-700"
+												className="text-left p-4 bg-muted/50 hover:bg-muted rounded-lg transition-colors border border-gray-200 dark:border-gray-700"
 											>
 												<div className="flex items-start gap-3">
 													{getSeverityIcon(attack.severity)}
 													<div className="flex-1 min-w-0">
-														<p className="text-sm font-mono text-gray-900 dark:text-white truncate">
+														<p className="text-sm font-mono text-foreground truncate">
 															{attack.prompt}
 														</p>
-														<p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+														<p className="text-xs text-muted-foreground mt-1">
 															{attack.description}
 														</p>
 													</div>
@@ -463,7 +463,7 @@ export default function PlaygroundPage() {
 							{/* Input Form */}
 							<form onSubmit={handleSubmit} className="space-y-4">
 								<div>
-									<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Enter Prompt to Scan:
 									</label>
 									<textarea
@@ -471,7 +471,7 @@ export default function PlaygroundPage() {
 										onChange={(e) => setPrompt(e.target.value)}
 										placeholder="Type or select a preset attack example..."
 										rows={4}
-										className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-600 dark:focus:border-purple-400 focus:ring-1 focus:ring-purple-600 dark:focus:ring-purple-400 transition-all font-mono text-sm text-gray-900 dark:text-white resize-none"
+										className="w-full bg-muted border border-border rounded-lg px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono text-sm text-foreground resize-none"
 									/>
 								</div>
 
@@ -536,28 +536,28 @@ export default function PlaygroundPage() {
 
 									{/* Metrics Grid */}
 									<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-										<div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-											<div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Confidence</div>
-											<div className="text-2xl font-bold text-gray-900 dark:text-white">
+										<div className="bg-muted rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+											<div className="text-xs text-muted-foreground mb-1">Confidence</div>
+											<div className="text-2xl font-bold text-foreground">
 												{(result.confidence * 100).toFixed(1)}%
 											</div>
 										</div>
-										<div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-											<div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Latency</div>
-											<div className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+										<div className="bg-muted rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+											<div className="text-xs text-muted-foreground mb-1">Latency</div>
+											<div className="text-2xl font-bold text-foreground flex items-center gap-2">
 												<Clock className="w-5 h-5" />
 												{result.latency}ms
 											</div>
 										</div>
-										<div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-											<div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Severity</div>
-											<div className="text-2xl font-bold text-gray-900 dark:text-white capitalize">
+										<div className="bg-muted rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+											<div className="text-xs text-muted-foreground mb-1">Severity</div>
+											<div className="text-2xl font-bold text-foreground capitalize">
 												{result.severity}
 											</div>
 										</div>
-										<div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-											<div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Attack Types</div>
-											<div className="text-2xl font-bold text-gray-900 dark:text-white">
+										<div className="bg-muted rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+											<div className="text-xs text-muted-foreground mb-1">Attack Types</div>
+											<div className="text-2xl font-bold text-foreground">
 												{result.attackTypes.length || 0}
 											</div>
 										</div>
@@ -565,8 +565,8 @@ export default function PlaygroundPage() {
 
 									{/* Attack Types */}
 									{result.attackTypes.length > 0 && (
-										<div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-											<h4 className="font-semibold text-gray-900 dark:text-white mb-3">Detected Attack Types:</h4>
+										<div className="bg-muted rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+											<h4 className="font-semibold text-foreground mb-3">Detected Attack Types:</h4>
 											<div className="flex flex-wrap gap-2">
 												{result.attackTypes.map((type, i) => (
 													<span
@@ -588,22 +588,22 @@ export default function PlaygroundPage() {
 							<motion.div
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
-								className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8"
+								className="bg-card rounded-xl shadow-lg border border-border p-8"
 							>
-								<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Recent Scans</h3>
+								<h3 className="text-xl font-bold text-foreground mb-6">Recent Scans</h3>
 								<div className="space-y-3">
 									{history.map((item, i) => (
 										<div
 											key={i}
-											className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+											className="p-4 bg-muted rounded-lg border border-gray-200 dark:border-gray-700"
 										>
 											<div className="flex items-start gap-3">
 												{getSeverityIcon(item.severity)}
 												<div className="flex-1 min-w-0">
-													<p className="text-sm font-mono text-gray-900 dark:text-white truncate">
+													<p className="text-sm font-mono text-foreground truncate">
 														{item.prompt}
 													</p>
-													<div className="flex items-center gap-4 mt-2 text-xs text-gray-600 dark:text-gray-400">
+													<div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
 														<span>{item.blocked ? 'Blocked' : 'Allowed'}</span>
 														<span>{(item.confidence * 100).toFixed(1)}% confidence</span>
 														<span>{item.latency}ms</span>
@@ -624,10 +624,10 @@ export default function PlaygroundPage() {
 									<ExternalLink className="w-6 h-6 text-blue-600 dark:text-blue-400" />
 								</div>
 								<div>
-									<h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+									<h4 className="font-semibold text-foreground mb-2">
 										Try it in Production
 									</h4>
-									<p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+									<p className="text-sm text-muted-foreground mb-4">
 										Ready to protect your application? Get started with KoreShield in just 5 minutes with our Python or JavaScript SDK.
 									</p>
 									<div className="flex flex-wrap gap-3">
@@ -640,7 +640,7 @@ export default function PlaygroundPage() {
 										</a>
 										<a
 											href="https://docs.koreshield.com"
-											className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+											className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border text-foreground hover:bg-muted rounded-lg transition-colors"
 										>
 											View Documentation
 										</a>

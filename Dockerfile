@@ -1,5 +1,5 @@
 # Build Stage
-FROM node:18-alpine as build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
@@ -18,8 +18,8 @@ ENV VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID=$VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies with retry settings for flaky registry pulls
+RUN npm ci --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000
 
 # Copy source code
 COPY . .
