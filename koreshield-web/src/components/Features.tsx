@@ -4,38 +4,38 @@ import { Activity, Database, Globe, Network, Shield, FileText } from 'lucide-rea
 const features = [
     {
         icon: Shield,
-        title: '95% Accuracy',
-        description: 'Industry-leading detection rate with <3% false positives. Battle-tested across millions of production requests.',
-        highlight: true, // Bento: takes 2/3 width
+        title: '95% Detection Accuracy',
+        description: 'Fewer than 3 false positives per 100 blocked requests. Tuned on millions of real-world attack attempts — not synthetic test data — so it catches what matters without crying wolf.',
+        highlight: true,
     },
     {
         icon: Network,
         title: 'Multi-Provider',
-        description: 'Unified security for OpenAI, Anthropic, Gemini, and DeepSeek.',
+        description: 'One SDK, one API key, full coverage across OpenAI, Anthropic, Gemini, and DeepSeek. Switch providers without touching your security layer.',
         highlight: false,
     },
     {
         icon: Database,
         title: 'RAG Defense',
-        description: 'Scan retrieved context for indirect prompt injection attacks before they reach the LLM.',
+        description: 'Scans every document in your retrieval context before it reaches the LLM — catching injected instructions your vector database doesn\'t know to look for.',
         highlight: false,
     },
     {
         icon: Globe,
         title: 'CRM Integrations',
-        description: 'Secure Salesforce, HubSpot, and Zendesk data pipelines out-of-the-box.',
+        description: 'Pre-built connectors for Salesforce, HubSpot, and Zendesk. Secure your CRM-to-LLM pipelines without writing custom data extraction logic.',
         highlight: false,
     },
     {
         icon: FileText,
         title: 'Audit Trails',
-        description: 'Structured logs and security events for compliance, incident response, and monitoring.',
+        description: 'Every scan, every block, every decision — logged with full context. Query your threat history, or export to your SIEM in one command.',
         highlight: false,
     },
     {
         icon: Activity,
         title: 'Real-time Monitoring',
-        description: 'Detect jailbreaks, PII leakage, and code injection instantly with sub-30ms latency.',
+        description: 'Sub-30ms interception with no perceptible latency overhead. Threats appear in your dashboard the moment they\'re detected — not after the fact.',
         highlight: false,
     },
 ];
@@ -52,10 +52,10 @@ function Features() {
                     className="text-center mb-16"
                 >
                     <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-foreground tracking-[-0.04em]">
-                        Key Features
+                        What KoreShield Catches Before Your LLM Does
                     </h2>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                        Enterprise-grade security primitives, designed to drop into any LLM workflow.
+                        50+ attack detection patterns, tuned on real production traffic — not just benchmark datasets.
                     </p>
                 </motion.div>
 

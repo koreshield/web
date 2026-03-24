@@ -1,6 +1,8 @@
 import emailjs from '@emailjs/browser';
 import { motion } from 'framer-motion';
+import { ArrowRight, Github, Mail, MessageSquare, FileText } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 import { useToast } from '../components/ToastNotification';
 import { SEOConfig } from '../lib/seo-config';
@@ -11,68 +13,36 @@ const TEMPLATE_CONTACT = import.meta.env.VITE_EMAILJS_TEMPLATE_ID_CONTACT as str
 
 const supportOptions = [
 	{
-		icon: (
-			<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					strokeWidth={2}
-					d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-				/>
-			</svg>
-		),
-		title: 'Community Support',
-		description: 'Join our Discord community for peer support, share experiences, and get help from other developers.',
+		icon: <MessageSquare className="w-6 h-6" />,
+		title: 'Community Discord',
+		description: 'Get answers fast from fellow developers and our team. Best for general questions and integration help.',
 		cta: 'Join Discord',
 		link: 'https://discord.gg/koreshield',
+		external: true,
 	},
 	{
-		icon: (
-			<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					strokeWidth={2}
-					d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-				/>
-			</svg>
-		),
+		icon: <Mail className="w-6 h-6" />,
 		title: 'Email Support',
-		description: 'For technical support, bug reports, or feature requests, reach out to our engineering team.',
+		description: 'For technical issues, bug reports, or feature requests. Our engineering team reviews every ticket.',
 		cta: 'Email Us',
 		link: 'mailto:support@koreshield.com',
+		external: true,
 	},
 	{
-		icon: (
-			<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					strokeWidth={2}
-					d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-				/>
-			</svg>
-		),
+		icon: <FileText className="w-6 h-6" />,
 		title: 'Documentation',
-		description: 'Comprehensive guides, API references, and tutorials to help you get the most out of KoreShield.',
+		description: 'Comprehensive guides, API references, and tutorials. Most questions are answered here first.',
 		cta: 'Browse Docs',
 		link: 'https://docs.koreshield.com',
+		external: true,
 	},
 	{
-		icon: (
-			<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					strokeWidth={2}
-					d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-				/>
-			</svg>
-		),
-		title: 'GitHub Issues',
-		description: 'Report bugs, request features, or follow development on GitHub.',
+		icon: <Github className="w-6 h-6" />,
+		title: 'GitHub',
+		description: 'Report bugs, request features, or follow development progress on our public repositories.',
 		cta: 'View on GitHub',
 		link: 'https://github.com/koreshield/',
+		external: true,
 	},
 ];
 
@@ -80,242 +50,167 @@ export default function ContactPage() {
 	const [activeTab, setActiveTab] = useState<'general' | 'technical'>('general');
 
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+		<div className="min-h-screen bg-background text-foreground transition-colors">
 			<SEOMeta {...SEOConfig.contact} />
 
-			{/* Hero Section */}
-			<section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
-				<div className="max-w-7xl mx-auto text-center">
+			{/* Hero */}
+			<section className="py-24 px-6 relative ambient-glow">
+				<div className="max-w-3xl mx-auto text-center relative z-10">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5 }}
+						transition={{ duration: 0.6 }}
 					>
-						<h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+						<div className="inline-flex items-center gap-2 bg-electric-green/10 border border-electric-green/20 text-electric-green text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-widest">
+							<span className="w-1.5 h-1.5 rounded-full bg-electric-green" />
+							Contact
+						</div>
+						<h1 className="text-5xl md:text-6xl font-extrabold mb-6 tracking-[-0.04em] text-foreground">
 							Get in Touch
 						</h1>
-						<p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
-							Whether you're a developer, enterprise customer, or just curious about KoreShield, we're here to help.
+						<p className="text-lg text-muted-foreground leading-relaxed">
+							Developer? Enterprise team? Just curious? We're here and we reply fast.
 						</p>
 					</motion.div>
 				</div>
 			</section>
 
-			{/* Support Options */}
-			<section className="py-20 px-4">
-				<div className="max-w-7xl mx-auto">
-					<h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-						How Can We Help?
-					</h2>
-
-					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+			{/* Support channels */}
+			<section className="py-16 px-6 border-t border-border">
+				<div className="max-w-6xl mx-auto">
+					<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">How can we help?</h2>
+					<div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
 						{supportOptions.map((option, index) => (
-							<motion.div
+							<motion.a
 								key={option.title}
+								href={option.link}
+								target={option.external ? '_blank' : undefined}
+								rel={option.external ? 'noreferrer noopener' : undefined}
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.5, delay: index * 0.1 }}
-								className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow"
+								transition={{ duration: 0.4, delay: index * 0.08 }}
+								className="group bg-card border border-border hover:border-primary/40 rounded-xl p-6 transition-all duration-200 hover:-translate-y-0.5 block"
 							>
-								<div className="text-blue-600 dark:text-blue-400 mb-4">{option.icon}</div>
-								<h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-									{option.title}
-								</h3>
-								<p className="text-gray-600 dark:text-gray-400 mb-6">{option.description}</p>
-								<a
-									href={option.link}
-									className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline font-medium"
-								>
+								<div className="text-electric-green mb-4">{option.icon}</div>
+								<h3 className="text-base font-semibold text-foreground mb-2">{option.title}</h3>
+								<p className="text-sm text-muted-foreground mb-4 leading-relaxed">{option.description}</p>
+								<span className="inline-flex items-center gap-1.5 text-sm font-medium text-primary group-hover:gap-2.5 transition-all">
 									{option.cta}
-									<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth={2}
-											d="M9 5l7 7-7 7"
-										/>
-									</svg>
-								</a>
-							</motion.div>
+									<ArrowRight className="w-3.5 h-3.5" />
+								</span>
+							</motion.a>
 						))}
 					</div>
 				</div>
 			</section>
 
-			{/* Enterprise Sales CTA */}
-			<section className="py-12 px-4">
+			{/* Enterprise CTA */}
+			<section className="py-10 px-6">
 				<div className="max-w-4xl mx-auto">
-					<motion.div
-						initial={{ opacity: 0, y: 16 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5 }}
-						className="rounded-2xl bg-gray-900 border border-gray-700 p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6"
-					>
+					<div className="rounded-2xl bg-card border border-white/[0.08] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
 						<div>
-							<p className="text-sm font-semibold text-electric-green uppercase tracking-wider mb-1">Enterprise</p>
-							<h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Scaling AI at enterprise level?</h3>
-							<p className="text-gray-400 max-w-lg">
+							<p className="text-xs font-semibold text-electric-green uppercase tracking-wider mb-1">Enterprise</p>
+							<h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Scaling AI at enterprise level?</h3>
+							<p className="text-muted-foreground max-w-lg text-sm leading-relaxed">
 								Talk to our sales team about custom volumes, dedicated support, SSO, and compliance requirements.
 								Typical response within 24 hours.
 							</p>
 						</div>
-						<a
-							href="/pricing#contact-sales"
-							className="shrink-0 inline-flex items-center gap-2 bg-electric-green hover:bg-emerald-dark text-white font-semibold px-6 py-3 rounded-lg transition-colors whitespace-nowrap shadow-md hover:shadow-lg border-2 border-emerald-600"
+						<Link
+							to="/pricing"
+							className="shrink-0 inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-lg transition-colors whitespace-nowrap shadow-md"
 						>
 							Talk to Sales
-							<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-							</svg>
-						</a>
-					</motion.div>
+							<ArrowRight className="w-4 h-4" />
+						</Link>
+					</div>
 				</div>
 			</section>
 
 			{/* Contact Forms */}
-			<section className="py-20 px-4 bg-white dark:bg-gray-900">
-				<div className="max-w-4xl mx-auto">
-					<h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-						Send Us a Message
-					</h2>
+			<section className="py-20 px-6 border-t border-border">
+				<div className="max-w-3xl mx-auto">
+					<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">Send us a message</h2>
 
-					{/* Tab Navigation */}
-					<div className="flex gap-4 mb-8 border-b border-gray-200 dark:border-gray-800">
-						<button
-							onClick={() => setActiveTab('general')}
-							className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'general'
-								? 'border-blue-600 text-blue-600 dark:text-blue-400'
-								: 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+					{/* Tabs */}
+					<div className="flex gap-1 mb-8 p-1 bg-muted/50 rounded-lg w-fit">
+						{(['general', 'technical'] as const).map((tab) => (
+							<button
+								key={tab}
+								type="button"
+								onClick={() => setActiveTab(tab)}
+								className={`px-5 py-2 text-sm font-medium rounded-md transition-colors capitalize ${
+									activeTab === tab
+										? 'bg-card text-foreground shadow-sm'
+										: 'text-muted-foreground hover:text-foreground'
 								}`}
-						>
-							General Enquiry
-						</button>
-						<button
-							onClick={() => setActiveTab('technical')}
-							className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'technical'
-								? 'border-blue-600 text-blue-600 dark:text-blue-400'
-								: 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-								}`}
-						>
-							Technical Support
-						</button>
+							>
+								{tab === 'general' ? 'General Enquiry' : 'Technical Support'}
+							</button>
+						))}
 					</div>
 
-					{/* Form Content */}
 					{activeTab === 'general' && <GeneralContactForm />}
 					{activeTab === 'technical' && <TechnicalSupportForm />}
 				</div>
 			</section>
-
-
 		</div>
 	);
 }
 
+const inputClass = "w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground text-sm transition-colors placeholder:text-muted-foreground/50";
+const labelClass = "block text-sm font-medium text-foreground mb-1.5";
+const submitClass = "w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm";
+
 function GeneralContactForm() {
-	const [formData, setFormData] = useState({
-		name: '',
-		email: '',
-		subject: '',
-		message: '',
-	});
+	const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
 	const [loading, setLoading] = useState(false);
 	const toast = useToast();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setLoading(true);
-
 		try {
-			await emailjs.send(
-				EMAILJS_SERVICE_ID,
-				TEMPLATE_CONTACT,
-				{
-					form_type: 'General Enquiry',
-					icon: '👤',
-					from_name: formData.name,
-					from_email: formData.email,
-					reply_to: formData.email,
-					subject_line: formData.subject,
-					details: `Subject: ${formData.subject}\n\nMessage:\n${formData.message}`,
-				},
-				EMAILJS_PUBLIC_KEY
-			);
-			toast.success('Message sent!', "We'll get back to you within 24-48 hours.");
+			await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_CONTACT, {
+				form_type: 'General Enquiry',
+				icon: '',
+				from_name: formData.name,
+				from_email: formData.email,
+				reply_to: formData.email,
+				subject_line: formData.subject,
+				details: `Subject: ${formData.subject}\n\nMessage:\n${formData.message}`,
+			}, EMAILJS_PUBLIC_KEY);
+			toast.success('Message sent!', "We'll get back to you within 24–48 hours.");
 			setFormData({ name: '', email: '', subject: '', message: '' });
 		} catch (err: any) {
-			const msg = err?.text || err?.message || 'Something went wrong. Please try again or email hello@koreshield.com directly.';
-			toast.error('Failed to send', msg);
+			toast.error('Failed to send', err?.text || err?.message || 'Please try again or email hello@koreshield.com directly.');
 		} finally {
 			setLoading(false);
 		}
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-6">
-			<div className="grid md:grid-cols-2 gap-6">
+		<form onSubmit={handleSubmit} className="space-y-5">
+			<div className="grid md:grid-cols-2 gap-5">
 				<div>
-					<label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Full Name *
-					</label>
-					<input
-						type="text"
-						id="name"
-						required
-						value={formData.name}
-						onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					/>
+					<label className={labelClass}>Full name *</label>
+					<input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} placeholder="Jane Smith" />
 				</div>
 				<div>
-					<label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Email Address *
-					</label>
-					<input
-						type="email"
-						id="email"
-						required
-						value={formData.email}
-						onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					/>
+					<label className={labelClass}>Email address *</label>
+					<input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} placeholder="you@company.com" />
 				</div>
 			</div>
-
 			<div>
-				<label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-					Subject *
-				</label>
-				<input
-					type="text"
-					id="subject"
-					required
-					value={formData.subject}
-					onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-					className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-				/>
+				<label className={labelClass}>Subject *</label>
+				<input type="text" required value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} className={inputClass} placeholder="How can we help?" />
 			</div>
-
 			<div>
-				<label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-					Message *
-				</label>
-				<textarea
-					id="message"
-					required
-					rows={6}
-					value={formData.message}
-					onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-					className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-				/>
+				<label className={labelClass}>Message *</label>
+				<textarea required rows={6} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className={inputClass} placeholder="Tell us more…" />
 			</div>
-
-			<button
-				type="submit"
-				disabled={loading}
-				className="w-full bg-electric-green hover:bg-emerald-dark text-white font-semibold py-3 px-6 rounded-lg transition-all cursor-pointer shadow-md hover:shadow-lg border-2 border-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
-			>
-				{loading ? 'Sending...' : 'Send Message'}
+			<button type="submit" disabled={loading} className={submitClass}>
+				{loading ? 'Sending…' : 'Send message'}
 			</button>
 		</form>
 	);
@@ -323,14 +218,7 @@ function GeneralContactForm() {
 
 function TechnicalSupportForm() {
 	const [formData, setFormData] = useState({
-		name: '',
-		email: '',
-		tier: 'community',
-		severity: 'low',
-		category: 'bug',
-		subject: '',
-		description: '',
-		environment: '',
+		name: '', email: '', tier: 'startup', severity: 'low', category: 'bug', subject: '', description: '', environment: '',
 	});
 	const [loading, setLoading] = useState(false);
 	const toast = useToast();
@@ -338,99 +226,51 @@ function TechnicalSupportForm() {
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setLoading(true);
-
 		try {
-			await emailjs.send(
-				EMAILJS_SERVICE_ID,
-				TEMPLATE_CONTACT,
-				{
-					form_type: 'Technical Support',
-					icon: '🛠️',
-					from_name: formData.name,
-					from_email: formData.email,
-					reply_to: formData.email,
-					subject_line: `[${formData.severity.toUpperCase()}] ${formData.subject}`,
-					details: `Tier: ${formData.tier}\nSeverity: ${formData.severity}\nCategory: ${formData.category}\nSubject: ${formData.subject}\n\nDescription:\n${formData.description}\n\nEnvironment:\n${formData.environment || 'Not provided'}`,
-				},
-				EMAILJS_PUBLIC_KEY
-			);
+			await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_CONTACT, {
+				form_type: 'Technical Support',
+				icon: '',
+				from_name: formData.name,
+				from_email: formData.email,
+				reply_to: formData.email,
+				subject_line: `[${formData.severity.toUpperCase()}] ${formData.subject}`,
+				details: `Tier: ${formData.tier}\nSeverity: ${formData.severity}\nCategory: ${formData.category}\nSubject: ${formData.subject}\n\nDescription:\n${formData.description}\n\nEnvironment:\n${formData.environment || 'Not provided'}`,
+			}, EMAILJS_PUBLIC_KEY);
 			toast.success('Support ticket created!', 'Our technical team will review your issue shortly.');
-			setFormData({
-				name: '',
-				email: '',
-			tier: 'community',
-				severity: 'low',
-				category: 'bug',
-				subject: '',
-				description: '',
-				environment: '',
-			});
+			setFormData({ name: '', email: '', tier: 'startup', severity: 'low', category: 'bug', subject: '', description: '', environment: '' });
 		} catch (err: any) {
-			const msg = err?.text || err?.message || 'Something went wrong. Please try again or email support@koreshield.com directly.';
-			toast.error('Failed to send', msg);
+			toast.error('Failed to send', err?.text || err?.message || 'Please try again or email support@koreshield.com directly.');
 		} finally {
 			setLoading(false);
 		}
 	};
 
+	const selectClass = `${inputClass} appearance-none`;
+
 	return (
-		<form onSubmit={handleSubmit} className="space-y-6">
-			<div className="grid md:grid-cols-2 gap-6">
+		<form onSubmit={handleSubmit} className="space-y-5">
+			<div className="grid md:grid-cols-2 gap-5">
 				<div>
-					<label htmlFor="tech-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Full Name *
-					</label>
-					<input
-						type="text"
-						id="tech-name"
-						required
-						value={formData.name}
-						onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					/>
+					<label className={labelClass}>Full name *</label>
+					<input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} placeholder="Jane Smith" />
 				</div>
 				<div>
-					<label htmlFor="tech-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Email Address *
-					</label>
-					<input
-						type="email"
-						id="tech-email"
-						required
-						value={formData.email}
-						onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					/>
+					<label className={labelClass}>Email address *</label>
+					<input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} placeholder="you@company.com" />
 				</div>
 			</div>
-
-			<div className="grid md:grid-cols-3 gap-6">
+			<div className="grid md:grid-cols-3 gap-5">
 				<div>
-					<label htmlFor="tier" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Your Tier
-					</label>
-					<select
-						id="tier"
-						value={formData.tier}
-						onChange={(e) => setFormData({ ...formData, tier: e.target.value })}
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					>
-						<option value="community">Community</option>
+					<label htmlFor="ts-tier" className={labelClass}>Your tier</label>
+					<select id="ts-tier" value={formData.tier} onChange={(e) => setFormData({ ...formData, tier: e.target.value })} className={selectClass}>
 						<option value="startup">Startup</option>
 						<option value="growth">Growth</option>
 						<option value="enterprise">Enterprise</option>
 					</select>
 				</div>
 				<div>
-					<label htmlFor="severity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Severity
-					</label>
-					<select
-						id="severity"
-						value={formData.severity}
-						onChange={(e) => setFormData({ ...formData, severity: e.target.value })}
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					>
+					<label htmlFor="ts-severity" className={labelClass}>Severity</label>
+					<select id="ts-severity" value={formData.severity} onChange={(e) => setFormData({ ...formData, severity: e.target.value })} className={selectClass}>
 						<option value="low">Low</option>
 						<option value="medium">Medium</option>
 						<option value="high">High</option>
@@ -438,15 +278,8 @@ function TechnicalSupportForm() {
 					</select>
 				</div>
 				<div>
-					<label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						Category
-					</label>
-					<select
-						id="category"
-						value={formData.category}
-						onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-						className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-					>
+					<label htmlFor="ts-category" className={labelClass}>Category</label>
+					<select id="ts-category" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className={selectClass}>
 						<option value="bug">Bug Report</option>
 						<option value="feature">Feature Request</option>
 						<option value="integration">Integration Issue</option>
@@ -456,62 +289,22 @@ function TechnicalSupportForm() {
 					</select>
 				</div>
 			</div>
-
 			<div>
-				<label htmlFor="tech-subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-					Subject *
-				</label>
-				<input
-					type="text"
-					id="tech-subject"
-					required
-					value={formData.subject}
-					onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-					placeholder="Brief description of the issue"
-					className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-				/>
+				<label className={labelClass}>Subject *</label>
+				<input type="text" required value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} className={inputClass} placeholder="Brief description of the issue" />
 			</div>
-
 			<div>
-				<label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-					Description *
-				</label>
-				<textarea
-					id="description"
-					required
-					rows={6}
-					value={formData.description}
-					onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-					placeholder="Please provide detailed steps to reproduce, error messages, and expected vs actual behaviour"
-					className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-				/>
+				<label className={labelClass}>Description *</label>
+				<textarea required rows={6} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={inputClass} placeholder="Steps to reproduce, error messages, expected vs actual behaviour…" />
 			</div>
-
 			<div>
-				<label htmlFor="environment" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-					Environment Details
-				</label>
-				<textarea
-					id="environment"
-					rows={3}
-					value={formData.environment}
-					onChange={(e) => setFormData({ ...formData, environment: e.target.value })}
-					placeholder="KoreShield version, deployment method (Docker/Python), Python/Node version, OS, etc."
-					className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-				/>
+				<label className={labelClass}>Environment details</label>
+				<textarea rows={3} value={formData.environment} onChange={(e) => setFormData({ ...formData, environment: e.target.value })} className={inputClass} placeholder="KoreShield version, deployment method, Python/Node version, OS…" />
 			</div>
-
-			<button
-				type="submit"
-				disabled={loading}
-				className="w-full bg-electric-green hover:bg-emerald-dark text-white font-semibold py-3 px-6 rounded-lg transition-all cursor-pointer shadow-md hover:shadow-lg border-2 border-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
-			>
-				{loading ? 'Submitting...' : 'Submit Support Ticket'}
+			<button type="submit" disabled={loading} className={submitClass}>
+				{loading ? 'Submitting…' : 'Submit support ticket'}
 			</button>
-
-			<p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-				Response times vary by tier. Enterprise customers get 24/7 priority support.
-			</p>
+			<p className="text-xs text-muted-foreground text-center">Response times vary by tier. Enterprise customers receive 24/7 priority support.</p>
 		</form>
 	);
 }

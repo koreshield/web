@@ -1,197 +1,113 @@
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { ArrowRight, Home, BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const suggestedLinks = [
+	{
+		href: 'https://docs.koreshield.com/quickstart',
+		label: 'Quickstart Tutorial',
+		desc: 'Get up and running in under 15 minutes',
+		external: true,
+	},
+	{
+		href: 'https://docs.koreshield.com/installation',
+		label: 'Installation Guide',
+		desc: 'Docker, Python, NPM, Kubernetes',
+		external: true,
+	},
+	{
+		href: 'https://docs.koreshield.com/api-reference',
+		label: 'API Reference',
+		desc: 'Full endpoint documentation',
+		external: true,
+	},
+];
 
 export default function NotFoundPage() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 p-4">
-      <div className="max-w-2xl w-full text-center">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* 404 Illustration */}
-          <div className="mb-8">
-            <motion.div
-              className="text-9xl font-bold text-blue-600 dark:text-blue-400"
-              animate={{
-                scale: [1, 1.05, 1],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-            >
-              404
-            </motion.div>
-          </div>
+	return (
+		<div className="min-h-[80vh] flex items-center justify-center px-6 py-20 bg-background">
+			<div className="max-w-xl w-full text-center">
+				<motion.div
+					initial={{ opacity: 0, y: -16 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.5 }}
+				>
+					{/* 404 number */}
+					<motion.div
+						className="text-[9rem] font-extrabold leading-none tracking-[-0.06em] text-electric-green/20 select-none mb-4"
+						animate={{ scale: [1, 1.03, 1] }}
+						transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+					>
+						404
+					</motion.div>
 
-          {/* Message */}
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Page Not Found
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-            The page you're looking for doesn't exist or has been moved.
-          </p>
+					{/* Badge */}
+					<div className="inline-flex items-center gap-2 bg-electric-green/10 border border-electric-green/20 text-electric-green text-xs font-semibold px-3 py-1.5 rounded-full mb-5 uppercase tracking-widest">
+						<span className="w-1.5 h-1.5 rounded-full bg-electric-green" />
+						Page Not Found
+					</div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link
-              to="/"
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors inline-flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                />
-              </svg>
-              Back to Home
-            </Link>
-            <a
-              href="https://docs.koreshield.com"
-              target="_blank"
-              rel="noreferrer"
-              className="px-6 py-3 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-medium rounded-lg transition-colors inline-flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-              View Documentation
-            </a>
-          </div>
+					<h1 className="text-3xl md:text-4xl font-extrabold text-foreground mb-3 tracking-tight">
+						Nothing here but silence.
+					</h1>
+					<p className="text-muted-foreground mb-8 leading-relaxed">
+						The page you're looking for doesn't exist or has been moved. Let's get you back on track.
+					</p>
 
-          {/* Suggested Links */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 max-w-lg mx-auto">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Popular Pages
-            </h2>
-            <div className="space-y-2 text-left">
-              <a
-                href="https://docs.koreshield.com/quickstart"
-                target="_blank"
-                rel="noreferrer"
-                className="block p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <svg
-                    className="w-5 h-5 text-blue-600 dark:text-blue-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                      Quickstart Tutorial
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Get started in 15 minutes
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <a
-                href="https://docs.koreshield.com/installation"
-                target="_blank"
-                rel="noreferrer"
-                className="block p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <svg
-                    className="w-5 h-5 text-green-600 dark:text-green-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                    />
-                  </svg>
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                      Installation Guide
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Docker, Python, NPM, K8s
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <a
-                href="https://docs.koreshield.com/api-reference"
-                target="_blank"
-                rel="noreferrer"
-                className="block p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <svg
-                    className="w-5 h-5 text-purple-600 dark:text-purple-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                    />
-                  </svg>
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                      API Reference
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Complete API documentation
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
+					{/* Primary actions */}
+					<div className="flex flex-col sm:flex-row gap-3 justify-center mb-12">
+						<Link
+							to="/"
+							className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-colors"
+						>
+							<Home className="w-4 h-4" />
+							Back to Home
+						</Link>
+						<a
+							href="https://docs.koreshield.com"
+							target="_blank"
+							rel="noreferrer noopener"
+							className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-card border border-border hover:border-primary/40 text-foreground font-semibold rounded-lg transition-colors"
+						>
+							<BookOpen className="w-4 h-4" />
+							Documentation
+						</a>
+					</div>
 
-          {/* Help Text */}
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-8">
-            Still can't find what you're looking for?{' '}
-            <a
-              href="mailto:support@koreshield.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              Contact support
-            </a>{' '}
-            or join our{' '}
-            <a
-              href="https://discord.gg/koreshield"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              Discord community
-            </a>
-            .
-          </p>
-        </motion.div>
-      </div>
-    </div>
-  );
+					{/* Suggested links */}
+					<div className="bg-card border border-border rounded-xl p-5 text-left">
+						<p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">Popular pages</p>
+						<div className="space-y-1">
+							{suggestedLinks.map((link) => (
+								<a
+									key={link.label}
+									href={link.href}
+									target={link.external ? '_blank' : undefined}
+									rel={link.external ? 'noreferrer noopener' : undefined}
+									className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group"
+								>
+									<div>
+										<p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{link.label}</p>
+										<p className="text-xs text-muted-foreground">{link.desc}</p>
+									</div>
+									<ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+								</a>
+							))}
+						</div>
+					</div>
+
+					<p className="text-xs text-muted-foreground mt-6">
+						Still stuck?{' '}
+						<a href="mailto:support@koreshield.com" className="text-primary hover:underline">
+							Email support
+						</a>
+						{' '}or join our{' '}
+						<a href="https://discord.gg/koreshield" target="_blank" rel="noreferrer noopener" className="text-primary hover:underline">
+							Discord community
+						</a>.
+					</p>
+				</motion.div>
+			</div>
+		</div>
+	);
 }
