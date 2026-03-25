@@ -32,6 +32,7 @@ export function ProviderHealthPage() {
 	// WebSocket real-time updates
 	useEffect(() => {
 		wsClient.connect();
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setWsConnected(wsClient.isConnected());
 
 		wsClient.subscribe(['provider_health_change']);
@@ -64,7 +65,7 @@ export function ProviderHealthPage() {
 		switch (status) {
 			case 'healthy': return 'text-green-500';
 			case 'down': return 'text-red-500';
-			default: return 'text-gray-500';
+			default: return 'text-muted-foreground';
 		}
 	};
 
@@ -72,7 +73,7 @@ export function ProviderHealthPage() {
 		switch (status) {
 			case 'healthy': return 'bg-green-500/10 border-green-500/50';
 			case 'down': return 'bg-red-500/10 border-red-500/50';
-			default: return 'bg-gray-500/10 border-gray-500/50';
+			default: return 'bg-muted border-border';
 		}
 	};
 
@@ -117,9 +118,9 @@ export function ProviderHealthPage() {
 									<span className="text-sm font-medium text-green-600">Live</span>
 								</div>
 							) : (
-								<div className="flex items-center gap-2 px-3 py-2 bg-gray-500/10 border border-gray-500/50 rounded-lg">
-									<div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-									<span className="text-sm font-medium text-gray-600">Connecting...</span>
+								<div className="flex items-center gap-2 px-3 py-2 bg-muted border border-border rounded-lg">
+									<div className="w-2 h-2 bg-muted-foreground/60 rounded-full"></div>
+									<span className="text-sm font-medium text-muted-foreground">Connecting...</span>
 								</div>
 							)}
 						</div>

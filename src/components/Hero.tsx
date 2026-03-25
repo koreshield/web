@@ -17,13 +17,24 @@ function Hero() {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8 }}
 				>
+					<motion.div
+						className="inline-flex items-center gap-2 bg-electric-green/10 border border-electric-green/20 text-electric-green text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-widest"
+						initial={{ opacity: 0, y: 10 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6, delay: 0.1 }}
+					>
+						<span className="w-1.5 h-1.5 rounded-full bg-electric-green animate-pulse" />
+						LLM Security Firewall
+					</motion.div>
+
 					<motion.h1
 						className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.08] tracking-[-0.04em] text-foreground"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.2 }}
 					>
-						Secure Your AI Infrastructure.
+						Every Prompt Is a{' '}
+						<span className="text-electric-green">Potential Attack.</span>
 					</motion.h1>
 
 					<motion.p
@@ -32,75 +43,38 @@ function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.4 }}
 					>
-						The security proxy between your app and LLM providers. Prevents prompt injection, jailbreaks, and data exfiltration with <span className="text-electric-green font-semibold">95% detection accuracy</span>.
+						KoreShield intercepts every request between your app and LLM providers — blocking prompt injection, jailbreaks, and data exfiltration in{' '}
+						<span className="text-foreground font-semibold">under 30ms</span>, with{' '}
+						<span className="text-electric-green font-semibold">95% detection accuracy</span>.
 					</motion.p>
 
 					<motion.div
-						className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-6"
+						className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.6 }}
 					>
-						{/* Live Demo CTA */}
 						<Link
 							to="/demo"
-							className="group relative bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 w-full sm:w-auto overflow-hidden"
+							rel="noopener"
+							className="group relative bg-electric-green hover:bg-emerald-bright text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 w-full sm:w-auto overflow-hidden"
 						>
-							<span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-0 animate-shimmer" />
-							<Play className="w-4 h-4 fill-white relative z-10" />
+							<span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+							<Play className="w-4 h-4 fill-white relative z-10 shrink-0" />
 							<span className="relative z-10">See Live Demo</span>
-							<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10" />
+							<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10 shrink-0" />
 						</Link>
 
-						{/* Shimmer CTA button */}
 						<a
 							href="https://docs.koreshield.com"
 							target="_blank"
-							rel="noreferrer"
-							className="group relative bg-electric-green hover:bg-emerald-bright text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 w-full sm:w-auto overflow-hidden"
+							rel="noreferrer noopener"
+							className="group relative border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 text-foreground font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto backdrop-blur-sm"
 						>
-							<span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-0 animate-shimmer" />
-							<span className="relative z-10 flex items-center gap-2">
-								Read the Docs
-								<ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-							</span>
+							<span className="relative z-10">Read the Docs</span>
+							<ArrowRight className="w-4 h-4 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform shrink-0" />
 						</a>
-
-						{/* COMMENTED: GitHub button hidden
-						<a
-							href="https://github.com/koreshield/"
-							target="_blank"
-							rel="noreferrer"
-							className="group border border-white/10 dark:border-white/10 text-foreground hover:border-electric-green/50 hover:text-electric-green font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto bg-card/60 backdrop-blur-sm"
-						>
-							<Github className="w-4 h-4 sm:w-5 sm:h-5" />
-							<span>View on GitHub</span>
-						</a>
-						COMMENTED */}
 					</motion.div>
-
-					{/* COMMENTED: pip install command hidden
-					<motion.div
-						className="inline-flex items-center gap-3 bg-card/80 dark:bg-[#18181B]/80 border border-white/10 dark:border-white/8 rounded-lg px-4 py-2.5 font-mono text-sm text-muted-foreground backdrop-blur-sm"
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.8, delay: 0.8 }}
-					>
-						<span className="text-electric-green select-none">$</span>
-						<span className="select-all">{INSTALL_CMD}</span>
-						<button
-							onClick={handleCopy}
-							className="ml-1 p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
-							aria-label="Copy install command"
-						>
-							{copied ? (
-								<Check className="w-4 h-4 text-electric-green" />
-							) : (
-								<Copy className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
-							)}
-						</button>
-					</motion.div>
-					COMMENTED */}
 				</motion.div>
 
 				{/* Right: Interactive terminal */}

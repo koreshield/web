@@ -23,6 +23,7 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {
@@ -33,6 +34,10 @@ export function useToast() {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  }, []);
 
   const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -50,11 +55,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         removeToast(id);
       }, newToast.duration);
     }
-  }, []);
-
-  const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  }, []);
+  }, [removeToast]);
 
   const success = useCallback(
     (message: string, description?: string) => {
@@ -195,10 +196,12 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
 // Standalone toast function for use outside React components
 let globalAddToast: ((toast: Omit<Toast, 'id'>) => void) | null = null;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function setGlobalToast(addToast: (toast: Omit<Toast, 'id'>) => void) {
   globalAddToast = addToast;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const toast = {
   success: (message: string, description?: string) => {
     globalAddToast?.({ type: 'success', message, description });

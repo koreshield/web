@@ -20,7 +20,7 @@ plausible.enableAutoPageviews();
 export function trackEvent(eventName: string, props?: Record<string, string | number | boolean>) {
 	try {
 		plausible.trackEvent(eventName, { props });
-	} catch (_error) {
+	} catch {
 		// Silently fail in development or if analytics is blocked
 		if (import.meta.env.DEV) {
 			console.log('Analytics event:', eventName, props);
@@ -39,7 +39,7 @@ export function trackPageView(url?: string) {
 		} else {
 			plausible.trackPageview();
 		}
-	} catch (_error) {
+	} catch {
 		if (import.meta.env.DEV) {
 			console.log('Analytics page view:', url);
 		}

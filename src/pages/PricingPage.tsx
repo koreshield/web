@@ -1,9 +1,10 @@
 import emailjs from '@emailjs/browser';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 import { useToast } from '../components/ToastNotification';
+import { authService } from '../lib/auth';
 import { SEOConfig } from '../lib/seo-config';
 
 const tiers = [
@@ -78,7 +79,7 @@ const tiers = [
 			'Quarterly security reviews',
 			'Custom training sessions',
 		],
-		cta: 'Contact Sales',
+		cta: 'Choose Growth',
 		ctaLink: '#contact-sales',
 		popular: false,
 	},
@@ -153,11 +154,26 @@ const faqs = [
 ];
 
 export default function PricingPage() {
+	const navigate = useNavigate();
 	const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
 	const [openFaq, setOpenFaq] = useState<number | null>(null);
 
 	const handleContactSales = () => {
 		document.getElementById('contact-sales')?.scrollIntoView({ behavior: 'smooth' });
+	};
+
+	const handlePlanAction = (planId: string) => {
+		if (planId === 'enterprise') {
+			handleContactSales();
+			return;
+		}
+
+		const target = `/billing?plan=${encodeURIComponent(planId)}&period=${encodeURIComponent(billingPeriod)}&checkout=1`;
+		if (authService.isAuthenticated()) {
+			navigate(target);
+			return;
+		}
+		navigate(`/signup?plan=${encodeURIComponent(planId)}&period=${encodeURIComponent(billingPeriod)}`);
 	};
 
 	return (
@@ -188,7 +204,7 @@ export default function PricingPage() {
 							</span>
 							<button
 								onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'annual' : 'monthly')}
-								className="relative w-16 h-8 rounded-full transition-all cursor-pointer bg-gray-300 dark:bg-gray-600 border-2 border-gray-400 dark:border-gray-500"
+								className="relative w-16 h-8 rounded-full transition-all cursor-pointer bg-muted border border-border"
 							>
 								<motion.div
 									className="absolute top-0.5 left-0.5 w-6 h-6 rounded-full shadow-lg bg-white dark:bg-white border-2 border-electric-green"
@@ -279,18 +295,19 @@ export default function PricingPage() {
 
 									{tier.ctaLink.startsWith('#') ? (
 										<button
-											onClick={handleContactSales}
-											className="w-full py-3 px-6 rounded-lg font-semibold transition-all cursor-pointer bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600"
+											onClick={() => handlePlanAction(tier.id)}
+											className="w-full py-3 px-6 rounded-lg font-semibold transition-all cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground border-0"
 										>
 											{tier.cta}
 										</button>
 									) : (
-										<Link
-											to={tier.ctaLink}
-											className="w-full py-3 px-6 rounded-lg font-semibold transition-all text-center block cursor-pointer bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600"
+										<button
+											type="button"
+											onClick={() => handlePlanAction(tier.id)}
+											className="w-full py-3 px-6 rounded-lg font-semibold transition-all text-center block cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground border-0"
 										>
 											{tier.cta}
-										</Link>
+										</button>
 									)}
 								</motion.div>
 							);
@@ -322,7 +339,7 @@ export default function PricingPage() {
 											</p>
 											<button
 												onClick={handleContactSales}
-												className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 px-8 py-3 rounded-lg font-semibold transition-all cursor-pointer shadow-md"
+												className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 px-8 py-3 rounded-lg font-semibold transition-all cursor-pointer shadow-md"
 											>
 												{enterpriseTier.cta}
 											</button>
@@ -509,11 +526,11 @@ export default function PricingPage() {
 			<section className="py-20 px-4 bg-muted/40" id="contact-sales">
 				<div className="max-w-2xl mx-auto">
 					<div className="text-center mb-12">
-						<h2 className="text-3xl font-bold text-foreground mb-4">
-							Ready to Get Started?
+						<h2 className="text-3xl font-bold text-foreground mb-4 tracking-tight">
+							Talk to the team
 						</h2>
-						<p className="text-lg text-muted-foreground">
-							Talk to our team about your security needs
+						<p className="text-muted-foreground">
+							Tell us your stack, your scale, and your security requirements. We will match you to the right plan.
 						</p>
 					</div>
 
@@ -662,7 +679,7 @@ function ContactSalesForm() {
 
 			<p className="text-sm text-muted-foreground text-center mt-4">
 				By submitting this form, you agree to our{' '}
-				<a href="#" className="text-electric-green hover:underline">
+				<a href="/privacy-policy" className="text-electric-green hover:underline">
 					Privacy Policy
 				</a>
 			</p>

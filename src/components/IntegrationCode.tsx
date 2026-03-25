@@ -48,10 +48,10 @@ function IntegrationCode() {
                     className="text-center mb-14"
                 >
                     <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-foreground tracking-[-0.04em]">
-                        Easy Integration
+                        Two Lines. Full Coverage.
                     </h2>
                     <p className="text-muted-foreground text-lg">
-                        Drop-in replacement for your existing LLM clients
+                        Wrap your existing LLM client. KoreShield handles everything else — no rearchitecting, no new infrastructure.
                     </p>
                 </motion.div>
 
@@ -74,6 +74,7 @@ function IntegrationCode() {
                         {/* Tabs (Pill Style) */}
                         <div className="flex bg-black/50 p-1 rounded-lg border border-white/5">
                             <button
+                                type="button"
                                 onClick={() => setActiveTab('python')}
                                 className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-xs font-medium transition-all duration-300 ${activeTab === 'python'
                                         ? 'bg-gray-800 text-white ring-1 ring-white/10'
@@ -84,6 +85,7 @@ function IntegrationCode() {
                                 Python
                             </button>
                             <button
+                                type="button"
                                 onClick={() => setActiveTab('javascript')}
                                 className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-xs font-medium transition-all duration-300 ${activeTab === 'javascript'
                                         ? 'bg-gray-800 text-white ring-1 ring-white/10'
@@ -98,6 +100,7 @@ function IntegrationCode() {
                         {/* Actions */}
                         <div className="w-20 flex justify-end">
                             <button
+                                type="button"
                                 onClick={handleCopy}
                                 className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-md hover:bg-white/10"
                                 aria-label="Copy code"
