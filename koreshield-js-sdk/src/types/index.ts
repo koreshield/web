@@ -15,6 +15,12 @@ export interface KoreShieldConfig {
   headers?: Record<string, string>;
 }
 
+export interface NormalizationResult {
+  original: string;
+  normalized: string;
+  layers: string[];
+}
+
 export type SensitivityLevel = 'low' | 'medium' | 'high';
 export type SecurityAction = 'allow' | 'warn' | 'block';
 
@@ -146,6 +152,36 @@ export enum DetectionType {
   ALLOWLIST = 'allowlist',
 }
 
+export enum ToolRiskClass {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+export enum ToolCapability {
+  READ = 'read',
+  WRITE = 'write',
+  NETWORK = 'network',
+  EXECUTION = 'execution',
+  DATABASE = 'database',
+  CREDENTIAL_ACCESS = 'credential_access',
+}
+
+export interface ToolTrustContext {
+  source?: string;
+  trustLevel?: 'trusted' | 'internal' | 'partner' | 'external' | 'untrusted' | 'unknown' | string;
+  trust_level?: 'trusted' | 'internal' | 'partner' | 'external' | 'untrusted' | 'unknown' | string;
+  userApproved?: boolean | null;
+  user_approved?: boolean | null;
+  crossTenant?: boolean;
+  cross_tenant?: boolean;
+  chainDepth?: number;
+  chain_depth?: number;
+  priorTools?: string[];
+  prior_tools?: string[];
+}
+
 export interface SecurityPolicy {
   name: string;
   description?: string;
@@ -159,6 +195,133 @@ export interface SecurityPolicy {
   allowlistPatterns: string[];
   blocklistPatterns: string[];
   metadata?: Record<string, any>;
+}
+
+export interface LocalThreatIndicator {
+  type: DetectionType;
+  severity: ThreatLevel;
+  confidence: number;
+  description: string;
+  metadata?: Record<string, any>;
+}
+
+export interface PreflightScanResult {
+  blocked: boolean;
+  isSafe: boolean;
+  threatLevel: ThreatLevel;
+  confidence: number;
+  normalization: NormalizationResult;
+  indicators: LocalThreatIndicator[];
+  suggestedAction: SecurityAction;
+}
+
+export interface ToolCallPreflightResult extends PreflightScanResult {
+  toolName: string;
+  riskyTool: boolean;
+  reasons: string[];
+  riskClass: ToolRiskClass;
+  provenanceRisk: ToolRiskClass;
+  capabilitySignals: ToolCapability[];
+  reviewRequired: boolean;
+  confusedDeputyRisk: boolean;
+  escalationSignals: string[];
+  trustContext: ToolTrustContext;
+}
+
+export interface ToolScanPolicyResult {
+  allowed: boolean;
+  action: SecurityAction | 'blocked';
+  reason: string;
+  policy_violations: Array<{
+    policy: string;
+    severity: string;
+    details: Record<string, any>;
+    policy_id?: string;
+  }>;
+  user_role?: string | null;
+  permissions?: string[];
+  bypass_allowed?: boolean;
+  review_required?: boolean;
+  risk_class?: ToolRiskClass | string;
+}
+
+export interface ToolScanResponse {
+  scan_id: string;
+  tool_name: string;
+  allowed: boolean;
+  blocked: boolean;
+  action: SecurityAction | 'blocked';
+  risk_class: ToolRiskClass | string;
+  provenance_risk: ToolRiskClass | string;
+  risky_tool: boolean;
+  review_required: boolean;
+  capability_signals: Array<ToolCapability | string>;
+  confused_deputy_risk: boolean;
+  escalation_signals: string[];
+  trust_context: ToolTrustContext;
+  confidence: number;
+  indicators: Array<Record<string, any>>;
+  reasons: string[];
+  normalization: {
+    normalized: string;
+    layers: string[];
+  };
+  policy_result: ToolScanPolicyResult;
+  processing_time_ms: number;
+  timestamp: string;
+}
+
+export interface DocumentThreatMetadata {
+  base_detection_confidence?: number;
+  rag_pattern_confidence?: number;
+  query_similarity?: number;
+  directive_score?: number;
+  query_mismatch?: boolean;
+  high_directive_density?: boolean;
+  matched_on_normalized_text?: boolean;
+  threat_indicators?: string[];
+  normalization_layers?: string[];
+  document_metadata?: Record<string, any>;
+}
+
+export interface CrossDocumentThreatMetadata {
+  supporting_indicators?: string[];
+  document_count?: number;
+  coordinated?: boolean;
+}
+
+export interface RAGStatistics {
+  total_documents_scanned: number;
+  documents_with_threats: number;
+  total_threats_found: number;
+  documents_with_query_mismatch?: number;
+  documents_with_directive_density?: number;
+  documents_normalized?: number;
+  min_query_similarity?: number | null;
+  max_directive_score?: number | null;
+  [key: string]: any;
+}
+
+export interface QueryAnalysis {
+  is_attack: boolean;
+  details: Record<string, any>;
+}
+
+export interface RAGPreflightDocumentResult extends PreflightScanResult {
+  documentId: string;
+  querySimilarity: number;
+  directiveScore: number;
+  metadata?: Record<string, any>;
+}
+
+export interface RAGPreflightResult {
+  blocked: boolean;
+  isSafe: boolean;
+  threatLevel: ThreatLevel;
+  confidence: number;
+  userQuery: string;
+  documents: RAGPreflightDocumentResult[];
+  suggestedAction: SecurityAction;
 }
 
 export interface KoreShieldError extends Error {
@@ -260,18 +423,24 @@ export interface RAGDocument {
 export interface DocumentThreat {
   /** ID of the threatening document */
   document_id: string;
+  /** Optional backend document position */
+  document_index?: number;
+  /** Optional backend threat type */
+  threat_type?: string;
   /** Threat severity */
   severity: ThreatLevel;
   /** Detection confidence (0.0-1.0) */
   confidence: number;
   /** Patterns that were matched */
   patterns_matched: string[];
+  /** Optional excerpts from the document */
+  excerpts?: string[];
   /** Detected injection vectors */
   injection_vectors: InjectionVector[];
   /** Detected operational targets */
   operational_targets: OperationalTarget[];
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: DocumentThreatMetadata;
 }
 
 /**
@@ -291,7 +460,7 @@ export interface CrossDocumentThreat {
   /** Matched patterns */
   patterns: string[];
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: CrossDocumentThreatMetadata;
 }
 
 /**
@@ -319,7 +488,19 @@ export interface ContextAnalysis {
   /** Cross-document threats */
   cross_document_threats: CrossDocumentThreat[];
   /** Processing statistics */
-  statistics: Record<string, any>;
+  statistics: RAGStatistics;
+  is_safe?: boolean;
+  overall_severity?: ThreatLevel;
+  overall_confidence?: number;
+  injection_vectors?: InjectionVector[];
+  operational_targets?: OperationalTarget[];
+  persistence_mechanisms?: PersistenceMechanism[];
+  enterprise_contexts?: EnterpriseContext[];
+  detection_complexity?: DetectionComplexity;
+  scan_id?: string;
+  scan_timestamp?: string;
+  processing_time_ms?: number;
+  metadata?: Record<string, any>;
 }
 
 /**
@@ -340,14 +521,20 @@ export interface RAGScanConfig {
 export interface RAGScanResponse {
   /** Overall safety assessment */
   is_safe: boolean;
+  /** Optional scan identifier */
+  scan_id?: string;
   /** Overall threat severity */
   overall_severity: ThreatLevel;
   /** Overall detection confidence (0.0-1.0) */
   overall_confidence: number;
   /** 5-dimensional taxonomy classification */
-  taxonomy: TaxonomyClassification;
+  taxonomy?: TaxonomyClassification;
   /** Context analysis results */
   context_analysis: ContextAnalysis;
+  /** Top-level query analysis */
+  query_analysis?: QueryAnalysis | null;
+  /** End-to-end processing time */
+  processing_time_ms?: number;
   /** Request ID */
   request_id?: string;
   /** Timestamp */
@@ -364,6 +551,12 @@ export interface RAGScanRequest {
   documents: RAGDocument[];
   /** Optional configuration */
   config?: RAGScanConfig;
+}
+
+export interface ToolScanRequest {
+  tool_name: string;
+  args?: unknown;
+  context?: ToolTrustContext;
 }
 
 /**

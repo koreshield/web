@@ -29,8 +29,8 @@ from .policy import PolicyEngine
 from .sanitizer import SanitizationEngine
 from .rag_detector import RAGContextDetector
 from .rag_taxonomy import RetrievedDocument
-
-from .rag_taxonomy import RetrievedDocument
+from .runtime_governance import RuntimeGovernanceManager
+from .tool_security import ToolCallSecurityAnalyzer
 from .database import AsyncSessionLocal
 from .models.request_log import RequestLog
 from .models.rag_scan import RagScan
@@ -220,6 +220,8 @@ class KoreShieldProxy:
         self.detector = AttackDetector(security_config)
         self.rag_detector = RAGContextDetector(security_config)
         self.policy_engine = PolicyEngine(config)
+        self.tool_security = ToolCallSecurityAnalyzer(self.detector)
+        self.runtime_governance = RuntimeGovernanceManager(config)
         self.logger = FirewallLogger()
 
         # Initialize providers (multiple for failover)
@@ -790,6 +792,46 @@ class KoreShieldProxy:
         async def scan_prompt_batch(request: Request):
             return await self._handle_scan_batch(request)
 
+        @self.app.post("/v1/tools/scan", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def scan_tool_call(request: Request):
+            return await self._handle_tool_scan(request)
+
+        @self.app.post("/v1/tools/sessions", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def create_tool_runtime_session(request: Request):
+            return await self._handle_create_tool_session(request)
+
+        @self.app.get("/v1/tools/sessions", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def list_tool_runtime_sessions(request: Request, limit: int = 50, status: str | None = None):
+            return await self._handle_list_tool_sessions(request, limit=limit, status=status)
+
+        @self.app.get("/v1/tools/sessions/{session_id}", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def get_tool_runtime_session(session_id: str, request: Request):
+            return await self._handle_get_tool_session(request, session_id)
+
+        @self.app.post("/v1/tools/sessions/{session_id}/state", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def update_tool_runtime_session(session_id: str, request: Request):
+            return await self._handle_update_tool_session_state(request, session_id)
+
+        @self.app.get("/v1/tools/reviews", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def list_tool_runtime_reviews(request: Request, limit: int = 50, status: str | None = None):
+            return await self._handle_list_tool_reviews(request, limit=limit, status=status)
+
+        @self.app.get("/v1/tools/reviews/{ticket_id}", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def get_tool_runtime_review(ticket_id: str, request: Request):
+            return await self._handle_get_tool_review(request, ticket_id)
+
+        @self.app.post("/v1/tools/reviews/{ticket_id}/decision", tags=["Scan"])
+        @self.limiter.limit(rate_limit)
+        async def decide_tool_runtime_review(ticket_id: str, request: Request):
+            return await self._handle_review_decision(request, ticket_id)
+
         @self.app.get("/v1/scans", tags=["Scan"])
         @self.limiter.limit(rate_limit)
         async def list_scans(request: Request, limit: int = 100, offset: int = 0):
@@ -1223,6 +1265,306 @@ class KoreShieldProxy:
                 "Request handling error", request_id=request_id, error=str(e), exc_info=True
             )
             raise HTTPException(status_code=500, detail="Internal server error")
+
+    async def _handle_tool_scan(self, request: Request) -> Response:
+        """Handle server-side tool-call security scanning and runtime policy enforcement."""
+        import time
+
+        start_time = time.time()
+        request_id = str(uuid.uuid4())
+        principal = await self._authenticate_request(request)
+
+        try:
+            body = await request.json()
+        except Exception as e:
+            logger.error("tool_scan_invalid_json", request_id=request_id, error=str(e))
+            raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+
+        if not isinstance(body, dict):
+            raise HTTPException(status_code=400, detail="Request body must be a JSON object")
+
+        tool_name = body.get("tool_name")
+        if not isinstance(tool_name, str) or not tool_name.strip():
+            raise HTTPException(status_code=400, detail="'tool_name' is required and must be a non-empty string")
+        args = body.get("args", {})
+        context = body.get("context") or {}
+        session_id = context.get("session_id") or context.get("sessionId")
+        session_context = self.runtime_governance.get_session_context(session_id, principal)
+        if session_id and not session_context:
+            raise HTTPException(status_code=404, detail="Runtime session not found")
+        if session_context:
+            merged_context = dict(context)
+            merged_context["prior_tools"] = session_context["prior_tools"]
+            merged_context["prior_tool_events"] = session_context["prior_tool_events"]
+            merged_context["session_state"] = session_context["state"]
+            context = merged_context
+
+        self._increment_stat("requests_total")
+        self.logger.log_request(
+            request_id=request_id,
+            method=request.method,
+            path="/v1/tools/scan",
+            tool_name=tool_name,
+            session_id=session_id,
+        )
+
+        tool_analysis = self.tool_security.analyze(tool_name, args, context)
+        policy_result = self.policy_engine.evaluate_tool_call(
+            tool_name=tool_name,
+            tool_analysis=tool_analysis,
+            user_id=str(principal.get("user_id")) if principal.get("user_id") else None,
+            context={"principal": principal},
+        )
+
+        should_block = tool_analysis.get("suggested_action") == "block" or policy_result.get("allowed") is False
+        action_taken = "blocked" if should_block else policy_result.get("action", tool_analysis.get("suggested_action", "allow"))
+        severity = tool_analysis.get("risk_class", "medium")
+        governance_result = self.runtime_governance.record_tool_decision(
+            session_id=session_id,
+            principal=principal,
+            request_id=request_id,
+            tool_analysis=tool_analysis,
+            policy_result=policy_result,
+            action_taken=action_taken,
+            allowed=not should_block,
+        )
+        review_ticket = governance_result.get("review_ticket")
+        session_summary = governance_result.get("session")
+
+        self._emit_event(
+            "tool_call_evaluated",
+            {
+                "request_id": request_id,
+                "endpoint": "/v1/tools/scan",
+                "tool_name": tool_name,
+                "risk_class": tool_analysis.get("risk_class"),
+                "action_taken": action_taken,
+                "review_required": tool_analysis.get("review_required"),
+                "user_id": principal.get("user_id"),
+                "api_key_id": principal.get("api_key_id"),
+                "session_id": session_id,
+                "review_ticket_id": review_ticket.get("ticket_id") if review_ticket else None,
+            },
+        )
+
+        if should_block:
+            self._increment_stat("requests_blocked")
+            self._increment_stat("attacks_detected")
+            self.logger.log_attack(
+                request_id=request_id,
+                attack_type="tool_call_security",
+                details={
+                    "tool_analysis": tool_analysis,
+                    "policy_result": policy_result,
+                    "review_ticket": review_ticket,
+                    "session": session_summary,
+                },
+            )
+            self.logger.log_blocked(request_id=request_id, reason=policy_result.get("reason", "Tool call blocked"))
+            self._emit_event(
+                "threat_detected",
+                {
+                    "request_id": request_id,
+                    "endpoint": "/v1/tools/scan",
+                    "attack_type": "tool_call_security",
+                    "confidence": tool_analysis.get("confidence"),
+                    "severity": severity,
+                    "action_taken": "blocked",
+                    "user_id": principal.get("user_id"),
+                    "api_key_id": principal.get("api_key_id"),
+                    "session_id": session_id,
+                    "review_ticket_id": review_ticket.get("ticket_id") if review_ticket else None,
+                },
+            )
+        else:
+            self._increment_stat("requests_allowed")
+            self.logger.log_allowed(request_id=request_id)
+
+        processing_time_ms = (time.time() - start_time) * 1000
+        log_data = {
+            "request_id": request_id,
+            "timestamp": datetime.now(timezone.utc),
+            "provider": "tooling",
+            "model": tool_name,
+            "method": request.method,
+            "path": "/v1/tools/scan",
+            "status_code": 403 if should_block else 200,
+            "latency_ms": processing_time_ms,
+            "is_blocked": should_block,
+            "block_reason": policy_result.get("reason") if should_block else None,
+            "attack_detected": bool(tool_analysis.get("review_required") or tool_analysis.get("detection", {}).get("is_attack")),
+            "attack_type": "tool_call_security" if (should_block or tool_analysis.get("review_required")) else None,
+            "attack_details": {
+                "tool_analysis": tool_analysis,
+                "policy_result": policy_result,
+                "review_ticket": review_ticket,
+                "session": session_summary,
+            },
+            "ip_address": request.client.host if request.client else None,
+            "user_agent": request.headers.get("user-agent"),
+            "user_id": principal.get("user_id"),
+            "api_key_id": principal.get("api_key_id"),
+        }
+        asyncio.create_task(self._log_request_async(log_data))
+
+        response_payload = {
+            "scan_id": request_id,
+            "tool_name": tool_name,
+            "allowed": not should_block,
+            "blocked": should_block,
+            "action": action_taken,
+            "risk_class": tool_analysis.get("risk_class"),
+            "risky_tool": tool_analysis.get("risky_tool"),
+            "review_required": tool_analysis.get("review_required"),
+            "capability_signals": tool_analysis.get("capability_signals"),
+            "provenance_risk": tool_analysis.get("provenance_risk"),
+            "confused_deputy_risk": tool_analysis.get("confused_deputy_risk"),
+            "escalation_signals": tool_analysis.get("escalation_signals"),
+            "trust_context": tool_analysis.get("trust_context"),
+            "confidence": tool_analysis.get("confidence"),
+            "indicators": tool_analysis.get("indicators"),
+            "reasons": tool_analysis.get("reasons"),
+            "sequence_matches": tool_analysis.get("sequence_matches"),
+            "normalization": tool_analysis.get("normalization"),
+            "policy_result": policy_result,
+            "review_ticket": review_ticket,
+            "session": session_summary,
+            "processing_time_ms": processing_time_ms,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+        return JSONResponse(status_code=403 if should_block else 200, content=response_payload)
+
+    async def _handle_create_tool_session(self, request: Request) -> Response:
+        principal = await self._authenticate_request(request)
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+
+        if body is None:
+            body = {}
+        if not isinstance(body, dict):
+            raise HTTPException(status_code=400, detail="Request body must be a JSON object")
+
+        session = self.runtime_governance.create_session(principal, body)
+        self._emit_event(
+            "tool_session_created",
+            {
+                "session_id": session["session_id"],
+                "agent_id": session.get("agent_id"),
+                "intent": session.get("intent"),
+                "user_id": principal.get("user_id"),
+                "api_key_id": principal.get("api_key_id"),
+            },
+        )
+        return JSONResponse(status_code=201, content=session)
+
+    async def _handle_list_tool_sessions(
+        self,
+        request: Request,
+        limit: int = 50,
+        status: Optional[str] = None,
+    ) -> Response:
+        principal = await self._authenticate_request(request)
+        payload = self.runtime_governance.list_sessions(principal, limit=limit, status=status)
+        return JSONResponse(status_code=200, content=payload)
+
+    async def _handle_get_tool_session(self, request: Request, session_id: str) -> Response:
+        principal = await self._authenticate_request(request)
+        session = self.runtime_governance.get_session(session_id, principal)
+        if not session:
+            raise HTTPException(status_code=404, detail="Runtime session not found")
+        return JSONResponse(status_code=200, content=session)
+
+    async def _handle_update_tool_session_state(self, request: Request, session_id: str) -> Response:
+        principal = await self._authenticate_request(request)
+        try:
+            body = await request.json()
+        except Exception as e:
+            logger.error("tool_session_state_invalid_json", session_id=session_id, error=str(e))
+            raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+
+        if not isinstance(body, dict):
+            raise HTTPException(status_code=400, detail="Request body must be a JSON object")
+
+        new_state = body.get("state")
+        note = body.get("note")
+        if not isinstance(new_state, str):
+            raise HTTPException(status_code=400, detail="'state' is required")
+
+        try:
+            session = self.runtime_governance.update_session_state(session_id, principal, new_state, note=note)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+        if not session:
+            raise HTTPException(status_code=404, detail="Runtime session not found")
+
+        self._emit_event(
+            "tool_session_state_changed",
+            {
+                "session_id": session_id,
+                "state": new_state,
+                "user_id": principal.get("user_id"),
+                "api_key_id": principal.get("api_key_id"),
+            },
+        )
+        return JSONResponse(status_code=200, content=session)
+
+    async def _handle_list_tool_reviews(
+        self,
+        request: Request,
+        limit: int = 50,
+        status: Optional[str] = None,
+    ) -> Response:
+        principal = await self._authenticate_request(request)
+        payload = self.runtime_governance.list_reviews(principal, status=status, limit=limit)
+        return JSONResponse(status_code=200, content=payload)
+
+    async def _handle_get_tool_review(self, request: Request, ticket_id: str) -> Response:
+        principal = await self._authenticate_request(request)
+        review = self.runtime_governance.get_review(ticket_id, principal)
+        if not review:
+            raise HTTPException(status_code=404, detail="Runtime review not found")
+        return JSONResponse(status_code=200, content=review)
+
+    async def _handle_review_decision(self, request: Request, ticket_id: str) -> Response:
+        principal = await self._authenticate_request(request)
+        try:
+            body = await request.json()
+        except Exception as e:
+            logger.error("tool_review_decision_invalid_json", ticket_id=ticket_id, error=str(e))
+            raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+
+        if not isinstance(body, dict):
+            raise HTTPException(status_code=400, detail="Request body must be a JSON object")
+
+        decision = body.get("decision")
+        note = body.get("note")
+        if not isinstance(decision, str):
+            raise HTTPException(status_code=400, detail="'decision' is required")
+
+        try:
+            review = self.runtime_governance.decide_review(ticket_id, principal, decision, note=note)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+        if not review:
+            raise HTTPException(status_code=404, detail="Runtime review not found")
+
+        self._emit_event(
+            "tool_review_decided",
+            {
+                "ticket_id": ticket_id,
+                "decision": decision,
+                "session_id": review.get("session_id"),
+                "tool_name": review.get("tool_name"),
+                "user_id": principal.get("user_id"),
+                "api_key_id": principal.get("api_key_id"),
+            },
+        )
+        return JSONResponse(status_code=200, content=review)
 
     async def _handle_rag_scan(self, request: Request) -> Response:
         """

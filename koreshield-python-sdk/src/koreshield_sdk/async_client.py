@@ -13,14 +13,22 @@ from .types import (
     ScanResponse,
     BatchScanRequest,
     BatchScanResponse,
+    DetectionIndicator,
     DetectionResult,
+    DetectionType,
+    LocalPreflightResult,
     RAGDocument,
+    RAGPreflightResult,
     RAGScanRequest,
     RAGScanResponse,
     StreamingScanRequest,
     StreamingScanResponse,
     SecurityPolicy,
     PerformanceMetrics,
+    ThreatLevel,
+    ToolScanResponse,
+    ToolCallPreflightResult,
+    ToolTrustContext,
 )
 from .exceptions import (
     KoreShieldError,
@@ -30,6 +38,11 @@ from .exceptions import (
     ServerError,
     NetworkError,
     TimeoutError,
+)
+from .local_security import (
+    preflight_scan_prompt,
+    preflight_scan_rag_context,
+    preflight_scan_tool_call,
 )
 
 
@@ -165,6 +178,47 @@ class AsyncKoreShieldClient:
                     self._update_metrics(processing_time, is_error=True)
                     raise e
                 await asyncio.sleep(self.auth_config.retry_delay * (2 ** attempt))
+
+    def preflight_prompt(self, prompt: str) -> LocalPreflightResult:
+        """Run a local prompt scan without calling the KoreShield API."""
+        return preflight_scan_prompt(prompt)
+
+    def preflight_tool_call(self, tool_name: str, args: Any, context: Optional[Union[Dict[str, Any], ToolTrustContext]] = None) -> ToolCallPreflightResult:
+        """Run a local tool-call preflight scan before execution."""
+        return preflight_scan_tool_call(tool_name, args, context)
+
+    def preflight_rag_context(
+        self,
+        user_query: str,
+        documents: List[Union[Dict[str, Any], RAGDocument]],
+    ) -> RAGPreflightResult:
+        """Run a local preflight scan across retrieved RAG documents."""
+        rag_documents = []
+        for doc in documents:
+            if isinstance(doc, dict):
+                rag_documents.append(RAGDocument(
+                    id=doc["id"],
+                    content=doc["content"],
+                    metadata=doc.get("metadata", {})
+                ))
+            else:
+                rag_documents.append(doc)
+
+        return preflight_scan_rag_context(user_query, rag_documents)
+
+    async def scan_tool_call(
+        self,
+        tool_name: str,
+        args: Any = None,
+        context: Optional[Union[Dict[str, Any], ToolTrustContext]] = None,
+    ) -> ToolScanResponse:
+        """Scan a tool call server-side before execution."""
+        response = await self._make_request(
+            "POST",
+            "/v1/tools/scan",
+            {"tool_name": tool_name, "args": args, "context": context.model_dump() if isinstance(context, ToolTrustContext) else context},
+        )
+        return ToolScanResponse(**response)
 
     def _passes_security_policy(self, prompt: str) -> bool:
         """Check if prompt passes the current security policy.

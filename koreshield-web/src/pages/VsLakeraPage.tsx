@@ -1,27 +1,28 @@
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle, Code, DollarSign, ExternalLink, Minus, Shield, XCircle } from 'lucide-react';
 import { SEOMeta } from '../components/SEOMeta';
 
 export default function VsLakeraPage() {
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+		<div className="min-h-screen bg-background">
 			<SEOMeta
 				title="KoreShield vs Lakera Guard"
 				description="Compare KoreShield and Lakera Guard: features, pricing, and which LLM security solution is right for your needs."
 			/>
 
 			{/* Hero */}
-			<section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+			<section className="py-20 px-4 bg-background relative ambient-glow">
 				<div className="max-w-7xl mx-auto">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						className="text-center"
 					>
-						<h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
+						<h1 className="text-5xl font-bold text-foreground mb-6">
 							KoreShield vs Lakera Guard
 						</h1>
-						<p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
 							An honest comparison of two leading LLM security solutions
 						</p>
 					</motion.div>
@@ -36,12 +37,12 @@ export default function VsLakeraPage() {
 					transition={{ delay: 0.1 }}
 					className="grid md:grid-cols-2 gap-8"
 				>
-					<div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
+					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
 						<div className="flex items-center gap-3 mb-4">
-							<Shield className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-							<h2 className="text-2xl font-bold text-gray-900 dark:text-white">KoreShield</h2>
+							<Shield className="w-8 h-8 text-electric-green" />
+							<h2 className="text-2xl font-bold text-foreground">KoreShield</h2>
 						</div>
-						<p className="text-gray-600 dark:text-gray-400 mb-4">
+						<p className="text-muted-foreground mb-4">
 							Enterprise-grade LLM security with 95% detection accuracy and multi-provider support.
 						</p>
 						<div className="space-y-2">
@@ -64,12 +65,12 @@ export default function VsLakeraPage() {
 						</div>
 					</div>
 
-					<div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
+					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
 						<div className="flex items-center gap-3 mb-4">
 							<Shield className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-							<h2 className="text-2xl font-bold text-gray-900 dark:text-white">Lakera Guard</h2>
+							<h2 className="text-2xl font-bold text-foreground">Lakera Guard</h2>
 						</div>
-						<p className="text-gray-600 dark:text-gray-400 mb-4">
+						<p className="text-muted-foreground mb-4">
 							Closed-source enterprise LLM security platform with Fortune 500 customers and proven track record.
 						</p>
 						<div className="space-y-2">
@@ -98,69 +99,63 @@ export default function VsLakeraPage() {
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.2 }}
-					className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden"
+					className="bg-card rounded-xl shadow-lg border border-border overflow-hidden"
 				>
 					<div className="p-8">
-						<h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Feature Comparison</h2>
+						<h2 className="text-3xl font-bold text-foreground mb-6">Feature Comparison</h2>
 						<div className="overflow-x-auto">
 							<table className="w-full">
-								<thead className="border-b border-gray-200 dark:border-gray-800">
+								<thead className="border-b border-border">
 									<tr>
-										<th className="text-left py-4 px-4 text-gray-900 dark:text-white font-semibold">Feature</th>
-										<th className="text-center py-4 px-4 text-blue-600 dark:text-blue-400 font-semibold">KoreShield</th>
+										<th className="text-left py-4 px-4 text-foreground font-semibold">Feature</th>
+										<th className="text-center py-4 px-4 text-electric-green font-semibold">KoreShield</th>
 										<th className="text-center py-4 px-4 text-purple-600 dark:text-purple-400 font-semibold">Lakera Guard</th>
 									</tr>
 								</thead>
-								<tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-								{/* COMMENTED: Transparency row hidden
-								<tr>
-									<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Transparency</td>
-									<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-									<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
-								</tr>
-								COMMENTED */}
+								<tbody className="divide-y divide-border">
+								
 									<tr>
-										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Detection Accuracy</td>
-										<td className="py-4 px-4 text-center text-gray-900 dark:text-white">95%+</td>
-										<td className="py-4 px-4 text-center text-gray-900 dark:text-white">~90%</td>
+										<td className="py-4 px-4 text-foreground font-medium">Detection Accuracy</td>
+										<td className="py-4 px-4 text-center text-foreground">95%+</td>
+										<td className="py-4 px-4 text-center text-foreground">~90%</td>
 									</tr>
 									<tr>
-										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Multi-Provider Support</td>
+										<td className="py-4 px-4 text-foreground font-medium">Multi-Provider Support</td>
 										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
 										<td className="py-4 px-4 text-center"><Minus className="w-6 h-6 text-yellow-500 mx-auto" /></td>
 									</tr>
 									<tr>
-										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Self-Hosted Option</td>
+										<td className="py-4 px-4 text-foreground font-medium">Self-Hosted Option</td>
 										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
 										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
 									</tr>
 									<tr>
-										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Multi-Tenancy</td>
+										<td className="py-4 px-4 text-foreground font-medium">Multi-Tenancy</td>
 										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
 										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
 									</tr>
 									<tr>
-										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">RBAC</td>
+										<td className="py-4 px-4 text-foreground font-medium">RBAC</td>
 										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
 										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
 									</tr>
 									<tr>
-										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Custom Rules</td>
+										<td className="py-4 px-4 text-foreground font-medium">Custom Rules</td>
 										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
 										<td className="py-4 px-4 text-center"><Minus className="w-6 h-6 text-yellow-500 mx-auto" /></td>
 									</tr>
 									<tr>
-										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">RAG Protection</td>
+										<td className="py-4 px-4 text-foreground font-medium">RAG Protection</td>
 										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
 										<td className="py-4 px-4 text-center"><Minus className="w-6 h-6 text-yellow-500 mx-auto" /></td>
 									</tr>
 									<tr>
-										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Starting Price</td>
-										<td className="py-4 px-4 text-center text-gray-900 dark:text-white font-semibold">$299/mo</td>
-										<td className="py-4 px-4 text-center text-gray-900 dark:text-white font-semibold">$999/mo</td>
+										<td className="py-4 px-4 text-foreground font-medium">Starting Price</td>
+										<td className="py-4 px-4 text-center text-foreground font-semibold">$299/mo</td>
+										<td className="py-4 px-4 text-center text-foreground font-semibold">$999/mo</td>
 									</tr>
 									<tr>
-										<td className="py-4 px-4 text-gray-900 dark:text-white font-medium">Community Support</td>
+										<td className="py-4 px-4 text-foreground font-medium">Community Support</td>
 										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
 										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
 									</tr>
@@ -175,16 +170,16 @@ export default function VsLakeraPage() {
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.3 }}
-					className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8"
+					className="bg-card rounded-xl shadow-lg border border-border p-8"
 				>
 					<div className="flex items-center gap-3 mb-6">
-						<DollarSign className="w-8 h-8 text-green-600 dark:text-green-400" />
-						<h2 className="text-3xl font-bold text-gray-900 dark:text-white">Pricing Comparison</h2>
+						<DollarSign className="w-8 h-8 text-electric-green" />
+						<h2 className="text-3xl font-bold text-foreground">Pricing Comparison</h2>
 					</div>
 					<div className="grid md:grid-cols-2 gap-8">
 						<div>
-							<h3 className="text-xl font-semibold text-blue-600 dark:text-blue-400 mb-4">KoreShield</h3>
-							<ul className="space-y-3 text-gray-600 dark:text-gray-400">
+							<h3 className="text-xl font-semibold text-electric-green mb-4">KoreShield</h3>
+							<ul className="space-y-3 text-muted-foreground">
 							<li>• <strong>$299/mo:</strong> Startup (1M requests/mo)</li>
 							<li>• <strong>$1,999/mo:</strong> Growth (10M requests/mo)</li>
 							<li>• <strong>Custom:</strong> Enterprise self-hosted</li>
@@ -193,7 +188,7 @@ export default function VsLakeraPage() {
 						</div>
 						<div>
 							<h3 className="text-xl font-semibold text-purple-600 dark:text-purple-400 mb-4">Lakera Guard</h3>
-							<ul className="space-y-3 text-gray-600 dark:text-gray-400">
+							<ul className="space-y-3 text-muted-foreground">
 								<li>• <strong>No free tier</strong></li>
 								<li>• <strong>$999/mo:</strong> Starting plan</li>
 								<li>• <strong>$5K+/mo:</strong> Professional</li>
@@ -211,62 +206,62 @@ export default function VsLakeraPage() {
 					transition={{ delay: 0.4 }}
 					className="grid md:grid-cols-2 gap-8"
 				>
-					<div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
-						<h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-6">KoreShield Advantages</h3>
+					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
+						<h3 className="text-2xl font-bold text-electric-green mb-6">KoreShield Advantages</h3>
 						<ul className="space-y-3">
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Deployment Flexibility:</strong> Self-hosted and managed options</span>
+								<span className="text-foreground"><strong>Deployment Flexibility:</strong> Self-hosted and managed options</span>
 							</li>
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Cost:</strong> 50-70% cheaper for similar features</span>
+								<span className="text-foreground"><strong>Cost:</strong> 50-70% cheaper for similar features</span>
 							</li>
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Flexibility:</strong> Self-hosted or cloud deployment</span>
+								<span className="text-foreground"><strong>Flexibility:</strong> Self-hosted or cloud deployment</span>
 							</li>
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Multi-Provider:</strong> Works with all major LLMs</span>
+								<span className="text-foreground"><strong>Multi-Provider:</strong> Works with all major LLMs</span>
 							</li>
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Community:</strong> Active contributors and support</span>
+								<span className="text-foreground"><strong>Community:</strong> Active contributors and support</span>
 							</li>
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Accuracy:</strong> 95%+ detection rate</span>
+								<span className="text-foreground"><strong>Accuracy:</strong> 95%+ detection rate</span>
 							</li>
 						</ul>
 					</div>
 
-					<div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
+					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
 						<h3 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-6">Lakera Guard Advantages</h3>
 						<ul className="space-y-3">
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>First-Mover:</strong> Established market presence</span>
+								<span className="text-foreground"><strong>First-Mover:</strong> Established market presence</span>
 							</li>
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Enterprise Customers:</strong> Fortune 500 validation</span>
+								<span className="text-foreground"><strong>Enterprise Customers:</strong> Fortune 500 validation</span>
 							</li>
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Managed Service:</strong> Fully managed platform</span>
+								<span className="text-foreground"><strong>Managed Service:</strong> Fully managed platform</span>
 							</li>
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Marketing:</strong> Strong brand recognition</span>
+								<span className="text-foreground"><strong>Marketing:</strong> Strong brand recognition</span>
 							</li>
 							<li className="flex gap-3">
 								<XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Closed Source:</strong> No code transparency</span>
+								<span className="text-foreground"><strong>Closed Source:</strong> No code transparency</span>
 							</li>
 							<li className="flex gap-3">
 								<XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-1" />
-								<span className="text-gray-900 dark:text-white"><strong>Expensive:</strong> Premium pricing tier</span>
+								<span className="text-foreground"><strong>Expensive:</strong> Premium pricing tier</span>
 							</li>
 						</ul>
 					</div>
@@ -277,13 +272,13 @@ export default function VsLakeraPage() {
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.5 }}
-					className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-8"
+					className="bg-card border border-border rounded-xl p-8"
 				>
-					<h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Which Should You Choose?</h2>
+					<h2 className="text-3xl font-bold text-foreground mb-8 text-center">Which Should You Choose?</h2>
 					<div className="grid md:grid-cols-2 gap-8">
-						<div className="bg-white dark:bg-gray-900 rounded-lg p-6">
-							<h3 className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4">Choose KoreShield if:</h3>
-							<ul className="space-y-2 text-gray-700 dark:text-gray-300">
+						<div className="bg-card rounded-lg p-6">
+							<h3 className="text-xl font-bold text-electric-green mb-4">Choose KoreShield if:</h3>
+							<ul className="space-y-2 text-muted-foreground">
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You value transparency and control</li>
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You want cost-effective enterprise security</li>
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You need self-hosted/air-gapped deployment</li>
@@ -292,9 +287,9 @@ export default function VsLakeraPage() {
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You're building a startup or mid-market product</li>
 							</ul>
 						</div>
-						<div className="bg-white dark:bg-gray-900 rounded-lg p-6">
+						<div className="bg-card rounded-lg p-6">
 							<h3 className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-4">Choose Lakera Guard if:</h3>
-							<ul className="space-y-2 text-gray-700 dark:text-gray-300">
+							<ul className="space-y-2 text-muted-foreground">
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" /> You prefer fully managed solutions</li>
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" /> You have a large enterprise budget</li>
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" /> You want proven Fortune 500 validation</li>
@@ -311,27 +306,25 @@ export default function VsLakeraPage() {
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.6 }}
-					className="bg-blue-600 dark:bg-blue-900 rounded-xl p-8 text-center text-white"
+					className="bg-card border border-border rounded-xl p-10 text-center"
 				>
-					<h2 className="text-3xl font-bold mb-4">Upgrade to KoreShield</h2>
-					<p className="text-xl mb-6 text-blue-100">
+					<h2 className="text-3xl font-bold mb-4 text-foreground">Upgrade to KoreShield</h2>
+					<p className="text-lg mb-8 text-muted-foreground">
 						Get enterprise-ready security with the same security-first values
 					</p>
 					<div className="flex flex-wrap justify-center gap-4">
-						<a
-							href="/pricing"
-							className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+						<Link to="/pricing"
+							className="inline-flex items-center gap-2 px-6 py-3 bg-electric-green hover:bg-emerald-bright text-white rounded-lg font-semibold transition-colors"
 						>
 							<Code className="w-5 h-5" />
 							Upgrade Now
-						</a>
-						<a
-							href="/playground"
-							className="inline-flex items-center gap-2 px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-semibold transition-colors"
+						</Link>
+						<Link to="/playground"
+							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"
 						>
 							Try Interactive Demo
 							<ExternalLink className="w-5 h-5" />
-						</a>
+						</Link>
 					</div>
 				</motion.div>
 			</div>

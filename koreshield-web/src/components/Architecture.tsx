@@ -28,10 +28,10 @@ function Architecture() {
                     className="text-center mb-16"
                 >
                     <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-foreground tracking-[-0.04em]">
-                        How It Works
+                        Zero Rearchitecting Required
                     </h2>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                        KoreShield sits between your application and LLM providers, analyzing every request in real-time.
+                        Point KoreShield at your existing LLM provider. Every request is inspected, scored, and either passed through or stopped — without changing a line of your application code.
                     </p>
                 </motion.div>
 
@@ -59,7 +59,7 @@ function Architecture() {
                                 <span className="ml-4 text-foreground/70">messages=[&#123;...&#125;]</span><br />
                                 <span className="text-foreground/70">)</span>
                             </div>
-                            <p className="text-xs text-muted-foreground">Drop-in SDK — zero code changes needed.</p>
+                            <p className="text-xs text-muted-foreground">Works as a drop-in replacement. No refactoring needed.</p>
                         </div>
                     </motion.div>
 
@@ -89,8 +89,8 @@ function Architecture() {
                                     <Shield className="w-7 h-7 text-electric-green" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-foreground">Real-time Analysis</h3>
-                                    <p className="text-sm text-muted-foreground">Every request scanned in &lt;30ms</p>
+                                    <h3 className="text-lg font-bold text-foreground">Intercepted &amp; Analyzed</h3>
+                                    <p className="text-sm text-muted-foreground">Scored and classified in &lt;30ms</p>
                                 </div>
                             </div>
 
@@ -128,7 +128,7 @@ function Architecture() {
                                 </div>
                             ))}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-3">Safe, sanitized requests reach your LLMs.</p>
+                        <p className="text-xs text-muted-foreground mt-3">Only clean, policy-compliant requests reach your providers.</p>
                     </motion.div>
                 </div>
             </div>

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, CreditCard, RefreshCw, ShieldCheck } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api-client';
 
 type BillingAccount = {
@@ -42,11 +43,16 @@ const plans = [
 ];
 
 export default function BillingPage() {
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [account, setAccount] = useState<BillingAccount | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 	const [busyAction, setBusyAction] = useState<string | null>(null);
-	const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
+	const [checkoutNotice, setCheckoutNotice] = useState('');
+	const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>(
+		searchParams.get('period') === 'annual' ? 'annual' : 'monthly'
+	);
+	const autoCheckoutStarted = useRef(false);
 
 	const loadAccount = async () => {
 		setError('');
@@ -65,7 +71,19 @@ export default function BillingPage() {
 		void loadAccount();
 	}, []);
 
-	const handleCheckout = async (productId?: string) => {
+	useEffect(() => {
+		if (searchParams.get('period') === 'annual') {
+			setBillingPeriod('annual');
+			return;
+		}
+		setBillingPeriod('monthly');
+	}, [searchParams]);
+
+	const handleCheckout = async (
+		productId?: string,
+		planId?: string | null,
+		periodOverride?: 'monthly' | 'annual',
+	) => {
 		if (!productId) {
 			setError('Missing product ID. Set the VITE_POLAR_*_PRODUCT_ID environment variable first.');
 			return;
@@ -74,7 +92,15 @@ export default function BillingPage() {
 		setBusyAction(productId);
 		setError('');
 		try {
-			const response = await api.createBillingCheckout(productId, `${window.location.origin}/billing`) as BillingActionResponse;
+			const period = periodOverride || billingPeriod;
+			const successUrl = new URL('/billing', window.location.origin);
+			successUrl.searchParams.set('checkout', 'success');
+			successUrl.searchParams.set('period', period);
+			if (planId) {
+				successUrl.searchParams.set('plan', planId);
+			}
+
+			const response = await api.createBillingCheckout(productId, successUrl.toString()) as BillingActionResponse;
 			if (response?.url) {
 				window.location.href = response.url;
 				return;
@@ -117,6 +143,34 @@ export default function BillingPage() {
 		}
 	};
 
+	useEffect(() => {
+		if (searchParams.get('checkout') !== 'success') {
+			return;
+		}
+
+		setCheckoutNotice('Payment completed. Syncing your account with Polar now.');
+		void handleSync().finally(() => {
+			setSearchParams((current) => {
+				const next = new URLSearchParams(current);
+				next.delete('checkout');
+				return next;
+			}, { replace: true });
+		});
+	}, [searchParams, setSearchParams]);
+
+	useEffect(() => {
+		if (loading || autoCheckoutStarted.current || searchParams.get('checkout') !== '1') {
+			return;
+		}
+
+		const planId = searchParams.get('plan');
+		const period = searchParams.get('period') === 'annual' ? 'annual' : 'monthly';
+		const plan = plans.find((item) => item.name.toLowerCase() === planId);
+		const productId = plan ? (period === 'annual' ? plan.annualProductId : plan.monthlyProductId) : undefined;
+		autoCheckoutStarted.current = true;
+		void handleCheckout(productId, planId, period);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [loading, searchParams]);
 	return (
 		<div className="min-h-screen bg-background">
 			<header className="border-b border-border bg-card">
@@ -232,6 +286,9 @@ export default function BillingPage() {
 						<p className="text-sm text-muted-foreground mt-1">
 							These buttons launch Polar checkout using the configured GBP product IDs for monthly or annual billing.
 						</p>
+						{checkoutNotice && (
+							<p className="text-sm text-emerald-600 mt-2">{checkoutNotice}</p>
+						)}
 					</div>
 
 					<div className="inline-flex rounded-xl border border-border bg-card p-1">
@@ -267,7 +324,11 @@ export default function BillingPage() {
 									{billingPeriod === 'annual' ? plan.annualLabel : plan.monthlyLabel}
 								</div>
 								<button
-									onClick={() => void handleCheckout(billingPeriod === 'annual' ? plan.annualProductId : plan.monthlyProductId)}
+									onClick={() => void handleCheckout(
+										billingPeriod === 'annual' ? plan.annualProductId : plan.monthlyProductId,
+										plan.name.toLowerCase(),
+										billingPeriod,
+									)}
 									disabled={busyAction === (billingPeriod === 'annual' ? plan.annualProductId : plan.monthlyProductId)}
 									className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors disabled:opacity-60"
 								>

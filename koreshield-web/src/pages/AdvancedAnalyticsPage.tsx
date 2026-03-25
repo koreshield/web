@@ -72,7 +72,7 @@ export function AdvancedAnalyticsPage() {
 			case 'high': return 'bg-red-500/10 text-red-600 border-red-500/50';
 			case 'medium': return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/50';
 			case 'low': return 'bg-blue-500/10 text-blue-600 border-blue-500/50';
-			default: return 'bg-gray-500/10 text-gray-600 border-gray-500/50';
+			default: return 'bg-muted text-muted-foreground border-border';
 		}
 	};
 

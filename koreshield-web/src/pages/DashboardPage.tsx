@@ -36,6 +36,7 @@ export function DashboardPage() {
 
 		// Connect to WebSocket
 		wsClient.connect();
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setWsConnected(wsClient.isConnected());
 
 		// Subscribe to threat events
@@ -122,8 +123,8 @@ export function DashboardPage() {
 										</>
 									) : (
 										<>
-											<WifiOff className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-											<span className="text-xs font-medium text-gray-500 hidden sm:inline">Connecting...</span>
+											<WifiOff className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
+											<span className="text-xs font-medium text-muted-foreground hidden sm:inline">Connecting...</span>
 										</>
 									)}
 								</div>
