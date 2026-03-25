@@ -86,6 +86,12 @@ export function LoginPage() {
                         <span className="font-bold text-foreground">KoreShield</span>
                     </div>
 
+                    {(location.state as any)?.passwordReset && (
+                        <div className="mb-6 p-3 bg-electric-green/10 border border-electric-green/20 rounded-lg text-sm text-electric-green font-medium">
+                            Password updated — sign in with your new credentials.
+                        </div>
+                    )}
+
                     <div className="mb-8">
                         <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 tracking-tight">Welcome back</h1>
                         <p className="text-muted-foreground">Your security dashboard is one step away.</p>
