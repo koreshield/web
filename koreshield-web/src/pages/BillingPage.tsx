@@ -171,7 +171,6 @@ export default function BillingPage() {
 		void handleCheckout(productId, planId, period);
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [loading, searchParams]);
-
 	return (
 		<div className="min-h-screen bg-background">
 			<header className="border-b border-border bg-card">
