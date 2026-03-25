@@ -24,10 +24,10 @@ export function RAGShowcase() {
             <div className="max-w-7xl mx-auto relative z-10">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-foreground tracking-[-0.04em]">
-                        Secure Your RAG Pipeline
+                        Your Documents Can Attack Your LLM
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-                        Prevent indirect prompt injection attacks where malicious content in retrieved documents hijacks your LLM.
+                        Indirect prompt injection is the quiet threat in RAG pipelines. A single poisoned document in your knowledge base can silently redirect your LLM's behavior — without anyone knowing until it's too late.
                     </p>
                 </div>
 

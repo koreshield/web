@@ -20,8 +20,14 @@ import {
   RAGScanResponse,
   RAGScanConfig,
   RAGBatchScanItem,
+  PreflightScanResult,
+  ToolCallPreflightResult,
+  RAGPreflightResult,
+  ToolScanRequest,
+  ToolScanResponse,
 } from '../types';
 import { validateConfig } from '../utils';
+import { preflightScanPrompt, preflightScanRAGContext, preflightScanToolCall } from '../local/security';
 
 export class KoreShieldClient {
   private client: AxiosInstance;
@@ -144,6 +150,27 @@ export class KoreShieldClient {
       this.updateMetrics(processingTime, true);
       throw this.handleError(error);
     }
+  }
+
+  /**
+   * Run a local preflight prompt scan without calling the KoreShield API.
+   */
+  preflightPrompt(prompt: string): PreflightScanResult {
+    return preflightScanPrompt(prompt);
+  }
+
+  /**
+   * Run a local preflight tool-call scan before execution.
+   */
+  preflightToolCall(toolName: string, args: unknown, context?: ToolScanRequest['context']): ToolCallPreflightResult {
+    return preflightScanToolCall(toolName, args, context);
+  }
+
+  /**
+   * Run a local preflight scan across retrieved RAG documents.
+   */
+  preflightRAGContext(userQuery: string, documents: RAGDocument[]): RAGPreflightResult {
+    return preflightScanRAGContext(userQuery, documents);
   }
 
   /**
@@ -441,6 +468,30 @@ export class KoreShieldClient {
     }
 
     return results;
+  }
+
+  /**
+   * Scan a tool call server-side before execution.
+   */
+  async scanToolCall(
+    toolName: string,
+    args?: unknown,
+    context?: ToolScanRequest['context'],
+  ): Promise<ToolScanResponse> {
+    try {
+      const payload: ToolScanRequest = {
+        tool_name: toolName,
+        args,
+        context,
+      };
+      const response: AxiosResponse<ToolScanResponse> = await this.client.post(
+        '/v1/tools/scan',
+        payload,
+      );
+      return response.data;
+    } catch (error: any) {
+      throw this.handleError(error);
+    }
   }
 
   /**

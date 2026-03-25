@@ -63,6 +63,7 @@ function TerminalAnimation() {
 		}, demoIndex === 0 ? 800 : 2000);
 
 		return () => clearTimeout(timeout);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [autoPlaying, phase, demoIndex]);
 
 	const animateTyping = useCallback((text: string) => {

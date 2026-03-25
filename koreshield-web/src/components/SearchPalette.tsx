@@ -107,7 +107,7 @@ export function SearchPalette({ mobile }: SearchPaletteProps) {
       {mobile ? (
         <button
           onClick={() => setOpen(true)}
-          className="flex md:hidden items-center justify-center p-2 text-gray-400 hover:text-white transition-colors"
+          className="flex md:hidden items-center justify-center p-2 text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Search"
         >
           <Search className="w-5 h-5" />

@@ -301,7 +301,6 @@ export function RAGSecurityPage() {
 
 	useEffect(() => {
 		refreshHistory();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [currentUser?.id]);
 
 	const maxFileSizeBytes = 10 * 1024 * 1024;
@@ -376,7 +375,7 @@ export function RAGSecurityPage() {
 						extracted_at: new Date().toISOString()
 					}
 				});
-			} catch (err) {
+			} catch {
 				showError(`Failed to read file: ${file.name}`);
 			}
 		}
@@ -558,7 +557,7 @@ export function RAGSecurityPage() {
 			case 'high': return 'text-orange-600 bg-orange-500/10 border-orange-500/50';
 			case 'medium': return 'text-yellow-600 bg-yellow-500/10 border-yellow-500/50';
 			case 'low': return 'text-blue-600 bg-blue-500/10 border-blue-500/50';
-			default: return 'text-gray-600 bg-gray-500/10 border-gray-500/50';
+			default: return 'text-muted-foreground bg-muted border-border';
 		}
 	};
 
@@ -854,7 +853,7 @@ export function RAGSecurityPage() {
 										}))}
 										className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${scanConfig.enable_cross_document_analysis
 												? 'bg-primary'
-												: 'bg-gray-300'
+												: 'bg-muted'
 											}`}
 									>
 										<span
