@@ -24,6 +24,7 @@ const DemoPage = lazy(() => import('./pages/DemoPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const IntegrationsPage = lazy(() => import('./pages/IntegrationsPage'));
 const ChangelogPage = lazy(() => import('./pages/ChangelogPage'));
@@ -239,11 +240,11 @@ function AppContent() {
 						}
 					/>
 					<Route
-						path="/forgot-password"
+						path="/reset-password"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
-									<ForgotPasswordPage />
+									<ResetPasswordPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}

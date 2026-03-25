@@ -131,6 +131,19 @@ export const authService = {
 		}
 	},
 
+	async resetPassword(token: string, newPassword: string): Promise<void> {
+		const response = await fetch(`${API_BASE_URL}/v1/management/reset-password`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ token, new_password: newPassword })
+		});
+
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({ detail: 'Request failed' }));
+			throw new Error(error.detail || 'Failed to reset password');
+		}
+	},
+
 	on(event: AuthEventType, handler: AuthEventHandler) {
 		eventEmitter.on(event, handler);
 	},
