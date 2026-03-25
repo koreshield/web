@@ -67,7 +67,7 @@ export function ComplianceReportsPage() {
 			case 'fail':
 				return 'text-red-600 bg-red-500/10 border-red-500/50';
 			default:
-				return 'text-gray-600 bg-gray-500/10 border-gray-500/50';
+				return 'text-muted-foreground bg-muted border-border';
 		}
 	};
 
@@ -83,7 +83,7 @@ export function ComplianceReportsPage() {
 			case 'fail':
 				return <AlertTriangle className="w-5 h-5 text-red-600" />;
 			default:
-				return <Clock className="w-5 h-5 text-gray-600" />;
+				return <Clock className="w-5 h-5 text-muted-foreground" />;
 		}
 	};
 

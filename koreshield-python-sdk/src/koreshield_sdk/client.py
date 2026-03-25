@@ -13,9 +13,14 @@ from .types import (
     BatchScanRequest,
     BatchScanResponse,
     DetectionResult,
+    LocalPreflightResult,
     RAGDocument,
+    RAGPreflightResult,
     RAGScanRequest,
     RAGScanResponse,
+    ToolScanResponse,
+    ToolCallPreflightResult,
+    ToolTrustContext,
 )
 from .exceptions import (
     KoreShieldError,
@@ -25,6 +30,11 @@ from .exceptions import (
     ServerError,
     NetworkError,
     TimeoutError,
+)
+from .local_security import (
+    preflight_scan_prompt,
+    preflight_scan_rag_context,
+    preflight_scan_tool_call,
 )
 
 
@@ -87,6 +97,47 @@ class KoreShieldClient:
 
         scan_response = ScanResponse(**response)
         return scan_response.result
+
+    def preflight_prompt(self, prompt: str) -> LocalPreflightResult:
+        """Run a local prompt scan without calling the KoreShield API."""
+        return preflight_scan_prompt(prompt)
+
+    def preflight_tool_call(self, tool_name: str, args: Any, context: Optional[Union[Dict[str, Any], ToolTrustContext]] = None) -> ToolCallPreflightResult:
+        """Run a local tool-call preflight scan before execution."""
+        return preflight_scan_tool_call(tool_name, args, context)
+
+    def preflight_rag_context(
+        self,
+        user_query: str,
+        documents: List[Union[Dict[str, Any], RAGDocument]],
+    ) -> RAGPreflightResult:
+        """Run a local preflight scan across retrieved RAG documents."""
+        rag_documents = []
+        for doc in documents:
+            if isinstance(doc, dict):
+                rag_documents.append(RAGDocument(
+                    id=doc["id"],
+                    content=doc["content"],
+                    metadata=doc.get("metadata", {})
+                ))
+            else:
+                rag_documents.append(doc)
+
+        return preflight_scan_rag_context(user_query, rag_documents)
+
+    def scan_tool_call(
+        self,
+        tool_name: str,
+        args: Any = None,
+        context: Optional[Union[Dict[str, Any], ToolTrustContext]] = None,
+    ) -> ToolScanResponse:
+        """Scan a tool call server-side before execution."""
+        response = self._make_request(
+            "POST",
+            "/v1/tools/scan",
+            {"tool_name": tool_name, "args": args, "context": context.model_dump() if isinstance(context, ToolTrustContext) else context},
+        )
+        return ToolScanResponse(**response)
 
     def scan_batch(self, prompts: List[str], parallel: bool = True, max_concurrent: int = 10) -> List[DetectionResult]:
         """Scan multiple prompts for security threats.

@@ -4,11 +4,35 @@ Attack detection engine for identifying prompt injection attempts.
 
 from typing import Dict, List, Optional
 import re
+import time
 import structlog
 from .rule_engine import RuleEngine
 from .list_manager import ListManager, ListType
+from .normalization import normalize_text
 
 logger = structlog.get_logger(__name__)
+
+DEFAULT_DETECTOR_PERFORMANCE_BUDGETS = {
+    "target_p50_ms": 8.0,
+    "target_p95_ms": 20.0,
+    "max_prompt_chars": 20000,
+    "max_normalized_expansion_ratio": 1.5,
+}
+
+HIGH_RISK_PATTERNS = [
+    ("instruction_override", re.compile(r"ignore\s+(?:all\s+)?(?:previous|prior|above|earlier)\s+(?:instructions|rules|prompts|guidelines|context)", re.IGNORECASE), "high", 0.35),
+    ("system_prompt_spoof", re.compile(r"\[\s*(?:system|admin|developer|override)\s*:?.*?\]", re.IGNORECASE | re.DOTALL), "high", 0.30),
+    ("role_hijack", re.compile(r"(?:you\s+are\s+now|act\s+as|pretend\s+to\s+be)\b", re.IGNORECASE), "medium", 0.20),
+    ("developer_mode", re.compile(r"\b(?:developer|debug|dan|god)\s+mode\b", re.IGNORECASE), "high", 0.30),
+    ("prompt_leakage", re.compile(r"(?:reveal|show|display|leak)\s+(?:your\s+)?(?:system\s+prompt|instructions?|hidden\s+prompt)", re.IGNORECASE), "high", 0.40),
+    ("data_exfiltration", re.compile(r"(?:send|upload|transmit|export)\s+(?:all\s+|the\s+)?(?:data|credentials|passwords|secrets?)", re.IGNORECASE), "high", 0.35),
+    ("markdown_image_exfiltration", re.compile(r"!\[[^\]]*\]\(https?:\/\/[^)]*\?[^)]*(?:data|q|query|text|payload|exfil|leak|steal)=", re.IGNORECASE), "critical", 0.50),
+    ("credential_enumeration", re.compile(r"list\s+(?:all\s+)?(?:available\s+)?(?:api\s*keys?|tokens?|passwords?|credentials?|secrets?)", re.IGNORECASE), "critical", 0.45),
+    ("encoded_prompt_exfiltration", re.compile(r"(?:base64|encode|encrypt)\s+(?:the\s+)?(?:system\s+)?prompt\s+(?:and\s+)?(?:embed|hide|put|include)", re.IGNORECASE), "critical", 0.45),
+    ("side_channel_exfiltration", re.compile(r"vary\s+(?:the\s+)?(?:length|format|style|wording)\s+(?:of\s+)?(?:your\s+)?responses?\s+(?:based\s+on|according\s+to)\s+(?:each\s+)?(?:character|letter|word|byte)", re.IGNORECASE), "high", 0.35),
+    ("privileged_tool_abuse", re.compile(r"(?:use|call)\s+(?:the\s+)?(?:admin|root|sudo|superuser|privileged)\s+(?:tool|function|command|access)\s+(?:to\s+)?(?:grant|give|allow|enable)", re.IGNORECASE), "critical", 0.45),
+    ("recursive_tool_abuse", re.compile(r"call\s+(?:yourself|this\s+(?:function|tool|agent))\s+recursively", re.IGNORECASE), "high", 0.35),
+]
 
 
 class AttackDetector:
@@ -63,12 +87,24 @@ class AttackDetector:
             - confidence: Confidence score (0-1)
             - indicators: List of attack indicators
         """
+        started_at = time.perf_counter()
         indicators = []
         attack_type = None
         confidence = 0.0
-
-        # Basic detection heuristics
+        normalization = normalize_text(prompt)
+        normalized_prompt = normalization["normalized"]
         prompt_lower = prompt.lower()
+        normalized_lower = normalized_prompt.lower()
+        scan_variants = [("raw", prompt, prompt_lower)]
+        if normalized_prompt != prompt:
+            scan_variants.append(("normalized", normalized_prompt, normalized_lower))
+            indicators.append(
+                {
+                    "type": "normalization_applied",
+                    "severity": "low",
+                    "layers": normalization["layers"],
+                }
+            )
 
         # Check for common injection patterns
         injection_keywords = [
@@ -119,40 +155,59 @@ class AttackDetector:
         ]
 
         for keyword in injection_keywords:
-            if keyword in prompt_lower:
+            if keyword in normalized_lower:
                 indicators.append(
                     {"type": "keyword_match", "keyword": keyword, "severity": "medium"}
                 )
                 confidence += 0.2
 
+        for pattern_name, pattern, severity, score in HIGH_RISK_PATTERNS:
+            for source, target, _target_lower in scan_variants:
+                if pattern.search(target):
+                    indicators.append(
+                        {
+                            "type": pattern_name,
+                            "severity": severity,
+                            "source": source,
+                        }
+                    )
+                    confidence += score
+                    break
+
         # Check for suspicious patterns
-        if "```" in prompt and ("system" in prompt_lower or "instruction" in prompt_lower):
+        if "```" in prompt and ("system" in normalized_lower or "instruction" in normalized_lower):
             indicators.append({"type": "code_block_injection", "severity": "high"})
             confidence += 0.3
 
         # Check for role manipulation attempts
-        if any(role in prompt_lower for role in ["you are", "act as", "pretend to be"]):
+        if any(role in normalized_lower for role in ["you are", "act as", "pretend to be"]):
             indicators.append({"type": "role_manipulation", "severity": "medium"})
             confidence += 0.25
 
         # Phase 1: Advanced pattern detection
         # Check for encoding attempts (base64, hex, etc.)
-        import re
-        if re.search(r'[A-Za-z0-9+/=]{20,}', prompt):  # Potential base64
+        if "base64_decode" in normalization["layers"] or "hex_decode" in normalization["layers"]:
+            indicators.append({"type": "encoding_attempt", "severity": "high"})
+            confidence += 0.4
+        elif re.search(r'[A-Za-z0-9+/=]{20,}', prompt):  # Potential base64
             indicators.append({"type": "encoding_attempt", "severity": "high"})
             confidence += 0.4
 
         # Check for prompt leaking attempts
         leaking_keywords = ["reveal prompt", "show system", "display instructions", "leak prompt", "system prompt"]
-        if any(phrase in prompt_lower for phrase in leaking_keywords):
+        if any(phrase in normalized_lower for phrase in leaking_keywords):
             indicators.append({"type": "prompt_leaking", "severity": "high"})
             confidence += 0.5
 
         # Check for data exfiltration attempts
         exfil_keywords = ["send to", "upload to", "post to", "transmit to", "send all", "upload all"]
-        if any(phrase in prompt_lower for phrase in exfil_keywords):
+        if any(phrase in normalized_lower for phrase in exfil_keywords):
             indicators.append({"type": "data_exfiltration", "severity": "high"})
             confidence += 0.4
+
+        if "output the exact text between" in normalized_lower or "content between <" in normalized_lower:
+            indicators.append({"type": "tag_extraction", "severity": "high"})
+            confidence += 0.35
 
         # Check for adversarial suffixes
         adversarial_suffixes = [
@@ -163,17 +218,21 @@ class AttackDetector:
             "stay in character",
         ]
         for suffix in adversarial_suffixes:
-            if suffix in prompt_lower:
+            if suffix in normalized_lower:
                 indicators.append({"type": "adversarial_suffix", "severity": "medium"})
                 confidence += 0.2
 
         # Check for multi-turn injection attempts
-        if "##end" in prompt_lower or "end of prompt" in prompt_lower:
+        if "##end" in normalized_lower or "end of prompt" in normalized_lower:
             indicators.append({"type": "multi_turn_injection", "severity": "medium"})
             confidence += 0.25
 
+        if any(token in normalized_lower for token in ["sudo", "superuser", "admin tool", "root access"]):
+            indicators.append({"type": "privilege_escalation", "severity": "high"})
+            confidence += 0.3
+
         # Check for mathematical tricks
-        if re.search(r'\d+\s*\+\s*\d+\s*=\s*\d+', prompt):  # Simple math puzzles
+        if re.search(r'\d+\s*\+\s*\d+\s*=\s*\d+', normalized_prompt):  # Simple math puzzles
             indicators.append({"type": "math_trick", "severity": "low"})
             confidence += 0.1
 
@@ -201,7 +260,8 @@ class AttackDetector:
                 confidence = max(confidence, sanitization.get("confidence", 0.0))
 
         # Phase 1: Custom rule engine evaluation
-        custom_rule_matches = self.rule_engine.evaluate(prompt, context)
+        rule_prompt = normalized_prompt if normalized_prompt != prompt else prompt
+        custom_rule_matches = self.rule_engine.evaluate(rule_prompt, context)
         for match in custom_rule_matches:
             severity = match["severity"]
             action = match["action"]
@@ -239,16 +299,15 @@ class AttackDetector:
             match_found = False
             if entry.entry_type == "keyword":
                 # Check if keyword appears in prompt (case-insensitive)
-                if entry_value.lower() in prompt_lower:
+                if entry_value.lower() in normalized_lower:
                     match_found = True
             elif entry.entry_type == "regex":
                 # Check if regex pattern matches
-                import re
-                if re.search(entry_value, prompt, re.IGNORECASE):
+                if re.search(entry_value, rule_prompt, re.IGNORECASE):
                     match_found = True
             elif entry.entry_type == "exact":
                 # Check for exact match
-                if entry_value.lower() == prompt_lower:
+                if entry_value.lower() == normalized_lower:
                     match_found = True
             # Add other entry types as needed
             
@@ -276,16 +335,15 @@ class AttackDetector:
             match_found = False
             if entry.entry_type == "keyword":
                 # Check if keyword appears in prompt (case-insensitive)
-                if entry_value.lower() in prompt_lower:
+                if entry_value.lower() in normalized_lower:
                     match_found = True
             elif entry.entry_type == "regex":
                 # Check if regex pattern matches
-                import re
-                if re.search(entry_value, prompt, re.IGNORECASE):
+                if re.search(entry_value, rule_prompt, re.IGNORECASE):
                     match_found = True
             elif entry.entry_type == "exact":
                 # Check for exact match
-                if entry_value.lower() == prompt_lower:
+                if entry_value.lower() == normalized_lower:
                     match_found = True
             # Add other entry types as needed
             
@@ -302,9 +360,15 @@ class AttackDetector:
             # Allowlist matches can reduce confidence
             confidence = max(0, confidence - 0.2)
 
+        threat_indicators = [
+            indicator
+            for indicator in indicators
+            if indicator.get("type") not in {"normalization_applied"}
+        ]
+
         # Determine attack type
-        if indicators:
-            high_severity = [i for i in indicators if i.get("severity") == "high"]
+        if threat_indicators:
+            high_severity = [i for i in threat_indicators if i.get("severity") == "high"]
             if high_severity:
                 attack_type = "direct_injection"
             else:
@@ -312,15 +376,42 @@ class AttackDetector:
 
         # Cap confidence at 1.0
         confidence = min(confidence, 1.0)
+        processing_time_ms = (time.perf_counter() - started_at) * 1000
+        budgets = self.config.get("performance_budgets", DEFAULT_DETECTOR_PERFORMANCE_BUDGETS)
+        normalized_ratio = (
+            len(normalized_prompt) / max(len(prompt), 1)
+            if prompt else 1.0
+        )
+        within_budget = (
+            processing_time_ms <= budgets["target_p95_ms"]
+            and len(prompt) <= budgets["max_prompt_chars"]
+            and normalized_ratio <= budgets["max_normalized_expansion_ratio"]
+        )
 
         result = {
-            "is_attack": len(indicators) > 0,
+            "is_attack": len(threat_indicators) > 0,
             "attack_type": attack_type,
             "confidence": confidence,
             "indicators": indicators,
+            "normalized_prompt": normalized_prompt,
+            "normalization_layers": normalization["layers"],
+            "processing_time_ms": processing_time_ms,
+            "performance_budget": {
+                **budgets,
+                "prompt_chars": len(prompt),
+                "normalized_chars": len(normalized_prompt),
+                "normalized_expansion_ratio": round(normalized_ratio, 4),
+                "within_budget": within_budget,
+            },
         }
 
-        logger.debug("Detection complete", is_attack=result["is_attack"], confidence=confidence)
+        logger.debug(
+            "Detection complete",
+            is_attack=result["is_attack"],
+            confidence=confidence,
+            processing_time_ms=processing_time_ms,
+            within_budget=within_budget,
+        )
 
         return result
 
@@ -355,12 +446,13 @@ class AttackDetector:
             "ignore", "forget", "override", "bypass", "jailbreak",
             "system", "assistant", "instruction", "new", "act as"
         ]
-        keyword_count = sum(1 for keyword in injection_keywords if keyword in prompt.lower())
+        normalized_prompt = normalize_text(prompt)["normalized"].lower()
+        keyword_count = sum(1 for keyword in injection_keywords if keyword in normalized_prompt)
         features["keyword_density"] = min(keyword_count / 5.0, 1.0)  # Normalize
 
         # Special character ratio
         special_chars = re.findall(r'[^\w\s]', prompt)
-        features["special_chars"] = min(len(special_chars) / len(prompt), 1.0)
+        features["special_chars"] = min(len(special_chars) / max(len(prompt), 1), 1.0)
 
         # Length anomaly (very long prompts might be suspicious)
         features["length_anomaly"] = min(len(prompt) / 2000.0, 1.0)  # Normalize

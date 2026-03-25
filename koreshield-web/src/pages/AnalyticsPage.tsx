@@ -238,7 +238,7 @@ export function AnalyticsPage() {
                                             <div className={`text-sm font-medium ${
                                                 tenant.tier === 'enterprise' ? 'text-orange-600' :
                                                 tenant.tier === 'professional' ? 'text-purple-600' :
-                                                tenant.tier === 'starter' ? 'text-blue-600' : 'text-gray-600'
+                                                tenant.tier === 'starter' ? 'text-blue-600' : 'text-muted-foreground'
                                             }`}>
                                                 {tenant.tier.charAt(0).toUpperCase() + tenant.tier.slice(1)}
                                             </div>
@@ -282,7 +282,7 @@ export function AnalyticsPage() {
                                                 tenant.tier === 'enterprise' ? 'bg-orange-500/10 text-orange-600' :
                                                 tenant.tier === 'professional' ? 'bg-purple-500/10 text-purple-600' :
                                                 tenant.tier === 'starter' ? 'bg-blue-500/10 text-blue-600' : 
-                                                'bg-gray-500/10 text-gray-600'
+                                                'bg-muted text-muted-foreground'
                                             }`}>
                                                 {tenant.tier.charAt(0).toUpperCase() + tenant.tier.slice(1)}
                                             </span>

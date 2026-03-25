@@ -231,7 +231,7 @@ export function TeamDetailsPage() {
 											) : (
 												<span className={`px-2 py-1 rounded text-xs font-medium ${member.role === 'owner' ? 'bg-purple-500/10 text-purple-400' :
 													member.role === 'admin' ? 'bg-blue-500/10 text-blue-400' :
-														'bg-gray-500/10 text-gray-400'
+														'bg-muted text-muted-foreground'
 													}`}>
 													{member.role.toUpperCase()}
 												</span>
