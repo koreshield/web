@@ -1,7 +1,7 @@
 import emailjs from '@emailjs/browser';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 import { useToast } from '../components/ToastNotification';
 import { authService } from '../lib/auth';
@@ -679,9 +679,9 @@ function ContactSalesForm() {
 
 			<p className="text-sm text-muted-foreground text-center mt-4">
 				By submitting this form, you agree to our{' '}
-				<a href="/privacy-policy" className="text-electric-green hover:underline">
+				<Link to="/privacy-policy" className="text-electric-green hover:underline">
 					Privacy Policy
-				</a>
+				</Link>
 			</p>
 		</form>
 	);

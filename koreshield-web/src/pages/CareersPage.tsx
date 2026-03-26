@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, MapPin, Clock, Briefcase } from 'lucide-react';
+import { ArrowRight, Briefcase, Clock, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
@@ -31,6 +31,48 @@ const openRoles = [
 		location: 'London',
 		type: 'Full-time',
 		description: 'Build relationships with enterprise security and engineering teams. You understand the AI landscape, can speak credibly to technical buyers, and are driven by helping customers solve real problems.',
+	},
+	{
+		title: 'Global Sales Manager',
+		team: 'Sales',
+		location: 'London',
+		type: 'Full-time',
+		description: 'Lead and scale our global sales motion, from pipeline strategy to closing enterprise deals. You bring experience selling security or developer tooling internationally and know how to build and coach high-performing teams.',
+	},
+	{
+		title: 'UI Engineer',
+		team: 'Engineering',
+		location: 'London / Remote',
+		type: 'Full-time',
+		description: "Craft the interfaces that security teams rely on every day. You care deeply about performance, accessibility, and pixel-perfect execution, turning complex data into clean, intuitive experiences.",
+	},
+	{
+		title: 'Security Engineer (Red Team)',
+		team: 'Security',
+		location: 'London / Remote',
+		type: 'Full-time',
+		description: "Attempt to break what we build. You'll simulate adversarial attacks against LLM-powered systems, uncover weaknesses in our detection pipeline, and feed your findings directly into hardening our defences.",
+	},
+	{
+		title: 'Data Engineer (Big Data)',
+		team: 'Platform',
+		location: 'London / Remote',
+		type: 'Full-time',
+		description: 'Design and operate the data infrastructure that powers KoreShield at scale. You have hands-on experience with large-scale streaming and batch pipelines and a strong bias towards reliability and observability.',
+	},
+	{
+		title: 'AI Product Manager',
+		team: 'Product',
+		location: 'London / Remote',
+		type: 'Full-time',
+		description: 'Define the roadmap for KoreShield\'s AI-powered detection and policy features. You sit at the intersection of security research, engineering, and customer needs, translating signals into a coherent product strategy.',
+	},
+	{
+		title: 'Senior DevOps Engineer',
+		team: 'Platform',
+		location: 'London / Remote',
+		type: 'Full-time',
+		description: 'Own the infrastructure that keeps KoreShield fast, secure, and always-on. You bring deep experience with cloud-native deployments, CI/CD, and operating systems at high availability under real production pressure.',
 	},
 ];
 
