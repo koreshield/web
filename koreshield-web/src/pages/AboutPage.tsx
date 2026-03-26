@@ -200,7 +200,7 @@ export default function AboutPage() {
 
 					<div className="text-center mt-16">
 						<Link
-							to="/contact"
+							to="/careers"
 							className="inline-flex items-center gap-2 text-sm font-semibold text-electric-green bg-electric-green/10 border border-electric-green/20 hover:bg-electric-green/20 px-6 py-3 rounded-full transition-all duration-200"
 						>
 							We're hiring — join our team

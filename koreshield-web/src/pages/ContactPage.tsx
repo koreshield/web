@@ -1,6 +1,6 @@
 import emailjs from '@emailjs/browser';
 import { motion } from 'framer-motion';
-import { ArrowRight, Github, Mail, MessageSquare, FileText } from 'lucide-react';
+import { ArrowRight, FileText, Github, Mail, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
@@ -160,7 +160,7 @@ export default function ContactPage() {
 
 const inputClass = "w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground text-sm transition-colors placeholder:text-muted-foreground/50";
 const labelClass = "block text-sm font-medium text-foreground mb-1.5";
-const submitClass = "w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm";
+const submitClass = "w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm";
 
 function GeneralContactForm() {
 	const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });

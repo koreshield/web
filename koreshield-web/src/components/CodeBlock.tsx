@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import { useState } from 'react';
 
 interface CodeBlockProps {
   children: string;
@@ -42,7 +42,7 @@ export function CodeBlock({
           </div>
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted"
+            className="flex items-center gap-1.5 px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted cursor-pointer"
             title="Copy code"
           >
             {copied ? (
@@ -90,7 +90,7 @@ export function CodeBlock({
         {!filename && !language && (
           <button
             onClick={handleCopy}
-            className="absolute top-2 right-2 p-2 text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted/50"
+            className="absolute top-2 right-2 p-2 text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted/50 cursor-pointer"
             title="Copy code"
           >
             {copied ? (

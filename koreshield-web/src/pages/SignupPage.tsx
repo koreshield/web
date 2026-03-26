@@ -1,6 +1,6 @@
+import { ArrowRight, Lock, Mail, ShieldCheck, User } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 export function SignupPage() {
     const navigate = useNavigate();
@@ -182,7 +182,7 @@ export function SignupPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                            className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
                         >
                             {loading ? (
                                 'Creating account…'

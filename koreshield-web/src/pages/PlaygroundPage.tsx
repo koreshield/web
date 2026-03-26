@@ -1,22 +1,22 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-	Send,
-	ShieldCheck,
-	ShieldAlert,
-	Loader2,
-	Copy,
-	ExternalLink,
-	Filter,
-	AlertTriangle,
-	CheckCircle,
-	AlertCircle,
-	XCircle,
-	Clock,
-	Share2,
-	RotateCcw,
-	History
+    AlertCircle,
+    AlertTriangle,
+    CheckCircle,
+    Clock,
+    Copy,
+    ExternalLink,
+    Filter,
+    History,
+    Loader2,
+    RotateCcw,
+    Send,
+    Share2,
+    ShieldAlert,
+    ShieldCheck,
+    XCircle
 } from 'lucide-react';
+import { useState } from 'react';
 import { SEOMeta } from '../components/SEOMeta';
 
 // Comprehensive preset attacks organized by category
@@ -632,7 +632,9 @@ export default function PlaygroundPage() {
 									</p>
 									<div className="flex flex-wrap gap-3">
 										<a
-											href="https://docs.koreshield.com/getting-started/installation"
+										href="https://docs.koreshield.com/docs/getting-started/quick-start/"
+										target="_blank"
+										rel="noreferrer noopener"
 											className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
 										>
 											Quick Start Guide
