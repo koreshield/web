@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Send, ShieldCheck, ShieldAlert, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Loader2, Send, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
 // import { api } from '../lib/api-client';
 
 const PRESET_ATTACKS = [
@@ -67,7 +67,7 @@ export function InteractiveDemo() {
                     <button
                         key={i}
                         onClick={() => setInput(attack)}
-                        className="text-xs bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground px-3 py-2 rounded-full transition-colors border border-transparent hover:border-border"
+                        className="text-xs bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground px-3 py-2 rounded-full transition-colors border border-transparent hover:border-border cursor-pointer"
                     >
                         {attack}
                     </button>
@@ -85,7 +85,7 @@ export function InteractiveDemo() {
                 <button
                     type="submit"
                     disabled={loading || !input}
-                    className="absolute right-2 top-2 bottom-2 bg-primary/10 hover:bg-primary/20 text-primary p-2 rounded-md transition-colors disabled:opacity-50"
+                    className="absolute right-2 top-2 bottom-2 bg-primary/10 hover:bg-primary/20 text-primary p-2 rounded-md transition-colors cursor-pointer disabled:opacity-50"
                 >
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 </button>
