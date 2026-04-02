@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Building2, TrendingUp, Users, Activity, BarChart3, Filter } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, PieChart as RechartsPie, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Link } from 'react-router-dom';
 import { api } from '../lib/api-client';
 
 interface TenantAnalytics {
@@ -22,7 +23,7 @@ export function AnalyticsPage() {
     const [selectedMetric, setSelectedMetric] = useState<'requests' | 'blocked' | 'attacks' | 'latency'>('requests');
 
     // Fetch tenant analytics from API
-    const { data: analytics = [], isLoading } = useQuery<TenantAnalytics[]>({
+    const { data: analytics = [], isLoading, error, refetch } = useQuery<TenantAnalytics[]>({
         queryKey: ['tenant-analytics', timeRange],
         queryFn: async () => {
             // Note: Backend doesn't support time_range filtering yet
@@ -30,6 +31,8 @@ export function AnalyticsPage() {
         },
         refetchInterval: 30000,
     });
+    const analyticsError = error as (Error & { code?: number }) | null;
+    const accessDenied = analyticsError?.code === 403;
 
     const totalRequests = analytics.reduce((sum, t) => sum + t.requests_total, 0);
     const totalBlocked = analytics.reduce((sum, t) => sum + t.requests_blocked, 0);
@@ -99,6 +102,51 @@ export function AnalyticsPage() {
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {accessDenied && (
+                    <div className="bg-card border border-border rounded-lg p-8 text-center">
+                        <BarChart3 className="w-10 h-10 mx-auto mb-4 text-primary" />
+                        <h2 className="text-xl font-semibold mb-2">Analytics require an admin seat</h2>
+                        <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+                            Your account can use KoreShield, but tenant-level analytics are currently restricted to admin users.
+                            Finish onboarding with teams, API keys, rules, alerts, and protected requests first, then return once your role is upgraded.
+                        </p>
+                        <div className="flex flex-wrap items-center justify-center gap-3">
+                            <Link
+                                to="/getting-started"
+                                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                            >
+                                Continue onboarding
+                            </Link>
+                            <Link
+                                to="/dashboard"
+                                className="px-4 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                            >
+                                Back to dashboard
+                            </Link>
+                        </div>
+                    </div>
+                )}
+
+                {!accessDenied && analyticsError && (
+                    <div className="bg-card border border-border rounded-lg p-8 text-center">
+                        <BarChart3 className="w-10 h-10 mx-auto mb-4 text-red-500" />
+                        <h2 className="text-xl font-semibold mb-2">Analytics are not loading right now</h2>
+                        <p className="text-muted-foreground mb-6">
+                            {analyticsError.message || 'Something went wrong while loading analytics.'}
+                        </p>
+                        <button
+                            onClick={() => {
+                                void refetch();
+                            }}
+                            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                )}
+
+                {!accessDenied && !analyticsError && (
+                <>
                 {/* Global Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
                     <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
@@ -302,6 +350,8 @@ export function AnalyticsPage() {
                         </table>
                     </div>
                 </div>
+                </>
+                )}
             </main>
         </div>
     );
