@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FileText, Calendar, Download, Plus, Clock, Play, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { api } from '../lib/api-client';
 
 
@@ -54,7 +55,7 @@ export function ReportsPage() {
     const queryClient = useQueryClient();
 
     // Fetch reports
-    const { data: reportsData = [], isLoading: reportsLoading } = useQuery({
+    const { data: reportsData = [], isLoading: reportsLoading, error: reportsError, refetch: refetchReports } = useQuery({
         queryKey: ['reports'],
         queryFn: async () => {
             return api.getReports();
@@ -63,7 +64,7 @@ export function ReportsPage() {
     const reports = reportsData as Report[];
 
     // Fetch report templates
-    const { data: templatesData = [], isLoading: templatesLoading } = useQuery({
+    const { data: templatesData = [], isLoading: templatesLoading, error: templatesError, refetch: refetchTemplates } = useQuery({
         queryKey: ['report-templates'],
         queryFn: async () => {
             return api.getReportTemplates();
@@ -110,6 +111,10 @@ export function ReportsPage() {
     });
 
     const scheduledReports = reports.filter((r) => r.schedule !== 'manual');
+    const reportsApiError = reportsError as (Error & { code?: number }) | null;
+    const templatesApiError = templatesError as (Error & { code?: number }) | null;
+    const reportsAccessDenied = reportsApiError?.code === 403 || templatesApiError?.code === 403;
+    const reportsLoadError = !reportsAccessDenied && (reportsApiError || templatesApiError);
 
     return (
         <div className="min-h-screen bg-background">
@@ -191,6 +196,52 @@ export function ReportsPage() {
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {reportsAccessDenied && (
+                    <div className="bg-card border border-border rounded-lg p-8 text-center">
+                        <FileText className="w-10 h-10 mx-auto mb-4 text-primary" />
+                        <h2 className="text-xl font-semibold mb-2">Reports require an admin seat</h2>
+                        <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+                            Your account is signed in correctly, but this workspace only allows admin users to generate and schedule platform reports.
+                            Continue onboarding with teams, API keys, rules, alerts, and RAG scans first, or ask an admin to upgrade your role.
+                        </p>
+                        <div className="flex flex-wrap items-center justify-center gap-3">
+                            <Link
+                                to="/getting-started"
+                                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                            >
+                                Continue onboarding
+                            </Link>
+                            <Link
+                                to="/dashboard"
+                                className="px-4 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                            >
+                                Back to dashboard
+                            </Link>
+                        </div>
+                    </div>
+                )}
+
+                {reportsLoadError && (
+                    <div className="bg-card border border-border rounded-lg p-8 text-center">
+                        <FileText className="w-10 h-10 mx-auto mb-4 text-red-500" />
+                        <h2 className="text-xl font-semibold mb-2">Reports are not loading right now</h2>
+                        <p className="text-muted-foreground mb-6">
+                            {reportsApiError?.message || templatesApiError?.message || 'Something went wrong while loading reports.'}
+                        </p>
+                        <button
+                            onClick={() => {
+                                void refetchReports();
+                                void refetchTemplates();
+                            }}
+                            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                )}
+
+                {!reportsAccessDenied && !reportsLoadError && (
+                <>
                 {/* All Reports Tab */}
                 {activeTab === 'reports' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -398,6 +449,8 @@ export function ReportsPage() {
                             </table>
                         </div>
                     </div>
+                )}
+                </>
                 )}
             </main>
 
