@@ -38,7 +38,7 @@ const extractPdfText = async (file: File): Promise<string> => {
 		}
 
 		return pageTexts.join('\n').trim();
-	} catch (error) {
+	} catch {
 		throw new DocumentReadError(
 			`We couldn't extract text from ${file.name}. Try a text-based PDF or export it as TXT/DOCX.`,
 			file.name,
