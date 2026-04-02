@@ -1,6 +1,6 @@
 {
   "list_type": "allowlist",
-  "last_updated": "2026-04-03T00:28:03.576926",
+  "last_updated": "2026-04-03T00:49:34.971942",
   "entries": [
     {
       "value": "allowed.com",
@@ -17,7 +17,7 @@
       "entry_type": "keyword",
       "reason": "Allowed pattern",
       "added_by": "system",
-      "created_at": "2026-04-03T00:28:03.576923",
+      "created_at": "2026-04-03T00:49:34.971939",
       "expires_at": null,
       "metadata": {},
       "is_active": true
