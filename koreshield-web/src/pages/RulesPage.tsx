@@ -145,7 +145,7 @@ export function RulesPage() {
             const result = await api.testRule({
                 pattern: formData.pattern,
                 pattern_type: formData.pattern_type,
-                test_text: testText,
+                test_input: testText,
             });
             setTestResult(result as any);
         } catch {

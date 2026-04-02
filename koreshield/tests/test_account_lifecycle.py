@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.koreshield.api import billing, management
+from src.koreshield.api import billing, management, teams
 from src.koreshield.api.auth import init_jwt_config
 from src.koreshield.models.base import Base
 from src.koreshield.models.team import Team, TeamMember
@@ -61,8 +61,10 @@ def _build_test_client(tmp_path: Path) -> tuple[TestClient, sessionmaker, object
     app = FastAPI()
     app.include_router(management.router, prefix="/v1/management")
     app.include_router(billing.router, prefix="/v1")
+    app.include_router(teams.router, prefix="/v1")
     app.dependency_overrides[management.get_db] = override_get_db
     app.dependency_overrides[billing.get_db] = override_get_db
+    app.dependency_overrides[teams.get_db] = override_get_db
 
     async def fake_send_welcome_email(email: str, name: str | None = None) -> bool:
         return True
@@ -226,6 +228,35 @@ def test_billing_portal_returns_503_without_polar_configuration(tmp_path: Path):
 
         assert response.status_code == 503
         assert response.json()["detail"] == "POLAR_ACCESS_TOKEN is not configured"
+    finally:
+        management.send_welcome_email, management.send_verification_email = original_senders
+        client.close()
+        env_patcher.stop()
+        asyncio.run(_dispose_engine(engine))
+
+
+def test_teams_collection_routes_work_without_redirects(tmp_path: Path):
+    client, _session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
+    try:
+        _signup(client)
+
+        list_response = client.get("/v1/teams")
+        assert list_response.status_code == 200
+        assert list_response.json() == []
+
+        create_response = client.post(
+            "/v1/teams",
+            json={"name": "KoreShield Ops", "slug": "koreshield-ops"},
+        )
+        assert create_response.status_code == 200
+        payload = create_response.json()
+        assert payload["name"] == "KoreShield Ops"
+        assert payload["slug"] == "koreshield-ops"
+        assert payload["my_role"] == "owner"
+
+        trailing_list_response = client.get("/v1/teams/")
+        assert trailing_list_response.status_code == 200
+        assert len(trailing_list_response.json()) == 1
     finally:
         management.send_welcome_email, management.send_verification_email = original_senders
         client.close()
