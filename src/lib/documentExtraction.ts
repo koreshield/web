@@ -18,7 +18,7 @@ const extractPdfText = async (file: File): Promise<string> => {
 		disableWorker: true,
 		useSystemFonts: true,
 		isEvalSupported: false,
-	});
+	} as any);
 
 	try {
 		const pdf = await loadingTask.promise;
@@ -28,7 +28,7 @@ const extractPdfText = async (file: File): Promise<string> => {
 			const page = await pdf.getPage(pageIndex);
 			const content = await page.getTextContent();
 			const pageText = content.items
-				.map((item: { str?: string }) => (typeof item.str === 'string' ? item.str : ''))
+				.map((item: any) => (typeof item?.str === 'string' ? item.str : ''))
 				.filter(Boolean)
 				.join(' ');
 
