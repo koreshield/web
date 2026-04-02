@@ -241,6 +241,7 @@ export function ReportsPage() {
                 )}
 
                 {!reportsAccessDenied && !reportsLoadError && (
+                <>
                 {/* All Reports Tab */}
                 {activeTab === 'reports' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -449,6 +450,7 @@ export function ReportsPage() {
                         </div>
                     </div>
                 )}
+                </>
                 )}
             </main>
 
