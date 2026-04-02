@@ -1,29 +1,29 @@
-from fastapi import APIRouter, HTTPException, Request, Depends, Response, status
-from pydantic import BaseModel, EmailStr
-import structlog
-import bcrypt
-import secrets
+import json
 import os
 import re
+import secrets
 from datetime import datetime, timedelta, timezone
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
-from .auth import AUTH_COOKIE_NAME, get_current_admin, get_current_user, issue_jwt_token
-from ..models.user import User
+import bcrypt
+import structlog
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from pydantic import BaseModel, EmailStr
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from ..database import get_db
 from ..models.api_key import APIKey
+from ..models.user import User
 from ..services.email import (
     send_password_reset_email,
     send_verification_email,
     send_welcome_email,
 )
+from .auth import AUTH_COOKIE_NAME, get_current_admin, get_current_user, issue_jwt_token
 
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["management"])
-
-from ..database import get_db, AsyncSessionLocal, engine
 
 SENSITIVE_KEY_PATTERN = re.compile(
     r"(password|secret|token|private[_-]?key|api[_-]?key|dsn|connection|credential|auth)",
@@ -147,7 +147,7 @@ async def signup(
 ):
     """
     User signup endpoint with email verification.
-    
+
     Creates a new user account, sends welcome email and verification email.
     Password is hashed using bcrypt before storage.
     """
@@ -155,23 +155,23 @@ async def signup(
         # Check if user already exists
         result = await db.execute(select(User).where(User.email == request.email))
         existing_user = result.scalar_one_or_none()
-        
+
         if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered"
             )
-        
+
         # Validate password strength
         _validate_password_strength(request.password)
-        
+
         # Hash password
         password_hash = _hash_password(request.password)
-        
+
         # Generate verification token
         verification_token = secrets.token_urlsafe(32)
         verification_expires = _utcnow_naive() + timedelta(hours=24)
-        
+
         # Create user
         import uuid
         user = User(
@@ -185,22 +185,22 @@ async def signup(
             email_verification_token=verification_token,
             email_verification_expires_at=verification_expires
         )
-        
+
         db.add(user)
         await db.commit()
         await db.refresh(user)
-        
+
         # Send emails (non-blocking, don't fail signup if email fails)
         try:
             await send_welcome_email(request.email, request.name)
             await send_verification_email(request.email, verification_token, request.name)
         except Exception as e:
             logger.warning("failed_to_send_signup_emails", email=request.email, error=str(e))
-        
+
         logger.info("user_signup_success", user_id=str(user.id), email=user.email)
-        
+
         token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
-        
+
         cookie_samesite = os.getenv("COOKIE_SAMESITE")
         if not cookie_samesite:
             env = os.getenv("ENVIRONMENT", "").lower()
@@ -224,7 +224,7 @@ async def signup(
             "token": token,
             "message": "Signup successful! Please check your email to verify your account."
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -273,21 +273,21 @@ async def admin_login(
 ):
     """
     User login endpoint with rate limiting to prevent brute force attacks.
-    
+
     Authenticates user with email and password, returns JWT token.
     """
     try:
         # Find user by email
         result = await db.execute(select(User).where(User.email == request.email))
         user = result.scalar_one_or_none()
-        
+
         if not user:
             logger.warning("login_attempt_user_not_found", email=request.email)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password"
             )
-        
+
         # Verify password
         if not bcrypt.checkpw(request.password.encode('utf-8'), user.password_hash.encode('utf-8')):
             logger.warning("login_attempt_invalid_password", email=request.email)
@@ -295,7 +295,7 @@ async def admin_login(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password"
             )
-        
+
         # Check if user is active
         if user.status != 'active':
             logger.warning("login_attempt_inactive_user", email=request.email, status=user.status)
@@ -303,11 +303,11 @@ async def admin_login(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Account is not active"
             )
-        
+
         # Update last login
         user.last_login_at = _utcnow_naive()
         await db.commit()
-        
+
         token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
         cookie_samesite = os.getenv("COOKIE_SAMESITE")
         if not cookie_samesite:
@@ -326,14 +326,14 @@ async def admin_login(
             max_age=24 * 60 * 60,
             path="/",
         )
-        
+
         logger.info("login_success", user_id=str(user.id), email=user.email)
-        
+
         return {
             "user": user.to_dict(),
             "token": token
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -474,53 +474,51 @@ async def get_config(request: Request, current_user: dict = Depends(get_current_
 
 @router.patch("/config/security")
 async def update_security_config(
-    request: Request, 
+    request: Request,
     config_update: SecurityConfigUpdate,
     current_user: dict = Depends(get_current_admin)
 ):
     """Update security configuration."""
     if not hasattr(request.app.state, "config"):
         raise HTTPException(status_code=500, detail="Config not available")
-    
+
     current_config = request.app.state.config
     security_config = current_config.get("security", {})
-    
+
     updates_made = False
-    
+
     if config_update.sensitivity:
         if config_update.sensitivity not in ["low", "medium", "high"]:
             raise HTTPException(status_code=400, detail="Invalid sensitivity level")
         security_config["sensitivity"] = config_update.sensitivity
         updates_made = True
-        
+
     if config_update.default_action:
         if config_update.default_action not in ["block", "allow", "flag"]:
             raise HTTPException(status_code=400, detail="Invalid default action")
         security_config["default_action"] = config_update.default_action
         updates_made = True
-    
+
 
     if updates_made:
         # Update the main config object
         current_config["security"] = security_config
         logger.info("security_config_updated", updates=config_update.dict(exclude_unset=True))
-        
+
 
     if updates_made:
         # Update the main config object
         current_config["security"] = security_config
         logger.info("security_config_updated", updates=config_update.dict(exclude_unset=True))
-        
+
     return {"status": "updated", "config": security_config}
 
-import json
-import os
 
 @router.get("/logs")
 async def get_audit_logs(
-    request: Request, 
-    limit: int = 100, 
-    offset: int = 0, 
+    request: Request,
+    limit: int = 100,
+    offset: int = 0,
     level: str | None = None,
     current_user: dict = Depends(get_current_user)
 ):
@@ -532,26 +530,26 @@ async def get_audit_logs(
             with open(log_file, "r", encoding="utf-8") as f:
                 # Read all lines
                 lines = f.readlines()
-                
+
                 # Process in reverse (newest first)
                 for line in reversed(lines):
                     try:
                         log_entry = json.loads(line)
-                        
+
                         # Filter by level if requested
                         if level and log_entry.get("level", "").lower() != level.lower():
                             continue
-                            
+
                         logs.append(log_entry)
                     except json.JSONDecodeError:
                         continue
         except Exception as e:
             logger.error("Error reading log file", error=str(e))
-    
+
     # Pagination
     total_count = len(logs)
     paginated_logs = logs[offset : offset + limit]
-    
+
     return {"logs": paginated_logs, "total": total_count, "limit": limit, "offset": offset}
 
 class Policy(BaseModel):
@@ -574,17 +572,17 @@ async def create_policy(request: Request, policy: Policy, current_user: dict = D
     """Create or update a policy."""
     if not hasattr(request.app.state, "policy_engine"):
         raise HTTPException(status_code=500, detail="Policy engine not initialized")
-    
+
     engine = request.app.state.policy_engine
     success = engine.add_policy(policy.dict())
-    
+
     if not success:
         raise HTTPException(status_code=400, detail="Policy ID already exists")
 
     # Persist to config in state
     if hasattr(request.app.state, "config"):
         request.app.state.config["policies"] = engine.list_policies()
-        
+
     return {"status": "created", "policy": policy}
 
 @router.delete("/policies/{policy_id}")
@@ -592,10 +590,10 @@ async def delete_policy(request: Request, policy_id: str, current_user: dict = D
     """Delete a policy."""
     if not hasattr(request.app.state, "policy_engine"):
         raise HTTPException(status_code=500, detail="Policy engine not initialized")
-        
+
     engine = request.app.state.policy_engine
     success = engine.remove_policy(policy_id)
-    
+
     if not success:
         raise HTTPException(status_code=404, detail="Policy not found")
 
@@ -644,25 +642,25 @@ async def generate_api_key(
 ):
     """
     Generate a new API key for the authenticated user.
-    
+
     **Important**: The full API key is only returned once. Store it securely!
     """
     try:
         # Generate API key
         full_key, key_hash, key_prefix = APIKey.generate_key()
-        
+
         # Calculate expiration
         # Calculate expiration
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         expires_at = None
-        
+
         if request.expires_at is not None:
              # Normalize to naive UTC for storage
              if request.expires_at.tzinfo is not None:
                  expires_at = request.expires_at.astimezone(timezone.utc).replace(tzinfo=None)
              else:
                  expires_at = request.expires_at
-                 
+
              if expires_at <= now:
                  raise HTTPException(
                      status_code=status.HTTP_400_BAD_REQUEST,
@@ -675,7 +673,7 @@ async def generate_api_key(
                     detail="expires_in_days must be greater than 0",
                 )
             expires_at = now + timedelta(days=request.expires_in_days)
-        
+
         # Create API key record
         api_key = APIKey(
             user_id=current_user["id"],
@@ -685,24 +683,24 @@ async def generate_api_key(
             description=request.description,
             expires_at=expires_at,
         )
-        
+
         db.add(api_key)
         await db.commit()
         await db.refresh(api_key)
-        
+
         logger.info(
             "API key generated",
             user_id=str(current_user["id"]),
             key_id=str(api_key.id),
             key_prefix=key_prefix
         )
-        
+
         # Return with full key (only time it's shown!)
         response_data = api_key.to_dict()
         response_data["api_key"] = full_key
-        
+
         return response_data
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -725,7 +723,7 @@ async def list_api_keys(
 ):
     """
     List all API keys for the authenticated user.
-    
+
     Note: Full keys are never shown again after creation.
     """
     try:
@@ -735,9 +733,9 @@ async def list_api_keys(
             .order_by(APIKey.created_at.desc())
         )
         api_keys = result.scalars().all()
-        
+
         return [api_key.to_dict() for api_key in api_keys]
-        
+
     except Exception as e:
         logger.error("Failed to list API keys", error=str(e))
         raise HTTPException(
@@ -767,26 +765,26 @@ async def revoke_api_key(
             .where(APIKey.user_id == current_user["id"])
         )
         api_key = result.scalar_one_or_none()
-        
+
         if not api_key:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="API key not found"
             )
-        
+
         # Mark as revoked
         api_key.is_revoked = True
         await db.commit()
-        
+
         logger.info(
             "API key revoked",
             user_id=str(current_user["id"]),
             key_id=str(api_key.id),
             key_prefix=api_key.key_prefix
         )
-        
+
         return {"status": "revoked", "key_id": key_id}
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -810,7 +808,7 @@ async def get_api_key(
 ):
     """
     Get details of a specific API key.
-    
+
     Note: The full key is never returned, only the prefix.
     """
     try:
@@ -820,15 +818,15 @@ async def get_api_key(
             .where(APIKey.user_id == current_user["id"])
         )
         api_key = result.scalar_one_or_none()
-        
+
         if not api_key:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="API key not found"
             )
-        
+
         return api_key.to_dict()
-        
+
     except HTTPException:
         raise
     except Exception as e:
