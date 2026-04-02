@@ -62,6 +62,7 @@ describe('RulesPage', () => {
 			</QueryClientProvider>,
 		);
 
+		await user.click(screen.getByRole('button', { name: /Create Rule|New Rule/i }));
 		await user.type(screen.getByPlaceholderText('pattern'), 'ignore all previous instructions');
 		await user.type(
 			screen.getByPlaceholderText('Enter test text to check if pattern matches...'),
