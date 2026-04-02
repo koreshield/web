@@ -52,6 +52,6 @@ describe('ReportsPage', () => {
 		await waitFor(() => {
 			expect(screen.getByText(/Reports require an admin seat/i)).toBeInTheDocument();
 		});
-		expect(screen.getByText(/Continue onboarding/i)).toBeInTheDocument();
+		expect(screen.getByRole('link', { name: /Continue onboarding/i })).toBeInTheDocument();
 	});
 });
