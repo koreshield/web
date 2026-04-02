@@ -284,6 +284,8 @@ async def create_customer_portal_session(
     if not account.polar_customer_id:
         try:
             account = await sync_account_from_polar(account, db)
+        except PolarConfigurationError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
         except httpx.HTTPStatusError as exc:
             if exc.response.status_code == 404:
                 raise HTTPException(
