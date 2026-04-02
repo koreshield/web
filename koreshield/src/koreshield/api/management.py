@@ -445,10 +445,10 @@ async def reset_password(
         )
 
 @router.post("/logout")
-async def admin_logout(response: Response, current_user: dict = Depends(get_current_admin)):
-    """Admin logout endpoint (stateless - just returns success)."""
+async def admin_logout(response: Response, current_user: dict = Depends(get_current_user)):
+    """Logout endpoint for any authenticated user."""
     response.delete_cookie(key=AUTH_COOKIE_NAME, path="/")
-    logger.info("admin_logout", user_id=current_user.get("id"), email=current_user.get("email"))
+    logger.info("user_logout", user_id=current_user.get("id"), email=current_user.get("email"))
     return {"status": "logged_out"}
 
 @router.get("/stats")

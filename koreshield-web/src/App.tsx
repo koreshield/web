@@ -49,6 +49,7 @@ const AuditLogsPage = lazy(() => import('./pages/AuditLogsPage'));
 const AdvancedAnalyticsPage = lazy(() => import('./pages/AdvancedAnalyticsPage').then(m => ({ default: m.AdvancedAnalyticsPage })));
 const ComplianceReportsPage = lazy(() => import('./pages/ComplianceReportsPage').then(m => ({ default: m.ComplianceReportsPage })));
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
+const GettingStartedPage = lazy(() => import('./pages/GettingStartedPage'));
 const BillingPage = lazy(() => import('./pages/BillingPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
 const CareersPage = lazy(() => import('./pages/CareersPage'));
@@ -94,6 +95,18 @@ function AppContent() {
 								<RouteErrorBoundary>
 									<ProtectedRoute>
 										<BillingPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/getting-started"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<GettingStartedPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
 							</Suspense>

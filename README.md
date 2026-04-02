@@ -94,7 +94,8 @@ if not result.is_safe:
 
 ### Documentation
 
-- [RAG Integration Guide](docs/RAG_INTEGRATION_GUIDE.md) - Complete integration guide
+- [Client Integration Guide](koreshield-docs/docs/client-integration/guide.mdx) - Public integration walkthrough
+- [Client Onboarding](koreshield/docs/CLIENT_ONBOARDING.md) - How clients actually use KoreShield
 - [CRM Security Templates](koreshield/src/koreshield/crm_templates/README.md) - Platform-specific configurations
 - [Research Paper](https://www.academia.edu/145685538/_Preprint_LLM_Firewall_A_Novel_Taxonomy_of_Indirect_Prompt_Injection_Attacks_in_Enterprise_RAG_Systems) - Academic foundation
 - [CRM Benchmark Fixtures](koreshield/research/experiments/crm-benchmarks/README.md) - Synthetic Salesforce and HubSpot evaluation assets
@@ -240,10 +241,11 @@ pytest
 ```
 
 ## Documentation
-- [System Design](docs/SYSTEM_DESIGN.md) - Comprehensive system architecture and design
-- [Error Codes](docs/ERROR_CODES.md) - Standardized error responses and codes
+- [Getting Started](koreshield/docs/GETTING_STARTED.md) - Local quick start and integration basics
+- [Client Onboarding](koreshield/docs/CLIENT_ONBOARDING.md) - Clear customer onboarding flow
 - [Detection Patterns](koreshield/docs/DETECTION_PATTERNS.md) - Security pattern documentation
-- [Auth Migration Notes](koreshield/docs/AUTH_MIGRATION.md) - New auth requirements and client migration guide
+- [Auth Migration Notes](koreshield/docs/AUTH_MIGRATION.md) - Auth requirements and client migration guide
+- [Client-Facing Audit](koreshield/docs/CLIENT_FACING_AUDIT.md) - Current UI and capability alignment
 - [API Documentation](http://localhost:8000/docs) - Interactive OpenAPI/Swagger docs
 - Configuration Guide: config/config.example.yaml
 - Examples: examples/
