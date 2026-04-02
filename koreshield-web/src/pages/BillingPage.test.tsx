@@ -1,8 +1,11 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import BillingPage from './BillingPage';
 
-const getBillingAccount = vi.fn();
+const { getBillingAccount } = vi.hoisted(() => ({
+	getBillingAccount: vi.fn(),
+}));
 
 vi.mock('../lib/api-client', () => ({
 	api: {
