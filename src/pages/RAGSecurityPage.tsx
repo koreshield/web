@@ -27,9 +27,7 @@ import { SEOMeta } from '../components/SEOMeta';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
 import { authService } from '../lib/auth';
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import * as mammoth from 'mammoth/mammoth.browser';
+import { getDocumentReadErrorMessage, readUploadedDocument } from '../lib/documentExtraction';
 
 // Types based on backend schema
 interface RetrievedDocument {
@@ -130,8 +128,6 @@ type RAGApiResponse = {
 	timestamp?: string;
 	request_id?: string;
 };
-
-GlobalWorkerOptions.workerSrc = pdfWorker;
 
 const buildTaxonomyCounts = (values: string[] | undefined): Record<string, number> => {
 	if (!values) return {};
@@ -305,63 +301,24 @@ export function RAGSecurityPage() {
 
 	const maxFileSizeBytes = 10 * 1024 * 1024;
 
-	const extractPdfText = async (file: File): Promise<string> => {
-		const data = await file.arrayBuffer();
-		const pdf = await getDocument({ data }).promise;
-		let text = '';
-		for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex += 1) {
-			const page = await pdf.getPage(pageIndex);
-			const content = await page.getTextContent();
-			const pageText = content.items
-				.map((item: any) => (typeof item.str === 'string' ? item.str : ''))
-				.filter(Boolean)
-				.join(' ');
-			text += `${pageText}\n`;
-		}
-		return text.trim();
-	};
-
-	const extractDocxText = async (file: File): Promise<string> => {
-		const data = await file.arrayBuffer();
-		const result = await mammoth.extractRawText({ arrayBuffer: data });
-		return (result.value || '').trim();
-	};
-
-	const readFileContent = async (file: File): Promise<string> => {
-		const lowerName = file.name.toLowerCase();
-		const isPdf = file.type === 'application/pdf' || lowerName.endsWith('.pdf');
-		const isDocx =
-			file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-			lowerName.endsWith('.docx');
-
-		if (isPdf) {
-			return extractPdfText(file);
-		}
-
-		if (isDocx) {
-			return extractDocxText(file);
-		}
-
-		return file.text();
-	};
-
 	// Handle file upload
 	const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files;
 		if (!files || files.length === 0) return;
 
 		const newDocuments: RetrievedDocument[] = [];
+		const uploadErrors: string[] = [];
 
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 			try {
 				if (file.size > maxFileSizeBytes) {
-					showError(`File too large (max 10MB): ${file.name}`);
+					uploadErrors.push(`File too large (max 10MB): ${file.name}`);
 					continue;
 				}
-				const content = await readFileContent(file);
+				const content = await readUploadedDocument(file);
 				if (!content.trim()) {
-					showError(`No readable text found in: ${file.name}`);
+					uploadErrors.push(`No readable text found in: ${file.name}`);
 					continue;
 				}
 				newDocuments.push({
@@ -375,13 +332,19 @@ export function RAGSecurityPage() {
 						extracted_at: new Date().toISOString()
 					}
 				});
-			} catch {
-				showError(`Failed to read file: ${file.name}`);
+			} catch (err) {
+				uploadErrors.push(getDocumentReadErrorMessage(file, err));
 			}
 		}
 
 		setDocuments(prev => [...prev, ...newDocuments]);
-		success(`Added ${newDocuments.length} document(s)`);
+		e.target.value = '';
+
+		if (newDocuments.length > 0) {
+			success(`Added ${newDocuments.length} document(s)`);
+		}
+
+		uploadErrors.forEach((message) => showError(message));
 	};
 
 	// Handle paste content
