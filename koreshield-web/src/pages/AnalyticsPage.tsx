@@ -146,6 +146,7 @@ export function AnalyticsPage() {
                 )}
 
                 {!accessDenied && !analyticsError && (
+                <>
                 {/* Global Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
                     <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
@@ -349,6 +350,7 @@ export function AnalyticsPage() {
                         </table>
                     </div>
                 </div>
+                </>
                 )}
             </main>
         </div>
