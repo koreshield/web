@@ -53,6 +53,11 @@ export default function BillingPage() {
 		searchParams.get('period') === 'annual' ? 'annual' : 'monthly'
 	);
 	const autoCheckoutStarted = useRef(false);
+	const billingUnavailable =
+		error.includes('POLAR') ||
+		error.includes('Polar') ||
+		error.includes('not configured') ||
+		error.includes('customer portal');
 
 	const loadAccount = async () => {
 		setError('');
@@ -198,6 +203,12 @@ export default function BillingPage() {
 				{error && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
 						{error}
+					</div>
+				)}
+				{billingUnavailable && (
+					<div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700">
+						Hosted billing is not fully configured in this environment yet. You can still create your account, manage API keys,
+						and finish product onboarding while checkout and portal access are being wired up.
 					</div>
 				)}
 
