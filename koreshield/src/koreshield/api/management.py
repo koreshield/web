@@ -13,7 +13,11 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from .auth import AUTH_COOKIE_NAME, get_current_admin, get_current_user, issue_jwt_token
 from ..models.user import User
 from ..models.api_key import APIKey
-from ..services.email import send_welcome_email, send_verification_email
+from ..services.email import (
+    send_password_reset_email,
+    send_verification_email,
+    send_welcome_email,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -63,9 +67,37 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
 class SecurityConfigUpdate(BaseModel):
     sensitivity: str | None = None
     default_action: str | None = None
+
+
+def _utcnow_naive() -> datetime:
+    """Return naive UTC datetime for current schema compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def _hash_password(password: str) -> str:
+    """Hash a password with bcrypt."""
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def _validate_password_strength(password: str) -> None:
+    """Apply baseline password validation."""
+    if len(password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters long",
+        )
 
 
 @router.get("/me", summary="Current User", tags=["Authentication"])
@@ -131,18 +163,14 @@ async def signup(
             )
         
         # Validate password strength
-        if len(request.password) < 8:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Password must be at least 8 characters long"
-            )
+        _validate_password_strength(request.password)
         
         # Hash password
-        password_hash = bcrypt.hashpw(request.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        password_hash = _hash_password(request.password)
         
         # Generate verification token
         verification_token = secrets.token_urlsafe(32)
-        verification_expires = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
+        verification_expires = _utcnow_naive() + timedelta(hours=24)
         
         # Create user
         import uuid
@@ -277,7 +305,7 @@ async def admin_login(
             )
         
         # Update last login
-        user.last_login_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        user.last_login_at = _utcnow_naive()
         await db.commit()
         
         token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
@@ -313,6 +341,107 @@ async def admin_login(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Login failed. Please try again later."
+        )
+
+
+@router.post(
+    "/forgot-password",
+    summary="Request Password Reset",
+    description="Start the password reset flow and send a reset link if the account exists.",
+    tags=["Authentication"],
+)
+async def forgot_password(
+    request: ForgotPasswordRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Start the password reset flow.
+
+    This endpoint always returns the same response so it does not leak whether an
+    email address is registered.
+    """
+    generic_response = {
+        "message": "If an account exists for that email, a reset link has been sent."
+    }
+
+    try:
+        result = await db.execute(select(User).where(User.email == request.email))
+        user = result.scalar_one_or_none()
+
+        if not user or user.status != "active":
+            logger.info("password_reset_requested_for_unknown_or_inactive_user", email=request.email)
+            return generic_response
+
+        token = secrets.token_urlsafe(32)
+        user.reset_password_token = token
+        user.reset_password_expires_at = _utcnow_naive() + timedelta(minutes=15)
+        await db.commit()
+
+        try:
+            await send_password_reset_email(user.email, token, user.name)
+        except Exception as exc:
+            logger.warning("failed_to_send_password_reset_email", email=user.email, error=str(exc))
+
+        logger.info("password_reset_requested", user_id=str(user.id), email=user.email)
+        return generic_response
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("forgot_password_error", email=request.email, error=str(exc))
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Password reset request failed. Please try again later.",
+        )
+
+
+@router.post(
+    "/reset-password",
+    summary="Reset Password",
+    description="Complete the password reset flow using a valid reset token.",
+    tags=["Authentication"],
+)
+async def reset_password(
+    request: ResetPasswordRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Reset a user's password using a one-time token."""
+    try:
+        _validate_password_strength(request.new_password)
+
+        result = await db.execute(select(User).where(User.reset_password_token == request.token))
+        user = result.scalar_one_or_none()
+
+        if not user or not user.reset_password_expires_at:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired reset token",
+            )
+
+        if user.reset_password_expires_at <= _utcnow_naive():
+            user.reset_password_token = None
+            user.reset_password_expires_at = None
+            await db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired reset token",
+            )
+
+        user.password_hash = _hash_password(request.new_password)
+        user.reset_password_token = None
+        user.reset_password_expires_at = None
+        await db.commit()
+
+        logger.info("password_reset_success", user_id=str(user.id), email=user.email)
+        return {"message": "Password reset successful. You can now log in with your new password."}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("reset_password_error", error=str(exc))
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Password reset failed. Please try again later.",
         )
 
 @router.post("/logout")
