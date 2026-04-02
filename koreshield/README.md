@@ -157,9 +157,10 @@ pytest
 
 ## Documentation
 
-- [System Design](docs/SYSTEM_DESIGN.md) - Comprehensive system architecture and design
-- [API Reference](docs/API.md) - API endpoints and usage
 - [Getting Started Guide](docs/GETTING_STARTED.md) - Installation and quick start
+- [Auth Migration Notes](docs/AUTH_MIGRATION.md) - Dashboard and runtime auth guidance
+- [Client Onboarding](docs/CLIENT_ONBOARDING.md) - What clients actually do with KoreShield
+- [Client-Facing Audit](docs/CLIENT_FACING_AUDIT.md) - Current UI and backend capability alignment
 - [Configuration Guide](config/config.example.yaml) - Configuration options
 - [Examples](examples/) - Usage examples and test cases
 - [Research Notes](research/) - Research materials and notes
