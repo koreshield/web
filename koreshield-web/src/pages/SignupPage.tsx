@@ -123,12 +123,13 @@ export function SignupPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label className="block text-sm font-medium mb-2 text-foreground">
+                            <label htmlFor="signup-name" className="block text-sm font-medium mb-2 text-foreground">
                                 Full name
                             </label>
                             <div className="relative">
                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <input
+                                    id="signup-name"
                                     type="text"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -139,12 +140,13 @@ export function SignupPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-2 text-foreground">
+                            <label htmlFor="signup-email" className="block text-sm font-medium mb-2 text-foreground">
                                 Work email
                             </label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <input
+                                    id="signup-email"
                                     type="email"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -156,12 +158,13 @@ export function SignupPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-2 text-foreground">
+                            <label htmlFor="signup-password" className="block text-sm font-medium mb-2 text-foreground">
                                 Password
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <input
+                                    id="signup-password"
                                     type="password"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
