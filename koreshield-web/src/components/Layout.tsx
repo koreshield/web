@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { authService } from "../lib/auth";
+import { useAuthState } from "../hooks/useAuthState";
 import Footer from "./Footer";
 
 const navLinkClass = "text-sm font-medium text-muted-foreground hover:text-foreground transition-colors";
@@ -11,8 +12,7 @@ const mobileNavLinkClass = "text-base font-medium py-3 border-b border-white/[0.
 export function Layout() {
 	const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const navigate = useNavigate();
-	const isAuthenticated = authService.isAuthenticated();
-	const user = authService.getCurrentUser();
+	const { isAuthenticated, user, isHydrating } = useAuthState();
 	const { theme } = useTheme();
 	const logoSrc = theme === 'light' ? '/logo/SVG/Black.svg' : '/logo/SVG/White.svg';
 
@@ -36,7 +36,7 @@ export function Layout() {
 
 					{/* Desktop Nav */}
 					<nav className="hidden md:flex items-center gap-6">
-						{!isAuthenticated && (
+						{!isAuthenticated && !isHydrating && (
 							<>
 								<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer noopener" className={navLinkClass}>Docs</a>
 								<a href="https://blog.koreshield.com" target="_blank" rel="noreferrer noopener" className={navLinkClass}>Blog</a>
@@ -47,6 +47,7 @@ export function Layout() {
 						{isAuthenticated && (
 							<>
 								<Link to="/dashboard" className={navLinkClass}>Dashboard</Link>
+								<Link to="/getting-started" className={navLinkClass}>Getting Started</Link>
 								<Link to="/teams" className={navLinkClass}>Teams</Link>
 								<Link to="/threat-monitoring" className={navLinkClass}>Threats</Link>
 								<Link to="/provider-health" className={navLinkClass}>Providers</Link>
@@ -75,14 +76,14 @@ export function Layout() {
 									Logout
 								</button>
 							</div>
-						) : (
+						) : !isHydrating ? (
 							<Link
 								to="/login"
 								className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold transition-colors shadow-sm shadow-emerald-500/10"
 							>
 								Sign In
 							</Link>
-						)}
+						) : null}
 					</nav>
 
 					{/* Mobile menu toggle */}
@@ -99,7 +100,7 @@ export function Layout() {
 				{/* Mobile Nav */}
 				{isMobileMenuOpen && (
 					<div className="md:hidden border-t border-white/[0.06] bg-background/95 backdrop-blur-xl px-6 py-4 flex flex-col gap-1 max-h-[calc(100vh-4rem)] overflow-y-auto">
-						{!isAuthenticated && (
+						{!isAuthenticated && !isHydrating && (
 							<>
 								<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer noopener" className={mobileNavLinkClass}>Docs</a>
 								<a href="https://blog.koreshield.com" target="_blank" rel="noreferrer noopener" className={mobileNavLinkClass}>Blog</a>
@@ -112,6 +113,7 @@ export function Layout() {
 						{isAuthenticated && (
 							<>
 								<Link to="/dashboard" className={mobileNavLinkClass} onClick={closeMobile}>Dashboard</Link>
+								<Link to="/getting-started" className={mobileNavLinkClass} onClick={closeMobile}>Getting Started</Link>
 								<Link to="/teams" className={mobileNavLinkClass} onClick={closeMobile}>Teams</Link>
 								<Link to="/threat-monitoring" className={mobileNavLinkClass} onClick={closeMobile}>Threats</Link>
 								<Link to="/provider-health" className={mobileNavLinkClass} onClick={closeMobile}>Providers</Link>
@@ -146,7 +148,7 @@ export function Layout() {
 										Logout
 									</button>
 								</div>
-							) : (
+							) : !isHydrating ? (
 								<Link
 									to="/login"
 									className="block w-full text-center bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-3 rounded-lg font-semibold transition-colors"
@@ -154,7 +156,7 @@ export function Layout() {
 								>
 									Sign In
 								</Link>
-							)}
+							) : null}
 						</div>
 					</div>
 				)}
