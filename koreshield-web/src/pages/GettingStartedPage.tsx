@@ -78,6 +78,9 @@ export default function GettingStartedPage() {
 
 				<section className="rounded-2xl border border-border bg-card p-6">
 					<h2 className="text-xl font-semibold">Onboarding checklist</h2>
+					<p className="mt-2 text-sm text-muted-foreground">
+						The shortest path to value is: create one API key, make one successful protected request, then prove a malicious prompt or retrieved document gets flagged.
+					</p>
 					<div className="mt-6 grid gap-4 md:grid-cols-2">
 						{steps.map((step, index) => {
 							const Icon = step.icon;
@@ -159,6 +162,9 @@ const response = await client.chat.completions.create({
 							<BookOpen className="w-4 h-4" />
 							Need the public docs too? <a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">Open docs.koreshield.com</a>
 						</div>
+						<p className="mt-4 text-xs text-muted-foreground">
+							Reports and tenant-level analytics may be limited to admin users. They are follow-up operator tools, not blockers for the first customer integration.
+						</p>
 					</div>
 				</section>
 			</main>
