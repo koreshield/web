@@ -1,6 +1,3 @@
-import { getDocument } from 'pdfjs-dist';
-import * as mammoth from 'mammoth/mammoth.browser';
-
 export class DocumentReadError extends Error {
 	fileName: string;
 
@@ -12,6 +9,7 @@ export class DocumentReadError extends Error {
 }
 
 const extractPdfText = async (file: File): Promise<string> => {
+	const { getDocument } = await import('pdfjs-dist');
 	const data = new Uint8Array(await file.arrayBuffer());
 	const loadingTask = getDocument({
 		data,
@@ -50,6 +48,7 @@ const extractPdfText = async (file: File): Promise<string> => {
 
 const extractDocxText = async (file: File): Promise<string> => {
 	try {
+		const mammoth = await import('mammoth/mammoth.browser');
 		const data = await file.arrayBuffer();
 		const result = await mammoth.extractRawText({ arrayBuffer: data });
 		return (result.value || '').trim();
