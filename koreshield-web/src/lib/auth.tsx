@@ -50,6 +50,17 @@ class AuthEventEmitter {
 const eventEmitter = new AuthEventEmitter();
 let inMemoryToken: string | null = null;
 
+function persistSession(user: AuthUser, token?: string | null) {
+	inMemoryToken = token ?? null;
+	sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+	eventEmitter.emit('login');
+}
+
+function clearSession() {
+	inMemoryToken = null;
+	sessionStorage.removeItem(USER_STORAGE_KEY);
+}
+
 export const authService = {
 	async login(email: string, password: string): Promise<AuthUser> {
 		const response = await fetch(`${API_BASE_URL}/v1/management/login`, {
@@ -65,15 +76,12 @@ export const authService = {
 		}
 
 		const data: LoginResponse = await response.json();
-		inMemoryToken = data.token ?? null;
-		sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
-		eventEmitter.emit('login');
+		persistSession(data.user, data.token);
 		return data.user;
 	},
 
 	logout(): void {
-		inMemoryToken = null;
-		sessionStorage.removeItem(USER_STORAGE_KEY);
+		clearSession();
 		void fetch(`${API_BASE_URL}/v1/management/logout`, {
 			method: 'POST',
 			credentials: 'include',
@@ -102,7 +110,7 @@ export const authService = {
 			if (!data?.user) {
 				return false;
 			}
-			sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+			persistSession(data.user);
 			return true;
 		} catch {
 			return false;
@@ -116,6 +124,10 @@ export const authService = {
 
 	getToken(): string | null {
 		return inMemoryToken;
+	},
+
+	setSession(user: AuthUser, token?: string | null) {
+		persistSession(user, token);
 	},
 
 	async forgotPassword(email: string): Promise<void> {

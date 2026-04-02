@@ -1,3 +1,4 @@
+import { authService } from '../lib/auth';
 import { ArrowRight, Lock, Mail, ShieldCheck, User } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -35,7 +36,7 @@ export function SignupPage() {
                 throw new Error(data.detail || 'Signup failed');
             }
 
-            sessionStorage.setItem('admin_user', JSON.stringify(data.user));
+            authService.setSession(data.user, data.token ?? null);
 
             const fromLocation = (location.state as any)?.from;
             if (fromLocation) {
@@ -50,7 +51,7 @@ export function SignupPage() {
                 return;
             }
 
-            navigate('/dashboard');
+            navigate('/getting-started');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Signup failed');
         } finally {
