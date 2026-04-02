@@ -19,7 +19,7 @@ export function Tabs({ tabs, defaultValue }: TabsProps) {
           <button
             key={tab.value}
             onClick={() => setActiveTab(tab.value)}
-            className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+            className={`px-4 py-2 text-sm font-medium transition-colors relative cursor-pointer ${
               activeTab === tab.value
                 ? 'text-primary'
                 : 'text-muted-foreground hover:text-foreground'
