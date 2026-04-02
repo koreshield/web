@@ -1,22 +1,22 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Home, BookOpen } from 'lucide-react';
+import { ArrowRight, BookOpen, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const suggestedLinks = [
 	{
-		href: 'https://docs.koreshield.com/quickstart',
+		href: 'https://docs.koreshield.com/docs/getting-started/quick-start/',
 		label: 'Quickstart Tutorial',
 		desc: 'Get up and running in under 15 minutes',
 		external: true,
 	},
 	{
-		href: 'https://docs.koreshield.com/installation',
+		href: 'https://docs.koreshield.com/docs/getting-started/installation/',
 		label: 'Installation Guide',
 		desc: 'Docker, Python, NPM, Kubernetes',
 		external: true,
 	},
 	{
-		href: 'https://docs.koreshield.com/api-reference',
+		href: 'https://docs.koreshield.com/docs/api-reference/',
 		label: 'API Reference',
 		desc: 'Full endpoint documentation',
 		external: true,

@@ -239,7 +239,7 @@ function IntegrationsPage() {
 					<p className="text-muted-foreground text-sm">
 						This is a selection of our most popular integrations. View the full list in our{' '}
 						<a
-							href="https://docs.koreshield.com/docs/category/integrations/"
+							href="https://docs.koreshield.com/docs/integrations/"
 							target="_blank"
 							rel="noreferrer noopener"
 							className="text-electric-green hover:underline"
