@@ -3,14 +3,14 @@ import { useState, useEffect } from 'react';
 import { Activity, Shield, AlertTriangle, CheckCircle, LogOut, Wifi, WifiOff, Rocket, Code, BookOpen, ArrowRight, Key, Users, ScanSearch } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStats, useRecentAttacks } from '../hooks/useApi';
+import { useAuthState } from '../hooks/useAuthState';
 import { AttackDetailModal } from '../components/AttackDetailModal';
 import { ThreatTypeBreakdown, ThreatTimeline, ThreatSummary } from '../components/ThreatAnalytics';
 import { wsClient, type ThreatDetectedEvent } from '../lib/websocket-client';
 
 export function DashboardPage() {
 	const navigate = useNavigate();
-	const user = authService.getCurrentUser();
-	const isAuthenticated = authService.isAuthenticated();
+	const { user, isAuthenticated } = useAuthState();
 	const [selectedAttack, setSelectedAttack] = useState<any>(null);
 	const [wsConnected, setWsConnected] = useState(false);
 	const [_latestThreats, setLatestThreats] = useState<ThreatDetectedEvent[]>([]);
@@ -269,14 +269,12 @@ export function DashboardPage() {
 										<p className="text-xs sm:text-sm text-muted-foreground mb-3">
 											Route your LLM requests through KoreShield's proxy.
 										</p>
-										<a
-											href="https://docs.koreshield.com/docs/getting-started/quick-start/"
-											target="_blank"
-											rel="noreferrer"
+										<Link
+											to="/getting-started"
 											className="inline-flex items-center gap-1 text-xs sm:text-sm text-primary hover:underline"
 										>
-											View Docs <BookOpen className="w-3 h-3" />
-										</a>
+											Open guide <BookOpen className="w-3 h-3" />
+										</Link>
 									</div>
 								</div>
 
@@ -305,11 +303,8 @@ export function DashboardPage() {
 										{`import OpenAI from 'openai';
 
 const client = new OpenAI({
-  baseURL: '${window.location.origin}/v1/proxy/openai',
-  apiKey: 'your-openai-key',
-  defaultHeaders: {
-    'Authorization': 'Bearer ${authService.getToken()?.substring(0, 20)}...'
-  }
+  baseURL: '${window.location.origin}/v1',
+  apiKey: process.env.KORESHIELD_API_KEY
 });
 
 const response = await client.chat.completions.create({

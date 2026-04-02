@@ -1,9 +1,47 @@
-import { User, Mail, Shield, Building, CreditCard } from 'lucide-react';
+import { User, Mail, Shield, Building, CreditCard, Rocket, BookOpen, Key } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { authService } from '../lib/auth';
+import { api } from '../lib/api-client';
+import { useAuthState } from '../hooks/useAuthState';
+
+type BillingAccountSummary = {
+	plan_slug?: string;
+	plan_name?: string | null;
+	status?: string;
+	subscription_status?: string | null;
+	billing_email?: string | null;
+};
 
 export function ProfilePage() {
-	const user = authService.getCurrentUser();
+	const { user } = useAuthState();
+	const [billing, setBilling] = useState<BillingAccountSummary | null>(null);
+	const [billingState, setBillingState] = useState<'loading' | 'ready' | 'error'>('loading');
+
+	useEffect(() => {
+		if (!user) {
+			return;
+		}
+
+		let active = true;
+		void api.getBillingAccount()
+			.then((account) => {
+				if (!active) {
+					return;
+				}
+				setBilling(account as BillingAccountSummary);
+				setBillingState('ready');
+			})
+			.catch(() => {
+				if (!active) {
+					return;
+				}
+				setBillingState('error');
+			});
+
+		return () => {
+			active = false;
+		};
+	}, [user]);
 
 	if (!user) {
 		return (
@@ -15,7 +53,6 @@ export function ProfilePage() {
 
 	return (
 		<div className="min-h-screen bg-background">
-			{/* Header */}
 			<header className="border-b border-border bg-card">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
 					<div className="flex items-center gap-3">
@@ -25,14 +62,13 @@ export function ProfilePage() {
 						<div>
 							<h1 className="text-2xl font-bold">User Profile</h1>
 							<p className="text-sm text-muted-foreground">
-								Manage your account settings and preferences
+								Manage your account settings, billing state, and onboarding progress.
 							</p>
 						</div>
 					</div>
 				</div>
 			</header>
 
-			{/* Main Content */}
 			<main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				<div className="bg-card border border-border rounded-lg shadow-sm">
 					<div className="p-6 border-b border-border">
@@ -91,8 +127,22 @@ export function ProfilePage() {
 								Billing
 							</h2>
 							<p className="text-sm text-muted-foreground mt-1">
-								Manage your subscription, invoices, and Polar customer portal access.
+								Manage your subscription, invoices, and customer portal access.
 							</p>
+							<div className="mt-4 grid gap-3 sm:grid-cols-2">
+								<div className="rounded-lg bg-muted p-3">
+									<div className="text-xs uppercase tracking-wide text-muted-foreground">Plan</div>
+									<div className="mt-1 font-medium">
+										{billingState === 'ready' ? (billing?.plan_name || billing?.plan_slug || 'Free') : billingState === 'loading' ? 'Loading…' : 'Unavailable'}
+									</div>
+								</div>
+								<div className="rounded-lg bg-muted p-3">
+									<div className="text-xs uppercase tracking-wide text-muted-foreground">Subscription status</div>
+									<div className="mt-1 font-medium capitalize">
+										{billingState === 'ready' ? (billing?.subscription_status || billing?.status || 'inactive') : billingState === 'loading' ? 'Loading…' : 'Unavailable'}
+									</div>
+								</div>
+							</div>
 						</div>
 						<Link
 							to="/billing"
@@ -100,6 +150,27 @@ export function ProfilePage() {
 						>
 							Open billing
 						</Link>
+					</div>
+				</div>
+
+				<div className="mt-6 bg-card border border-border rounded-lg shadow-sm p-6">
+					<h2 className="text-lg font-semibold mb-4">Getting started</h2>
+					<div className="grid gap-4 md:grid-cols-3">
+						<Link to="/getting-started" className="rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
+							<Rocket className="w-5 h-5 text-primary mb-3" />
+							<div className="font-medium">Integration guide</div>
+							<p className="text-sm text-muted-foreground mt-2">See the exact steps clients take to connect their app to KoreShield.</p>
+						</Link>
+						<Link to="/settings/api-keys" className="rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
+							<Key className="w-5 h-5 text-primary mb-3" />
+							<div className="font-medium">Server API keys</div>
+							<p className="text-sm text-muted-foreground mt-2">Create the credentials your backend or gateway will use.</p>
+						</Link>
+						<a href="https://docs.koreshield.com/docs/getting-started/quick-start/" target="_blank" rel="noreferrer" className="rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
+							<BookOpen className="w-5 h-5 text-primary mb-3" />
+							<div className="font-medium">Public docs</div>
+							<p className="text-sm text-muted-foreground mt-2">Open the published docs if you want the broader setup guide.</p>
+						</a>
 					</div>
 				</div>
 			</main>
