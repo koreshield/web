@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, DollarSign, Shield, TrendingUp, AlertTriangle, CheckCircle, Code } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Code, DollarSign, Shield, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
 export default function VsBuildYourselfPage() {
@@ -349,7 +349,7 @@ export default function VsBuildYourselfPage() {
 							View Pricing
 						</Link>
 						<a
-							href="https://docs.koreshield.com/getting-started/installation"
+							href="https://docs.koreshield.com/docs/getting-started/installation/"
 							target="_blank"
 							rel="noreferrer noopener"
 							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"

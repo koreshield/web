@@ -1,6 +1,6 @@
-import { useState, type ReactNode } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, type ReactNode } from 'react';
 
 interface AccordionProps {
   title: string;
@@ -15,7 +15,7 @@ export function Accordion({ title, children, defaultOpen = false }: AccordionPro
     <div className="my-4 rounded-lg border border-border bg-card overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left font-medium hover:bg-muted/50 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 text-left font-medium hover:bg-muted/50 transition-colors cursor-pointer"
       >
         <span>{title}</span>
         <motion.div
