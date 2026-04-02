@@ -15,6 +15,7 @@ export function Layout() {
 	const { isAuthenticated, user, isHydrating } = useAuthState();
 	const { theme } = useTheme();
 	const logoSrc = theme === 'light' ? '/logo/SVG/Black.svg' : '/logo/SVG/White.svg';
+	const isAdmin = user?.role === 'admin';
 
 	const closeMobile = () => setMobileMenuOpen(false);
 
@@ -51,7 +52,7 @@ export function Layout() {
 								<Link to="/teams" className={navLinkClass}>Teams</Link>
 								<Link to="/threat-monitoring" className={navLinkClass}>Threats</Link>
 								<Link to="/provider-health" className={navLinkClass}>Providers</Link>
-								<Link to="/advanced-analytics" className={navLinkClass}>Analytics</Link>
+								{isAdmin && <Link to="/advanced-analytics" className={navLinkClass}>Analytics</Link>}
 							</>
 						)}
 
@@ -117,9 +118,9 @@ export function Layout() {
 								<Link to="/teams" className={mobileNavLinkClass} onClick={closeMobile}>Teams</Link>
 								<Link to="/threat-monitoring" className={mobileNavLinkClass} onClick={closeMobile}>Threats</Link>
 								<Link to="/provider-health" className={mobileNavLinkClass} onClick={closeMobile}>Providers</Link>
-								<Link to="/advanced-analytics" className={mobileNavLinkClass} onClick={closeMobile}>Analytics</Link>
+								{isAdmin && <Link to="/advanced-analytics" className={mobileNavLinkClass} onClick={closeMobile}>Analytics</Link>}
 								<Link to="/threat-map" className={mobileNavLinkClass} onClick={closeMobile}>Threat Map</Link>
-								<Link to="/compliance-reports" className={mobileNavLinkClass} onClick={closeMobile}>Compliance</Link>
+								{isAdmin && <Link to="/compliance-reports" className={mobileNavLinkClass} onClick={closeMobile}>Compliance</Link>}
 								<Link to="/api-key-management" className={mobileNavLinkClass} onClick={closeMobile}>API Keys</Link>
 								<Link to="/audit-logs" className={mobileNavLinkClass} onClick={closeMobile}>Audit Logs</Link>
 								<Link to="/rag-security" className={mobileNavLinkClass} onClick={closeMobile}>RAG Security</Link>
