@@ -137,6 +137,7 @@ class AlertChannel(Enum):
     WEBHOOK = "webhook"
     SLACK = "slack"
     TEAMS = "teams"
+    TELEGRAM = "telegram"
     PAGERDUTY = "pagerduty"
 
 
@@ -322,6 +323,8 @@ class AlertManager:
                 return await self._send_slack_alert(alert)
             elif channel == AlertChannel.TEAMS:
                 return await self._send_teams_alert(alert)
+            elif channel == AlertChannel.TELEGRAM:
+                return await self._send_telegram_alert(alert)
             elif channel == AlertChannel.PAGERDUTY:
                 return await self._send_pagerduty_alert(alert)
             else:
@@ -475,6 +478,47 @@ Details:
 
         return response.status_code == 200
 
+    async def _send_telegram_alert(self, alert: Alert) -> bool:
+        """Send alert via Telegram bot."""
+        telegram_config = getattr(self.config.channels, "telegram", None)
+        if not telegram_config or not telegram_config.enabled:
+            return False
+        if not telegram_config.bot_token or not telegram_config.channel_id:
+            logger.error("Telegram alert failed: missing bot token or channel id")
+            return False
+
+        icon = {
+            AlertSeverity.INFO: "INFO",
+            AlertSeverity.WARNING: "WARNING",
+            AlertSeverity.ERROR: "ERROR",
+            AlertSeverity.CRITICAL: "CRITICAL",
+        }
+        details_text = json.dumps(alert.details, indent=2, default=str)
+        message = (
+            f"<b>{icon[alert.severity]} KoreShield Alert</b>\n"
+            f"<b>Rule:</b> {alert.rule_name}\n"
+            f"<b>Severity:</b> {alert.severity.value.upper()}\n"
+            f"<b>Message:</b> {alert.message}\n"
+            f"<b>Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(alert.timestamp))}\n"
+            f"<b>Details:</b>\n<pre>{details_text}</pre>"
+        )
+
+        payload = {
+            "chat_id": telegram_config.channel_id,
+            "text": message,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": True,
+        }
+        if telegram_config.message_thread_id:
+            payload["message_thread_id"] = telegram_config.message_thread_id
+
+        response = await self.client.post(
+            f"https://api.telegram.org/bot{telegram_config.bot_token}/sendMessage",
+            json=payload,
+            headers={"Content-Type": "application/json"},
+        )
+        return response.status_code == 200
+
     async def _send_pagerduty_alert(self, alert: Alert) -> bool:
         """Send alert via PagerDuty."""
         pd_config = self.config.channels.pagerduty
@@ -523,6 +567,7 @@ class MonitoringSystem:
         config: MonitoringConfig,
         stats_getter: Optional[Callable[[], Dict[str, int]]] = None,
         event_publisher: Optional[Callable[[str, Dict[str, Any]], Awaitable[None]]] = None,
+        status_getter: Optional[Callable[[], Awaitable[Dict[str, Any]]]] = None,
     ):
         self.config = config
         self.metrics = MetricsCollector()
@@ -530,6 +575,8 @@ class MonitoringSystem:
         self.monitoring_enabled = config.enabled
         self.stats_getter = stats_getter
         self.event_publisher = event_publisher
+        self.status_getter = status_getter
+        self._last_status_snapshot: Dict[str, Any] | None = None
 
         # Background monitoring task
         self.monitoring_task: Optional[asyncio.Task] = None
@@ -556,7 +603,7 @@ class MonitoringSystem:
 
     async def _monitoring_loop(self):
         """Main monitoring loop."""
-        interval = self.config.get('monitoring', {}).get('check_interval_seconds', 60)
+        interval = getattr(self.config.alerts, "check_interval", 60)
 
         while True:
             try:
@@ -573,6 +620,11 @@ class MonitoringSystem:
 
                 # Update active alerts
                 self.alert_manager.active_alerts.extend(alerts)
+
+                status_alerts = await self._evaluate_status_snapshot()
+                for alert in status_alerts:
+                    await self._dispatch_operational_alert(alert)
+                self.alert_manager.active_alerts.extend(status_alerts)
 
                 # Publish cost threshold alerts (if configured)
                 if self.event_publisher and alerts:
@@ -597,6 +649,139 @@ class MonitoringSystem:
                 logger.error(f"Monitoring loop error: {e}")
 
             await asyncio.sleep(interval)
+
+    def _get_enabled_channels(self) -> List[AlertChannel]:
+        """Return enabled alert delivery channels."""
+        enabled_channels: List[AlertChannel] = []
+        channels_config = getattr(self.config.alerts, "channels", None)
+        if not channels_config:
+            return enabled_channels
+
+        for channel in AlertChannel:
+            channel_config = getattr(channels_config, channel.value, None)
+            if channel_config and getattr(channel_config, "enabled", False):
+                enabled_channels.append(channel)
+        return enabled_channels
+
+    async def _dispatch_operational_alert(self, alert: Alert) -> None:
+        """Send an alert across all enabled channels."""
+        enabled_channels = self._get_enabled_channels()
+        if not enabled_channels:
+            return
+
+        for channel in enabled_channels:
+            await self.alert_manager.send_alert(alert, channel)
+
+        if self.event_publisher:
+            try:
+                await self.event_publisher(
+                    "status_change_alert",
+                    {
+                        "rule_name": alert.rule_name,
+                        "severity": alert.severity.value,
+                        "message": alert.message,
+                        "timestamp": alert.timestamp,
+                        "details": alert.details,
+                    },
+                )
+            except Exception as e:
+                logger.error("event_publish_failed", event_type="status_change_alert", error=str(e))
+
+    async def notify_status_change(
+        self,
+        *,
+        subject_type: str,
+        subject_name: str,
+        old_status: str | None,
+        new_status: str | None,
+        detail: str | None = None,
+        extra: Dict[str, Any] | None = None,
+    ) -> None:
+        """Dispatch a single operational status change alert immediately."""
+        alert = Alert(
+            rule_name=f"{subject_type}_status_{subject_name}",
+            severity=self._severity_from_status(new_status or "unknown"),
+            message=f"{subject_type.replace('_', ' ').title()} '{subject_name}' changed from {old_status or 'unknown'} to {new_status or 'unknown'}",
+            details={
+                subject_type: subject_name,
+                "old_status": old_status,
+                "new_status": new_status,
+                "detail": detail,
+                **(extra or {}),
+            },
+            timestamp=time.time(),
+        )
+        await self._dispatch_operational_alert(alert)
+
+    def _severity_from_status(self, status: str) -> AlertSeverity:
+        """Map component status to alert severity."""
+        normalized = (status or "").lower()
+        if normalized in {"major_outage", "partial_outage", "unhealthy"}:
+            return AlertSeverity.ERROR
+        if normalized in {"degraded", "maintenance"}:
+            return AlertSeverity.WARNING
+        return AlertSeverity.INFO
+
+    async def _evaluate_status_snapshot(self) -> List[Alert]:
+        """Detect operational status changes between monitoring intervals."""
+        if not self.status_getter:
+            return []
+
+        snapshot = await self.status_getter()
+        if not self._last_status_snapshot:
+            self._last_status_snapshot = snapshot
+            return []
+
+        alerts: List[Alert] = []
+        previous = self._last_status_snapshot
+
+        for provider_name, provider_state in snapshot.get("providers", {}).items():
+            old_state = previous.get("providers", {}).get(provider_name, {})
+            old_status = old_state.get("status")
+            new_status = provider_state.get("status")
+            if old_status == new_status:
+                continue
+
+            alerts.append(
+                Alert(
+                    rule_name=f"provider_status_{provider_name}",
+                    severity=self._severity_from_status(new_status),
+                    message=f"Provider route '{provider_name}' changed from {old_status or 'unknown'} to {new_status or 'unknown'}",
+                    details={
+                        "provider": provider_name,
+                        "old_status": old_status,
+                        "new_status": new_status,
+                        "base_url": provider_state.get("base_url"),
+                        "error": provider_state.get("error"),
+                    },
+                    timestamp=time.time(),
+                )
+            )
+
+        for component_name, component_state in snapshot.get("components", {}).items():
+            old_state = previous.get("components", {}).get(component_name, {})
+            old_status = old_state.get("status")
+            new_status = component_state.get("status")
+            if old_status == new_status:
+                continue
+
+            alerts.append(
+                Alert(
+                    rule_name=f"component_status_{component_name}",
+                    severity=self._severity_from_status(new_status),
+                    message=f"Component '{component_name}' changed from {old_status or 'unknown'} to {new_status or 'unknown'}",
+                    details={
+                        "component": component_name,
+                        "old_status": old_status,
+                        "new_status": new_status,
+                        "detail": component_state.get("detail"),
+                    },
+                    timestamp=time.time(),
+                )
+            )
+
+        self._last_status_snapshot = snapshot
+        return alerts
 
     def _collect_current_metrics(self) -> Dict[str, Any]:
         """Collect current system metrics."""

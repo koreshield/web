@@ -98,6 +98,19 @@ class TeamsChannel(BaseModel):
     webhook_url: str = ""
 
 
+class TelegramChannel(BaseModel):
+    """Telegram alert channel configuration."""
+    enabled: bool = Field(
+        default_factory=lambda: (
+            (os.getenv("TELEGRAM_ALERTS_ENABLED", "").strip().lower() in {"1", "true", "yes", "on"})
+            or bool(os.getenv("TELEGRAM_BOT_TOKEN", "").strip() and os.getenv("TELEGRAM_CHANNEL_ID", "").strip())
+        )
+    )
+    bot_token: str = Field(default_factory=lambda: os.getenv("TELEGRAM_BOT_TOKEN", ""))
+    channel_id: str = Field(default_factory=lambda: os.getenv("TELEGRAM_CHANNEL_ID", ""))
+    message_thread_id: Optional[str] = Field(default_factory=lambda: os.getenv("TELEGRAM_MESSAGE_THREAD_ID", "") or None)
+
+
 class PagerDutyChannel(BaseModel):
     """PagerDuty alert channel configuration."""
     enabled: bool = False
@@ -117,6 +130,7 @@ class AlertChannels(BaseModel):
     email: EmailChannel = EmailChannel()
     slack: SlackChannel = SlackChannel()
     teams: TeamsChannel = TeamsChannel()
+    telegram: TelegramChannel = TelegramChannel()
     pagerduty: PagerDutyChannel = PagerDutyChannel()
     webhook: WebhookChannel = WebhookChannel()
 
@@ -153,6 +167,7 @@ class KoreShieldConfig(BaseModel):
         """Load configuration from dictionary."""
         # Handle providers separately as they're dynamic
         providers_data = data.pop('providers', {})
+        legacy_alerting = data.pop('alerting', None)
         providers = {}
         for name, config in providers_data.items():
             # Get API key from environment if not specified
@@ -160,6 +175,43 @@ class KoreShieldConfig(BaseModel):
             if 'api_key' not in config and api_key_env in os.environ:
                 config['api_key'] = os.environ[api_key_env]
             providers[name] = ProviderConfig(**config)
+
+        monitoring_data = data.get("monitoring", {}) or {}
+        if legacy_alerting:
+            monitoring_data["alerts"] = {
+                "enabled": legacy_alerting.get("enabled", True),
+                "check_interval": monitoring_data.get("check_interval_seconds", 60),
+                "rules": [
+                    {
+                        "name": rule.get("name"),
+                        "condition": rule.get("condition"),
+                        "severity": rule.get("severity", "warning"),
+                        "cooldown": int(rule.get("cooldown_minutes", 5)) * 60,
+                        "channels": rule.get("channels", []),
+                    }
+                    for rule in legacy_alerting.get("rules", [])
+                ],
+                "channels": {
+                    "email": {
+                        "enabled": legacy_alerting.get("email", {}).get("enabled", False),
+                        "smtp_server": legacy_alerting.get("email", {}).get("smtp_server", "smtp.gmail.com"),
+                        "smtp_port": legacy_alerting.get("email", {}).get("smtp_port", 587),
+                        "username": legacy_alerting.get("email", {}).get("username", ""),
+                        "password": legacy_alerting.get("email", {}).get("password", ""),
+                        "from_address": legacy_alerting.get("email", {}).get("from_address", ""),
+                        "to_addresses": legacy_alerting.get("email", {}).get("recipients", []),
+                    },
+                    "slack": legacy_alerting.get("slack", {}),
+                    "teams": legacy_alerting.get("teams", {}),
+                    "telegram": legacy_alerting.get("telegram", {}),
+                    "pagerduty": {
+                        "enabled": legacy_alerting.get("pagerduty", {}).get("enabled", False),
+                        "integration_key": legacy_alerting.get("pagerduty", {}).get("routing_key", ""),
+                    },
+                    "webhook": legacy_alerting.get("webhook", {}),
+                },
+            }
+        data["monitoring"] = monitoring_data
 
         # Create config object
         config_obj = self.__class__(**data)
