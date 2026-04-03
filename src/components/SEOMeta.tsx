@@ -64,6 +64,7 @@ export function SEOMeta({
 				'https://github.com/koreshield/',
 				'https://twitter.com/koreshield',
 				'https://linkedin.com/company/koreshield',
+				'https://t.me/koreshield',
 			],
 		},
 	};
@@ -113,5 +114,4 @@ export function SEOMeta({
 		</Helmet>
 	);
 }
-
 
