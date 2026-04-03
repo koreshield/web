@@ -10,6 +10,7 @@ import sys
 import uuid
 import time
 import contextlib
+import copy
 from collections import deque
 from pathlib import Path
 from contextlib import asynccontextmanager
@@ -96,7 +97,7 @@ class KoreShieldProxy:
             ("azure_openai", ["AZURE_OPENAI_API_KEY"], self.AzureOpenAIProvider),
         ]
 
-        self.config = config
+        self.config = copy.deepcopy(config)
         self.app = FastAPI(
             title="KoreShield API",
             version="1.0.0",
@@ -259,7 +260,7 @@ class KoreShieldProxy:
         from .monitoring import MonitoringSystem
         from .config import KoreShieldConfig
         kore_config = KoreShieldConfig()
-        kore_config.load_from_dict(config)
+        kore_config.load_from_dict(copy.deepcopy(config))
         self.monitoring = MonitoringSystem(
             kore_config.monitoring,
             stats_getter=self._get_stats_dict,
