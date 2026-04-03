@@ -33,7 +33,7 @@ function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.2 }}
 					>
-						Every Prompt Is a{' '}
+						Every Prompt is a{' '}
 						<span className="text-electric-green">Potential Attack.</span>
 					</motion.h1>
 
