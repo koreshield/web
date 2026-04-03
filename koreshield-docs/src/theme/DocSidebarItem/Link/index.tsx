@@ -1,5 +1,5 @@
 /**
- * KoreShield Docs — Custom sidebar item with icon support.
+ * KoreShield Docs  -  Custom sidebar item with icon support.
  *
  * This swizzle wraps the default DocSidebarItemLink to inject
  * an SVG icon from customProps.icon before the label text.

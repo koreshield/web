@@ -1,10 +1,10 @@
 // Setup:
 // 1. Go to https://resend.com > API Keys > Create API Key (name: "KoreShield Blog", Full Access)
-// 2. Copy the API key (starts with re_) — you only see it once
+// 2. Copy the API key (starts with re_)  -  you only see it once
 // 3. Get your Audience ID:
 //    - Go to https://resend.com/audience
 //    - Click the </> button (top right of the page)
-//    - Scroll the code panel until you see a UUID like 5e4d5e4d-5e4d-5e4d-... — that is your Audience ID
+//    - Scroll the code panel until you see a UUID like 5e4d5e4d-5e4d-5e4d-...  -  that is your Audience ID
 //    - OR call: curl -H "Authorization: Bearer YOUR_API_KEY" https://api.resend.com/audiences
 // 4. In Cloudflare Pages dashboard > your project > Settings > Environment Variables:
 //    Add RESEND_API_KEY = re_your_key_here
@@ -46,7 +46,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       });
     }
 
-    // Use explicit audience ID — falls back to auto-detect if not set
+    // Use explicit audience ID  -  falls back to auto-detect if not set
     let audienceId = env.RESEND_AUDIENCE_ID;
     if (!audienceId) {
       const audiencesRes = await fetch("https://api.resend.com/audiences", {

@@ -33,8 +33,22 @@ import { getDocumentReadErrorMessage, readUploadedDocument } from '../lib/docume
 interface RetrievedDocument {
 	id: string;
 	content: string;
-	metadata?: Record<string, any>;
+	metadata?: Record<string, unknown>;
 	score?: number;
+}
+
+interface ThreatReference {
+	excerpt: string;
+	match_text?: string;
+	location: {
+		start: number;
+		end: number;
+		basis?: 'original' | 'normalized';
+	};
+	normalized_location?: {
+		start: number;
+		end: number;
+	};
 }
 
 interface DocumentThreat {
@@ -43,9 +57,11 @@ interface DocumentThreat {
 	severity: 'critical' | 'high' | 'medium' | 'low';
 	confidence: number;
 	excerpt: string;
+	references: ThreatReference[];
 	location: {
 		start: number;
 		end: number;
+		basis?: 'original' | 'normalized';
 	};
 	taxonomy: {
 		injection_vector: string;
@@ -123,11 +139,78 @@ type RAGApiResponse = {
 			confidence?: number;
 		};
 	};
-	context_analysis?: any;
+	context_analysis?: {
+		is_safe?: boolean;
+		scan_id?: string;
+		scan_timestamp?: string;
+		processing_time_ms?: number;
+		total_threats_found?: number;
+		detection_complexity?: string;
+		injection_vectors?: string[];
+		operational_targets?: string[];
+		persistence_mechanisms?: string[];
+		enterprise_contexts?: string[];
+		document_threats?: Array<{
+			document_id?: string;
+			threat_type?: string;
+			severity?: 'critical' | 'high' | 'medium' | 'low';
+			confidence?: number;
+			excerpts?: string[];
+			injection_vector?: string;
+			operational_target?: string;
+			metadata?: {
+				persistence_mechanism?: string;
+				enterprise_context?: string;
+				detection_complexity?: string;
+				summary?: string;
+				evidence_refs?: ThreatReference[];
+			};
+		}>;
+		cross_document_threats?: Array<{
+			threat_type?: string;
+			severity?: 'critical' | 'high' | 'medium' | 'low';
+			confidence?: number;
+			document_ids?: string[];
+			description?: string;
+			metadata?: {
+				stage_summary?: string;
+			};
+		}>;
+		statistics?: {
+			total_threats_found?: number;
+			total_documents_scanned?: number;
+		};
+	};
 	processing_time_ms?: number;
 	timestamp?: string;
 	request_id?: string;
 };
+
+interface RAGHistoryEntry {
+	scan_id?: string;
+	timestamp?: string;
+	documents?: RetrievedDocument[];
+	user_query?: string;
+	response?: unknown;
+	result?: unknown;
+}
+
+interface RAGHistoryResponse {
+	scans?: RAGHistoryEntry[];
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+	if (error instanceof Error && error.message) {
+		return error.message;
+	}
+	return fallback;
+}
+
+function getDocumentDisplayName(document: RetrievedDocument, index: number) {
+	return typeof document.metadata?.filename === 'string'
+		? document.metadata.filename
+		: `Document ${index + 1}`;
+}
 
 const buildTaxonomyCounts = (values: string[] | undefined): Record<string, number> => {
 	if (!values) return {};
@@ -138,12 +221,12 @@ const buildTaxonomyCounts = (values: string[] | undefined): Record<string, numbe
 };
 
 const normalizeRagResponse = (
-	payload: any,
+	payload: unknown,
 	sourceDocuments: RetrievedDocument[],
 	userQueryValue: string
 ): RAGScanResult => {
 	// Already normalized
-	if (payload?.scan_metadata) {
+	if (payload && typeof payload === 'object' && 'scan_metadata' in payload) {
 		return payload as RAGScanResult;
 	}
 
@@ -151,17 +234,21 @@ const normalizeRagResponse = (
 	const context = apiPayload?.context_analysis || {};
 	const stats = context.statistics || {};
 
-	const documentThreats: DocumentThreat[] = (context.document_threats || []).map((threat: any, index: number) => {
-		const excerpt = threat.excerpts?.[0] || '';
+	const documentThreats: DocumentThreat[] = (context.document_threats || []).map((threat, index: number) => {
+		const references = threat.metadata?.evidence_refs || [];
+		const firstReference = references[0];
+		const excerpt = firstReference?.excerpt || threat.excerpts?.[0] || '';
 		return {
 			document_id: threat.document_id || sourceDocuments[index]?.id || `doc_${index}`,
 			threat_type: threat.threat_type || 'unknown',
 			severity: threat.severity || 'low',
 			confidence: threat.confidence || 0,
 			excerpt,
+			references,
 			location: {
-				start: 0,
-				end: excerpt.length,
+				start: firstReference?.location.start || 0,
+				end: firstReference?.location.end || excerpt.length,
+				basis: firstReference?.location.basis || 'normalized',
 			},
 			taxonomy: {
 				injection_vector: threat.injection_vector || 'unknown',
@@ -174,7 +261,7 @@ const normalizeRagResponse = (
 		};
 	});
 
-	const crossDocumentThreats: CrossDocumentThreat[] = (context.cross_document_threats || []).map((threat: any) => ({
+	const crossDocumentThreats: CrossDocumentThreat[] = (context.cross_document_threats || []).map((threat) => ({
 		threat_type: threat.threat_type || 'unknown',
 		severity: threat.severity || 'low',
 		confidence: threat.confidence || 0,
@@ -259,6 +346,12 @@ export function RAGSecurityPage() {
 	const [selectedTemplate, setSelectedTemplate] = useState<keyof typeof CRM_TEMPLATES | null>(null);
 	const [templateFields, setTemplateFields] = useState<Record<string, string>>({});
 	const [expandedThreat, setExpandedThreat] = useState<string | null>(null);
+
+	const getDocumentLabel = (documentId: string) => {
+		const document = documents.find((item) => item.id === documentId);
+		const filename = typeof document?.metadata?.filename === 'string' ? document.metadata.filename : null;
+		return filename || documentId;
+	};
 	const [showSafeDocuments, setShowSafeDocuments] = useState(false);
 	const [scanConfig, setScanConfig] = useState<ScanConfig>({
 		min_confidence: 0.3,
@@ -273,12 +366,12 @@ export function RAGSecurityPage() {
 		setHistoryLoading(true);
 		setHistoryError(null);
 		try {
-			const response: any = await api.getRagScanHistory(20, 0);
-			const scans = response?.scans || [];
-			const mapped = scans.map((item: any) => {
-				const documentsList = item.documents || [];
-				const responsePayload = item.response || item.result || item;
-				const normalized = normalizeRagResponse(responsePayload, documentsList, item.user_query || '');
+				const response = await api.getRagScanHistory(20, 0) as RAGHistoryResponse;
+				const scans = response?.scans || [];
+				const mapped = scans.map((item) => {
+					const documentsList = item.documents || [];
+					const responsePayload = item.response || item.result || item;
+					const normalized = normalizeRagResponse(responsePayload, documentsList, item.user_query || '');
 				return {
 					id: item.scan_id || normalized.scan_metadata.scan_id,
 					timestamp: item.timestamp || normalized.scan_metadata.timestamp,
@@ -288,9 +381,9 @@ export function RAGSecurityPage() {
 				} as RAGScanHistoryItem;
 			});
 			setScanHistory(mapped);
-		} catch (err: any) {
-			setHistoryError(err.message || 'Failed to load scan history');
-		} finally {
+			} catch (error) {
+				setHistoryError(getErrorMessage(error, 'Failed to load scan history'));
+			} finally {
 			setHistoryLoading(false);
 		}
 	};
@@ -415,9 +508,9 @@ export function RAGSecurityPage() {
 				setScanHistory([]);
 				success('Scan history cleared');
 			})
-			.catch((err: any) => {
-				showError(err.message || 'Failed to clear history');
-			});
+				.catch((error) => {
+					showError(getErrorMessage(error, 'Failed to clear history'));
+				});
 	};
 
 	const handleLoadHistory = (item: RAGScanHistoryItem) => {
@@ -432,9 +525,9 @@ export function RAGSecurityPage() {
 			.then(() => {
 				setScanHistory((prev) => prev.filter((item) => item.id !== id));
 			})
-			.catch((err: any) => {
-				showError(err.message || 'Failed to delete scan');
-			});
+				.catch((error) => {
+					showError(getErrorMessage(error, 'Failed to delete scan'));
+				});
 	};
 
 	const handleDownloadPack = async (scanId: string) => {
@@ -449,9 +542,9 @@ export function RAGSecurityPage() {
 			document.body.removeChild(a);
 			URL.revokeObjectURL(url);
 			success('Download started');
-		} catch (err: any) {
-			showError(err.message || 'Failed to download scan pack');
-		}
+			} catch (error) {
+				showError(getErrorMessage(error, 'Failed to download scan pack'));
+			}
 	};
 
 	// Perform RAG scan
@@ -477,10 +570,10 @@ export function RAGSecurityPage() {
 			} else {
 				showError(`${normalized.total_threats_found} threat(s) detected!`);
 			}
-		} catch (err: any) {
-			showError(err.message || 'Failed to scan documents');
-			console.error('RAG scan error:', err);
-		} finally {
+			} catch (error) {
+				showError(getErrorMessage(error, 'Failed to scan documents'));
+				console.error('RAG scan error:', error);
+			} finally {
 			setLoading(false);
 		}
 	};
@@ -526,10 +619,10 @@ export function RAGSecurityPage() {
 
 	// Get injection vector icon
 	const getInjectionVectorIcon = (vector: string) => {
-		const iconMap: Record<string, any> = {
-			email: Mail,
-			document: FileText,
-			web_scraping: Globe,
+			const iconMap: Record<string, typeof FileType> = {
+				email: Mail,
+				document: FileText,
+				web_scraping: Globe,
 			chat_message: MessageSquare,
 			database: Database,
 			file_upload: Upload
@@ -740,7 +833,7 @@ export function RAGSecurityPage() {
 											<FileText className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
 											<div className="flex-1 min-w-0">
 												<div className="font-medium text-sm">
-													{doc.metadata?.filename || `Document ${index + 1}`}
+													{getDocumentDisplayName(doc, index)}
 												</div>
 												<div className="text-xs text-muted-foreground truncate">
 													{doc.content.substring(0, 100)}...
@@ -1092,7 +1185,29 @@ export function RAGSecurityPage() {
 											<div className="p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
 												<code className="text-sm">{threat.excerpt}</code>
 											</div>
+											<div className="mt-2 text-xs text-muted-foreground">
+												Reference source: {getDocumentLabel(threat.document_id)}
+											</div>
 										</div>
+
+										{threat.references.length > 0 && (
+											<div>
+												<div className="text-sm font-medium mb-2">Referenced Findings</div>
+												<div className="space-y-3">
+													{threat.references.map((reference, referenceIndex) => (
+														<div
+															key={`${threat.document_id}-${referenceIndex}`}
+															className="rounded-lg border border-border bg-muted/30 p-3"
+														>
+															<div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+																{reference.location.basis === 'original' ? 'Document characters' : 'Normalized characters'} {reference.location.start}-{reference.location.end}
+															</div>
+															<code className="block text-sm whitespace-pre-wrap break-words">{reference.excerpt}</code>
+														</div>
+													))}
+												</div>
+											</div>
+										)}
 
 										{/* Explanation */}
 										<div>
@@ -1159,7 +1274,7 @@ export function RAGSecurityPage() {
 
 										{/* Location */}
 										<div className="text-xs text-muted-foreground">
-											Location: characters {threat.location.start}-{threat.location.end}
+											Location: {threat.location.basis === 'original' ? 'document' : 'normalized'} characters {threat.location.start}-{threat.location.end}
 										</div>
 									</motion.div>
 								)}

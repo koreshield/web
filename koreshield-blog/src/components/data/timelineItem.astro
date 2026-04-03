@@ -90,13 +90,13 @@ const getTypeText = (type: string) => {
 const getLinkIcon = (type: string) => {
     switch (type) {
         case "certificate":
-            return "🏆";
+            return "Award";
         case "project":
-            return "📑";
+            return "Publication";
         case "other":
-            return "🔗";
+            return "Link";
         default:
-            return "🔗";
+            return "Link";
     }
 };
 
@@ -213,7 +213,7 @@ const itemColor = item.color || "#3B82F6";
                     {item.location && (
                         <>
                             <div>•</div>
-                            <div>📍 {item.location}</div>
+                            <div>{item.location}</div>
                         </>
                     )}
                 </div>
@@ -302,7 +302,7 @@ const itemColor = item.color || "#3B82F6";
                     )}
                     {item.location && (
                         <div class={`text-black/60 dark:text-white/60 mb-2 ${sizeClasses.meta}`}>
-                            📍 {item.location}
+                            {item.location}
                         </div>
                     )}
                 </div>

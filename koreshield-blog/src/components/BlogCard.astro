@@ -95,7 +95,7 @@ const formattedDate = new Date(publishedDate).toLocaleDateString("en-US", {
               href={`/categories/${category.toLowerCase().replace(/\s+/g, "-")}`}
               class="inline-flex items-center gap-1 px-2 py-1 bg-cyber-purple/20 text-cyber-purple text-xs font-medium rounded-md hover:bg-cyber-purple/30 transition-colors"
             >
-              📁 {category}
+              {category}
             </a>
           )}
           {tags &&

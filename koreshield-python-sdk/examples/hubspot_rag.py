@@ -93,7 +93,7 @@ def scan_hubspot_contacts(koreshield: KoreShieldClient, hubspot_client: Any, que
     
     # 4. Process Results
     if scan_result.is_safe:
-        print("✅ All contacts safe. Proceeding with RAG generation.")
+        print(" All contacts safe. Proceeding with RAG generation.")
         # proceed_with_rag(documents)
     else:
         print(f"Security Threat Detected (Severity: {scan_result.overall_severity})")

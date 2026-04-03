@@ -82,7 +82,7 @@ export function ApiKeysPage() {
 			error('Name is required', 'Provide a name for the API key before generating.');
 			return;
 		}
-		const data: any = {
+		const data: { name: string; description?: string; expires_at?: string } = {
 			name: formData.name.trim(),
 			description: formData.description || undefined,
 		};
@@ -255,12 +255,6 @@ export function ApiKeysPage() {
 												<code className="text-sm font-mono bg-muted px-2 py-1 rounded">
 													{key.key_prefix}...
 												</code>
-												<button
-													onClick={() => handleCopyKey(key.key_prefix)}
-													className="p-1 hover:bg-muted rounded transition-colors"
-												>
-													<Copy className="w-3 h-3" />
-												</button>
 											</div>
 											<div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
 												<div className="flex items-center gap-1">
@@ -304,6 +298,15 @@ export function ApiKeysPage() {
 				<div className="mt-8 bg-card border border-border rounded-lg p-6">
 					<h3 className="text-lg font-semibold mb-4">Using Your API Key</h3>
 					<div className="space-y-4 text-sm">
+						<div className="rounded-lg border border-border bg-muted/30 p-4">
+							<div className="font-medium mb-2">What happens next</div>
+							<ol className="list-decimal ml-5 space-y-1 text-muted-foreground">
+								<li>Create one key for your backend, worker, or gateway.</li>
+								<li>Store it in an environment variable, not in browser code.</li>
+								<li>Send one protected request through KoreShield.</li>
+								<li>Run one malicious prompt or RAG scan so you can see the detection in the dashboard.</li>
+							</ol>
+						</div>
 						<div>
 							<p className="text-muted-foreground mb-2">
 								Include your API key in the Authorization header:
@@ -329,6 +332,7 @@ export function ApiKeysPage() {
 									<li>Store keys securely using environment variables</li>
 									<li>Rotate keys regularly and revoke unused keys</li>
 									<li>Use separate keys for different environments (dev, staging, prod)</li>
+									<li>Only the newly generated full key is usable. The list view shows prefixes for identification only.</li>
 								</ul>
 							</div>
 						</div>

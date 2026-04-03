@@ -5,14 +5,14 @@ const useCases = [
 	{
 		icon: DollarSign,
 		title: 'Fintech',
-		description: 'A single exfiltrated account number is a compliance violation. KoreShield scans every prompt and response for PCI-DSS sensitive data — blocking unauthorized extraction before it leaves your stack.',
+		description: 'A single exfiltrated account number is a compliance violation. KoreShield scans every prompt and response for PCI-DSS sensitive data  -  blocking unauthorized extraction before it leaves your stack.',
 		tag: 'PCI-DSS',
 		tagColor: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
 	},
 	{
 		icon: HeartPulse,
 		title: 'Healthcare',
-		description: 'PHI leaking through an LLM isn\'t just a breach — it\'s a HIPAA notification. KoreShield automatically redacts patient identifiers from prompts and responses, with full audit logs for your compliance team.',
+		description: 'PHI leaking through an LLM isn\'t just a breach  -  it\'s a HIPAA notification. KoreShield automatically redacts patient identifiers from prompts and responses, with full audit logs for your compliance team.',
 		tag: 'HIPAA',
 		tagColor: 'text-rose-400 bg-rose-400/10 border-rose-400/20',
 	},
@@ -40,7 +40,7 @@ function UseCases() {
 						Where a Breach Means More Than Downtime
 					</h2>
 					<p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-						KoreShield is built for environments where AI errors have regulatory and financial consequences — not just bad press.
+						KoreShield is built for environments where AI errors have regulatory and financial consequences  -  not just bad press.
 					</p>
 				</motion.div>
 

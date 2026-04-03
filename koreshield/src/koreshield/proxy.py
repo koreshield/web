@@ -8,6 +8,7 @@ import zipfile
 import os
 import sys
 import uuid
+import time
 import contextlib
 from collections import deque
 from pathlib import Path
@@ -213,6 +214,7 @@ class KoreShieldProxy:
         # In-memory fallback for RAG scan history when DB is unavailable
         self.app.state.rag_scan_store = deque(maxlen=250)
         self.app.state.rag_scan_index = {}
+        self.app.state.audit_log_store = deque(maxlen=500)
 
         # Initialize security components
         security_config = config.get("security", {})
@@ -300,6 +302,19 @@ class KoreShieldProxy:
 
     def _emit_event(self, event_type: str, data: dict) -> None:
         """Schedule an event publish without blocking the request path."""
+        self._append_audit_log(
+            {
+                "id": str(uuid.uuid4()),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "event": event_type,
+                "status": data.get("status") or data.get("action_taken") or "info",
+                "attack_type": data.get("attack_type"),
+                "request_id": data.get("request_id"),
+                "path": data.get("endpoint"),
+                "user_id": str(data.get("user_id")) if data.get("user_id") else None,
+                "attack_details": data,
+            }
+        )
         try:
             asyncio.create_task(self._publish_event(event_type, data))
         except RuntimeError:
@@ -529,6 +544,26 @@ class KoreShieldProxy:
             session.add(entry)
             await session.commit()
 
+    def _build_rag_log_summary(self, rag_scan_result) -> list[dict]:
+        """Create compact evidence references for audit logging and UI summaries."""
+        summary = []
+        for threat in rag_scan_result.document_threats[:10]:
+            evidence_refs = threat.metadata.get("evidence_refs", []) if threat.metadata else []
+            first_ref = evidence_refs[0] if evidence_refs else {}
+            location = first_ref.get("location", {})
+            summary.append(
+                {
+                    "document_id": threat.document_id,
+                    "threat_type": threat.threat_type,
+                    "severity": threat.severity.value,
+                    "confidence": round(threat.confidence, 4),
+                    "excerpt": first_ref.get("excerpt") or (threat.excerpts[0] if threat.excerpts else ""),
+                    "location": location,
+                    "evidence_refs": evidence_refs,
+                }
+            )
+        return summary
+
     @property
     def provider(self):
         """Get the primary (highest priority) provider."""
@@ -569,18 +604,19 @@ class KoreShieldProxy:
             for i, provider in enumerate(self.providers):
                 provider_name = self.provider_priority[i]
                 try:
-                    # For now, just check if provider exists
-                    # TODO: Implement actual health checks
-                    is_healthy = provider is not None
+                    check_started = time.perf_counter()
+                    is_healthy = bool(provider and await provider.health_check())
                     health_status[provider_name] = {
                         "healthy": is_healthy,
                         "priority": i,
                         "type": type(provider).__name__ if provider else None,
+                        "response_time_ms": (time.perf_counter() - check_started) * 1000,
                     }
                 except Exception as e:
                     health_status[provider_name] = {
                         "healthy": False,
                         "priority": i,
+                        "type": type(provider).__name__ if provider else None,
                         "error": str(e),
                     }
 
@@ -588,6 +624,7 @@ class KoreShieldProxy:
                 "providers": health_status,
                 "total_providers": len(self.providers),
                 "healthy_providers": sum(1 for p in health_status.values() if p["healthy"]),
+                "configured": len(self.providers) > 0,
             }
 
         # Status/metrics endpoint
@@ -860,6 +897,8 @@ class KoreShieldProxy:
 
     async def _log_request_async(self, log_data: dict):
         """Log request to database asynchronously."""
+        if not AsyncSessionLocal:
+            return
         try:
             async with AsyncSessionLocal() as session:
                 log_entry = RequestLog(**log_data)
@@ -867,6 +906,51 @@ class KoreShieldProxy:
                 await session.commit()
         except Exception as e:
             logger.error("Failed to log request to DB", error=str(e))
+
+    def _build_request_audit_entry(self, log_data: dict) -> dict:
+        """Normalize request log payloads for management log responses."""
+        timestamp = log_data.get("timestamp")
+        if isinstance(timestamp, datetime):
+            timestamp_value = timestamp.isoformat()
+        else:
+            timestamp_value = str(timestamp or datetime.now(timezone.utc).isoformat())
+
+        status_code = log_data.get("status_code", 200)
+        is_blocked = bool(log_data.get("is_blocked"))
+
+        return {
+            "id": str(uuid.uuid4()),
+            "request_id": log_data.get("request_id"),
+            "timestamp": timestamp_value,
+            "event": "request_log",
+            "path": log_data.get("path"),
+            "method": log_data.get("method"),
+            "provider": log_data.get("provider"),
+            "model": log_data.get("model"),
+            "status": "failure" if is_blocked or status_code >= 400 else "success",
+            "status_code": status_code,
+            "latency_ms": log_data.get("latency_ms"),
+            "tokens_total": log_data.get("tokens_total", 0),
+            "cost": log_data.get("cost", 0.0),
+            "is_blocked": is_blocked,
+            "attack_detected": bool(log_data.get("attack_detected")),
+            "attack_type": log_data.get("attack_type"),
+            "attack_details": log_data.get("attack_details") or {},
+            "user_id": str(log_data.get("user_id")) if log_data.get("user_id") else None,
+            "ip": log_data.get("ip_address"),
+            "user_agent": log_data.get("user_agent"),
+        }
+
+    def _append_audit_log(self, entry: dict) -> None:
+        """Store an audit entry in memory for dashboard visibility."""
+        if not entry:
+            return
+        self.app.state.audit_log_store.appendleft(entry)
+
+    def _queue_request_log(self, log_data: dict) -> None:
+        """Record a request log immediately in memory and persist asynchronously."""
+        self._append_audit_log(self._build_request_audit_entry(log_data))
+        self._queue_request_log(log_data)
 
     async def _authenticate_request(self, request: Request) -> dict:
         """
@@ -1146,7 +1230,7 @@ class KoreShieldProxy:
                     "user_id": principal.get("user_id"),
                     "api_key_id": principal.get("api_key_id"),
                 }
-                asyncio.create_task(self._log_request_async(log_data))
+                self._queue_request_log(log_data)
 
                 return JSONResponse(
                     status_code=403,
@@ -1216,7 +1300,7 @@ class KoreShieldProxy:
                     "user_id": principal.get("user_id"),
                     "api_key_id": principal.get("api_key_id"),
                 }
-                asyncio.create_task(self._log_request_async(log_data))
+                self._queue_request_log(log_data)
 
                 return JSONResponse(content=response)
 
@@ -1405,7 +1489,7 @@ class KoreShieldProxy:
             "user_id": principal.get("user_id"),
             "api_key_id": principal.get("api_key_id"),
         }
-        asyncio.create_task(self._log_request_async(log_data))
+        self._queue_request_log(log_data)
 
         response_payload = {
             "scan_id": request_id,
@@ -1705,6 +1789,21 @@ class KoreShieldProxy:
                     severity=rag_scan_result.overall_severity.value
                 ).inc()
 
+                rag_log_summary = self._build_rag_log_summary(rag_scan_result)
+                self.logger.log_attack(
+                    request_id=request_id,
+                    attack_type="indirect_injection",
+                    details={
+                        "endpoint": "/v1/rag/scan",
+                        "scan_id": rag_scan_result.scan_id,
+                        "documents_with_threats": rag_scan_result.documents_with_threats,
+                        "total_threats_found": rag_scan_result.total_threats_found,
+                        "overall_confidence": rag_scan_result.overall_confidence,
+                        "overall_severity": rag_scan_result.overall_severity.value,
+                        "threat_references": rag_log_summary,
+                    },
+                )
+
                 self._emit_event(
                     "threat_detected",
                     {
@@ -1715,6 +1814,7 @@ class KoreShieldProxy:
                         "confidence": rag_scan_result.overall_confidence,
                         "severity": rag_scan_result.overall_severity.value,
                         "action_taken": "flagged",
+                        "threat_references": rag_log_summary,
                         "user_id": principal.get("user_id"),
                         "api_key_id": principal.get("api_key_id"),
                     },
@@ -1735,6 +1835,35 @@ class KoreShieldProxy:
                 "processing_time_ms": (time.time() - start_time) * 1000,
                 "timestamp": rag_scan_result.scan_timestamp.isoformat(),
             }
+
+            log_data = {
+                "request_id": request_id,
+                "timestamp": datetime.now(timezone.utc),
+                "provider": "rag_scanner",
+                "model": "rag_context_scan",
+                "method": request.method,
+                "path": "/v1/rag/scan",
+                "status_code": 200,
+                "latency_ms": (time.time() - start_time) * 1000,
+                "tokens_total": 0,
+                "cost": 0.0,
+                "is_blocked": False,
+                "attack_detected": not combined_is_safe,
+                "attack_type": "indirect_injection" if not combined_is_safe else None,
+                "attack_details": {
+                    "scan_id": scan_id,
+                    "documents_with_threats": rag_scan_result.documents_with_threats,
+                    "total_threats_found": rag_scan_result.total_threats_found,
+                    "overall_confidence": rag_scan_result.overall_confidence,
+                    "overall_severity": rag_scan_result.overall_severity.value,
+                    "threat_references": rag_log_summary if not combined_is_safe else [],
+                },
+                "ip_address": request.client.host if request.client else None,
+                "user_agent": request.headers.get("user-agent"),
+                "user_id": principal.get("user_id"),
+                "api_key_id": principal.get("api_key_id"),
+            }
+            self._queue_request_log(log_data)
 
             try:
                 await self._store_rag_scan_db(

@@ -80,7 +80,7 @@ def test_various_attacks():
                 error = response.json().get("error", {})
                 print(f"    Reason: {error.get('message', 'Unknown')}")
             elif response.status_code == 200:
-                print(f"  ⚠ ALLOWED (may need pattern update)")
+                print(f"   ALLOWED (may need pattern update)")
             else:
                 print(f"  ? Status: {response.status_code}")
         except Exception as e:
