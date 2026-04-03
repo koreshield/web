@@ -1,73 +1,75 @@
-# React + TypeScript + Vite
+# KoreShield Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+KoreShield Web is the customer-facing dashboard and public site for the KoreShield platform.
 
-Currently, two official plugins are available:
+It serves two jobs:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- public product marketing pages such as pricing, integrations, status, and company pages
+- authenticated operational pages for customers managing teams, API keys, policies, RAG scans, alerts, billing, provider health, and audit activity
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19
+- TypeScript
+- Vite
+- React Router
+- Tailwind CSS
 
-## Expanding the ESLint configuration
+## Important Routes
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- `/` public landing page
+- `/status` public system status page
+- `/pricing` public pricing page
+- `/integrations` public integrations page
+- `/about` public team and company page
+- `/dashboard` authenticated customer overview
+- `/getting-started` authenticated onboarding guide
+- `/teams` team management
+- `/api-keys` API key management
+- `/rag-security` RAG security scanner
+- `/alerts` alert rules and channels
+- `/audit-logs` audit and runtime review history
+- `/billing` billing and Polar checkout flow
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Local Development
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The app runs on `http://localhost:5173` by default in Vite dev mode.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+If you want the full Docker stack instead, run from the repo root:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+docker compose --env-file .env -f docker-compose.prod.yml up -d --build
 ```
+
+That serves the production-style web container on `http://localhost:3000`.
+
+## Quality Checks
+
+```bash
+npm run lint
+npm test
+npm run build
+```
+
+## Environment Notes
+
+The production build reads these values at build time when present:
+
+- `VITE_API_BASE_URL`
+- `VITE_POLAR_STARTUP_PRODUCT_ID`
+- `VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID`
+- `VITE_POLAR_GROWTH_PRODUCT_ID`
+- `VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID`
+
+If `VITE_API_BASE_URL` is not set, the frontend falls back to the current-origin deployment assumptions used by the Docker and Caddy setup.
+
+## Related Docs
+
+- [/Users/nsisong/projects/koreshield/koreshield/docs/GETTING_STARTED.md](/Users/nsisong/projects/koreshield/koreshield/docs/GETTING_STARTED.md)
+- [/Users/nsisong/projects/koreshield/koreshield/docs/CLIENT_ONBOARDING.md](/Users/nsisong/projects/koreshield/koreshield/docs/CLIENT_ONBOARDING.md)
+- [/Users/nsisong/projects/koreshield/koreshield-web/how-to.md](/Users/nsisong/projects/koreshield/koreshield-web/how-to.md)

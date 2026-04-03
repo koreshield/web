@@ -1,142 +1,87 @@
-# Quick Start Guide
+# KoreShield Quickstart
 
-## Getting Started
+This quickstart is for the backend proxy in [/Users/nsisong/projects/koreshield/koreshield](/Users/nsisong/projects/koreshield/koreshield).
 
-### Prerequisites
+KoreShield sits between your application and model providers, scans traffic for prompt injection and related threats, applies policy, logs events, and forwards safe requests to configured providers.
 
-- Python 3.10 or higher
-- pip (Python package manager)
-- Git
+## Prerequisites
 
-### Installation
+- Python 3.11 or newer
+- PostgreSQL and Redis for the full app flow
+- at least one provider API key if you want live model routing
 
-1. **Clone the repository** (or work in the current directory):
-   ```bash
-   git clone https://github.com/koreshield/koreshield.git
-   cd koreshield/koreshield
-   ```
-
-2. **Create a virtual environment**:
-   ```bash
-   python -m venv venv
-   ```
-   
-   On Windows:
-   ```powershell
-   venv\Scripts\activate
-   ```
-   
-   On macOS/Linux:
-   ```bash
-   source venv/bin/activate
-   ```
-
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Set up configuration**:
-   ```bash
-   # Copy the example config
-   cp config/config.example.yaml config/config.yaml
-   # Edit config.yaml with your settings
-   ```
-
-5. **Run tests** (optional):
-   ```bash
-   pip install -r requirements-dev.txt
-   pytest
-   ```
-
-### Running the Firewall
+## Local Python Setup
 
 ```bash
-# From the project root
-python -m src.firewall.main
+cd /Users/nsisong/projects/koreshield/koreshield
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
-Or using uvicorn directly:
-```bash
-uvicorn src.firewall.proxy:app --reload
-```
+## Configuration
 
-The firewall will start on `http://localhost:8000`
-
-### Health Check
-
-Visit `http://localhost:8000/health` to verify the service is running.
-
-## Next Steps
-
-1. **Begin Literature Review** (Week 1-2):
-   - Start researching prompt injection attacks
-   - Review RAG system security papers
-   - Document findings in `research/literature/`
-
-2. **Develop MVP** (Weeks 5-8):
-   - Implement basic proxy functionality
-   - Add OpenAI API integration
-   - Create simple pattern matching
-   - Set up basic logging
-
-3. **Start Research** (Weeks 5-6):
-   - Build test RAG systems
-   - Conduct attack experiments
-   - Document attack vectors
-
-## Development
-
-### Project Structure
-
-```
-koreshield/
-├── src/
-│   ├── firewall/          # Core firewall modules
-│   └── providers/         # LLM provider integrations
-├── tests/                 # Test files
-├── research/              # Research notes and materials
-├── config/                # Configuration files
-├── docker/                # Docker setup
-└── docs/                  # Documentation (coming soon)
-```
-
-### Running Tests
+Copy the example config if you need a starting point:
 
 ```bash
-pytest
+cp config/config.example.yaml config/config.local.yaml
 ```
 
-With coverage:
+The repo already ships with a working local `config/config.yaml`, so most day-to-day work uses environment variables rather than replacing the checked-in config.
+
+Common env vars:
+
+- `DEEPSEEK_API_KEY`
+- `GEMINI_API_KEY` or `GOOGLE_API_KEY`
+- `AZURE_OPENAI_API_KEY`
+- `JWT_SECRET`
+- `DATABASE_URL`
+- `REDIS_URL`
+
+## Run The Backend
+
 ```bash
-pytest --cov=src --cov-report=html
+uvicorn src.koreshield.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Code Quality
+Health endpoints:
+
+- `http://localhost:8000/health`
+- `http://localhost:8000/status`
+- `http://localhost:8000/health/providers`
+
+## Run The Full Product With Docker
+
+From the repo root:
 
 ```bash
-# Format code
-black src/ tests/
-
-# Lint
-ruff check src/ tests/
-
-# Type check
-mypy src/
+cd /Users/nsisong/projects/koreshield
+docker compose --env-file .env -f docker-compose.prod.yml up -d --build
 ```
 
-## Resources
+That gives you:
 
-- [Research Notes](research/README.md)
-- [Contributing Guide](CONTRIBUTING.md)
-- [Getting Started Guide](docs/GETTING_STARTED.md)
+- web: `http://localhost:3000`
+- api: `http://localhost:8000`
 
-## Current Phase
+## Run Tests
 
-**Phase 1: Research & Planning (Weeks 1-4)**
+```bash
+cd /Users/nsisong/projects/koreshield/koreshield
+pytest -q
+python -m build
+```
 
-- Project structure set up
-- Development environment configured
-- Literature review (next step)
-- Research methodology design
+## What Clients Actually Use
 
+Clients typically do three things:
+
+1. Point their app or SDK traffic at KoreShield instead of calling the model provider directly.
+2. Use the dashboard to manage teams, API keys, policies, alerts, billing, and RAG scanning.
+3. Review blocked threats, provider health, audit logs, and status data over time.
+
+For the customer-facing explanation, use:
+
+- [/Users/nsisong/projects/koreshield/koreshield/docs/CLIENT_ONBOARDING.md](/Users/nsisong/projects/koreshield/koreshield/docs/CLIENT_ONBOARDING.md)
+- [/Users/nsisong/projects/koreshield/koreshield/docs/GETTING_STARTED.md](/Users/nsisong/projects/koreshield/koreshield/docs/GETTING_STARTED.md)
