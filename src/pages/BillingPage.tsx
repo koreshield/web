@@ -28,16 +28,16 @@ const plans = [
 		name: 'Startup',
 		monthlyProductId: import.meta.env.VITE_POLAR_STARTUP_PRODUCT_ID as string | undefined,
 		annualProductId: import.meta.env.VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID as string | undefined,
-		monthlyLabel: 'GBP monthly',
-		annualLabel: 'GBP annual',
+		monthlyLabel: 'Monthly',
+		annualLabel: 'Annual',
 		description: 'Managed SaaS for teams protecting up to 1M requests each month.',
 	},
 	{
 		name: 'Growth',
 		monthlyProductId: import.meta.env.VITE_POLAR_GROWTH_PRODUCT_ID as string | undefined,
 		annualProductId: import.meta.env.VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID as string | undefined,
-		monthlyLabel: 'GBP monthly',
-		annualLabel: 'GBP annual',
+		monthlyLabel: 'Monthly',
+		annualLabel: 'Annual',
 		description: 'Higher-volume hosted plan with more support and operational controls.',
 	},
 ];
@@ -184,7 +184,7 @@ export default function BillingPage() {
 						<div>
 							<h1 className="text-3xl font-bold">Billing</h1>
 							<p className="text-sm text-muted-foreground mt-2 max-w-2xl">
-								Manage your KoreShield subscription, launch Polar checkout in GBP, and keep your account entitlement state in sync.
+								Manage your KoreShield subscription, launch Polar checkout, and keep your account entitlement state in sync.
 							</p>
 						</div>
 						<button
@@ -211,6 +211,9 @@ export default function BillingPage() {
 						and finish product onboarding while checkout and portal access are being wired up.
 					</div>
 				)}
+				<div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+					Plan pricing and checkout currency come from your Polar products for this environment.
+				</div>
 
 				<section className="grid lg:grid-cols-[1.1fr,0.9fr] gap-6">
 					<div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
