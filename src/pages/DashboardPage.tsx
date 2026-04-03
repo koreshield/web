@@ -76,7 +76,7 @@ export function DashboardPage() {
 
 	if (statsError) {
 		return (
-			<div className="min-h-screen bg-background flex items-center justify-center">
+			<div className="flex items-center justify-center py-20">
 				<div className="text-center">
 					<AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
 					<h2 className="text-xl font-bold mb-2">Failed to Connect</h2>
@@ -95,11 +95,11 @@ export function DashboardPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div>
 			{/* Header */}
 			<header className="border-b border-border bg-card">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-					<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 sm:mb-0">
 						<div className="flex-1 min-w-0">
 							<h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
 							{isAuthenticated ? (
@@ -112,51 +112,51 @@ export function DashboardPage() {
 								</p>
 							)}
 						</div>
-						<div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-							{/* WebSocket Status Indicator */}
-							{isAuthenticated && (
-								<div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-muted rounded-lg">
-									{wsConnected ? (
-										<>
-											<Wifi className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
-											<span className="text-xs font-medium text-green-600 hidden sm:inline">Live</span>
-										</>
-									) : (
-										<>
-											<WifiOff className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
-											<span className="text-xs font-medium text-muted-foreground hidden sm:inline">Connecting...</span>
-										</>
-									)}
-								</div>
-							)}
-							{isAuthenticated && (
-								<Link
-									to="/settings/api-keys"
-									className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors border border-primary/20"
-									aria-label="Manage API Keys"
-								>
-									<Key className="w-4 h-4" />
-									<span className="hidden sm:inline font-medium">API Keys</span>
-								</Link>
-							)}
-							{isAuthenticated ? (
-								<button
-									onClick={handleLogout}
-									className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
-									aria-label="Logout"
-								>
-									<LogOut className="w-4 h-4" />
-									<span className="hidden sm:inline">Logout</span>
-								</button>
-							) : (
-								<Link
-									to="/login"
-									className="text-sm px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
-								>
-									Sign In
-								</Link>
-							)}
-						</div>
+					</div>
+					<div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+						{/* WebSocket Status Indicator */}
+						{isAuthenticated && (
+							<div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-muted rounded-lg">
+								{wsConnected ? (
+									<>
+										<Wifi className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
+										<span className="text-xs font-medium text-green-600 hidden sm:inline">Live</span>
+									</>
+								) : (
+									<>
+										<WifiOff className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
+										<span className="text-xs font-medium text-muted-foreground hidden sm:inline">Connecting...</span>
+									</>
+								)}
+							</div>
+						)}
+						{isAuthenticated && (
+							<Link
+								to="/settings/api-keys"
+								className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors border border-primary/20"
+								aria-label="Manage API Keys"
+							>
+								<Key className="w-4 h-4" />
+								<span className="hidden sm:inline font-medium">API Keys</span>
+							</Link>
+						)}
+						{isAuthenticated ? (
+							<button
+								onClick={handleLogout}
+								className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+								aria-label="Logout"
+							>
+								<LogOut className="w-4 h-4" />
+								<span className="hidden sm:inline">Logout</span>
+							</button>
+						) : (
+							<Link
+								to="/login"
+								className="text-sm px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+							>
+								Sign In
+							</Link>
+						)}
 					</div>
 				</div>
 			</header>
@@ -328,7 +328,7 @@ const response = await client.chat.completions.create({
 				) : (
 					<>
 						{/* Stats Grid */}
-						<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
+						<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
 							<div className="bg-card border border-border rounded-lg p-3 sm:p-6">
 								<div className="flex items-center justify-between mb-2">
 									<span className="text-xs sm:text-sm font-medium text-muted-foreground">Total Requests</span>
