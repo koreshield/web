@@ -143,11 +143,11 @@ export function PoliciesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
+        <div>
             {/* Header */}
             <header className="border-b border-border bg-card">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                             <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
                                 <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
@@ -237,26 +237,28 @@ export function PoliciesPage() {
                             <div key={policy.id} className="bg-card border border-border rounded-lg p-6">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                                             <h3 className="text-lg font-semibold">{policy.name}</h3>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getSeverityColor(policy.severity)}`}>
-                                                {policy.severity.toUpperCase()}
-                                            </span>
-                                            {policy.enabled !== false ? (
-                                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-medium">
-                                                    <CheckCircle className="w-3 h-3" />
-                                                    Enabled
+                                            <div className="flex flex-wrap gap-2">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getSeverityColor(policy.severity)}`}>
+                                                    {policy.severity.toUpperCase()}
                                                 </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-muted text-muted-foreground rounded-full text-xs font-medium">
-                                                    <X className="w-3 h-3" />
-                                                    Disabled
-                                                </span>
-                                            )}
+                                                {policy.enabled !== false ? (
+                                                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-medium">
+                                                        <CheckCircle className="w-3 h-3" />
+                                                        Enabled
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-muted text-muted-foreground rounded-full text-xs font-medium">
+                                                        <X className="w-3 h-3" />
+                                                        Disabled
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <p className="text-sm text-muted-foreground mb-4">{policy.description}</p>
                                         
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                             <div>
                                                 <div className="text-xs text-muted-foreground mb-1">Roles</div>
                                                 <div className="flex flex-wrap gap-1">
@@ -284,7 +286,7 @@ export function PoliciesPage() {
                                         </div>
                                     </div>
                                     
-                                    <div className="flex items-center gap-2 ml-4">
+                                    <div className="flex items-center gap-2 mt-4 sm:mt-0 sm:ml-4">
                                         <button
                                             onClick={() => setEditingPolicy(policy)}
                                             className="p-2 hover:bg-muted rounded-lg transition-colors"
@@ -308,17 +310,17 @@ export function PoliciesPage() {
                                         <p className="text-sm text-red-600 mb-3">
                                             Are you sure you want to delete this policy? This action cannot be undone.
                                         </p>
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-col sm:flex-row gap-2">
                                             <button
                                                 onClick={() => deleteMutation.mutate(policy.id)}
                                                 disabled={deleteMutation.isPending}
-                                                className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 text-sm"
+                                                className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 text-sm w-full sm:w-auto"
                                             >
                                                 {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
                                             </button>
                                             <button
                                                 onClick={() => setDeleteConfirm(null)}
-                                                className="px-3 py-1.5 bg-muted hover:bg-muted/80 rounded-lg text-sm"
+                                                className="px-3 py-1.5 bg-muted hover:bg-muted/80 rounded-lg text-sm w-full sm:w-auto"
                                             >
                                                 Cancel
                                             </button>
@@ -333,7 +335,7 @@ export function PoliciesPage() {
 
             {showCreateModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-                    <div className="w-full max-w-2xl rounded-lg border border-border bg-card p-6 shadow-xl">
+                    <div className="w-full max-w-2xl mx-4 sm:mx-auto rounded-xl border border-border bg-card p-6 shadow-xl max-h-[90dvh] overflow-y-auto">
                         <div className="mb-6 flex items-start justify-between gap-4">
                             <div>
                                 <h2 className="text-xl font-semibold">Create Security Policy</h2>
@@ -390,7 +392,7 @@ export function PoliciesPage() {
                                 />
                             </div>
 
-                            <div className="grid gap-4 md:grid-cols-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label htmlFor="policy-severity" className="mb-2 block text-sm font-medium">Severity</label>
                                     <select
@@ -436,14 +438,14 @@ export function PoliciesPage() {
                             </div>
                         </div>
 
-                        <div className="mt-6 flex gap-3">
+                        <div className="mt-6 flex flex-col sm:flex-row gap-3">
                             <button
                                 type="button"
                                 onClick={() => {
                                     setShowCreateModal(false);
                                     setFormData(DEFAULT_POLICY_FORM);
                                 }}
-                                className="flex-1 rounded-lg bg-muted px-4 py-2 hover:bg-muted/80"
+                                className="flex-1 rounded-lg bg-muted px-4 py-2 hover:bg-muted/80 w-full"
                                 disabled={createMutation.isPending}
                             >
                                 Cancel
@@ -451,7 +453,7 @@ export function PoliciesPage() {
                             <button
                                 type="button"
                                 onClick={handleCreatePolicy}
-                                className="flex-1 rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+                                className="flex-1 rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-60 w-full"
                                 disabled={createMutation.isPending}
                             >
                                 {createMutation.isPending ? 'Creating...' : 'Create policy'}

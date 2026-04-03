@@ -42,59 +42,59 @@ const steps = [
 
 export default function GettingStartedPage() {
 	return (
-		<div className="min-h-screen bg-background">
+		<div>
 			<header className="border-b border-border bg-card">
-				<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+				<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
 					<p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Client onboarding</p>
-					<h1 className="mt-3 text-3xl font-bold tracking-tight">How clients actually use KoreShield</h1>
-					<p className="mt-3 max-w-3xl text-sm text-muted-foreground">
+					<h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight">How clients actually use KoreShield</h1>
+					<p className="mt-3 max-w-3xl text-xs sm:text-sm text-muted-foreground">
 						KoreShield sits between your application and your model provider. Clients sign into the dashboard to manage access,
 						policies, billing, and teams, then their server-side application sends protected traffic through the KoreShield API.
 					</p>
 				</div>
 			</header>
 
-			<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-				<section className="grid gap-4 md:grid-cols-3">
-					<div className="rounded-2xl border border-border bg-card p-6">
+			<main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+				<section className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
+					<div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
 						<div className="text-sm font-semibold text-foreground">Dashboard users</div>
-						<p className="mt-2 text-sm text-muted-foreground">
+						<p className="mt-2 text-xs sm:text-sm text-muted-foreground">
 							Use secure cookie sessions for the admin UI, account lifecycle, billing, API key management, and operational visibility.
 						</p>
 					</div>
-					<div className="rounded-2xl border border-border bg-card p-6">
+					<div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
 						<div className="text-sm font-semibold text-foreground">Server integrations</div>
-						<p className="mt-2 text-sm text-muted-foreground">
+						<p className="mt-2 text-xs sm:text-sm text-muted-foreground">
 							Use generated API keys or a bearer token from your server-to-server environment. Do not put these credentials in the browser.
 						</p>
 					</div>
-					<div className="rounded-2xl border border-border bg-card p-6">
+					<div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
 						<div className="text-sm font-semibold text-foreground">Core traffic path</div>
-						<p className="mt-2 text-sm text-muted-foreground">
+						<p className="mt-2 text-xs sm:text-sm text-muted-foreground">
 							Route prompt traffic through <code>/v1/chat/completions</code>, prompt checks through <code>/v1/scan</code>, and retrieved documents through <code>/v1/rag/scan</code>.
 						</p>
 					</div>
 				</section>
 
-				<section className="rounded-2xl border border-border bg-card p-6">
-					<h2 className="text-xl font-semibold">Onboarding checklist</h2>
-					<p className="mt-2 text-sm text-muted-foreground">
+				<section className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+					<h2 className="text-lg sm:text-xl font-semibold">Onboarding checklist</h2>
+					<p className="mt-2 text-xs sm:text-sm text-muted-foreground">
 						The shortest path to value is: create one API key, make one successful protected request, then prove a malicious prompt or retrieved document gets flagged.
 					</p>
-					<div className="mt-6 grid gap-4 md:grid-cols-2">
+					<div className="mt-4 sm:mt-6 grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
 						{steps.map((step, index) => {
 							const Icon = step.icon;
 							const content = (
-								<div className="rounded-xl border border-border p-5 hover:border-primary/40 transition-colors h-full">
+								<div className="rounded-xl border border-border p-4 sm:p-5 hover:border-primary/40 transition-colors h-full">
 									<div className="flex items-center gap-3">
-										<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+										<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold flex-shrink-0">
 											{index + 1}
 										</div>
-										<Icon className="w-5 h-5 text-primary" />
+										<Icon className="w-5 h-5 text-primary flex-shrink-0" />
 									</div>
-									<h3 className="mt-4 font-semibold">{step.title}</h3>
-									<p className="mt-2 text-sm text-muted-foreground">{step.description}</p>
-									<div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary">
+									<h3 className="mt-4 font-semibold text-sm sm:text-base">{step.title}</h3>
+									<p className="mt-2 text-xs sm:text-sm text-muted-foreground">{step.description}</p>
+									<div className="mt-4 inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-primary">
 										{step.linkLabel}
 										<ArrowRight className="w-4 h-4" />
 									</div>
@@ -118,13 +118,13 @@ export default function GettingStartedPage() {
 					</div>
 				</section>
 
-				<section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
-					<div className="rounded-2xl border border-border bg-card p-6">
-						<h2 className="text-xl font-semibold">Minimal integration example</h2>
-						<p className="mt-2 text-sm text-muted-foreground">
+				<section className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-[1.1fr,0.9fr]">
+					<div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+						<h2 className="text-lg sm:text-xl font-semibold">Minimal integration example</h2>
+						<p className="mt-2 text-xs sm:text-sm text-muted-foreground">
 							This is the shape clients should understand first: point the OpenAI-compatible client at KoreShield and keep the real credential server-side.
 						</p>
-						<pre className="mt-4 overflow-x-auto rounded-xl bg-muted p-4 text-xs leading-6">
+						<pre className="mt-4 overflow-x-auto rounded-xl bg-muted p-3 sm:p-4 text-[10px] sm:text-xs leading-6">
 {`import OpenAI from 'openai';
 
 const client = new OpenAI({
@@ -142,27 +142,27 @@ const response = await client.chat.completions.create({
 						</pre>
 					</div>
 
-					<div className="rounded-2xl border border-border bg-card p-6">
-						<h2 className="text-xl font-semibold">Useful next pages</h2>
-						<div className="mt-4 space-y-3 text-sm">
-							<Link to="/dashboard" className="block rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
+					<div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+						<h2 className="text-lg sm:text-xl font-semibold">Useful next pages</h2>
+						<div className="mt-4 space-y-2 sm:space-y-3 text-xs sm:text-sm">
+							<Link to="/dashboard" className="block rounded-lg border border-border p-3 sm:p-4 hover:border-primary/40 transition-colors">
 								Dashboard
 								<div className="mt-1 text-muted-foreground">Live request totals, threat history, and first-run getting-started banner.</div>
 							</Link>
-							<Link to="/audit-logs" className="block rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
+							<Link to="/audit-logs" className="block rounded-lg border border-border p-3 sm:p-4 hover:border-primary/40 transition-colors">
 								Audit logs
 								<div className="mt-1 text-muted-foreground">Review blocked prompts, runtime decisions, and operator actions.</div>
 							</Link>
-							<Link to="/provider-health" className="block rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
+							<Link to="/provider-health" className="block rounded-lg border border-border p-3 sm:p-4 hover:border-primary/40 transition-colors">
 								Provider health
 								<div className="mt-1 text-muted-foreground">See whether the connected model providers are healthy before routing real traffic.</div>
 							</Link>
 						</div>
-						<div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
-							<BookOpen className="w-4 h-4" />
+						<div className="mt-4 sm:mt-6 flex items-start sm:items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+							<BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5 sm:mt-0" />
 							Need the public docs too? <a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">Open docs.koreshield.com</a>
 						</div>
-						<p className="mt-4 text-xs text-muted-foreground">
+						<p className="mt-4 text-[10px] sm:text-xs text-muted-foreground">
 							Reports and tenant-level analytics may be limited to admin users. They are follow-up operator tools, not blockers for the first customer integration.
 						</p>
 					</div>

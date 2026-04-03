@@ -72,21 +72,21 @@ export function TeamsPage() {
 			{/* Header */}
 			<header className="border-b border-border bg-card">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex items-center justify-between">
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 						<div className="flex items-center gap-3">
 							<div className="p-2 bg-primary/10 rounded-lg">
 								<Users className="w-6 h-6 text-primary" />
 							</div>
 							<div>
-								<h1 className="text-2xl font-bold">Teams</h1>
-								<p className="text-sm text-muted-foreground">
+								<h1 className="text-xl sm:text-2xl font-bold">Teams</h1>
+								<p className="text-xs sm:text-sm text-muted-foreground">
 									Manage your teams and collaborate with others
 								</p>
 							</div>
 						</div>
 						<button
 							onClick={() => setShowCreateModal(true)}
-							className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+							className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
 						>
 							<Plus className="w-4 h-4" />
 							<span>Create Team</span>
@@ -132,7 +132,7 @@ export function TeamsPage() {
 						</button>
 					</div>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
 						{teams.map((team) => (
 							<Link
 								key={team.id}
@@ -175,7 +175,7 @@ export function TeamsPage() {
 			{/* Create Team Modal */}
 			{showCreateModal && (
 				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-					<div className="bg-card border border-border rounded-lg max-w-md w-full p-6 shadow-xl">
+					<div className="bg-card border border-border rounded-lg max-w-md w-full max-h-[90dvh] overflow-y-auto p-4 sm:p-6 shadow-xl">
 						<h2 className="text-xl font-bold mb-4">Create New Team</h2>
 						<div className="space-y-4">
 							<div>
