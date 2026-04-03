@@ -31,16 +31,26 @@ describe('StatusPage', () => {
 				errors: 0,
 			},
 			providers: {
-				openai: { configured: true, priority: 0, type: 'OpenAIProvider' },
+				openai: { enabled: true, credentials_present: true, initialized: true, priority: 0, type: 'OpenAIProvider', status: 'initialized' },
 			},
 			total_providers: 1,
+			enabled_providers: 1,
+			initialized_providers: 1,
+			components: {
+				provider_routing: {
+					status: 'operational',
+					detail: 'All 1 initialized provider routes are healthy.',
+				},
+			},
 		});
 		getProviderHealth.mockResolvedValue({
 			providers: {
-				openai: { healthy: true, priority: 0, type: 'OpenAIProvider' },
+				openai: { enabled: true, credentials_present: true, initialized: true, healthy: true, priority: 0, type: 'OpenAIProvider', status: 'healthy' },
 			},
 			total_providers: 1,
+			enabled_providers: 1,
 			healthy_providers: 1,
+			initialized_providers: 1,
 			configured: true,
 		});
 
@@ -59,6 +69,8 @@ describe('StatusPage', () => {
 			expect.stringContaining('mailto:status@koreshield.com'),
 		);
 		expect(screen.getByRole('link', { name: /RSS Feed/i })).toHaveAttribute('href', '/status-feed.xml');
-		expect(screen.getByText(/Provider routing is active with 1 configured backend/i)).toBeInTheDocument();
+		expect(screen.getByText(/All 1 initialized provider routes are healthy/i)).toBeInTheDocument();
+		expect(screen.getByText(/Live Provider Routes/i)).toBeInTheDocument();
+		expect(screen.getByText(/Health check/i)).toBeInTheDocument();
 	});
 });
