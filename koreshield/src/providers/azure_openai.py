@@ -40,6 +40,7 @@ class AzureOpenAIProvider(BaseProvider):
         """
         self.resource_name = resource_name
         self.api_version = api_version
+        self.last_error: str | None = None
         self.deployment_mappings = deployment_mappings or {
             "gpt-3.5-turbo": "gpt-35-turbo",
             "gpt-4": "gpt-4",
@@ -162,12 +163,15 @@ class AzureOpenAIProvider(BaseProvider):
         try:
             # Try to list deployments as a lightweight health check
             await self.list_deployments()
+            self.last_error = None
             return True
-        except Exception:
+        except Exception as deployment_error:
             # Fallback to basic chat completion check
             try:
                 test_messages = [{"role": "user", "content": "Hello"}]
                 await self.chat_completion(test_messages, max_tokens=1)
+                self.last_error = None
                 return True
-            except Exception:
+            except Exception as chat_error:
+                self.last_error = f"Deployment check failed: {deployment_error}. Fallback chat check failed: {chat_error}"
                 return False

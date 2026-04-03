@@ -397,13 +397,22 @@ class KoreShieldProxy:
                 if api_key:
                     try:
                         base_url = provider_cfg.get("base_url")
+                        provider_kwargs = {
+                            "api_key": api_key,
+                            "base_url": base_url,
+                            "redis_client": self.redis_client,
+                            "cache_enabled": provider_cfg.get("cache_enabled", True),
+                        }
+                        if provider_name == "azure_openai":
+                            provider_kwargs.update(
+                                {
+                                    "resource_name": provider_cfg.get("resource_name"),
+                                    "api_version": provider_cfg.get("api_version", "2024-10-21"),
+                                    "deployment_mappings": provider_cfg.get("deployment_mappings"),
+                                }
+                            )
                         # Pass Redis client for caching and performance optimization
-                        provider_instance = provider_class(
-                            api_key=api_key, 
-                            base_url=base_url,
-                            redis_client=self.redis_client,
-                            cache_enabled=provider_cfg.get("cache_enabled", True)
-                        )
+                        provider_instance = provider_class(**provider_kwargs)
                         self.providers.append(provider_instance)
                         self.provider_priority.append(provider_name)
                         logger.info(f"{provider_name.capitalize()} provider initialized successfully with caching enabled")
@@ -734,6 +743,7 @@ class KoreShieldProxy:
                         "type": type(provider).__name__ if provider else None,
                         "response_time_ms": (time.perf_counter() - check_started) * 1000,
                         "status": "healthy" if is_healthy else "unhealthy",
+                        "error": getattr(provider, "last_error", None) if not is_healthy else None,
                     })
                 except Exception as e:
                     health_status[provider_name].update({
