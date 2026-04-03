@@ -1,6 +1,6 @@
 import emailjs from '@emailjs/browser';
 import { motion } from 'framer-motion';
-import { ArrowRight, FileText, Github, Mail, MessageSquare } from 'lucide-react';
+import { ArrowRight, FileText, Github, Mail, MessageSquare, Send } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
@@ -18,6 +18,14 @@ const supportOptions = [
 		description: 'Get answers fast from fellow developers and our team. Best for general questions and integration help.',
 		cta: 'Join Discord',
 		link: 'https://discord.gg/koreshield',
+		external: true,
+	},
+	{
+		icon: <Send className="w-6 h-6" />,
+		title: 'Telegram Channel',
+		description: 'Follow product updates, security notes, and launch announcements from the KoreShield team.',
+		cta: 'Join Telegram',
+		link: 'https://t.me/koreshield',
 		external: true,
 	},
 	{
