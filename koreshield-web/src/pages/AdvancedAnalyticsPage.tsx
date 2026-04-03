@@ -95,7 +95,7 @@ export function AdvancedAnalyticsPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="bg-background">
 			<SEOMeta
 				title="Advanced Analytics | KoreShield"
 				description="Cost optimization, performance metrics, and provider comparison analytics"
@@ -103,19 +103,19 @@ export function AdvancedAnalyticsPage() {
 
 			<header className="border-b border-border bg-card">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex items-center justify-between">
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 						<div>
-							<h1 className="text-3xl font-bold flex items-center gap-3">
+							<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
 								<BarChart3 className="w-8 h-8 text-primary" />
 								Advanced Analytics
 							</h1>
-							<p className="text-muted-foreground mt-1">
+							<p className="text-sm sm:text-base text-muted-foreground mt-1">
 								Cost optimization and performance insights
 							</p>
 						</div>
 						<button
 							onClick={exportData}
-							className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
+							className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
 						>
 							<Download className="w-4 h-4" />
 							Export Data
@@ -124,8 +124,8 @@ export function AdvancedAnalyticsPage() {
 				</div>
 			</header>
 
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
 					<div className="bg-card border border-border rounded-lg p-6">
 						<div className="flex items-center justify-between mb-2">
 							<span className="text-sm font-medium text-muted-foreground">Potential Savings</span>
@@ -154,9 +154,9 @@ export function AdvancedAnalyticsPage() {
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-					<div className="bg-card border border-border rounded-lg p-6">
-						<h2 className="text-xl font-semibold mb-4">Cost Optimization Recommendations</h2>
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-8">
+					<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+						<h2 className="text-lg sm:text-xl font-semibold mb-4">Cost Optimization Recommendations</h2>
 						<div className="space-y-3">
 							{MOCK_COST_OPTIMIZATIONS.map((opt, index) => (
 								<div key={index} className="p-4 bg-muted/50 rounded-lg">
@@ -175,9 +175,10 @@ export function AdvancedAnalyticsPage() {
 						</div>
 					</div>
 
-					<div className="bg-card border border-border rounded-lg p-6">
-						<h2 className="text-xl font-semibold mb-4">Budget Forecast</h2>
-						<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
+					<div className="bg-card border border-border rounded-lg p-4 sm:p-6 overflow-x-auto">
+						<h2 className="text-lg sm:text-xl font-semibold mb-4">Budget Forecast</h2>
+						<div className="w-full overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+							<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
 							<LineChart data={MOCK_BUDGET_FORECAST}>
 								<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
 								<XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
@@ -194,17 +195,18 @@ export function AdvancedAnalyticsPage() {
 								<Line type="monotone" dataKey="actual" stroke="#10b981" strokeWidth={2} name="Actual" />
 							</LineChart>
 						</ResponsiveContainer>
+						</div>
 					</div>
 				</div>
 
-				<div className="bg-card border border-border rounded-lg p-6 mb-8">
-					<h2 className="text-xl font-semibold mb-4">Provider Comparison</h2>
-					<div className="flex gap-2 mb-4">
+				<div className="bg-card border border-border rounded-lg p-4 sm:p-6 mb-8 overflow-x-auto">
+					<h2 className="text-lg sm:text-xl font-semibold mb-4">Provider Comparison</h2>
+					<div className="flex flex-wrap gap-2 mb-4">
 						{(['latency', 'cost', 'reliability', 'throughput'] as const).map((metric) => (
 							<button
 								key={metric}
 								onClick={() => setSelectedMetric(metric)}
-								className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedMetric === metric
+								className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${selectedMetric === metric
 									? 'bg-primary text-primary-foreground'
 									: 'bg-muted hover:bg-muted/80'
 									}`}
@@ -213,7 +215,8 @@ export function AdvancedAnalyticsPage() {
 							</button>
 						))}
 					</div>
-					<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
+					<div className="w-full overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+						<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
 						<BarChart data={MOCK_PROVIDER_METRICS}>
 							<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
 							<XAxis dataKey="provider" stroke="hsl(var(--muted-foreground))" />
@@ -235,12 +238,14 @@ export function AdvancedAnalyticsPage() {
 							/>
 						</BarChart>
 					</ResponsiveContainer>
+					</div>
 				</div>
 
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-					<div className="bg-card border border-border rounded-lg p-6">
-						<h2 className="text-xl font-semibold mb-4">Cost Allocation by Team</h2>
-						<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
+					<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+						<h2 className="text-lg sm:text-xl font-semibold mb-4">Cost Allocation by Team</h2>
+						<div className="w-full overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+							<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
 							<PieChart>
 								<Pie
 									data={MOCK_COST_ALLOCATION}
@@ -265,6 +270,7 @@ export function AdvancedAnalyticsPage() {
 								/>
 							</PieChart>
 						</ResponsiveContainer>
+						</div>
 						<div className="mt-4 space-y-2">
 							{MOCK_COST_ALLOCATION.map((item, index) => (
 								<div key={item.name} className="flex items-center justify-between text-sm">
@@ -281,8 +287,8 @@ export function AdvancedAnalyticsPage() {
 						</div>
 					</div>
 
-					<div className="bg-card border border-border rounded-lg p-6">
-						<h2 className="text-xl font-semibold mb-4">Performance Metrics</h2>
+					<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+						<h2 className="text-lg sm:text-xl font-semibold mb-4">Performance Metrics</h2>
 						<div className="space-y-4">
 							<div className="p-4 bg-muted/50 rounded-lg">
 								<div className="flex items-center justify-between mb-2">

@@ -118,17 +118,17 @@ export function ThreatMonitoringPage() {
 	}, {} as Record<string, number>);
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="bg-background">
 			{/* Header */}
 			<header className="border-b border-border bg-card">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex items-center justify-between">
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 						<div>
-							<h1 className="text-3xl font-bold flex items-center gap-3">
+							<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
 								<Activity className="w-8 h-8 text-primary" />
 								Live Threat Monitoring
 							</h1>
-							<p className="text-muted-foreground mt-1">
+							<p className="text-sm sm:text-base text-muted-foreground mt-1">
 								Real-time security threat detection and analysis
 							</p>
 						</div>
@@ -149,9 +149,9 @@ export function ThreatMonitoringPage() {
 				</div>
 			</header>
 
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
 				{/* Stats Cards */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
 					<div className="bg-card border border-border rounded-lg p-6">
 						<div className="flex items-center justify-between mb-2">
 							<span className="text-sm font-medium text-muted-foreground">Total Threats</span>
@@ -182,18 +182,18 @@ export function ThreatMonitoringPage() {
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 mb-8">
 					{/* Live Attack Feed */}
 					<div className="lg:col-span-2">
 						<div className="bg-card border border-border rounded-lg">
 							{/* Controls */}
-							<div className="p-4 border-b border-border flex flex-wrap items-center gap-4">
-								<h2 className="text-lg font-semibold flex items-center gap-2">
+							<div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+								<h2 className="text-base sm:text-lg font-semibold flex items-center gap-2">
 									<Shield className="w-5 h-5" />
 									Attack Feed
 								</h2>
 
-								<div className="flex items-center gap-2 ml-auto">
+								<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:ml-auto w-full sm:w-auto">
 									<button
 										onClick={() => setAutoScroll(!autoScroll)}
 										className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${autoScroll ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'

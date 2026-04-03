@@ -72,7 +72,7 @@ export function AnalyticsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
+        <div>
             {/* Header */}
             <header className="border-b border-border bg-card">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
@@ -173,22 +173,22 @@ export function AnalyticsPage() {
                         </div>
                     </div>
 
-                    <div className="bg-card border border-border rounded-lg p-6">
+                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-muted-foreground">Attacks Detected</span>
-                            <Building2 className="w-5 h-5 text-orange-500" />
+                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">Attacks Detected</span>
+                            <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                         </div>
-                        <div className="text-3xl font-bold text-orange-600">{totalAttacks.toLocaleString()}</div>
+                        <div className="text-xl sm:text-3xl font-bold text-orange-600">{totalAttacks.toLocaleString()}</div>
                         <div className="text-xs text-muted-foreground mt-1">Security incidents</div>
                     </div>
 
-                    <div className="bg-card border border-border rounded-lg p-6">
+                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-muted-foreground">Avg Latency</span>
-                            <Users className="w-5 h-5 text-purple-500" />
+                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">Avg Latency</span>
+                            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                         </div>
-                        <div className="text-3xl font-bold">{avgLatency.toFixed(0)}ms</div>
-                        <div className="text-xs text-muted-foreground mt-1">Platform-wide</div>
+                        <div className="text-xl sm:text-3xl font-bold">{avgLatency.toFixed(0)}ms</div>
+                        <div className="text-xs text-muted-foreground mt-1 hidden sm:block">Platform-wide</div>
                     </div>
                 </div>
 
