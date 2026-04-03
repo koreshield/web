@@ -271,6 +271,7 @@ class KoreShieldProxy:
             event_publisher=self._publish_event,
             status_getter=self._get_live_status_snapshot,
         )
+        self.app.state.monitoring = self.monitoring
 
         # Initialize JWT authentication
         from .api.auth import init_jwt_config
@@ -365,6 +366,29 @@ class KoreShieldProxy:
             )
         except RuntimeError:
             logger.debug("provider_health_change_alert_skipped_no_loop", provider=provider_name)
+
+    def _notify_operational_event(
+        self,
+        *,
+        event_name: str,
+        severity: str,
+        message: str,
+        details: dict,
+        publish_event_type: str = "operational_event",
+    ) -> None:
+        """Schedule a detailed operational notification without blocking the request path."""
+        try:
+            asyncio.create_task(
+                self.monitoring.notify_operational_event(
+                    event_name=event_name,
+                    severity=severity,
+                    message=message,
+                    details=details,
+                    publish_event_type=publish_event_type,
+                )
+            )
+        except RuntimeError:
+            logger.debug("operational_alert_skipped_no_loop", event_name=event_name)
 
     async def _get_provider_health_snapshot(self) -> dict[str, dict]:
         """Build a live provider-health snapshot."""
@@ -1396,6 +1420,29 @@ class KoreShieldProxy:
                     "api_key_id": principal.get("api_key_id"),
                 }
                 self._queue_request_log(log_data)
+                self._notify_operational_event(
+                    event_name="chat_completion_blocked",
+                    severity="warning",
+                    message="Protected chat request blocked by KoreShield policy",
+                    publish_event_type="scan_event",
+                    details={
+                        "endpoint": "/v1/chat/completions",
+                        "request_id": request_id,
+                        "provider": "unknown",
+                        "model": model,
+                        "blocked": True,
+                        "status": "blocked",
+                        "action_taken": "blocked",
+                        "reason": reason,
+                        "user_id": principal.get("user_id"),
+                        "api_key_id": principal.get("api_key_id"),
+                        "latency_ms": log_data["latency_ms"],
+                        "attack_type": detection_result.get("attack_type"),
+                        "confidence": detection_result.get("confidence"),
+                        "indicators": detection_result.get("indicators"),
+                        "policy_result": policy_result,
+                    },
+                )
 
                 return JSONResponse(
                     status_code=403,
@@ -1466,6 +1513,26 @@ class KoreShieldProxy:
                     "api_key_id": principal.get("api_key_id"),
                 }
                 self._queue_request_log(log_data)
+                self._notify_operational_event(
+                    event_name="chat_completion_completed",
+                    severity="info",
+                    message="Protected chat request completed successfully",
+                    publish_event_type="scan_event",
+                    details={
+                        "endpoint": "/v1/chat/completions",
+                        "request_id": request_id,
+                        "provider": provider_name,
+                        "model": model,
+                        "blocked": False,
+                        "status": "success",
+                        "user_id": principal.get("user_id"),
+                        "api_key_id": principal.get("api_key_id"),
+                        "latency_ms": log_data["latency_ms"],
+                        "tokens_total": log_data["tokens_total"],
+                        "tokens_prompt": log_data["tokens_prompt"],
+                        "tokens_completion": log_data["tokens_completion"],
+                    },
+                )
 
                 return JSONResponse(content=response)
 
@@ -1478,6 +1545,22 @@ class KoreShieldProxy:
 
                 self._increment_stat("errors")
                 logger.error("Provider API error", status_code=e.response.status_code, error=str(e))
+                self._notify_operational_event(
+                    event_name="chat_completion_provider_error",
+                    severity="error",
+                    message="Provider request failed during protected chat completion",
+                    publish_event_type="operational_error",
+                    details={
+                        "endpoint": "/v1/chat/completions",
+                        "request_id": request_id,
+                        "provider": provider_name,
+                        "model": model,
+                        "status_code": e.response.status_code,
+                        "error": str(e),
+                        "user_id": principal.get("user_id"),
+                        "api_key_id": principal.get("api_key_id"),
+                    },
+                )
                 return JSONResponse(
                     status_code=e.response.status_code,
                     content=e.response.json() if e.response.content else {"error": str(e)},
@@ -1491,6 +1574,21 @@ class KoreShieldProxy:
 
                 self._increment_stat("errors")
                 logger.error("Provider error", error=str(e))
+                self._notify_operational_event(
+                    event_name="chat_completion_provider_unavailable",
+                    severity="error",
+                    message="Provider service became unavailable during protected chat completion",
+                    publish_event_type="operational_error",
+                    details={
+                        "endpoint": "/v1/chat/completions",
+                        "request_id": request_id,
+                        "provider": provider_name,
+                        "model": model,
+                        "error": str(e),
+                        "user_id": principal.get("user_id"),
+                        "api_key_id": principal.get("api_key_id"),
+                    },
+                )
                 raise HTTPException(status_code=500, detail="Provider service unavailable")
 
         except HTTPException:
@@ -1655,6 +1753,30 @@ class KoreShieldProxy:
             "api_key_id": principal.get("api_key_id"),
         }
         self._queue_request_log(log_data)
+        self._notify_operational_event(
+            event_name="tool_scan_completed",
+            severity="warning" if should_block else "info",
+            message="Tool call security scan completed",
+            publish_event_type="scan_event",
+            details={
+                "endpoint": "/v1/tools/scan",
+                "request_id": request_id,
+                "scan_id": request_id,
+                "tool_name": tool_name,
+                "blocked": should_block,
+                "status": "blocked" if should_block else "allowed",
+                "action_taken": action_taken,
+                "user_id": principal.get("user_id"),
+                "api_key_id": principal.get("api_key_id"),
+                "latency_ms": processing_time_ms,
+                "risk_class": tool_analysis.get("risk_class"),
+                "review_required": tool_analysis.get("review_required"),
+                "confidence": tool_analysis.get("confidence"),
+                "reasons": tool_analysis.get("reasons"),
+                "sequence_matches": tool_analysis.get("sequence_matches"),
+                "review_ticket_id": review_ticket.get("ticket_id") if review_ticket else None,
+            },
+        )
 
         response_payload = {
             "scan_id": request_id,
@@ -1700,6 +1822,19 @@ class KoreShieldProxy:
         self._emit_event(
             "tool_session_created",
             {
+                "session_id": session["session_id"],
+                "agent_id": session.get("agent_id"),
+                "intent": session.get("intent"),
+                "user_id": principal.get("user_id"),
+                "api_key_id": principal.get("api_key_id"),
+            },
+        )
+        self._notify_operational_event(
+            event_name="tool_session_created",
+            severity="info",
+            message="Runtime tool session created",
+            publish_event_type="runtime_event",
+            details={
                 "session_id": session["session_id"],
                 "agent_id": session.get("agent_id"),
                 "intent": session.get("intent"),
@@ -1759,6 +1894,19 @@ class KoreShieldProxy:
                 "api_key_id": principal.get("api_key_id"),
             },
         )
+        self._notify_operational_event(
+            event_name="tool_session_state_changed",
+            severity="info",
+            message="Runtime tool session state changed",
+            publish_event_type="runtime_event",
+            details={
+                "session_id": session_id,
+                "status": new_state,
+                "user_id": principal.get("user_id"),
+                "api_key_id": principal.get("api_key_id"),
+                "note": note,
+            },
+        )
         return JSONResponse(status_code=200, content=session)
 
     async def _handle_list_tool_reviews(
@@ -1805,6 +1953,20 @@ class KoreShieldProxy:
         self._emit_event(
             "tool_review_decided",
             {
+                "ticket_id": ticket_id,
+                "decision": decision,
+                "session_id": review.get("session_id"),
+                "tool_name": review.get("tool_name"),
+                "user_id": principal.get("user_id"),
+                "api_key_id": principal.get("api_key_id"),
+            },
+        )
+        self._notify_operational_event(
+            event_name="tool_review_decided",
+            severity="warning" if decision.lower() == "reject" else "info",
+            message="Runtime tool review decision recorded",
+            publish_event_type="runtime_event",
+            details={
                 "ticket_id": ticket_id,
                 "decision": decision,
                 "session_id": review.get("session_id"),
@@ -2029,6 +2191,29 @@ class KoreShieldProxy:
                 "api_key_id": principal.get("api_key_id"),
             }
             self._queue_request_log(log_data)
+            self._notify_operational_event(
+                event_name="rag_scan_completed",
+                severity="warning" if not combined_is_safe else "info",
+                message="RAG security scan completed",
+                publish_event_type="scan_event",
+                details={
+                    "endpoint": "/v1/rag/scan",
+                    "request_id": request_id,
+                    "scan_id": scan_id,
+                    "blocked": not combined_is_safe,
+                    "is_safe": combined_is_safe,
+                    "status": "flagged" if not combined_is_safe else "safe",
+                    "user_id": principal.get("user_id"),
+                    "api_key_id": principal.get("api_key_id"),
+                    "documents_scanned": len(documents_data),
+                    "total_threats_found": rag_scan_result.total_threats_found,
+                    "latency_ms": log_data["latency_ms"],
+                    "query_is_attack": query_is_attack,
+                    "overall_confidence": rag_scan_result.overall_confidence,
+                    "overall_severity": rag_scan_result.overall_severity.value,
+                    "threat_references": rag_log_summary if not combined_is_safe else [],
+                },
+            )
 
             try:
                 await self._store_rag_scan_db(
@@ -2106,6 +2291,26 @@ class KoreShieldProxy:
                 self._increment_stat("requests_blocked")
                 self._increment_stat("attacks_detected")
 
+            self._notify_operational_event(
+                event_name="prompt_scan_completed",
+                severity="warning" if not result["is_safe"] else "info",
+                message="Prompt scan completed",
+                publish_event_type="scan_event",
+                details={
+                    "endpoint": "/v1/scan",
+                    "request_id": request_id,
+                    "scan_id": scan_id,
+                    "is_safe": result["is_safe"],
+                    "blocked": not result["is_safe"],
+                    "status": "threat_detected" if not result["is_safe"] else "safe",
+                    "latency_ms": processing_time_ms,
+                    "attack_type": result.get("attack_type"),
+                    "confidence": result.get("confidence"),
+                    "indicators": result.get("indicators"),
+                    "metadata": body.get("metadata"),
+                },
+            )
+
             return JSONResponse(content=response)
         except HTTPException:
             raise
@@ -2181,6 +2386,21 @@ class KoreShieldProxy:
 
             total_processed = len(results)
             processing_time_ms = (time.time() - start_time) * 1000
+            self._notify_operational_event(
+                event_name="prompt_scan_batch_completed",
+                severity="warning" if total_unsafe else "info",
+                message="Batch prompt scan completed",
+                publish_event_type="scan_event",
+                details={
+                    "endpoint": "/v1/scan/batch",
+                    "request_id": request_id,
+                    "total_processed": total_processed,
+                    "total_safe": total_safe,
+                    "total_unsafe": total_unsafe,
+                    "latency_ms": processing_time_ms,
+                    "status": "threats_detected" if total_unsafe else "safe",
+                },
+            )
 
             return JSONResponse(content={
                 "results": results,

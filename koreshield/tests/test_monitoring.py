@@ -315,6 +315,43 @@ class TestAlertManager:
         payload = call_args[1]["json"]
         assert payload["chat_id"] == "-1001234567890"
         assert "provider_status_gemini" in payload["text"]
+        assert "old_status" in payload["text"]
+
+    @pytest.mark.asyncio
+    async def test_notify_operational_event_dispatches_enabled_channels(self):
+        """Operational events should dispatch immediately to enabled channels."""
+        monitoring_config = MagicMock()
+        monitoring_config.enabled = True
+        monitoring_config.alerts = MagicMock()
+        monitoring_system = MonitoringSystem(monitoring_config)
+        monitoring_system.alert_manager.send_alert = AsyncMock(return_value=True)
+        channels = MagicMock()
+        channels.telegram.enabled = True
+        channels.email.enabled = False
+        channels.slack.enabled = False
+        channels.teams.enabled = False
+        channels.pagerduty.enabled = False
+        channels.webhook.enabled = False
+        monitoring_system.config.alerts.channels = channels
+
+        await monitoring_system.notify_operational_event(
+            event_name="prompt_scan_completed",
+            severity="warning",
+            message="Prompt scan completed with a threat",
+            details={
+                "endpoint": "/v1/scan",
+                "request_id": "req-123",
+                "blocked": True,
+                "attack_type": "prompt_injection",
+            },
+            publish_event_type="scan_event",
+        )
+
+        monitoring_system.alert_manager.send_alert.assert_awaited_once()
+        sent_alert = monitoring_system.alert_manager.send_alert.await_args.args[0]
+        assert sent_alert.rule_name == "prompt_scan_completed"
+        assert sent_alert.details["event_type"] == "scan_event"
+        assert sent_alert.details["blocked"] is True
 
     @pytest.mark.asyncio
     async def test_send_pagerduty_alert_success(self, alert_manager):
