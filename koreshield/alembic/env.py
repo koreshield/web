@@ -40,7 +40,9 @@ if database_url:
     # Handle asyncpg URLs for migrations (convert to psycopg2)
     if database_url.startswith("postgresql+asyncpg://"):
         database_url = database_url.replace("postgresql+asyncpg://", "postgresql://")
-    config.set_main_option("sqlalchemy.url", database_url)
+    # Alembic stores the URL in a ConfigParser-backed object, so raw percent
+    # escapes from URL-encoded credentials must be doubled first.
+    config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.

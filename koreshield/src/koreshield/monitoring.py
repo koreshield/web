@@ -7,6 +7,7 @@ import ast
 import json
 import smtplib
 import time
+from html import escape
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Dict, List, Optional, Any, Callable, Awaitable
@@ -487,21 +488,7 @@ Details:
             logger.error("Telegram alert failed: missing bot token or channel id")
             return False
 
-        icon = {
-            AlertSeverity.INFO: "INFO",
-            AlertSeverity.WARNING: "WARNING",
-            AlertSeverity.ERROR: "ERROR",
-            AlertSeverity.CRITICAL: "CRITICAL",
-        }
-        details_text = json.dumps(alert.details, indent=2, default=str)
-        message = (
-            f"<b>{icon[alert.severity]} KoreShield Alert</b>\n"
-            f"<b>Rule:</b> {alert.rule_name}\n"
-            f"<b>Severity:</b> {alert.severity.value.upper()}\n"
-            f"<b>Message:</b> {alert.message}\n"
-            f"<b>Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(alert.timestamp))}\n"
-            f"<b>Details:</b>\n<pre>{details_text}</pre>"
-        )
+        message = self._build_telegram_message(alert)
 
         payload = {
             "chat_id": telegram_config.channel_id,
@@ -532,6 +519,96 @@ Details:
 
         logger.info("Telegram alert sent", channel_id=telegram_config.channel_id)
         return True
+
+    def _build_telegram_message(self, alert: Alert) -> str:
+        """Build a richer Telegram message for operational alerts."""
+        icon = {
+            AlertSeverity.INFO: "INFO",
+            AlertSeverity.WARNING: "WARNING",
+            AlertSeverity.ERROR: "ERROR",
+            AlertSeverity.CRITICAL: "CRITICAL",
+        }
+
+        details = alert.details or {}
+        lines = [
+            f"<b>{icon[alert.severity]} KoreShield Alert</b>",
+            f"<b>Rule:</b> {escape(str(alert.rule_name))}",
+            f"<b>Severity:</b> {escape(alert.severity.value.upper())}",
+            f"<b>Message:</b> {escape(str(alert.message))}",
+            f"<b>Time:</b> {escape(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(alert.timestamp)))}",
+        ]
+
+        summary_fields = [
+            ("Event", details.get("event_type")),
+            ("Endpoint", details.get("endpoint") or details.get("path")),
+            ("Request ID", details.get("request_id")),
+            ("Scan ID", details.get("scan_id")),
+            ("Provider", details.get("provider")),
+            ("Model", details.get("model")),
+            ("Tool", details.get("tool_name")),
+            ("Report", details.get("report_name")),
+            ("Template", details.get("template")),
+            ("Action", details.get("action_taken")),
+            ("Status", details.get("status") or details.get("new_status")),
+            ("Previous", details.get("old_status")),
+            ("User", details.get("user_id")),
+            ("API Key", details.get("api_key_id")),
+            ("Latency", self._format_metric(details.get("latency_ms"), "ms")),
+            ("Response time", self._format_metric(details.get("response_time_ms"), "ms")),
+            ("Threats", details.get("total_threats_found")),
+            ("Documents", details.get("documents_scanned")),
+            ("Tokens", details.get("tokens_total")),
+            ("Blocked", details.get("blocked")),
+            ("Safe", details.get("is_safe")),
+        ]
+        for label, value in summary_fields:
+            if value is None or value == "":
+                continue
+            lines.append(f"<b>{escape(label)}:</b> {escape(str(value))}")
+
+        references = details.get("threat_references") or details.get("evidence_refs") or []
+        if references:
+            lines.append("<b>Evidence:</b>")
+            for ref in references[:3]:
+                excerpt = ref.get("excerpt") or ref.get("text") or ""
+                document_id = ref.get("document_id") or ref.get("document") or "unknown"
+                location = ref.get("location") or {}
+                location_bits = []
+                if location.get("start") is not None:
+                    location_bits.append(f"start {location['start']}")
+                if location.get("end") is not None:
+                    location_bits.append(f"end {location['end']}")
+                location_text = f" ({', '.join(location_bits)})" if location_bits else ""
+                lines.append(
+                    f"• <b>{escape(str(document_id))}</b>{escape(location_text)}: {escape(self._truncate(excerpt, 180))}"
+                )
+
+        error_text = details.get("error") or details.get("detail")
+        if error_text:
+            lines.append(f"<b>Note:</b> {escape(self._truncate(str(error_text), 300))}")
+
+        details_text = json.dumps(details, indent=2, default=str)
+        if len(details_text) > 2500:
+            details_text = f"{details_text[:2500]}\n...truncated..."
+        lines.append("<b>Payload:</b>")
+        lines.append(f"<pre>{escape(details_text)}</pre>")
+        return "\n".join(lines)
+
+    def _format_metric(self, value: Any, suffix: str) -> Optional[str]:
+        """Format numeric metrics for alert output."""
+        if value is None or value == "":
+            return None
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError):
+            return str(value)
+        if numeric.is_integer():
+            return f"{int(numeric)} {suffix}"
+        return f"{numeric:.2f} {suffix}"
+
+    def _truncate(self, value: str, limit: int) -> str:
+        """Truncate verbose strings for messaging channels."""
+        return value if len(value) <= limit else f"{value[:limit - 3]}..."
 
     async def _send_pagerduty_alert(self, alert: Alert) -> bool:
         """Send alert via PagerDuty."""
@@ -700,6 +777,50 @@ class MonitoringSystem:
                 )
             except Exception as e:
                 logger.error("event_publish_failed", event_type="status_change_alert", error=str(e))
+
+    async def notify_operational_event(
+        self,
+        *,
+        event_name: str,
+        severity: AlertSeverity | str,
+        message: str,
+        details: Dict[str, Any] | None = None,
+        publish_event_type: str = "operational_event",
+    ) -> None:
+        """Dispatch a rich operational event across all enabled channels immediately."""
+        normalized_severity = severity
+        if isinstance(normalized_severity, str):
+            normalized_severity = AlertSeverity(normalized_severity)
+
+        alert = Alert(
+            rule_name=event_name,
+            severity=normalized_severity,
+            message=message,
+            details={
+                "event_type": publish_event_type,
+                **(details or {}),
+            },
+            timestamp=time.time(),
+        )
+
+        enabled_channels = self._get_enabled_channels()
+        for channel in enabled_channels:
+            await self.alert_manager.send_alert(alert, channel)
+
+        if self.event_publisher:
+            try:
+                await self.event_publisher(
+                    publish_event_type,
+                    {
+                        "rule_name": alert.rule_name,
+                        "severity": alert.severity.value,
+                        "message": alert.message,
+                        "timestamp": alert.timestamp,
+                        "details": alert.details,
+                    },
+                )
+            except Exception as e:
+                logger.error("event_publish_failed", event_type=publish_event_type, error=str(e))
 
     async def notify_status_change(
         self,
