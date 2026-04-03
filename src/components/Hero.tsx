@@ -7,7 +7,7 @@ function Hero() {
 
 	return (
 		<section className="relative min-h-[90vh] flex items-center justify-center px-6 py-28 overflow-hidden bg-background transition-colors ambient-glow">
-			{/* Subtle dot grid — barely visible */}
+			{/* Subtle dot grid  -  barely visible */}
 			<div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
 			<div className="relative z-10 max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
@@ -43,7 +43,7 @@ function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.4 }}
 					>
-						KoreShield intercepts every request between your app and LLM providers — blocking prompt injection, jailbreaks, and data exfiltration in{' '}
+						KoreShield intercepts every request between your app and LLM providers  -  blocking prompt injection, jailbreaks, and data exfiltration in{' '}
 						<span className="text-foreground font-semibold">under 30ms</span>, with{' '}
 						<span className="text-electric-green font-semibold">95% detection accuracy</span>.
 					</motion.p>

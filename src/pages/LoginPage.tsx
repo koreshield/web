@@ -3,6 +3,14 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { authService } from '../lib/auth';
 import { Lock, Mail, ShieldCheck } from 'lucide-react';
 
+interface LocationState {
+	from?: {
+		pathname: string;
+		search?: string;
+	};
+	passwordReset?: boolean;
+}
+
 export function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -10,14 +18,15 @@ export function LoginPage() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const locationState = location.state as LocationState | null;
 
     useEffect(() => {
         if (authService.isAuthenticated()) {
-            const fromLocation = (location.state as any)?.from;
+            const fromLocation = locationState?.from;
             const from = fromLocation ? `${fromLocation.pathname}${fromLocation.search || ''}` : '/dashboard';
             navigate(from, { replace: true });
         }
-    }, [navigate, location]);
+    }, [locationState, navigate]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,7 +35,7 @@ export function LoginPage() {
 
         try {
             await authService.login(email, password);
-            const fromLocation = (location.state as any)?.from;
+            const fromLocation = locationState?.from;
             const from = fromLocation ? `${fromLocation.pathname}${fromLocation.search || ''}` : '/dashboard';
             navigate(from, { replace: true });
         } catch (err) {
@@ -38,7 +47,7 @@ export function LoginPage() {
 
     return (
         <div className="min-h-screen bg-background flex">
-            {/* Left brand panel — hidden on mobile */}
+            {/* Left brand panel  -  hidden on mobile */}
             <div className="hidden lg:flex lg:w-[45%] bg-card border-r border-white/[0.06] flex-col justify-between p-12 relative overflow-hidden">
                 {/* Subtle ambient gradient */}
                 <div className="absolute inset-0 bg-gradient-to-br from-electric-green/[0.04] via-transparent to-transparent pointer-events-none" />
@@ -60,7 +69,7 @@ export function LoginPage() {
                     <div className="space-y-4">
                         {[
                             '95% detection accuracy across 50+ attack patterns',
-                            'Sub-30ms interception — zero perceptible latency',
+                            'Sub-30ms interception  -  zero perceptible latency',
                             'Zero prompt data stored or retained',
                         ].map((item) => (
                             <div key={item} className="flex items-start gap-3">
@@ -86,9 +95,9 @@ export function LoginPage() {
                         <span className="font-bold text-foreground">KoreShield</span>
                     </div>
 
-                    {(location.state as any)?.passwordReset && (
+                    {locationState?.passwordReset && (
                         <div className="mb-6 p-3 bg-electric-green/10 border border-electric-green/20 rounded-lg text-sm text-electric-green font-medium">
-                            Password updated — sign in with your new credentials.
+                            Password updated  -  sign in with your new credentials.
                         </div>
                     )}
 

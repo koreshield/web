@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    /* Light mode — clean, airy whites with subtle warmth */
+    /* Light mode  -  clean, airy whites with subtle warmth */
     --background: 0 0% 99%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
@@ -29,22 +29,22 @@
   }
 
   .dark {
-    /* "Midnight Forest" — deep, layered dark with subtle depth */
-    --background: 240 6% 3.5%;       /* #09090B — deep neutral black */
-    --foreground: 0 0% 95%;          /* #F2F2F2 — slightly off-white, easier on eyes */
-    --card: 240 4% 9.4%;             /* #18181B — lifted card surfaces */
+    /* "Midnight Forest"  -  deep, layered dark with subtle depth */
+    --background: 240 6% 3.5%;       /* #09090B  -  deep neutral black */
+    --foreground: 0 0% 95%;          /* #F2F2F2  -  slightly off-white, easier on eyes */
+    --card: 240 4% 9.4%;             /* #18181B  -  lifted card surfaces */
     --card-foreground: 0 0% 95%;
     --popover: 240 4% 9.4%;
     --popover-foreground: 0 0% 95%;
-    --primary: 160 84% 39%;          /* #10B981 — trusted emerald */
+    --primary: 160 84% 39%;          /* #10B981  -  trusted emerald */
     --primary-foreground: 0 0% 100%;
     --secondary: 240 3.7% 15.9%;     /* Subtle secondary surface */
     --secondary-foreground: 0 0% 95%;
     --muted: 240 3.7% 15.9%;         /* Muted surface for alternating sections */
-    --muted-foreground: 240 5% 64.9%; /* #A1A1AA — zinc-400, the "right" gray */
+    --muted-foreground: 240 5% 64.9%; /* #A1A1AA  -  zinc-400, the "right" gray */
     --accent: 160 84% 39%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 346.8 77.2% 49.8%; /* #E11D48 — ruby red for threats */
+    --destructive: 346.8 77.2% 49.8%; /* #E11D48  -  ruby red for threats */
     --destructive-foreground: 0 0% 100%;
     --border: 240 3.7% 15.9%;        /* Semi-transparent feel via HSL */
     --input: 240 3.7% 15.9%;
@@ -73,7 +73,7 @@
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
-  /* Custom brand colors — "Midnight Forest" palette */
+  /* Custom brand colors  -  "Midnight Forest" palette */
   --color-electric-green: #10b981;
   --color-emerald-bright: #34d399;
   --color-emerald-dark: #047857;
@@ -94,7 +94,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Headings — tight tracking, bold, Geist */
+  /* Headings  -  tight tracking, bold, Geist */
   h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.025em;
     font-weight: 700;
@@ -114,7 +114,7 @@ body {
   box-sizing: border-box;
 }
 
-/* ═══ Terminal — frosted glass dark card ═══ */
+/* ═══ Terminal  -  frosted glass dark card ═══ */
 .terminal {
   font-family: var(--font-mono);
   background: rgba(9, 9, 11, 0.85);

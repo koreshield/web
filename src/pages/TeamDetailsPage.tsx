@@ -26,6 +26,13 @@ interface Team {
 	owner_id: string;
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+	if (error instanceof Error && error.message) {
+		return error.message;
+	}
+	return fallback;
+}
+
 export function TeamDetailsPage() {
 	const { teamId } = useParams<{ teamId: string }>();
 	const navigate = useNavigate();
@@ -58,8 +65,8 @@ export function TeamDetailsPage() {
 			setInviteData({ email: '', role: 'member' });
 			success('Member added successfully!');
 		},
-		onError: (err: any) => {
-			error(err.message || 'Failed to add member');
+		onError: (mutationError: unknown) => {
+			error(getErrorMessage(mutationError, 'Failed to add member'));
 		},
 	});
 
@@ -70,8 +77,8 @@ export function TeamDetailsPage() {
 			queryClient.invalidateQueries({ queryKey: ['team-members', teamId] });
 			success('Member removed successfully');
 		},
-		onError: (err: any) => {
-			error(err.message || 'Failed to remove member');
+		onError: (mutationError: unknown) => {
+			error(getErrorMessage(mutationError, 'Failed to remove member'));
 		},
 	});
 
@@ -83,8 +90,8 @@ export function TeamDetailsPage() {
 			queryClient.invalidateQueries({ queryKey: ['team-members', teamId] });
 			success('Role updated successfully');
 		},
-		onError: (err: any) => {
-			error(err.message || 'Failed to update role');
+		onError: (mutationError: unknown) => {
+			error(getErrorMessage(mutationError, 'Failed to update role'));
 		},
 	});
 
@@ -95,8 +102,8 @@ export function TeamDetailsPage() {
 			success('Team deleted successfully');
 			navigate('/teams');
 		},
-		onError: (err: any) => {
-			error(err.message || 'Failed to delete team');
+		onError: (mutationError: unknown) => {
+			error(getErrorMessage(mutationError, 'Failed to delete team'));
 			setIsDeletingTeam(false);
 		},
 	});

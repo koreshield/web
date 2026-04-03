@@ -8,6 +8,9 @@ export class DocumentReadError extends Error {
 	}
 }
 
+interface PdfTextItem {
+	str?: string;
+}
 const extractPdfText = async (file: File): Promise<string> => {
 	const { getDocument } = await import('pdfjs-dist');
 	const data = new Uint8Array(await file.arrayBuffer());
@@ -16,7 +19,7 @@ const extractPdfText = async (file: File): Promise<string> => {
 		disableWorker: true,
 		useSystemFonts: true,
 		isEvalSupported: false,
-	} as any);
+	} as Parameters<typeof getDocument>[0]);
 
 	try {
 		const pdf = await loadingTask.promise;
@@ -25,8 +28,8 @@ const extractPdfText = async (file: File): Promise<string> => {
 		for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex += 1) {
 			const page = await pdf.getPage(pageIndex);
 			const content = await page.getTextContent();
-			const pageText = content.items
-				.map((item: any) => (typeof item?.str === 'string' ? item.str : ''))
+			const pageText = (content.items as PdfTextItem[])
+				.map((item) => (typeof item?.str === 'string' ? item.str : ''))
 				.filter(Boolean)
 				.join(' ');
 

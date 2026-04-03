@@ -339,7 +339,7 @@ function AppContent() {
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
-									<ProtectedRoute>
+									<ProtectedRoute requiredRole="admin">
 										<CostAnalyticsPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
@@ -351,7 +351,7 @@ function AppContent() {
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
-									<ProtectedRoute>
+									<ProtectedRoute requiredRole="admin">
 										<RBACPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
@@ -459,7 +459,7 @@ function AppContent() {
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
-									<ProtectedRoute>
+									<ProtectedRoute requiredRole="admin">
 										<ApiKeyManagementPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
@@ -471,7 +471,7 @@ function AppContent() {
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
-									<ProtectedRoute>
+									<ProtectedRoute requiredRole="admin">
 										<AdvancedAnalyticsPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
@@ -483,7 +483,7 @@ function AppContent() {
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
-									<ProtectedRoute>
+									<ProtectedRoute requiredRole="admin">
 										<ComplianceReportsPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>

@@ -43,7 +43,7 @@ function LandingPage() {
             <section className="py-28 md:py-36 px-6 relative ambient-glow">
                 <div className="max-w-7xl mx-auto relative z-10">
                     <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4 tracking-[-0.04em]">Threats Blocked. Right Now.</h2>
-                    <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto">Watch KoreShield intercept real attack patterns as they happen. These are the same threats hitting production AI systems today — classified, scored, and stopped.</p>
+                    <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto">Watch KoreShield intercept real attack patterns as they happen. These are the same threats hitting production AI systems today  -  classified, scored, and stopped.</p>
                     <ErrorBoundary fallback={<div className="h-64 bg-muted/20 border border-white/[0.08] rounded-2xl text-center p-8">Unable to load dashboard</div>}>
                         <ThreatDashboard />
                     </ErrorBoundary>
@@ -74,7 +74,7 @@ function LandingPage() {
             <TrustBadges />
             <UseCases />
 
-            {/* — CTA Section — */}
+            {/*  -  CTA Section  -  */}
             <section className="py-32 md:py-44 px-6 bg-background relative overflow-hidden ambient-glow">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-electric-green/[0.02] to-transparent pointer-events-none" />
                 <div className="max-w-7xl mx-auto relative z-10">
@@ -125,7 +125,7 @@ function LandingPage() {
                         {/* Mobile arrow */}
                         <div className="lg:hidden"><CTAFlowArrow /></div>
 
-                        {/* Step 2: Configure — star card */}
+                        {/* Step 2: Configure  -  star card */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
@@ -154,7 +154,7 @@ function LandingPage() {
                                 </div>
 
                                 <div className="space-y-3">
-                                    {/* config.yaml — provider selection */}
+                                    {/* config.yaml  -  provider selection */}
                                     <div className="p-3 bg-muted/50 rounded border border-white/[0.06] text-xs font-mono text-muted-foreground leading-relaxed">
                                         <div className="text-muted-foreground/50 mb-1"># config.yaml</div>
                                         <div><span className="text-blue-400">providers</span>:</div>
