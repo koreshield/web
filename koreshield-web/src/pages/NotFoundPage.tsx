@@ -105,6 +105,10 @@ export default function NotFoundPage() {
 						<a href="https://discord.gg/koreshield" target="_blank" rel="noreferrer noopener" className="text-primary hover:underline">
 							Discord community
 						</a>.
+						{' '}You can also follow our{' '}
+						<a href="https://t.me/koreshield" target="_blank" rel="noreferrer noopener" className="text-primary hover:underline">
+							Telegram channel
+						</a>.
 					</p>
 				</motion.div>
 			</div>
