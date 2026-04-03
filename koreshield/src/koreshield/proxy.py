@@ -21,6 +21,7 @@ import asyncio
 import httpx
 import structlog
 import redis
+import redis.asyncio as aioredis
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy import select, or_, func, delete
@@ -147,15 +148,18 @@ class KoreShieldProxy:
         if redis_enabled:
             try:
                 self.redis_client = redis.from_url(redis_url)
+                self.redis_async_client = aioredis.from_url(redis_url)
                 # Test connection
                 self.redis_client.ping()
                 logger.info("Connected to Redis", redis_url=redis_url)
             except Exception as e:
                 logger.error("Failed to connect to Redis, falling back to in-memory", error=str(e))
                 self.redis_client = None
+                self.redis_async_client = None
         else:
             logger.info("Redis disabled, using in-memory storage")
             self.redis_client = None
+            self.redis_async_client = None
 
         # Initialize parameter-based rate limiter with Redis storage
         if self.redis_client:
@@ -285,8 +289,8 @@ class KoreShieldProxy:
         self.app.include_router(websocket_router) # Prefix is already /ws defined in router
 
         # Set Redis client for WebSocket module
-        if self.redis_client:
-            websocket_module.set_redis_client(self.redis_client)        
+        if self.redis_async_client:
+            websocket_module.set_redis_client(self.redis_async_client)
         # Setup routes LAST (includes catch-all route)
         self._setup_routes()
 
