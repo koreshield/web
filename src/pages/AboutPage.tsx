@@ -9,7 +9,7 @@ const team = [
 		name: 'Teslim O. Kazeem',
 		role: 'Co-founder & CEO',
 		bio: 'MSc Data Science. Leading the vision for enterprise-grade LLM security.',
-		image: null,
+		image: '/team/teslim-kazeem.png',
 	},
 	{
 		name: 'Isaac Emmanuel',
@@ -18,10 +18,10 @@ const team = [
 		image: '/team/isaac-emmanuel.jpg',
 	},
 	{
-		name: 'Ahmed Lanre',
+		name: 'Ahmed Oladapo',
 		role: 'Co-founder & Security Engineer (Blue Team)',
-		bio: 'Blue team security engineer focused on detection coverage, response workflows, and operational hardening.',
-		image: null,
+		bio: 'Security engineer focused on detection coverage, and response workflows.',
+		image: '/team/ahmed-oladapo.png',
 	},
 	{
 		name: 'Victor Emmanuel',
