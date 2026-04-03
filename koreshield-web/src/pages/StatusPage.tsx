@@ -86,6 +86,7 @@ interface StatusApiResponse {
     present_env_vars?: string[];
     healthy?: boolean;
     response_time_ms?: number;
+    error?: string;
   }>;
   total_providers?: number;
   enabled_providers?: number;
@@ -127,6 +128,7 @@ type ProviderRoute = {
   responseTimeMs?: number;
   baseUrl?: string | null;
   missingEnvVars: string[];
+  error?: string | null;
 };
 
 const COMPONENT_ORDER = [
@@ -307,16 +309,80 @@ const historicalIncidents: Incident[] = [
       },
     ],
   },
+  {
+    id: 'inc-004',
+    title: 'Dashboard route load errors after frontend refresh',
+    severity: 'minor',
+    status: 'resolved',
+    affectedComponents: ['dashboard'],
+    createdAt: new Date('2026-04-03T10:00:00Z'),
+    updatedAt: new Date('2026-04-03T10:35:00Z'),
+    resolvedAt: new Date('2026-04-03T10:35:00Z'),
+    updates: [
+      {
+        message: 'A subset of dashboard routes showed a generic page-load error after the frontend bundle changed during local rebuilds.',
+        timestamp: new Date('2026-04-03T10:00:00Z'),
+        status: 'investigating',
+      },
+      {
+        message: 'We traced the issue to route-level rendering failures that were being masked by a generic fallback state.',
+        timestamp: new Date('2026-04-03T10:12:00Z'),
+        status: 'identified',
+      },
+      {
+        message: 'The fallback now records the route, classifies the failure, and surfaces a reference ID for debugging.',
+        timestamp: new Date('2026-04-03T10:24:00Z'),
+        status: 'monitoring',
+      },
+      {
+        message: 'The updated bundle was deployed and route-level failures now show actionable diagnostics instead of a vague refresh prompt.',
+        timestamp: new Date('2026-04-03T10:35:00Z'),
+        status: 'resolved',
+      },
+    ],
+  },
+  {
+    id: 'inc-005',
+    title: 'Azure OpenAI route health mismatch during provider rollout',
+    severity: 'minor',
+    status: 'resolved',
+    affectedComponents: ['provider-routing', 'api-gateway'],
+    createdAt: new Date('2026-04-03T11:30:00Z'),
+    updatedAt: new Date('2026-04-03T12:20:00Z'),
+    resolvedAt: new Date('2026-04-03T12:20:00Z'),
+    updates: [
+      {
+        message: 'Azure OpenAI credentials were present, but health checks still reported the route as unavailable.',
+        timestamp: new Date('2026-04-03T11:30:00Z'),
+        status: 'investigating',
+      },
+      {
+        message: 'We confirmed the deployment was using the newer Azure Cognitive Services endpoint shape with a live gpt-4o deployment.',
+        timestamp: new Date('2026-04-03T11:48:00Z'),
+        status: 'identified',
+      },
+      {
+        message: 'Provider initialization and health probes were updated to follow the deployed gpt-4o route correctly.',
+        timestamp: new Date('2026-04-03T12:05:00Z'),
+        status: 'monitoring',
+      },
+      {
+        message: 'Azure OpenAI routing is now healthy and visible in live provider health checks.',
+        timestamp: new Date('2026-04-03T12:20:00Z'),
+        status: 'resolved',
+      },
+    ],
+  },
 ];
 
 const maintenanceWindows: MaintenanceWindow[] = [
   {
     id: 'maint-001',
-    title: 'Scheduled datastore maintenance',
-    description: 'Routine PostgreSQL indexing and Redis memory tuning. Expected customer impact is under 5 minutes.',
+    title: 'Scheduled datastore and provider-routing maintenance',
+    description: 'Routine PostgreSQL indexing, Redis memory tuning, and provider route validation for hosted environments. Expected customer impact is under 5 minutes.',
     scheduledStart: new Date('2026-04-18T01:00:00Z'),
     scheduledEnd: new Date('2026-04-18T02:30:00Z'),
-    affectedComponents: ['api-gateway', 'billing', 'audit-log-stream'],
+    affectedComponents: ['api-gateway', 'billing', 'audit-log-stream', 'provider-routing'],
     status: 'scheduled',
   },
 ];
@@ -503,6 +569,7 @@ export default function StatusPage() {
               responseTimeMs: provider.response_time_ms,
               baseUrl: provider.base_url,
               missingEnvVars: provider.missing_env_vars || [],
+              error: provider.error || null,
             })),
         );
         setComponents(
@@ -755,6 +822,12 @@ export default function StatusPage() {
                     <div className="flex justify-between gap-4">
                       <span>Response time</span>
                       <span className="font-medium text-foreground">{provider.responseTimeMs.toFixed(0)} ms</span>
+                    </div>
+                  ) : null}
+                  {provider.error ? (
+                    <div className="pt-2">
+                      <div className="text-muted-foreground mb-1">Latest health note</div>
+                      <p className="text-xs leading-relaxed text-foreground/80 break-words">{provider.error}</p>
                     </div>
                   ) : null}
                   {!provider.credentialsPresent && provider.missingEnvVars.length > 0 ? (
