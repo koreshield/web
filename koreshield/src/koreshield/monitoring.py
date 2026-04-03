@@ -512,12 +512,26 @@ Details:
         if telegram_config.message_thread_id:
             payload["message_thread_id"] = telegram_config.message_thread_id
 
-        response = await self.client.post(
-            f"https://api.telegram.org/bot{telegram_config.bot_token}/sendMessage",
-            json=payload,
-            headers={"Content-Type": "application/json"},
-        )
-        return response.status_code == 200
+        try:
+            response = await self.client.post(
+                f"https://api.telegram.org/bot{telegram_config.bot_token}/sendMessage",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+            )
+        except Exception as exc:
+            logger.error("Telegram alert request failed", error=str(exc))
+            return False
+
+        if response.status_code != 200:
+            logger.error(
+                "Telegram alert rejected",
+                status_code=response.status_code,
+                response_text=response.text,
+            )
+            return False
+
+        logger.info("Telegram alert sent", channel_id=telegram_config.channel_id)
+        return True
 
     async def _send_pagerduty_alert(self, alert: Alert) -> bool:
         """Send alert via PagerDuty."""
