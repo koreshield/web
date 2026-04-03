@@ -107,17 +107,17 @@ export function ProviderHealthPage() {
 	const hasProviders = Object.values(providers).length > 0;
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="bg-background">
 			{/* Header */}
 			<header className="border-b border-border bg-card">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex items-center justify-between">
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 						<div>
-							<h1 className="text-3xl font-bold flex items-center gap-3">
+							<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
 								<Server className="w-8 h-8 text-primary" />
 								Provider Health Dashboard
 							</h1>
-							<p className="text-muted-foreground mt-1">
+							<p className="text-sm sm:text-base text-muted-foreground mt-1">
 								Real-time monitoring of LLM provider infrastructure
 							</p>
 						</div>
@@ -138,9 +138,9 @@ export function ProviderHealthPage() {
 				</div>
 			</header>
 
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
 				{/* Summary Stats */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
 					<div className="bg-card border border-border rounded-lg p-6">
 						<div className="flex items-center justify-between mb-2">
 							<span className="text-sm font-medium text-muted-foreground">Healthy</span>
@@ -188,7 +188,7 @@ export function ProviderHealthPage() {
 							</p>
 						</div>
 					) : (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
 							{Object.entries(providers).map(([name, provider]) => {
 								return (
 									<div
@@ -235,35 +235,37 @@ export function ProviderHealthPage() {
 
 				{/* Priority Comparison Chart */}
 				{hasProviders && (
-				<div className="bg-card border border-border rounded-lg p-6 mb-8">
-					<h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-						<Activity className="w-5 h-5" />
-						Provider Priority
-					</h2>
-					<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
-						<BarChart data={priorityChartData}>
-							<CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-							<XAxis dataKey="name" className="text-sm" />
-							<YAxis label={{ value: 'Priority', angle: -90, position: 'insideLeft' }} />
-							<Tooltip
-								contentStyle={{
-									backgroundColor: 'hsl(var(--card))',
-									border: '1px solid hsl(var(--border))',
-									borderRadius: '8px'
-								}}
-							/>
-							<Bar dataKey="priority" radius={[8, 8, 0, 0]}>
-								{priorityChartData.map((entry, index) => (
-									<Cell key={`cell-${index}`} fill={getBarColor(entry.status)} />
-								))}
-							</Bar>
-						</BarChart>
-					</ResponsiveContainer>
+					<div className="bg-card border border-border rounded-lg p-4 sm:p-6 mb-8">
+						<h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 flex items-center gap-2">
+							<Activity className="w-5 h-5" />
+							Provider Priority
+						</h2>
+						<div className="w-full overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+						<ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
+							<BarChart data={priorityChartData}>
+								<CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+								<XAxis dataKey="name" className="text-sm" />
+								<YAxis label={{ value: 'Priority', angle: -90, position: 'insideLeft' }} />
+								<Tooltip
+									contentStyle={{
+										backgroundColor: 'hsl(var(--card))',
+										border: '1px solid hsl(var(--border))',
+										borderRadius: '8px'
+									}}
+								/>
+								<Bar dataKey="priority" radius={[8, 8, 0, 0]}>
+									{priorityChartData.map((entry, index) => (
+										<Cell key={`cell-${index}`} fill={getBarColor(entry.status)} />
+									))}
+								</Bar>
+							</BarChart>
+						</ResponsiveContainer>
+					</div>
 				</div>
-				)}
-			</main>
-		</div>
-	);
+			)}
+		</main>
+	</div>
+);
 }
 
 export default ProviderHealthPage;
