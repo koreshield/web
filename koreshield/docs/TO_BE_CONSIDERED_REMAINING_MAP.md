@@ -2,6 +2,8 @@
 
 This document tracks what is still left to evaluate or extract from [`to-be-considered`](/Users/nsisong/projects/koreshield/to-be-considered) after Phases 1 through 4.
 
+Until the open items in this map are either extracted or intentionally dropped, `to-be-considered` should be treated as a reference archive and not deleted from the repo.
+
 ## Already Integrated
 
 - [x] normalization and obfuscation hardening concepts
