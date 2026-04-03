@@ -59,7 +59,7 @@ class AlertRuleResponse(BaseModel):
 
 class AlertChannelCreateRequest(BaseModel):
     """Request model for creating an alert channel."""
-    type: str = Field(..., description="Channel type: email, slack, webhook, teams, pagerduty")
+    type: str = Field(..., description="Channel type: email, slack, webhook, teams, telegram, pagerduty")
     name: str = Field(..., min_length=1, max_length=200)
     enabled: bool = Field(default=True)
     config: Dict[str, Any] = Field(..., description="Channel-specific configuration")
@@ -294,7 +294,7 @@ async def create_alert_channel(
     """Create a new alert channel."""
     try:
         # Validate channel type
-        valid_types = ['email', 'slack', 'webhook', 'teams', 'pagerduty']
+        valid_types = ['email', 'slack', 'webhook', 'teams', 'telegram', 'pagerduty']
         if request.type.lower() not in valid_types:
             raise HTTPException(status_code=400, detail=f"Invalid channel type. Must be one of: {', '.join(valid_types)}")
         
@@ -340,7 +340,7 @@ async def update_alert_channel(
         
         # Validate channel type if provided
         if request.type:
-            valid_types = ['email', 'slack', 'webhook', 'teams', 'pagerduty']
+            valid_types = ['email', 'slack', 'webhook', 'teams', 'telegram', 'pagerduty']
             if request.type.lower() not in valid_types:
                 raise HTTPException(status_code=400, detail=f"Invalid channel type. Must be one of: {', '.join(valid_types)}")
         
