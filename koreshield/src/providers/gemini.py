@@ -19,7 +19,9 @@ class GeminiProvider(BaseProvider):
         self,
         api_key: str,
         base_url: Optional[str] = None,
-        safety_settings: Optional[List[Dict[str, Any]]] = None
+        safety_settings: Optional[List[Dict[str, Any]]] = None,
+        redis_client=None,
+        cache_enabled: bool = True,
     ):
         """
         Initialize Gemini provider.
@@ -30,7 +32,12 @@ class GeminiProvider(BaseProvider):
             safety_settings: Optional safety settings for content filtering
         """
         self.safety_settings = safety_settings or self._get_default_safety_settings()
-        super().__init__(api_key, base_url)
+        super().__init__(
+            api_key,
+            base_url,
+            redis_client=redis_client,
+            cache_enabled=cache_enabled,
+        )
 
     def _get_default_url(self) -> str:
         """Get Google Gemini API URL."""
