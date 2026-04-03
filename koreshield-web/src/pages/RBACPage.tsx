@@ -129,18 +129,18 @@ export function RBACPage() {
     }, {} as Record<string, Permission[]>);
 
     return (
-        <div className="min-h-screen bg-background">
+        <div>
             {/* Header */}
             <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <Shield className="w-6 h-6 text-primary" />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                                <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                             </div>
-                            <div>
-                                <h1 className="text-2xl font-bold">RBAC Management</h1>
-                                <p className="text-sm text-muted-foreground">
+                            <div className="min-w-0">
+                                <h1 className="text-lg sm:text-2xl font-bold">RBAC Management</h1>
+                                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
                                     Manage users, roles, and permissions
                                 </p>
                             </div>
@@ -148,7 +148,7 @@ export function RBACPage() {
                         {activeTab === 'users' && (
                             <button
                                 onClick={() => setShowUserModal(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                                className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors w-full sm:w-auto text-sm"
                             >
                                 <Plus className="w-4 h-4" />
                                 Add User
@@ -157,7 +157,7 @@ export function RBACPage() {
                         {activeTab === 'roles' && (
                             <button
                                 onClick={() => setShowRoleModal(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                                className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors w-full sm:w-auto text-sm"
                             >
                                 <Plus className="w-4 h-4" />
                                 Create Role
@@ -166,16 +166,16 @@ export function RBACPage() {
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex gap-4 mt-6 border-b border-border">
+                    <div className="flex overflow-x-auto gap-2 sm:gap-4 mt-4 sm:mt-6 border-b border-border">
                         <button
                             onClick={() => setActiveTab('users')}
-                            className={`pb-3 px-2 font-medium transition-colors relative ${activeTab === 'users'
+                            className={`pb-3 px-2 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${activeTab === 'users'
                                     ? 'text-primary'
                                     : 'text-muted-foreground hover:text-foreground'
                                 }`}
                         >
-                            <div className="flex items-center gap-2">
-                                <Users className="w-4 h-4" />
+                            <div className="flex items-center gap-1 sm:gap-2">
+                                <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                                 Users
                             </div>
                             {activeTab === 'users' && (
@@ -184,13 +184,13 @@ export function RBACPage() {
                         </button>
                         <button
                             onClick={() => setActiveTab('roles')}
-                            className={`pb-3 px-2 font-medium transition-colors relative ${activeTab === 'roles'
+                            className={`pb-3 px-2 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${activeTab === 'roles'
                                     ? 'text-primary'
                                     : 'text-muted-foreground hover:text-foreground'
                                 }`}
                         >
-                            <div className="flex items-center gap-2">
-                                <Shield className="w-4 h-4" />
+                            <div className="flex items-center gap-1 sm:gap-2">
+                                <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
                                 Roles
                             </div>
                             {activeTab === 'roles' && (
@@ -199,13 +199,13 @@ export function RBACPage() {
                         </button>
                         <button
                             onClick={() => setActiveTab('permissions')}
-                            className={`pb-3 px-2 font-medium transition-colors relative ${activeTab === 'permissions'
+                            className={`pb-3 px-2 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${activeTab === 'permissions'
                                     ? 'text-primary'
                                     : 'text-muted-foreground hover:text-foreground'
                                 }`}
                         >
-                            <div className="flex items-center gap-2">
-                                <Key className="w-4 h-4" />
+                            <div className="flex items-center gap-1 sm:gap-2">
+                                <Key className="w-3 h-3 sm:w-4 sm:h-4" />
                                 Permissions
                             </div>
                             {activeTab === 'permissions' && (
@@ -223,7 +223,7 @@ export function RBACPage() {
                     <>
                         {/* Filters */}
                         <div className="flex gap-4 mb-6 flex-wrap">
-                            <div className="flex-1 min-w-[300px] relative">
+                            <div className="flex-1 min-w-0 relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <input
                                     type="text"
