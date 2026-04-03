@@ -17,7 +17,7 @@ def main():
         base_url="http://localhost:8000"  # Your KoreShield API URL
     )
 
-    print("🛡️  KoreShield + DeepSeek Integration Demo")
+    print("  KoreShield + DeepSeek Integration Demo")
     print("=" * 50)
 
     # Test prompt scanning
@@ -27,19 +27,19 @@ def main():
         print(f" Scanning prompt: '{test_prompt}'")
         result = client.scan_prompt(test_prompt)
 
-        print("✅ Scan Result:"        print(f"   Safe: {result.is_safe}")
+        print(" Scan Result:"        print(f"   Safe: {result.is_safe}")
         print(f"   Threats detected: {len(result.threats)}")
         print(f"   Confidence: {result.confidence}")
 
         if result.threats:
-            print("🚨 Threats found:")
+            print("Threats found:")
             for threat in result.threats:
                 print(f"   - {threat.type}: {threat.description}")
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f" Error: {e}")
 
-    print("\n🔧 To use with actual DeepSeek API:")
+    print("\nTo use with actual DeepSeek API:")
     print("1. Set DEEPSEEK_API_KEY environment variable")
     print("2. Configure KoreShield to use DeepSeek (already done in config.yaml)")
     print("3. Restart KoreShield API")

@@ -1,5 +1,5 @@
 /**
- * KoreShield Docs — Design system synced with koreshield.com
+ * KoreShield Docs  -  Design system synced with koreshield.com
  * Colors: #060606 bg | #10b77f emerald | #f2f2f2 foreground
  * Font: Geist Sans + Geist Mono
  */
@@ -68,7 +68,7 @@
 	--ifm-background-color: #060606;
 }
 
-/* ─── DARK MODE — matches koreshield.com ─────────────── */
+/* ─── DARK MODE  -  matches koreshield.com ─────────────── */
 
 
 /* ─── BASE ───────────────────────────────────────────── */
@@ -119,7 +119,7 @@ html {
 	color: #f2f2f2 !important;
 }
 
-/* GitHub icon in navbar — strictly constrained */
+/* GitHub icon in navbar  -  strictly constrained */
 .header-github-link {
 	width: 24px;
 	height: 24px;
@@ -178,7 +178,7 @@ html {
 }
 
 /* ─── Medium screens (997–1160px): right navbar overflow ─ */
-/* Right side has: Search + API Reference + GitHub — too tight.
+/* Right side has: Search + API Reference + GitHub  -  too tight.
    Hide API Reference from the bar; still accessible via the docs nav. */
 @media (min-width: 997px) and (max-width: 1160px) {
 	.navbar-api-ref {
@@ -186,7 +186,7 @@ html {
 	}
 }
 
-/* ─── EDIT THIS PAGE — fix oversized GitHub SVG ─────── */
+/* ─── EDIT THIS PAGE  -  fix oversized GitHub SVG ─────── */
 /* The "Edit this page" link at the bottom of each doc page
    contains a raw GitHub SVG with no size constraints. */
 .doc-edit-link svg,
@@ -419,7 +419,7 @@ html {
 	opacity: 0.45;
 }
 
-/* ── Light mode icon filter — darken icons on white bg ───── */
+/* ── Light mode icon filter  -  darken icons on white bg ───── */
 [data-theme='light'] .menu__link::before {
 	filter: brightness(0.7);
 }
@@ -574,7 +574,7 @@ div[class^='codeBlockContainer'] {
 	color: var(--ifm-color-primary);
 }
 
-/* Footer social icons row — properly sized */
+/* Footer social icons row  -  properly sized */
 .footer-social-icons {
 	display: flex;
 	flex-direction: row;
@@ -615,7 +615,7 @@ div[class^='codeBlockContainer'] {
    ══════════════════════════════════════════════════════════════ */
 
 /* Base: prevent horizontal overflow on any screen ─────────── */
-/* NOTE: overflow-x: hidden is on html only — NOT body.
+/* NOTE: overflow-x: hidden is on html only  -  NOT body.
    Setting overflow-x:hidden on body breaks position:fixed (mobile sidebar)
    on iOS Safari by creating an implicit scroll container. */
 html {
@@ -672,7 +672,7 @@ body {
 		width: min(300px, 88vw);
 		max-width: 300px;
 		height: 100vh;
-		height: 100dvh; /* dynamic viewport height — avoids iOS address-bar gap */
+		height: 100dvh; /* dynamic viewport height  -  avoids iOS address-bar gap */
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
 		border-right: 1px solid #1a1a1a;
@@ -890,7 +890,7 @@ body {
 	}
 }
 
-/* ── Small phone — iPhone SE (≤ 375px) ─────────────────────── */
+/* ── Small phone  -  iPhone SE (≤ 375px) ─────────────────────── */
 @media (max-width: 375px) {
 	.navbar {
 		padding-left: 0.6rem;

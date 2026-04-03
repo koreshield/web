@@ -1,4 +1,4 @@
-name: "Code Scanning — Bandit (Python) & TS Type Check"
+name: "Code Scanning  -  Bandit (Python) & TS Type Check"
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
 jobs:
   # ── Python SAST with Bandit ──────────────────────────────────────────────────
   bandit-python:
-    name: Bandit — Python Security Scan
+    name: Bandit  -  Python Security Scan
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -54,19 +54,19 @@ jobs:
                   report = json.load(f)
               highs = [r for r in report.get("results", []) if r.get("issue_severity") == "HIGH"]
               if highs:
-                  print(f"❌ {len(highs)} HIGH severity finding(s):")
+                  print(f" {len(highs)} HIGH severity finding(s):")
                   for h in highs:
-                      print(f"  {h['filename']}:{h['line_number']} — {h['issue_text']}")
+                      print(f"  {h['filename']}:{h['line_number']}  -  {h['issue_text']}")
                   sys.exit(1)
               else:
-                  print("✅ No HIGH severity findings.")
+                  print(" No HIGH severity findings.")
           except Exception as e:
               print(f"Warning: Could not parse report: {e}")
           EOF
 
-  # ── TypeScript / Frontend — Build & Type Check ───────────────────────────────
+  # ── TypeScript / Frontend  -  Build & Type Check ───────────────────────────────
   typescript-check:
-    name: TypeScript — Build & Type Check
+    name: TypeScript  -  Build & Type Check
     runs-on: ubuntu-latest
     defaults:
       run:

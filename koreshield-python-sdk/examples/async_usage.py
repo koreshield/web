@@ -51,7 +51,7 @@ async def demo_single_scanning():
         result = await scan_single_prompt(client, prompt)
 
         if result["error"]:
-            print(f"❌ Error: {result['error']}")
+            print(f" Error: {result['error']}")
         else:
             print(f"Prompt: {result['prompt']}")
             print(f"Safe: {result['safe']}")
@@ -102,7 +102,7 @@ async def demo_batch_scanning():
         unsafe_count = 0
 
         for prompt, result in zip(prompts, results):
-            status = "✅" if result.is_safe else ""
+            status = "" if result.is_safe else ""
             threat = f" ({result.threat_level.value})" if not result.is_safe else ""
             print(f"{status} {prompt[:40]}{'...' if len(prompt) > 40 else ''}{threat}")
 
@@ -159,7 +159,7 @@ async def demo_sequential_vs_concurrent():
             r1.is_safe == r2.is_safe and r1.threat_level == r2.threat_level
             for r1, r2 in zip(sequential_results, concurrent_results)
         )
-        print(f"Results consistent: {'✅' if results_match else '❌'}")
+        print(f"Results consistent: {'' if results_match else ''}")
 
 
 async def main():

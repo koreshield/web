@@ -112,7 +112,7 @@ async def send_welcome_email(email: str, name: Optional[str] = None) -> bool:
     <body>
         <div class="container">
             <div class="header">
-                <h1 style="margin: 0; font-size: 32px;">Welcome to KoreShield! 🛡️</h1>
+                <h1 style="margin: 0; font-size: 32px;">Welcome to KoreShield! </h1>
             </div>
             <div class="content">
                 <p>Hi {display_name},</p>
@@ -122,17 +122,17 @@ async def send_welcome_email(email: str, name: Optional[str] = None) -> bool:
                 <p>KoreShield protects your AI applications from:</p>
 
                 <div class="feature">
-                    <div class="feature-title">🔒 Prompt Injection Attacks</div>
+                    <div class="feature-title">Prompt Injection Attacks</div>
                     <div>Advanced detection and blocking of malicious prompts trying to manipulate your AI</div>
                 </div>
 
                 <div class="feature">
-                    <div class="feature-title">🚨 Data Leakage Prevention</div>
+                    <div class="feature-title">Data Leakage Prevention</div>
                     <div>Protect sensitive information from being exposed through AI responses</div>
                 </div>
 
                 <div class="feature">
-                    <div class="feature-title">📊 Real-time Monitoring</div>
+                    <div class="feature-title">Real-time Monitoring</div>
                     <div>Track threats, analyze patterns, and get instant alerts</div>
                 </div>
 
@@ -158,7 +158,7 @@ async def send_welcome_email(email: str, name: Optional[str] = None) -> bool:
             </div>
             <div class="footer">
                 <p>KoreShield - AI Security Made Simple</p>
-                <p>Built with ❤️ by Teslim & Isaac</p>
+                <p>Built with ❤ by Teslim & Isaac</p>
             </div>
         </div>
     </body>
@@ -167,7 +167,7 @@ async def send_welcome_email(email: str, name: Optional[str] = None) -> bool:
 
     return await send_email(
         to=email,
-        subject="Welcome to KoreShield! 🛡️",
+        subject="Welcome to KoreShield! ",
         html=html
     )
 

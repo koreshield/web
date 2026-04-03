@@ -137,7 +137,7 @@ form?.addEventListener('submit', async (e) => {
     const data = await res.json().catch(() => ({})) as { success?: boolean; error?: string };
 
     if (res.ok && data?.success) {
-      msg.textContent = "You're subscribed — thanks for joining!";
+      msg.textContent = "You're subscribed  -  thanks for joining!";
       msg.className = 'text-sm mt-1 text-electric-blue';
       form.reset();
     } else {

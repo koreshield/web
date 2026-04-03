@@ -3,33 +3,33 @@
 # Railway Deployment Setup Script for KoreShield
 # This script helps prepare your KoreShield project for Railway deployment
 
-echo "🚀 KoreShield Railway Deployment Setup"
+echo " KoreShield Railway Deployment Setup"
 echo "======================================"
 
 # Check if we're in the right directory
 if [ ! -f "railway.json" ]; then
-    echo "❌ Error: railway.json not found. Please run this script from the llm-firewall directory."
+    echo " Error: railway.json not found. Please run this script from the llm-firewall directory."
     exit 1
 fi
 
-echo "✅ Found railway.json configuration"
+echo " Found railway.json configuration"
 
 # Check for required files
 REQUIRED_FILES=("docker/Dockerfile" "config/railway-config.yaml" "requirements.txt" "src/koreshield/proxy.py")
 for file in "${REQUIRED_FILES[@]}"; do
     if [ ! -f "$file" ]; then
-        echo "❌ Error: Required file $file not found."
+        echo " Error: Required file $file not found."
         exit 1
     fi
 done
 
-echo "✅ All required files present"
+echo " All required files present"
 
 # Check if Railway CLI is installed (optional)
 if command -v railway &> /dev/null; then
-    echo "✅ Railway CLI is installed"
+    echo " Railway CLI is installed"
 else
-    echo "ℹ️  Railway CLI not found. Install it with: npm install -g @railway/cli"
+    echo "ℹ  Railway CLI not found. Install it with: npm install -g @railway/cli"
 fi
 
 echo ""
@@ -68,6 +68,6 @@ echo ""
 echo "7. Verify Deployment:"
 echo "   curl https://your-project-url.up.railway.app/health"
 echo ""
-echo "🎉 Deployment complete! Your KoreShield instance will be available at the Railway URL."
+echo " Deployment complete! Your KoreShield instance will be available at the Railway URL."
 echo ""
 echo "📖 For detailed instructions, see: docs/RAILWAY_DEPLOYMENT.md"
