@@ -10,6 +10,7 @@ from uuid import UUID
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -17,6 +18,7 @@ from src.koreshield.api import billing, management, teams
 from src.koreshield.api.auth import init_jwt_config
 from src.koreshield.models.base import Base
 from src.koreshield.models.team import Team, TeamMember
+from src.koreshield.models.user import User
 
 
 def _build_test_client(tmp_path: Path) -> tuple[TestClient, sessionmaker, object, tuple[object, object], object]:
@@ -117,6 +119,19 @@ async def _create_team_membership(
         return team
 
 
+async def _update_user_role(
+    session_factory: sessionmaker,
+    *,
+    user_id: str,
+    role: str,
+) -> None:
+    async with session_factory() as session:
+        result = await session.execute(select(User).where(User.id == UUID(user_id)))
+        user = result.scalar_one()
+        user.role = role
+        await session.commit()
+
+
 def _signup(client: TestClient, email: str = "user@example.com", password: str = "Password123!") -> dict:
     response = client.post(
         "/v1/management/signup",
@@ -142,6 +157,32 @@ def test_regular_user_session_lifecycle_supports_me_and_logout(tmp_path: Path):
 
         after_logout_response = client.get("/v1/management/me")
         assert after_logout_response.status_code == 401
+    finally:
+        management.send_welcome_email, management.send_verification_email = original_senders
+        client.close()
+        env_patcher.stop()
+        asyncio.run(_dispose_engine(engine))
+
+
+def test_login_promotes_legacy_user_when_workspace_has_no_privileged_users(tmp_path: Path):
+    client, session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
+    try:
+        signup_data = _signup(client)
+        user_id = signup_data["user"]["id"]
+
+        asyncio.run(_update_user_role(session_factory, user_id=user_id, role="user"))
+        client.post("/v1/management/logout")
+
+        login_response = client.post(
+            "/v1/management/login",
+            json={"email": "user@example.com", "password": "Password123!"},
+        )
+        assert login_response.status_code == 200
+        assert login_response.json()["user"]["role"] == "owner"
+
+        me_response = client.get("/v1/management/me")
+        assert me_response.status_code == 200
+        assert me_response.json()["user"]["role"] == "owner"
     finally:
         management.send_welcome_email, management.send_verification_email = original_senders
         client.close()

@@ -225,6 +225,13 @@ class KoreShieldProxy:
         self.tool_security = ToolCallSecurityAnalyzer(self.detector)
         self.runtime_governance = RuntimeGovernanceManager(config)
         self.logger = FirewallLogger()
+        self.app.state.sanitizer = self.sanitizer
+        self.app.state.detector = self.detector
+        self.app.state.rag_detector = self.rag_detector
+        self.app.state.policy_engine = self.policy_engine
+        self.app.state.tool_security = self.tool_security
+        self.app.state.runtime_governance = self.runtime_governance
+        self.app.state.firewall_logger = self.logger
 
         # Initialize providers (multiple for failover)
         self.providers: List[Any] = []
