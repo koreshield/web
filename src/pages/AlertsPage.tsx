@@ -514,52 +514,53 @@ export function AlertsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
+        <div>
             {/* Header */}
             <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <Bell className="w-6 h-6 text-primary" />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                                <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                             </div>
-                            <div>
-                                <h1 className="text-2xl font-bold">Alert Management</h1>
-                                <p className="text-sm text-muted-foreground">
+                            <div className="min-w-0">
+                                <h1 className="text-lg sm:text-2xl font-bold">Alert Management</h1>
+                                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
                                     Configure alert rules and notification channels
                                 </p>
                             </div>
                         </div>
                         <button
                             onClick={() => activeTab === 'rules' ? setShowCreateRule(true) : setShowCreateChannel(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm w-full sm:w-auto justify-center"
                         >
                             <Plus className="w-4 h-4" />
-                            {activeTab === 'rules' ? 'Create Rule' : 'Create Channel'}
+                            <span className="hidden sm:inline">{activeTab === 'rules' ? 'Create Rule' : 'Create Channel'}</span>
+                            <span className="sm:hidden">{activeTab === 'rules' ? 'Rule' : 'Channel'}</span>
                         </button>
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex gap-2 mt-6 border-b border-border">
+                    <div className="flex overflow-x-auto gap-1 border-b border-border -mx-4 px-4 sm:mx-0 sm:px-0">
                         <button
                             onClick={() => setActiveTab('rules')}
-                            className={`px-4 py-2 font-medium transition-colors ${
+                            className={`px-3 sm:px-4 py-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
                                 activeTab === 'rules'
                                     ? 'text-primary border-b-2 border-primary'
                                     : 'text-muted-foreground hover:text-foreground'
                             }`}
                         >
-                            Alert Rules
+                            Rules
                         </button>
                         <button
                             onClick={() => setActiveTab('channels')}
-                            className={`px-4 py-2 font-medium transition-colors ${
+                            className={`px-3 sm:px-4 py-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
                                 activeTab === 'channels'
                                     ? 'text-primary border-b-2 border-primary'
                                     : 'text-muted-foreground hover:text-foreground'
                             }`}
                         >
-                            Notification Channels
+                            Channels
                         </button>
                     </div>
                 </div>
@@ -618,7 +619,7 @@ export function AlertsPage() {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="overflow-x-auto">
+                                <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                                     <table className="w-full">
                                         <thead className="bg-muted/50 border-b border-border">
                                             <tr>
@@ -810,7 +811,7 @@ export function AlertsPage() {
             {/* Create Alert Rule Modal */}
             {showCreateRule && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-card border border-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-card border border-border rounded-xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-border">
                             <h2 className="text-xl font-bold">Create Alert Rule</h2>
                             <button
@@ -853,7 +854,7 @@ export function AlertsPage() {
                                     placeholder="error_rate > 0.05"
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-2">Severity *</label>
                                     <select
@@ -922,7 +923,7 @@ export function AlertsPage() {
             {/* Edit Alert Rule Modal */}
             {showEditRule && editingRule && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-card border border-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-card border border-border rounded-xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-border">
                             <h2 className="text-xl font-bold">Edit Alert Rule</h2>
                             <button
@@ -1030,7 +1031,7 @@ export function AlertsPage() {
             {/* Create Alert Channel Modal */}
             {showCreateChannel && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-card border border-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-card border border-border rounded-xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-border">
                             <h2 className="text-xl font-bold">Create Notification Channel</h2>
                             <button
@@ -1041,7 +1042,7 @@ export function AlertsPage() {
                             </button>
                         </div>
                         <form onSubmit={handleCreateChannel} className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-2">Channel Type *</label>
                                     <select
@@ -1107,7 +1108,7 @@ export function AlertsPage() {
             {/* Edit Alert Channel Modal */}
             {showEditChannel && editingChannel && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-card border border-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-card border border-border rounded-xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-border">
                             <h2 className="text-xl font-bold">Edit Notification Channel</h2>
                             <button
@@ -1118,7 +1119,7 @@ export function AlertsPage() {
                             </button>
                         </div>
                         <form onSubmit={handleUpdateChannel} className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-2">Channel Type *</label>
                                     <select

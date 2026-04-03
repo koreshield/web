@@ -52,7 +52,7 @@ export function ProfilePage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div>
 			<header className="border-b border-border bg-card">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
 					<div className="flex items-center gap-3">
@@ -78,7 +78,7 @@ export function ProfilePage() {
 						</p>
 					</div>
 					<div className="p-6 space-y-6">
-						<div className="grid gap-6 md:grid-cols-2">
+						<div className="grid gap-3 sm:gap-6 md:grid-cols-2">
 							<div className="space-y-2">
 								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
 									<User className="w-4 h-4" /> Full Name
@@ -119,9 +119,9 @@ export function ProfilePage() {
 					</div>
 				</div>
 
-				<div className="mt-6 bg-card border border-border rounded-lg shadow-sm p-6">
-					<div className="flex items-start justify-between gap-4 flex-wrap">
-						<div>
+				<div className="mt-6 bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6">
+					<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+						<div className="flex-1">
 							<h2 className="text-lg font-semibold flex items-center gap-2">
 								<CreditCard className="w-5 h-5 text-primary" />
 								Billing
@@ -129,7 +129,7 @@ export function ProfilePage() {
 							<p className="text-sm text-muted-foreground mt-1">
 								Manage your subscription, invoices, and customer portal access.
 							</p>
-							<div className="mt-4 grid gap-3 sm:grid-cols-2">
+							<div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2">
 								<div className="rounded-lg bg-muted p-3">
 									<div className="text-xs uppercase tracking-wide text-muted-foreground">Plan</div>
 									<div className="mt-1 font-medium">
@@ -146,16 +146,16 @@ export function ProfilePage() {
 						</div>
 						<Link
 							to="/billing"
-							className="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+							className="w-full sm:w-auto inline-flex items-center justify-center sm:justify-start px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
 						>
 							Open billing
 						</Link>
 					</div>
 				</div>
 
-				<div className="mt-6 bg-card border border-border rounded-lg shadow-sm p-6">
+				<div className="mt-6 bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6">
 					<h2 className="text-lg font-semibold mb-4">Getting started</h2>
-					<div className="grid gap-4 md:grid-cols-3">
+					<div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
 						<Link to="/getting-started" className="rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
 							<Rocket className="w-5 h-5 text-primary mb-3" />
 							<div className="font-medium">Integration guide</div>

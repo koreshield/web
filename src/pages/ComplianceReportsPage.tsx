@@ -108,21 +108,21 @@ export function ComplianceReportsPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div>
 			<SEOMeta
 				title="Compliance Reports | KoreShield"
 				description="Automated compliance reporting for SOC 2, ISO 27001, GDPR, and more"
 			/>
 
 			<header className="border-b border-border bg-card">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex items-center justify-between">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+					<div className="flex items-center gap-2 sm:gap-3">
+						<div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+							<FileText className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
+						</div>
 						<div>
-							<h1 className="text-3xl font-bold flex items-center gap-3">
-								<FileText className="w-8 h-8 text-primary" />
-								Compliance Reports
-							</h1>
-							<p className="text-muted-foreground mt-1">
+							<h1 className="text-lg sm:text-2xl font-bold">Compliance Reports</h1>
+							<p className="text-xs sm:text-sm text-muted-foreground mt-0.5 hidden sm:block">
 								Automated compliance reporting and audit trails
 							</p>
 						</div>
@@ -131,7 +131,7 @@ export function ComplianceReportsPage() {
 			</header>
 
 			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-				<div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+				<div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-8">
 					{MOCK_REPORTS.map((report) => (
 						<div
 							key={report.id}
@@ -176,11 +176,11 @@ export function ComplianceReportsPage() {
 
 						{selectedTemplate && (
 							<div className="space-y-3">
-								<div className="flex items-center justify-between mb-4">
+								<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 									<h3 className="text-lg font-semibold">{selectedTemplate} Controls</h3>
 									<button
 										onClick={() => generateReport(selectedTemplate)}
-										className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors text-sm"
+										className="flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors text-sm w-full sm:w-auto"
 									>
 										<Download className="w-4 h-4" />
 										Export Report
@@ -253,7 +253,7 @@ export function ComplianceReportsPage() {
 						onClick={() => setSelectedReport(null)}
 					>
 						<div
-							className="bg-card border border-border rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+							className="bg-card border border-border rounded-xl p-4 sm:p-6 max-w-2xl w-full mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto"
 							onClick={(e) => e.stopPropagation()}
 						>
 							<h3 className="text-2xl font-bold mb-4">{selectedReport.type} Report Details</h3>
