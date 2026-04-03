@@ -24,7 +24,7 @@ export function ForgotPasswordPage() {
 
     return (
         <div className="min-h-screen bg-background flex">
-            {/* Left brand panel — hidden on mobile */}
+            {/* Left brand panel  -  hidden on mobile */}
             <div className="hidden lg:flex lg:w-[45%] bg-card border-r border-white/[0.06] flex-col justify-between p-12 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-electric-green/[0.04] via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-electric-green/[0.03] rounded-full translate-x-1/2 translate-y-1/2 blur-3xl pointer-events-none" />

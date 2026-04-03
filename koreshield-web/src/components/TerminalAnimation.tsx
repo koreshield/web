@@ -78,7 +78,7 @@ function TerminalAnimation() {
 				i++;
 				typingRef.current = window.setTimeout(typeChar, 30 + Math.random() * 40);
 			} else {
-				// Done typing — scan
+				// Done typing  -  scan
 				typingRef.current = window.setTimeout(() => {
 					setPhase('scanning');
 					typingRef.current = window.setTimeout(() => {

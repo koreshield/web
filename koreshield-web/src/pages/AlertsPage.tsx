@@ -22,7 +22,7 @@ interface AlertChannel {
     type: 'email' | 'slack' | 'webhook' | 'teams' | 'pagerduty';
     name: string;
     enabled: boolean;
-    config: Record<string, any>;
+    config: Record<string, unknown>;
 }
 
 interface AlertRuleFormData {
@@ -54,6 +54,14 @@ interface AlertChannelFormData {
         // PagerDuty
         integration_key?: string;
     };
+}
+
+function asSeverity(value: string): AlertRuleFormData['severity'] {
+    return value as AlertRuleFormData['severity'];
+}
+
+function asChannelType(value: string): AlertChannelFormData['type'] {
+    return value as AlertChannelFormData['type'];
 }
 
 export function AlertsPage() {
@@ -201,8 +209,8 @@ export function AlertsPage() {
     const handleTestChannel = async (channelId: string) => {
         setTestingChannelId(channelId);
         try {
-            const result = await api.testAlertChannel(channelId);
-            if ((result as any).success) {
+            const result = await api.testAlertChannel(channelId) as { success?: boolean; message?: string };
+            if (result.success) {
                 success('Test notification sent successfully');
             } else {
                 showError('Test notification failed');
@@ -508,6 +516,9 @@ export function AlertsPage() {
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="mb-6 rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
+                    Alerts help customers prove that KoreShield is operating, but they only become useful after you connect at least one notification channel and one rule.
+                </div>
                 {/* Rules Tab */}
                 {activeTab === 'rules' && (
                     <>
@@ -546,7 +557,14 @@ export function AlertsPage() {
                             ) : rules.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12">
                                     <Bell className="w-12 h-12 text-muted-foreground opacity-50 mb-4" />
-                                    <p className="text-muted-foreground">No alert rules found</p>
+                                    <p className="text-muted-foreground mb-3">No alert rules found</p>
+                                    <button
+                                        onClick={() => setShowCreateRule(true)}
+                                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Create your first rule
+                                    </button>
                                 </div>
                             ) : (
                                 <div className="overflow-x-auto">
@@ -673,7 +691,14 @@ export function AlertsPage() {
                             ) : channels.length === 0 ? (
                                 <div className="col-span-full flex flex-col items-center justify-center py-12">
                                     <Bell className="w-12 h-12 text-muted-foreground opacity-50 mb-4" />
-                                    <p className="text-muted-foreground">No notification channels found</p>
+                                    <p className="text-muted-foreground mb-3">No notification channels found</p>
+                                    <button
+                                        onClick={() => setShowCreateChannel(true)}
+                                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Add your first channel
+                                    </button>
                                 </div>
                             ) : (
                                 channels.map((channel) => (
@@ -782,7 +807,7 @@ export function AlertsPage() {
                                     <label className="block text-sm font-medium mb-2">Severity *</label>
                                     <select
                                         value={ruleFormData.severity}
-                                        onChange={(e) => setRuleFormData({ ...ruleFormData, severity: e.target.value as any })}
+                                        onChange={(e) => setRuleFormData({ ...ruleFormData, severity: e.target.value as AlertRuleFormData['severity'] })}
                                         className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                                     >
                                         <option value="critical">Critical</option>
@@ -891,7 +916,7 @@ export function AlertsPage() {
                                     <label className="block text-sm font-medium mb-2">Severity *</label>
                                     <select
                                         value={ruleFormData.severity}
-                                        onChange={(e) => setRuleFormData({ ...ruleFormData, severity: e.target.value as any })}
+	                                        onChange={(e) => setRuleFormData({ ...ruleFormData, severity: asSeverity(e.target.value) })}
                                         className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                                     >
                                         <option value="critical">Critical</option>
@@ -970,7 +995,7 @@ export function AlertsPage() {
                                     <label className="block text-sm font-medium mb-2">Channel Type *</label>
                                     <select
                                         value={channelFormData.type}
-                                        onChange={(e) => setChannelFormData({ ...channelFormData, type: e.target.value as any, config: {} })}
+	                                        onChange={(e) => setChannelFormData({ ...channelFormData, type: asChannelType(e.target.value), config: {} })}
                                         className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                                     >
                                         <option value="email">Email</option>

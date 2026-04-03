@@ -41,7 +41,7 @@ def main():
             result = client.scan_prompt(prompt)
 
             # Display results
-            status = "✅ SAFE" if result.is_safe else f" UNSAFE ({result.threat_level.value.upper()})"
+            status = " SAFE" if result.is_safe else f" UNSAFE ({result.threat_level.value.upper()})"
             print(f"   Status: {status}")
             print(f"   Confidence: {result.confidence:.2%}")
             print(f"   Processing Time: {result.processing_time_ms:.1f}ms")
@@ -52,9 +52,9 @@ def main():
                     print(f"     - {indicator.type.value}: {indicator.severity.value} ({indicator.confidence:.2f})")
 
         except KoreShieldError as e:
-            print(f"   ❌ Error: {e}")
+            print(f"    Error: {e}")
         except Exception as e:
-            print(f"   ❌ Unexpected error: {e}")
+            print(f"    Unexpected error: {e}")
 
     print("\n" + "=" * 50)
     print("Demo completed!")

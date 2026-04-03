@@ -5,7 +5,7 @@ const features = [
     {
         icon: Shield,
         title: '95% Detection Accuracy',
-        description: 'Fewer than 3 false positives per 100 blocked requests. Tuned on millions of real-world attack attempts — not synthetic test data — so it catches what matters without crying wolf.',
+        description: 'Fewer than 3 false positives per 100 blocked requests. Tuned on millions of real-world attack attempts  -  not synthetic test data  -  so it catches what matters without crying wolf.',
         highlight: true,
     },
     {
@@ -17,7 +17,7 @@ const features = [
     {
         icon: Database,
         title: 'RAG Defense',
-        description: 'Scans every document in your retrieval context before it reaches the LLM — catching injected instructions your vector database doesn\'t know to look for.',
+        description: 'Scans every document in your retrieval context before it reaches the LLM  -  catching injected instructions your vector database doesn\'t know to look for.',
         highlight: false,
     },
     {
@@ -29,13 +29,13 @@ const features = [
     {
         icon: FileText,
         title: 'Audit Trails',
-        description: 'Every scan, every block, every decision — logged with full context. Query your threat history, or export to your SIEM in one command.',
+        description: 'Every scan, every block, every decision  -  logged with full context. Query your threat history, or export to your SIEM in one command.',
         highlight: false,
     },
     {
         icon: Activity,
         title: 'Real-time Monitoring',
-        description: 'Sub-30ms interception with no perceptible latency overhead. Threats appear in your dashboard the moment they\'re detected — not after the fact.',
+        description: 'Sub-30ms interception with no perceptible latency overhead. Threats appear in your dashboard the moment they\'re detected  -  not after the fact.',
         highlight: false,
     },
 ];
@@ -55,13 +55,13 @@ function Features() {
                         What KoreShield Catches Before Your LLM Does
                     </h2>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                        50+ attack detection patterns, tuned on real production traffic — not just benchmark datasets.
+                        50+ attack detection patterns, tuned on real production traffic  -  not just benchmark datasets.
                     </p>
                 </motion.div>
 
                 {/* Bento Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Hero card — 95% Accuracy — spans 2 cols */}
+                    {/* Hero card  -  95% Accuracy  -  spans 2 cols */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -80,7 +80,7 @@ function Features() {
                         </div>
                     </motion.div>
 
-                    {/* Multi-Provider — 1 col */}
+                    {/* Multi-Provider  -  1 col */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -96,7 +96,7 @@ function Features() {
                         <p className="text-muted-foreground">{features[1].description}</p>
                     </motion.div>
 
-                    {/* Bottom row — 3 equal cards */}
+                    {/* Bottom row  -  3 equal cards */}
                     {features.slice(2).map((feature, index) => (
                         <motion.div
                             key={index + 2}
