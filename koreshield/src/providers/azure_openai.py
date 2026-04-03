@@ -71,6 +71,29 @@ class AzureOpenAIProvider(BaseProvider):
         """Get the deployment name for a given model."""
         return self.deployment_mappings.get(model, model)
 
+    def _get_health_probe_models(self) -> list[str]:
+        """Return a small ordered list of likely deployment names to probe."""
+        preferred_models = [
+            "gpt-4o-mini",
+            "gpt-4o",
+            "gpt-4.1-mini",
+            "gpt-4.1",
+            "gpt-4-turbo",
+            "gpt-4",
+            "gpt-3.5-turbo",
+        ]
+
+        ordered = []
+        for model_name in preferred_models:
+            if model_name in self.deployment_mappings and model_name not in ordered:
+                ordered.append(model_name)
+
+        for model_name in self.deployment_mappings:
+            if model_name not in ordered:
+                ordered.append(model_name)
+
+        return ordered or ["gpt-4o"]
+
     async def chat_completion(
         self, messages: list, model: str = "gpt-3.5-turbo", **kwargs
     ) -> Dict[str, Any]:
@@ -166,12 +189,20 @@ class AzureOpenAIProvider(BaseProvider):
             self.last_error = None
             return True
         except Exception as deployment_error:
-            # Fallback to basic chat completion check
-            try:
-                test_messages = [{"role": "user", "content": "Hello"}]
-                await self.chat_completion(test_messages, max_tokens=1)
-                self.last_error = None
-                return True
-            except Exception as chat_error:
-                self.last_error = f"Deployment check failed: {deployment_error}. Fallback chat check failed: {chat_error}"
-                return False
+            # Some Azure endpoint shapes do not expose the generic deployments
+            # listing route. Probe known deployment names directly instead.
+            chat_errors = []
+            for probe_model in self._get_health_probe_models():
+                try:
+                    test_messages = [{"role": "user", "content": "Hello"}]
+                    await self.chat_completion(test_messages, model=probe_model, max_tokens=1)
+                    self.last_error = None
+                    return True
+                except Exception as chat_error:
+                    chat_errors.append(f"{probe_model}: {chat_error}")
+
+            self.last_error = (
+                f"Deployment check failed: {deployment_error}. "
+                f"Fallback chat checks failed: {' | '.join(chat_errors)}"
+            )
+            return False
