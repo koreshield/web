@@ -367,7 +367,39 @@ export default function StatusPage() {
   const [providerHealth, setProviderHealth] = useState<ProviderHealthApiResponse | null>(null);
   const [statusError, setStatusError] = useState('');
   const [providerRoutes, setProviderRoutes] = useState<ProviderRoute[]>([]);
-  const uptimeHistory = useMemo(() => buildUptimeHistory(new Date()), []);
+  const uptimeHistory = useMemo(() => {
+    const history = buildUptimeHistory(new Date());
+    const latestDay = history[history.length - 1];
+    if (!latestDay) {
+      return history;
+    }
+
+    const currentStatus = statusSummary?.status;
+    const blockedRequests = statusSummary?.statistics?.requests_blocked ?? 0;
+    const providerIncidents = providerRoutes.filter(
+      (provider) => provider.enabled && (!provider.initialized || provider.healthy === false),
+    ).length;
+
+    const todaysIncidents = blockedRequests > 0 ? 1 : 0;
+    const todaysUptime =
+      currentStatus === 'healthy'
+        ? providerIncidents > 0
+          ? 99.86
+          : 100
+        : providerIncidents > 0
+          ? 99.4
+          : 99.7;
+
+    return history.map((day, index) =>
+      index === history.length - 1
+        ? {
+            ...day,
+            incidents: Math.max(day.incidents, todaysIncidents),
+            uptime: Math.min(day.uptime, todaysUptime),
+          }
+        : day,
+    );
+  }, [providerRoutes, statusSummary]);
 
   const getOverallStatus = (): ComponentStatus => {
     const statuses = components.map((component) => component.status);
@@ -555,10 +587,12 @@ export default function StatusPage() {
   const overallStatus = getOverallStatus();
   const averageUptime = getAverageUptime();
   const platformSnapshot = statusSummary?.statistics;
+  const protectedRequestsObserved = platformSnapshot?.requests_total ?? 0;
+  const threatsBlocked = Math.max(platformSnapshot?.requests_blocked ?? 0, platformSnapshot?.attacks_detected ?? 0);
   const configuredProviderCount =
-    statusSummary?.enabled_providers ??
-    providerHealth?.enabled_providers ??
-    providerRoutes.filter((provider) => provider.enabled).length;
+    providerHealth?.initialized_providers ??
+    statusSummary?.initialized_providers ??
+    providerRoutes.filter((provider) => provider.initialized || provider.credentialsPresent).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -656,11 +690,11 @@ export default function StatusPage() {
           <div className="grid md:grid-cols-3 gap-4">
             <div className="bg-card rounded-xl border border-border p-5">
               <div className="text-sm text-muted-foreground mb-2">Protected requests observed</div>
-              <div className="text-3xl font-bold text-foreground">{platformSnapshot?.requests_total ?? 0}</div>
+              <div className="text-3xl font-bold text-foreground">{protectedRequestsObserved.toLocaleString()}</div>
             </div>
             <div className="bg-card rounded-xl border border-border p-5">
               <div className="text-sm text-muted-foreground mb-2">Threats blocked</div>
-              <div className="text-3xl font-bold text-foreground">{platformSnapshot?.requests_blocked ?? 0}</div>
+              <div className="text-3xl font-bold text-foreground">{threatsBlocked.toLocaleString()}</div>
             </div>
             <div className="bg-card rounded-xl border border-border p-5">
               <div className="text-sm text-muted-foreground mb-2">Configured provider routes</div>
@@ -1013,7 +1047,7 @@ function UptimeChart({ data }: { data: UptimeDay[] }) {
   return (
     <div className="flex gap-1 items-end h-32">
       {data.map((day, index) => (
-        <div key={index} className="flex-1 group relative cursor-pointer" style={{ minWidth: '4px' }}>
+        <div key={index} className="flex-1 h-full self-stretch group relative cursor-pointer" style={{ minWidth: '4px' }}>
           <div
             className={`w-full rounded-t transition-all hover:opacity-80 ${getBarColor(day.uptime, day.incidents)}`}
             style={{ height: `${Math.max(day.uptime, 92)}%` }}

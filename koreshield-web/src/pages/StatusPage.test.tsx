@@ -64,6 +64,9 @@ describe('StatusPage', () => {
 			expect(screen.getByText(/Protected requests observed/i)).toBeInTheDocument();
 		});
 
+		expect(screen.getByText('42')).toBeInTheDocument();
+		expect(screen.getByText('4')).toBeInTheDocument();
+		expect(screen.getAllByText('1').length).toBeGreaterThan(0);
 		expect(screen.getByRole('link', { name: /Subscribe to Alerts/i })).toHaveAttribute(
 			'href',
 			expect.stringContaining('mailto:status@koreshield.com'),
