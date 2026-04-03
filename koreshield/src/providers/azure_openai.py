@@ -24,7 +24,9 @@ class AzureOpenAIProvider(BaseProvider):
         base_url: Optional[str] = None,
         resource_name: Optional[str] = None,
         api_version: str = "2023-12-01-preview",
-        deployment_mappings: Optional[Dict[str, str]] = None
+        deployment_mappings: Optional[Dict[str, str]] = None,
+        redis_client=None,
+        cache_enabled: bool = True,
     ):
         """
         Initialize Azure OpenAI provider.
@@ -50,7 +52,12 @@ class AzureOpenAIProvider(BaseProvider):
         if not base_url and resource_name:
             base_url = f"https://{resource_name}.openai.azure.com"
 
-        super().__init__(api_key, base_url)
+        super().__init__(
+            api_key,
+            base_url,
+            redis_client=redis_client,
+            cache_enabled=cache_enabled,
+        )
 
     def _get_default_url(self) -> str:
         """Get Azure OpenAI API URL."""
