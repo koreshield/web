@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import List, Optional, Dict
 from enum import Enum
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, status
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, status, Request
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -182,6 +182,7 @@ async def get_reports(
 @router.post("", response_model=ReportSchema)
 async def create_report(
     report_data: ReportCreate,
+    request: Request,
     current_user: dict = Depends(get_current_admin),
     session: AsyncSession = Depends(get_db)
 ):
@@ -211,6 +212,23 @@ async def create_report(
     session.add(new_report)
     await session.commit()
     await session.refresh(new_report)
+
+    monitoring = getattr(request.app.state, "monitoring", None)
+    if monitoring:
+        await monitoring.notify_operational_event(
+            event_name="report_created",
+            severity="info",
+            message="Report configuration created",
+            publish_event_type="report_event",
+            details={
+                "report_id": str(new_report.id),
+                "report_name": new_report.name,
+                "template": template.name,
+                "format": new_report.format,
+                "schedule": new_report.schedule,
+                "user_id": current_user["id"],
+            },
+        )
     
     # Return schema
     return {
@@ -227,7 +245,7 @@ async def create_report(
         "file_url": new_report.file_url
     }
 
-async def _generate_report_task(report_id: str, user_id: str):
+async def _generate_report_task(report_id: str, user_id: str, monitoring=None):
     """Background task to generate report."""
     async with AsyncSessionLocal() as session:
         result = await session.execute(select(Report).where(Report.id == report_id))
@@ -238,21 +256,69 @@ async def _generate_report_task(report_id: str, user_id: str):
             
         report.status = "running"
         await session.commit()
+        if monitoring:
+            await monitoring.notify_operational_event(
+                event_name="report_generation_started",
+                severity="info",
+                message="Report generation started",
+                publish_event_type="report_event",
+                details={
+                    "report_id": str(report.id),
+                    "report_name": report.name,
+                    "status": "running",
+                    "user_id": user_id,
+                },
+            )
         
-        # Simulate generation
-        await asyncio.sleep(2)
-        
-        # In real impl, fetch RequestLogs depending on filters
-        # logs_stmt = select(RequestLog)...
-        
-        report.status = "completed"
-        report.last_run_at = datetime.utcnow()
-        report.file_url = f"/api/v1/reports/{report.id}/download"
-        await session.commit()
+        try:
+            # Simulate generation
+            await asyncio.sleep(2)
+            
+            # In real impl, fetch RequestLogs depending on filters
+            # logs_stmt = select(RequestLog)...
+            
+            report.status = "completed"
+            report.last_run_at = datetime.utcnow()
+            report.file_url = f"/api/v1/reports/{report.id}/download"
+            await session.commit()
+
+            if monitoring:
+                await monitoring.notify_operational_event(
+                    event_name="report_generation_completed",
+                    severity="info",
+                    message="Report generation completed",
+                    publish_event_type="report_event",
+                    details={
+                        "report_id": str(report.id),
+                        "report_name": report.name,
+                        "status": "completed",
+                        "file_url": report.file_url,
+                        "user_id": user_id,
+                    },
+                )
+        except Exception as exc:
+            report.status = "failed"
+            await session.commit()
+            if monitoring:
+                await monitoring.notify_operational_event(
+                    event_name="report_generation_failed",
+                    severity="error",
+                    message="Report generation failed",
+                    publish_event_type="operational_error",
+                    details={
+                        "report_id": str(report.id),
+                        "report_name": report.name,
+                        "status": "failed",
+                        "error": str(exc),
+                        "user_id": user_id,
+                    },
+                )
+            raise
 
 @router.post("/{report_id}/generate")
 async def generate_report(
     report_id: str,
+    request: Request,
     background_tasks: BackgroundTasks,
     current_user: dict = Depends(get_current_admin),
     session: AsyncSession = Depends(get_db)
@@ -266,9 +332,28 @@ async def generate_report(
         
     if report.status == "running":
         raise HTTPException(status_code=409, detail="Report is already running")
-        
-    background_tasks.add_task(_generate_report_task, str(report.id), str(current_user["id"]))
     
+    monitoring = getattr(request.app.state, "monitoring", None)
+    background_tasks.add_task(
+        _generate_report_task,
+        str(report.id),
+        str(current_user["id"]),
+        monitoring,
+    )
+    if monitoring:
+        await monitoring.notify_operational_event(
+            event_name="report_generation_queued",
+            severity="info",
+            message="Report generation queued",
+            publish_event_type="report_event",
+            details={
+                "report_id": str(report.id),
+                "report_name": report.name,
+                "status": "queued",
+                "user_id": current_user["id"],
+            },
+        )
+
     return {"status": "queued", "message": "Report generation started"}
 
 @router.get("/logs", response_model=List[dict])
