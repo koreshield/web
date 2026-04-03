@@ -279,7 +279,7 @@ function AppContent() {
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
-									<ProtectedRoute>
+									<ProtectedRoute requiredRole="admin">
 										<PoliciesPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
