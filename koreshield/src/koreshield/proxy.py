@@ -10,6 +10,7 @@ import sys
 import uuid
 import time
 import contextlib
+import copy
 from collections import deque
 from pathlib import Path
 from contextlib import asynccontextmanager
@@ -20,6 +21,7 @@ import asyncio
 import httpx
 import structlog
 import redis
+import redis.asyncio as aioredis
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy import select, or_, func, delete
@@ -88,8 +90,15 @@ class KoreShieldProxy:
         self.DeepSeekProvider = DeepSeekProvider
         self.GeminiProvider = GeminiProvider
         self.AzureOpenAIProvider = AzureOpenAIProvider
+        self.provider_catalog = [
+            ("deepseek", ["DEEPSEEK_API_KEY"], self.DeepSeekProvider),
+            ("openai", ["OPENAI_API_KEY"], self.OpenAIProvider),
+            ("anthropic", ["ANTHROPIC_API_KEY"], self.AnthropicProvider),
+            ("gemini", ["GOOGLE_API_KEY", "GEMINI_API_KEY"], self.GeminiProvider),
+            ("azure_openai", ["AZURE_OPENAI_API_KEY"], self.AzureOpenAIProvider),
+        ]
 
-        self.config = config
+        self.config = copy.deepcopy(config)
         self.app = FastAPI(
             title="KoreShield API",
             version="1.0.0",
@@ -139,15 +148,18 @@ class KoreShieldProxy:
         if redis_enabled:
             try:
                 self.redis_client = redis.from_url(redis_url)
+                self.redis_async_client = aioredis.from_url(redis_url)
                 # Test connection
                 self.redis_client.ping()
                 logger.info("Connected to Redis", redis_url=redis_url)
             except Exception as e:
                 logger.error("Failed to connect to Redis, falling back to in-memory", error=str(e))
                 self.redis_client = None
+                self.redis_async_client = None
         else:
             logger.info("Redis disabled, using in-memory storage")
             self.redis_client = None
+            self.redis_async_client = None
 
         # Initialize parameter-based rate limiter with Redis storage
         if self.redis_client:
@@ -252,7 +264,7 @@ class KoreShieldProxy:
         from .monitoring import MonitoringSystem
         from .config import KoreShieldConfig
         kore_config = KoreShieldConfig()
-        kore_config.load_from_dict(config)
+        kore_config.load_from_dict(copy.deepcopy(config))
         self.monitoring = MonitoringSystem(
             kore_config.monitoring,
             stats_getter=self._get_stats_dict,
@@ -277,8 +289,8 @@ class KoreShieldProxy:
         self.app.include_router(websocket_router) # Prefix is already /ws defined in router
 
         # Set Redis client for WebSocket module
-        if self.redis_client:
-            websocket_module.set_redis_client(self.redis_client)        
+        if self.redis_async_client:
+            websocket_module.set_redis_client(self.redis_async_client)
         # Setup routes LAST (includes catch-all route)
         self._setup_routes()
 
@@ -370,19 +382,10 @@ class KoreShieldProxy:
         safe_config = {k: {**v, 'api_key': '***redacted***'} if 'api_key' in v else v for k, v in providers_config.items()}
         logger.info(f"Available providers config: {safe_config}")
 
-        # Provider options with priority order (higher index = higher priority)
-        provider_options = [
-            ("deepseek", ["DEEPSEEK_API_KEY"], self.DeepSeekProvider),
-            ("openai", ["OPENAI_API_KEY"], self.OpenAIProvider),
-            ("anthropic", ["ANTHROPIC_API_KEY"], self.AnthropicProvider),
-            ("gemini", ["GOOGLE_API_KEY", "GEMINI_API_KEY"], self.GeminiProvider),
-            ("azure_openai", ["AZURE_OPENAI_API_KEY"], self.AzureOpenAIProvider),
-        ]
-
         self.providers = []
         self.provider_priority = []
 
-        for provider_name, env_vars, provider_class in provider_options:
+        for provider_name, env_vars, provider_class in self.provider_catalog:
             provider_cfg = providers_config.get(provider_name, {})
             logger.info(f"Checking provider {provider_name}: enabled={provider_cfg.get('enabled', False)}")
             if provider_cfg.get("enabled", False):
@@ -413,6 +416,118 @@ class KoreShieldProxy:
             logger.warning("No LLM providers configured. Set up API keys and enable providers in config.yaml")
         else:
             logger.info(f"Initialized {len(self.providers)} providers: {', '.join(self.provider_priority)}")
+
+    def _build_provider_status_snapshot(self) -> dict[str, dict]:
+        """Describe provider configuration and runtime readiness for status reporting."""
+        providers_config = self.config.get("providers", {})
+        initialized_by_name = {
+            provider_name: self.providers[index]
+            for index, provider_name in enumerate(self.provider_priority)
+            if index < len(self.providers)
+        }
+
+        snapshot: dict[str, dict] = {}
+        for provider_name, env_vars, _provider_class in self.provider_catalog:
+            provider_cfg = providers_config.get(provider_name, {})
+            enabled = bool(provider_cfg.get("enabled", False))
+            present_env_vars = [env_var for env_var in env_vars if os.getenv(env_var)]
+            credentials_present = bool(present_env_vars)
+            provider_instance = initialized_by_name.get(provider_name)
+            initialized = provider_instance is not None
+            priority = self.provider_priority.index(provider_name) if provider_name in self.provider_priority else None
+            provider_status = "disabled"
+            if enabled and not credentials_present:
+                provider_status = "missing_credentials"
+            elif enabled and credentials_present and not initialized:
+                provider_status = "misconfigured"
+            elif initialized:
+                provider_status = "initialized"
+
+            snapshot[provider_name] = {
+                "enabled": enabled,
+                "credentials_present": credentials_present,
+                "accepted_env_vars": env_vars,
+                "present_env_vars": present_env_vars,
+                "missing_env_vars": [] if credentials_present else env_vars,
+                "initialized": initialized,
+                "priority": priority,
+                "type": type(provider_instance).__name__ if provider_instance else None,
+                "base_url": provider_cfg.get("base_url"),
+                "status": provider_status,
+            }
+
+        return snapshot
+
+    def _build_component_snapshot(
+        self,
+        provider_snapshot: dict[str, dict],
+        provider_health_overrides: dict[str, dict] | None = None,
+    ) -> dict[str, dict]:
+        """Create a live component view for the public status page."""
+        enabled_provider_count = sum(1 for provider in provider_snapshot.values() if provider.get("enabled"))
+        initialized_provider_count = sum(1 for provider in provider_snapshot.values() if provider.get("initialized"))
+        healthy_provider_count = sum(
+            1
+            for provider in (provider_health_overrides or {}).values()
+            if provider.get("healthy") is True
+        )
+        billing_configured = all(
+            [
+                os.getenv("POLAR_ACCESS_TOKEN", "").strip(),
+                os.getenv("POLAR_WEBHOOK_SECRET", "").strip(),
+                os.getenv("POLAR_ORGANIZATION_SLUG", "").strip() or os.getenv("POLAR_ORGANIZATION_ID", "").strip(),
+            ]
+        )
+        policy_count = len(self.policy_engine.list_policies()) if self.policy_engine else 0
+
+        provider_routing_status = "degraded"
+        provider_routing_detail = "No provider routes are enabled in this environment."
+        if enabled_provider_count > 0 and initialized_provider_count == 0:
+            provider_routing_detail = "Provider routes are enabled in config, but credentials are still missing or invalid."
+        elif initialized_provider_count > 0 and provider_health_overrides:
+            if healthy_provider_count == 0:
+                provider_routing_status = "partial_outage"
+                provider_routing_detail = "Provider routes are initialized, but none are reporting healthy right now."
+            elif healthy_provider_count < initialized_provider_count:
+                provider_routing_status = "degraded"
+                provider_routing_detail = f"{healthy_provider_count} of {initialized_provider_count} initialized provider routes are healthy."
+            else:
+                provider_routing_status = "operational"
+                provider_routing_detail = f"All {initialized_provider_count} initialized provider routes are healthy."
+        elif initialized_provider_count > 0:
+            provider_routing_status = "operational"
+            provider_routing_detail = f"{initialized_provider_count} provider route{'s' if initialized_provider_count != 1 else ''} initialized."
+
+        return {
+            "api_gateway": {
+                "status": "operational",
+                "detail": "API health endpoint is responding normally.",
+            },
+            "detection_engine": {
+                "status": "operational" if self.config.get("security", {}).get("features", {}).get("detection", True) else "degraded",
+                "detail": "Prompt and content detection is active." if self.config.get("security", {}).get("features", {}).get("detection", True) else "Detection is disabled in config.",
+            },
+            "policy_engine": {
+                "status": "operational" if self.policy_engine else "degraded",
+                "detail": f"{policy_count} starter policy{'ies' if policy_count != 1 else ''} loaded.",
+            },
+            "rag_scanner": {
+                "status": "operational" if self.rag_detector else "degraded",
+                "detail": "RAG document scanning and evidence extraction are ready.",
+            },
+            "billing": {
+                "status": "operational" if billing_configured else "degraded",
+                "detail": "Polar billing credentials are configured." if billing_configured else "Billing is available, but one or more Polar environment values are missing.",
+            },
+            "audit_log_stream": {
+                "status": "operational",
+                "detail": f"{len(self.app.state.audit_log_store)} recent audit events retained in the in-memory stream.",
+            },
+            "provider_routing": {
+                "status": provider_routing_status,
+                "detail": provider_routing_detail,
+            },
+        }
 
     def _get_stats_dict(self) -> dict:
         """Get current statistics as a dictionary."""
@@ -607,44 +722,46 @@ class KoreShieldProxy:
         # Provider health check endpoint
         @self.app.get("/health/providers", tags=["Health"])
         async def provider_health():
-            health_status = {}
+            health_status = self._build_provider_status_snapshot()
             for i, provider in enumerate(self.providers):
                 provider_name = self.provider_priority[i]
                 try:
                     check_started = time.perf_counter()
                     is_healthy = bool(provider and await provider.health_check())
-                    health_status[provider_name] = {
+                    health_status[provider_name].update({
                         "healthy": is_healthy,
                         "priority": i,
                         "type": type(provider).__name__ if provider else None,
                         "response_time_ms": (time.perf_counter() - check_started) * 1000,
-                    }
+                        "status": "healthy" if is_healthy else "unhealthy",
+                    })
                 except Exception as e:
-                    health_status[provider_name] = {
+                    health_status[provider_name].update({
                         "healthy": False,
                         "priority": i,
                         "type": type(provider).__name__ if provider else None,
                         "error": str(e),
-                    }
+                        "status": "unhealthy",
+                    })
 
             return {
                 "providers": health_status,
                 "total_providers": len(self.providers),
-                "healthy_providers": sum(1 for p in health_status.values() if p["healthy"]),
-                "configured": len(self.providers) > 0,
+                "enabled_providers": sum(1 for p in health_status.values() if p.get("enabled")),
+                "healthy_providers": sum(1 for p in health_status.values() if p.get("healthy") is True),
+                "configured": any(provider.get("enabled") for provider in health_status.values()),
+                "initialized_providers": sum(1 for p in health_status.values() if p.get("initialized")),
+                "missing_credentials": [
+                    name for name, provider in health_status.items()
+                    if provider.get("status") == "missing_credentials"
+                ],
             }
 
         # Status/metrics endpoint
         @self.app.get("/status", tags=["Health"])
         async def status():
-            provider_status = {}
-            for i, provider in enumerate(self.providers):
-                provider_name = self.provider_priority[i]
-                provider_status[provider_name] = {
-                    "configured": True,
-                    "priority": i,
-                    "type": type(provider).__name__,
-                }
+            provider_status = self._build_provider_status_snapshot()
+            component_status = self._build_component_snapshot(provider_status)
 
             return {
                 "status": "healthy",
@@ -652,6 +769,9 @@ class KoreShieldProxy:
                 "statistics": self._get_stats_dict(),
                 "providers": provider_status,
                 "total_providers": len(self.providers),
+                "enabled_providers": sum(1 for p in provider_status.values() if p.get("enabled")),
+                "initialized_providers": sum(1 for p in provider_status.values() if p.get("initialized")),
+                "components": component_status,
             }
 
         # Prometheus metrics endpoint

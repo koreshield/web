@@ -1,7 +1,17 @@
 export function resolveApiBaseUrl(value?: string) {
 	const normalized = (value || '').trim();
 	if (!normalized || normalized === '/') {
-		return '';
+		if (typeof window === 'undefined') {
+			return 'http://localhost:8000';
+		}
+
+		const { hostname, protocol } = window.location;
+		if (hostname === 'localhost' || hostname === '127.0.0.1') {
+			return 'http://localhost:8000';
+		}
+
+		const apiHost = hostname.startsWith('www.') ? `api.${hostname.slice(4)}` : `api.${hostname}`;
+		return `${protocol}//${apiHost}`;
 	}
 	return normalized.endsWith('/') ? normalized.slice(0, -1) : normalized;
 }
