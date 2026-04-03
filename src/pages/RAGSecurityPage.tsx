@@ -211,7 +211,6 @@ function getDocumentDisplayName(document: RetrievedDocument, index: number) {
 		? document.metadata.filename
 		: `Document ${index + 1}`;
 }
-
 const buildTaxonomyCounts = (values: string[] | undefined): Record<string, number> => {
 	if (!values) return {};
 	return values.reduce<Record<string, number>>((acc, value) => {
