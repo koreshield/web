@@ -9,10 +9,10 @@ services:
                 ports:
                         - "8000:8000"
                 environment:
-                        - DATABASE_URL=postgresql://${POSTGRES_USER:-koreshield}:${POSTGRES_PASSWORD:-koreshield_password}@postgres:5432/${POSTGRES_DB:-koreshield}
+                        - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
                         - REDIS_URL=redis://redis:6379/0
                         - ENVIRONMENT=production
-                        - JWT_SECRET=${JWT_SECRET:-koreshield_default_secret_32_chars_long_!!}
+                        - JWT_SECRET=${JWT_SECRET}
                         - JWT_ISSUER=koreshield-auth
                         - JWT_AUDIENCE=koreshield-api
                         - CORS_ORIGINS=https://koreshield.com,https://www.koreshield.com,https://api.koreshield.com
@@ -74,9 +74,9 @@ services:
                 image: postgres:15-alpine
                 container_name: koreshield-postgres
                 environment:
-                        POSTGRES_USER: ${POSTGRES_USER:-koreshield}
-                        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-koreshield_password}
-                        POSTGRES_DB: ${POSTGRES_DB:-koreshield}
+                        POSTGRES_USER: ${POSTGRES_USER}
+                        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+                        POSTGRES_DB: ${POSTGRES_DB}
                 volumes:
                         - postgres_data:/var/lib/postgresql/data
                 healthcheck:
