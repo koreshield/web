@@ -47,6 +47,7 @@ yarn.lock
 
 # Project specific
 main-site-ui/
+temp.html
 
 # Keep project management docs
 TODO.md
