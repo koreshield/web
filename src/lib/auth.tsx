@@ -2,6 +2,7 @@
  * Authentication service for KoreShield admin UI.
  * Uses secure HttpOnly cookie sessions with in-memory bearer fallback.
  */
+import { resolveApiBaseUrl } from './api-base';
 
 export interface AuthUser {
 	id: string;
@@ -16,7 +17,7 @@ export interface LoginResponse {
 	user: AuthUser;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.koreshield.com";
+const API_BASE_URL = resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 const USER_STORAGE_KEY = 'admin_user';
 
 type AuthEventType = 'login' | 'logout';
