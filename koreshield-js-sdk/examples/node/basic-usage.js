@@ -19,10 +19,10 @@ async function main() {
   console.log('Testing KoreShield connection...');
   const isConnected = await client.testConnection();
   if (!isConnected) {
-    console.error('❌ Cannot connect to KoreShield proxy');
+    console.error(' Cannot connect to KoreShield proxy');
     process.exit(1);
   }
-  console.log('✅ Connected to KoreShield');
+  console.log(' Connected to KoreShield');
 
   // Example 1: Basic chat completion
   console.log('\n Example 1: Basic Chat Completion');
@@ -43,7 +43,7 @@ async function main() {
   }
 
   // Example 2: Using OpenAI-compatible wrapper
-  console.log('\n🤖 Example 2: OpenAI-Compatible API');
+  console.log('\n Example 2: OpenAI-Compatible API');
   try {
     const openai = new KoreShieldOpenAI({
       baseURL: 'http://localhost:8000',
@@ -64,7 +64,7 @@ async function main() {
   }
 
   // Example 3: Security monitoring
-  console.log('\n🛡️ Example 3: Security Monitoring');
+  console.log('\n Example 3: Security Monitoring');
   try {
     const metrics = await client.getMetrics();
     console.log('Security Metrics:', {
@@ -85,7 +85,7 @@ async function main() {
   }
 
   // Example 4: Custom security options
-  console.log('\n⚙️ Example 4: Custom Security Options');
+  console.log('\n⚙ Example 4: Custom Security Options');
   try {
     const response = await client.createChatCompletion({
       model: 'gpt-3.5-turbo',

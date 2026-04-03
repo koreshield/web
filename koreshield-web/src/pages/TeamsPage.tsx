@@ -15,6 +15,13 @@ interface Team {
 	owner_id: string;
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+	if (error instanceof Error && error.message) {
+		return error.message;
+	}
+	return fallback;
+}
+
 export function TeamsPage() {
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [formData, setFormData] = useState({
@@ -39,8 +46,8 @@ export function TeamsPage() {
 			setFormData({ name: '', slug: '' });
 			success('Team created successfully!');
 		},
-		onError: (err: any) => {
-			error(err.message || 'Failed to create team');
+		onError: (mutationError: unknown) => {
+			error(getErrorMessage(mutationError, 'Failed to create team'));
 		},
 	});
 
@@ -100,7 +107,7 @@ export function TeamsPage() {
 							Failed to load teams. This is usually a network or backend connectivity issue.
 						</p>
 						<p className="text-xs text-muted-foreground mb-6">
-							{(teamsError as any)?.message || 'Unable to reach the KoreShield API.'}
+							{getErrorMessage(teamsError, 'Unable to reach the KoreShield API.')}
 						</p>
 						<button
 							onClick={() => refetch()}
@@ -231,4 +238,3 @@ export function TeamsPage() {
 		</div>
 	);
 }
-

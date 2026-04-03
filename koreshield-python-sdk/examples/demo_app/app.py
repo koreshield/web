@@ -16,7 +16,7 @@ from koreshield_sdk import KoreShieldClient, RAGDocument
 # Page Config
 st.set_page_config(
     page_title="KoreShield RAG Security Demo",
-    page_icon="🛡️",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -55,7 +55,7 @@ st.markdown("""
 # sidebar
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/000000/shield.png", width=64)
-    st.title("KoreShield 🛡️")
+    st.title("KoreShield ")
     st.markdown("Scale RAG securely.")
     
     api_key = st.text_input("API Key", type="password", value="demo-key")
@@ -108,7 +108,7 @@ if "scan_stats" not in st.session_state:
 st.title("RAG Security Playground")
 st.markdown("Test how KoreShield protects your RAG application from **Indirect Prompt Injection** attacks.")
 
-tab1, tab2, tab3 = st.tabs(["💬 Chat Interface", "📚 Knowledge Base", "📊 Analytics"])
+tab1, tab2, tab3 = st.tabs(["Chat Interface", "Knowledge Base", "Analytics"])
 
 with tab2:
     st.header("Knowledge Base")
@@ -154,7 +154,7 @@ with tab1:
         st.session_state.chat_history.append({"role": "user", "content": user_query})
         
         # 2. Perform RAG Scan
-        with st.status("🛡️ Scanning RAG Context...", expanded=True) as status:
+        with st.status(" Scanning RAG Context...", expanded=True) as status:
             client = KoreShieldClient(api_key=api_key, base_url=base_url)
             
             # Prepare docs
@@ -179,7 +179,7 @@ with tab1:
                 st.session_state.scan_stats["queries"] += 1
                 
                 if result.is_safe:
-                    status.update(label="✅ Context Safe", state="complete")
+                    status.update(label=" Context Safe", state="complete")
                     safe_docs = docs_to_scan
                 else:
                     threat_count = result.total_threats_found
@@ -200,7 +200,7 @@ with tab1:
                         st.warning("Proceeding with ALL documents (Blocking Disabled).")
                         
             except Exception as e:
-                status.update(label="❌ Error connecting to KoreShield", state="error")
+                status.update(label=" Error connecting to KoreShield", state="error")
                 st.error(f"Connection failed: {str(e)}")
                 safe_docs = []
 
@@ -209,7 +209,7 @@ with tab1:
             response = generate_response(user_query, safe_docs)
             st.session_state.chat_history.append({"role": "assistant", "content": response})
         else:
-            block_msg = "🚫 Request blocked due to security policies. Use the Knowledge Base tab to review threats."
+            block_msg = "Request blocked due to security policies. Use the Knowledge Base tab to review threats."
             st.session_state.chat_history.append({"role": "assistant", "content": block_msg})
             
     # Display chat history interactively
@@ -244,4 +244,4 @@ with tab3:
 
 # Footer
 st.markdown("---")
-st.markdown("🛡️ **KoreShield** - Protecting Enterprise LLM Integrations")
+st.markdown(" **KoreShield** - Protecting Enterprise LLM Integrations")

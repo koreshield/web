@@ -34,7 +34,7 @@ const features = [
 			</svg>
 		),
 		title: 'Framework Integrations',
-		desc: 'Drop-in support for LangChain, LlamaIndex, FastAPI, and Express. One import — no proxy required.',
+		desc: 'Drop-in support for LangChain, LlamaIndex, FastAPI, and Express. One import  -  no proxy required.',
 	},
 	{
 		icon: (
@@ -82,7 +82,7 @@ function HomepageHero() {
 
 				<p className={styles.heroSubtitle}>
 					KoreShield detects and blocks prompt injection, data exfiltration, and adversarial
-					inputs before they reach your AI models — in under 1ms.
+					inputs before they reach your AI models  -  in under 1ms.
 				</p>
 
 				<div className={styles.heroCta}>

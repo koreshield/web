@@ -97,7 +97,7 @@ async def main():
         processing_time = time.time() - start_time
 
         print("
-📊 Streaming Scan Results:"        print(f"Total chunks processed: {streaming_result.total_chunks}")
+Streaming Scan Results:"        print(f"Total chunks processed: {streaming_result.total_chunks}")
         print(".2f"        print(f"Overall threat level: {streaming_result.overall_result.threat_level.value}")
         print(f"Overall confidence: {streaming_result.overall_result.confidence:.2f}")
         print(f"Overall safety: {'SAFE' if streaming_result.overall_result.is_safe else 'UNSAFE'}")
@@ -107,7 +107,7 @@ async def main():
         unsafe_chunks = streaming_result.total_chunks - safe_chunks
 
         print("
-📈 Chunk Analysis:"        print(f"Safe chunks: {safe_chunks}")
+Chunk Analysis:"        print(f"Safe chunks: {safe_chunks}")
         print(f"Unsafe chunks: {unsafe_chunks}")
 
         # Show details of unsafe chunks
@@ -126,11 +126,11 @@ async def main():
         # Get performance metrics
         metrics = await client.get_performance_metrics()
         print("
-📈 Performance Metrics:"        print(f"Streaming chunks processed: {metrics.streaming_chunks_processed}")
+Performance Metrics:"        print(f"Streaming chunks processed: {metrics.streaming_chunks_processed}")
         print(f"Total requests: {metrics.total_requests}")
         print(".2f"
         print("
-✅ Streaming scan completed!"        print(f"Processed {len(long_content)} characters in {processing_time:.2f} seconds")
+ Streaming scan completed!"        print(f"Processed {len(long_content)} characters in {processing_time:.2f} seconds")
 
 
 if __name__ == "__main__":
