@@ -15,9 +15,10 @@ interface AuditLog {
 	status: 'success' | 'failure';
 	ip_address: string;
 	user_agent: string;
-	details: Record<string, any>;
+	details: Record<string, unknown>;
 	severity: 'low' | 'medium' | 'high' | 'critical';
 	is_tool_runtime: boolean;
+	is_rag_scan: boolean;
 	tool_name?: string;
 	risk_class?: string;
 	review_required?: boolean;
@@ -49,6 +50,47 @@ interface RuntimeSession {
 	recent_tools: string[];
 }
 
+interface AuditLogsResponse {
+	logs?: Array<Record<string, unknown>>;
+}
+
+interface RuntimeReviewsResponse {
+	reviews?: RuntimeReview[];
+}
+
+interface RuntimeSessionsResponse {
+	sessions?: RuntimeSession[];
+}
+
+interface RuntimeReviewDecisionResponse {
+	session_id?: string;
+}
+
+function toStringValue(value: unknown, fallback: string): string {
+	if (typeof value === 'string' && value.length > 0) {
+		return value;
+	}
+	if (typeof value === 'number' || typeof value === 'boolean') {
+		return String(value);
+	}
+	return fallback;
+}
+
+function toStatusValue(value: unknown): AuditLog['status'] {
+	return value === 'failure' ? 'failure' : 'success';
+}
+
+function toSeverityValue(value: unknown, fallback: AuditLog['severity']): AuditLog['severity'] {
+	if (value === 'critical' || value === 'high' || value === 'medium' || value === 'low') {
+		return value;
+	}
+	return fallback;
+}
+
+function toBooleanValue(value: unknown, fallback = false): boolean {
+	return typeof value === 'boolean' ? value : fallback;
+}
+
 export default function AuditLogsPage() {
 	const [logs, setLogs] = useState<AuditLog[]>([]);
 	const [reviews, setReviews] = useState<RuntimeReview[]>([]);
@@ -64,40 +106,51 @@ export default function AuditLogsPage() {
 	const toast = useToast();
 
 	useEffect(() => {
-		const normalize = (entry: any, index: number): AuditLog => {
+		const normalize = (entry: Record<string, unknown>, index: number): AuditLog => {
 			const level = (entry.level || entry.severity || 'info').toString().toLowerCase();
 			const severity = level === 'error' ? 'high' : level === 'warn' ? 'medium' : 'low';
-			const details = entry.details || entry.attack_details || entry;
-			const toolAnalysis = details.tool_analysis || {};
-			const policyResult = details.policy_result || {};
+			const details = (entry.details || entry.attack_details || entry) as Record<string, unknown>;
+			const toolAnalysis = (details.tool_analysis || {}) as Record<string, unknown>;
+			const policyResult = (details.policy_result || {}) as Record<string, unknown>;
+			const threatReferences = Array.isArray(details.threat_references)
+				? details.threat_references as Array<Record<string, unknown>>
+				: [];
 			const isToolRuntime = entry.path === '/v1/tools/scan'
 				|| entry.event === 'tool_call_evaluated'
 				|| entry.attack_type === 'tool_call_security'
 				|| !!toolAnalysis.tool_name;
+			const isRagScan = entry.path === '/v1/rag/scan'
+				|| entry.endpoint === '/v1/rag/scan'
+				|| entry.attack_type === 'indirect_injection';
 			const toolName = toolAnalysis.tool_name || entry.tool_name || entry.model || undefined;
 			const riskClass = toolAnalysis.risk_class || entry.risk_class || policyResult.risk_class || undefined;
 			const reviewRequired = toolAnalysis.review_required ?? entry.review_required ?? policyResult.review_required ?? false;
 			const decisionAction = entry.action_taken || entry.action || policyResult.action || (entry.is_blocked ? 'blocked' : undefined);
+			const firstThreatReference = threatReferences[0];
+			const firstThreatExcerpt = typeof firstThreatReference?.excerpt === 'string' ? firstThreatReference.excerpt : undefined;
 			const summary = isToolRuntime
 				? `${toolName || 'tool'} ${decisionAction || 'evaluated'}${riskClass ? ` · ${riskClass}` : ''}${reviewRequired ? ' · review required' : ''}`
+				: isRagScan
+					? `RAG scan flagged ${details.total_threats_found || entry.total_threats_found || 'threats'}${firstThreatExcerpt ? ` · ${firstThreatExcerpt}` : ''}`
 				: undefined;
 			return {
-				id: entry.id || entry.request_id || entry.scan_id || entry.event_id || String(index),
-				timestamp: entry.timestamp || entry.time || entry.created_at || new Date().toISOString(),
-				user_email: entry.user_email || entry.email || entry.user || entry.user_id || 'system',
-				action: isToolRuntime ? 'tool_runtime' : entry.action || entry.event || entry.message || 'event',
-				resource_type: isToolRuntime ? 'tool_call' : entry.resource_type || entry.resource || 'system',
-				resource_id: entry.resource_id || entry.id || '-',
-				status: entry.status || (level === 'error' ? 'failure' : 'success'),
-				ip_address: entry.ip || entry.client_ip || entry.user_ip || '-',
-				user_agent: entry.user_agent || entry.ua || '-',
+				id: toStringValue(entry.id || entry.request_id || entry.scan_id || entry.event_id, String(index)),
+				timestamp: toStringValue(entry.timestamp || entry.time || entry.created_at, new Date().toISOString()),
+				user_email: toStringValue(entry.user_email || entry.email || entry.user || entry.user_id, 'system'),
+				action: isToolRuntime ? 'tool_runtime' : toStringValue(entry.action || entry.event || entry.message, 'event'),
+				resource_type: isToolRuntime ? 'tool_call' : toStringValue(entry.resource_type || entry.resource, 'system'),
+				resource_id: toStringValue(entry.resource_id || entry.id, '-'),
+				status: toStatusValue(entry.status || (level === 'error' ? 'failure' : 'success')),
+				ip_address: toStringValue(entry.ip || entry.client_ip || entry.user_ip, '-'),
+				user_agent: toStringValue(entry.user_agent || entry.ua, '-'),
 				details,
-				severity: entry.severity || toolAnalysis.risk_class || severity,
+				severity: toSeverityValue(entry.severity || toolAnalysis.risk_class, severity),
 				is_tool_runtime: isToolRuntime,
-				tool_name: toolName,
-				risk_class: riskClass,
-				review_required: reviewRequired,
-				decision_action: decisionAction,
+				is_rag_scan: isRagScan,
+				tool_name: typeof toolName === 'string' ? toolName : undefined,
+				risk_class: typeof riskClass === 'string' ? riskClass : undefined,
+				review_required: toBooleanValue(reviewRequired),
+				decision_action: typeof decisionAction === 'string' ? decisionAction : undefined,
 				summary,
 			};
 		};
@@ -106,11 +159,11 @@ export default function AuditLogsPage() {
 			setLoading(true);
 			setErrorMessage(null);
 			try {
-				const [auditResponse, reviewResponse, sessionResponse] = await Promise.all([
-					api.getAuditLogs(200, 0) as Promise<any>,
-					api.getRuntimeReviews(25, 'pending') as Promise<any>,
-					api.getRuntimeSessions(25) as Promise<any>,
-				]);
+					const [auditResponse, reviewResponse, sessionResponse] = await Promise.all([
+						api.getAuditLogs(200, 0) as Promise<AuditLogsResponse>,
+						api.getRuntimeReviews(25, 'pending') as Promise<RuntimeReviewsResponse>,
+						api.getRuntimeSessions(25) as Promise<RuntimeSessionsResponse>,
+					]);
 				const entries = (auditResponse?.logs || []).map(normalize);
 				setLogs(entries);
 				setReviews(reviewResponse?.reviews || []);
@@ -129,7 +182,11 @@ export default function AuditLogsPage() {
 
 	const handleReviewDecision = async (ticketId: string, decision: 'approved' | 'rejected') => {
 		try {
-			const decidedReview = await api.decideRuntimeReview(ticketId, decision, `Decision recorded from audit dashboard: ${decision}`) as any;
+			const decidedReview = await api.decideRuntimeReview(
+				ticketId,
+				decision,
+				`Decision recorded from audit dashboard: ${decision}`
+			) as RuntimeReviewDecisionResponse;
 			setReviews((current) => current.filter((review) => review.ticket_id !== ticketId));
 			if (decidedReview?.session_id) {
 				setSessions((current) => current.map((session) => {
@@ -160,6 +217,7 @@ export default function AuditLogsPage() {
 		const matchesAction =
 			filterAction === 'all'
 			|| (filterAction === 'tool_runtime' && log.is_tool_runtime)
+			|| (filterAction === 'rag_scan' && log.is_rag_scan)
 			|| (filterAction === 'review_required' && log.review_required)
 			|| (filterAction === 'blocked' && (log.decision_action === 'blocked' || log.status === 'failure'))
 			|| log.action.includes(filterAction);
@@ -191,6 +249,7 @@ export default function AuditLogsPage() {
 	};
 
 	const runtimeToolLogs = logs.filter((log) => log.is_tool_runtime);
+	const ragScanLogs = logs.filter((log) => log.is_rag_scan);
 	const reviewRequiredLogs = runtimeToolLogs.filter((log) => log.review_required);
 	const blockedToolLogs = runtimeToolLogs.filter((log) => log.decision_action === 'blocked' || log.status === 'failure');
 	const activeSessions = sessions.filter((session) => session.state === 'active');
@@ -249,6 +308,21 @@ export default function AuditLogsPage() {
 						</div>
 						<div className="text-2xl font-bold text-foreground">
 							{reviewRequiredLogs.length}
+						</div>
+					</div>
+				</div>
+
+				<div className="bg-card rounded-xl p-6 border border-border mb-8">
+					<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+						<div>
+							<h2 className="text-lg font-semibold text-foreground">RAG Evidence Visibility</h2>
+							<p className="text-sm text-muted-foreground">
+								Indirect prompt injection findings now log the suspicious excerpt and document reference so reviews can point to concrete evidence instead of a generic flag.
+							</p>
+						</div>
+						<div className="text-right">
+							<div className="text-xs uppercase tracking-wide text-muted-foreground">RAG scan events</div>
+							<div className="text-2xl font-bold text-foreground">{ragScanLogs.length}</div>
 						</div>
 					</div>
 				</div>
@@ -435,6 +509,7 @@ export default function AuditLogsPage() {
 									<option value="login">Login</option>
 									<option value="exported">Exported</option>
 									<option value="tool_runtime">Tool Runtime</option>
+									<option value="rag_scan">RAG Scan Findings</option>
 									<option value="review_required">Review Required</option>
 									<option value="blocked">Blocked Decisions</option>
 								</select>
@@ -502,7 +577,7 @@ export default function AuditLogsPage() {
 											Resource
 										</th>
 										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-											Runtime Summary
+											Summary
 										</th>
 										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
 											Status

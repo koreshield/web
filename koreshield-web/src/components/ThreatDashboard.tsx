@@ -70,7 +70,7 @@ export function ThreatDashboard() {
         return () => clearInterval(interval);
     }, []);
 
-    // Separate interval for log entries — faster feed
+    // Separate interval for log entries  -  faster feed
     useEffect(() => {
         const addLog = () => {
             logIdRef.current += 1;

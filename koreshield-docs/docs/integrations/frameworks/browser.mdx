@@ -306,7 +306,7 @@ async function chat() {
     </style>
 </head>
 <body>
-    <h1>🔒 Secure AI Chat</h1>
+    <h1>Secure AI Chat</h1>
     <div class="chat-container">
         <div id="messages" class="messages"></div>
         <div class="input-area">
@@ -332,7 +332,7 @@ async function chat() {
                     debug: true
                 });
 
-                displayMessage('system', 'Koreshield initialized successfully! 🔒');
+                displayMessage('system', 'Koreshield initialized successfully!');
             } catch (error) {
                 displayMessage('error', `Failed to initialize: ${error.message}`);
             }
@@ -513,13 +513,13 @@ async function cachedChat(messages) {
 Never expose API keys in client-side code:
 
 ```javascript
-// ❌ Bad - API key in client code
+//  Bad - API key in client code
 const Koreshield = Koreshield.createClient({
     baseURL: 'https://api.example.com',
     apiKey: 'sk-1234567890abcdef' // Exposed to users!
 });
 
-// ✅ Good - Fetch from server
+//  Good - Fetch from server
 async function init() {
     const config = await fetch('/api/Koreshield-config').then(r => r.json());
     return Koreshield.createClient(config);
@@ -624,7 +624,7 @@ For better performance, host the SDK on your CDN:
 
 ## Next Steps
 
-- 📖 [SDK Reference](https://github.com/koreshield/node-sdk)
-- 🎯 [Framework Integrations](/docs/integrations)
-- 🔒 [Security Best Practices](/docs/features/security)
-- 📊 [Monitoring Guide](/docs/integrations/monitoring)
+- [SDK Reference](https://github.com/koreshield/node-sdk)
+- [Framework Integrations](/docs/integrations)
+- [Security Best Practices](/docs/features/security)
+- [Monitoring Guide](/docs/integrations/monitoring)

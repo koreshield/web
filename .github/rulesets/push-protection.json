@@ -1,5 +1,5 @@
 {
-	"name": "Push protection — block secrets and force pushes",
+	"name": "Push protection  -  block secrets and force pushes",
 	"target": "push",
 	"enforcement": "active",
 	"rules": [

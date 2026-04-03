@@ -53,9 +53,9 @@ def demo_basic_callback():
     for prompt in safe_prompts:
         try:
             response = llm([HumanMessage(content=prompt)])
-            print(f"✅ '{prompt[:30]}...' -> {response.content[:50]}...")
+            print(f" '{prompt[:30]}...' -> {response.content[:50]}...")
         except Exception as e:
-            print(f"❌ '{prompt[:30]}...' -> Error: {e}")
+            print(f" '{prompt[:30]}...' -> Error: {e}")
 
     # Show scan results
     scan_results = security_callback.get_scan_results()
@@ -67,7 +67,7 @@ def demo_basic_callback():
 
 def demo_blocking_callback():
     """Demonstrate callback handler with threat blocking."""
-    print("\n🛡️ Blocking LangChain + KoreShield Integration")
+    print("\n Blocking LangChain + KoreShield Integration")
     print("-" * 48)
 
     api_key = os.getenv("KORESHIELD_API_KEY")
@@ -102,16 +102,16 @@ def demo_blocking_callback():
     for prompt, should_succeed in test_prompts:
         try:
             response = llm([HumanMessage(content=prompt)])
-            status = "✅ ALLOWED" if should_succeed else " FALSE POSITIVE"
+            status = " ALLOWED" if should_succeed else " FALSE POSITIVE"
             print(f"{status} '{prompt[:35]}...'")
         except Exception as e:
-            status = "❌ BLOCKED" if not should_succeed else " FALSE NEGATIVE"
+            status = " BLOCKED" if not should_succeed else " FALSE NEGATIVE"
             print(f"{status} '{prompt[:35]}...' -> {str(e)[:50]}...")
 
 
 def demo_chain_integration():
     """Demonstrate integration with LangChain chains."""
-    print("\n🔗 LangChain Chain + KoreShield Integration")
+    print("\nLangChain Chain + KoreShield Integration")
     print("-" * 46)
 
     api_key = os.getenv("KORESHIELD_API_KEY")
@@ -154,10 +154,10 @@ Answer:"""
     for question in questions:
         try:
             result = chain.run(question=question)
-            print(f"✅ Question processed: '{question[:30]}...'")
+            print(f" Question processed: '{question[:30]}...'")
             print(f"   Answer: {result[:60]}...")
         except Exception as e:
-            print(f"❌ Error: {e}")
+            print(f" Error: {e}")
 
     # Show security stats
     scan_results = security_callback.get_scan_results()
@@ -167,7 +167,7 @@ Answer:"""
 
 def demo_custom_callback():
     """Demonstrate custom callback handler behavior."""
-    print("\n⚙️  Custom Callback Handler Configuration")
+    print("\n⚙  Custom Callback Handler Configuration")
     print("-" * 42)
 
     api_key = os.getenv("KORESHIELD_API_KEY")

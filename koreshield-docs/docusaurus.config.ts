@@ -28,7 +28,7 @@ const config: Config = {
 
 	stylesheets: [
 		{
-			// Geist Sans + Geist Mono — matches koreshield.com font
+			// Geist Sans + Geist Mono  -  matches koreshield.com font
 			href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap',
 			type: 'text/css',
 		},

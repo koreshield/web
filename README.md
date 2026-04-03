@@ -24,7 +24,7 @@ Detailed commercial packaging and licensing terms are still being finalized. For
 
 This project is unified under the KoreShield brand, with all resources, SDKs, and documentation available at [koreshield.com](https://koreshield.com).
 
-The goal is for KoreShield to be the "security layer" for any LLM-powered enterprise system—easy to integrate, highly configurable, and always up-to-date with the latest defenses and best practices.
+The goal is for KoreShield to be the "security layer" for any LLM-powered enterprise system - easy to integrate, highly configurable, and always up-to-date with the latest defenses and best practices.
 
 ### Related Research
 

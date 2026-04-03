@@ -54,7 +54,7 @@ export default defineType({
 					],
 				},
 				{
-					// Custom code block — no plugin required
+					// Custom code block  -  no plugin required
 					type: 'object',
 					name: 'codeBlock',
 					title: 'Code Block',

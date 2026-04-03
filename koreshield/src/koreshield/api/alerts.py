@@ -416,3 +416,17 @@ async def test_alert_channel(
     except Exception as e:
         logger.error("Failed to test alert channel", channel_id=request.channel_id, error=str(e))
         raise HTTPException(status_code=500, detail=f"Failed to test alert channel: {str(e)}")
+
+
+@router.post(
+    "/management/alerts/channels/{channel_id}/test",
+    summary="Test alert channel by ID",
+    description="Send a test message to an alert channel using a REST-style path."
+)
+async def test_alert_channel_by_id(
+    channel_id: str,
+    _current_user: dict = Depends(get_current_user)
+):
+    """Compatibility route for clients that address a specific channel directly."""
+    request = AlertChannelTestRequest(channel_id=channel_id)
+    return await test_alert_channel(request, _current_user)

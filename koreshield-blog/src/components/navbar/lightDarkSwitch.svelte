@@ -1,5 +1,5 @@
 <script lang="ts">
-// COMMENTED: light/dark switch disabled — site is dark mode only
+// COMMENTED: light/dark switch disabled  -  site is dark mode only
 // All original code preserved below for re-enabling if needed.
 //
 // import Icon from "@iconify/svelte";
@@ -25,4 +25,4 @@
 // function hidePanel() { ... }
 </script>
 
-<!-- COMMENTED: light/dark toggle hidden — site is dark mode only -->
+<!-- COMMENTED: light/dark toggle hidden  -  site is dark mode only -->

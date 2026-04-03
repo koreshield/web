@@ -96,11 +96,11 @@ export function getStoredTheme(): LIGHT_DARK_MODE {
 // Function to initialize theme from local storage or default
 export function initTheme(): void {
     if (typeof window === "undefined") return;
-    // COMMENTED: light mode support disabled — always dark
+    // COMMENTED: light mode support disabled  -  always dark
     // const storedTheme = getStoredTheme();
     // applyThemeToDocument(storedTheme, true);
     applyThemeToDocument(DARK_MODE, true);
-    // COMMENTED: system theme listener disabled — dark only
+    // COMMENTED: system theme listener disabled  -  dark only
     // window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
     //     const currentStored = getStoredTheme();
     //     if (currentStored === SYSTEM_MODE) {

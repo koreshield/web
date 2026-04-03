@@ -8,11 +8,12 @@ import bcrypt
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..database import get_db
+from ..database import AsyncSessionLocal, get_db
 from ..models.api_key import APIKey
+from ..models.request_log import RequestLog
 from ..models.user import User
 from ..services.email import (
     send_password_reset_email,
@@ -98,6 +99,16 @@ def _validate_password_strength(password: str) -> None:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Password must be at least 8 characters long",
         )
+
+
+async def get_optional_db():
+    """Return a database session when configured, otherwise yield None."""
+    if not AsyncSessionLocal:
+        yield None
+        return
+
+    async for session in get_db():
+        yield session
 
 
 @router.get("/me", summary="Current User", tags=["Authentication"])
@@ -520,11 +531,67 @@ async def get_audit_logs(
     limit: int = 100,
     offset: int = 0,
     level: str | None = None,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession | None = Depends(get_optional_db),
 ):
     """Get audit logs."""
     log_file = "logs/koreshield.log"
     logs = []
+    seen_signatures: set[tuple[str | None, str | None, str | None]] = set()
+
+    def append_unique(entry: dict) -> None:
+        signature = (
+            entry.get("request_id"),
+            entry.get("event"),
+            entry.get("timestamp"),
+        )
+        if signature in seen_signatures:
+            return
+        seen_signatures.add(signature)
+        logs.append(entry)
+
+    if db is not None:
+        try:
+            result = await db.execute(
+                select(RequestLog)
+                .order_by(desc(RequestLog.timestamp))
+                .offset(offset)
+                .limit(limit)
+            )
+            request_logs = result.scalars().all()
+            for entry in request_logs:
+                append_unique(
+                    {
+                    "id": str(entry.id),
+                    "request_id": entry.request_id,
+                    "timestamp": entry.timestamp.isoformat(),
+                    "event": "request_log",
+                    "path": entry.path,
+                    "method": entry.method,
+                    "provider": entry.provider,
+                    "model": entry.model,
+                    "status": "failure" if entry.is_blocked or entry.status_code >= 400 else "success",
+                    "status_code": entry.status_code,
+                    "latency_ms": entry.latency_ms,
+                    "tokens_total": entry.tokens_total,
+                    "cost": entry.cost,
+                    "is_blocked": entry.is_blocked,
+                    "attack_detected": entry.attack_detected,
+                    "attack_type": entry.attack_type,
+                    "attack_details": entry.attack_details or {},
+                    "user_id": str(entry.user_id) if entry.user_id else None,
+                    "ip": entry.ip_address,
+                    "user_agent": entry.user_agent,
+                    }
+                )
+        except Exception as e:
+            logger.error("Error reading request logs", error=str(e))
+
+    audit_store = getattr(request.app.state, "audit_log_store", None)
+    if audit_store:
+        for entry in audit_store:
+            append_unique(entry)
+
     if os.path.exists(log_file):
         try:
             with open(log_file, "r", encoding="utf-8") as f:
@@ -540,11 +607,13 @@ async def get_audit_logs(
                         if level and log_entry.get("level", "").lower() != level.lower():
                             continue
 
-                        logs.append(log_entry)
+                        append_unique(log_entry)
                     except json.JSONDecodeError:
                         continue
         except Exception as e:
             logger.error("Error reading log file", error=str(e))
+
+    logs.sort(key=lambda entry: entry.get("timestamp", ""), reverse=True)
 
     # Pagination
     total_count = len(logs)
