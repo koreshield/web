@@ -6,6 +6,7 @@
  */
 
 import { authService } from './auth';
+import { resolveWebSocketBaseUrl } from './api-base';
 
 // Get queryClient from the singleton - will be initialized in App.tsx
 let queryClient: any = null;
@@ -14,8 +15,9 @@ export function setQueryClient(client: any) {
 }
 
 // WebSocket URL configuration
-const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || 
-    (import.meta.env.VITE_API_BASE_URL?.replace('http', 'ws') || 'ws://localhost:8000');
+const WS_BASE_URL =
+    import.meta.env.VITE_WS_BASE_URL ||
+    resolveWebSocketBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
 export type EventType =
     | 'threat_detected'

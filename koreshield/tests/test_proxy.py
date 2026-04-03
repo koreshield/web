@@ -199,6 +199,32 @@ def test_metrics_endpoint(proxy):
     assert any(keyword in content for keyword in ["# HELP", "# TYPE", "koreshield_"])
 
 
+def test_policy_management_endpoints_have_initialized_engine(proxy, auth_headers):
+    """Test management policy endpoints can use the initialized policy engine."""
+    client = TestClient(proxy.app)
+
+    create_response = client.post(
+        "/v1/management/policies",
+        json={
+            "id": "smoke-policy",
+            "name": "Smoke Policy",
+            "description": "Protects the workspace during smoke tests",
+            "severity": "medium",
+            "roles": ["admin", "user"],
+        },
+        headers=auth_headers,
+    )
+
+    assert create_response.status_code == 200
+    payload = create_response.json()
+    assert payload["status"] == "created"
+    assert payload["policy"]["id"] == "smoke-policy"
+
+    list_response = client.get("/v1/management/policies", headers=auth_headers)
+    assert list_response.status_code == 200
+    assert any(policy["id"] == "smoke-policy" for policy in list_response.json())
+
+
 def test_tool_scan_endpoint_flags_critical_tool_calls(proxy, auth_headers):
     """Test server-side tool-call scanning blocks critical-risk tool usage."""
     client = TestClient(proxy.app)
