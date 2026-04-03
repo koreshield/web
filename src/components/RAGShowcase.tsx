@@ -4,11 +4,11 @@ import { AlertTriangle, ArrowDown, ArrowRight, Database, FileText, Lock, Shield 
 function FlowArrow() {
     return (
         <>
-            {/* Horizontal arrow — large screens */}
+            {/* Horizontal arrow  -  large screens */}
             <div className="hidden lg:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 items-center justify-center w-10 h-10 rounded-full bg-muted border border-border shadow-sm">
                 <ArrowRight className="text-electric-green w-5 h-5" />
             </div>
-            {/* Vertical arrow — small screens */}
+            {/* Vertical arrow  -  small screens */}
             <div className="flex lg:hidden justify-center py-2">
                 <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted border border-border shadow-sm">
                     <ArrowDown className="text-electric-green w-5 h-5" />
@@ -27,7 +27,7 @@ export function RAGShowcase() {
                         Your Documents Can Attack Your LLM
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-                        Indirect prompt injection is the quiet threat in RAG pipelines. A single poisoned document in your knowledge base can silently redirect your LLM's behavior — without anyone knowing until it's too late.
+                        Indirect prompt injection is the quiet threat in RAG pipelines. A single poisoned document in your knowledge base can silently redirect your LLM's behavior  -  without anyone knowing until it's too late.
                     </p>
                 </div>
 
@@ -72,7 +72,7 @@ export function RAGShowcase() {
                         transition={{ delay: 0.2 }}
                         className="relative overflow-visible"
                     >
-                        {/* Badge — sits outside the card */}
+                        {/* Badge  -  sits outside the card */}
                         <div className="flex justify-center mb-3">
                             <span className="inline-flex items-center gap-1.5 bg-emerald-600 dark:bg-electric-green text-white font-bold px-5 py-2 text-xs rounded-full uppercase tracking-widest shadow-lg shadow-emerald-600/30 dark:shadow-emerald-500/30 ring-2 ring-emerald-600/20 dark:ring-emerald-400/20">
                                 <Shield className="w-3.5 h-3.5" />

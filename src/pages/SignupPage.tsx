@@ -3,9 +3,17 @@ import { ArrowRight, Lock, Mail, ShieldCheck, User } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
+interface LocationState {
+    from?: {
+        pathname: string;
+        search?: string;
+    };
+}
+
 export function SignupPage() {
     const navigate = useNavigate();
     const location = useLocation();
+    const locationState = location.state as LocationState | null;
     const [searchParams] = useSearchParams();
     const [formData, setFormData] = useState({
         email: '',
@@ -38,7 +46,7 @@ export function SignupPage() {
 
             authService.setSession(data.user, data.token ?? null);
 
-            const fromLocation = (location.state as any)?.from;
+            const fromLocation = locationState?.from;
             if (fromLocation) {
                 navigate(`${fromLocation.pathname}${fromLocation.search || ''}`, { replace: true });
                 return;
@@ -61,7 +69,7 @@ export function SignupPage() {
 
     return (
         <div className="min-h-screen bg-background flex">
-            {/* Left brand panel — hidden on mobile */}
+            {/* Left brand panel  -  hidden on mobile */}
             <div className="hidden lg:flex lg:w-[45%] bg-card border-r border-white/[0.06] flex-col justify-between p-12 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-electric-green/[0.04] via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-electric-green/[0.03] rounded-full translate-x-1/2 translate-y-1/2 blur-3xl pointer-events-none" />
@@ -77,7 +85,7 @@ export function SignupPage() {
                     <div>
                         <p className="text-xs font-semibold text-electric-green uppercase tracking-widest mb-3">What you get on day one</p>
                         <p className="text-2xl font-semibold text-foreground leading-snug tracking-tight">
-                            Full LLM security — from your first API call.
+                            Full LLM security  -  from your first API call.
                         </p>
                     </div>
 

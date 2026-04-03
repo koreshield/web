@@ -31,11 +31,11 @@ function Architecture() {
                         Zero Rearchitecting Required
                     </h2>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                        Point KoreShield at your existing LLM provider. Every request is inspected, scored, and either passed through or stopped — without changing a line of your application code.
+                        Point KoreShield at your existing LLM provider. Every request is inspected, scored, and either passed through or stopped  -  without changing a line of your application code.
                     </p>
                 </motion.div>
 
-                {/* 3-column flow — matches RAGShowcase pattern */}
+                {/* 3-column flow  -  matches RAGShowcase pattern */}
                 <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-10 lg:items-stretch">
                     {/* Step 1: Your Application */}
                     <motion.div
@@ -66,7 +66,7 @@ function Architecture() {
                     {/* Mobile arrow */}
                     <div className="lg:hidden"><FlowArrow /></div>
 
-                    {/* Step 2: KoreShield Proxy — the "star" card */}
+                    {/* Step 2: KoreShield Proxy  -  the "star" card */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}

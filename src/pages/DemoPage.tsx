@@ -539,7 +539,7 @@ export default function DemoPage() {
 			<div className="text-center py-8 md:py-10 px-4 md:px-6">
 				<div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-electric-green/30 bg-electric-green/10 text-electric-green text-xs font-medium mb-4">
 					<div className="w-1.5 h-1.5 rounded-full bg-electric-green animate-pulse" />
-					Live API Demo — Login required for scans
+					Live API Demo  -  Login required for scans
 				</div>
 				<h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 text-foreground">
 					See KoreShield Stop Real AI Attacks

@@ -63,7 +63,7 @@ const advantages = [
 	{
 		icon: <TrendingUp className="w-7 h-7" />,
 		title: 'Research-Driven Innovation',
-		description: 'We evolve the threat model with research, production telemetry, and customer feedback to keep defences current — not just reactive.',
+		description: 'We evolve the threat model with research, production telemetry, and customer feedback to keep defences current  -  not just reactive.',
 		bullets: [
 			'Continuous pattern updates',
 			'Dedicated research pipeline',
@@ -161,7 +161,7 @@ export default function WhyKoreShieldPage() {
 				{/* The KoreShield Advantage */}
 				<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
 					<h2 className="text-3xl font-bold text-foreground mb-3 text-center tracking-tight">The KoreShield Advantage</h2>
-					<p className="text-center text-muted-foreground mb-10">Layers of security working together — not just pattern matching.</p>
+					<p className="text-center text-muted-foreground mb-10">Layers of security working together  -  not just pattern matching.</p>
 					<div className="bg-card border border-border rounded-2xl divide-y divide-border">
 						{advantages.map((adv) => (
 							<div key={adv.title} className="p-8 flex gap-6">
@@ -262,7 +262,7 @@ export default function WhyKoreShieldPage() {
 						Ready to Secure Your LLM?
 					</h2>
 					<p className="text-muted-foreground mb-8 max-w-lg mx-auto relative z-10">
-						Join teams protecting their AI with KoreShield — from early-stage startups to enterprise deployments.
+						Join teams protecting their AI with KoreShield  -  from early-stage startups to enterprise deployments.
 					</p>
 					<div className="flex flex-wrap justify-center gap-4 relative z-10">
 						<Link

@@ -18,6 +18,10 @@ interface TenantAnalytics {
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#f97316', '#84cc16'];
 
+function asSelectedMetric(value: string): 'requests' | 'blocked' | 'attacks' | 'latency' {
+    return value as 'requests' | 'blocked' | 'attacks' | 'latency';
+}
+
 export function AnalyticsPage() {
     const [timeRange, setTimeRange] = useState('24h');
     const [selectedMetric, setSelectedMetric] = useState<'requests' | 'blocked' | 'attacks' | 'latency'>('requests');
@@ -196,7 +200,7 @@ export function AnalyticsPage() {
                             <Filter className="w-4 h-4 text-muted-foreground" />
                             <select
                                 value={selectedMetric}
-                                onChange={(e) => setSelectedMetric(e.target.value as any)}
+                                onChange={(e) => setSelectedMetric(asSelectedMetric(e.target.value))}
                                 className="px-3 py-1 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                             >
                                 <option value="requests">Total Requests</option>
