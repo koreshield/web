@@ -19,6 +19,8 @@ lerna-debug.log*
 .env
 .env.production
 .env.local
+.env.backup
+.env.local.backup
 
 # macOS-specific files
 .DS_Store
