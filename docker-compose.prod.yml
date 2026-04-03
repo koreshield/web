@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
         # Backend API Service
         api:
@@ -24,6 +22,12 @@ services:
                         - POLAR_ORGANIZATION_SLUG=${POLAR_ORGANIZATION_SLUG:-koreshield}
                         - POLAR_ORGANIZATION_ID=${POLAR_ORGANIZATION_ID}
                         - POLAR_DEFAULT_CURRENCY=${POLAR_DEFAULT_CURRENCY:-GBP}
+                        - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+                        - OPENAI_API_KEY=${OPENAI_API_KEY}
+                        - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+                        - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+                        - GEMINI_API_KEY=${GEMINI_API_KEY}
+                        - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
                         # Add API Keys here or in a .env file on the VPS
                         # - OPENAI_API_KEY=${OPENAI_API_KEY}
                 healthcheck:

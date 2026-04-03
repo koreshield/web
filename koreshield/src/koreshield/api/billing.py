@@ -41,6 +41,34 @@ def utcnow_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
+def compact_dict(payload: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in payload.items() if value is not None}
+
+
+def should_retry_checkout_without_currency(exc: httpx.HTTPStatusError) -> bool:
+    if exc.response.status_code != 422:
+        return False
+
+    try:
+        payload = exc.response.json()
+    except ValueError:
+        return False
+
+    detail = payload.get("detail")
+    if not isinstance(detail, list):
+        return False
+
+    for item in detail:
+        if not isinstance(item, dict):
+            continue
+        message = str(item.get("msg", "")).lower()
+        location = item.get("loc") or []
+        if "currency" in message and "product" in message and "product_id" in location:
+            return True
+
+    return False
+
+
 class CheckoutRequest(BaseModel):
     product_id: str
     success_url: str | None = None
@@ -140,12 +168,12 @@ async def get_or_create_billing_account(
         team_id=default_team.id if default_team else None,
         billing_email=user.email,
         external_customer_id=external_customer_id,
-        billing_metadata={
+        billing_metadata=compact_dict({
             "owner_email": user.email,
             "owner_name": user.name,
             "scope": "team" if default_team else "user",
             "team_slug": default_team.slug if default_team else None,
-        },
+        }),
     )
     db.add(account)
     await db.commit()
@@ -250,26 +278,51 @@ async def create_checkout_session(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     payload = {
-        "products": [request.product_id],
+        "product_id": request.product_id,
         "customer_email": account.billing_email or user.email,
         "customer_name": user.name or user.email,
         "external_customer_id": account.external_customer_id,
         "success_url": request.success_url,
-        "metadata": {
+        "metadata": compact_dict({
             **(account.billing_metadata or {}),
             "owner_user_id": str(account.owner_user_id),
             "team_id": str(account.team_id) if account.team_id else None,
-        },
+        }),
     }
-    default_currency = os.getenv("POLAR_DEFAULT_CURRENCY", "").strip().upper()
+    default_currency = os.getenv("POLAR_DEFAULT_CURRENCY", "").strip().lower()
     if default_currency:
         payload["currency"] = default_currency
 
     try:
         checkout = await client.create_checkout(payload)
     except httpx.HTTPStatusError as exc:
-        logger.error("polar_checkout_failed", status_code=exc.response.status_code, body=exc.response.text)
-        raise HTTPException(status_code=502, detail="Unable to create Polar checkout session") from exc
+        if payload.get("currency") and should_retry_checkout_without_currency(exc):
+            retry_payload = dict(payload)
+            retry_payload.pop("currency", None)
+            logger.warning(
+                "polar_checkout_retry_without_currency",
+                status_code=exc.response.status_code,
+                body=exc.response.text,
+                product_id=request.product_id,
+            )
+            try:
+                checkout = await client.create_checkout(retry_payload)
+            except httpx.HTTPStatusError as retry_exc:
+                logger.error(
+                    "polar_checkout_failed",
+                    status_code=retry_exc.response.status_code,
+                    body=retry_exc.response.text,
+                    product_id=request.product_id,
+                )
+                raise HTTPException(status_code=502, detail="Unable to create Polar checkout session") from retry_exc
+        else:
+            logger.error(
+                "polar_checkout_failed",
+                status_code=exc.response.status_code,
+                body=exc.response.text,
+                product_id=request.product_id,
+            )
+            raise HTTPException(status_code=502, detail="Unable to create Polar checkout session") from exc
 
     return {"url": checkout.get("url"), "checkout": checkout}
 
