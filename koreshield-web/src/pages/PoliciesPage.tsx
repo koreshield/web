@@ -62,6 +62,8 @@ export function PoliciesPage() {
         },
         refetchInterval: 30000,
     });
+    const hasPermissionError =
+        error instanceof Error && error.message.toLowerCase().includes('insufficient permissions');
 
     const createMutation = useMutation({
         mutationFn: (policy: CreatePolicyForm) =>
@@ -199,6 +201,12 @@ export function PoliciesPage() {
 
                 {/* Policies Grid */}
                 <div className="grid grid-cols-1 gap-6">
+                    {hasPermissionError && (
+                        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
+                            Policy management is only available to workspace owners and admins. If this is your first KoreShield workspace,
+                            sign out and sign back in once so your account can refresh its role before trying again.
+                        </div>
+                    )}
                     {isLoading ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
