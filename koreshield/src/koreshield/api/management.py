@@ -8,7 +8,7 @@ import bcrypt
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr
-from sqlalchemy import desc, select
+from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import AsyncSessionLocal, get_db
@@ -101,6 +101,29 @@ def _validate_password_strength(password: str) -> None:
         )
 
 
+async def _count_privileged_users(db: AsyncSession) -> int:
+    result = await db.execute(
+        select(func.count())
+        .select_from(User)
+        .where(User.role.in_(["admin", "owner", "superuser"]))
+    )
+    return int(result.scalar_one() or 0)
+
+
+async def _promote_to_owner_if_workspace_unclaimed(db: AsyncSession, user: User) -> bool:
+    if user.role in {"admin", "owner", "superuser"}:
+        return False
+
+    privileged_user_count = await _count_privileged_users(db)
+    if privileged_user_count > 0:
+        return False
+
+    user.role = "owner"
+    user.updated_at = _utcnow_naive()
+    logger.info("bootstrap_promoted_user_to_owner", user_id=str(user.id), email=user.email)
+    return True
+
+
 async def get_optional_db():
     """Return a database session when configured, otherwise yield None."""
     if not AsyncSessionLocal:
@@ -183,6 +206,10 @@ async def signup(
         verification_token = secrets.token_urlsafe(32)
         verification_expires = _utcnow_naive() + timedelta(hours=24)
 
+        user_count_result = await db.execute(select(func.count()).select_from(User))
+        existing_user_count = user_count_result.scalar_one()
+        assigned_role = "owner" if existing_user_count == 0 else "user"
+
         # Create user
         import uuid
         user = User(
@@ -190,7 +217,7 @@ async def signup(
             email=request.email,
             password_hash=password_hash,
             name=request.name,
-            role='user',
+            role=assigned_role,
             status='active',
             email_verified=False,
             email_verification_token=verification_token,
@@ -315,6 +342,8 @@ async def admin_login(
                 detail="Account is not active"
             )
 
+        role_changed = await _promote_to_owner_if_workspace_unclaimed(db, user)
+
         # Update last login
         user.last_login_at = _utcnow_naive()
         await db.commit()
@@ -338,7 +367,7 @@ async def admin_login(
             path="/",
         )
 
-        logger.info("login_success", user_id=str(user.id), email=user.email)
+        logger.info("login_success", user_id=str(user.id), email=user.email, role=user.role, role_changed=role_changed)
 
         return {
             "user": user.to_dict(),

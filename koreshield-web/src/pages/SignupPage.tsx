@@ -2,6 +2,7 @@ import { authService } from '../lib/auth';
 import { ArrowRight, Lock, Mail, ShieldCheck, User } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { resolveApiBaseUrl } from '../lib/api-base';
 
 interface LocationState {
     from?: {
@@ -22,6 +23,7 @@ export function SignupPage() {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const apiBaseUrl = resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,7 +31,7 @@ export function SignupPage() {
         setLoading(true);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/v1/management/signup`, {
+            const response = await fetch(`${apiBaseUrl}/v1/management/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
