@@ -269,6 +269,7 @@ class KoreShieldProxy:
             kore_config.monitoring,
             stats_getter=self._get_stats_dict,
             event_publisher=self._publish_event,
+            status_getter=self._get_live_status_snapshot,
         )
 
         # Initialize JWT authentication
@@ -350,6 +351,53 @@ class KoreShieldProxy:
                 "new_status": getattr(new_status, "value", str(new_status)),
             },
         )
+
+    async def _get_provider_health_snapshot(self) -> dict[str, dict]:
+        """Build a live provider-health snapshot."""
+        health_status = self._build_provider_status_snapshot()
+        for i, provider in enumerate(self.providers):
+            provider_name = self.provider_priority[i]
+            try:
+                check_started = time.perf_counter()
+                is_healthy = bool(provider and await provider.health_check())
+                health_status[provider_name].update({
+                    "healthy": is_healthy,
+                    "priority": i,
+                    "type": type(provider).__name__ if provider else None,
+                    "response_time_ms": (time.perf_counter() - check_started) * 1000,
+                    "status": "healthy" if is_healthy else "unhealthy",
+                    "error": getattr(provider, "last_error", None) if not is_healthy else None,
+                })
+            except Exception as e:
+                health_status[provider_name].update({
+                    "healthy": False,
+                    "priority": i,
+                    "type": type(provider).__name__ if provider else None,
+                    "error": str(e),
+                    "status": "unhealthy",
+                })
+        return health_status
+
+    async def _get_live_status_snapshot(self) -> dict[str, Any]:
+        """Build the live status payload used by the public status page and alerting."""
+        provider_status = await self._get_provider_health_snapshot()
+        component_status = self._build_component_snapshot(provider_status, provider_health_overrides=provider_status)
+        return {
+            "status": "healthy",
+            "version": "0.1.0",
+            "statistics": self._get_stats_dict(),
+            "providers": provider_status,
+            "total_providers": len(self.providers),
+            "enabled_providers": sum(1 for p in provider_status.values() if p.get("enabled")),
+            "initialized_providers": sum(1 for p in provider_status.values() if p.get("initialized")),
+            "healthy_providers": sum(1 for p in provider_status.values() if p.get("healthy") is True),
+            "configured": any(provider.get("enabled") for provider in provider_status.values()),
+            "missing_credentials": [
+                name for name, provider in provider_status.items()
+                if provider.get("status") == "missing_credentials"
+            ],
+            "components": component_status,
+        }
 
     def _derive_detection_severity(self, detection_result: dict) -> str:
         """Infer severity from detection indicators and confidence."""
@@ -731,29 +779,7 @@ class KoreShieldProxy:
         # Provider health check endpoint
         @self.app.get("/health/providers", tags=["Health"])
         async def provider_health():
-            health_status = self._build_provider_status_snapshot()
-            for i, provider in enumerate(self.providers):
-                provider_name = self.provider_priority[i]
-                try:
-                    check_started = time.perf_counter()
-                    is_healthy = bool(provider and await provider.health_check())
-                    health_status[provider_name].update({
-                        "healthy": is_healthy,
-                        "priority": i,
-                        "type": type(provider).__name__ if provider else None,
-                        "response_time_ms": (time.perf_counter() - check_started) * 1000,
-                        "status": "healthy" if is_healthy else "unhealthy",
-                        "error": getattr(provider, "last_error", None) if not is_healthy else None,
-                    })
-                except Exception as e:
-                    health_status[provider_name].update({
-                        "healthy": False,
-                        "priority": i,
-                        "type": type(provider).__name__ if provider else None,
-                        "error": str(e),
-                        "status": "unhealthy",
-                    })
-
+            health_status = await self._get_provider_health_snapshot()
             return {
                 "providers": health_status,
                 "total_providers": len(self.providers),
@@ -770,19 +796,7 @@ class KoreShieldProxy:
         # Status/metrics endpoint
         @self.app.get("/status", tags=["Health"])
         async def status():
-            provider_status = self._build_provider_status_snapshot()
-            component_status = self._build_component_snapshot(provider_status)
-
-            return {
-                "status": "healthy",
-                "version": "0.1.0",
-                "statistics": self._get_stats_dict(),
-                "providers": provider_status,
-                "total_providers": len(self.providers),
-                "enabled_providers": sum(1 for p in provider_status.values() if p.get("enabled")),
-                "initialized_providers": sum(1 for p in provider_status.values() if p.get("initialized")),
-                "components": component_status,
-            }
+            return await self._get_live_status_snapshot()
 
         # Prometheus metrics endpoint
         @self.app.get("/metrics", tags=["Health"])
