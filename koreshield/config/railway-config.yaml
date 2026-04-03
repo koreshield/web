@@ -1,4 +1,7 @@
-# Railway Production Configuration
+# Railway-oriented configuration for the KoreShield backend.
+# This file is intended for the backend-only Railway deployment path that uses
+# koreshield/docker/Dockerfile with CONFIG_FILE=config/railway-config.yaml.
+
 server:
   host: "0.0.0.0"
   port: 8000
@@ -20,26 +23,32 @@ providers:
   deepseek:
     enabled: true
     base_url: "https://api.deepseek.com/v1"
+
   openai:
     enabled: false
     base_url: "https://api.openai.com/v1"
+
   anthropic:
     enabled: false
     base_url: "https://api.anthropic.com/v1"
 
+  gemini:
+    enabled: true
+    base_url: "https://generativelanguage.googleapis.com/v1beta"
+
+  azure_openai:
+    enabled: true
+    base_url: "https://koreshieldai.cognitiveservices.azure.com"
+    resource_name: "koreshieldai"
+    api_version: "2025-01-01-preview"
+
 redis:
-  enabled: true  # Enable Redis since you have it set up
-  url: "${REDIS_URL}"  # Use Railway's provided Redis URL
-
-# JWT Authentication (optional - set JWT_PUBLIC_KEY env var instead)
-# jwt:
-#   public_key: "${JWT_PUBLIC_KEY}"
-#   algorithm: "RS256"
-#   issuer: "koreshield-auth"
-
-monitoring:
   enabled: true
-  check_interval_seconds: 60
+  url: "${REDIS_URL}"
+
+jwt:
+  issuer: "koreshield-auth"
+  audience: "koreshield-api"
 
 alerting:
   enabled: true
@@ -49,6 +58,25 @@ alerting:
       severity: "warning"
       channels: ["webhook"]
       cooldown_minutes: 5
+      description: "Alert when attack detection rate is high"
+      enabled: true
+
+    - name: "Provider Down"
+      condition: "healthy_providers == 0"
+      severity: "critical"
+      channels: ["webhook", "telegram"]
+      cooldown_minutes: 10
+      description: "Alert when all configured providers are unavailable"
+      enabled: true
+
   webhook:
     enabled: true
     url: "${ALERT_WEBHOOK_URL}"
+
+  telegram:
+    enabled: true
+    # bot token, channel id, and optional message thread id come from env vars
+
+monitoring:
+  enabled: true
+  check_interval_seconds: 60
