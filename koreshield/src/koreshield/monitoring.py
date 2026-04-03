@@ -2,21 +2,21 @@
 Monitoring and alerting system for KoreShield.
 """
 
-import asyncio
 import ast
+import asyncio
 import json
 import smtplib
 import time
-from html import escape
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from typing import Dict, List, Optional, Any, Callable, Awaitable
 from dataclasses import dataclass
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from enum import Enum
+from html import escape
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 import httpx
-from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 import structlog
+from prometheus_client import Counter, Gauge, Histogram, generate_latest
 
 from .config import AlertingConfig, MonitoringConfig
 
@@ -558,6 +558,13 @@ Details:
             ("Threats", details.get("total_threats_found")),
             ("Documents", details.get("documents_scanned")),
             ("Tokens", details.get("tokens_total")),
+            ("Requests total", details.get("requests_total")),
+            ("Requests blocked", details.get("requests_blocked")),
+            ("Attacks detected", details.get("attacks_detected")),
+            ("Errors", details.get("errors")),
+            ("Healthy providers", details.get("healthy_provider_count")),
+            ("Degraded providers", details.get("degraded_provider_count")),
+            ("Provider count", details.get("provider_count")),
             ("Blocked", details.get("blocked")),
             ("Safe", details.get("is_safe")),
         ]
@@ -586,6 +593,15 @@ Details:
         error_text = details.get("error") or details.get("detail")
         if error_text:
             lines.append(f"<b>Note:</b> {escape(self._truncate(str(error_text), 300))}")
+
+        if details.get("providers_unhealthy"):
+            lines.append(f"<b>Unhealthy providers:</b> {escape(', '.join(map(str, details['providers_unhealthy'])))}")
+        if details.get("components_degraded"):
+            lines.append(f"<b>Degraded components:</b> {escape(', '.join(map(str, details['components_degraded'])))}")
+
+        telegram_config = getattr(self.config.channels, "telegram", None)
+        if telegram_config and not telegram_config.include_payload:
+            return "\n".join(lines)
 
         details_text = json.dumps(details, indent=2, default=str)
         if len(details_text) > 2500:
@@ -668,6 +684,7 @@ class MonitoringSystem:
         self.event_publisher = event_publisher
         self.status_getter = status_getter
         self._last_status_snapshot: Dict[str, Any] | None = None
+        self._last_telegram_digest_at: float = 0.0
 
         # Background monitoring task
         self.monitoring_task: Optional[asyncio.Task] = None
@@ -680,9 +697,30 @@ class MonitoringSystem:
 
         logger.info("Starting monitoring system")
         self.monitoring_task = asyncio.create_task(self._monitoring_loop())
+        await self.notify_operational_event(
+            event_name="monitoring_started",
+            severity=AlertSeverity.INFO,
+            message="Monitoring system started",
+            details={
+                "component": "monitoring",
+                "status": "started",
+            },
+            publish_event_type="system_status",
+        )
 
     async def stop_monitoring(self):
         """Stop the monitoring system."""
+        if self.monitoring_enabled:
+            await self.notify_operational_event(
+                event_name="monitoring_stopped",
+                severity=AlertSeverity.WARNING,
+                message="Monitoring system stopping",
+                details={
+                    "component": "monitoring",
+                    "status": "stopping",
+                },
+                publish_event_type="system_status",
+            )
         if self.monitoring_task:
             self.monitoring_task.cancel()
             try:
@@ -717,6 +755,24 @@ class MonitoringSystem:
                     await self._dispatch_operational_alert(alert)
                 self.alert_manager.active_alerts.extend(status_alerts)
 
+                if self.status_getter:
+                    try:
+                        snapshot = await self.status_getter()
+                    except Exception as exc:
+                        await self.notify_operational_event(
+                            event_name="status_snapshot_failed",
+                            severity=AlertSeverity.ERROR,
+                            message="Failed to refresh live status snapshot",
+                            details={
+                                "component": "status_snapshot",
+                                "status": "error",
+                                "error": str(exc),
+                            },
+                            publish_event_type="system_status",
+                        )
+                    else:
+                        await self._maybe_send_telegram_health_digest(snapshot)
+
                 # Publish cost threshold alerts (if configured)
                 if self.event_publisher and alerts:
                     for alert in alerts:
@@ -738,6 +794,17 @@ class MonitoringSystem:
 
             except Exception as e:
                 logger.error(f"Monitoring loop error: {e}")
+                await self.notify_operational_event(
+                    event_name="monitoring_loop_error",
+                    severity=AlertSeverity.ERROR,
+                    message="Monitoring loop encountered an error",
+                    details={
+                        "component": "monitoring",
+                        "status": "error",
+                        "error": str(e),
+                    },
+                    publish_event_type="system_status",
+                )
 
             await asyncio.sleep(interval)
 
@@ -847,6 +914,58 @@ class MonitoringSystem:
             timestamp=time.time(),
         )
         await self._dispatch_operational_alert(alert)
+
+    async def _maybe_send_telegram_health_digest(self, snapshot: Dict[str, Any]) -> None:
+        """Send a periodic live-health digest to Telegram without spamming every loop."""
+        telegram_config = getattr(self.config.alerts.channels, "telegram", None)
+        if not telegram_config or not telegram_config.enabled or not telegram_config.health_digest_enabled:
+            return
+
+        interval_seconds = max(int(telegram_config.health_digest_interval_minutes or 15), 1) * 60
+        now = time.time()
+        if self._last_telegram_digest_at and (now - self._last_telegram_digest_at) < interval_seconds:
+            return
+
+        providers = snapshot.get("providers", {}) or {}
+        components = snapshot.get("components", {}) or {}
+        statistics = snapshot.get("statistics", {}) or {}
+        unhealthy_providers = sorted(
+            provider_name
+            for provider_name, provider_state in providers.items()
+            if provider_state.get("status") not in {"healthy", "disabled"}
+        )
+        degraded_components = sorted(
+            component_name
+            for component_name, component_state in components.items()
+            if component_state.get("status") not in {"operational", "disabled"}
+        )
+
+        detail = (
+            "All tracked providers and components are healthy."
+            if not unhealthy_providers and not degraded_components
+            else "Attention needed on one or more live services."
+        )
+        await self.notify_operational_event(
+            event_name="telegram_health_digest",
+            severity=AlertSeverity.INFO if not unhealthy_providers and not degraded_components else AlertSeverity.WARNING,
+            message="Live health digest",
+            details={
+                "component": "monitoring",
+                "status": "healthy" if not unhealthy_providers and not degraded_components else "degraded",
+                "detail": detail,
+                "provider_count": len(providers),
+                "healthy_provider_count": sum(1 for provider in providers.values() if provider.get("status") == "healthy"),
+                "degraded_provider_count": len(unhealthy_providers),
+                "providers_unhealthy": unhealthy_providers,
+                "components_degraded": degraded_components,
+                "requests_total": statistics.get("requests_total", 0),
+                "requests_blocked": statistics.get("requests_blocked", 0),
+                "attacks_detected": statistics.get("attacks_detected", 0),
+                "errors": statistics.get("errors", 0),
+            },
+            publish_event_type="system_status",
+        )
+        self._last_telegram_digest_at = now
 
     def _severity_from_status(self, status: str) -> AlertSeverity:
         """Map component status to alert severity."""
