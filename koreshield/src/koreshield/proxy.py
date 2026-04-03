@@ -810,12 +810,12 @@ class KoreShieldProxy:
         rate_limit = self.config.get("security", {}).get("rate_limit", "60/minute")
 
         # Health check endpoint
-        @self.app.get("/health", tags=["Health"])
+        @self.app.get("/health", tags=["Health"], summary="Health Check", description="Check the health status of the KoreShield proxy and all configured LLM providers.")
         async def health():
             return {"status": "healthy", "version": "0.1.0"}
 
         # Provider health check endpoint
-        @self.app.get("/health/providers", tags=["Health"])
+        @self.app.get("/health/providers", tags=["Health"], summary="Provider Health", description="Get detailed health status for each configured LLM provider.")
         async def provider_health():
             health_status = await self._get_provider_health_snapshot()
             return {
@@ -832,12 +832,12 @@ class KoreShieldProxy:
             }
 
         # Status/metrics endpoint
-        @self.app.get("/status", tags=["Health"])
+        @self.app.get("/status", tags=["Health"], summary="System Status", description="Get live statistics including request counts, block rates, attack detections, and provider health.")
         async def status():
             return await self._get_live_status_snapshot()
 
         # Prometheus metrics endpoint
-        @self.app.get("/metrics", tags=["Health"])
+        @self.app.get("/metrics", tags=["Health"], summary="Prometheus Metrics", description="Prometheus-compatible metrics endpoint for monitoring and alerting. Returns text/plain in Prometheus exposition format.")
         async def metrics():
             from prometheus_client import CONTENT_TYPE_LATEST
             return Response(
@@ -846,18 +846,18 @@ class KoreShieldProxy:
             )
 
         # OpenAI-compatible chat completions endpoint
-        @self.app.post("/v1/chat/completions", tags=["Chat"])
+        @self.app.post("/v1/chat/completions", tags=["Chat"], summary="Protected Chat Completions", description="OpenAI-compatible chat completions endpoint with built-in threat detection. Drop-in replacement for OpenAI's /v1/chat/completions.")
         @self.limiter.limit(rate_limit)
         async def chat_completions(request: Request):
             return await self._handle_chat_completion(request)
 
         # RAG context scanning endpoint
-        @self.app.post("/v1/rag/scan", tags=["Chat"])
+        @self.app.post("/v1/rag/scan", tags=["Chat"], summary="Scan RAG Context", description="Scan retrieved documents for indirect prompt injection threats before passing to the LLM.")
         @self.limiter.limit(rate_limit)
         async def rag_scan(request: Request):
             return await self._handle_rag_scan(request)
 
-        @self.app.get("/v1/rag/scans", tags=["Chat"])
+        @self.app.get("/v1/rag/scans", tags=["Chat"], summary="List RAG Scans", description="Retrieve the history of RAG security scans with pagination.")
         @self.limiter.limit(rate_limit)
         async def list_rag_scans(request: Request, limit: int = 50, offset: int = 0):
             principal = await self._authenticate_request(request)
@@ -896,7 +896,7 @@ class KoreShieldProxy:
                 "offset": offset,
             }
 
-        @self.app.get("/v1/rag/scans/{scan_id}", tags=["Chat"])
+        @self.app.get("/v1/rag/scans/{scan_id}", tags=["Chat"], summary="Get RAG Scan", description="Get the full details of a specific RAG security scan by ID.")
         @self.limiter.limit(rate_limit)
         async def get_rag_scan(scan_id: str, request: Request):
             principal = await self._authenticate_request(request)

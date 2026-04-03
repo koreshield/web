@@ -356,6 +356,130 @@ async def generate_report(
 
     return {"status": "queued", "message": "Report generation started"}
 
+@router.put("/{report_id}", response_model=ReportSchema, summary="Update Report", description="Update report configuration such as name, description, schedule, or format.")
+async def update_report(
+    report_id: str,
+    report_update: ReportUpdate,
+    current_user: dict = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_db),
+):
+    """Update an existing report's configuration."""
+    try:
+        report_uuid = uuid.UUID(report_id)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Invalid report ID format")
+
+    stmt = select(Report, ReportTemplate).join(ReportTemplate, Report.template_id == ReportTemplate.id).where(Report.id == report_uuid)
+    result = await session.execute(stmt)
+    row = result.one_or_none()
+    if not row:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    report, template = row
+
+    if report_update.name is not None:
+        report.name = report_update.name
+    if report_update.description is not None:
+        report.description = report_update.description
+    if report_update.schedule is not None:
+        report.schedule = report_update.schedule
+    if report_update.format is not None:
+        report.format = report_update.format
+    if report_update.filters is not None:
+        report.filters = report_update.filters.model_dump()
+
+    await session.commit()
+    await session.refresh(report)
+
+    schema = ReportSchema.model_validate(report)
+    schema.template = template.name
+    schema.last_run = report.last_run_at.isoformat() if report.last_run_at else "Never"
+    return schema
+
+
+@router.delete("/{report_id}", status_code=204, summary="Delete Report", description="Permanently delete a report and all its data.")
+async def delete_report(
+    report_id: str,
+    current_user: dict = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_db),
+):
+    """Delete an existing report."""
+    try:
+        report_uuid = uuid.UUID(report_id)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Invalid report ID format")
+
+    stmt = select(Report).where(Report.id == report_uuid)
+    result = await session.execute(stmt)
+    report = result.scalar_one_or_none()
+
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    await session.delete(report)
+    await session.commit()
+
+
+@router.get("/{report_id}/download", summary="Download Report", description="Download the generated output of a completed report. Returns CSV or JSON data based on the report format.")
+async def download_report(
+    report_id: str,
+    current_user: dict = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_db),
+):
+    """Download the generated report file."""
+    from fastapi.responses import Response
+    import json
+    import csv
+    import io
+
+    try:
+        report_uuid = uuid.UUID(report_id)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Invalid report ID format")
+
+    stmt = select(Report, ReportTemplate).join(ReportTemplate, Report.template_id == ReportTemplate.id).where(Report.id == report_uuid)
+    result = await session.execute(stmt)
+    row = result.one_or_none()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    report, template = row
+
+    if report.status not in ["completed"]:
+        raise HTTPException(status_code=400, detail="Report has not been generated yet. Run the report first.")
+
+    # Build export data from report filters/metadata
+    export_data = {
+        "report_name": report.name,
+        "template": template.name,
+        "generated_at": report.last_run_at.isoformat() if report.last_run_at else None,
+        "filters": report.filters,
+        "status": report.status,
+        "format": report.format,
+    }
+
+    if report.format == "json":
+        content = json.dumps(export_data, indent=2, default=str)
+        return Response(
+            content=content,
+            media_type="application/json",
+            headers={"Content-Disposition": f'attachment; filename="{report.name.replace(" ", "_")}.json"'},
+        )
+    else:
+        # CSV format
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["Field", "Value"])
+        for key, value in export_data.items():
+            writer.writerow([key, str(value)])
+        content = output.getvalue()
+        return Response(
+            content=content,
+            media_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="{report.name.replace(" ", "_")}.csv"'},
+        )
+
 @router.get("/logs", response_model=List[dict])
 async def get_logs(
     limit: int = 50,

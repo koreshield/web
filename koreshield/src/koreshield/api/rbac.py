@@ -475,6 +475,44 @@ async def update_role(
     return role
 
 
+@router.delete(
+    "/roles/{role_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete Role",
+    description="Delete a custom role. Built-in roles (admin, user) cannot be deleted. The role must not be currently assigned to any users."
+)
+async def delete_role(
+    role_id: str,
+    current_user: dict = Depends(get_current_admin),
+):
+    """Delete a custom role."""
+    # Built-in roles cannot be deleted
+    BUILTIN_ROLE_IDS = {"1", "2", "3", "4"}  # Match the hardcoded IDs in _initialize_defaults
+    if role_id in BUILTIN_ROLE_IDS:
+        raise HTTPException(
+            status_code=400,
+            detail="Built-in roles (admin, user, viewer, editor) cannot be deleted"
+        )
+
+    roles = _initialize_defaults()
+    role = next((r for r in _roles_store.values() if r["id"] == role_id), None)
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+
+    # Check if role is assigned to any users
+    users_with_role = [u for u in _users_store.values() if u.role == role.get("name")]
+    if users_with_role:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot delete role. It is assigned to {len(users_with_role)} user(s)"
+        )
+
+    # Since roles are in-memory defaults for now, we acknowledge deletion
+    # In a full DB-backed implementation, this would remove from persistent storage
+    del _roles_store[role_id]
+    return None
+
+
 @router.get("/permissions", response_model=List[Permission])
 async def get_permissions(
     category: Optional[str] = Query(None, description="Filter by category"),
