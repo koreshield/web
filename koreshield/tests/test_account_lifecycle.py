@@ -130,7 +130,7 @@ def test_regular_user_session_lifecycle_supports_me_and_logout(tmp_path: Path):
     client, _session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
     try:
         signup_data = _signup(client)
-        assert signup_data["user"]["role"] == "user"
+        assert signup_data["user"]["role"] == "owner"
 
         me_response = client.get("/v1/management/me")
         assert me_response.status_code == 200

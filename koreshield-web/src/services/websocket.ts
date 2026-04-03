@@ -1,3 +1,5 @@
+import { resolveWebSocketBaseUrl } from '../lib/api-base';
+
 type ThreatEvent = {
     id: string;
     timestamp: string;
@@ -21,8 +23,7 @@ class WebSocketService {
     private baseUrl: string;
 
     constructor() {
-        const apiUrl = import.meta.env.VITE_API_BASE_URL;
-        this.baseUrl = apiUrl.replace('https://', 'wss://').replace('http://', 'ws://');
+        this.baseUrl = resolveWebSocketBaseUrl(import.meta.env.VITE_API_BASE_URL);
     }
 
     connect() {
