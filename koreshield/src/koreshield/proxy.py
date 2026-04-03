@@ -298,6 +298,7 @@ class KoreShieldProxy:
         # Emit system status updates on lifecycle events
         @self.app.on_event("startup")
         async def _startup_event():
+            await self.start_monitoring()
             self._emit_event(
                 "system_status",
                 {
@@ -308,6 +309,7 @@ class KoreShieldProxy:
 
         @self.app.on_event("shutdown")
         async def _shutdown_event():
+            await self.stop_monitoring()
             self._emit_event(
                 "system_status",
                 {
@@ -351,6 +353,18 @@ class KoreShieldProxy:
                 "new_status": getattr(new_status, "value", str(new_status)),
             },
         )
+        try:
+            asyncio.create_task(
+                self.monitoring.notify_status_change(
+                    subject_type="provider",
+                    subject_name=provider_name,
+                    old_status=getattr(old_status, "value", str(old_status)),
+                    new_status=getattr(new_status, "value", str(new_status)),
+                    detail="Provider health monitor observed a live route status transition.",
+                )
+            )
+        except RuntimeError:
+            logger.debug("provider_health_change_alert_skipped_no_loop", provider=provider_name)
 
     async def _get_provider_health_snapshot(self) -> dict[str, dict]:
         """Build a live provider-health snapshot."""
