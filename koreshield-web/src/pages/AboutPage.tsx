@@ -18,6 +18,12 @@ const team = [
 		image: null,
 	},
 	{
+		name: 'Ahmed Lanre',
+		role: 'Security Engineer (Blue Team)',
+		bio: 'Blue team security engineer focused on detection coverage, response workflows, and operational hardening.',
+		image: null,
+	},
+	{
 		name: 'Victor Emmanuel',
 		role: 'Frontend Engineer & Designer',
 		bio: 'Crafting intuitive interfaces for complex security workflows.',
@@ -28,7 +34,7 @@ const team = [
 const values = [
 	{
 		title: 'Security First',
-		description: 'Every decision prioritises the security and privacy of our users. Trust is earned through transparency and rigorous testing  -  not promised.',
+		description: 'Every decision prioritises the security and privacy of our users. Trust is earned through transparency and rigorous testing, not promised.',
 	},
 	{
 		title: 'Innovation',
@@ -40,7 +46,7 @@ const values = [
 	},
 	{
 		title: 'Global Impact',
-		description: 'Building technology that protects AI systems worldwide  -  making the AI-powered future safer for everyone who depends on it.',
+		description: 'Building technology that protects AI systems worldwide, making the AI-powered future safer for everyone who depends on it.',
 	},
 ];
 
@@ -65,7 +71,7 @@ export default function AboutPage() {
 							Securing the<br className="hidden md:block" /> AI-Powered Future
 						</h1>
 						<p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-							KoreShield was built on one belief: that production AI deserves the same security rigour as any critical infrastructure  -  and that it shouldn't take a breach to get there.
+							KoreShield was built on one belief: production AI deserves the same security rigour as any critical infrastructure, and teams should not need a breach before they act on it.
 						</p>
 					</motion.div>
 				</div>
@@ -77,7 +83,7 @@ export default function AboutPage() {
 					<h2 className="text-3xl font-bold mb-8 tracking-tight text-foreground">Our Mission</h2>
 					<div className="space-y-5 text-muted-foreground leading-relaxed text-lg">
 						<p>
-							Large Language Models are transforming how we build software, but they introduce entirely new security challenges. Traditional application security tools weren't designed for the unique threats facing AI systems  -  prompt injection, jailbreaking, data exfiltration, and adversarial attacks.
+							Large Language Models are transforming how we build software, but they introduce entirely new security challenges. Traditional application security tools were not designed for prompt injection, jailbreaking, data exfiltration, and adversarial attacks.
 						</p>
 						<p>
 							KoreShield was founded to solve this problem. We combine cutting-edge AI safety research with enterprise-grade infrastructure to provide comprehensive protection for LLM applications. Our mission is to make AI systems as secure as traditional software, enabling organisations to deploy AI confidently.
@@ -148,7 +154,7 @@ export default function AboutPage() {
 						<div>
 							<h3 className="text-xl font-semibold text-foreground mb-4">Innovation at Scale</h3>
 							<p className="text-muted-foreground mb-4 leading-relaxed">
-								KoreShield represents a genuinely innovative approach to LLM security. Our 50+ detection patterns, real-time threat analysis, and multi-provider support architecture are novel contributions to the field  -  addressing a £15 billion total addressable market.
+								KoreShield represents a genuinely innovative approach to LLM security. Our 50+ detection patterns, real-time threat analysis, and multi-provider support architecture are designed for a category that is growing fast and needs serious operational tooling.
 							</p>
 							<p className="text-muted-foreground leading-relaxed">
 								Our technology is designed for global scalability, supporting multi-tenancy, cloud-native deployment, and enterprise-grade compliance. We're building not just for today's market, but for the next decade of AI adoption.
@@ -203,7 +209,7 @@ export default function AboutPage() {
 							to="/careers"
 							className="inline-flex items-center gap-2 text-sm font-semibold text-electric-green bg-electric-green/10 border border-electric-green/20 hover:bg-electric-green/20 px-6 py-3 rounded-full transition-all duration-200"
 						>
-							We're hiring  -  join our team
+							We&apos;re hiring. Join our team
 							<ArrowRight className="w-4 h-4" />
 						</Link>
 					</div>
