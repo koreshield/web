@@ -11,7 +11,6 @@ export class DocumentReadError extends Error {
 interface PdfTextItem {
 	str?: string;
 }
-
 const extractPdfText = async (file: File): Promise<string> => {
 	const { getDocument } = await import('pdfjs-dist');
 	const data = new Uint8Array(await file.arrayBuffer());
