@@ -74,16 +74,60 @@ interface StatusApiResponse {
     attacks_detected?: number;
     errors?: number;
   };
-  providers?: Record<string, { configured?: boolean; priority?: number; type?: string | null }>;
+  providers?: Record<string, {
+    enabled?: boolean;
+    credentials_present?: boolean;
+    initialized?: boolean;
+    priority?: number | null;
+    type?: string | null;
+    status?: string;
+    base_url?: string | null;
+    missing_env_vars?: string[];
+    present_env_vars?: string[];
+    healthy?: boolean;
+    response_time_ms?: number;
+  }>;
   total_providers?: number;
+  enabled_providers?: number;
+  initialized_providers?: number;
+  components?: Record<string, { status?: ComponentStatus; detail?: string }>;
 }
 
 interface ProviderHealthApiResponse {
-  providers?: Record<string, { healthy?: boolean; priority?: number; type?: string | null }>;
+  providers?: Record<string, {
+    enabled?: boolean;
+    credentials_present?: boolean;
+    initialized?: boolean;
+    priority?: number | null;
+    type?: string | null;
+    status?: string;
+    base_url?: string | null;
+    missing_env_vars?: string[];
+    present_env_vars?: string[];
+    healthy?: boolean;
+    response_time_ms?: number;
+    error?: string;
+  }>;
   total_providers?: number;
+  enabled_providers?: number;
   healthy_providers?: number;
+  initialized_providers?: number;
   configured?: boolean;
+  missing_credentials?: string[];
 }
+
+type ProviderRoute = {
+  id: string;
+  status: string;
+  enabled: boolean;
+  initialized: boolean;
+  credentialsPresent: boolean;
+  healthy?: boolean;
+  type?: string | null;
+  responseTimeMs?: number;
+  baseUrl?: string | null;
+  missingEnvVars: string[];
+};
 
 const COMPONENT_ORDER = [
   'api-gateway',
@@ -95,6 +139,17 @@ const COMPONENT_ORDER = [
   'audit-log-stream',
   'provider-routing',
 ] as const;
+
+const COMPONENT_STATUS_KEY: Record<(typeof COMPONENT_ORDER)[number], string> = {
+  'api-gateway': 'api_gateway',
+  'detection-engine': 'detection_engine',
+  'policy-engine': 'policy_engine',
+  'rag-scanner': 'rag_scanner',
+  billing: 'billing',
+  dashboard: 'dashboard',
+  'audit-log-stream': 'audit_log_stream',
+  'provider-routing': 'provider_routing',
+};
 
 const COMPONENT_CATALOG: Record<(typeof COMPONENT_ORDER)[number], Omit<Component, 'status' | 'lastChecked'>> = {
   'api-gateway': {
@@ -311,6 +366,7 @@ export default function StatusPage() {
   const [statusSummary, setStatusSummary] = useState<StatusApiResponse | null>(null);
   const [providerHealth, setProviderHealth] = useState<ProviderHealthApiResponse | null>(null);
   const [statusError, setStatusError] = useState('');
+  const [providerRoutes, setProviderRoutes] = useState<ProviderRoute[]>([]);
   const uptimeHistory = useMemo(() => buildUptimeHistory(new Date()), []);
 
   const getOverallStatus = (): ComponentStatus => {
@@ -391,57 +447,86 @@ export default function StatusPage() {
         }
 
         const totalProviders = providerState.total_providers ?? stats.total_providers ?? 0;
-        const configuredProviders = Object.keys(providerState?.providers || stats?.providers || {}).length;
+        const providerSnapshot = providerState.providers || stats.providers || {};
+        const configuredProviders = stats.enabled_providers ?? providerState.enabled_providers ?? Object.values(providerSnapshot).filter((provider) => provider.enabled).length;
         const requestsTotal = stats?.statistics?.requests_total ?? 0;
         const blockedTotal = stats?.statistics?.requests_blocked ?? 0;
+        const initializedProviders = providerState.initialized_providers ?? stats.initialized_providers ?? Object.values(providerSnapshot).filter((provider) => provider.initialized).length;
+        const backendComponents = stats.components || {};
 
         setStatusSummary(stats);
         setProviderHealth(providerState);
         setStatusError('');
+        setProviderRoutes(
+          Object.entries(providerSnapshot)
+            .filter(([, provider]) => provider.enabled || provider.initialized || provider.credentials_present)
+            .map(([providerName, provider]) => ({
+              id: providerName,
+              status: provider.status || (provider.healthy ? 'healthy' : provider.enabled ? 'degraded' : 'disabled'),
+              enabled: Boolean(provider.enabled),
+              initialized: Boolean(provider.initialized),
+              credentialsPresent: Boolean(provider.credentials_present),
+              healthy: provider.healthy,
+              type: provider.type,
+              responseTimeMs: provider.response_time_ms,
+              baseUrl: provider.base_url,
+              missingEnvVars: provider.missing_env_vars || [],
+            })),
+        );
         setComponents(
           buildDefaultComponents(now).map((component) => {
+            const backendComponent = backendComponents[COMPONENT_STATUS_KEY[component.id as keyof typeof COMPONENT_STATUS_KEY]];
+
             if (component.id === 'provider-routing') {
               return {
                 ...component,
-                status: configuredProviders > 0 ? 'operational' : 'degraded',
+                status: backendComponent?.status || (configuredProviders > 0 ? 'operational' : 'degraded'),
                 description:
-                  configuredProviders > 0
-                    ? `Provider routing is active with ${configuredProviders} configured backend${configuredProviders === 1 ? '' : 's'}.`
-                    : 'Provider routing is healthy, but this environment has no provider credentials configured right now.',
+                  backendComponent?.detail ||
+                  (configuredProviders > 0
+                    ? `Provider routing is enabled for ${configuredProviders} provider configuration${configuredProviders === 1 ? '' : 's'}, with ${initializedProviders} initialized route${initializedProviders === 1 ? '' : 's'}.`
+                    : 'Provider routing is healthy, but this environment has no provider credentials configured right now.'),
               };
             }
 
             if (component.id === 'api-gateway') {
               return {
                 ...component,
-                status: health?.status === 'healthy' ? 'operational' : 'degraded',
+                status: backendComponent?.status || (health?.status === 'healthy' ? 'operational' : 'degraded'),
                 responseTime: component.responseTime,
-                description: `Primary ingress for proxied chat, scan, and management traffic. ${requestsTotal.toLocaleString()} requests observed in this environment.`,
+                description: backendComponent?.detail || `Primary ingress for proxied chat, scan, and management traffic. ${requestsTotal.toLocaleString()} requests observed in this environment.`,
               };
             }
 
             if (component.id === 'audit-log-stream') {
               return {
                 ...component,
-                description: `Security event capture, review queues, and alert rule execution. ${blockedTotal.toLocaleString()} requests blocked so far.`,
+                status: backendComponent?.status || component.status,
+                description: backendComponent?.detail || `Security event capture, review queues, and alert rule execution. ${blockedTotal.toLocaleString()} requests blocked so far.`,
               };
             }
 
             if (component.id === 'billing') {
               return {
                 ...component,
-                description: 'Hosted billing account sync, checkout, and customer portal orchestration with Polar.',
+                status: backendComponent?.status || component.status,
+                description: backendComponent?.detail || 'Hosted billing account sync, checkout, and customer portal orchestration with Polar.',
               };
             }
 
             if (component.id === 'dashboard') {
               return {
                 ...component,
-                description: 'Customer dashboard, onboarding surfaces, audit views, and status communication.',
+                status: backendComponent?.status || component.status,
+                description: backendComponent?.detail || 'Customer dashboard, onboarding surfaces, audit views, and status communication.',
               };
             }
 
-            return component;
+            return {
+              ...component,
+              status: backendComponent?.status || component.status,
+              description: backendComponent?.detail || component.description,
+            };
           }),
         );
 
@@ -470,6 +555,10 @@ export default function StatusPage() {
   const overallStatus = getOverallStatus();
   const averageUptime = getAverageUptime();
   const platformSnapshot = statusSummary?.statistics;
+  const configuredProviderCount =
+    statusSummary?.enabled_providers ??
+    providerHealth?.enabled_providers ??
+    providerRoutes.filter((provider) => provider.enabled).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -575,10 +664,73 @@ export default function StatusPage() {
             </div>
             <div className="bg-card rounded-xl border border-border p-5">
               <div className="text-sm text-muted-foreground mb-2">Configured provider routes</div>
-              <div className="text-3xl font-bold text-foreground">
-                {Object.keys(providerHealth?.providers || statusSummary?.providers || {}).length}
-              </div>
+              <div className="text-3xl font-bold text-foreground">{configuredProviderCount}</div>
             </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+          className="mb-12"
+        >
+          <h2 className="text-2xl font-bold text-foreground mb-6">Live Provider Routes</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            {providerRoutes.map((provider) => (
+              <div key={provider.id} className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground capitalize">{provider.id.replace('_', ' ')}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {provider.type || 'Provider route'} {provider.baseUrl ? `· ${provider.baseUrl}` : ''}
+                    </p>
+                  </div>
+                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border ${
+                    provider.status === 'healthy' || provider.status === 'initialized'
+                      ? 'bg-green-500/10 text-green-500 border-green-500/20'
+                      : provider.status === 'missing_credentials'
+                        ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                        : provider.status === 'disabled'
+                          ? 'bg-muted text-muted-foreground border-border'
+                          : 'bg-orange-500/10 text-orange-500 border-orange-500/20'
+                  }`}>
+                    {provider.status.replace('_', ' ')}
+                  </span>
+                </div>
+                <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+                  <div className="flex justify-between gap-4">
+                    <span>Enabled in config</span>
+                    <span className="font-medium text-foreground">{provider.enabled ? 'Yes' : 'No'}</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Credentials present</span>
+                    <span className="font-medium text-foreground">{provider.credentialsPresent ? 'Yes' : 'No'}</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Initialized</span>
+                    <span className="font-medium text-foreground">{provider.initialized ? 'Yes' : 'No'}</span>
+                  </div>
+                  {typeof provider.healthy === 'boolean' && (
+                    <div className="flex justify-between gap-4">
+                      <span>Health check</span>
+                      <span className="font-medium text-foreground">{provider.healthy ? 'Healthy' : 'Unhealthy'}</span>
+                    </div>
+                  )}
+                  {provider.responseTimeMs ? (
+                    <div className="flex justify-between gap-4">
+                      <span>Response time</span>
+                      <span className="font-medium text-foreground">{provider.responseTimeMs.toFixed(0)} ms</span>
+                    </div>
+                  ) : null}
+                  {!provider.credentialsPresent && provider.missingEnvVars.length > 0 ? (
+                    <p className="pt-2">
+                      Missing environment values: <span className="font-mono text-xs text-foreground">{provider.missingEnvVars.join(', ')}</span>
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            ))}
           </div>
         </motion.div>
 
