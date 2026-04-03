@@ -244,6 +244,10 @@ dist
 tmp/
 temp/
 
+# Retired local remote/deploy helpers
+.run_remote.exp
+update_remote_env.py
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
