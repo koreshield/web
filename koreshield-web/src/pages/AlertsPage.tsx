@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Plus, Edit, Trash2, Mail, MessageSquare, Webhook, AlertTriangle, CheckCircle, Clock, X, TestTube2, Loader } from 'lucide-react';
+import { Bell, Plus, Edit, Trash2, Mail, MessageSquare, Webhook, AlertTriangle, CheckCircle, Clock, X, TestTube2, Loader, Send } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
@@ -19,7 +19,7 @@ interface AlertRule {
 
 interface AlertChannel {
     id: string;
-    type: 'email' | 'slack' | 'webhook' | 'teams' | 'pagerduty';
+    type: 'email' | 'slack' | 'webhook' | 'teams' | 'telegram' | 'pagerduty';
     name: string;
     enabled: boolean;
     config: Record<string, unknown>;
@@ -36,7 +36,7 @@ interface AlertRuleFormData {
 }
 
 interface AlertChannelFormData {
-    type: 'email' | 'slack' | 'webhook' | 'teams' | 'pagerduty';
+    type: 'email' | 'slack' | 'webhook' | 'teams' | 'telegram' | 'pagerduty';
     name: string;
     enabled: boolean;
     config: {
@@ -51,6 +51,10 @@ interface AlertChannelFormData {
         headers?: string;
         // Teams
         teams_webhook_url?: string;
+        // Telegram
+        bot_token?: string;
+        channel_id?: string;
+        message_thread_id?: string;
         // PagerDuty
         integration_key?: string;
     };
@@ -322,6 +326,7 @@ export function AlertsPage() {
             case 'slack': return <MessageSquare className="w-4 h-4" />;
             case 'webhook': return <Webhook className="w-4 h-4" />;
             case 'teams': return <MessageSquare className="w-4 h-4" />;
+            case 'telegram': return <Send className="w-4 h-4" />;
             case 'pagerduty': return <AlertTriangle className="w-4 h-4" />;
             default: return <Bell className="w-4 h-4" />;
         }
@@ -440,6 +445,52 @@ export function AlertsPage() {
                             className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                             placeholder="https://outlook.office.com/webhook/..."
                         />
+                    </div>
+                );
+            case 'telegram':
+                return (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Bot Token *</label>
+                            <input
+                                type="password"
+                                required
+                                value={channelFormData.config.bot_token || ''}
+                                onChange={(e) => setChannelFormData({
+                                    ...channelFormData,
+                                    config: { ...channelFormData.config, bot_token: e.target.value }
+                                })}
+                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="Telegram bot token"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Channel ID *</label>
+                            <input
+                                type="text"
+                                required
+                                value={channelFormData.config.channel_id || ''}
+                                onChange={(e) => setChannelFormData({
+                                    ...channelFormData,
+                                    config: { ...channelFormData.config, channel_id: e.target.value }
+                                })}
+                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="-1001234567890"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Message Thread ID</label>
+                            <input
+                                type="text"
+                                value={channelFormData.config.message_thread_id || ''}
+                                onChange={(e) => setChannelFormData({
+                                    ...channelFormData,
+                                    config: { ...channelFormData.config, message_thread_id: e.target.value }
+                                })}
+                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="Optional forum topic thread id"
+                            />
+                        </div>
                     </div>
                 );
             case 'pagerduty':
@@ -1002,6 +1053,7 @@ export function AlertsPage() {
                                         <option value="slack">Slack</option>
                                         <option value="webhook">Webhook</option>
                                         <option value="teams">Microsoft Teams</option>
+                                        <option value="telegram">Telegram</option>
                                         <option value="pagerduty">PagerDuty</option>
                                     </select>
                                 </div>
@@ -1078,6 +1130,7 @@ export function AlertsPage() {
                                         <option value="slack">Slack</option>
                                         <option value="webhook">Webhook</option>
                                         <option value="teams">Microsoft Teams</option>
+                                        <option value="telegram">Telegram</option>
                                         <option value="pagerduty">PagerDuty</option>
                                     </select>
                                 </div>

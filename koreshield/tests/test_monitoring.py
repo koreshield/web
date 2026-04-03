@@ -288,6 +288,35 @@ class TestAlertManager:
         assert payload["themeColor"] == "FF0000"  # Red for ERROR
 
     @pytest.mark.asyncio
+    async def test_send_telegram_alert_success(self, alert_manager):
+        """Test successful Telegram alert sending."""
+        alert = Alert(
+            rule_name="provider_status_gemini",
+            severity=AlertSeverity.WARNING,
+            message="Provider route changed state",
+            details={"provider": "gemini", "old_status": "healthy", "new_status": "degraded"},
+            timestamp=time.time()
+        )
+
+        alert_manager.config.channels.telegram.enabled = True
+        alert_manager.config.channels.telegram.bot_token = "telegram-token"
+        alert_manager.config.channels.telegram.channel_id = "-1001234567890"
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        alert_manager.client.post = AsyncMock(return_value=mock_response)
+
+        result = await alert_manager.send_alert(alert, AlertChannel.TELEGRAM)
+        assert result is True
+
+        alert_manager.client.post.assert_called_once()
+        call_args = alert_manager.client.post.call_args
+        assert call_args[0][0] == "https://api.telegram.org/bottelegram-token/sendMessage"
+        payload = call_args[1]["json"]
+        assert payload["chat_id"] == "-1001234567890"
+        assert "provider_status_gemini" in payload["text"]
+
+    @pytest.mark.asyncio
     async def test_send_pagerduty_alert_success(self, alert_manager):
         """Test successful PagerDuty alert sending."""
         alert = Alert(
@@ -380,6 +409,33 @@ class TestMonitoringSystem:
         assert isinstance(metrics_text, str)
         # Should contain Prometheus format
         assert any(keyword in metrics_text for keyword in ["# HELP", "# TYPE", "koreshield_"])
+
+    @pytest.mark.asyncio
+    async def test_evaluate_status_snapshot_emits_alerts_on_change(self, monitoring_system):
+        """Test status snapshot alerts only fire on transitions."""
+        snapshots = [
+            {
+                "providers": {"gemini": {"status": "healthy", "base_url": "https://example.com", "error": None}},
+                "components": {"provider_routing": {"status": "operational", "detail": "All healthy"}},
+            },
+            {
+                "providers": {"gemini": {"status": "unhealthy", "base_url": "https://example.com", "error": "timeout"}},
+                "components": {"provider_routing": {"status": "degraded", "detail": "Provider routing degraded"}},
+            },
+        ]
+
+        async def status_getter():
+            return snapshots.pop(0)
+
+        monitoring_system.status_getter = status_getter
+
+        first_pass = await monitoring_system._evaluate_status_snapshot()
+        assert first_pass == []
+
+        second_pass = await monitoring_system._evaluate_status_snapshot()
+        assert len(second_pass) == 2
+        assert any("Provider route 'gemini' changed" in alert.message for alert in second_pass)
+        assert any("Component 'provider_routing' changed" in alert.message for alert in second_pass)
 
     @pytest.mark.asyncio
     async def test_start_stop_monitoring(self, monitoring_system):
