@@ -256,13 +256,13 @@ export default function AuditLogsPage() {
 	const suspendedSessions = sessions.filter((session) => session.state === 'suspended');
 
 	return (
-		<div className="min-h-screen bg-background pt-20 pb-12">
+		<div className="bg-background pt-20 pb-12">
 			<SEOMeta
 				title="Audit & Compliance Logs | KoreShield"
 				description="View and analyze audit logs for compliance and security monitoring"
 			/>
 
-			<div className="max-w-7xl mx-auto px-6">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6">
 				{/* Header */}
 				<div className="mb-8">
 					<div className="flex items-center gap-3 mb-4">
@@ -275,83 +275,83 @@ export default function AuditLogsPage() {
 				</div>
 
 				{/* Stats Cards */}
-				<div className="grid md:grid-cols-4 gap-6 mb-8">
-					<div className="bg-card rounded-xl p-6 border border-border">
+				<div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-8">
+					<div className="bg-card rounded-xl p-3 sm:p-6 border border-border">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm text-muted-foreground">Total Events</span>
-							<Activity className="w-5 h-5 text-blue-500" />
+							<span className="text-xs sm:text-sm text-muted-foreground">Total Events</span>
+							<Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
 						</div>
-						<div className="text-2xl font-bold text-foreground">{logs.length}</div>
+						<div className="text-xl sm:text-2xl font-bold text-foreground">{logs.length}</div>
 					</div>
-					<div className="bg-card rounded-xl p-6 border border-border">
+					<div className="bg-card rounded-xl p-3 sm:p-6 border border-border">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm text-muted-foreground">Success Rate</span>
-							<Activity className="w-5 h-5 text-green-500" />
+							<span className="text-xs sm:text-sm text-muted-foreground">Success Rate</span>
+							<Activity className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
 						</div>
-						<div className="text-2xl font-bold text-foreground">
+						<div className="text-xl sm:text-2xl font-bold text-foreground">
 							{logs.length === 0 ? '0%' : `${Math.round((logs.filter(l => l.status === 'success').length / logs.length) * 100)}%`}
 						</div>
 					</div>
-					<div className="bg-card rounded-xl p-6 border border-border">
+					<div className="bg-card rounded-xl p-3 sm:p-6 border border-border">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm text-muted-foreground">Runtime Tool Events</span>
-							<Workflow className="w-5 h-5 text-amber-500" />
+							<span className="text-xs sm:text-sm text-muted-foreground">Runtime Tool Events</span>
+							<Workflow className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
 						</div>
-						<div className="text-2xl font-bold text-foreground">
+						<div className="text-xl sm:text-2xl font-bold text-foreground">
 							{runtimeToolLogs.length}
 						</div>
 					</div>
-					<div className="bg-card rounded-xl p-6 border border-border">
+					<div className="bg-card rounded-xl p-3 sm:p-6 border border-border">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm text-muted-foreground">Review Required</span>
-							<Eye className="w-5 h-5 text-purple-500" />
+							<span className="text-xs sm:text-sm text-muted-foreground">Review Required</span>
+							<Eye className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
 						</div>
-						<div className="text-2xl font-bold text-foreground">
+						<div className="text-xl sm:text-2xl font-bold text-foreground">
 							{reviewRequiredLogs.length}
 						</div>
 					</div>
 				</div>
 
-				<div className="bg-card rounded-xl p-6 border border-border mb-8">
-					<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+				<div className="bg-card rounded-xl p-4 sm:p-6 border border-border mb-8">
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 						<div>
-							<h2 className="text-lg font-semibold text-foreground">RAG Evidence Visibility</h2>
-							<p className="text-sm text-muted-foreground">
+							<h2 className="text-base sm:text-lg font-semibold text-foreground">RAG Evidence Visibility</h2>
+							<p className="text-xs sm:text-sm text-muted-foreground">
 								Indirect prompt injection findings now log the suspicious excerpt and document reference so reviews can point to concrete evidence instead of a generic flag.
 							</p>
 						</div>
-						<div className="text-right">
+						<div className="text-left sm:text-right">
 							<div className="text-xs uppercase tracking-wide text-muted-foreground">RAG scan events</div>
-							<div className="text-2xl font-bold text-foreground">{ragScanLogs.length}</div>
+							<div className="text-xl sm:text-2xl font-bold text-foreground">{ragScanLogs.length}</div>
 						</div>
 					</div>
 				</div>
 
-				<div className="grid md:grid-cols-3 gap-6 mb-8">
-					<div className="bg-card rounded-xl p-6 border border-border">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
+					<div className="bg-card rounded-xl p-4 sm:p-6 border border-border">
 						<div className="flex items-center gap-3 mb-3">
-							<Shield className="w-5 h-5 text-electric-green" />
-							<h2 className="text-lg font-semibold text-foreground">Tool Runtime Focus</h2>
+							<Shield className="w-4 h-4 sm:w-5 sm:h-5 text-electric-green" />
+							<h2 className="text-base sm:text-lg font-semibold text-foreground">Tool Runtime Focus</h2>
 						</div>
-						<p className="text-sm text-muted-foreground">
+						<p className="text-xs sm:text-sm text-muted-foreground">
 							KoreShield now records server-side tool scan decisions here so runtime enforcement is visible alongside normal audit history.
 						</p>
 					</div>
-					<div className="bg-card rounded-xl p-6 border border-border">
-						<div className="text-sm text-muted-foreground mb-2">Blocked Tool Calls</div>
-						<div className="text-2xl font-bold text-foreground">{blockedToolLogs.length}</div>
-						<p className="text-sm text-muted-foreground mt-2">High-trust failures and low-trust delegated tool calls are highlighted here.</p>
+					<div className="bg-card rounded-xl p-4 sm:p-6 border border-border">
+						<div className="text-xs sm:text-sm text-muted-foreground mb-2">Blocked Tool Calls</div>
+						<div className="text-xl sm:text-2xl font-bold text-foreground">{blockedToolLogs.length}</div>
+						<p className="text-xs sm:text-sm text-muted-foreground mt-2">High-trust failures and low-trust delegated tool calls are highlighted here.</p>
 					</div>
-					<div className="bg-card rounded-xl p-6 border border-border">
-						<div className="text-sm text-muted-foreground mb-2">Unique Actors</div>
-						<div className="text-2xl font-bold text-foreground">{new Set(logs.map(l => l.user_email)).size}</div>
-						<p className="text-sm text-muted-foreground mt-2">Includes API-key scoped and user-scoped runtime events.</p>
+					<div className="bg-card rounded-xl p-4 sm:p-6 border border-border">
+						<div className="text-xs sm:text-sm text-muted-foreground mb-2">Unique Actors</div>
+						<div className="text-xl sm:text-2xl font-bold text-foreground">{new Set(logs.map(l => l.user_email)).size}</div>
+						<p className="text-xs sm:text-sm text-muted-foreground mt-2">Includes API-key scoped and user-scoped runtime events.</p>
 					</div>
 				</div>
 
-				<div className="grid lg:grid-cols-2 gap-6 mb-8">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
 					<div className="bg-card rounded-xl border border-border overflow-hidden">
-						<div className="px-6 py-4 border-b border-border flex items-center justify-between">
+						<div className="px-4 sm:px-6 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 							<div>
 								<h2 className="text-lg font-semibold text-foreground">Pending Runtime Reviews</h2>
 								<p className="text-sm text-muted-foreground">High-risk tool calls waiting for explicit approval or rejection.</p>
@@ -404,12 +404,12 @@ export default function AuditLogsPage() {
 					</div>
 
 					<div className="bg-card rounded-xl border border-border overflow-hidden">
-						<div className="px-6 py-4 border-b border-border">
-							<h2 className="text-lg font-semibold text-foreground">Runtime Sessions</h2>
-							<p className="text-sm text-muted-foreground">KoreShield session governance for MCP-style or agent-driven tool execution.</p>
+						<div className="px-4 sm:px-6 py-4 border-b border-border">
+							<h2 className="text-base sm:text-lg font-semibold text-foreground">Runtime Sessions</h2>
+							<p className="text-xs sm:text-sm text-muted-foreground">KoreShield session governance for MCP-style or agent-driven tool execution.</p>
 						</div>
-						<div className="p-6">
-							<div className="grid grid-cols-3 gap-4 mb-4">
+						<div className="p-4 sm:p-6">
+							<div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4">
 								<div>
 									<div className="text-xs uppercase tracking-wide text-muted-foreground">Active</div>
 									<div className="text-2xl font-bold text-foreground">{activeSessions.length}</div>
@@ -451,56 +451,58 @@ export default function AuditLogsPage() {
 				</div>
 
 				{/* Actions Bar */}
-				<div className="bg-card rounded-xl p-6 border border-border mb-6">
-					<div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-						<div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-							<div className="relative w-full sm:w-96">
-								<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+				<div className="bg-card rounded-xl p-4 sm:p-6 border border-border mb-6">
+					<div className="flex flex-col gap-4">
+						<div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full">
+							<div className="relative flex-1">
+								<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
 								<input
 									type="text"
 									placeholder="Search logs by user, action, IP..."
 									value={search}
 									onChange={(e) => setSearch(e.target.value)}
-									className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-electric-green"
+									className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-electric-green text-sm"
 								/>
 							</div>
 							<button
 								onClick={() => setShowFilters(!showFilters)}
-								className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+								className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted/50 transition-colors text-sm w-full sm:w-auto"
 							>
-								<Filter className="w-5 h-5" />
-								Filters {showFilters && <span className="text-xs">▼</span>}
+								<Filter className="w-4 h-4 sm:w-5 sm:h-5" />
+								<span className="hidden sm:inline">Filters</span>
+								<span className="sm:hidden">Filter</span>
+								{showFilters && <span className="text-xs">▼</span>}
 							</button>
 						</div>
-						<div className="flex gap-2">
+						<div className="flex gap-2 flex-wrap">
 							<button
 								onClick={() => handleExport('csv')}
-								className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg hover:bg-muted/50 transition-colors"
+								className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-card border border-border rounded-lg hover:bg-muted/50 transition-colors text-sm flex-1 sm:flex-none"
 							>
-								<Download className="w-5 h-5" />
-								CSV
+								<Download className="w-4 h-4 sm:w-5 sm:h-5" />
+								<span className="hidden sm:inline">CSV</span>
 							</button>
 							<button
 								onClick={() => handleExport('json')}
-								className="inline-flex items-center gap-2 px-4 py-2 bg-electric-green hover:bg-electric-green/90 text-black font-medium rounded-lg transition-colors"
+								className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-electric-green hover:bg-electric-green/90 text-black font-medium rounded-lg transition-colors text-sm flex-1 sm:flex-none"
 							>
-								<Download className="w-5 h-5" />
-								JSON
+								<Download className="w-4 h-4 sm:w-5 sm:h-5" />
+								<span className="hidden sm:inline">JSON</span>
 							</button>
 						</div>
 					</div>
 
 					{/* Filters Panel */}
 					{showFilters && (
-						<div className="mt-4 pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-4">
+						<div className="mt-4 pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
 							<div>
-								<label className="block text-sm font-medium text-muted-foreground mb-2">
+								<label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-2">
 									Action Type
 								</label>
 								<select
 									value={filterAction}
 									onChange={(e) => setFilterAction(e.target.value)}
-									className="w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-electric-green"
+									className="w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-electric-green text-sm"
 								>
 									<option value="all">All Actions</option>
 									<option value="created">Created</option>
@@ -515,13 +517,13 @@ export default function AuditLogsPage() {
 								</select>
 							</div>
 							<div>
-								<label className="block text-sm font-medium text-muted-foreground mb-2">
+								<label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-2">
 									Status
 								</label>
 								<select
 									value={filterStatus}
 									onChange={(e) => setFilterStatus(e.target.value)}
-									className="w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-electric-green"
+									className="w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-electric-green text-sm"
 								>
 									<option value="all">All Statuses</option>
 									<option value="success">Success</option>
@@ -551,41 +553,41 @@ export default function AuditLogsPage() {
 				{/* Audit Logs Table */}
 				<div className="bg-card rounded-xl border border-border overflow-hidden">
 					{loading ? (
-						<div className="p-12 text-center text-muted-foreground">Loading audit logs...</div>
+						<div className="p-12 text-center text-muted-foreground text-sm">Loading audit logs...</div>
 					) : errorMessage ? (
-						<div className="p-12 text-center text-red-500">{errorMessage}</div>
+						<div className="p-12 text-center text-red-500 text-sm">{errorMessage}</div>
 					) : filteredLogs.length === 0 ? (
 						<div className="p-12 text-center">
-							<FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-							<p className="text-muted-foreground">No audit logs found</p>
+							<FileText className="w-8 h-8 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-4" />
+							<p className="text-xs sm:text-sm text-muted-foreground">No audit logs found</p>
 						</div>
 					) : (
-						<div className="overflow-x-auto">
+						<div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
 							<table className="w-full">
 								<thead className="bg-muted border-b border-border">
 									<tr>
-										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
 											Timestamp
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
 											User
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
 											Action
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
 											Resource
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
 											Summary
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
 											Status
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
 											Severity
 										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+										<th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
 											IP Address
 										</th>
 									</tr>
@@ -597,28 +599,28 @@ export default function AuditLogsPage() {
 											className={`hover:bg-muted/50 ${log.severity === 'critical' ? 'bg-red-50/30 dark:bg-red-900/10' : ''
 												}`}
 										>
-											<td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+											<td className="px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-foreground">
 												{format(new Date(log.timestamp), 'MMM d, HH:mm:ss')}
 											</td>
 											<td className="px-6 py-4 whitespace-nowrap">
 												<div className="flex items-center gap-2">
-													<User className="w-4 h-4 text-muted-foreground" />
-													<span className="text-sm text-foreground">{log.user_email}</span>
+													<User className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+													<span className="text-xs sm:text-sm text-foreground break-all">{log.user_email}</span>
 												</div>
 											</td>
 											<td className="px-6 py-4 whitespace-nowrap">
-												<code className="text-sm text-muted-foreground font-mono bg-muted px-2 py-1 rounded">
+												<code className="text-xs sm:text-sm text-muted-foreground font-mono bg-muted px-2 py-1 rounded">
 													{log.action}
 												</code>
 											</td>
-											<td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+											<td className="px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-muted-foreground">
 												<div>{log.resource_type}</div>
-												{log.tool_name && <div className="text-xs text-muted-foreground font-mono mt-1">{log.tool_name}</div>}
+												{log.tool_name && <div className="text-xs text-muted-foreground font-mono mt-1 break-all">{log.tool_name}</div>}
 											</td>
-											<td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+											<td className="px-6 py-4 text-xs sm:text-sm text-muted-foreground">
 												{log.summary ? (
 													<div className="space-y-1">
-														<div className="font-medium text-foreground">{log.summary}</div>
+														<div className="font-medium text-foreground break-words">{log.summary}</div>
 														{log.risk_class && (
 															<span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${getSeverityColor(log.risk_class)}`}>
 																{log.risk_class}
@@ -639,7 +641,7 @@ export default function AuditLogsPage() {
 													{log.severity}
 												</span>
 											</td>
-											<td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground font-mono">
+											<td className="px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-muted-foreground font-mono break-all">
 												{log.ip_address}
 											</td>
 										</tr>
@@ -651,10 +653,9 @@ export default function AuditLogsPage() {
 				</div>
 
 				{/* Footer Info */}
-				<div className="mt-6 text-sm text-muted-foreground">
+				<div className="mt-6 text-xs sm:text-sm text-muted-foreground">
 					<p>
-						Showing {filteredLogs.length} of {logs.length} audit log entries.
-						Retention policy: 90 days for standard logs, 365 days for compliance logs.
+						Showing {filteredLogs.length} of {logs.length} audit log entries. Retention policy: 90 days for standard logs, 365 days for compliance logs.
 					</p>
 				</div>
 			</div>
