@@ -569,8 +569,15 @@ export default function StatusPage() {
               responseTimeMs: provider.response_time_ms,
               baseUrl: provider.base_url,
               missingEnvVars: provider.missing_env_vars || [],
-              error: provider.error || null,
-            })),
+            })).sort((a, b) => {
+              const order = ['gemini', 'azure_openai', 'deepseek'];
+              const idxA = order.indexOf(a.id);
+              const idxB = order.indexOf(b.id);
+              if (idxA === -1 && idxB === -1) return a.id.localeCompare(b.id);
+              if (idxA === -1) return 1;
+              if (idxB === -1) return -1;
+              return idxA - idxB;
+            }),
         );
         setComponents(
           buildDefaultComponents(now).map((component) => {
