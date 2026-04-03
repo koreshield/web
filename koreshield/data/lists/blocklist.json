@@ -1,6 +1,6 @@
 {
   "list_type": "blocklist",
-  "last_updated": "2026-04-03T01:38:48.336515",
+  "last_updated": "2026-04-03T08:55:13.929348",
   "entries": [
     {
       "value": "malicious.com",
@@ -127,7 +127,7 @@
       "entry_type": "keyword",
       "reason": "Blocked keyword",
       "added_by": "system",
-      "created_at": "2026-04-03T01:38:48.336512",
+      "created_at": "2026-04-03T08:55:13.929345",
       "expires_at": null,
       "metadata": {},
       "is_active": true
