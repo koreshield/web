@@ -15,11 +15,11 @@ const team = [
 		name: 'Isaac Emmanuel',
 		role: 'Co-founder & CTO',
 		bio: '15+ years full-stack engineering. Architecting scalable security infrastructure.',
-		image: null,
+		image: '/team/isaac-emmanuel.jpg',
 	},
 	{
 		name: 'Ahmed Lanre',
-		role: 'Security Engineer (Blue Team)',
+		role: 'Co-founder & Security Engineer (Blue Team)',
 		bio: 'Blue team security engineer focused on detection coverage, response workflows, and operational hardening.',
 		image: null,
 	},
@@ -190,9 +190,17 @@ export default function AboutPage() {
 								className="group relative w-full sm:w-72 bg-white/[0.03] border border-white/[0.07] rounded-2xl p-8 text-center hover:border-electric-green/30 hover:bg-white/[0.06] transition-all duration-300 hover:-translate-y-1"
 							>
 								<div className="relative w-20 h-20 mx-auto mb-6">
-									<div className="w-20 h-20 rounded-full bg-gradient-to-br from-electric-green to-blue-500 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-emerald-500/20">
-										{member.name.split(' ').map((n) => n[0]).join('')}
-									</div>
+									{member.image ? (
+										<img
+											src={member.image}
+											alt={member.name}
+											className="w-20 h-20 rounded-full object-cover object-center shadow-lg shadow-emerald-500/20"
+										/>
+									) : (
+										<div className="w-20 h-20 rounded-full bg-gradient-to-br from-electric-green to-blue-500 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-emerald-500/20">
+											{member.name.split(' ').map((n) => n[0]).join('')}
+										</div>
+									)}
 									<div className="absolute inset-0 rounded-full bg-gradient-to-br from-electric-green to-blue-500 opacity-20 blur-lg scale-110 group-hover:opacity-40 transition-opacity" />
 								</div>
 								<h3 className="text-lg font-bold text-white mb-2">{member.name}</h3>
