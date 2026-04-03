@@ -11,15 +11,44 @@ interface Policy {
     severity: 'low' | 'medium' | 'high' | 'critical';
     roles: string[];
     enabled?: boolean;
-    conditions?: Record<string, any>;
+    conditions?: Record<string, unknown>;
     actions?: string[];
     created_at?: string;
     updated_at?: string;
 }
 
+type PolicyRole = 'admin' | 'moderator' | 'user';
+
+type CreatePolicyForm = {
+    id: string;
+    name: string;
+    description: string;
+    severity: Policy['severity'];
+    roles: PolicyRole[];
+};
+
+const DEFAULT_POLICY_FORM: CreatePolicyForm = {
+    id: '',
+    name: '',
+    description: '',
+    severity: 'medium',
+    roles: ['admin', 'moderator', 'user'],
+};
+
+const AVAILABLE_ROLES: PolicyRole[] = ['admin', 'moderator', 'user'];
+
+function slugifyPolicyId(value: string) {
+    return value
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
 export function PoliciesPage() {
     const [, setEditingPolicy] = useState<Policy | null>(null);
-    const [, setShowCreateModal] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [formData, setFormData] = useState<CreatePolicyForm>(DEFAULT_POLICY_FORM);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const queryClient = useQueryClient();
     const { addToast } = useToast();
@@ -32,6 +61,29 @@ export function PoliciesPage() {
             return Array.isArray(response) ? response : [];
         },
         refetchInterval: 30000,
+    });
+    const hasPermissionError =
+        error instanceof Error && error.message.toLowerCase().includes('insufficient permissions');
+
+    const createMutation = useMutation({
+        mutationFn: (policy: CreatePolicyForm) =>
+            api.createPolicy({
+                id: policy.id,
+                name: policy.name,
+                description: policy.description,
+                severity: policy.severity,
+                roles: policy.roles,
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['policies'] });
+            addToast({ type: 'success', message: 'Policy created successfully' });
+            setShowCreateModal(false);
+            setFormData(DEFAULT_POLICY_FORM);
+        },
+        onError: (mutationError: unknown) => {
+            const message = mutationError instanceof Error ? mutationError.message : 'Failed to create policy';
+            addToast({ type: 'error', message });
+        },
     });
 
     // Delete policy mutation
@@ -55,6 +107,39 @@ export function PoliciesPage() {
             case 'low': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
             default: return 'bg-muted text-muted-foreground border-border';
         }
+    };
+
+    const handleNameChange = (value: string) => {
+        const nextId = slugifyPolicyId(value);
+        setFormData((previous) => ({
+            ...previous,
+            name: value,
+            id: previous.id === '' || previous.id === slugifyPolicyId(previous.name) ? nextId : previous.id,
+        }));
+    };
+
+    const toggleRole = (role: PolicyRole) => {
+        setFormData((previous) => {
+            const hasRole = previous.roles.includes(role);
+            const roles = hasRole
+                ? previous.roles.filter((entry) => entry !== role)
+                : [...previous.roles, role];
+            return {
+                ...previous,
+                roles,
+            };
+        });
+    };
+
+    const handleCreatePolicy = () => {
+        if (!formData.id || !formData.name || !formData.description || formData.roles.length === 0) {
+            addToast({
+                type: 'warning',
+                message: 'Complete the policy form before creating it',
+            });
+            return;
+        }
+        createMutation.mutate(formData);
     };
 
     return (
@@ -116,6 +201,12 @@ export function PoliciesPage() {
 
                 {/* Policies Grid */}
                 <div className="grid grid-cols-1 gap-6">
+                    {hasPermissionError && (
+                        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
+                            Policy management is only available to workspace owners and admins. If this is your first KoreShield workspace,
+                            sign out and sign back in once so your account can refresh its role before trying again.
+                        </div>
+                    )}
                     {isLoading ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -239,6 +330,136 @@ export function PoliciesPage() {
                     )}
                 </div>
             </main>
+
+            {showCreateModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                    <div className="w-full max-w-2xl rounded-lg border border-border bg-card p-6 shadow-xl">
+                        <div className="mb-6 flex items-start justify-between gap-4">
+                            <div>
+                                <h2 className="text-xl font-semibold">Create Security Policy</h2>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    Add a policy that can be referenced and managed from the KoreShield dashboard.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setShowCreateModal(false);
+                                    setFormData(DEFAULT_POLICY_FORM);
+                                }}
+                                className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                aria-label="Close create policy dialog"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label htmlFor="policy-name" className="mb-2 block text-sm font-medium">Policy name</label>
+                                <input
+                                    id="policy-name"
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={(event) => handleNameChange(event.target.value)}
+                                    placeholder="Protect prompt leakage"
+                                    className="w-full rounded-lg border border-border bg-muted px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="policy-id" className="mb-2 block text-sm font-medium">Policy ID</label>
+                                <input
+                                    id="policy-id"
+                                    type="text"
+                                    value={formData.id}
+                                    onChange={(event) => setFormData((previous) => ({ ...previous, id: slugifyPolicyId(event.target.value) }))}
+                                    placeholder="protect-prompt-leakage"
+                                    className="w-full rounded-lg border border-border bg-muted px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="policy-description" className="mb-2 block text-sm font-medium">Description</label>
+                                <textarea
+                                    id="policy-description"
+                                    value={formData.description}
+                                    onChange={(event) => setFormData((previous) => ({ ...previous, description: event.target.value }))}
+                                    rows={4}
+                                    placeholder="Explain what this policy is intended to protect and when it should apply."
+                                    className="w-full rounded-lg border border-border bg-muted px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
+
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <label htmlFor="policy-severity" className="mb-2 block text-sm font-medium">Severity</label>
+                                    <select
+                                        id="policy-severity"
+                                        value={formData.severity}
+                                        onChange={(event) =>
+                                            setFormData((previous) => ({
+                                                ...previous,
+                                                severity: event.target.value as Policy['severity'],
+                                            }))
+                                        }
+                                        className="w-full rounded-lg border border-border bg-muted px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    >
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium">Allowed roles</label>
+                                    <div className="flex flex-wrap gap-2 rounded-lg border border-border bg-muted p-3">
+                                        {AVAILABLE_ROLES.map((role) => {
+                                            const selected = formData.roles.includes(role);
+                                            return (
+                                                <button
+                                                    key={role}
+                                                    type="button"
+                                                    onClick={() => toggleRole(role)}
+                                                    className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+                                                        selected
+                                                            ? 'border-primary bg-primary/10 text-primary'
+                                                            : 'border-border bg-background text-muted-foreground hover:text-foreground'
+                                                    }`}
+                                                >
+                                                    {role}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowCreateModal(false);
+                                    setFormData(DEFAULT_POLICY_FORM);
+                                }}
+                                className="flex-1 rounded-lg bg-muted px-4 py-2 hover:bg-muted/80"
+                                disabled={createMutation.isPending}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleCreatePolicy}
+                                className="flex-1 rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+                                disabled={createMutation.isPending}
+                            >
+                                {createMutation.isPending ? 'Creating...' : 'Create policy'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

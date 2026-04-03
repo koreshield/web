@@ -15,7 +15,7 @@ export function Layout() {
 	const { isAuthenticated, user, isHydrating } = useAuthState();
 	const { theme } = useTheme();
 	const logoSrc = theme === 'light' ? '/logo/SVG/Black.svg' : '/logo/SVG/White.svg';
-	const isAdmin = user?.role === 'admin';
+	const isAdmin = user?.role === 'admin' || user?.role === 'owner' || user?.role === 'superuser';
 
 	const closeMobile = () => setMobileMenuOpen(false);
 
