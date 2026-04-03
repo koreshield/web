@@ -49,7 +49,7 @@ class SecurityConfig(BaseModel):
     features: Features = Features()
 
     @field_validator("lists", mode="before")
-    def _default_lists(cls, value):
+    def _default_lists(cls, value):  # noqa: N805 - Pydantic validator signature
         return value or {}
 
 
@@ -109,6 +109,15 @@ class TelegramChannel(BaseModel):
     bot_token: str = Field(default_factory=lambda: os.getenv("TELEGRAM_BOT_TOKEN", ""))
     channel_id: str = Field(default_factory=lambda: os.getenv("TELEGRAM_CHANNEL_ID", ""))
     message_thread_id: Optional[str] = Field(default_factory=lambda: os.getenv("TELEGRAM_MESSAGE_THREAD_ID", "") or None)
+    health_digest_enabled: bool = Field(
+        default_factory=lambda: os.getenv("TELEGRAM_HEALTH_DIGEST_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on"}
+    )
+    health_digest_interval_minutes: int = Field(
+        default_factory=lambda: int(os.getenv("TELEGRAM_HEALTH_DIGEST_INTERVAL_MINUTES", "15") or "15")
+    )
+    include_payload: bool = Field(
+        default_factory=lambda: os.getenv("TELEGRAM_INCLUDE_ALERT_PAYLOAD", "true").strip().lower() in {"1", "true", "yes", "on"}
+    )
 
 
 class PagerDutyChannel(BaseModel):

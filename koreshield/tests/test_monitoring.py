@@ -2,15 +2,21 @@
 Tests for KoreShield monitoring and alerting system.
 """
 
-import pytest
-import asyncio
 import time
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from src.koreshield.config import AlertingConfig
 from src.koreshield.monitoring import (
-    MetricsCollector, AlertManager, AlertRule, Alert,
-    AlertSeverity, AlertChannel, MonitoringSystem
+    Alert,
+    AlertChannel,
+    AlertManager,
+    AlertRule,
+    AlertSeverity,
+    MetricsCollector,
+    MonitoringSystem,
 )
-from src.koreshield.config import AlertingConfig, MonitoringConfig
 
 
 class TestMetricsCollector:
@@ -317,6 +323,30 @@ class TestAlertManager:
         assert "provider_status_gemini" in payload["text"]
         assert "old_status" in payload["text"]
 
+    def test_build_telegram_message_respects_payload_toggle(self, alert_manager):
+        """Telegram payload block can be disabled for cleaner operational alerts."""
+        alert = Alert(
+            rule_name="telegram_health_digest",
+            severity=AlertSeverity.INFO,
+            message="Live health digest",
+            details={
+                "requests_total": 120,
+                "requests_blocked": 4,
+                "attacks_detected": 4,
+                "provider_count": 3,
+                "healthy_provider_count": 3,
+                "degraded_provider_count": 0,
+            },
+            timestamp=time.time(),
+        )
+
+        alert_manager.config.channels.telegram.include_payload = False
+        message = alert_manager._build_telegram_message(alert)
+
+        assert "Requests total" in message
+        assert "Healthy providers" in message
+        assert "<b>Payload:</b>" not in message
+
     @pytest.mark.asyncio
     async def test_notify_operational_event_dispatches_enabled_channels(self):
         """Operational events should dispatch immediately to enabled channels."""
@@ -473,6 +503,52 @@ class TestMonitoringSystem:
         assert len(second_pass) == 2
         assert any("Provider route 'gemini' changed" in alert.message for alert in second_pass)
         assert any("Component 'provider_routing' changed" in alert.message for alert in second_pass)
+
+    @pytest.mark.asyncio
+    async def test_health_digest_dispatches_periodically(self, monitoring_system):
+        """Health digests should send to Telegram on schedule with live stats."""
+        monitoring_system.notify_operational_event = AsyncMock(return_value=None)
+        monitoring_system.config.alerts.channels.telegram.enabled = True
+        monitoring_system.config.alerts.channels.telegram.health_digest_enabled = True
+        monitoring_system.config.alerts.channels.telegram.health_digest_interval_minutes = 15
+
+        snapshot = {
+            "providers": {
+                "gemini": {"status": "healthy"},
+                "deepseek": {"status": "healthy"},
+            },
+            "components": {
+                "provider_routing": {"status": "operational"},
+            },
+            "statistics": {
+                "requests_total": 320,
+                "requests_blocked": 12,
+                "attacks_detected": 12,
+                "errors": 0,
+            },
+        }
+
+        await monitoring_system._maybe_send_telegram_health_digest(snapshot)
+
+        monitoring_system.notify_operational_event.assert_awaited_once()
+        kwargs = monitoring_system.notify_operational_event.await_args.kwargs
+        assert kwargs["event_name"] == "telegram_health_digest"
+        assert kwargs["details"]["requests_total"] == 320
+        assert kwargs["details"]["healthy_provider_count"] == 2
+
+    @pytest.mark.asyncio
+    async def test_health_digest_skips_until_interval_elapsed(self, monitoring_system):
+        """Health digests should not spam every monitoring loop."""
+        monitoring_system.notify_operational_event = AsyncMock(return_value=None)
+        monitoring_system.config.alerts.channels.telegram.enabled = True
+        monitoring_system.config.alerts.channels.telegram.health_digest_enabled = True
+        monitoring_system.config.alerts.channels.telegram.health_digest_interval_minutes = 15
+        monitoring_system._last_telegram_digest_at = time.time()
+
+        snapshot = {"providers": {}, "components": {}, "statistics": {}}
+        await monitoring_system._maybe_send_telegram_health_digest(snapshot)
+
+        monitoring_system.notify_operational_event.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_start_stop_monitoring(self, monitoring_system):
