@@ -248,21 +248,26 @@ class RAGContextDetector:
         
         # Additional RAG-specific pattern matching
         rag_indicators = []
-        rag_excerpts = []
+        evidence_refs = []
         
         for pattern in self.compiled_patterns:
             matches = pattern.finditer(normalized_content)
             for match in matches:
-                matched_text = match.group(0)
                 rag_indicators.append(f"rag_pattern_{pattern.pattern[:30]}")
-                
-                # Extract excerpt with context
-                start = max(0, match.start() - 50)
-                end = min(len(normalized_content), match.end() + 50)
-                excerpt = normalized_content[start:end]
-                if len(excerpt) > self.max_excerpt_length:
-                    excerpt = excerpt[:self.max_excerpt_length] + "..."
-                rag_excerpts.append(excerpt)
+                evidence_refs.append(
+                    self._build_evidence_ref(
+                        original_content=doc.content,
+                        normalized_content=normalized_content,
+                        match_start=match.start(),
+                        match_end=match.end(),
+                        matched_text=match.group(0),
+                    )
+                )
+
+        if not evidence_refs and detection_result.get("is_attack"):
+            evidence_refs.append(
+                self._build_fallback_evidence_ref(doc.content, normalized_content)
+            )
         
         
         # Combine indicators from both detectors
@@ -333,7 +338,7 @@ class RAGContextDetector:
             threat_type=detection_result.get("attack_type", "indirect_injection"),
             confidence=combined_confidence,
             indicators=indicator_strings,
-            excerpts=rag_excerpts if rag_excerpts else detection_result.get("matched_patterns", [])[:3],
+            excerpts=[ref["excerpt"] for ref in evidence_refs[:3]],
             injection_vector=injection_vector,
             operational_target=operational_target,
             severity=severity,
@@ -346,10 +351,94 @@ class RAGContextDetector:
                 "high_directive_density": directive_score >= 0.18,
                 "matched_on_normalized_text": normalized_content != doc.content,
                 "threat_indicators": indicator_strings,
+                "evidence_refs": evidence_refs,
+                "evidence_count": len(evidence_refs),
                 "normalization_layers": normalized["layers"],
                 "document_metadata": doc.metadata,
             }
         )
+
+    def _build_evidence_ref(
+        self,
+        original_content: str,
+        normalized_content: str,
+        match_start: int,
+        match_end: int,
+        matched_text: str,
+    ) -> Dict[str, Any]:
+        """Build a user-facing reference for a suspicious document segment."""
+        context_start = max(0, match_start - 50)
+        context_end = min(len(normalized_content), match_end + 50)
+        normalized_excerpt = normalized_content[context_start:context_end]
+        normalized_excerpt = self._truncate_excerpt(normalized_excerpt)
+
+        original_match_start = self._find_original_match_start(original_content, matched_text)
+        if original_match_start is not None:
+            original_match_end = min(len(original_content), original_match_start + len(matched_text))
+            original_context_start = max(0, original_match_start - 50)
+            original_context_end = min(len(original_content), original_match_end + 50)
+            excerpt = self._truncate_excerpt(original_content[original_context_start:original_context_end])
+            return {
+                "excerpt": excerpt,
+                "match_text": matched_text,
+                "location": {
+                    "start": original_match_start,
+                    "end": original_match_end,
+                    "basis": "original",
+                },
+                "normalized_location": {
+                    "start": match_start,
+                    "end": match_end,
+                },
+            }
+
+        return {
+            "excerpt": normalized_excerpt,
+            "match_text": matched_text,
+            "location": {
+                "start": match_start,
+                "end": match_end,
+                "basis": "normalized",
+            },
+            "normalized_location": {
+                "start": match_start,
+                "end": match_end,
+            },
+        }
+
+    def _build_fallback_evidence_ref(self, original_content: str, normalized_content: str) -> Dict[str, Any]:
+        """Provide a stable snippet when no regex-based evidence span is available."""
+        base_excerpt = original_content or normalized_content
+        excerpt = self._truncate_excerpt(base_excerpt[: self.max_excerpt_length])
+        basis = "original" if original_content else "normalized"
+        return {
+            "excerpt": excerpt,
+            "match_text": excerpt,
+            "location": {
+                "start": 0,
+                "end": min(len(base_excerpt), self.max_excerpt_length),
+                "basis": basis,
+            },
+            "normalized_location": {
+                "start": 0,
+                "end": min(len(normalized_content), self.max_excerpt_length),
+            },
+        }
+
+    def _find_original_match_start(self, original_content: str, matched_text: str) -> Optional[int]:
+        """Find a best-effort original-content position for a normalized match."""
+        if not original_content or not matched_text:
+            return None
+        exact_match = re.search(re.escape(matched_text), original_content, re.IGNORECASE)
+        if exact_match:
+            return exact_match.start()
+        return None
+
+    def _truncate_excerpt(self, excerpt: str) -> str:
+        """Trim excerpts to the configured max length without dropping context completely."""
+        if len(excerpt) <= self.max_excerpt_length:
+            return excerpt
+        return excerpt[: self.max_excerpt_length].rstrip() + "..."
 
     def _tokenize(self, text: str) -> Set[str]:
         """Tokenize text for lightweight query/document similarity checks."""
