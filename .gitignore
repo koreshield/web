@@ -311,6 +311,7 @@ OPEN_SOURCE_SETUP.md
 GITHUB_WORKFLOW_EXPLAINED.md
 *.md
 !README.md
+!koreshield-web/how-to.md
 *.tar.gz
 koreshield/.env.railway_backup
 koreshield/prod.env

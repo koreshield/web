@@ -66,6 +66,7 @@ config/*.yaml
 *.sh
 *.bash
 *.zsh
+!deploy.sh
 
 # Environment variables
 .env
