@@ -950,7 +950,7 @@ class KoreShieldProxy:
     def _queue_request_log(self, log_data: dict) -> None:
         """Record a request log immediately in memory and persist asynchronously."""
         self._append_audit_log(self._build_request_audit_entry(log_data))
-        self._queue_request_log(log_data)
+        asyncio.create_task(self._log_request_async(log_data))
 
     async def _authenticate_request(self, request: Request) -> dict:
         """
