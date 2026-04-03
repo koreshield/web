@@ -630,7 +630,7 @@ export function RAGSecurityPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="bg-background">
 			<SEOMeta
 				title="RAG Security Scanner | KoreShield"
 				description="Scan retrieved documents for indirect prompt injection attacks in RAG systems"
@@ -639,31 +639,31 @@ export function RAGSecurityPage() {
 			{/* Header */}
 			<header className="border-b border-border bg-card">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex items-start justify-between">
+					<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
 						<div>
-							<h1 className="text-3xl font-bold mb-2">RAG Security Scanner</h1>
-							<p className="text-muted-foreground">
+							<h1 className="text-2xl sm:text-3xl font-bold mb-2">RAG Security Scanner</h1>
+							<p className="text-sm sm:text-base text-muted-foreground">
 								Detect indirect prompt injection attacks in retrieved documents
 							</p>
 						</div>
-						<Shield className="w-12 h-12 text-primary opacity-50" />
+						<Shield className="hidden sm:block w-12 h-12 text-primary opacity-50 flex-shrink-0" />
 					</div>
 				</div>
 			</header>
 
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
 					{/* Left Column - Document Input */}
-					<div className="lg:col-span-2 space-y-6">
+					<div className="lg:col-span-2 space-y-4 sm:space-y-6">
 						{/* Document Input Section */}
-						<div className="bg-card border border-border rounded-lg p-6">
-							<h2 className="text-xl font-semibold mb-4">Add Documents</h2>
+						<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+							<h2 className="text-lg sm:text-xl font-semibold mb-4">Add Documents</h2>
 
 							{/* Tabs */}
-							<div className="flex gap-2 mb-4 border-b border-border">
+							<div className="flex flex-wrap gap-2 mb-4 border-b border-border overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
 								<button
 									onClick={() => setActiveTab('upload')}
-									className={`px-4 py-2 font-medium transition-colors border-b-2 ${activeTab === 'upload'
+									className={`px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === 'upload'
 											? 'border-primary text-primary'
 											: 'border-transparent text-muted-foreground hover:text-foreground'
 										}`}
@@ -673,7 +673,7 @@ export function RAGSecurityPage() {
 								</button>
 								<button
 									onClick={() => setActiveTab('paste')}
-									className={`px-4 py-2 font-medium transition-colors border-b-2 ${activeTab === 'paste'
+									className={`px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === 'paste'
 											? 'border-primary text-primary'
 											: 'border-transparent text-muted-foreground hover:text-foreground'
 										}`}
@@ -683,7 +683,7 @@ export function RAGSecurityPage() {
 								</button>
 								<button
 									onClick={() => setActiveTab('template')}
-									className={`px-4 py-2 font-medium transition-colors border-b-2 ${activeTab === 'template'
+									className={`px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === 'template'
 											? 'border-primary text-primary'
 											: 'border-transparent text-muted-foreground hover:text-foreground'
 										}`}
@@ -705,9 +705,9 @@ export function RAGSecurityPage() {
 												onChange={handleFileUpload}
 												className="hidden"
 											/>
-											<div className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
-												<Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-												<p className="text-sm font-medium mb-1">Click to upload files</p>
+											<div className="border-2 border-dashed border-border rounded-lg p-6 sm:p-8 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
+												<Upload className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 sm:mb-4 text-muted-foreground" />
+												<p className="text-xs sm:text-sm font-medium mb-1">Click to upload files</p>
 												<p className="text-xs text-muted-foreground">
 													Supports TXT, MD, JSON, CSV, PDF, DOCX (max 10MB per file)
 												</p>
@@ -728,7 +728,7 @@ export function RAGSecurityPage() {
 										<button
 											onClick={handleAddPasteContent}
 											disabled={!pasteContent.trim()}
-											className="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+											className="mt-3 w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 										>
 											Add Document
 										</button>
@@ -737,14 +737,14 @@ export function RAGSecurityPage() {
 
 								{activeTab === 'template' && (
 									<div className="space-y-4">
-										<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+										<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
 											{Object.entries(CRM_TEMPLATES).map(([key, template]) => {
 												const Icon = template.icon;
 												return (
 													<button
 														key={key}
 														onClick={() => setSelectedTemplate(key as keyof typeof CRM_TEMPLATES)}
-														className={`p-4 border rounded-lg text-left transition-colors ${selectedTemplate === key
+														className={`p-3 sm:p-4 border rounded-lg text-left transition-colors ${selectedTemplate === key
 																? 'border-primary bg-primary/10'
 																: 'border-border hover:border-primary/50'
 															}`}
@@ -782,7 +782,7 @@ export function RAGSecurityPage() {
 												))}
 												<button
 													onClick={handleAddTemplate}
-													className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+								className="w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
 												>
 													Add CRM Record
 												</button>
@@ -794,8 +794,8 @@ export function RAGSecurityPage() {
 						</div>
 
 						{/* User Query (Optional) */}
-						<div className="bg-card border border-border rounded-lg p-6">
-							<h2 className="text-xl font-semibold mb-4">User Query (Optional)</h2>
+						<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+						<h2 className="text-lg sm:text-xl font-semibold mb-4">User Query (Optional)</h2>
 							<p className="text-sm text-muted-foreground mb-4">
 								Enter the user's query to check for prompt injection attempts
 							</p>
@@ -810,7 +810,7 @@ export function RAGSecurityPage() {
 
 						{/* Document List */}
 						{documents.length > 0 && (
-							<div className="bg-card border border-border rounded-lg p-6">
+						<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
 								<div className="flex items-center justify-between mb-4">
 									<h2 className="text-xl font-semibold">
 										Documents ({documents.length})
@@ -854,7 +854,7 @@ export function RAGSecurityPage() {
 						<button
 							onClick={handleScan}
 							disabled={loading || documents.length === 0}
-							className="w-full px-6 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+							className="w-full px-6 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
 						>
 							{loading ? (
 								<>
@@ -871,10 +871,10 @@ export function RAGSecurityPage() {
 					</div>
 
 					{/* Right Column - Scan Configuration & Results */}
-					<div className="space-y-6">
+					<div className="space-y-4 sm:space-y-6">
 						{/* Scan Configuration */}
-						<div className="bg-card border border-border rounded-lg p-6">
-							<h2 className="text-lg font-semibold mb-4">Scan Configuration</h2>
+						<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+						<h2 className="text-base sm:text-lg font-semibold mb-4">Scan Configuration</h2>
 							<div className="space-y-4">
 								<div>
 									<label className="block text-sm font-medium mb-2">
@@ -941,7 +941,7 @@ export function RAGSecurityPage() {
 
 						{/* Scan Results Summary */}
 						{scanResult && (
-							<div className="bg-card border border-border rounded-lg p-6 space-y-4">
+						<div className="bg-card border border-border rounded-lg p-4 sm:p-6 space-y-4">
 								<div className="flex items-center justify-between">
 									<h2 className="text-lg font-semibold">Scan Results</h2>
 									<div className="flex items-center gap-3">
@@ -985,7 +985,7 @@ export function RAGSecurityPage() {
 								</div>
 
 								{/* Metadata */}
-								<div className="grid grid-cols-2 gap-3 text-sm">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
 									<div className="p-3 bg-muted rounded-lg">
 										<div className="text-muted-foreground mb-1">Scan ID</div>
 										<div className="font-mono text-xs truncate">
@@ -1006,7 +1006,7 @@ export function RAGSecurityPage() {
 										<div className="text-sm font-medium">Document Status</div>
 										<button
 											onClick={() => setShowSafeDocuments(!showSafeDocuments)}
-											className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+											className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 whitespace-nowrap"
 										>
 											{showSafeDocuments ? (
 												<>
@@ -1044,8 +1044,8 @@ export function RAGSecurityPage() {
 						)}
 
 						{/* Scan History */}
-						<div className="bg-card border border-border rounded-lg p-6 space-y-4">
-							<div className="flex items-center justify-between">
+						<div className="bg-card border border-border rounded-lg p-4 sm:p-6 space-y-4">
+						<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
 								<h2 className="text-lg font-semibold">Scan History</h2>
 								{scanHistory.length > 0 && (
 									<button
@@ -1081,14 +1081,14 @@ export function RAGSecurityPage() {
 											<div className="flex items-center gap-2">
 												<button
 													onClick={() => handleLoadHistory(item)}
-													className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+													className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 whitespace-nowrap"
 												>
 													<Eye className="w-3 h-3" />
 													View
 												</button>
 												<button
 													onClick={() => handleDownloadPack(item.id)}
-													className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+													className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 whitespace-nowrap"
 												>
 													<Download className="w-3 h-3" />
 													Download
@@ -1108,7 +1108,7 @@ export function RAGSecurityPage() {
 						</div>
 
 						{/* Info Card */}
-						<div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-4">
+						<div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-3 sm:p-4">
 							<div className="flex gap-3">
 								<Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
 								<div className="text-sm text-blue-600">
@@ -1126,7 +1126,7 @@ export function RAGSecurityPage() {
 				{/* Detailed Threat Analysis */}
 				{scanResult && scanResult.document_threats.length > 0 && (
 					<div className="mt-8 space-y-4">
-						<h2 className="text-2xl font-bold">Threat Analysis</h2>
+						<h2 className="text-xl sm:text-2xl font-bold">Threat Analysis</h2>
 
 						{/* Document Threats */}
 						{scanResult.document_threats.map((threat, index) => (
@@ -1143,7 +1143,7 @@ export function RAGSecurityPage() {
 											? null
 											: `${threat.document_id}-${index}`
 									)}
-									className="w-full p-4 text-left hover:bg-muted/50 transition-colors"
+									className="w-full p-3 sm:p-4 text-left hover:bg-muted/50 transition-colors"
 								>
 									<div className="flex items-start justify-between">
 										<div className="flex-1">
@@ -1219,7 +1219,7 @@ export function RAGSecurityPage() {
 										{/* Taxonomy */}
 										<div>
 											<div className="text-sm font-medium mb-3">5D Taxonomy Classification</div>
-											<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+											<div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
 												<div className="p-3 bg-muted rounded-lg">
 													<div className="flex items-center gap-2 mb-1">
 														{(() => {
@@ -1283,7 +1283,7 @@ export function RAGSecurityPage() {
 						{/* Cross-Document Threats */}
 						{scanResult.cross_document_threats.length > 0 && (
 							<div className="mt-6">
-								<h3 className="text-xl font-bold mb-4">Cross-Document Attack Chains</h3>
+								<h3 className="text-lg sm:text-xl font-bold mb-4">Cross-Document Attack Chains</h3>
 								{scanResult.cross_document_threats.map((threat, index) => (
 									<div
 										key={index}
@@ -1323,8 +1323,8 @@ export function RAGSecurityPage() {
 
 						{/* Taxonomy Summary */}
 						<div className="bg-card border border-border rounded-lg p-6 mt-6">
-							<h3 className="text-xl font-bold mb-4">Taxonomy Summary</h3>
-							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+							<h3 className="text-lg sm:text-xl font-bold mb-4">Taxonomy Summary</h3>
+							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
 								{Object.entries(scanResult.taxonomy_summary).map(([category, data]) => {
 									const total = Object.values(data as Record<string, number>).reduce((a, b) => a + b, 0);
 									if (total === 0) return null;

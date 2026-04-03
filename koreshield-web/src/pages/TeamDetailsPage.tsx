@@ -129,37 +129,37 @@ export function TeamDetailsPage() {
 	const isOwner = team.my_role === 'owner';
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div>
 			{/* Header */}
 			<header className="border-b border-border bg-card">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex flex-col gap-4">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+					<div className="flex flex-col gap-3 sm:gap-4">
 						<Link to="/teams" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit">
 							<ArrowLeft className="w-4 h-4" />
 							Back to Teams
 						</Link>
-						<div className="flex items-start justify-between">
-							<div className="flex items-center gap-3">
-								<div className="p-3 bg-primary/10 rounded-lg">
-									<Users className="w-8 h-8 text-primary" />
+						<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+							<div className="flex items-center gap-3 min-w-0">
+								<div className="p-2 sm:p-3 bg-primary/10 rounded-lg flex-shrink-0">
+									<Users className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
 								</div>
-								<div>
-									<h1 className="text-3xl font-bold flex items-center gap-2">
-										{team.name}
-										<span className="text-sm font-normal text-muted-foreground bg-muted px-2 py-1 rounded">
+								<div className="min-w-0">
+									<h1 className="text-xl sm:text-3xl font-bold flex flex-wrap items-center gap-2">
+										<span className="truncate">{team.name}</span>
+										<span className="text-xs sm:text-sm font-normal text-muted-foreground bg-muted px-2 py-1 rounded">
 											/{team.slug}
 										</span>
 									</h1>
-									<p className="text-sm text-muted-foreground mt-1">
+									<p className="text-xs sm:text-sm text-muted-foreground mt-1">
 										Created on {format(new Date(team.created_at), 'MMM d, yyyy')}
 									</p>
 								</div>
 							</div>
-							<div className="flex items-center gap-3">
+							<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
 								{canManageTeam && (
 									<button
 										onClick={() => setShowInviteModal(true)}
-										className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+										className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm"
 									>
 										<UserPlus className="w-4 h-4" />
 										<span>Add Member</span>
@@ -173,7 +173,7 @@ export function TeamDetailsPage() {
 												deleteTeamMutation.mutate();
 											}
 										}}
-										className="flex items-center gap-2 px-4 py-2 border border-destructive/50 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+										className="flex items-center justify-center gap-2 px-4 py-2 border border-destructive/50 text-destructive hover:bg-destructive/10 rounded-lg transition-colors text-sm"
 										disabled={isDeletingTeam}
 									>
 										<Trash2 className="w-4 h-4" />
@@ -197,6 +197,7 @@ export function TeamDetailsPage() {
 					</h2>
 
 					<div className="bg-card border border-border rounded-lg overflow-hidden">
+						<div className="overflow-x-auto">
 						<table className="w-full">
 							<thead>
 								<tr className="bg-muted/50 border-b border-border text-left">
@@ -268,6 +269,7 @@ export function TeamDetailsPage() {
 								))}
 							</tbody>
 						</table>
+						</div>
 					</div>
 				</section>
 			</main>

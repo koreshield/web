@@ -2,7 +2,8 @@ import { Suspense, lazy, useEffect } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
-import { Layout } from './components/Layout';
+import { AppLayout } from './components/AppLayout';
+import { MarketingLayout } from './components/MarketingLayout';
 import { PageLoader, SuspenseFallback } from './components/LoadingStates';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ToastProvider, setGlobalToast, useToast } from './components/ToastNotification';
@@ -65,69 +66,14 @@ function AppContent() {
 	return (
 		<Router>
 			<Routes>
-				<Route element={<Layout />}>
+				{/* Marketing/Public Layout */}
+				<Route element={<MarketingLayout />}>
 					<Route
 						path="/"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<LandingPage />
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="/profile"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<ProtectedRoute>
-										<ProfilePage />
-									</ProtectedRoute>
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="/billing"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<ProtectedRoute>
-										<BillingPage />
-									</ProtectedRoute>
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="/getting-started"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<ProtectedRoute>
-										<GettingStartedPage />
-									</ProtectedRoute>
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="/integrations"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<IntegrationsPage />
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="/changelog"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<ChangelogPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}
@@ -223,21 +169,41 @@ function AppContent() {
 						}
 					/>
 					<Route
-						path="/login"
+						path="/demo"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
-									<LoginPage />
+									<DemoPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}
 					/>
 					<Route
-						path="/forgot-password"
+						path="/integrations"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
-									<ForgotPasswordPage />
+									<IntegrationsPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/changelog"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ChangelogPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/login"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LoginPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}
@@ -253,6 +219,16 @@ function AppContent() {
 						}
 					/>
 					<Route
+						path="/forgot-password"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ForgotPasswordPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
 						path="/reset-password"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
@@ -263,12 +239,100 @@ function AppContent() {
 						}
 					/>
 					<Route
+						path="/privacy-policy"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/terms-of-service"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/cookie-policy"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/careers"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<CareersPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="*"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<NotFoundPage />
+							</Suspense>
+						}
+					/>
+				</Route>
+
+				{/* App Layout - Authenticated Routes */}
+				<Route element={<AppLayout />}>
+					<Route
 						path="/dashboard"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<ProtectedRoute>
 										<DashboardPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/getting-started"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<GettingStartedPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/profile"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<ProfilePage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/billing"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<BillingPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
 							</Suspense>
@@ -395,6 +459,18 @@ function AppContent() {
 						}
 					/>
 					<Route
+						path="/api-key-management"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute requiredRole="admin">
+										<ApiKeyManagementPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
 						path="/settings/api-keys"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
@@ -455,18 +531,6 @@ function AppContent() {
 						}
 					/>
 					<Route
-						path="/api-key-management"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<ProtectedRoute requiredRole="admin">
-										<ApiKeyManagementPage />
-									</ProtectedRoute>
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
 						path="/advanced-analytics"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
@@ -499,64 +563,6 @@ function AppContent() {
 										<AuditLogsPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="/demo"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<DemoPage />
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="/privacy-policy"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<LegalPage />
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="/terms-of-service"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<LegalPage />
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="/cookie-policy"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<LegalPage />
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="/careers"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<CareersPage />
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="*"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<NotFoundPage />
 							</Suspense>
 						}
 					/>
