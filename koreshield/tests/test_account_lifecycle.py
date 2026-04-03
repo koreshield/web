@@ -5,9 +5,10 @@ Integration tests for auth, account lifecycle, and billing flows.
 import asyncio
 import os
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 from uuid import UUID
 
+import httpx
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import select
@@ -269,6 +270,120 @@ def test_billing_portal_returns_503_without_polar_configuration(tmp_path: Path):
 
         assert response.status_code == 503
         assert response.json()["detail"] == "POLAR_ACCESS_TOKEN is not configured"
+    finally:
+        management.send_welcome_email, management.send_verification_email = original_senders
+        client.close()
+        env_patcher.stop()
+        asyncio.run(_dispose_engine(engine))
+
+
+def test_billing_checkout_normalizes_payload_for_polar(tmp_path: Path):
+    client, _session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
+    try:
+        _signup(client, email="billing@koreshield.ai")
+
+        with patch.dict(
+            os.environ,
+            {
+                "POLAR_ACCESS_TOKEN": "polar_test_token",
+                "POLAR_WEBHOOK_SECRET": "polar_test_secret",
+                "POLAR_SERVER": "sandbox",
+                "POLAR_DEFAULT_CURRENCY": "GBP",
+            },
+            clear=False,
+        ):
+            with patch("src.koreshield.api.billing.PolarClient") as client_mock, patch(
+                "src.koreshield.api.billing.get_polar_config"
+            ) as config_mock:
+                checkout_mock = AsyncMock(
+                    return_value={"url": "https://sandbox-checkout.polar.sh/session/test"}
+                )
+                client_mock.return_value.create_checkout = checkout_mock
+                config_mock.return_value = billing.get_polar_config()
+
+                response = client.post(
+                    "/v1/billing/checkout",
+                    json={
+                        "product_id": "prod_test_123",
+                        "success_url": "https://koreshield.com/billing?checkout=success",
+                    },
+                )
+
+                assert response.status_code == 200
+                assert response.json()["url"] == "https://sandbox-checkout.polar.sh/session/test"
+
+                sent_payload = checkout_mock.await_args.args[0]
+                assert sent_payload["product_id"] == "prod_test_123"
+                assert sent_payload["currency"] == "gbp"
+                assert sent_payload["customer_email"] == "billing@koreshield.ai"
+                assert "products" not in sent_payload
+                assert sent_payload["metadata"]["scope"] == "user"
+                assert sent_payload["metadata"]["owner_email"] == "billing@koreshield.ai"
+                assert "team_id" not in sent_payload["metadata"]
+                assert "team_slug" not in sent_payload["metadata"]
+    finally:
+        management.send_welcome_email, management.send_verification_email = original_senders
+        client.close()
+        env_patcher.stop()
+        asyncio.run(_dispose_engine(engine))
+
+
+def test_billing_checkout_retries_without_currency_when_product_currency_mismatches(tmp_path: Path):
+    client, _session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
+    try:
+        _signup(client, email="billing@koreshield.ai")
+
+        with patch.dict(
+            os.environ,
+            {
+                "POLAR_ACCESS_TOKEN": "polar_test_token",
+                "POLAR_WEBHOOK_SECRET": "polar_test_secret",
+                "POLAR_SERVER": "sandbox",
+                "POLAR_DEFAULT_CURRENCY": "GBP",
+            },
+            clear=False,
+        ):
+            with patch("src.koreshield.api.billing.PolarClient") as client_mock, patch(
+                "src.koreshield.api.billing.get_polar_config"
+            ) as config_mock:
+                request = httpx.Request("POST", "https://sandbox-api.polar.sh/v1/checkouts/")
+                response = httpx.Response(
+                    422,
+                    request=request,
+                    json={
+                        "detail": [
+                            {
+                                "loc": ["body", "product_id"],
+                                "msg": "Product is not available in the specified currency.",
+                            }
+                        ]
+                    },
+                )
+                checkout_mock = AsyncMock(
+                    side_effect=[
+                        httpx.HTTPStatusError("currency mismatch", request=request, response=response),
+                        {"url": "https://sandbox-checkout.polar.sh/session/test"},
+                    ]
+                )
+                client_mock.return_value.create_checkout = checkout_mock
+                config_mock.return_value = billing.get_polar_config()
+
+                response = client.post(
+                    "/v1/billing/checkout",
+                    json={
+                        "product_id": "prod_test_123",
+                        "success_url": "https://koreshield.com/billing?checkout=success",
+                    },
+                )
+
+                assert response.status_code == 200
+                assert response.json()["url"] == "https://sandbox-checkout.polar.sh/session/test"
+
+                first_payload = checkout_mock.await_args_list[0].args[0]
+                second_payload = checkout_mock.await_args_list[1].args[0]
+                assert first_payload["currency"] == "gbp"
+                assert "currency" not in second_payload
+                assert second_payload["product_id"] == "prod_test_123"
     finally:
         management.send_welcome_email, management.send_verification_email = original_senders
         client.close()

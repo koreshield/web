@@ -176,6 +176,7 @@ async def test_proxy_forwards_safe_requests(proxy, auth_headers):
 
 def test_status_endpoint(proxy):
     """Test the status endpoint returns statistics."""
+    proxy.config["providers"] = {"openai": {"enabled": True}}
     client = TestClient(proxy.app)
 
     response = client.get("/status")
@@ -184,6 +185,11 @@ def test_status_endpoint(proxy):
     data = response.json()
     assert data["status"] == "healthy"
     assert "statistics" in data
+    assert "components" in data
+    assert "providers" in data
+    assert data["components"]["provider_routing"]["status"] == "degraded"
+    assert data["providers"]["openai"]["enabled"] is True
+    assert data["providers"]["openai"]["status"] == "missing_credentials"
 
 
 def test_metrics_endpoint(proxy):
@@ -389,8 +395,16 @@ def test_tool_scan_endpoint_uses_session_history_for_sequence_detection(proxy, a
 
 def test_provider_health_endpoint(proxy):
     """Test the provider health endpoint."""
+    proxy.config["providers"] = {
+        "openai": {"enabled": True},
+        "anthropic": {"enabled": False},
+    }
     # Mock providers
-    proxy.providers = [MagicMock(), MagicMock()]
+    first_provider = MagicMock()
+    first_provider.health_check = AsyncMock(return_value=True)
+    second_provider = MagicMock()
+    second_provider.health_check = AsyncMock(return_value=False)
+    proxy.providers = [first_provider, second_provider]
     proxy.provider_priority = ["openai", "anthropic"]
 
     client = TestClient(proxy.app)
@@ -403,6 +417,11 @@ def test_provider_health_endpoint(proxy):
     assert "total_providers" in data
     assert "healthy_providers" in data
     assert data["total_providers"] == 2
+    assert data["healthy_providers"] == 1
+    assert data["enabled_providers"] == 1
+    assert data["configured"] is True
+    assert data["providers"]["openai"]["status"] == "healthy"
+    assert data["providers"]["anthropic"]["status"] == "unhealthy"
 
 
 class _FakeResult:
