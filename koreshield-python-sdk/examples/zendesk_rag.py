@@ -77,7 +77,7 @@ def scan_zendesk_tickets(koreshield: KoreShieldClient, zenpy_client: Any, query:
     
     # 4. Handle Results
     if result.is_safe:
-        print("✅ No threats found in tickets.")
+        print(" No threats found in tickets.")
     else:
         print(f"Found {result.total_threats_found} threats!")
         

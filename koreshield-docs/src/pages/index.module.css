@@ -19,7 +19,7 @@
 	background-color: #060606;
 }
 
-/* Subtle ambient glow — clipped on mobile using min() */
+/* Subtle ambient glow  -  clipped on mobile using min() */
 .hero::before {
 	content: '';
 	position: absolute;
@@ -275,7 +275,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   BREAKPOINTS — Mobile First
+   BREAKPOINTS  -  Mobile First
    lg   ≤ 1024px  iPad landscape / small laptop
    md   ≤ 768px   iPad portrait
    sm   ≤ 640px   large phone landscape
@@ -432,7 +432,7 @@
 	}
 }
 
-/* ── Small phone — iPhone SE (≤ 375px) ── */
+/* ── Small phone  -  iPhone SE (≤ 375px) ── */
 @media (max-width: 375px) {
 	.hero {
 		padding: 64px 14px 48px;

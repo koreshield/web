@@ -172,7 +172,7 @@ export default function CareersPage() {
 						<div>
 							<h3 className="text-xl font-bold text-foreground mb-2">Don't see a matching role?</h3>
 							<p className="text-muted-foreground text-sm leading-relaxed max-w-md">
-								We hire for talent over titles. If you're exceptional and care about AI security, send us a note — we're always open to conversations.
+								We hire for talent over titles. If you're exceptional and care about AI security, send us a note  -  we're always open to conversations.
 							</p>
 						</div>
 						<Link

@@ -50,9 +50,14 @@ export function Layout() {
 								<Link to="/dashboard" className={navLinkClass}>Dashboard</Link>
 								<Link to="/getting-started" className={navLinkClass}>Getting Started</Link>
 								<Link to="/teams" className={navLinkClass}>Teams</Link>
+								<Link to="/api-key-management" className={navLinkClass}>API Keys</Link>
+								<Link to="/rag-security" className={navLinkClass}>RAG Security</Link>
+								<Link to="/alerts" className={navLinkClass}>Alerts</Link>
+								<Link to="/audit-logs" className={navLinkClass}>Audit Logs</Link>
 								<Link to="/threat-monitoring" className={navLinkClass}>Threats</Link>
 								<Link to="/provider-health" className={navLinkClass}>Providers</Link>
 								{isAdmin && <Link to="/advanced-analytics" className={navLinkClass}>Analytics</Link>}
+								{isAdmin && <Link to="/compliance-reports" className={navLinkClass}>Compliance</Link>}
 							</>
 						)}
 
@@ -116,14 +121,15 @@ export function Layout() {
 								<Link to="/dashboard" className={mobileNavLinkClass} onClick={closeMobile}>Dashboard</Link>
 								<Link to="/getting-started" className={mobileNavLinkClass} onClick={closeMobile}>Getting Started</Link>
 								<Link to="/teams" className={mobileNavLinkClass} onClick={closeMobile}>Teams</Link>
+								<Link to="/api-key-management" className={mobileNavLinkClass} onClick={closeMobile}>API Keys</Link>
+								<Link to="/rag-security" className={mobileNavLinkClass} onClick={closeMobile}>RAG Security</Link>
+								<Link to="/alerts" className={mobileNavLinkClass} onClick={closeMobile}>Alerts</Link>
+								<Link to="/audit-logs" className={mobileNavLinkClass} onClick={closeMobile}>Audit Logs</Link>
 								<Link to="/threat-monitoring" className={mobileNavLinkClass} onClick={closeMobile}>Threats</Link>
 								<Link to="/provider-health" className={mobileNavLinkClass} onClick={closeMobile}>Providers</Link>
 								{isAdmin && <Link to="/advanced-analytics" className={mobileNavLinkClass} onClick={closeMobile}>Analytics</Link>}
 								<Link to="/threat-map" className={mobileNavLinkClass} onClick={closeMobile}>Threat Map</Link>
 								{isAdmin && <Link to="/compliance-reports" className={mobileNavLinkClass} onClick={closeMobile}>Compliance</Link>}
-								<Link to="/api-key-management" className={mobileNavLinkClass} onClick={closeMobile}>API Keys</Link>
-								<Link to="/audit-logs" className={mobileNavLinkClass} onClick={closeMobile}>Audit Logs</Link>
-								<Link to="/rag-security" className={mobileNavLinkClass} onClick={closeMobile}>RAG Security</Link>
 							</>
 						)}
 						<a href="https://github.com/koreshield/" target="_blank" rel="noreferrer noopener" className={`${mobileNavLinkClass} flex items-center gap-2`}>

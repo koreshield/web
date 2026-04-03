@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2026-02-05
 
-### 🎉 Major Release: RAG Detection System
+###  Major Release: RAG Detection System
 
 This major release introduces comprehensive **Retrieval-Augmented Generation (RAG) security** capabilities based on the LLM-Firewall research paper, implementing a 5-dimensional taxonomy for detecting indirect prompt injection attacks in RAG systems.
 

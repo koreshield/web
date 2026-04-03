@@ -83,7 +83,7 @@ def check_config(config_path: str) -> bool:
         if issues:
             print("\nIssues found:")
             for issue in issues:
-                print(f"  ⚠ {issue}")
+                print(f"   {issue}")
             return False
         else:
             print("\n✓ Configuration looks good!")

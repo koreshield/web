@@ -53,14 +53,14 @@ async def main():
         unsafe_count = len(results) - safe_count
 
         print("
-📊 Batch Processing Results:"        print(f"Total prompts: {len(prompts)}")
+Batch Processing Results:"        print(f"Total prompts: {len(prompts)}")
         print(f"Safe prompts: {safe_count}")
         print(f"Unsafe prompts: {unsafe_count}")
         print(".2f"        print(".2f"
         # Get performance metrics
         metrics = await client.get_performance_metrics()
         print("
-📈 Performance Metrics:"        print(f"Total requests: {metrics.total_requests}")
+Performance Metrics:"        print(f"Total requests: {metrics.total_requests}")
         print(".2f"        print(".2f"        print(".2f"        print(".1f"
         # Show details of unsafe prompts
         if unsafe_count > 0:

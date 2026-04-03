@@ -57,7 +57,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🛡️ KoreShield Browser Example</h1>
+        <h1> KoreShield Browser Example</h1>
         <p>This example demonstrates using KoreShield in the browser for secure AI interactions.</p>
 
         <div id="status" class="status info">Initializing KoreShield...</div>
@@ -102,10 +102,10 @@
                 baseURL: 'http://localhost:8000', // Adjust for your setup
                 debug: true
             });
-            statusDiv.textContent = '✅ KoreShield client initialized';
+            statusDiv.textContent = ' KoreShield client initialized';
             statusDiv.className = 'status success';
         } catch (error) {
-            statusDiv.textContent = `❌ Failed to initialize: ${error.message}`;
+            statusDiv.textContent = ` Failed to initialize: ${error.message}`;
             statusDiv.className = 'status error';
             console.error('Initialization error:', error);
         }
@@ -121,10 +121,10 @@
             try {
                 const isConnected = await client.testConnection();
                 result.innerHTML = `<div class="status ${isConnected ? 'success' : 'error'}">
-                    ${isConnected ? '✅ Connected to KoreShield' : '❌ Connection failed'}
+                    ${isConnected ? ' Connected to KoreShield' : ' Connection failed'}
                 </div>`;
             } catch (error) {
-                result.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+                result.innerHTML = `<div class="status error"> Error: ${error.message}</div>`;
             } finally {
                 button.disabled = false;
                 button.textContent = 'Test Connection';
@@ -171,12 +171,12 @@
                 result.innerHTML = `
                     <div class="output">${content}</div>
                     <div class="status ${safetyCheck.safe ? 'success' : 'error'}">
-                        Safety Check: ${safetyCheck.safe ? '✅ Safe' : '⚠️ Issues detected'}
+                        Safety Check: ${safetyCheck.safe ? ' Safe' : ' Issues detected'}
                         ${!safetyCheck.safe ? `<br>Issues: ${safetyCheck.issues.join(', ')}` : ''}
                     </div>
                 `;
             } catch (error) {
-                result.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+                result.innerHTML = `<div class="status error"> Error: ${error.message}</div>`;
             } finally {
                 button.disabled = false;
                 button.textContent = 'Send Message';
@@ -204,7 +204,7 @@ Uptime: ${Math.floor(metrics.uptime_seconds / 3600)}h ${Math.floor((metrics.upti
                     </div>
                 `;
             } catch (error) {
-                result.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+                result.innerHTML = `<div class="status error"> Error: ${error.message}</div>`;
             } finally {
                 button.disabled = false;
                 button.textContent = 'Get Metrics';
@@ -231,7 +231,7 @@ Uptime: ${Math.floor(metrics.uptime_seconds / 3600)}h ${Math.floor((metrics.upti
 
                 result.innerHTML = eventsHtml || '<div class="status info">No recent security events</div>';
             } catch (error) {
-                result.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+                result.innerHTML = `<div class="status error"> Error: ${error.message}</div>`;
             } finally {
                 button.disabled = false;
                 button.textContent = 'Get Recent Events';

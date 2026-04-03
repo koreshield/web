@@ -12,12 +12,21 @@ interface Provider {
 	error?: string;
 }
 
+type ProviderHealthResponse = {
+	providers?: Record<string, {
+		healthy?: boolean;
+		priority?: number;
+		type?: string | null;
+		error?: string;
+	}>;
+};
+
 export function ProviderHealthPage() {
 	const [wsConnected, setWsConnected] = useState(false);
 
 	// Fetch provider health data
 	const { data: healthData, isLoading } = useProviderHealth();
-	const providersRaw: Record<string, any> = (healthData as any)?.providers || {};
+	const providersRaw = ((healthData as ProviderHealthResponse | undefined)?.providers) || {};
 	const providers: Record<string, Provider> = Object.entries(providersRaw).reduce((acc, [name, provider]) => {
 		acc[name] = {
 			name,
@@ -95,6 +104,7 @@ export function ProviderHealthPage() {
 
 	const healthyCount = Object.values(providers).filter(p => p.status === 'healthy').length;
 	const downCount = Object.values(providers).filter(p => p.status === 'down').length;
+	const hasProviders = Object.values(providers).length > 0;
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -170,6 +180,13 @@ export function ProviderHealthPage() {
 						<div className="flex items-center justify-center py-12">
 							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
 						</div>
+					) : !hasProviders ? (
+						<div className="rounded-lg border border-border bg-card p-8">
+							<h3 className="text-lg font-semibold mb-2">No providers configured yet</h3>
+							<p className="text-sm text-muted-foreground">
+								Provider health becomes useful after you add at least one model provider in KoreShield configuration. Finish onboarding with API keys, rules, and your first protected request first, then return here for live provider status.
+							</p>
+						</div>
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 							{Object.entries(providers).map(([name, provider]) => {
@@ -217,6 +234,7 @@ export function ProviderHealthPage() {
 				</div>
 
 				{/* Priority Comparison Chart */}
+				{hasProviders && (
 				<div className="bg-card border border-border rounded-lg p-6 mb-8">
 					<h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
 						<Activity className="w-5 h-5" />
@@ -242,6 +260,7 @@ export function ProviderHealthPage() {
 						</BarChart>
 					</ResponsiveContainer>
 				</div>
+				)}
 			</main>
 		</div>
 	);

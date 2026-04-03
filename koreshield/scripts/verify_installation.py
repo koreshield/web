@@ -52,7 +52,7 @@ def check_config_file():
         print(f"✓ Configuration file found: {config_path}")
         return True
     elif example_path.exists():
-        print(f"⚠ Configuration file not found, but example exists: {example_path}")
+        print(f" Configuration file not found, but example exists: {example_path}")
         print(f"  Copy it: cp {example_path} {config_path}")
         return False
     else:
@@ -67,7 +67,7 @@ def check_api_key():
         print("✓ OPENAI_API_KEY environment variable is set")
         return True
     else:
-        print("⚠ OPENAI_API_KEY environment variable not set")
+        print(" OPENAI_API_KEY environment variable not set")
         print("  Set it: export OPENAI_API_KEY=your-key-here")
         return False
 

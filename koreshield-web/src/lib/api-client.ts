@@ -6,7 +6,14 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.koreshiel
 interface APIError {
 	message: string;
 	code: number;
-	details?: any;
+	details?: unknown;
+}
+
+type JsonRecord = Record<string, unknown>;
+
+interface ValidationErrorItem {
+	msg?: string;
+	message?: string;
 }
 
 class ApiClient {
@@ -112,13 +119,14 @@ class ApiClient {
 		}
 	}
 
-	private getErrorMessage(status: number, errorData: any): string {
-		if (errorData?.error) return errorData.error;
-		if (errorData?.message) return errorData.message;
-		if (typeof errorData?.detail === 'string') return errorData.detail;
-		if (Array.isArray(errorData?.detail)) {
-			const messages = errorData.detail
-				.map((item: any) => item?.msg || item?.message)
+	private getErrorMessage(status: number, errorData: unknown): string {
+		const errorObject = typeof errorData === 'object' && errorData !== null ? errorData as JsonRecord : null;
+		if (typeof errorObject?.error === 'string') return errorObject.error;
+		if (typeof errorObject?.message === 'string') return errorObject.message;
+		if (typeof errorObject?.detail === 'string') return errorObject.detail;
+		if (Array.isArray(errorObject?.detail)) {
+			const messages = (errorObject.detail as ValidationErrorItem[])
+				.map((item) => item?.msg || item?.message)
 				.filter(Boolean);
 			if (messages.length) {
 				return messages.join('; ');
@@ -176,7 +184,7 @@ class ApiClient {
 		return this.getAuditLogs(limit, 0);
 	}
 
-	async scanText(content: string, metadata?: Record<string, any>) {
+	async scanText(content: string, metadata?: JsonRecord) {
 		if (!this.isRealAPIMode) {
 			return this.simulateScan(content);
 		}
@@ -225,7 +233,7 @@ class ApiClient {
 		return this.fetch('/v1/management/policies');
 	}
 
-	async createPolicy(policy: any) {
+	async createPolicy(policy: JsonRecord) {
 		return this.fetch('/v1/management/policies', {
 			method: 'POST',
 			body: JSON.stringify(policy),
@@ -441,18 +449,22 @@ class ApiClient {
 
 	// Phase 3: RBAC APIs
 	async getUsers(params?: { search?: string; role?: string }) {
-		const queryParams = new URLSearchParams(params as any).toString();
+			const queryParams = new URLSearchParams(
+				Object.entries(params ?? {}).flatMap(([key, value]) =>
+					typeof value === 'string' && value ? [[key, value]] : [],
+				),
+			).toString();
 		return this.fetch(`/v1/rbac/users${queryParams ? '?' + queryParams : ''}`);
 	}
 
-	async createUser(userData: any) {
+	async createUser(userData: JsonRecord) {
 		return this.fetch('/v1/rbac/users', {
 			method: 'POST',
 			body: JSON.stringify(userData),
 		});
 	}
 
-	async updateUser(userId: string, userData: any) {
+	async updateUser(userId: string, userData: JsonRecord) {
 		return this.fetch(`/v1/rbac/users/${userId}`, {
 			method: 'PUT',
 			body: JSON.stringify(userData),
@@ -469,14 +481,14 @@ class ApiClient {
 		return this.fetch('/v1/rbac/roles');
 	}
 
-	async createRole(roleData: any) {
+	async createRole(roleData: JsonRecord) {
 		return this.fetch('/v1/rbac/roles', {
 			method: 'POST',
 			body: JSON.stringify(roleData),
 		});
 	}
 
-	async updateRole(roleId: string, roleData: any) {
+	async updateRole(roleId: string, roleData: JsonRecord) {
 		return this.fetch(`/v1/rbac/roles/${roleId}`, {
 			method: 'PUT',
 			body: JSON.stringify(roleData),
@@ -499,14 +511,14 @@ class ApiClient {
 		return this.fetch('/v1/reports');
 	}
 
-	async createReport(reportData: any) {
+	async createReport(reportData: JsonRecord) {
 		return this.fetch('/v1/reports', {
 			method: 'POST',
 			body: JSON.stringify(reportData),
 		});
 	}
 
-	async updateReport(reportId: string, reportData: any) {
+	async updateReport(reportId: string, reportData: JsonRecord) {
 		return this.fetch(`/v1/reports/${reportId}`, {
 			method: 'PUT',
 			body: JSON.stringify(reportData),
@@ -539,14 +551,14 @@ class ApiClient {
 		return this.fetch(`/v1/teams${queryParams}`);
 	}
 
-	async createTeam(teamData: any) {
+	async createTeam(teamData: JsonRecord) {
 		return this.fetch('/v1/teams', {
 			method: 'POST',
 			body: JSON.stringify(teamData),
 		});
 	}
 
-	async updateTeam(teamId: string, teamData: any) {
+	async updateTeam(teamId: string, teamData: JsonRecord) {
 		return this.fetch(`/v1/teams/${teamId}`, {
 			method: 'PUT',
 			body: JSON.stringify(teamData),
@@ -604,7 +616,7 @@ class ApiClient {
 		return this.fetch(`/v1/teams/${teamId}/dashboards${queryParams}`);
 	}
 
-	async createSharedDashboard(teamId: string, dashboardData: any) {
+	async createSharedDashboard(teamId: string, dashboardData: JsonRecord) {
 		return this.fetch(`/v1/teams/${teamId}/dashboards`, {
 			method: 'POST',
 			body: JSON.stringify(dashboardData),
@@ -648,14 +660,14 @@ class ApiClient {
 		return this.fetch(`/v1/management/rules/${ruleId}`);
 	}
 
-	async createRule(ruleData: any) {
+	async createRule(ruleData: JsonRecord) {
 		return this.fetch('/v1/management/rules', {
 			method: 'POST',
 			body: JSON.stringify(ruleData),
 		});
 	}
 
-	async updateRule(ruleId: string, ruleData: any) {
+	async updateRule(ruleId: string, ruleData: JsonRecord) {
 		return this.fetch(`/v1/management/rules/${ruleId}`, {
 			method: 'PUT',
 			body: JSON.stringify(ruleData),
@@ -668,7 +680,7 @@ class ApiClient {
 		});
 	}
 
-	async testRule(ruleData: any) {
+	async testRule(ruleData: JsonRecord) {
 		return this.fetch('/v1/management/rules/test', {
 			method: 'POST',
 			body: JSON.stringify(ruleData),
@@ -684,14 +696,14 @@ class ApiClient {
 		return this.fetch(`/v1/management/alerts/rules/${ruleId}`);
 	}
 
-	async createAlertRule(ruleData: any) {
+	async createAlertRule(ruleData: JsonRecord) {
 		return this.fetch('/v1/management/alerts/rules', {
 			method: 'POST',
 			body: JSON.stringify(ruleData),
 		});
 	}
 
-	async updateAlertRule(ruleId: string, ruleData: any) {
+	async updateAlertRule(ruleId: string, ruleData: JsonRecord) {
 		return this.fetch(`/v1/management/alerts/rules/${ruleId}`, {
 			method: 'PUT',
 			body: JSON.stringify(ruleData),
@@ -708,14 +720,14 @@ class ApiClient {
 		return this.fetch('/v1/management/alerts/channels');
 	}
 
-	async createAlertChannel(channelData: any) {
+	async createAlertChannel(channelData: JsonRecord) {
 		return this.fetch('/v1/management/alerts/channels', {
 			method: 'POST',
 			body: JSON.stringify(channelData),
 		});
 	}
 
-	async updateAlertChannel(channelId: string, channelData: any) {
+	async updateAlertChannel(channelId: string, channelData: JsonRecord) {
 		return this.fetch(`/v1/management/alerts/channels/${channelId}`, {
 			method: 'PUT',
 			body: JSON.stringify(channelData),
@@ -729,8 +741,9 @@ class ApiClient {
 	}
 
 	async testAlertChannel(channelId: string) {
-		return this.fetch(`/v1/management/alerts/channels/${channelId}/test`, {
+		return this.fetch('/v1/management/alerts/channels/test', {
 			method: 'POST',
+			body: JSON.stringify({ channel_id: channelId }),
 		});
 	}
 
@@ -753,7 +766,7 @@ class ApiClient {
 	}
 
 	// Export functionality
-	async exportData(type: 'csv' | 'pdf', endpoint: string, params?: any) {
+	async exportData(type: 'csv' | 'pdf', endpoint: string, params?: JsonRecord) {
 		const response = await fetch(`${this.baseUrl}${endpoint}`, {
 			method: 'POST',
 			headers: {
@@ -777,7 +790,7 @@ class ApiClient {
 		documents: Array<{
 			id: string;
 			content: string;
-			metadata?: Record<string, any>;
+			metadata?: Record<string, unknown>;
 			score?: number;
 		}>;
 		config?: {

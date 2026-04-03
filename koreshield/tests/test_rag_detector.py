@@ -57,6 +57,10 @@ class TestRAGContextDetector:
         assert result.overall_severity in [ThreatSeverity.HIGH, ThreatSeverity.CRITICAL]
         assert len(result.document_threats) >= 1
         assert result.document_threats[0].injection_vector == InjectionVector.EMAIL
+        evidence_refs = result.document_threats[0].metadata.get("evidence_refs", [])
+        assert evidence_refs
+        assert "excerpt" in evidence_refs[0]
+        assert evidence_refs[0]["location"]["end"] >= evidence_refs[0]["location"]["start"]
     
     def test_scan_multiple_documents_mixed(self, detector):
         """Test scanning multiple documents with mix of safe and malicious."""

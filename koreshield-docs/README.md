@@ -13,7 +13,7 @@ This repository contains the complete documentation for Koreshield, built with D
 - **Configuration**: Deployment and policy configuration
 - **Advanced Topics**: Architecture, performance tuning, and best practices
 
-## 🚀 Local Development
+##  Local Development
 
 ### Prerequisites
 
@@ -50,7 +50,7 @@ npm run serve
 
 Serves the production build locally for testing.
 
-## 📝 Contributing
+## Contributing
 
 Contributions to improve the documentation are welcome! Please:
 
@@ -68,13 +68,13 @@ Contributions to improve the documentation are welcome! Please:
 - Follow the existing structure and formatting
 - Add screenshots for UI-related documentation
 
-## 🔗 Links
+## Links
 
 - **Main Repository**: [github.com/koreshield/koreshield](https://github.com/koreshield/koreshield)
 - **Documentation Site**: [docs.koreshield.com](https://docs.koreshield.com)
 - **Discord Community**: [discord.gg/Koreshield](https://discord.gg/Koreshield)
 
-## 📄 License
+## License
 
 This documentation is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 

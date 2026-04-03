@@ -62,7 +62,7 @@
     font-size: 13px;
   }
 
-  /* Table of contents — hide on mobile, only show in sidebar */
+  /* Table of contents  -  hide on mobile, only show in sidebar */
   .tableOfContents {
     display: none;
   }
