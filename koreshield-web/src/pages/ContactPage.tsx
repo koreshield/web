@@ -5,11 +5,35 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 import { useToast } from '../components/ToastNotification';
+import { getPlanById } from '../lib/pricing';
 import { SEOConfig } from '../lib/seo-config';
 
 const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string;
 const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string;
-const TEMPLATE_CONTACT = import.meta.env.VITE_EMAILJS_TEMPLATE_ID_CONTACT as string;
+const TEMPLATE_CONTACT =
+	(import.meta.env.VITE_EMAILJS_TEMPLATE_ID_CONTACT as string | undefined) ||
+	(import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string | undefined) ||
+	'';
+const emailConfigAvailable =
+	Boolean(EMAILJS_SERVICE_ID) &&
+	Boolean(EMAILJS_PUBLIC_KEY) &&
+	Boolean(TEMPLATE_CONTACT);
+
+function buildTemplatePayload(values: {
+	name: string;
+	email: string;
+	company: string;
+	tier: string;
+	message: string;
+}) {
+	return {
+		name: values.name,
+		email: values.email,
+		company: values.company,
+		tier: values.tier,
+		message: values.message,
+	};
+}
 
 const supportOptions = [
 	{
@@ -77,7 +101,7 @@ export default function ContactPage() {
 							Get in Touch
 						</h1>
 						<p className="text-lg text-muted-foreground leading-relaxed">
-							Developer? Enterprise team? Just curious? We're here and we reply fast.
+							Evaluating KoreShield, comparing plans, or preparing an enterprise rollout? We are here and we reply fast.
 						</p>
 					</motion.div>
 				</div>
@@ -120,7 +144,7 @@ export default function ContactPage() {
 							<p className="text-xs font-semibold text-electric-green uppercase tracking-wider mb-1">Enterprise</p>
 							<h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Scaling AI at enterprise level?</h3>
 							<p className="text-muted-foreground max-w-lg text-sm leading-relaxed">
-								Talk to our sales team about custom volumes, dedicated support, SSO, and compliance requirements.
+								Talk to our sales team about protected-request volume, dedicated support, SSO, and compliance requirements.
 								Typical response within 24 hours.
 							</p>
 						</div>
@@ -179,16 +203,23 @@ function GeneralContactForm() {
 		e.preventDefault();
 		setLoading(true);
 		try {
-			await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_CONTACT, {
-				form_type: 'General Enquiry',
-				icon: '',
-				from_name: formData.name,
-				from_email: formData.email,
-				reply_to: formData.email,
-				subject_line: formData.subject,
-				details: `Subject: ${formData.subject}\n\nMessage:\n${formData.message}`,
-			}, EMAILJS_PUBLIC_KEY);
-			toast.success('Message sent!', "We'll get back to you within 24–48 hours.");
+			if (!emailConfigAvailable) {
+				throw new Error('Contact email is not configured in this environment. Please email hello@koreshield.com directly.');
+			}
+
+			await emailjs.send(
+				EMAILJS_SERVICE_ID,
+				TEMPLATE_CONTACT,
+				buildTemplatePayload({
+					name: formData.name,
+					email: formData.email,
+					company: 'General enquiry',
+					tier: 'general',
+					message: `Subject: ${formData.subject}\n\n${formData.message}`,
+				}),
+				EMAILJS_PUBLIC_KEY,
+			);
+			toast.success('Message sent!', "We'll get back to you within 24 to 48 hours.");
 			setFormData({ name: '', email: '', subject: '', message: '' });
 		} catch (err: any) {
 			toast.error('Failed to send', err?.text || err?.message || 'Please try again or email hello@koreshield.com directly.');
@@ -226,7 +257,14 @@ function GeneralContactForm() {
 
 function TechnicalSupportForm() {
 	const [formData, setFormData] = useState({
-		name: '', email: '', tier: 'startup', severity: 'low', category: 'bug', subject: '', description: '', environment: '',
+		name: '',
+		email: '',
+		tier: getPlanById('growth')?.name ?? 'Growth',
+		severity: 'low',
+		category: 'bug',
+		subject: '',
+		description: '',
+		environment: '',
 	});
 	const [loading, setLoading] = useState(false);
 	const toast = useToast();
@@ -235,17 +273,38 @@ function TechnicalSupportForm() {
 		e.preventDefault();
 		setLoading(true);
 		try {
-			await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_CONTACT, {
-				form_type: 'Technical Support',
-				icon: '',
-				from_name: formData.name,
-				from_email: formData.email,
-				reply_to: formData.email,
-				subject_line: `[${formData.severity.toUpperCase()}] ${formData.subject}`,
-				details: `Tier: ${formData.tier}\nSeverity: ${formData.severity}\nCategory: ${formData.category}\nSubject: ${formData.subject}\n\nDescription:\n${formData.description}\n\nEnvironment:\n${formData.environment || 'Not provided'}`,
-			}, EMAILJS_PUBLIC_KEY);
+			if (!emailConfigAvailable) {
+				throw new Error('Support email is not configured in this environment. Please email support@koreshield.com directly.');
+			}
+
+			await emailjs.send(
+				EMAILJS_SERVICE_ID,
+				TEMPLATE_CONTACT,
+				buildTemplatePayload({
+					name: formData.name,
+					email: formData.email,
+					company: 'Technical support',
+					tier: formData.tier,
+					message:
+						`Severity: ${formData.severity}\n` +
+						`Category: ${formData.category}\n` +
+						`Subject: ${formData.subject}\n\n` +
+						`Description:\n${formData.description}\n\n` +
+						`Environment:\n${formData.environment || 'Not provided'}`,
+				}),
+				EMAILJS_PUBLIC_KEY,
+			);
 			toast.success('Support ticket created!', 'Our technical team will review your issue shortly.');
-			setFormData({ name: '', email: '', tier: 'startup', severity: 'low', category: 'bug', subject: '', description: '', environment: '' });
+			setFormData({
+				name: '',
+				email: '',
+				tier: getPlanById('growth')?.name ?? 'Growth',
+				severity: 'low',
+				category: 'bug',
+				subject: '',
+				description: '',
+				environment: '',
+			});
 		} catch (err: any) {
 			toast.error('Failed to send', err?.text || err?.message || 'Please try again or email support@koreshield.com directly.');
 		} finally {
@@ -271,9 +330,10 @@ function TechnicalSupportForm() {
 				<div>
 					<label htmlFor="ts-tier" className={labelClass}>Your tier</label>
 					<select id="ts-tier" value={formData.tier} onChange={(e) => setFormData({ ...formData, tier: e.target.value })} className={selectClass}>
-						<option value="startup">Startup</option>
-						<option value="growth">Growth</option>
-						<option value="enterprise">Enterprise</option>
+						<option value={getPlanById('free')?.name ?? 'Free'}>Free</option>
+						<option value={getPlanById('growth')?.name ?? 'Growth'}>Growth</option>
+						<option value={getPlanById('scale')?.name ?? 'Scale'}>Scale</option>
+						<option value={getPlanById('enterprise')?.name ?? 'Enterprise'}>Enterprise</option>
 					</select>
 				</div>
 				<div>
@@ -312,7 +372,7 @@ function TechnicalSupportForm() {
 			<button type="submit" disabled={loading} className={submitClass}>
 				{loading ? 'Submitting…' : 'Submit support ticket'}
 			</button>
-			<p className="text-xs text-muted-foreground text-center">Response times vary by tier. Enterprise customers receive 24/7 priority support.</p>
+			<p className="text-xs text-muted-foreground text-center">Response times vary by plan. Enterprise customers receive contract-backed priority support.</p>
 		</form>
 	);
 }

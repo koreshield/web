@@ -36,6 +36,14 @@ STATE_REFRESH_EVENTS = {
     "order.refunded",
 }
 
+DEFAULT_INTERNAL_UNLIMITED_EMAILS = {
+    "ei@nsisong.com",
+    "isaacnsisong@gmail.com",
+    "tes@koreshield.com",
+    "admin@koreshield.com",
+    "ei@koreshield.com",
+}
+
 
 def utcnow_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
@@ -43,6 +51,21 @@ def utcnow_naive() -> datetime:
 
 def compact_dict(payload: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in payload.items() if value is not None}
+
+
+def get_internal_unlimited_emails() -> set[str]:
+    configured = {
+        email.strip().lower()
+        for email in os.getenv("BILLING_INTERNAL_UNLIMITED_EMAILS", "").split(",")
+        if email.strip()
+    }
+    return configured or DEFAULT_INTERNAL_UNLIMITED_EMAILS
+
+
+def is_internal_unlimited_email(email: str | None) -> bool:
+    if not email:
+        return False
+    return email.strip().lower() in get_internal_unlimited_emails()
 
 
 def should_retry_checkout_without_currency(exc: httpx.HTTPStatusError) -> bool:
@@ -119,6 +142,42 @@ def serialize_account(account: BillingAccount) -> BillingAccountResponse:
         external_customer_id=account.external_customer_id,
         polar_customer_id=account.polar_customer_id,
         metadata=account.billing_metadata or {},
+        polar_customer_state=account.polar_customer_state or {},
+    )
+
+
+def serialize_internal_unlimited_account(
+    account: BillingAccount,
+    *,
+    user: User,
+) -> BillingAccountResponse:
+    metadata = {
+        **(account.billing_metadata or {}),
+        "internal_unlimited": True,
+        "protected_requests": "unlimited",
+        "team_access": "unlimited",
+        "retention": "custom",
+        "support": "priority",
+    }
+
+    return BillingAccountResponse(
+        id=str(account.id),
+        owner_user_id=str(account.owner_user_id),
+        team_id=str(account.team_id) if account.team_id else None,
+        provider=account.provider,
+        status="active",
+        plan_slug="enterprise",
+        plan_name="Enterprise",
+        subscription_status="active",
+        subscription_id=account.subscription_id,
+        product_id=account.product_id,
+        currency="GBP",
+        cancel_at_period_end=False,
+        current_period_end=None,
+        billing_email=account.billing_email or user.email,
+        external_customer_id=account.external_customer_id,
+        polar_customer_id=account.polar_customer_id,
+        metadata=metadata,
         polar_customer_state=account.polar_customer_state or {},
     )
 
@@ -253,6 +312,9 @@ async def get_billing_account(
     db: AsyncSession = Depends(get_db),
 ):
     account = await get_or_create_billing_account(db, current_user)
+    user = await get_user_record(db, current_user)
+    if is_internal_unlimited_email(user.email):
+        return serialize_internal_unlimited_account(account, user=user)
     try:
         account = await sync_account_from_polar(account, db)
     except PolarConfigurationError:
@@ -271,6 +333,11 @@ async def create_checkout_session(
 ):
     account = await get_or_create_billing_account(db, current_user)
     user = await get_user_record(db, current_user)
+    if is_internal_unlimited_email(user.email):
+        raise HTTPException(
+            status_code=400,
+            detail="Internal KoreShield accounts already have unlimited enterprise access and do not use hosted checkout.",
+        )
 
     try:
         client = PolarClient(get_polar_config())
@@ -334,6 +401,12 @@ async def create_customer_portal_session(
     db: AsyncSession = Depends(get_db),
 ):
     account = await get_or_create_billing_account(db, current_user)
+    user = await get_user_record(db, current_user)
+    if is_internal_unlimited_email(user.email):
+        raise HTTPException(
+            status_code=400,
+            detail="Internal KoreShield accounts already have unlimited enterprise access and do not use the hosted customer portal.",
+        )
     if not account.polar_customer_id:
         try:
             account = await sync_account_from_polar(account, db)
@@ -380,6 +453,9 @@ async def sync_billing_account(
     db: AsyncSession = Depends(get_db),
 ):
     account = await get_or_create_billing_account(db, current_user)
+    user = await get_user_record(db, current_user)
+    if is_internal_unlimited_email(user.email):
+        return serialize_internal_unlimited_account(account, user=user)
     try:
         account = await sync_account_from_polar(account, db)
     except PolarConfigurationError as exc:

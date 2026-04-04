@@ -17,8 +17,8 @@ export const SEOConfig = {
 	},
 	pricing: {
 		title: 'Pricing',
-		description: 'Transparent pricing for KoreShield LLM security. Affordable plans for startups and enterprises. UK-based support.',
-		keywords: 'LLM security pricing, AI security cost, prompt injection protection pricing, enterprise LLM security',
+		description: 'KoreShield pricing for protected AI requests. Start free, scale with overages, and unlock enterprise security and deployment controls when you need them.',
+		keywords: 'LLM security pricing, protected requests pricing, AI security cost, prompt screening pricing, enterprise LLM security',
 		structuredData: {
 			'@context': 'https://schema.org',
 			'@type': 'FAQPage',
@@ -28,7 +28,7 @@ export const SEOConfig = {
 					name: 'How does the pricing work?',
 					acceptedAnswer: {
 						'@type': 'Answer',
-						text: 'Our pricing is based on the number of API requests per month and the level of support you need. Contact us for evaluation or pilot access.',
+						text: 'KoreShield charges a platform fee plus included protected requests each month. Hosted overages scale with usage, while enterprise plans are sold contractually with advanced governance and deployment controls.',
 					},
 				},
 			],

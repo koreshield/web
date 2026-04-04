@@ -151,7 +151,7 @@ export default function VsLakeraPage() {
 									</tr>
 									<tr>
 										<td className="py-4 px-4 text-foreground font-medium">Starting Price</td>
-										<td className="py-4 px-4 text-center text-foreground font-semibold">$299/mo</td>
+										<td className="py-4 px-4 text-center text-foreground font-semibold">£99/mo paid tier</td>
 										<td className="py-4 px-4 text-center text-foreground font-semibold">$999/mo</td>
 									</tr>
 									<tr>
@@ -180,10 +180,11 @@ export default function VsLakeraPage() {
 						<div>
 							<h3 className="text-xl font-semibold text-electric-green mb-4">KoreShield</h3>
 							<ul className="space-y-3 text-muted-foreground">
-							<li>• <strong>$299/mo:</strong> Startup (1M requests/mo)</li>
-							<li>• <strong>$1,999/mo:</strong> Growth (10M requests/mo)</li>
-							<li>• <strong>Custom:</strong> Enterprise self-hosted</li>
-								<li>• <strong>50-70% cost savings</strong> vs competitors</li>
+								<li>• <strong>£0:</strong> Free tier with 10,000 protected requests</li>
+								<li>• <strong>£99/mo:</strong> Growth with 100,000 protected requests</li>
+								<li>• <strong>£399/mo:</strong> Scale with 1,000,000 protected requests</li>
+								<li>• <strong>From £18k/year:</strong> Enterprise with private deployment and governance controls</li>
+								<li>• <strong>Usage-based overages</strong> instead of seat-based pricing</li>
 							</ul>
 						</div>
 						<div>
