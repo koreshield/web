@@ -543,7 +543,29 @@ class ApiClient {
 	}
 
 	async downloadReport(reportId: string) {
-		return this.fetch(`/v1/reports/${reportId}/download`);
+		const url = `${this.baseUrl}/v1/reports/${reportId}/download`;
+		const headers: Record<string, string> = {};
+		const adminToken = authService.getToken();
+		if (adminToken) {
+			headers.Authorization = `Bearer ${adminToken}`;
+		}
+		const response = await fetch(url, {
+			method: 'GET',
+			headers,
+			credentials: 'include',
+		});
+		if (!response.ok) {
+			const errorData = await response.json().catch(() => ({}));
+			throw new Error(this.getErrorMessage(response.status, errorData));
+		}
+		const blob = await response.blob();
+		const disposition = response.headers.get('content-disposition') || '';
+		const filenameMatch = disposition.match(/filename="?([^"]+)"?/i);
+		return {
+			blob,
+			contentType: response.headers.get('content-type') || 'application/octet-stream',
+			filename: filenameMatch?.[1] || `report-${reportId}`,
+		};
 	}
 
 	// Phase 3: Teams APIs
@@ -597,6 +619,13 @@ class ApiClient {
 	async getTeamInvites(teamId: string, status?: string) {
 		const queryParams = status ? `?status_filter=${status}` : '';
 		return this.fetch(`/v1/teams/${teamId}/invites${queryParams}`);
+	}
+
+	async createTeamInvite(teamId: string, inviteData: { email: string; role: string }) {
+		return this.fetch(`/v1/teams/${teamId}/invites`, {
+			method: 'POST',
+			body: JSON.stringify(inviteData),
+		});
 	}
 
 	async addMember(teamId: string, memberData: { email: string; role: string }) {

@@ -26,6 +26,7 @@ services:
                         - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
                         - TELEGRAM_CHANNEL_ID=${TELEGRAM_CHANNEL_ID}
                         - TELEGRAM_MESSAGE_THREAD_ID=${TELEGRAM_MESSAGE_THREAD_ID}
+                        - BILLING_INTERNAL_UNLIMITED_EMAILS=${BILLING_INTERNAL_UNLIMITED_EMAILS}
                         - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
                         - OPENAI_API_KEY=${OPENAI_API_KEY}
                         - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
@@ -59,6 +60,10 @@ services:
                                 - VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID=${VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID}
                                 - VITE_POLAR_GROWTH_PRODUCT_ID=${VITE_POLAR_GROWTH_PRODUCT_ID}
                                 - VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID=${VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID}
+                                - VITE_EMAILJS_SERVICE_ID=${VITE_EMAILJS_SERVICE_ID}
+                                - VITE_EMAILJS_TEMPLATE_ID=${VITE_EMAILJS_TEMPLATE_ID}
+                                - VITE_EMAILJS_TEMPLATE_ID_CONTACT=${VITE_EMAILJS_TEMPLATE_ID_CONTACT}
+                                - VITE_EMAILJS_PUBLIC_KEY=${VITE_EMAILJS_PUBLIC_KEY}
                 image: koreshield-web:latest
                 container_name: koreshield-web
                 ports:
