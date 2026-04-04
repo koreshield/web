@@ -78,7 +78,7 @@ describe('BillingPage', () => {
 			plan_name: 'Enterprise',
 			subscription_status: 'active',
 			current_period_end: null,
-			billing_email: 'ei@koreshield.com',
+			billing_email: 'internal-owner@example.com',
 			external_customer_id: 'team:internal',
 			metadata: {
 				internal_unlimited: true,
