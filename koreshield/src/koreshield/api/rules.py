@@ -16,7 +16,7 @@ from ..rule_engine import RuleEngine, CustomRule, RuleSeverity, RuleAction
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(tags=["rules"])
+router = APIRouter(tags=["Rules"])
 
 # Initialize global rule engine
 _rule_engine: Optional[RuleEngine] = None

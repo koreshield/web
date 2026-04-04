@@ -18,7 +18,7 @@ from ..models.request_log import RequestLog
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/analytics", tags=["analytics"])
+router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
 
 class TimeRange(str, Enum):
@@ -122,7 +122,7 @@ async def _query_cost_data(session: AsyncSession, time_range: TimeRange) -> List
     return final_data
 
 
-@router.get("/costs", response_model=List[CostData])
+@router.get("/costs", response_model=List[CostData], summary="Cost Analytics", description="Get daily LLM cost data broken down by provider for the specified time range. Supports filtering by provider and tenant.")
 async def get_cost_analytics(
     time_range: TimeRange = Query(TimeRange.LAST_7_DAYS, description="Time range for cost data"),
     provider: Optional[str] = Query(None, description="Filter by provider"),
@@ -160,7 +160,7 @@ async def get_cost_analytics(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve cost analytics: {str(e)}")
 
 
-@router.get("/costs/summary")
+@router.get("/costs/summary", summary="Cost Summary", description="Get a high-level cost summary for the current period including total spend, period-over-period change, average cost per request, and projected monthly cost.")
 async def get_cost_summary(
     current_user: dict = Depends(get_current_admin),
     session: AsyncSession = Depends(get_db)
@@ -227,7 +227,7 @@ async def get_cost_summary(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve cost summary: {str(e)}")
 
 
-@router.get("/tenants")
+@router.get("/tenants", summary="Tenant Analytics", description="Get per-tenant usage and cost analytics. Returns aggregated metrics grouped by tenant.")
 async def get_tenant_analytics(
     current_user: dict = Depends(get_current_admin),
     session: AsyncSession = Depends(get_db)
