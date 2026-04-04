@@ -4,6 +4,7 @@ Integration tests for auth, account lifecycle, and billing flows.
 
 import asyncio
 import os
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 from uuid import UUID
@@ -15,9 +16,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.koreshield.api import billing, management, teams
+from src.koreshield.api import billing, management, rbac, reports, teams
 from src.koreshield.api.auth import init_jwt_config
 from src.koreshield.models.base import Base
+from src.koreshield.models.report import Report
 from src.koreshield.models.team import Team, TeamMember
 from src.koreshield.models.user import User
 
@@ -65,9 +67,13 @@ def _build_test_client(tmp_path: Path) -> tuple[TestClient, sessionmaker, object
     app.include_router(management.router, prefix="/v1/management")
     app.include_router(billing.router, prefix="/v1")
     app.include_router(teams.router, prefix="/v1")
+    app.include_router(reports.router, prefix="/v1")
+    app.include_router(rbac.router, prefix="/v1")
     app.dependency_overrides[management.get_db] = override_get_db
     app.dependency_overrides[billing.get_db] = override_get_db
     app.dependency_overrides[teams.get_db] = override_get_db
+    app.dependency_overrides[reports.get_db] = override_get_db
+    reports.AsyncSessionLocal = session_factory
 
     async def fake_send_welcome_email(email: str, name: str | None = None) -> bool:
         return True
@@ -232,6 +238,46 @@ def test_billing_account_prefers_team_scope_for_owner(tmp_path: Path):
         assert payload["team_id"] == str(team.id)
         assert payload["external_customer_id"] == f"team:{team.id}"
         assert payload["billing_email"] == "user@example.com"
+    finally:
+        management.send_welcome_email, management.send_verification_email = original_senders
+        client.close()
+        env_patcher.stop()
+        asyncio.run(_dispose_engine(engine))
+
+
+def test_internal_team_emails_receive_unlimited_enterprise_billing_state(tmp_path: Path):
+    client, _session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
+    try:
+        signup_data = _signup(client, email="ei@koreshield.com")
+        user_id = signup_data["user"]["id"]
+
+        response = client.get("/v1/billing/account")
+        assert response.status_code == 200
+        payload = response.json()
+
+        assert payload["owner_user_id"] == user_id
+        assert payload["plan_slug"] == "enterprise"
+        assert payload["plan_name"] == "Enterprise"
+        assert payload["status"] == "active"
+        assert payload["subscription_status"] == "active"
+        assert payload["currency"] == "GBP"
+        assert payload["metadata"]["internal_unlimited"] is True
+        assert payload["metadata"]["protected_requests"] == "unlimited"
+        assert payload["metadata"]["team_access"] == "unlimited"
+
+        checkout_response = client.post(
+            "/v1/billing/checkout",
+            json={"product_id": "prod_test_123"},
+        )
+        assert checkout_response.status_code == 400
+        assert "unlimited enterprise access" in checkout_response.json()["detail"]
+
+        portal_response = client.post(
+            "/v1/billing/portal",
+            json={"return_url": "https://koreshield.com/billing"},
+        )
+        assert portal_response.status_code == 400
+        assert "unlimited enterprise access" in portal_response.json()["detail"]
     finally:
         management.send_welcome_email, management.send_verification_email = original_senders
         client.close()
@@ -418,3 +464,142 @@ def test_teams_collection_routes_work_without_redirects(tmp_path: Path):
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
+
+
+def test_team_invites_and_shared_dashboards_flow(tmp_path: Path):
+    client, _session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
+    try:
+        _signup(client)
+
+        create_team_response = client.post(
+            "/v1/teams",
+            json={"name": "Security Ops", "slug": "security-ops"},
+        )
+        assert create_team_response.status_code == 200
+        team_id = create_team_response.json()["id"]
+
+        invite_response = client.post(
+            f"/v1/teams/{team_id}/invites",
+            json={"email": "analyst@koreshield.com", "role": "viewer"},
+        )
+        assert invite_response.status_code == 201
+        invite_id = invite_response.json()["id"]
+
+        duplicate_invite_response = client.post(
+            f"/v1/teams/{team_id}/invites",
+            json={"email": "analyst@koreshield.com", "role": "viewer"},
+        )
+        assert duplicate_invite_response.status_code == 400
+
+        list_invites_response = client.get(f"/v1/teams/{team_id}/invites")
+        assert list_invites_response.status_code == 200
+        assert len(list_invites_response.json()) == 1
+
+        dashboard_response = client.post(
+            f"/v1/teams/{team_id}/dashboards",
+            json={
+                "name": "Threat Review",
+                "dashboard_type": "security",
+                "config": {"widgets": ["threats", "providers"]},
+            },
+        )
+        assert dashboard_response.status_code == 201
+        dashboard_id = dashboard_response.json()["id"]
+
+        duplicate_dashboard_response = client.post(
+            f"/v1/teams/{team_id}/dashboards",
+            json={
+                "name": "Threat Review",
+                "dashboard_type": "security",
+                "config": {"widgets": []},
+            },
+        )
+        assert duplicate_dashboard_response.status_code == 400
+
+        list_dashboards_response = client.get(f"/v1/teams/{team_id}/dashboards")
+        assert list_dashboards_response.status_code == 200
+        assert len(list_dashboards_response.json()) == 1
+
+        delete_dashboard_response = client.delete(f"/v1/teams/{team_id}/dashboards/{dashboard_id}")
+        assert delete_dashboard_response.status_code == 204
+
+        cancel_invite_response = client.delete(f"/v1/teams/{team_id}/invites/{invite_id}")
+        assert cancel_invite_response.status_code == 204
+    finally:
+        management.send_welcome_email, management.send_verification_email = original_senders
+        client.close()
+        env_patcher.stop()
+        asyncio.run(_dispose_engine(engine))
+
+
+def test_reports_update_delete_and_download_flow(tmp_path: Path):
+    client, session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
+    try:
+        _signup(client)
+
+        create_response = client.post(
+            "/v1/reports",
+            json={
+                "name": "Monthly Security Summary",
+                "description": "Initial description",
+                "template": "Security Overview",
+                "schedule": "manual",
+                "format": "pdf",
+                "filters": {"date_range": "30d", "providers": [], "tenants": [], "metrics": []},
+            },
+        )
+        assert create_response.status_code == 200
+        report_id = create_response.json()["id"]
+
+        update_response = client.put(
+            f"/v1/reports/{report_id}",
+            json={"name": "Updated Security Summary", "format": "json"},
+        )
+        assert update_response.status_code == 200
+        assert update_response.json()["name"] == "Updated Security Summary"
+        assert update_response.json()["format"] == "json"
+
+        generate_response = client.post(f"/v1/reports/{report_id}/generate")
+        assert generate_response.status_code == 200
+
+        report_list_response = client.get("/v1/reports")
+        assert report_list_response.status_code == 200
+        assert any(report["id"] == report_id for report in report_list_response.json())
+
+        async def _mark_report_complete():
+            async with session_factory() as session:
+                result = await session.execute(select(Report).where(Report.id == UUID(report_id)))
+                report = result.scalar_one()
+                report.status = "completed"
+                report.format = "pdf"
+                report.last_run_at = datetime.utcnow()
+                await session.commit()
+
+        asyncio.run(_mark_report_complete())
+
+        download_response = client.get(f"/v1/reports/{report_id}/download")
+        assert download_response.status_code == 200
+        assert download_response.headers["content-type"].startswith("application/pdf")
+
+        delete_response = client.delete(f"/v1/reports/{report_id}")
+        assert delete_response.status_code == 204
+    finally:
+        management.send_welcome_email, management.send_verification_email = original_senders
+        client.close()
+        env_patcher.stop()
+        asyncio.run(_dispose_engine(engine))
+def test_rbac_delete_custom_role_guardrails():
+    rbac._initialize_defaults()
+    custom_role_id = "999"
+    rbac._roles_store[custom_role_id] = rbac.Role(
+        id=custom_role_id,
+        name="Custom Role",
+        description="Custom permissions",
+        permissions=["view:dashboard"],
+        user_count=0,
+    )
+
+    admin_user = {"id": "1", "role": "admin"}
+    response = asyncio.run(rbac.delete_role(custom_role_id, current_user=admin_user))
+    assert response is None
+    assert custom_role_id not in rbac._roles_store

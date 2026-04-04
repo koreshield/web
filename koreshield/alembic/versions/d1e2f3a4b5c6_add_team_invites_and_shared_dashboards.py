@@ -5,8 +5,9 @@ Revises: c7d485155c51
 Branch Labels: None
 Depends On: None
 """
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 revision = 'd1e2f3a4b5c6'
 down_revision = 'c7d485155c51'
@@ -29,6 +30,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['created_by'], ['users.id']),
         sa.ForeignKeyConstraint(['team_id'], ['teams.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('team_id', 'email', 'status', name='uq_team_invites_team_email_status'),
         sa.UniqueConstraint('token'),
     )
     op.create_index('ix_team_invites_team_id', 'team_invites', ['team_id'])
@@ -40,13 +42,14 @@ def upgrade() -> None:
         sa.Column('team_id', sa.UUID(), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
         sa.Column('dashboard_type', sa.String(length=50), nullable=False, server_default='security'),
-        sa.Column('config', sa.JSON(), nullable=True),
+        sa.Column('config', sa.JSON(), nullable=False, server_default=sa.text("'{}'::json")),
         sa.Column('created_by', sa.UUID(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=True),
         sa.Column('updated_at', sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(['created_by'], ['users.id']),
         sa.ForeignKeyConstraint(['team_id'], ['teams.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('team_id', 'name', name='uq_shared_dashboards_team_name'),
     )
     op.create_index('ix_shared_dashboards_team_id', 'shared_dashboards', ['team_id'])
 
