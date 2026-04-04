@@ -41,6 +41,6 @@ describe('PricingPage', () => {
 		expect(screen.getByText('£950')).toBeInTheDocument();
 		expect(screen.getByText(/100,000 protected requests\/month/i)).toBeInTheDocument();
 		expect(screen.getByText(/what is a protected request/i)).toBeInTheDocument();
-		expect(screen.getAllByRole('button', { name: /talk to sales/i }).length).toBeGreaterThan(0);
+		expect(screen.getAllByRole('link', { name: /talk to sales/i }).length).toBeGreaterThan(0);
 	});
 });
