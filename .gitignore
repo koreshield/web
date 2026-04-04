@@ -334,3 +334,4 @@ personal-docs/answers/2026-03-14-client-ready-midddleman-pitch.docx
 .ssh_remote.exp
 *.exp
 vps-fix.sh
+*.sh
