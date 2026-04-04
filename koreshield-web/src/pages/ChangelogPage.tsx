@@ -9,6 +9,7 @@ type ChangelogEntry = {
 	summary: string;
 	customerImpact: string;
 	items: string[];
+	isMajor?: boolean;
 };
 
 type ChangelogBatch = {
@@ -98,16 +99,102 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		],
 	},
 	{
+		label: 'March 2026 Roundup',
+		timeframe: 'March 2026',
+		overview:
+			'March focused on platform depth: RAG evidence visibility, runtime tool security, detector hardening, enterprise billing, and clearer onboarding for customers integrating KoreShield into production systems.',
+		stats: [
+			{ label: 'Curated updates', value: '8' },
+			{ label: 'Security upgrades', value: '5' },
+			{ label: 'Integration improvements', value: '3' },
+		],
+		entries: [
+			{
+				date: '2026-03-25',
+				title: 'Password reset moved from UI-only to end-to-end',
+				category: 'Added',
+				summary:
+					'The password reset experience shipped as a full product flow across dashboard UI and backend management APIs instead of stopping at page design.',
+				customerImpact:
+					'Administrators can now complete password recovery without manual support or hidden backend setup.',
+				items: [
+					'Added reset password and forgot password support in the dashboard.',
+					'Backed the flow with real management endpoints and token handling.',
+					'Improved login feedback after successful password reset.',
+				],
+			},
+			{
+				date: '2026-03-23',
+				title: 'Runtime tool security and governed sessions expanded',
+				category: 'Security',
+				summary:
+					'KoreShield now goes beyond prompt scanning by evaluating risky tool calls, provider trust context, approval workflows, and suspicious tool chains in agentic flows.',
+				customerImpact:
+					'Customers evaluating agents and tool use can apply policy-backed review flows instead of trusting raw tool execution.',
+				items: [
+					'Added runtime tool scan and policy-backed allow, warn, and block decisions.',
+					'Introduced governed runtime sessions and review workflows for risky operations.',
+					'Expanded confused-deputy and trust-aware tool heuristics.',
+				],
+			},
+			{
+				date: '2026-03-22',
+				title: 'Prompt and RAG detection were hardened',
+				category: 'Security',
+				summary:
+					'Detector normalization, prompt-injection pattern coverage, indirect prompt-injection analysis, and RAG heuristics all received major upgrades.',
+				customerImpact:
+					'KoreShield is better at catching evasive instructions, poisoning attempts, and retrieved-document abuse before content reaches a model.',
+				items: [
+					'Added stronger normalization and raw plus normalized scanning paths.',
+					'Expanded the detector corpus for prompt override, leakage, and exfiltration attempts.',
+					'Improved RAG analysis with query-document mismatch and directive-density signals.',
+				],
+			},
+			{
+				date: '2026-03-16',
+				title: 'Hosted billing and subscription management were introduced',
+				category: 'Added',
+				summary:
+					'KoreShield added Polar-backed billing flows so hosted pricing, checkout, and customer account state can be managed inside the product.',
+				customerImpact:
+					'Hosted customers now have a clearer path from evaluation to paid plan selection and entitlement management.',
+				items: [
+					'Added Polar checkout and webhook handling for hosted billing.',
+					'Improved plan metadata handling and subscription state mirroring.',
+					'Aligned pricing and checkout flows with hosted and enterprise packaging.',
+				],
+			},
+		],
+	},
+	{
 		label: 'February 2026 Roundup',
 		timeframe: 'February 2026',
 		overview:
 			'February focused on hardening the scanning pipeline, expanding analytics, and making the dashboard more useful for teams who depend on KoreShield in daily operations.',
 		stats: [
-			{ label: 'Curated updates', value: '6' },
+			{ label: 'Curated updates', value: '7' },
 			{ label: 'Security upgrades', value: '3' },
 			{ label: 'Dashboard improvements', value: '3' },
 		],
 		entries: [
+			{
+				date: '2026-02-10',
+				title: 'v0.3.0 — Web Platform & Dashboard Launch',
+				isMajor: true,
+				category: 'Added',
+				summary:
+					'The KoreShield hosted web platform launched with a comprehensive monitoring and management dashboard, marking the transition from API-only to a fully integrated product.',
+				customerImpact:
+					'Customers can now monitor threats, manage API keys, audit activity, and test policies through a dedicated dashboard — no custom tooling required.',
+				items: [
+					'Live Threat Monitoring: real-time threat detection and visualization across all protected endpoints.',
+					'Provider Health Dashboard: monitor LLM provider status and performance.',
+					'API Key Management: secure key rotation and access control.',
+					'Audit Logs: complete compliance and activity tracking.',
+					'Interactive Playground: test and validate security policies.',
+				],
+			},
 			{
 				date: '2026-02-27',
 				title: 'Advanced analytics now surfaces per-endpoint threat breakdowns',
@@ -283,11 +370,27 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		overview:
 			'December was the initial build sprint: infrastructure setup, the backend framework, the first detector implementations, and the foundational architecture that KoreShield runs on today.',
 		stats: [
-			{ label: 'Curated updates', value: '4' },
+			{ label: 'Curated updates', value: '5' },
 			{ label: 'Infrastructure milestones', value: '3' },
 			{ label: 'Core features shipped', value: '2' },
 		],
 		entries: [
+			{
+				date: '2025-12-31',
+				title: 'v0.2.0 — Research Paper Preprint Release',
+				isMajor: true,
+				category: 'Added',
+				summary:
+					'KoreShield published a comprehensive research preprint on LLM security and indirect prompt injection taxonomy, establishing the theoretical foundation for the platform\'s detection approach.',
+				customerImpact:
+					'The published framework gives customers and prospects a rigorous, peer-reviewed basis for evaluating KoreShield\'s security model.',
+				items: [
+					'Released preprint: "LLM Firewall: A Novel Taxonomy of Indirect Prompt Injection Attacks in Enterprise RAG Systems".',
+					'Introduced the 5-dimensional threat classification framework underpinning KoreShield\'s detectors.',
+					'Documented attack vectors and defense mechanisms with empirical analysis.',
+					'Published on Academia.edu for open peer review.',
+				],
+			},
 			{
 				date: '2025-12-28',
 				title: 'Production infrastructure provisioned on VPS with Caddy and Docker',
@@ -302,6 +405,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 					'Provisioned PostgreSQL with persistent volumes and Redis for session and rate-limit storage.',
 				],
 			},
+
 			{
 				date: '2025-12-22',
 				title: 'First detector implementations: prompt injection and PII leakage',
@@ -347,70 +451,30 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		],
 	},
 	{
-		label: 'March 2026 Roundup',
-		timeframe: 'March 2026',
+		label: 'November 2025 Roundup',
+		timeframe: 'November 2025',
 		overview:
-			'March focused on platform depth: RAG evidence visibility, runtime tool security, detector hardening, enterprise billing, and clearer onboarding for customers integrating KoreShield into production systems.',
+			'November marked the public launch of KoreShield with its first stable release: multi-provider LLM support, real-time prompt injection detection, and foundational SDK integrations.',
 		stats: [
-			{ label: 'Curated updates', value: '8' },
-			{ label: 'Security upgrades', value: '5' },
-			{ label: 'Integration improvements', value: '3' },
+			{ label: 'Curated updates', value: '1' },
+			{ label: 'Launch milestones', value: '1' },
 		],
 		entries: [
 			{
-				date: '2026-03-25',
-				title: 'Password reset moved from UI-only to end-to-end',
+				date: '2025-11-15',
+				title: 'v0.1.0 — Initial Release',
+				isMajor: true,
 				category: 'Added',
 				summary:
-					'The password reset experience shipped as a full product flow across dashboard UI and backend management APIs instead of stopping at page design.',
+					'KoreShield\'s first public release shipped with core LLM security features: multi-provider support, real-time prompt injection detection, Python and JavaScript SDKs, basic RAG context scanning, and Docker-based deployment.',
 				customerImpact:
-					'Administrators can now complete password recovery without manual support or hidden backend setup.',
+					'Developers can immediately protect LLM applications across OpenAI, Anthropic, and DeepSeek with a drop-in SDK — no infrastructure changes required.',
 				items: [
-					'Added reset password and forgot password support in the dashboard.',
-					'Backed the flow with real management endpoints and token handling.',
-					'Improved login feedback after successful password reset.',
-				],
-			},
-			{
-				date: '2026-03-23',
-				title: 'Runtime tool security and governed sessions expanded',
-				category: 'Security',
-				summary:
-					'KoreShield now goes beyond prompt scanning by evaluating risky tool calls, provider trust context, approval workflows, and suspicious tool chains in agentic flows.',
-				customerImpact:
-					'Customers evaluating agents and tool use can apply policy-backed review flows instead of trusting raw tool execution.',
-				items: [
-					'Added runtime tool scan and policy-backed allow, warn, and block decisions.',
-					'Introduced governed runtime sessions and review workflows for risky operations.',
-					'Expanded confused-deputy and trust-aware tool heuristics.',
-				],
-			},
-			{
-				date: '2026-03-22',
-				title: 'Prompt and RAG detection were hardened',
-				category: 'Security',
-				summary:
-					'Detector normalization, prompt-injection pattern coverage, indirect prompt-injection analysis, and RAG heuristics all received major upgrades.',
-				customerImpact:
-					'KoreShield is better at catching evasive instructions, poisoning attempts, and retrieved-document abuse before content reaches a model.',
-				items: [
-					'Added stronger normalization and raw plus normalized scanning paths.',
-					'Expanded the detector corpus for prompt override, leakage, and exfiltration attempts.',
-					'Improved RAG analysis with query-document mismatch and directive-density signals.',
-				],
-			},
-			{
-				date: '2026-03-16',
-				title: 'Hosted billing and subscription management were introduced',
-				category: 'Added',
-				summary:
-					'KoreShield added Polar-backed billing flows so hosted pricing, checkout, and customer account state can be managed inside the product.',
-				customerImpact:
-					'Hosted customers now have a clearer path from evaluation to paid plan selection and entitlement management.',
-				items: [
-					'Added Polar checkout and webhook handling for hosted billing.',
-					'Improved plan metadata handling and subscription state mirroring.',
-					'Aligned pricing and checkout flows with hosted and enterprise packaging.',
+					'Multi-provider LLM support: OpenAI, Anthropic, and DeepSeek out of the box.',
+					'Real-time prompt injection detection on every request.',
+					'Python and JavaScript SDKs published for easy integration.',
+					'Basic RAG context scanning to catch retrieved-document abuse.',
+					'Docker-based deployment for self-hosted production use.',
 				],
 			},
 		],
@@ -481,6 +545,11 @@ function ChangelogPage() {
 										<div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
 											<div className="max-w-3xl">
 												<div className="flex flex-wrap items-center gap-3">
+													{entry.isMajor && (
+														<span className="rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-black">
+															Major
+														</span>
+													)}
 													<span
 														className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${CATEGORY_STYLES[entry.category]}`}
 													>

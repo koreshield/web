@@ -24,7 +24,7 @@ from .auth import AUTH_COOKIE_NAME, get_current_admin, get_current_user, issue_j
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(tags=["management"])
+router = APIRouter(tags=["Management"])
 
 SENSITIVE_KEY_PATTERN = re.compile(
     r"(password|secret|token|private[_-]?key|api[_-]?key|dsn|connection|credential|auth)",
@@ -509,14 +509,14 @@ async def reset_password(
             detail="Password reset failed. Please try again later.",
         )
 
-@router.post("/logout")
+@router.post("/logout", summary="Logout", description="Invalidate the current session cookie and log out the authenticated user.", tags=["Authentication"])
 async def admin_logout(response: Response, current_user: dict = Depends(get_current_user)):
     """Logout endpoint for any authenticated user."""
     response.delete_cookie(key=AUTH_COOKIE_NAME, path="/")
     logger.info("user_logout", user_id=current_user.get("id"), email=current_user.get("email"))
     return {"status": "logged_out"}
 
-@router.get("/stats")
+@router.get("/stats", summary="Platform Statistics", description="Return live request counts, block rates, threat detections, and provider health statistics for the dashboard.")
 async def get_stats(request: Request, current_user: dict = Depends(get_current_user)):
     """Get current proxy statistics."""
     # Access the proxy instance from the app state or request
@@ -524,7 +524,7 @@ async def get_stats(request: Request, current_user: dict = Depends(get_current_u
         return request.app.state.stats
     return {"error": "Stats not available"}
 
-@router.get("/config")
+@router.get("/config", summary="Get Configuration", description="Return the current platform configuration (development environments only). Sensitive values are redacted.")
 async def get_config(request: Request, current_user: dict = Depends(get_current_admin)):
     """Get current configuration."""
     if hasattr(request.app.state, "config"):
@@ -537,7 +537,7 @@ async def get_config(request: Request, current_user: dict = Depends(get_current_
         return _redact_sensitive(current_config)
     return {"error": "Config not available"}
 
-@router.patch("/config/security")
+@router.patch("/config/security", summary="Update Security Config", description="Update runtime security settings including sensitivity level and default action policy.")
 async def update_security_config(
     request: Request,
     config_update: SecurityConfigUpdate,
@@ -579,7 +579,7 @@ async def update_security_config(
     return {"status": "updated", "config": security_config}
 
 
-@router.get("/logs")
+@router.get("/logs", summary="Audit Logs", description="Retrieve paginated audit logs from the database and log file. Filter by severity level (info, warning, error, critical).")
 async def get_audit_logs(
     request: Request,
     limit: int = 100,
@@ -682,7 +682,7 @@ class Policy(BaseModel):
     severity: str
     roles: list[str] = ["admin", "moderator", "user"]
 
-@router.get("/policies")
+@router.get("/policies", summary="List Policies", description="List all active security policies configured in the policy engine.")
 async def list_policies(request: Request, current_user: dict = Depends(get_current_user)):
     """List all security policies."""
     # Assuming the proxy instance is available and has the policy engine
@@ -690,7 +690,7 @@ async def list_policies(request: Request, current_user: dict = Depends(get_curre
         return request.app.state.policy_engine.list_policies()
     return []
 
-@router.post("/policies")
+@router.post("/policies", summary="Create Policy", description="Add a new security policy to the policy engine. Policy IDs must be unique.")
 async def create_policy(request: Request, policy: Policy, current_user: dict = Depends(get_current_admin)):
     """Create or update a policy."""
     if not hasattr(request.app.state, "policy_engine"):
@@ -708,7 +708,7 @@ async def create_policy(request: Request, policy: Policy, current_user: dict = D
 
     return {"status": "created", "policy": policy}
 
-@router.delete("/policies/{policy_id}")
+@router.delete("/policies/{policy_id}", summary="Delete Policy", description="Remove a security policy by ID from the policy engine.")
 async def delete_policy(request: Request, policy_id: str, current_user: dict = Depends(get_current_admin)):
     """Delete a policy."""
     if not hasattr(request.app.state, "policy_engine"):

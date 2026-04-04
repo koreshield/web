@@ -27,7 +27,7 @@ from .auth import get_current_admin
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/reports", tags=["reports"])
+router = APIRouter(prefix="/reports", tags=["Reports"])
 
 # Pydantic Models for Request/Response
 # Note: DB models have same names, so using aliases or separate classes
@@ -193,7 +193,7 @@ async def _seed_templates(session: AsyncSession):
 
     await session.commit()
 
-@router.get("/templates", response_model=List[ReportTemplateSchema])
+@router.get("/templates", response_model=List[ReportTemplateSchema], summary="List Report Templates", description="List all available report templates including security summaries, compliance audits, and threat analysis reports.")
 async def get_templates(
     current_user: dict = Depends(get_current_admin),
     session: AsyncSession = Depends(get_db)
@@ -206,7 +206,7 @@ async def get_templates(
     templates = result.scalars().all()
     return templates
 
-@router.get("", response_model=List[ReportSchema])
+@router.get("", response_model=List[ReportSchema], summary="List Reports", description="List all reports created by the authenticated user. Filter by status, schedule, or format.")
 async def get_reports(
     status: Optional[str] = None,
     schedule: Optional[str] = None,
@@ -244,7 +244,7 @@ async def get_reports(
 
     return reports
 
-@router.post("", response_model=ReportSchema)
+@router.post("", response_model=ReportSchema, summary="Create Report", description="Create a new report from a template. Optionally configure scheduling, output format, and filters.")
 async def create_report(
     report_data: ReportCreate,
     request: Request,
@@ -380,7 +380,7 @@ async def _generate_report_task(report_id: str, user_id: str, monitoring=None):
                 )
             raise
 
-@router.post("/{report_id}/generate")
+@router.post("/{report_id}/generate", summary="Generate Report", description="Trigger immediate generation of a report. The report status will update to generating and then completed or failed.")
 async def generate_report(
     report_id: str,
     request: Request,
@@ -566,7 +566,7 @@ async def download_report(
             headers={"Content-Disposition": f'attachment; filename="{report.name.replace(" ", "_")}.csv"'},
         )
 
-@router.get("/logs", response_model=List[dict])
+@router.get("/logs", response_model=List[dict], summary="Report Logs", description="Get a log of all report generation events including timestamps, statuses, and error messages.")
 async def get_logs(
     limit: int = 50,
     offset: int = 0,
