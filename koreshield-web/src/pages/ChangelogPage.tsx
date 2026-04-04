@@ -98,6 +98,255 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		],
 	},
 	{
+		label: 'February 2026 Roundup',
+		timeframe: 'February 2026',
+		overview:
+			'February focused on hardening the scanning pipeline, expanding analytics, and making the dashboard more useful for teams who depend on KoreShield in daily operations.',
+		stats: [
+			{ label: 'Curated updates', value: '6' },
+			{ label: 'Security upgrades', value: '3' },
+			{ label: 'Dashboard improvements', value: '3' },
+		],
+		entries: [
+			{
+				date: '2026-02-27',
+				title: 'Advanced analytics now surfaces per-endpoint threat breakdowns',
+				category: 'Added',
+				summary:
+					'The analytics section was extended so operators can drill into threat patterns at the endpoint level, not just the account level.',
+				customerImpact:
+					'Teams can now identify which specific API endpoints or application surfaces are generating the most security events.',
+				items: [
+					'Added per-endpoint request volume and threat-rate breakdowns.',
+					'Introduced time-series views for blocked vs. flagged requests per endpoint.',
+					'Improved filtering to scope analytics by endpoint, provider, and policy.',
+				],
+			},
+			{
+				date: '2026-02-25',
+				title: 'RAG scan evidence is now surfaced in the dashboard',
+				category: 'Improved',
+				summary:
+					'Operators can now see exactly which retrieved documents triggered a RAG security signal, rather than seeing a binary block result.',
+				customerImpact:
+					'Security teams get actionable attribution when KoreShield flags a RAG retrieval flow, making it easier to tune policies and explain decisions.',
+				items: [
+					'Added document-level evidence cards to RAG scan results in the dashboard.',
+					'Improved scan result payloads to include chunk index and retrieval score context.',
+					'Expanded audit log entries for RAG events with evidence references.',
+				],
+			},
+			{
+				date: '2026-02-20',
+				title: 'Prompt injection detector expanded with evasion patterns',
+				category: 'Security',
+				summary:
+					'The prompt injection detector was updated with a broader pattern corpus targeting obfuscation, role override, and context manipulation evasion techniques.',
+				customerImpact:
+					'KoreShield catches more sophisticated injection attempts that use encoding, synonym substitution, or multi-step manipulation to bypass simpler detectors.',
+				items: [
+					'Added detection patterns for Base64-encoded instruction injection.',
+					'Improved role-override detection to cover persona and instruction-reversal attacks.',
+					'Expanded context manipulation heuristics for multi-turn evasion chains.',
+				],
+			},
+			{
+				date: '2026-02-14',
+				title: 'Policy engine now supports threshold-based alert suppression',
+				category: 'Improved',
+				summary:
+					'Policies can now be configured with alert suppression thresholds so operators are not overwhelmed by high-volume, low-severity signals.',
+				customerImpact:
+					'Teams operating at scale can filter out alert noise while maintaining full scan coverage and audit trail completeness.',
+				items: [
+					'Added per-policy minimum severity and rate thresholds for alert delivery.',
+					'Improved policy configuration UI to expose suppression controls.',
+					'Maintained full audit log retention even for suppressed alerts.',
+				],
+			},
+			{
+				date: '2026-02-08',
+				title: 'Provider health visibility extended to latency percentiles',
+				category: 'Added',
+				summary:
+					'The provider health section now shows p50, p95, and p99 response-time distributions in addition to error rates.',
+				customerImpact:
+					'Teams running latency-sensitive AI workloads can now see tail latency behavior per provider without exporting data to an external APM tool.',
+				items: [
+					'Added p50, p95, and p99 latency charts to provider health cards.',
+					'Improved error-rate displays to differentiate timeout errors from authentication failures.',
+					'Connected provider health data to the alert system so latency spikes can trigger Telegram notifications.',
+				],
+			},
+			{
+				date: '2026-02-03',
+				title: 'Team invite and permission management shipped',
+				category: 'Added',
+				summary:
+					'KoreShield now supports multi-member teams with role-based access so administrators can invite colleagues and assign permissions without sharing credentials.',
+				customerImpact:
+					'Security and engineering teams can collaborate inside the dashboard with appropriate access boundaries instead of sharing a single account.',
+				items: [
+					'Added team invite flow with email-based onboarding.',
+					'Introduced role assignments for Admin, Developer, and Viewer access levels.',
+					'Improved team management page with member listing, role editing, and revocation.',
+				],
+			},
+		],
+	},
+	{
+		label: 'January 2026 Roundup',
+		timeframe: 'January 2026',
+		overview:
+			'January established the foundation for the hosted platform: authentication, the initial dashboard, API key management, and the first real scan pipeline wired end-to-end.',
+		stats: [
+			{ label: 'Curated updates', value: '5' },
+			{ label: 'Foundation features', value: '4' },
+			{ label: 'Security improvements', value: '2' },
+		],
+		entries: [
+			{
+				date: '2026-01-28',
+				title: 'Dashboard shell and core navigation went live',
+				category: 'Added',
+				summary:
+					'The authenticated dashboard shell launched with sidebar navigation, theme switching, and a persistent layout for the metrics, alerts, policies, and settings sections.',
+				customerImpact:
+					'Customers can now log into a real product interface instead of interacting with KoreShield only through the API.',
+				items: [
+					'Launched the authenticated app shell with route-based navigation.',
+					'Added dark and light theme support with persistent preference storage.',
+					'Introduced the dashboard metrics overview page with live protected-request counts.',
+				],
+			},
+			{
+				date: '2026-01-24',
+				title: 'API key management available in the dashboard',
+				category: 'Added',
+				summary:
+					'Customers can now create, name, rotate, and revoke server API keys directly from the dashboard without making raw API calls.',
+				customerImpact:
+					'Integration is faster and safer because teams no longer need to share raw tokens out of band to onboard new services.',
+				items: [
+					'Added API key creation with optional name and expiry.',
+					'Introduced key revocation and rotation from the dashboard.',
+					'Improved key listing with last-used timestamps and scope labels.',
+				],
+			},
+			{
+				date: '2026-01-18',
+				title: 'Prompt scan pipeline wired end-to-end',
+				category: 'Security',
+				summary:
+					'The core prompt screening pipeline — from request receipt through detector evaluation to audit log write and policy decision — was completed and validated in a staging environment.',
+				customerImpact:
+					'KoreShield can now intercept, evaluate, and enforce policy on real AI requests rather than running synthetic simulations.',
+				items: [
+					'Completed the synchronous scan path from API ingress to policy enforcement.',
+					'Added audit log writes for every scan decision with full detector payloads.',
+					'Validated the pipeline under realistic throughput on a staging cluster.',
+				],
+			},
+			{
+				date: '2026-01-12',
+				title: 'JWT authentication and user registration completed',
+				category: 'Security',
+				summary:
+					'The user authentication system was completed with registration, login, JWT issuance, and refresh token handling.',
+				customerImpact:
+					'Customers can create and manage accounts with proper session security instead of relying on long-lived static tokens.',
+				items: [
+					'Completed registration, login, and logout flows with JWT and refresh tokens.',
+					'Added email verification step to the signup flow.',
+					'Implemented token expiry, rotation, and revocation on logout.',
+				],
+			},
+			{
+				date: '2026-01-05',
+				title: 'Public marketing site launched',
+				category: 'Added',
+				summary:
+					'The public KoreShield website launched with the landing page, pricing page, documentation links, and basic contact flow.',
+				customerImpact:
+					'Prospective customers can evaluate KoreShield, compare plans, and start the signup process without needing a direct introduction.',
+				items: [
+					'Launched landing page with feature overview and integration code samples.',
+					'Published pricing page with plan comparisons and FAQ.',
+					'Added contact and support channels with email routing.',
+				],
+			},
+		],
+	},
+	{
+		label: 'December 2025 Roundup',
+		timeframe: 'December 2025',
+		overview:
+			'December was the initial build sprint: infrastructure setup, the backend framework, the first detector implementations, and the foundational architecture that KoreShield runs on today.',
+		stats: [
+			{ label: 'Curated updates', value: '4' },
+			{ label: 'Infrastructure milestones', value: '3' },
+			{ label: 'Core features shipped', value: '2' },
+		],
+		entries: [
+			{
+				date: '2025-12-28',
+				title: 'Production infrastructure provisioned on VPS with Caddy and Docker',
+				category: 'Infra',
+				summary:
+					'The production environment was provisioned with a Docker Compose stack, Caddy reverse proxy with automatic TLS, PostgreSQL, and Redis — ready for the first real deployment.',
+				customerImpact:
+					'KoreShield has a stable, self-hosted production foundation with HTTPS and proper service isolation from day one.',
+				items: [
+					'Set up Docker Compose production stack with API, web, database, and cache services.',
+					'Configured Caddy for automatic TLS with HTTPS routing for koreshield.com and api.koreshield.com.',
+					'Provisioned PostgreSQL with persistent volumes and Redis for session and rate-limit storage.',
+				],
+			},
+			{
+				date: '2025-12-22',
+				title: 'First detector implementations: prompt injection and PII leakage',
+				category: 'Security',
+				summary:
+					'The first two production-grade security detectors landed: a prompt injection classifier and a PII leakage detector covering common personal data patterns.',
+				customerImpact:
+					'KoreShield can intercept prompt injection attacks and flag responses that might expose personal information from the first integration.',
+				items: [
+					'Implemented baseline prompt injection detector with pattern matching and heuristic scoring.',
+					'Added PII leakage detector covering email, phone, SSN, and credit card patterns.',
+					'Integrated both detectors into the scan pipeline with configurable severity thresholds.',
+				],
+			},
+			{
+				date: '2025-12-16',
+				title: 'Backend API framework and database schema established',
+				category: 'Added',
+				summary:
+					'The Python backend was built on FastAPI with the initial database schema, migration tooling, and health check infrastructure that all subsequent features are layered on top of.',
+				customerImpact:
+					'KoreShield\'s backend is structured for extensibility and production reliability from the start, not retrofitted later.',
+				items: [
+					'Bootstrapped FastAPI application with structured routing and middleware.',
+					'Designed and migrated initial database schema covering users, scans, policies, and audit logs.',
+					'Added Alembic for versioned database migrations and health check endpoints.',
+				],
+			},
+			{
+				date: '2025-12-08',
+				title: 'KoreShield project initiated and monorepo structure set up',
+				category: 'Added',
+				summary:
+					'The KoreShield monorepo was created with the initial project structure for the backend API, web frontend, Python SDK, JavaScript SDK, documentation site, and blog.',
+				customerImpact:
+					'All KoreShield components share a single versioned repository, making it straightforward for contributors and integrations to stay aligned.',
+				items: [
+					'Created monorepo with koreshield (API), koreshield-web (frontend), koreshield-python-sdk, koreshield-js-sdk, koreshield-docs, and koreshield-blog.',
+					'Set up shared tooling including linting, formatting, and CI configuration.',
+					'Defined core architectural principles: scan-first, provider-agnostic, policy-driven.',
+				],
+			},
+		],
+	},
+	{
 		label: 'March 2026 Roundup',
 		timeframe: 'March 2026',
 		overview:
