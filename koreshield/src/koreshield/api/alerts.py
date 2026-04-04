@@ -15,7 +15,7 @@ from .auth import get_current_user
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(tags=["alerts"])
+router = APIRouter(tags=["Alerts"])
 
 # In-memory storage for MVP (would be database in production)
 _alert_rules: Dict[str, dict] = {}
