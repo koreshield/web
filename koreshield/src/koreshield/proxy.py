@@ -119,14 +119,20 @@ class KoreShieldProxy:
             - Team Collaboration: Multi-tenant support with RBAC
             """,
             openapi_tags=[
-                {"name": "Authentication", "description": "User signup, login, and account management"},
-                {"name": "Chat", "description": "LLM Chat Completions endpoint with security scanning"},
-                {"name": "Management", "description": "Admin Dashboard APIs for configuration and monitoring"},
-                {"name": "Analytics", "description": "Usage analytics, metrics, and cost tracking"},
-                {"name": "RBAC", "description": "Role-based access control and user management"},
-                {"name": "Reports", "description": "Security reports and audit logs"},
-                {"name": "Teams", "description": "Team and organization management"},
-                {"name": "Health", "description": "System health checks and status"}
+                {"name": "Authentication", "description": "User signup, login, JWT authentication, and account management"},
+                {"name": "API Keys", "description": "Generate, list, inspect, and revoke API keys for SDK and direct API access"},
+                {"name": "Chat", "description": "OpenAI-compatible chat completions endpoint with built-in threat detection and provider routing"},
+                {"name": "Scan", "description": "Direct prompt scanning, batch scanning, tool call scanning, governed runtime sessions, and review workflows"},
+                {"name": "Management", "description": "Dashboard configuration, request logs, security policies, and platform statistics"},
+                {"name": "Rules", "description": "Custom detection rules: create, update, delete, and test pattern-based rules"},
+                {"name": "Alerts", "description": "Alert rules and notification channels: configure conditions, severities, cooldowns, and delivery channels"},
+                {"name": "Analytics", "description": "Usage analytics, cost tracking, and per-tenant metrics"},
+                {"name": "RBAC", "description": "Role-based access control: manage users, roles, and permission assignments"},
+                {"name": "Reports", "description": "Security reports: templates, scheduling, generation, and download"},
+                {"name": "Teams", "description": "Team and organisation management: members, roles, invites, and shared dashboards"},
+                {"name": "Billing", "description": "Subscription management via Polar: account state, checkout, customer portal, and webhooks"},
+                {"name": "Websocket", "description": "Real-time event streaming over WebSocket"},
+                {"name": "Health", "description": "System health checks, provider status, Prometheus metrics, and live statistics"},
             ],
             contact={
                 "name": "KoreShield Support",
@@ -919,7 +925,7 @@ class KoreShieldProxy:
                 raise HTTPException(status_code=404, detail="RAG scan not found")
             return scan
 
-        @self.app.delete("/v1/rag/scans/{scan_id}", tags=["Chat"])
+        @self.app.delete("/v1/rag/scans/{scan_id}", tags=["Chat"], summary="Delete RAG Scan", description="Delete a specific RAG security scan record by ID.")
         @self.limiter.limit(rate_limit)
         async def delete_rag_scan(scan_id: str, request: Request):
             principal = await self._authenticate_request(request)
@@ -944,7 +950,7 @@ class KoreShieldProxy:
                     raise HTTPException(status_code=404, detail="RAG scan not found")
                 return {"deleted": True}
 
-        @self.app.delete("/v1/rag/scans", tags=["Chat"])
+        @self.app.delete("/v1/rag/scans", tags=["Chat"], summary="Clear All RAG Scans", description="Delete all RAG scan records for the authenticated principal.")
         @self.limiter.limit(rate_limit)
         async def clear_rag_scans(request: Request):
             principal = await self._authenticate_request(request)
@@ -964,7 +970,7 @@ class KoreShieldProxy:
                 await session.commit()
                 return {"deleted": True}
 
-        @self.app.get("/v1/rag/scans/{scan_id}/pack", tags=["Chat"])
+        @self.app.get("/v1/rag/scans/{scan_id}/pack", tags=["Chat"], summary="Download RAG Scan Pack", description="Download the full request, response, and document payloads for a RAG scan as a ZIP archive.")
         @self.limiter.limit(rate_limit)
         async def download_rag_scan_pack(scan_id: str, request: Request):
             principal = await self._authenticate_request(request)
@@ -1008,57 +1014,57 @@ class KoreShieldProxy:
             return Response(content=buffer.read(), media_type="application/zip", headers=headers)
 
         # Prompt scanning endpoints
-        @self.app.post("/v1/scan", tags=["Scan"])
+        @self.app.post("/v1/scan", tags=["Scan"], summary="Scan Prompt", description="Scan a single prompt for threats including prompt injection, PII leakage, and policy violations. Returns a threat assessment with confidence scores and a policy decision.")
         @self.limiter.limit(rate_limit)
         async def scan_prompt(request: Request):
             return await self._handle_scan(request)
 
-        @self.app.post("/v1/scan/batch", tags=["Scan"])
+        @self.app.post("/v1/scan/batch", tags=["Scan"], summary="Batch Scan Prompts", description="Scan multiple prompts in a single request. Each item is evaluated independently and results are returned in the same order.")
         @self.limiter.limit(rate_limit)
         async def scan_prompt_batch(request: Request):
             return await self._handle_scan_batch(request)
 
-        @self.app.post("/v1/tools/scan", tags=["Scan"])
+        @self.app.post("/v1/tools/scan", tags=["Scan"], summary="Scan Tool Call", description="Evaluate a tool call for security risks including confused-deputy attacks, excessive permissions, and unsafe argument patterns.")
         @self.limiter.limit(rate_limit)
         async def scan_tool_call(request: Request):
             return await self._handle_tool_scan(request)
 
-        @self.app.post("/v1/tools/sessions", tags=["Scan"])
+        @self.app.post("/v1/tools/sessions", tags=["Scan"], summary="Create Runtime Session", description="Start a governed runtime session to track a sequence of tool calls with policy-backed allow, warn, and block decisions.")
         @self.limiter.limit(rate_limit)
         async def create_tool_runtime_session(request: Request):
             return await self._handle_create_tool_session(request)
 
-        @self.app.get("/v1/tools/sessions", tags=["Scan"])
+        @self.app.get("/v1/tools/sessions", tags=["Scan"], summary="List Runtime Sessions", description="List active and recent governed runtime sessions. Filter by status (active, completed, blocked).")
         @self.limiter.limit(rate_limit)
         async def list_tool_runtime_sessions(request: Request, limit: int = 50, status: str | None = None):
             return await self._handle_list_tool_sessions(request, limit=limit, status=status)
 
-        @self.app.get("/v1/tools/sessions/{session_id}", tags=["Scan"])
+        @self.app.get("/v1/tools/sessions/{session_id}", tags=["Scan"], summary="Get Runtime Session", description="Get the full state and event history of a specific governed runtime session.")
         @self.limiter.limit(rate_limit)
         async def get_tool_runtime_session(session_id: str, request: Request):
             return await self._handle_get_tool_session(request, session_id)
 
-        @self.app.post("/v1/tools/sessions/{session_id}/state", tags=["Scan"])
+        @self.app.post("/v1/tools/sessions/{session_id}/state", tags=["Scan"], summary="Update Session State", description="Update the state of a governed runtime session, e.g. marking it completed or attaching additional context.")
         @self.limiter.limit(rate_limit)
         async def update_tool_runtime_session(session_id: str, request: Request):
             return await self._handle_update_tool_session_state(request, session_id)
 
-        @self.app.get("/v1/tools/reviews", tags=["Scan"])
+        @self.app.get("/v1/tools/reviews", tags=["Scan"], summary="List Tool Reviews", description="List pending and resolved human-review tickets raised by the runtime tool governance engine.")
         @self.limiter.limit(rate_limit)
         async def list_tool_runtime_reviews(request: Request, limit: int = 50, status: str | None = None):
             return await self._handle_list_tool_reviews(request, limit=limit, status=status)
 
-        @self.app.get("/v1/tools/reviews/{ticket_id}", tags=["Scan"])
+        @self.app.get("/v1/tools/reviews/{ticket_id}", tags=["Scan"], summary="Get Tool Review", description="Get the full details of a specific tool review ticket including the flagged tool call and its risk assessment.")
         @self.limiter.limit(rate_limit)
         async def get_tool_runtime_review(ticket_id: str, request: Request):
             return await self._handle_get_tool_review(request, ticket_id)
 
-        @self.app.post("/v1/tools/reviews/{ticket_id}/decision", tags=["Scan"])
+        @self.app.post("/v1/tools/reviews/{ticket_id}/decision", tags=["Scan"], summary="Submit Review Decision", description="Approve or reject a pending tool review ticket. Approvals allow the tool call to proceed; rejections block it and log the decision.")
         @self.limiter.limit(rate_limit)
         async def decide_tool_runtime_review(ticket_id: str, request: Request):
             return await self._handle_review_decision(request, ticket_id)
 
-        @self.app.get("/v1/scans", tags=["Scan"])
+        @self.app.get("/v1/scans", tags=["Scan"], summary="List Scans", description="List recent prompt scan results with pagination. Returns scan metadata, detected threats, and policy decisions.")
         @self.limiter.limit(rate_limit)
         async def list_scans(request: Request, limit: int = 100, offset: int = 0):
             await self._authenticate_request(request)
@@ -1071,7 +1077,7 @@ class KoreShieldProxy:
                 "offset": offset,
             }
 
-        @self.app.get("/v1/scans/{scan_id}", tags=["Scan"])
+        @self.app.get("/v1/scans/{scan_id}", tags=["Scan"], summary="Get Scan", description="Get the full details of a specific prompt scan result by ID.")
         @self.limiter.limit(rate_limit)
         async def get_scan(scan_id: str, request: Request):
             await self._authenticate_request(request)

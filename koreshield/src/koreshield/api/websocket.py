@@ -21,7 +21,7 @@ from .auth import AUTH_COOKIE_NAME, verify_jwt_token
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/ws", tags=["websocket"])
+router = APIRouter(prefix="/ws", tags=["Websocket"])
 
 # Close code for unauthenticated/invalid auth, aligned with public docs.
 WS_AUTH_CLOSE_CODE = 4003
@@ -291,7 +291,7 @@ async def publish_event(event_type: str, data: Dict[str, Any]):
 
 
 # Health check endpoint for WebSocket service
-@router.get("/health")
+@router.get("/health", summary="WebSocket Health", description="Check that the WebSocket event stream service is running and accepting connections.")
 async def websocket_health():
     """Check WebSocket service health."""
     return JSONResponse({
