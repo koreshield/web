@@ -36,15 +36,6 @@ STATE_REFRESH_EVENTS = {
     "order.refunded",
 }
 
-DEFAULT_INTERNAL_UNLIMITED_EMAILS = {
-    "ei@nsisong.com",
-    "isaacnsisong@gmail.com",
-    "tes@koreshield.com",
-    "admin@koreshield.com",
-    "ei@koreshield.com",
-}
-
-
 def utcnow_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
@@ -54,12 +45,11 @@ def compact_dict(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def get_internal_unlimited_emails() -> set[str]:
-    configured = {
+    return {
         email.strip().lower()
         for email in os.getenv("BILLING_INTERNAL_UNLIMITED_EMAILS", "").split(",")
         if email.strip()
     }
-    return configured or DEFAULT_INTERNAL_UNLIMITED_EMAILS
 
 
 def is_internal_unlimited_email(email: str | None) -> bool:
