@@ -142,6 +142,31 @@ async def get_me(
     return {"user": current_user}
 
 
+class UpdateProfileRequest(BaseModel):
+    name: str | None = None
+
+
+@router.patch("/me", summary="Update Profile", tags=["Authentication"])
+async def update_me(
+    request: UpdateProfileRequest,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update the authenticated user's profile (name only for now)."""
+    user_id = current_user.get("id")
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if request.name is not None:
+        user.name = request.name.strip() or user.name
+
+    await db.commit()
+    await db.refresh(user)
+    return {"user": user.to_dict()}
+
+
 @router.post(
     "/signup",
     status_code=status.HTTP_201_CREATED,
