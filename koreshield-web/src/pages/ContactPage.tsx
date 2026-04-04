@@ -25,6 +25,9 @@ function buildTemplatePayload(values: {
 	company: string;
 	tier: string;
 	message: string;
+	subject?: string;
+	formType?: string;
+	icon?: string;
 }) {
 	return {
 		name: values.name,
@@ -32,6 +35,13 @@ function buildTemplatePayload(values: {
 		company: values.company,
 		tier: values.tier,
 		message: values.message,
+		form_type: values.formType ?? 'General Enquiry',
+		icon: values.icon ?? '✉️',
+		from_name: values.name,
+		from_email: values.email,
+		subject: values.subject ?? '',
+		subject_line: values.subject ?? 'New enquiry',
+		details: values.message,
 	};
 }
 
@@ -215,6 +225,9 @@ function GeneralContactForm() {
 					email: formData.email,
 					company: 'General enquiry',
 					tier: 'general',
+					formType: 'General Enquiry',
+					icon: '✉️',
+					subject: formData.subject,
 					message: `Subject: ${formData.subject}\n\n${formData.message}`,
 				}),
 				EMAILJS_PUBLIC_KEY,
@@ -285,6 +298,9 @@ function TechnicalSupportForm() {
 					email: formData.email,
 					company: 'Technical support',
 					tier: formData.tier,
+					formType: 'Technical Support',
+					icon: '🛠️',
+					subject: formData.subject,
 					message:
 						`Severity: ${formData.severity}\n` +
 						`Category: ${formData.category}\n` +
