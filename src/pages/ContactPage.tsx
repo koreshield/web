@@ -2,7 +2,7 @@ import emailjs from '@emailjs/browser';
 import { motion } from 'framer-motion';
 import { ArrowRight, FileText, Github, Mail, MessageSquare, Send } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 import { useToast } from '../components/ToastNotification';
 import { getPlanById } from '../lib/pricing';
@@ -19,12 +19,31 @@ const emailConfigAvailable =
 	Boolean(EMAILJS_PUBLIC_KEY) &&
 	Boolean(TEMPLATE_CONTACT);
 
+function openMailClient({
+	to,
+	subject,
+	body,
+}: {
+	to: string;
+	subject: string;
+	body: string;
+}) {
+	const params = new URLSearchParams({
+		subject,
+		body,
+	});
+	window.location.href = `mailto:${to}?${params.toString()}`;
+}
+
 function buildTemplatePayload(values: {
 	name: string;
 	email: string;
 	company: string;
 	tier: string;
 	message: string;
+	subject?: string;
+	formType?: string;
+	icon?: string;
 }) {
 	return {
 		name: values.name,
@@ -32,6 +51,13 @@ function buildTemplatePayload(values: {
 		company: values.company,
 		tier: values.tier,
 		message: values.message,
+		form_type: values.formType ?? 'General Enquiry',
+		icon: values.icon ?? '✉️',
+		from_name: values.name,
+		from_email: values.email,
+		subject: values.subject ?? '',
+		subject_line: values.subject ?? 'New enquiry',
+		details: values.message,
 	};
 }
 
@@ -79,7 +105,9 @@ const supportOptions = [
 ];
 
 export default function ContactPage() {
-	const [activeTab, setActiveTab] = useState<'general' | 'technical'>('general');
+	const [searchParams] = useSearchParams();
+	const initialTab = searchParams.get('tab') === 'technical' ? 'technical' : 'general';
+	const [activeTab, setActiveTab] = useState<'general' | 'technical'>(initialTab);
 
 	return (
 		<div className="min-h-screen bg-background text-foreground transition-colors">
@@ -182,7 +210,7 @@ export default function ContactPage() {
 						))}
 					</div>
 
-					{activeTab === 'general' && <GeneralContactForm />}
+					{activeTab === 'general' && <GeneralContactForm initialSubject={searchParams.get('subject') || ''} />}
 					{activeTab === 'technical' && <TechnicalSupportForm />}
 				</div>
 			</section>
@@ -194,8 +222,8 @@ const inputClass = "w-full px-4 py-3 bg-background border border-border rounded-
 const labelClass = "block text-sm font-medium text-foreground mb-1.5";
 const submitClass = "w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm";
 
-function GeneralContactForm() {
-	const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+function GeneralContactForm({ initialSubject }: { initialSubject: string }) {
+	const [formData, setFormData] = useState({ name: '', email: '', subject: initialSubject, message: '' });
 	const [loading, setLoading] = useState(false);
 	const toast = useToast();
 
@@ -204,7 +232,16 @@ function GeneralContactForm() {
 		setLoading(true);
 		try {
 			if (!emailConfigAvailable) {
-				throw new Error('Contact email is not configured in this environment. Please email hello@koreshield.com directly.');
+				openMailClient({
+					to: 'hello@koreshield.com',
+					subject: formData.subject || 'General enquiry',
+					body:
+						`Name: ${formData.name}\n` +
+						`Email: ${formData.email}\n\n` +
+						`${formData.message}`,
+				});
+				toast.info('Opening your email app', 'We routed this enquiry to hello@koreshield.com because browser email sending is not configured here.');
+				return;
 			}
 
 			await emailjs.send(
@@ -215,6 +252,9 @@ function GeneralContactForm() {
 					email: formData.email,
 					company: 'General enquiry',
 					tier: 'general',
+					formType: 'General Enquiry',
+					icon: '✉️',
+					subject: formData.subject,
 					message: `Subject: ${formData.subject}\n\n${formData.message}`,
 				}),
 				EMAILJS_PUBLIC_KEY,
@@ -274,7 +314,20 @@ function TechnicalSupportForm() {
 		setLoading(true);
 		try {
 			if (!emailConfigAvailable) {
-				throw new Error('Support email is not configured in this environment. Please email support@koreshield.com directly.');
+				openMailClient({
+					to: 'support@koreshield.com',
+					subject: formData.subject || 'Technical support request',
+					body:
+						`Name: ${formData.name}\n` +
+						`Email: ${formData.email}\n` +
+						`Tier: ${formData.tier}\n` +
+						`Severity: ${formData.severity}\n` +
+						`Category: ${formData.category}\n\n` +
+						`Description:\n${formData.description}\n\n` +
+						`Environment:\n${formData.environment || 'Not provided'}`,
+				});
+				toast.info('Opening your email app', 'We routed this support request to support@koreshield.com because browser email sending is not configured here.');
+				return;
 			}
 
 			await emailjs.send(
@@ -285,6 +338,9 @@ function TechnicalSupportForm() {
 					email: formData.email,
 					company: 'Technical support',
 					tier: formData.tier,
+					formType: 'Technical Support',
+					icon: '🛠️',
+					subject: formData.subject,
 					message:
 						`Severity: ${formData.severity}\n` +
 						`Category: ${formData.category}\n` +

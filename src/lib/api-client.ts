@@ -241,6 +241,13 @@ class ApiClient {
 		});
 	}
 
+	async updateMe(data: { name?: string }) {
+		return this.fetch('/v1/management/me', {
+			method: 'PATCH',
+			body: JSON.stringify(data),
+		});
+	}
+
 	async getBillingAccount() {
 		return this.fetch('/v1/billing/account');
 	}
