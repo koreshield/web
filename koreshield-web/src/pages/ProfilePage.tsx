@@ -1,8 +1,10 @@
-import { User, Mail, Shield, Building, CreditCard, Rocket, BookOpen, Key } from 'lucide-react';
+import { BookOpen, Building, CheckCircle2, CreditCard, Key, Mail, Pencil, Rocket, Shield, User, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../lib/api-client';
+import { useToast } from '../components/ToastNotification';
 import { useAuthState } from '../hooks/useAuthState';
+import { api } from '../lib/api-client';
+import { authService } from '../lib/auth';
 
 type BillingAccountSummary = {
 	plan_slug?: string;
@@ -12,36 +14,67 @@ type BillingAccountSummary = {
 	billing_email?: string | null;
 };
 
+const inputClass =
+	'w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-foreground text-sm transition-colors placeholder:text-muted-foreground/50';
+
 export function ProfilePage() {
 	const { user } = useAuthState();
+	const toast = useToast();
 	const [billing, setBilling] = useState<BillingAccountSummary | null>(null);
 	const [billingState, setBillingState] = useState<'loading' | 'ready' | 'error'>('loading');
 
-	useEffect(() => {
-		if (!user) {
-			return;
-		}
+	// Edit state
+	const [editing, setEditing] = useState(false);
+	const [editName, setEditName] = useState('');
+	const [saving, setSaving] = useState(false);
 
+	useEffect(() => {
+		if (!user) return;
 		let active = true;
 		void api.getBillingAccount()
 			.then((account) => {
-				if (!active) {
-					return;
-				}
+				if (!active) return;
 				setBilling(account as BillingAccountSummary);
 				setBillingState('ready');
 			})
 			.catch(() => {
-				if (!active) {
-					return;
-				}
+				if (!active) return;
 				setBillingState('error');
 			});
-
-		return () => {
-			active = false;
-		};
+		return () => { active = false; };
 	}, [user]);
+
+	const handleStartEdit = () => {
+		setEditName(user?.name || '');
+		setEditing(true);
+	};
+
+	const handleCancelEdit = () => {
+		setEditing(false);
+		setEditName('');
+	};
+
+	const handleSave = async () => {
+		if (!editName.trim()) {
+			toast.error('Name required', 'Display name cannot be empty.');
+			return;
+		}
+		setSaving(true);
+		try {
+			const result = await api.updateMe({ name: editName.trim() }) as { user?: Record<string, unknown> };
+			// Update the local auth session so the name is reflected everywhere immediately
+			if (result?.user && user) {
+				authService.setSession({ ...user, name: editName.trim() });
+			}
+			toast.success('Profile updated', 'Your display name has been saved.');
+			setEditing(false);
+		} catch (err: unknown) {
+			const msg = err instanceof Error ? err.message : 'Please try again.';
+			toast.error('Failed to save', msg);
+		} finally {
+			setSaving(false);
+		}
+	};
 
 	if (!user) {
 		return (
@@ -70,24 +103,58 @@ export function ProfilePage() {
 			</header>
 
 			<main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+				{/* Personal Information card */}
 				<div className="bg-card border border-border rounded-lg shadow-sm">
-					<div className="p-6 border-b border-border">
-						<h2 className="text-lg font-semibold">Personal Information</h2>
-						<p className="text-sm text-muted-foreground">
-							Basic details about your account.
-						</p>
+					<div className="p-6 border-b border-border flex items-center justify-between">
+						<div>
+							<h2 className="text-lg font-semibold">Personal Information</h2>
+							<p className="text-sm text-muted-foreground">Your display name and account details.</p>
+						</div>
+						{!editing ? (
+							<button
+								type="button"
+								onClick={handleStartEdit}
+								className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+							>
+								<Pencil className="w-3.5 h-3.5" />
+								Edit
+							</button>
+						) : (
+							<button
+								type="button"
+								onClick={handleCancelEdit}
+								className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+							>
+								<X className="w-3.5 h-3.5" />
+								Cancel
+							</button>
+						)}
 					</div>
+
 					<div className="p-6 space-y-6">
-						<div className="grid gap-3 sm:gap-6 md:grid-cols-2">
+						<div className="grid gap-4 md:grid-cols-2">
+							{/* Name — editable */}
 							<div className="space-y-2">
 								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
 									<User className="w-4 h-4" /> Full Name
 								</label>
-								<div className="p-3 bg-muted rounded-md text-foreground font-medium">
-									{user.name}
-								</div>
+								{editing ? (
+									<input
+										type="text"
+										value={editName}
+										onChange={(e) => setEditName(e.target.value)}
+										className={inputClass}
+										placeholder="Your full name"
+										autoFocus
+									/>
+								) : (
+									<div className="p-3 bg-muted rounded-md text-foreground font-medium">
+										{user.name || <span className="text-muted-foreground italic">Not set</span>}
+									</div>
+								)}
 							</div>
 
+							{/* Email — read-only */}
 							<div className="space-y-2">
 								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
 									<Mail className="w-4 h-4" /> Email Address
@@ -95,8 +162,10 @@ export function ProfilePage() {
 								<div className="p-3 bg-muted rounded-md text-foreground font-medium">
 									{user.email}
 								</div>
+								<p className="text-xs text-muted-foreground">Email address cannot be changed here.</p>
 							</div>
 
+							{/* Role — read-only */}
 							<div className="space-y-2">
 								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
 									<Shield className="w-4 h-4" /> Role
@@ -106,6 +175,7 @@ export function ProfilePage() {
 								</div>
 							</div>
 
+							{/* Status — read-only */}
 							<div className="space-y-2">
 								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
 									<Building className="w-4 h-4" /> Account Status
@@ -116,9 +186,34 @@ export function ProfilePage() {
 								</div>
 							</div>
 						</div>
+
+						{/* Save button shown only in edit mode */}
+						{editing && (
+							<div className="flex justify-end pt-2">
+								<button
+									type="button"
+									onClick={() => void handleSave()}
+									disabled={saving}
+									className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-5 py-2 rounded-lg transition-colors disabled:opacity-60 text-sm"
+								>
+									{saving ? (
+										<>
+											<span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+											Saving…
+										</>
+									) : (
+										<>
+											<CheckCircle2 className="w-3.5 h-3.5" />
+											Save changes
+										</>
+									)}
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 
+				{/* Billing card */}
 				<div className="mt-6 bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6">
 					<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 						<div className="flex-1">
@@ -133,13 +228,21 @@ export function ProfilePage() {
 								<div className="rounded-lg bg-muted p-3">
 									<div className="text-xs uppercase tracking-wide text-muted-foreground">Plan</div>
 									<div className="mt-1 font-medium">
-										{billingState === 'ready' ? (billing?.plan_name || billing?.plan_slug || 'Free') : billingState === 'loading' ? 'Loading…' : 'Unavailable'}
+										{billingState === 'ready'
+											? billing?.plan_name || billing?.plan_slug || 'Free'
+											: billingState === 'loading'
+												? 'Loading…'
+												: 'Unavailable'}
 									</div>
 								</div>
 								<div className="rounded-lg bg-muted p-3">
 									<div className="text-xs uppercase tracking-wide text-muted-foreground">Subscription status</div>
 									<div className="mt-1 font-medium capitalize">
-										{billingState === 'ready' ? (billing?.subscription_status || billing?.status || 'inactive') : billingState === 'loading' ? 'Loading…' : 'Unavailable'}
+										{billingState === 'ready'
+											? billing?.subscription_status || billing?.status || 'inactive'
+											: billingState === 'loading'
+												? 'Loading…'
+												: 'Unavailable'}
 									</div>
 								</div>
 							</div>
@@ -153,6 +256,7 @@ export function ProfilePage() {
 					</div>
 				</div>
 
+				{/* Getting started */}
 				<div className="mt-6 bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6">
 					<h2 className="text-lg font-semibold mb-4">Getting started</h2>
 					<div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
