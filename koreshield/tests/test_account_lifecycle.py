@@ -248,8 +248,8 @@ def test_billing_account_prefers_team_scope_for_owner(tmp_path: Path):
 def test_internal_team_emails_receive_unlimited_enterprise_billing_state(tmp_path: Path):
     client, _session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
     try:
-        os.environ["BILLING_INTERNAL_UNLIMITED_EMAILS"] = "ei@koreshield.com"
-        signup_data = _signup(client, email="ei@koreshield.com")
+        os.environ["BILLING_INTERNAL_UNLIMITED_EMAILS"] = "internal-owner@example.com"
+        signup_data = _signup(client, email="internal-owner@example.com")
         user_id = signup_data["user"]["id"]
 
         response = client.get("/v1/billing/account")
