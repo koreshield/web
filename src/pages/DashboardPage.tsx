@@ -265,7 +265,7 @@ const client = new OpenAI({
 										</div>
 										<div className="flex-1 min-w-0">
 											<div className="flex items-center gap-2 mb-0.5">
-												<span className="text-sm font-medium">{attack.threat_type}</span>
+												<span className="text-sm font-medium">{attack.threat_type || 'Unknown'}</span>
 												<span className={`text-xs px-1.5 py-0.5 rounded-full ${
 													attack.action_taken === 'blocked'
 														? 'bg-red-500/10 text-red-500'
@@ -273,9 +273,11 @@ const client = new OpenAI({
 												}`}>
 													{attack.action_taken}
 												</span>
+												{attack.confidence != null && (
 												<span className="text-xs text-muted-foreground">
-													{(attack.confidence * 100).toFixed(0)}%
+													{(Number(attack.confidence) * 100).toFixed(0)}%
 												</span>
+												)}
 											</div>
 											<p className="text-xs text-muted-foreground truncate">{attack.content_preview}</p>
 											<p className="text-[11px] text-muted-foreground/60 mt-0.5">
