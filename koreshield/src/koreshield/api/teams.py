@@ -6,16 +6,16 @@ Provides full team management: CRUD, membership, invites, and shared dashboards.
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from uuid import UUID
-import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import and_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..database import get_db
-from ..models.team import Team, TeamMember, TeamInvite, SharedDashboard
+from ..models.team import SharedDashboard, Team, TeamInvite, TeamMember
 from ..models.user import User
 from .auth import get_current_user
 
@@ -90,7 +90,12 @@ class SharedDashboardSchema(BaseModel):
 class CreateDashboardRequest(BaseModel):
     name: str
     dashboard_type: str = "security"
-    config: dict = {}
+    config: dict = Field(default_factory=dict)
+
+
+VALID_TEAM_ROLES = {"admin", "member", "viewer"}
+VALID_INVITE_STATUSES = {"pending", "accepted", "cancelled"}
+VALID_DASHBOARD_TYPES = {"security", "analytics", "compliance"}
 
 
 # ──────────────────────────────────────────────
@@ -257,7 +262,11 @@ async def add_member(
     if member.role not in ["owner", "admin"]:
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
-    query = select(User).where(User.email == request.email)
+    normalized_email = request.email.strip().lower()
+    if request.role not in VALID_TEAM_ROLES:
+        raise HTTPException(status_code=400, detail="Invalid role. Must be one of: admin, member, viewer")
+
+    query = select(User).where(User.email == normalized_email)
     result = await db.execute(query)
     user = result.scalar_one_or_none()
 
@@ -352,6 +361,8 @@ async def list_invites(
 
     query = select(TeamInvite).where(TeamInvite.team_id == team_id)
     if status_filter:
+        if status_filter not in VALID_INVITE_STATUSES:
+            raise HTTPException(status_code=400, detail="Invalid invite status")
         query = query.where(TeamInvite.status == status_filter)
     else:
         query = query.where(TeamInvite.status == "pending")
@@ -371,8 +382,12 @@ async def create_invite(
     if member.role not in ["owner", "admin"]:
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
+    normalized_email = request.email.strip().lower()
+    if request.role not in VALID_TEAM_ROLES:
+        raise HTTPException(status_code=400, detail="Invalid role. Must be one of: admin, member, viewer")
+
     # Check if user already exists — add directly if so
-    query = select(User).where(User.email == request.email)
+    query = select(User).where(User.email == normalized_email)
     result = await db.execute(query)
     existing_user = result.scalar_one_or_none()
 
@@ -389,7 +404,7 @@ async def create_invite(
     # Always create an invite record for tracking
     # Check for duplicate pending invite
     q3 = select(TeamInvite).where(
-        and_(TeamInvite.team_id == team_id, TeamInvite.email == request.email, TeamInvite.status == "pending")
+        and_(TeamInvite.team_id == team_id, TeamInvite.email == normalized_email, TeamInvite.status == "pending")
     )
     r3 = await db.execute(q3)
     if r3.scalar_one_or_none():
@@ -397,14 +412,18 @@ async def create_invite(
 
     invite = TeamInvite(
         team_id=team_id,
-        email=request.email,
+        email=normalized_email,
         role=request.role,
         created_by=UUID(member.user_id if isinstance(member.user_id, str) else str(member.user_id)),
         status="accepted" if existing_user else "pending",
         expires_at=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=7),
     )
     db.add(invite)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="A pending invite already exists for this email")
     await db.refresh(invite)
     return invite
 
@@ -445,6 +464,8 @@ async def list_dashboards(
 ):
     query = select(SharedDashboard).where(SharedDashboard.team_id == team_id)
     if dashboard_type:
+        if dashboard_type not in VALID_DASHBOARD_TYPES:
+            raise HTTPException(status_code=400, detail="Invalid dashboard type")
         query = query.where(SharedDashboard.dashboard_type == dashboard_type)
 
     result = await db.execute(query)
@@ -462,15 +483,33 @@ async def create_dashboard(
     if member.role not in ["owner", "admin"]:
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
+    dashboard_name = request.name.strip()
+    dashboard_type = request.dashboard_type.strip().lower()
+    if not dashboard_name:
+        raise HTTPException(status_code=400, detail="Dashboard name is required")
+    if dashboard_type not in VALID_DASHBOARD_TYPES:
+        raise HTTPException(status_code=400, detail="Invalid dashboard type")
+
+    existing_query = select(SharedDashboard).where(
+        and_(SharedDashboard.team_id == team_id, SharedDashboard.name == dashboard_name)
+    )
+    existing_result = await db.execute(existing_query)
+    if existing_result.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="A dashboard with this name already exists for the team")
+
     dashboard = SharedDashboard(
         team_id=team_id,
-        name=request.name,
-        dashboard_type=request.dashboard_type,
-        config=request.config,
+        name=dashboard_name,
+        dashboard_type=dashboard_type,
+        config=request.config or {},
         created_by=UUID(str(member.user_id)),
     )
     db.add(dashboard)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="A dashboard with this name already exists for the team")
     await db.refresh(dashboard)
     return dashboard
 
