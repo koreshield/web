@@ -41,7 +41,7 @@ export const PRICING_FAQS = [
 	{
 		question: 'How do overages work?',
 		answer:
-			'Growth includes 100,000 protected requests and charges £12 per additional 100,000. Scale includes 1,000,000 protected requests and charges £8 per additional 100,000. Enterprise volume is handled contractually.',
+			'Growth includes 100,000 protected requests and charges £12 per additional 100,000. Scale includes 1,000,000 protected requests and also charges £12 per additional 100,000. Enterprise volume is handled contractually.',
 	},
 	{
 		question: 'What about RAG scanning?',
@@ -69,6 +69,7 @@ export const PRICING_PLANS: PricingPlan[] = [
 		monthlyPriceValue: 0,
 		annualPriceValue: 0,
 		includedRequests: '10,000 protected requests/month',
+		overage: '£12 per extra 100,000 protected requests',
 		retention: '7-day retention',
 		cta: 'Start Free',
 		features: [
@@ -116,7 +117,7 @@ export const PRICING_PLANS: PricingPlan[] = [
 		annualPriceValue: 3830,
 		annualSavingsLabel: 'Save £958/year',
 		includedRequests: '1,000,000 protected requests/month',
-		overage: '£8 per extra 100,000 protected requests',
+		overage: '£12 per extra 100,000 protected requests',
 		retention: '90-day retention',
 		cta: 'Choose Scale',
 		checkoutSlug: 'scale',
