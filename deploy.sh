@@ -116,15 +116,20 @@ done
 
 # ── 2. Git pull ──────────────────────────────────────────────────────────────
 header "2. PULL LATEST MAIN"
-BEFORE=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-git fetch origin main 2>&1 | tail -3
-git reset --hard origin/main 2>&1 | tail -3
-AFTER=$(git rev-parse --short HEAD)
-if [ "$BEFORE" != "$AFTER" ]; then
-  ok "Updated: $BEFORE → $AFTER"
-  git log --oneline -5
+if [ -d ".git" ]; then
+  BEFORE=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+  log "Git repo detected. Updating..."
+  git fetch origin main 2>&1 | tail -3
+  git reset --hard origin/main 2>&1 | tail -3
+  AFTER=$(git rev-parse --short HEAD)
+  if [ "$BEFORE" != "$AFTER" ]; then
+    ok "Updated: $BEFORE → $AFTER"
+    git log --oneline -5
+  else
+    ok "Already at latest: $BEFORE"
+  fi
 else
-  ok "Already at latest: $BEFORE"
+  warn "Not a git repository (missing .git). Skipping pull; using local files."
 fi
 
 # ── 3. Core services ─────────────────────────────────────────────────────────
@@ -181,15 +186,35 @@ done
 
 # ── 5. Rebuild WEB ───────────────────────────────────────────────────────────
 header "5. REBUILD WEB (bakes VITE_* vars into bundle)"
+
+log "Creating local image backup..."
+docker tag koreshield-web:latest koreshield-web:backup 2>/dev/null || true
+
+log "Building new WEB image..."
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build --no-cache web
+
+log "Swapping containers..."
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" stop web 2>/dev/null || true
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" rm -f web 2>/dev/null || true
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d web
 ok "Web container started"
 
+log "Waiting for Web health..."
 for i in $(seq 1 20); do
   HTTP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "000")
-  [ "$HTTP" = "200" ] && ok "Web healthy (HTTP $HTTP)" && break
+  log "  attempt $i/20 — HTTP $HTTP"
+  if [ "$HTTP" = "200" ]; then
+    ok "Web healthy (HTTP $HTTP)"
+    break
+  fi
+  if [ "$i" -eq 20 ]; then
+    fail "Web failed health check! Attempting ROLLBACK to backup image..."
+    docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" stop web 2>/dev/null || true
+    docker tag koreshield-web:backup koreshield-web:latest 2>/dev/null || true
+    docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d web
+    fail "Rollback complete. Please check logs: docker logs koreshield-web"
+    exit 1
+  fi
   sleep 3
 done
 
