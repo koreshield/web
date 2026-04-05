@@ -958,3 +958,95 @@ async def get_api_key(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get API key"
         )
+
+# ============================================================================
+# Threat & Block Log Export
+# ============================================================================
+
+import csv
+import io as _io
+
+@router.get(
+    "/export/threats",
+    summary="Export Threat & Block Logs",
+    description=(
+        "Download all threat detections and blocked requests as a CSV file. "
+        "Includes timestamp, attack type, confidence, action taken, provider, model, "
+        "latency, and IP address. Suitable for client and investor reporting."
+    ),
+    tags=["Management"],
+    response_class=Response,
+)
+async def export_threat_logs(
+    limit: int = 10000,
+    include_safe: bool = False,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession | None = Depends(get_optional_db),
+):
+    """Export threat and block logs as a downloadable CSV."""
+
+    rows = []
+
+    if db:
+        from sqlalchemy import or_
+        query = select(RequestLog).order_by(desc(RequestLog.timestamp)).limit(limit)
+        if not include_safe:
+            query = query.where(
+                or_(RequestLog.attack_detected == True, RequestLog.is_blocked == True)
+            )
+        result = await db.execute(query)
+        logs = result.scalars().all()
+
+        for log in logs:
+            details = log.attack_details or {}
+            detection = details.get("detection") or {}
+            policy = details.get("policy") or {}
+            confidence = detection.get("confidence") or ""
+            triggered_policy = policy.get("reason") or policy.get("policy_id") or ""
+            explanation = detection.get("attack_type") or log.attack_type or ""
+
+            rows.append({
+                "timestamp": log.timestamp.isoformat() if log.timestamp else "",
+                "request_id": log.request_id or "",
+                "threat_detected": str(bool(log.attack_detected)),
+                "threat_type": log.attack_type or "",
+                "confidence": f"{float(confidence):.4f}" if confidence != "" else "",
+                "action_taken": "blocked" if log.is_blocked else "allowed",
+                "triggered_policy": triggered_policy,
+                "block_reason": log.block_reason or "",
+                "provider": log.provider or "",
+                "model": log.model or "",
+                "status_code": log.status_code or "",
+                "latency_ms": f"{log.latency_ms:.1f}" if log.latency_ms else "",
+                "tokens_total": log.tokens_total or 0,
+                "cost_gbp": f"{log.cost:.6f}" if log.cost else "0.000000",
+                "ip_address": log.ip_address or "",
+                "user_agent": (log.user_agent or "")[:120],
+                "user_id": str(log.user_id) if log.user_id else "",
+                "api_key_id": str(log.api_key_id) if log.api_key_id else "",
+            })
+    else:
+        # Fallback: no DB — return empty CSV with headers only
+        pass
+
+    fieldnames = [
+        "timestamp", "request_id", "threat_detected", "threat_type",
+        "confidence", "action_taken", "triggered_policy", "block_reason",
+        "provider", "model", "status_code", "latency_ms",
+        "tokens_total", "cost_gbp", "ip_address", "user_agent",
+        "user_id", "api_key_id",
+    ]
+
+    output = _io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(rows)
+
+    csv_bytes = output.getvalue().encode("utf-8")
+    filename = f"koreshield_threats_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
+
+    return Response(
+        content=csv_bytes,
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
