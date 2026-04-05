@@ -5,9 +5,8 @@ services:
                         context: ./koreshield
                         dockerfile: Dockerfile
                 image: koreshield:latest
-                container_name: koreshield-api
-                # ports:
-                #         - "127.0.0.1:8000:8000" # Restricted to local loopback (Caddy uses internal network)
+                ports:
+                        - "127.0.0.1:8000:8000" # Restricted to local loopback (host health checks)
                 deploy:
                         resources:
                                 limits:
@@ -77,9 +76,8 @@ services:
                                 - VITE_EMAILJS_TEMPLATE_ID_CONTACT=${VITE_EMAILJS_TEMPLATE_ID_CONTACT}
                                 - VITE_EMAILJS_PUBLIC_KEY=${VITE_EMAILJS_PUBLIC_KEY}
                 image: koreshield-web:latest
-                container_name: koreshield-web
-                # ports:
-                #         - "127.0.0.1:3000:80" # Restricted to local loopback
+                ports:
+                        - "127.0.0.1:3000:80" # Restricted to local loopback (host health checks)
                 deploy:
                         resources:
                                 limits:
