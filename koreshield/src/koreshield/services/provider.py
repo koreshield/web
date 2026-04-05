@@ -87,11 +87,21 @@ class ProviderService:
         
         for name, _, _ in self.provider_catalog:
             cfg = providers_config.get(name, {})
+            is_enabled = cfg.get("enabled", False)
+            is_initialized = name in self.provider_priority
+            
+            if is_initialized:
+                status_str = "healthy" # Will be updated by live check if applicable
+            elif is_enabled:
+                status_str = "missing_credentials"
+            else:
+                status_str = "disabled"
+
             status[name] = {
-                "enabled": cfg.get("enabled", False),
-                "initialized": name in self.provider_priority,
+                "enabled": is_enabled,
+                "initialized": is_initialized,
                 "healthy": True, # Default
-                "status": "initialized" if name in self.provider_priority else "disabled"
+                "status": status_str
             }
             
         # Add live check results
