@@ -21,7 +21,7 @@ from .auth import AUTH_COOKIE_NAME, verify_jwt_token
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/ws", tags=["Websocket"])
+router = APIRouter(prefix="/ws", tags=["WebSocket"])
 
 # Close code for unauthenticated/invalid auth, aligned with public docs.
 WS_AUTH_CLOSE_CODE = 4003
