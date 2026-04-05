@@ -26,6 +26,21 @@ fi
 [ -f "$ENV_FILE" ]     || { fail "Missing .env at $(pwd)/$ENV_FILE"; exit 1; }
 log "Working directory: $(pwd)"
 
+# ── 0.1. Periodic Docker Cleanup ─────────────────────────────────────────────
+header "0.1. PERIODIC DOCKER CLEANUP"
+PRUNE_BREADCRUMB="/tmp/.last_docker_prune"
+PRUNE_INTERVAL_DAYS=7 # Run cleanup if last run was > 7 days ago
+
+if [ ! -f "$PRUNE_BREADCRUMB" ] || [ $(( $(date +%s) - $(stat -c %Y "$PRUNE_BREADCRUMB" 2>/dev/null || stat -f %m "$PRUNE_BREADCRUMB" 2>/dev/null) )) -gt $(( $PRUNE_INTERVAL_DAYS * 86400 )) ]; then
+  log "Last cleanup was more than $PRUNE_INTERVAL_DAYS days ago (or never)."
+  log "Reclaiming disk space (build cache, unused images)..."
+  docker system prune -af --volumes
+  touch "$PRUNE_BREADCRUMB"
+  ok "Cleanup complete. Disk state optimized."
+else
+  log "Recent cleanup found (within $PRUNE_INTERVAL_DAYS days). Skipping."
+fi
+
 # ── 1. FULL ENV AUDIT + PATCH ────────────────────────────────────────────────
 header "1. ENV CHECK & PATCH"
 
