@@ -494,8 +494,8 @@ def api_key_proxy(proxy, monkeypatch):
     def fake_session_local():
         return _FakeAsyncSession(key_map, lambda: current_key["value"])
 
-    monkeypatch.setattr("src.koreshield.proxy.AsyncSessionLocal", fake_session_local)
-    monkeypatch.setattr("src.koreshield.proxy.APIKey.hash_key", staticmethod(fake_hash_key))
+    proxy.auth.db_session_factory = fake_session_local
+    monkeypatch.setattr("src.koreshield.services.auth.APIKey.hash_key", staticmethod(fake_hash_key))
     return proxy, valid_key
 
 
