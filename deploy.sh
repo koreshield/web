@@ -62,10 +62,7 @@ declare -A REQUIRED_VARS=(
   ["POSTGRES_USER"]="koreshield"
   ["POSTGRES_DB"]="koreshield"
   ["TELEGRAM_ALERTS_ENABLED"]="true"
-  ["TELEGRAM_CHANNEL_ID"]="-1003525774274"
   ["AZURE_OPENAI_ENDPOINT"]="https://koreshieldai.cognitiveservices.azure.com/"
-  ["POSTGRES_PASSWORD"]="Wall3t"
-  ["DATABASE_URL"]="postgresql://koreshield:Wall3t@postgres:5432/koreshield"
 )
 
 # Vars that must be non-empty but have secret values we don't hardcode here
@@ -150,7 +147,14 @@ done
 
 # ── 4. Rebuild API ───────────────────────────────────────────────────────────
 header "4. REBUILD API"
+
+log "Creating local image backup..."
+docker tag koreshield:latest koreshield:backup 2>/dev/null || true
+
+log "Building new API image..."
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build --no-cache api
+
+log "Swapping containers..."
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" stop api 2>/dev/null || true
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" rm -f api 2>/dev/null || true
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d api
@@ -160,8 +164,18 @@ log "Waiting for API health..."
 for i in $(seq 1 25); do
   HTTP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health 2>/dev/null || echo "000")
   log "  attempt $i/25 — HTTP $HTTP"
-  [ "$HTTP" = "200" ] && ok "API healthy!" && break
-  [ "$i" -eq 25 ] && fail "API not healthy after 100s" && docker logs koreshield-api --tail 60 && exit 1
+  if [ "$HTTP" = "200" ]; then
+    ok "API healthy!"
+    break
+  fi
+  if [ "$i" -eq 25 ]; then
+    fail "API failed health check! Attempting ROLLBACK to backup image..."
+    docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" stop api 2>/dev/null || true
+    docker tag koreshield:backup koreshield:latest
+    docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d api
+    fail "Rollback complete. Please check logs: docker logs koreshield-api"
+    exit 1
+  fi
   sleep 4
 done
 
