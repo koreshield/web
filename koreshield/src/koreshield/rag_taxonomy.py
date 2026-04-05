@@ -214,6 +214,7 @@ class RAGDetectionResult:
                     "injection_vector": dt.injection_vector.value,
                     "operational_target": dt.operational_target.value,
                     "severity": dt.severity.value,
+                    "evidence_refs": dt.metadata.get("evidence_refs", []),
                     "metadata": dt.metadata,
                 }
                 for dt in self.document_threats

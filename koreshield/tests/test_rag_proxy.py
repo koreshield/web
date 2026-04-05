@@ -29,7 +29,16 @@ def test_config():
             "default_action": "block",
             "min_confidence": 0.3,
         },
-        "providers": {},  # No providers needed for scanning
+        "providers": {
+            "deepseek": {"enabled": True, "base_url": "https://api.deepseek.com/v1"},
+            "gemini": {"enabled": True, "base_url": "https://generativelanguage.googleapis.com/v1beta"},
+            "azure_openai": {"enabled": True, "base_url": "https://koreshieldai.cognitiveservices.azure.com"},
+        },
+        "jwt": {
+            "secret": "test-secret-with-minimum-32-characters!!",
+            "issuer": "koreshield-auth",
+            "audience": "koreshield-api",
+        },
         "redis": {"enabled": False},  # Disable Redis for tests
     }
 
