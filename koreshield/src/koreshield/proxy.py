@@ -131,7 +131,7 @@ class KoreShieldProxy:
                 {"name": "Reports", "description": "Security reports: templates, scheduling, generation, and download"},
                 {"name": "Teams", "description": "Team and organisation management: members, roles, invites, and shared dashboards"},
                 {"name": "Billing", "description": "Subscription management via Polar: account state, checkout, customer portal, and webhooks"},
-                {"name": "Websocket", "description": "Real-time event streaming over WebSocket"},
+                {"name": "WebSocket", "description": "Real-time event streaming over WebSocket"},
                 {"name": "Health", "description": "System health checks, provider status, Prometheus metrics, and live statistics"},
             ],
             contact={
