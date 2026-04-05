@@ -64,6 +64,8 @@ declare -A REQUIRED_VARS=(
   ["TELEGRAM_ALERTS_ENABLED"]="true"
   ["TELEGRAM_CHANNEL_ID"]="-1003525774274"
   ["AZURE_OPENAI_ENDPOINT"]="https://koreshieldai.cognitiveservices.azure.com/"
+  ["POSTGRES_PASSWORD"]="Wall3t"
+  ["DATABASE_URL"]="postgresql://koreshield:Wall3t@postgres:5432/koreshield"
 )
 
 # Vars that must be non-empty but have secret values we don't hardcode here
