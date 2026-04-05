@@ -63,6 +63,7 @@ declare -A REQUIRED_VARS=(
   ["POSTGRES_DB"]="koreshield"
   ["TELEGRAM_ALERTS_ENABLED"]="true"
   ["AZURE_OPENAI_ENDPOINT"]="https://koreshieldai.cognitiveservices.azure.com/"
+  ["ENABLED_PROVIDERS"]="gemini,azure_openai,deepseek,openai"
 )
 
 # Vars that must be non-empty but have secret values we don't hardcode here

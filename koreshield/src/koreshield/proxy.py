@@ -191,6 +191,17 @@ class KoreShieldProxy:
             db_session_factory=AsyncSessionLocal
         )
         self.auth = AuthService(db_session_factory=AsyncSessionLocal)
+        
+        # Override provider enabled status from environment if ENABLED_PROVIDERS is set
+        enabled_providers_env = os.getenv("ENABLED_PROVIDERS")
+        if enabled_providers_env:
+            enabled_list = [p.strip().lower() for p in enabled_providers_env.split(",")]
+            providers_config = config.get("providers", {})
+            for provider_name in providers_config:
+                providers_config[provider_name]["enabled"] = provider_name in enabled_list
+                # Log if we are overriding
+                self.logger.info(f"Provider {provider_name} status overridden by ENABLED_PROVIDERS: {providers_config[provider_name]['enabled']}")
+
         self.provider_service = ProviderService(config, redis_client=self.redis_client)
         self.security = SecurityService(config)
         self.governance = GovernanceService(config, self.detector)
