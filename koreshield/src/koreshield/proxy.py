@@ -38,7 +38,7 @@ from .database import AsyncSessionLocal
 from .models.request_log import RequestLog
 from .models.rag_scan import RagScan
 from .models.api_key import APIKey
-from .api.auth import get_request_token, verify_jwt_token
+from .api.auth import get_request_token, verify_jwt_token, init_jwt_config
 
 # New Service Architecture
 from .services.auth import AuthService
@@ -80,32 +80,10 @@ class KoreShieldProxy:
         Args:
             config: Configuration dictionary
         """
-        # Handle provider imports
-        # Add src directory to path to allow importing providers
-        _current_file = Path(__file__).resolve()
-        _src_dir = _current_file.parent.parent
-        if str(_src_dir) not in sys.path:
-            sys.path.insert(0, str(_src_dir))
-
-        from providers.openai import OpenAIProvider
-        from providers.anthropic import AnthropicProvider
-        from providers.deepseek import DeepSeekProvider
-        from providers.gemini import GeminiProvider
-        from providers.azure_openai import AzureOpenAIProvider
-        self.OpenAIProvider = OpenAIProvider
-        self.AnthropicProvider = AnthropicProvider
-        self.DeepSeekProvider = DeepSeekProvider
-        self.GeminiProvider = GeminiProvider
-        self.AzureOpenAIProvider = AzureOpenAIProvider
-        self.provider_catalog = [
-            ("deepseek", ["DEEPSEEK_API_KEY"], self.DeepSeekProvider),
-            ("openai", ["OPENAI_API_KEY"], self.OpenAIProvider),
-            ("anthropic", ["ANTHROPIC_API_KEY"], self.AnthropicProvider),
-            ("gemini", ["GOOGLE_API_KEY", "GEMINI_API_KEY"], self.GeminiProvider),
-            ("azure_openai", ["AZURE_OPENAI_API_KEY"], self.AzureOpenAIProvider),
-        ]
-
         self.config = copy.deepcopy(config)
+
+        # Initialize JWT configuration before any service uses auth
+        init_jwt_config(self.config)
         self.app = FastAPI(
             title="KoreShield API",
             version="1.0.0",
@@ -219,6 +197,7 @@ class KoreShieldProxy:
         self.app.state.scan_index = {}
         self.app.state.rag_scan_store = deque(maxlen=250)
         self.app.state.rag_scan_index = {}
+        self.app.state.audit_log_store = deque(maxlen=1000)
 
         # 7. Setup Routers & Middleware
         self.app.add_middleware(
@@ -925,19 +904,45 @@ class KoreShieldProxy:
         """Forward to SecurityService."""
         request_id = str(uuid.uuid4())
         principal = await self._authenticate_request(request)
-        body = await request.json()
         
+        # Parse and validate JSON body
+        try:
+            body = await request.json()
+        except Exception as e:
+            logger.error("Failed to parse JSON", request_id=request_id, error=str(e))
+            raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+            
         user_query = body.get("user_query", "")
         documents_data = body.get("documents", [])
         
-        # Convert documents
-        documents = [RetrievedDocument(id=d.get("id"), content=d.get("content"), metadata=d.get("metadata"), score=d.get("score")) for d in documents_data]
+        # Convert documents with validation
+        try:
+            documents = []
+            for d in documents_data:
+                if not isinstance(d, dict):
+                    raise HTTPException(status_code=400, detail="Each document must be an object")
+                documents.append(RetrievedDocument(
+                    id=d.get("id"),
+                    content=d.get("content"),
+                    metadata=d.get("metadata"),
+                    score=d.get("score")
+                ))
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error("Failed to convert documents", error=str(e))
+            raise HTTPException(status_code=400, detail="Invalid document format")
+
+        import time
+        start_scan_time = time.time()
         
         rag_scan_result = self.security.scan_rag(
             user_query=user_query,
             documents=documents,
             config_override=body.get("config")
         )
+
+        processing_time_ms = (time.time() - start_scan_time) * 1000
 
         query_scan = self.security.scan_prompt(user_query, context={"principal": principal}) if user_query else None
         is_safe = (not query_scan["blocked"] if query_scan else True) and rag_scan_result.is_safe
@@ -953,8 +958,24 @@ class KoreShieldProxy:
             "overall_severity": rag_scan_result.overall_severity.value,
             "overall_confidence": rag_scan_result.overall_confidence,
             "context_analysis": rag_scan_result.to_dict(),
+            "processing_time_ms": processing_time_ms,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
+        # Track in memory for dashboard/tests
+        self._append_audit_log(self._build_request_audit_entry({
+            "request_id": response_data["scan_id"],
+            "timestamp": datetime.now(timezone.utc),
+            "path": "/v1/rag/scan",
+            "method": "POST",
+            "status_code": 200,
+            "latency_ms": processing_time_ms,
+            "is_blocked": not is_safe,
+            "attack_detected": not is_safe,
+            "attack_type": "indirect_injection" if not is_safe else None,
+            "attack_details": {"threat_references": response_data["context_analysis"].get("document_threats", [])},
+            "user_id": principal.get("user_id"),
+        }))
 
         self.telemetry.queue_rag_scan(
             principal=principal,
