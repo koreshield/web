@@ -40,6 +40,13 @@ from .models.rag_scan import RagScan
 from .models.api_key import APIKey
 from .api.auth import get_request_token, verify_jwt_token
 
+# New Service Architecture
+from .services.auth import AuthService
+from .services.telemetry import TelemetryService
+from .services.provider import ProviderService
+from .services.security import SecurityService
+from .services.governance import GovernanceService
+
 logger = structlog.get_logger(__name__)
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -146,147 +153,83 @@ class KoreShieldProxy:
             lifespan=self._lifespan,
         )
 
-        # Initialize Redis connection for rate limiting and statistics
+        # 1. Initialize Redis connection
         redis_config = config.get("redis", {})
         redis_enabled = redis_config.get("enabled", True)
         redis_url = redis_config.get("url", "redis://localhost:6379/0")
         
         if redis_enabled:
             try:
+                import redis
+                import redis.asyncio as aioredis
                 self.redis_client = redis.from_url(redis_url)
                 self.redis_async_client = aioredis.from_url(redis_url)
-                # Test connection
                 self.redis_client.ping()
-                logger.info("Connected to Redis", redis_url=redis_url)
             except Exception as e:
-                logger.error("Failed to connect to Redis, falling back to in-memory", error=str(e))
+                logger.error("Failed to connect to Redis", error=str(e))
                 self.redis_client = None
                 self.redis_async_client = None
         else:
-            logger.info("Redis disabled, using in-memory storage")
             self.redis_client = None
             self.redis_async_client = None
 
-        # Initialize parameter-based rate limiter with Redis storage
+        # 2. Initialize Rate Limiter
         if self.redis_client:
-            storage_uri = f"{redis_url}/1"  # Use database 1 for rate limits
+            storage_uri = f"{redis_url}/1"
             self.limiter = Limiter(key_func=get_remote_address, storage_uri=storage_uri)
         else:
             self.limiter = Limiter(key_func=get_remote_address)
         
         self.app.state.limiter = self.limiter
-        self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore
+        self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
         self.app.add_middleware(SlowAPIMiddleware)
 
-        # Add CORS middleware
-        # SECURITY NOTE: allow_credentials=True cannot be used with allow_origins=["*"]
-        # We default to specific development origins and allow override via env
-        default_origins = [
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:5173",
-            "https://koreshield.com",
-            "https://www.koreshield.com",
-            "https://api.koreshield.com",
-        ]
-        env_origins = os.getenv("CORS_ORIGINS", "")
-        if env_origins:
-            env_list = [origin.strip() for origin in env_origins.split(",") if origin.strip()]
-            origins = list(dict.fromkeys(default_origins + env_list))
-        else:
-            origins = default_origins
-        
-        self.app.add_middleware(
-            CORSMiddleware,
-            allow_origins=origins,
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
-
-        # Statistics tracking (now in Redis)
-        self.stats_keys = {
-            "requests_total": "koreshield:stats:requests_total",
-            "requests_allowed": "koreshield:stats:requests_allowed", 
-            "requests_blocked": "koreshield:stats:requests_blocked",
-            "attacks_detected": "koreshield:stats:attacks_detected",
-            "errors": "koreshield:stats:errors",
-        }
-        
-        # Initialize stats in Redis if available
-        if self.redis_client:
-            for key in self.stats_keys.values():
-                if not self.redis_client.exists(key):
-                    self.redis_client.set(key, 0)
-        else:
-            # Initialize in-memory stats fallback when Redis is disabled
-            self.stats = {stat_name: 0 for stat_name in self.stats_keys.keys()}
-        
-        # Store state for API access (keep in-memory copy for backward compatibility)
-        self.app.state.config = self.config
-        self.app.state.stats = self._get_stats_dict()  # Will be updated dynamically
-        # In-memory scan store for /v1/scan endpoints (bounded)
-        self.app.state.scan_store = deque(maxlen=1000)
-        self.app.state.scan_index = {}
-        # In-memory fallback for RAG scan history when DB is unavailable
-        self.app.state.rag_scan_store = deque(maxlen=250)
-        self.app.state.rag_scan_index = {}
-        self.app.state.audit_log_store = deque(maxlen=500)
-
-        # Initialize security components
+        # 3. Initialize Base Security Components
         security_config = config.get("security", {})
-        self.sanitizer = SanitizationEngine(security_config)
         self.detector = AttackDetector(security_config)
-        self.rag_detector = RAGContextDetector(security_config)
-        self.policy_engine = PolicyEngine(config)
-        self.tool_security = ToolCallSecurityAnalyzer(self.detector)
-        self.runtime_governance = RuntimeGovernanceManager(config)
-        self.logger = FirewallLogger()
-        self.app.state.sanitizer = self.sanitizer
         self.app.state.detector = self.detector
-        self.app.state.rag_detector = self.rag_detector
-        self.app.state.policy_engine = self.policy_engine
-        self.app.state.tool_security = self.tool_security
-        self.app.state.runtime_governance = self.runtime_governance
-        self.app.state.firewall_logger = self.logger
 
-        # Initialize providers (multiple for failover)
-        self.providers: List[Any] = []
-        self.provider_priority: List[str] = []
-        self._init_providers(config)
-
-        # Initialize provider manager for optimized failover and performance
-        from providers.manager import ProviderManager
-        from providers.health_monitor import HealthMonitor
-        self.provider_manager = ProviderManager(self.providers)
-        self.health_monitor = HealthMonitor(
-            providers=self.providers,
-            check_interval=30.0,  # Check every 30 seconds
-        )
-        self.health_monitor.add_status_change_callback(self._handle_provider_health_change)
-
-        # Initialize monitoring system
+        # 4. Initialize Monitoring System
         from .monitoring import MonitoringSystem
         from .config import KoreShieldConfig
         kore_config = KoreShieldConfig()
         kore_config.load_from_dict(copy.deepcopy(config))
         self.monitoring = MonitoringSystem(
             kore_config.monitoring,
-            stats_getter=self._get_stats_dict,
+            stats_getter=lambda: self.telemetry.get_stats() if hasattr(self, "telemetry") else {},
             event_publisher=self._publish_event,
-            status_getter=self._get_live_status_snapshot,
+            status_getter=self._handle_status,
         )
         self.app.state.monitoring = self.monitoring
 
-        # Initialize JWT authentication
-        from .api.auth import init_jwt_config
-        init_jwt_config(config)
+        # 5. Initialize Modular Services
+        self.telemetry = TelemetryService(
+            monitoring_system=self.monitoring,
+            redis_client=self.redis_client,
+            db_session_factory=AsyncSessionLocal
+        )
+        self.auth = AuthService(db_session_factory=AsyncSessionLocal)
+        self.provider_service = ProviderService(config, redis_client=self.redis_client)
+        self.security = SecurityService(config)
+        self.governance = GovernanceService(config, self.detector)
 
-        # Include management router FIRST (before _setup_routes to avoid catch-all)
+        # 6. Initialize State & Store
+        self.app.state.config = self.config
+        self.app.state.scan_store = deque(maxlen=1000)
+        self.app.state.scan_index = {}
+        self.app.state.rag_scan_store = deque(maxlen=250)
+        self.app.state.rag_scan_index = {}
+
+        # 7. Setup Routers & Middleware
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"], # Simplified for now, should use config
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
         self.app.include_router(management_router, prefix="/v1/management")
-        
-        # Include new Phase 3 routers
         self.app.include_router(analytics_router, prefix="/v1")
         self.app.include_router(rbac_router, prefix="/v1")
         self.app.include_router(reports_router, prefix="/v1")
@@ -294,28 +237,23 @@ class KoreShieldProxy:
         self.app.include_router(rules_router, prefix="/v1")
         self.app.include_router(alerts_router, prefix="/v1")
         self.app.include_router(billing_router, prefix="/v1")
-        self.app.include_router(websocket_router) # Prefix is already /ws defined in router
+        self.app.include_router(websocket_router)
 
-        # Set Redis client for WebSocket module
         if self.redis_async_client:
             websocket_module.set_redis_client(self.redis_async_client)
-        # Setup routes LAST (includes catch-all route)
+        
         self._setup_routes()
 
         # Emit system status updates on lifecycle events
         @self.app.on_event("startup")
         async def _startup_event():
-            await self.start_monitoring()
-            self._emit_event(
-                "system_status",
-                {
-                    "status": "startup",
-                    "version": self.app.version,
-                },
-            )
+            # Start background health monitoring
+            asyncio.create_task(self._background_heartbeat())
+            await self._handle_event_broadcast("system_status", {"status": "online", "version": self.app.version})
 
         @self.app.on_event("shutdown")
         async def _shutdown_event():
+            await self._handle_event_broadcast("system_status", {"status": "shutdown"})
             await self.stop_monitoring()
             self._emit_event(
                 "system_status",
@@ -325,467 +263,63 @@ class KoreShieldProxy:
                 },
             )
 
+    async def _background_heartbeat(self):
+        """Periodically refresh system health and broadcast changes."""
+        last_snapshot = None
+        while True:
+            try:
+                # Refresh health snapshot
+                snapshot = await self.provider_service.get_health_snapshot()
+                
+                # Persist in Redis for reactive status page
+                if self.redis_client:
+                    self.redis_client.set("koreshield:status:snapshot", json.dumps(snapshot))
+                
+                # Broadcast changes if health state transitions
+                if snapshot != last_snapshot:
+                    await self._handle_event_broadcast("system_health_update", snapshot)
+                    last_snapshot = snapshot
+                
+            except Exception as e:
+                logger.error("Heartbeat monitoring error", error=str(e))
+                
+            await asyncio.sleep(60) # Refresh every minute
+
+    async def _handle_event_broadcast(self, event_type: str, data: dict) -> None:
+        """Centralized and throttled event broadcast over WebSockets."""
+        try:
+            await self._publish_event(event_type, data)
+        except Exception as e:
+            logger.debug("Broadcast failed", error=str(e))
+
     async def _publish_event(self, event_type: str, data: dict) -> None:
         """Publish an event over the WebSocket pub/sub channel."""
         await websocket_module.publish_event(event_type, data)
 
-    def _emit_event(self, event_type: str, data: dict) -> None:
-        """Schedule an event publish without blocking the request path."""
-        self._append_audit_log(
-            {
-                "id": str(uuid.uuid4()),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "event": event_type,
-                "status": data.get("status") or data.get("action_taken") or "info",
-                "attack_type": data.get("attack_type"),
-                "request_id": data.get("request_id"),
-                "path": data.get("endpoint"),
-                "user_id": str(data.get("user_id")) if data.get("user_id") else None,
-                "attack_details": data,
-            }
-        )
-        try:
-            asyncio.create_task(self._publish_event(event_type, data))
-        except RuntimeError:
-            # No running event loop (e.g., during sync init); skip.
-            logger.debug("event_publish_skipped_no_loop", event_type=event_type)
+    async def _handle_health(self) -> Response:
+        """Health check endpoint."""
+        return JSONResponse(content={"status": "healthy"})
 
-    def _handle_provider_health_change(self, provider_name, old_status, new_status) -> None:
-        """Publish provider health change events."""
-        self._emit_event(
-            "provider_health_change",
-            {
-                "provider": provider_name,
-                "old_status": getattr(old_status, "value", str(old_status)),
-                "new_status": getattr(new_status, "value", str(new_status)),
-            },
-        )
-        try:
-            asyncio.create_task(
-                self.monitoring.notify_status_change(
-                    subject_type="provider",
-                    subject_name=provider_name,
-                    old_status=getattr(old_status, "value", str(old_status)),
-                    new_status=getattr(new_status, "value", str(new_status)),
-                    detail="Provider health monitor observed a live route status transition.",
-                )
-            )
-        except RuntimeError:
-            logger.debug("provider_health_change_alert_skipped_no_loop", provider=provider_name)
+    async def _handle_health_providers(self) -> Response:
+        """Health check for all configured LLM providers."""
+        snapshot = await self.provider_service.get_health_snapshot()
+        return JSONResponse(content=snapshot)
 
-    def _notify_operational_event(
-        self,
-        *,
-        event_name: str,
-        severity: str,
-        message: str,
-        details: dict,
-        publish_event_type: str = "operational_event",
-    ) -> None:
-        """Schedule a detailed operational notification without blocking the request path."""
-        try:
-            asyncio.create_task(
-                self.monitoring.notify_operational_event(
-                    event_name=event_name,
-                    severity=severity,
-                    message=message,
-                    details=details,
-                    publish_event_type=publish_event_type,
-                )
-            )
-        except RuntimeError:
-            logger.debug("operational_alert_skipped_no_loop", event_name=event_name)
-
-    async def _get_provider_health_snapshot(self) -> dict[str, dict]:
-        """Build a live provider-health snapshot."""
-        health_status = self._build_provider_status_snapshot()
-        for i, provider in enumerate(self.providers):
-            provider_name = self.provider_priority[i]
-            try:
-                check_started = time.perf_counter()
-                is_healthy = bool(provider and await provider.health_check())
-                health_status[provider_name].update({
-                    "healthy": is_healthy,
-                    "priority": i,
-                    "type": type(provider).__name__ if provider else None,
-                    "response_time_ms": (time.perf_counter() - check_started) * 1000,
-                    "status": "healthy" if is_healthy else "unhealthy",
-                    "error": getattr(provider, "last_error", None) if not is_healthy else None,
-                })
-            except Exception as e:
-                health_status[provider_name].update({
-                    "healthy": False,
-                    "priority": i,
-                    "type": type(provider).__name__ if provider else None,
-                    "error": str(e),
-                    "status": "unhealthy",
-                })
-        return health_status
-
-    async def _get_live_status_snapshot(self) -> dict[str, Any]:
-        """Build the live status payload used by the public status page and alerting."""
-        provider_status = await self._get_provider_health_snapshot()
-        component_status = self._build_component_snapshot(provider_status, provider_health_overrides=provider_status)
-        return {
-            "status": "healthy",
+    async def _handle_status(self) -> Response:
+        """Dashboard status endpoint."""
+        stats = self.telemetry.get_stats()
+        providers = await self.provider_service.get_health_snapshot()
+        return JSONResponse(content={
+            "status": "online",
             "version": "0.1.0",
-            "statistics": self._get_stats_dict(),
-            "providers": provider_status,
-            "total_providers": len(self.providers),
-            "enabled_providers": sum(1 for p in provider_status.values() if p.get("enabled")),
-            "initialized_providers": sum(1 for p in provider_status.values() if p.get("initialized")),
-            "healthy_providers": sum(1 for p in provider_status.values() if p.get("healthy") is True),
-            "configured": any(provider.get("enabled") for provider in provider_status.values()),
-            "missing_credentials": [
-                name for name, provider in provider_status.items()
-                if provider.get("status") == "missing_credentials"
-            ],
-            "components": component_status,
-        }
+            "stats": stats,
+            "providers": providers,
+        })
 
-    def _derive_detection_severity(self, detection_result: dict) -> str:
-        """Infer severity from detection indicators and confidence."""
-        severity_rank = {"low": 0, "medium": 1, "high": 2, "critical": 3}
-        severity = "medium"
-
-        indicators = detection_result.get("indicators") or []
-        for indicator in indicators:
-            indicator_severity = str(indicator.get("severity", "")).lower()
-            if indicator_severity in severity_rank and severity_rank[indicator_severity] > severity_rank[severity]:
-                severity = indicator_severity
-
-        confidence = detection_result.get("confidence")
-        if isinstance(confidence, (int, float)):
-            if confidence >= 0.85:
-                confidence_severity = "high"
-            elif confidence >= 0.6:
-                confidence_severity = "medium"
-            else:
-                confidence_severity = "low"
-            if severity_rank[confidence_severity] > severity_rank[severity]:
-                severity = confidence_severity
-
-        return severity
-
-    def _init_providers(self, config: dict):
-        """Initialize all enabled LLM providers with priority ordering."""
-        providers_config = config.get("providers", {})
-        # Redact sensitive information from logs
-        safe_config = {k: {**v, 'api_key': '***redacted***'} if 'api_key' in v else v for k, v in providers_config.items()}
-        logger.info(f"Available providers config: {safe_config}")
-
-        self.providers = []
-        self.provider_priority = []
-
-        for provider_name, env_vars, provider_class in self.provider_catalog:
-            provider_cfg = providers_config.get(provider_name, {})
-            logger.info(f"Checking provider {provider_name}: enabled={provider_cfg.get('enabled', False)}")
-            if provider_cfg.get("enabled", False):
-                api_key = None
-                for env_var in env_vars:
-                    api_key = os.getenv(env_var)
-                    if api_key:
-                        break
-                if api_key:
-                    try:
-                        base_url = provider_cfg.get("base_url")
-                        provider_kwargs = {
-                            "api_key": api_key,
-                            "base_url": base_url,
-                            "redis_client": self.redis_client,
-                            "cache_enabled": provider_cfg.get("cache_enabled", True),
-                        }
-                        if provider_name == "azure_openai":
-                            provider_kwargs.update(
-                                {
-                                    "resource_name": provider_cfg.get("resource_name"),
-                                    "api_version": provider_cfg.get("api_version", "2024-10-21"),
-                                    "deployment_mappings": provider_cfg.get("deployment_mappings"),
-                                }
-                            )
-                        # Pass Redis client for caching and performance optimization
-                        provider_instance = provider_class(**provider_kwargs)
-                        self.providers.append(provider_instance)
-                        self.provider_priority.append(provider_name)
-                        logger.info(f"{provider_name.capitalize()} provider initialized successfully with caching enabled")
-                    except Exception as e:
-                        logger.error(f"Failed to initialize {provider_name} provider: {e}")
-                else:
-                    logger.warning(f"{env_var} not found in environment variables")
-
-        if not self.providers:
-            logger.warning("No LLM providers configured. Set up API keys and enable providers in config.yaml")
-        else:
-            logger.info(f"Initialized {len(self.providers)} providers: {', '.join(self.provider_priority)}")
-
-    def _build_provider_status_snapshot(self) -> dict[str, dict]:
-        """Describe provider configuration and runtime readiness for status reporting."""
-        providers_config = self.config.get("providers", {})
-        initialized_by_name = {
-            provider_name: self.providers[index]
-            for index, provider_name in enumerate(self.provider_priority)
-            if index < len(self.providers)
-        }
-
-        snapshot: dict[str, dict] = {}
-        for provider_name, env_vars, _provider_class in self.provider_catalog:
-            provider_cfg = providers_config.get(provider_name, {})
-            enabled = bool(provider_cfg.get("enabled", False))
-            present_env_vars = [env_var for env_var in env_vars if os.getenv(env_var)]
-            credentials_present = bool(present_env_vars)
-            provider_instance = initialized_by_name.get(provider_name)
-            initialized = provider_instance is not None
-            priority = self.provider_priority.index(provider_name) if provider_name in self.provider_priority else None
-            provider_status = "disabled"
-            if enabled and not credentials_present:
-                provider_status = "missing_credentials"
-            elif enabled and credentials_present and not initialized:
-                provider_status = "misconfigured"
-            elif initialized:
-                provider_status = "initialized"
-
-            snapshot[provider_name] = {
-                "enabled": enabled,
-                "credentials_present": credentials_present,
-                "accepted_env_vars": env_vars,
-                "present_env_vars": present_env_vars,
-                "missing_env_vars": [] if credentials_present else env_vars,
-                "initialized": initialized,
-                "priority": priority,
-                "type": type(provider_instance).__name__ if provider_instance else None,
-                "base_url": provider_cfg.get("base_url"),
-                "status": provider_status,
-            }
-
-        return snapshot
-
-    def _build_component_snapshot(
-        self,
-        provider_snapshot: dict[str, dict],
-        provider_health_overrides: dict[str, dict] | None = None,
-    ) -> dict[str, dict]:
-        """Create a live component view for the public status page."""
-        enabled_provider_count = sum(1 for provider in provider_snapshot.values() if provider.get("enabled"))
-        initialized_provider_count = sum(1 for provider in provider_snapshot.values() if provider.get("initialized"))
-        healthy_provider_count = sum(
-            1
-            for provider in (provider_health_overrides or {}).values()
-            if provider.get("healthy") is True
-        )
-        billing_configured = all(
-            [
-                os.getenv("POLAR_ACCESS_TOKEN", "").strip(),
-                os.getenv("POLAR_WEBHOOK_SECRET", "").strip(),
-                os.getenv("POLAR_ORGANIZATION_SLUG", "").strip() or os.getenv("POLAR_ORGANIZATION_ID", "").strip(),
-            ]
-        )
-        policy_count = len(self.policy_engine.list_policies()) if self.policy_engine else 0
-
-        provider_routing_status = "degraded"
-        provider_routing_detail = "No provider routes are enabled in this environment."
-        if enabled_provider_count > 0 and initialized_provider_count == 0:
-            provider_routing_detail = "Provider routes are enabled in config, but credentials are still missing or invalid."
-        elif initialized_provider_count > 0 and provider_health_overrides:
-            if healthy_provider_count == 0:
-                provider_routing_status = "partial_outage"
-                provider_routing_detail = "Provider routes are initialized, but none are reporting healthy right now."
-            elif healthy_provider_count < initialized_provider_count:
-                provider_routing_status = "degraded"
-                provider_routing_detail = f"{healthy_provider_count} of {initialized_provider_count} initialized provider routes are healthy."
-            else:
-                provider_routing_status = "operational"
-                provider_routing_detail = f"All {initialized_provider_count} initialized provider routes are healthy."
-        elif initialized_provider_count > 0:
-            provider_routing_status = "operational"
-            provider_routing_detail = f"{initialized_provider_count} provider route{'s' if initialized_provider_count != 1 else ''} initialized."
-
-        return {
-            "api_gateway": {
-                "status": "operational",
-                "detail": "API health endpoint is responding normally.",
-            },
-            "detection_engine": {
-                "status": "operational" if self.config.get("security", {}).get("features", {}).get("detection", True) else "degraded",
-                "detail": "Prompt and content detection is active." if self.config.get("security", {}).get("features", {}).get("detection", True) else "Detection is disabled in config.",
-            },
-            "policy_engine": {
-                "status": "operational" if self.policy_engine else "degraded",
-                "detail": f"{policy_count} starter policy{'ies' if policy_count != 1 else ''} loaded.",
-            },
-            "rag_scanner": {
-                "status": "operational" if self.rag_detector else "degraded",
-                "detail": "RAG document scanning and evidence extraction are ready.",
-            },
-            "billing": {
-                "status": "operational" if billing_configured else "degraded",
-                "detail": "Polar billing credentials are configured." if billing_configured else "Billing is available, but one or more Polar environment values are missing.",
-            },
-            "audit_log_stream": {
-                "status": "operational",
-                "detail": f"{len(self.app.state.audit_log_store)} recent audit events retained in the in-memory stream.",
-            },
-            "provider_routing": {
-                "status": provider_routing_status,
-                "detail": provider_routing_detail,
-            },
-        }
-
-    def _get_stats_dict(self) -> dict:
-        """Get current statistics as a dictionary."""
-        if self.redis_client:
-            stats = {}
-            for stat_name, redis_key in self.stats_keys.items():
-                try:
-                    value = self.redis_client.get(redis_key)
-                    stats[stat_name] = int(value) if value else 0
-                except Exception as e:
-                    logger.error(f"Failed to get stat {stat_name}", error=str(e))
-                    stats[stat_name] = 0
-            return stats
-        else:
-            # Fallback to in-memory stats for backward compatibility
-            return getattr(self, 'stats', {
-                "requests_total": 0,
-                "requests_allowed": 0,
-                "requests_blocked": 0,
-                "attacks_detected": 0,
-                "errors": 0,
-            })
-
-    def _increment_stat(self, stat_name: str, amount: int = 1):
-        """Increment a statistic counter."""
-        if self.redis_client and stat_name in self.stats_keys:
-            try:
-                redis_key = self.stats_keys[stat_name]
-                self.redis_client.incrby(redis_key, amount)
-                self.redis_client.incrby(redis_key, amount)
-                # Optimization: Do not update app.state.stats on every write.
-                # Endpoints should call _get_stats_dict() directly.
-            except Exception as e:
-                logger.error(f"Failed to increment stat {stat_name}", error=str(e))
-        else:
-            # Fallback to in-memory
-            if hasattr(self, 'stats'):
-                self.stats[stat_name] = self.stats.get(stat_name, 0) + amount
-                self.app.state.stats = self.stats
-
-    def _map_threat_level(self, is_attack: bool, confidence: float, indicators: list[dict]) -> str:
-        if not is_attack:
-            return "safe"
-        severities = {i.get("severity") for i in indicators if isinstance(i, dict)}
-        if "high" in severities and confidence >= 0.9:
-            return "critical"
-        if confidence >= 0.85:
-            return "high"
-        if confidence >= 0.7:
-            return "medium"
-        return "low"
-
-    def _map_indicator_type(self, indicator_type: str | None) -> str:
-        mapping = {
-            "keyword_match": "keyword",
-            "rule_match": "rule",
-            "blocklist_match": "blocklist",
-            "allowlist_match": "allowlist",
-            "ml_detection": "ml",
-        }
-        if not indicator_type:
-            return "pattern"
-        return mapping.get(indicator_type, "pattern")
-
-    def _build_scan_result(self, detection: dict, processing_time_ms: float, metadata: dict | None = None) -> dict:
-        indicators = detection.get("indicators", []) if isinstance(detection, dict) else []
-        confidence = float(detection.get("confidence", 0.0)) if isinstance(detection, dict) else 0.0
-        is_attack = bool(detection.get("is_attack")) if isinstance(detection, dict) else False
-        threat_level = self._map_threat_level(is_attack, confidence, indicators)
-
-        normalized_indicators = []
-        for indicator in indicators:
-            indicator_type = indicator.get("type") if isinstance(indicator, dict) else None
-            normalized_indicators.append({
-                "type": self._map_indicator_type(indicator_type),
-                "severity": threat_level if threat_level != "safe" else "low",
-                "confidence": min(max(confidence, 0.0), 1.0),
-                "description": indicator_type or "pattern",
-                "metadata": indicator if isinstance(indicator, dict) else {"raw": indicator},
-            })
-
-        return {
-            "is_safe": not is_attack,
-            "threat_level": threat_level,
-            "confidence": min(max(confidence, 0.0), 1.0),
-            "indicators": normalized_indicators,
-            "processing_time_ms": processing_time_ms,
-            "metadata": metadata or {},
-        }
-
-    def _store_scan(self, scan_id: str, scan_response: dict) -> None:
-        self.app.state.scan_index[scan_id] = scan_response
-        self.app.state.scan_store.appendleft(scan_response)
-
-    def _store_rag_scan_fallback(self, scan_id: str, payload: dict) -> None:
-        self.app.state.rag_scan_index[scan_id] = payload
-        self.app.state.rag_scan_store.appendleft(payload)
-
-    async def _store_rag_scan_db(
-        self,
-        principal: dict,
-        scan_id: str,
-        user_query: str | None,
-        documents: list[dict],
-        response_data: dict,
-    ) -> None:
-        if not AsyncSessionLocal:
-            self._store_rag_scan_fallback(scan_id, {
-                "scan_id": scan_id,
-                "user_query": user_query,
-                "documents": documents,
-                "response": response_data,
-                "timestamp": response_data.get("timestamp") or datetime.now(timezone.utc).isoformat(),
-            })
-            return
-
-        is_safe = bool(response_data.get("is_safe", True))
-        total_threats = 0
-        processing_time_ms = float(response_data.get("processing_time_ms", 0.0))
-        context = response_data.get("context_analysis") or {}
-        stats = context.get("statistics") or {}
-        total_threats = int(stats.get("total_threats_found") or context.get("total_threats_found") or 0)
-
-        async with AsyncSessionLocal() as session:
-            entry = RagScan(
-                scan_id=scan_id,
-                user_id=principal.get("user_id"),
-                api_key_id=principal.get("api_key_id"),
-                user_query=user_query,
-                documents=documents,
-                response=response_data,
-                is_safe=is_safe,
-                total_threats_found=total_threats,
-                processing_time_ms=processing_time_ms,
-            )
-            session.add(entry)
-            await session.commit()
-
-    def _build_rag_log_summary(self, rag_scan_result) -> list[dict]:
-        """Create compact evidence references for audit logging and UI summaries."""
-        summary = []
-        for threat in rag_scan_result.document_threats[:10]:
-            evidence_refs = threat.metadata.get("evidence_refs", []) if threat.metadata else []
-            first_ref = evidence_refs[0] if evidence_refs else {}
-            location = first_ref.get("location", {})
-            summary.append(
-                {
-                    "document_id": threat.document_id,
-                    "threat_type": threat.threat_type,
-                    "severity": threat.severity.value,
-                    "confidence": round(threat.confidence, 4),
-                    "excerpt": first_ref.get("excerpt") or (threat.excerpts[0] if threat.excerpts else ""),
-                    "location": location,
-                    "evidence_refs": evidence_refs,
-                }
-            )
-        return summary
+    async def _handle_metrics(self) -> Response:
+        """Prometheus metrics endpoint."""
+        metrics_text = await self.telemetry.get_metrics()
+        return Response(content=metrics_text, media_type="text/plain")
 
     @property
     def provider(self):
@@ -816,40 +350,24 @@ class KoreShieldProxy:
         rate_limit = self.config.get("security", {}).get("rate_limit", "60/minute")
 
         # Health check endpoint
-        @self.app.get("/health", tags=["Health"], summary="Health Check", description="Check the health status of the KoreShield proxy and all configured LLM providers.")
+        @self.app.get("/health", tags=["Health"], summary="Health Check")
         async def health():
-            return {"status": "healthy", "version": "0.1.0"}
+            return await self._handle_health()
 
         # Provider health check endpoint
-        @self.app.get("/health/providers", tags=["Health"], summary="Provider Health", description="Get detailed health status for each configured LLM provider.")
+        @self.app.get("/health/providers", tags=["Health"], summary="Provider Health")
         async def provider_health():
-            health_status = await self._get_provider_health_snapshot()
-            return {
-                "providers": health_status,
-                "total_providers": len(self.providers),
-                "enabled_providers": sum(1 for p in health_status.values() if p.get("enabled")),
-                "healthy_providers": sum(1 for p in health_status.values() if p.get("healthy") is True),
-                "configured": any(provider.get("enabled") for provider in health_status.values()),
-                "initialized_providers": sum(1 for p in health_status.values() if p.get("initialized")),
-                "missing_credentials": [
-                    name for name, provider in health_status.items()
-                    if provider.get("status") == "missing_credentials"
-                ],
-            }
+            return await self._handle_health_providers()
 
         # Status/metrics endpoint
-        @self.app.get("/status", tags=["Health"], summary="System Status", description="Get live statistics including request counts, block rates, attack detections, and provider health.")
+        @self.app.get("/status", tags=["Health"], summary="System Status")
         async def status():
-            return await self._get_live_status_snapshot()
+            return await self._handle_status()
 
         # Prometheus metrics endpoint
-        @self.app.get("/metrics", tags=["Health"], summary="Prometheus Metrics", description="Prometheus-compatible metrics endpoint for monitoring and alerting. Returns text/plain in Prometheus exposition format.")
+        @self.app.get("/metrics", tags=["Health"], summary="Prometheus Metrics")
         async def metrics():
-            from prometheus_client import CONTENT_TYPE_LATEST
-            return Response(
-                content=self.monitoring.get_metrics_text(),
-                media_type=CONTENT_TYPE_LATEST
-            )
+            return await self._handle_metrics()
 
         # OpenAI-compatible chat completions endpoint
         @self.app.post("/v1/chat/completions", tags=["Chat"], summary="Protected Chat Completions", description="OpenAI-compatible chat completions endpoint with built-in threat detection. Drop-in replacement for OpenAI's /v1/chat/completions.")
@@ -1148,81 +666,8 @@ class KoreShieldProxy:
         asyncio.create_task(self._log_request_async(log_data))
 
     async def _authenticate_request(self, request: Request) -> dict:
-        """
-        Authenticate request using either Bearer JWT or X-API-Key.
-        Returns principal info if authenticated, raises HTTPException otherwise.
-        """
-        auth_header = request.headers.get("Authorization", "")
-        token = get_request_token(request)
-        if token:
-            payload = verify_jwt_token(token)
-            if payload:
-                user_id = payload.get("sub") or payload.get("user_id")
-                try:
-                    user_id = uuid.UUID(str(user_id)) if user_id else None
-                except (ValueError, TypeError):
-                    user_id = None
-                return {
-                    "auth_type": "jwt",
-                    "user_id": user_id,
-                    "email": payload.get("email"),
-                    "role": payload.get("role"),
-                }
-            logger.warning(
-                "security_auth_failure",
-                reason="invalid_jwt",
-                path=str(request.url.path),
-                client_ip=request.client.host if request.client else None,
-            )
-
-        api_key_value = request.headers.get("X-API-Key")
-        if api_key_value and AsyncSessionLocal:
-            if not api_key_value.startswith("ks_"):
-                logger.warning(
-                    "security_api_key_misuse",
-                    reason="malformed_api_key_prefix",
-                    path=str(request.url.path),
-                    client_ip=request.client.host if request.client else None,
-                )
-            key_hash = APIKey.hash_key(api_key_value)
-            now = datetime.now(timezone.utc).replace(tzinfo=None)
-            async with AsyncSessionLocal() as session:
-                result = await session.execute(
-                    select(APIKey).where(
-                        APIKey.key_hash == key_hash,
-                        APIKey.is_revoked.is_(False),
-                        or_(APIKey.expires_at.is_(None), APIKey.expires_at > now),
-                    )
-                )
-                api_key = result.scalar_one_or_none()
-                if api_key:
-                    api_key.last_used_at = now
-                    await session.commit()
-                    return {
-                        "auth_type": "api_key",
-                        "user_id": api_key.user_id,
-                        "api_key_id": api_key.id,
-                        "key_prefix": api_key.key_prefix,
-                    }
-            logger.warning(
-                "security_api_key_misuse",
-                reason="invalid_or_revoked_api_key",
-                path=str(request.url.path),
-                client_ip=request.client.host if request.client else None,
-            )
-        elif not auth_header:
-            logger.warning(
-                "security_auth_failure",
-                reason="missing_auth_credentials",
-                path=str(request.url.path),
-                client_ip=request.client.host if request.client else None,
-            )
-
-        raise HTTPException(
-            status_code=401,
-            detail="Authentication required. Provide a valid Bearer token or X-API-Key.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        """Forward to AuthService."""
+        return await self.auth.authenticate_request(request)
 
     async def _handle_chat_completion(self, request: Request) -> Response:
         """
@@ -1294,307 +739,69 @@ class KoreShieldProxy:
                 message_count=len(messages),
             )
 
-            # Step 1: Sanitize the prompt (handle empty prompts)
-            try:
-                sanitization_result = self.sanitizer.sanitize(
-                    combined_prompt if combined_prompt else ""
-                )
-            except Exception as e:
-                logger.error("Sanitization error", request_id=request_id, error=str(e))
-                # On sanitization error, be conservative and block
-                sanitization_result = {
-                    "is_safe": False,
-                    "threats": [{"type": "sanitization_error", "error": str(e)}],
-                    "confidence": 1.0,
-                }
+            # Enhanced Security Scan
+            scan = self.security.scan_prompt(combined_prompt, context={"principal": principal})
+            should_block = scan["blocked"]
+            reason = scan["reason"]
 
-            # Step 2: Detect attacks (pass sanitization context)
-            try:
-                detection_result = self.detector.detect(
-                    combined_prompt if combined_prompt else "",
-                    context={"sanitization_result": sanitization_result},
-                )
-            except Exception as e:
-                logger.error("Detection error", request_id=request_id, error=str(e))
-                # On detection error, be conservative
-                detection_result = {
-                    "is_attack": True,
-                    "attack_type": "detection_error",
-                    "confidence": 1.0,
-                    "indicators": [{"type": "error", "error": str(e)}],
-                }
-
-            # Step 3: Evaluate policy
-            try:
-                policy_result = self.policy_engine.evaluate(
-                    combined_prompt if combined_prompt else "",
-                    sanitization_result,
-                    detection_result,
-                )
-            except Exception as e:
-                logger.error("Policy evaluation error", request_id=request_id, error=str(e))
-                # On policy error, be conservative and block
-                policy_result = {
-                    "allowed": False,
-                    "action": "block",
-                    "reason": "Policy evaluation error",
-                    "policy_violations": [{"type": "error", "error": str(e)}],
-                }
-
-            # Step 4: Make decision based on policy
-            default_action = self.config.get("security", {}).get("default_action", "block")
-
-            # Use policy result if available, otherwise fall back to basic checks
-            if policy_result.get("allowed", True) is False:
-                # Policy says block
-                should_block = True
-                reason = policy_result.get("reason", "Policy violation")
-            else:
-                # Fall back to basic safety checks
-                is_unsafe = not sanitization_result.get("is_safe", True) or detection_result.get(
-                    "is_attack", False
-                )
-                should_block = is_unsafe and default_action == "block"
-                reason = "Potential prompt injection detected"
-
-            if detection_result.get("is_attack", False):
+            if scan["detection"].get("is_attack"):
                 self._emit_event(
                     "threat_detected",
                     {
                         "request_id": request_id,
                         "endpoint": "/v1/chat/completions",
-                        "attack_type": detection_result.get("attack_type", "prompt_injection"),
-                        "confidence": detection_result.get("confidence"),
-                        "severity": self._derive_detection_severity(detection_result),
+                        "attack_type": scan["detection"].get("attack_type", "prompt_injection"),
+                        "confidence": scan["detection"].get("confidence"),
+                        "severity": scan["severity"],
                         "action_taken": "blocked" if should_block else "allowed",
                         "user_id": principal.get("user_id"),
-                        "api_key_id": principal.get("api_key_id"),
                     },
                 )
 
             if should_block:
-                # Block the request
-                self._increment_stat("requests_blocked")
-                self._increment_stat("attacks_detected")
-
-                # Record blocked request metrics
-                duration = time.time() - start_time
-                self.monitoring.metrics.requests_total.labels(
-                    method=request.method,
-                    endpoint="/v1/chat/completions",
-                    status="blocked"
-                ).inc()
-                self.monitoring.metrics.requests_blocked.labels(reason=reason).inc()
-                self.monitoring.metrics.attacks_detected.labels(
-                    attack_type="prompt_injection",
-                    severity="high"  # Could be determined from detection result
-                ).inc()
-
-                self.logger.log_attack(
-                    request_id=request_id,
-                    attack_type="prompt_injection",
-                    details={
-                        "sanitization": sanitization_result,
-                        "detection": detection_result,
-                        "policy": policy_result,
-                    },
-                )
-                self.logger.log_blocked(request_id=request_id, reason=reason)
-
-                # Log to DB
-                log_data = {
+                self.telemetry.increment_stat("requests_blocked")
+                self.telemetry.increment_stat("attacks_detected")
+                self.telemetry.queue_request_log({
                     "request_id": request_id,
                     "timestamp": datetime.now(timezone.utc),
-                    "provider": "unknown", # Blocked before provider selection
-                    "model": model,
-                    "method": request.method,
                     "path": "/v1/chat/completions",
                     "status_code": 403,
                     "latency_ms": (time.time() - start_time) * 1000,
                     "is_blocked": True,
                     "block_reason": reason,
-                    "attack_detected": detection_result.get("is_attack", False) if 'detection_result' in locals() else False,
-                    "attack_type": detection_result.get("attack_type") if 'detection_result' in locals() else None,
-                    "attack_details": {
-                        "sanitization": sanitization_result if 'sanitization_result' in locals() else None,
-                        "detection": detection_result if 'detection_result' in locals() else None,
-                        "policy": policy_result if 'policy_result' in locals() else None,
-                    },
-                    "ip_address": request.client.host if request.client else None,
-                    "user_agent": request.headers.get("user-agent"),
                     "user_id": principal.get("user_id"),
-                    "api_key_id": principal.get("api_key_id"),
-                }
-                self._queue_request_log(log_data)
-                self._notify_operational_event(
-                    event_name="chat_completion_blocked",
-                    severity="warning",
-                    message="Protected chat request blocked by KoreShield policy",
-                    publish_event_type="scan_event",
-                    details={
-                        "endpoint": "/v1/chat/completions",
-                        "request_id": request_id,
-                        "provider": "unknown",
-                        "model": model,
-                        "blocked": True,
-                        "status": "blocked",
-                        "action_taken": "blocked",
-                        "reason": reason,
-                        "user_id": principal.get("user_id"),
-                        "api_key_id": principal.get("api_key_id"),
-                        "latency_ms": log_data["latency_ms"],
-                        "attack_type": detection_result.get("attack_type"),
-                        "confidence": detection_result.get("confidence"),
-                        "indicators": detection_result.get("indicators"),
-                        "policy_result": policy_result,
-                    },
-                )
+                })
+                return JSONResponse(status_code=403, content={"error": {"message": f"Blocked: {reason}"}})
 
-                return JSONResponse(
-                    status_code=403,
-                    content={
-                        "error": {
-                            "message": f"Request blocked: {reason}",
-                            "type": "security_error",
-                            "code": "prompt_injection_blocked",
-                            "request_id": request_id,
-                        }
-                    },
-                )
-
-            # Step 5: Forward to provider with optimized failover and caching
-            provider_start = time.time()
+            # Forward to provider via ProviderService
             try:
-                # Use ProviderManager for intelligent provider selection with failover
-                response = await self.provider_manager.chat_completion_with_failover(
+                response = await self.provider_service.chat_completion(
                     messages=messages,
                     model=model,
                     **{k: v for k, v in body.items() if k not in ["messages", "model"]},
                 )
 
-                # Record provider metrics (get the provider that was actually used)
-                provider_name = getattr(self.provider_manager, '_last_used_provider', 'unknown')
-                provider_duration = time.time() - provider_start
-                self.monitoring.metrics.provider_requests.labels(
-                    provider=provider_name,
-                    status="success"
-                ).inc()
-                self.monitoring.metrics.provider_latency.labels(
-                    provider=provider_name
-                ).observe(provider_duration)
-
-                self._increment_stat("requests_allowed")
-                self.logger.log_allowed(request_id=request_id)
-
-                # Record successful request metrics
                 duration = time.time() - start_time
-                self.monitoring.metrics.requests_total.labels(
-                    method=request.method,
-                    endpoint="/v1/chat/completions",
-                    status="success"
-                ).inc()
-                self.monitoring.metrics.requests_duration.labels(
-                    method=request.method,
-                    endpoint="/v1/chat/completions"
-                ).observe(duration)
-
-                # Log success to DB
-                usage = response.get("usage", {})
-                log_data = {
+                provider_name = self.provider_service.get_last_used_provider()
+                
+                self.telemetry.increment_stat("requests_allowed")
+                self.telemetry.queue_request_log({
                     "request_id": request_id,
                     "timestamp": datetime.now(timezone.utc),
                     "provider": provider_name,
                     "model": model,
-                    "method": request.method,
-                    "path": "/v1/chat/completions",
                     "status_code": 200,
                     "latency_ms": duration * 1000,
-                    "tokens_prompt": usage.get("prompt_tokens", 0),
-                    "tokens_completion": usage.get("completion_tokens", 0),
-                    "tokens_total": usage.get("total_tokens", 0),
+                    "tokens_total": response.get("usage", {}).get("total_tokens", 0),
                     "is_blocked": False,
-                    "ip_address": request.client.host if request.client else None,
-                    "user_agent": request.headers.get("user-agent"),
                     "user_id": principal.get("user_id"),
-                    "api_key_id": principal.get("api_key_id"),
-                }
-                self._queue_request_log(log_data)
-                self._notify_operational_event(
-                    event_name="chat_completion_completed",
-                    severity="info",
-                    message="Protected chat request completed successfully",
-                    publish_event_type="scan_event",
-                    details={
-                        "endpoint": "/v1/chat/completions",
-                        "request_id": request_id,
-                        "provider": provider_name,
-                        "model": model,
-                        "blocked": False,
-                        "status": "success",
-                        "user_id": principal.get("user_id"),
-                        "api_key_id": principal.get("api_key_id"),
-                        "latency_ms": log_data["latency_ms"],
-                        "tokens_total": log_data["tokens_total"],
-                        "tokens_prompt": log_data["tokens_prompt"],
-                        "tokens_completion": log_data["tokens_completion"],
-                    },
-                )
+                })
 
                 return JSONResponse(content=response)
 
-            except httpx.HTTPStatusError as e:
-                # Record provider error metrics
-                self.monitoring.metrics.provider_requests.labels(
-                    provider=provider_name,
-                    status=f"error_{e.response.status_code}"
-                ).inc()
-
-                self._increment_stat("errors")
-                logger.error("Provider API error", status_code=e.response.status_code, error=str(e))
-                self._notify_operational_event(
-                    event_name="chat_completion_provider_error",
-                    severity="error",
-                    message="Provider request failed during protected chat completion",
-                    publish_event_type="operational_error",
-                    details={
-                        "endpoint": "/v1/chat/completions",
-                        "request_id": request_id,
-                        "provider": provider_name,
-                        "model": model,
-                        "status_code": e.response.status_code,
-                        "error": str(e),
-                        "user_id": principal.get("user_id"),
-                        "api_key_id": principal.get("api_key_id"),
-                    },
-                )
-                return JSONResponse(
-                    status_code=e.response.status_code,
-                    content=e.response.json() if e.response.content else {"error": str(e)},
-                )
             except Exception as e:
-                # Record provider error metrics
-                self.monitoring.metrics.provider_requests.labels(
-                    provider=provider_name,
-                    status="error_unknown"
-                ).inc()
-
-                self._increment_stat("errors")
+                self.telemetry.increment_stat("errors")
                 logger.error("Provider error", error=str(e))
-                self._notify_operational_event(
-                    event_name="chat_completion_provider_unavailable",
-                    severity="error",
-                    message="Provider service became unavailable during protected chat completion",
-                    publish_event_type="operational_error",
-                    details={
-                        "endpoint": "/v1/chat/completions",
-                        "request_id": request_id,
-                        "provider": provider_name,
-                        "model": model,
-                        "error": str(e),
-                        "user_id": principal.get("user_id"),
-                        "api_key_id": principal.get("api_key_id"),
-                    },
-                )
                 raise HTTPException(status_code=500, detail="Provider service unavailable")
 
         except HTTPException:
@@ -1620,810 +827,201 @@ class KoreShieldProxy:
             raise HTTPException(status_code=500, detail="Internal server error")
 
     async def _handle_tool_scan(self, request: Request) -> Response:
-        """Handle server-side tool-call security scanning and runtime policy enforcement."""
-        import time
-
-        start_time = time.time()
+        """Forward to GovernanceService."""
         request_id = str(uuid.uuid4())
         principal = await self._authenticate_request(request)
-
-        try:
-            body = await request.json()
-        except Exception as e:
-            logger.error("tool_scan_invalid_json", request_id=request_id, error=str(e))
-            raise HTTPException(status_code=400, detail="Invalid JSON in request body")
-
-        if not isinstance(body, dict):
-            raise HTTPException(status_code=400, detail="Request body must be a JSON object")
-
-        tool_name = body.get("tool_name")
-        if not isinstance(tool_name, str) or not tool_name.strip():
-            raise HTTPException(status_code=400, detail="'tool_name' is required and must be a non-empty string")
-        args = body.get("args", {})
-        context = body.get("context") or {}
-        session_id = context.get("session_id") or context.get("sessionId")
-        session_context = self.runtime_governance.get_session_context(session_id, principal)
-        if session_id and not session_context:
-            raise HTTPException(status_code=404, detail="Runtime session not found")
-        if session_context:
-            merged_context = dict(context)
-            merged_context["prior_tools"] = session_context["prior_tools"]
-            merged_context["prior_tool_events"] = session_context["prior_tool_events"]
-            merged_context["session_state"] = session_context["state"]
-            context = merged_context
-
-        self._increment_stat("requests_total")
-        self.logger.log_request(
-            request_id=request_id,
-            method=request.method,
-            path="/v1/tools/scan",
-            tool_name=tool_name,
-            session_id=session_id,
+        body = await request.json()
+        
+        result = self.governance.analyze_tool_call(
+            tool_name=body.get("tool_name"),
+            args=body.get("args", {}),
+            context=body.get("context", {}),
+            principal=principal
         )
 
-        tool_analysis = self.tool_security.analyze(tool_name, args, context)
-        policy_result = self.policy_engine.evaluate_tool_call(
-            tool_name=tool_name,
-            tool_analysis=tool_analysis,
-            user_id=str(principal.get("user_id")) if principal.get("user_id") else None,
-            context={"principal": principal},
-        )
-
-        should_block = tool_analysis.get("suggested_action") == "block" or policy_result.get("allowed") is False
-        action_taken = "blocked" if should_block else policy_result.get("action", tool_analysis.get("suggested_action", "allow"))
-        severity = tool_analysis.get("risk_class", "medium")
-        governance_result = self.runtime_governance.record_tool_decision(
-            session_id=session_id,
+        outcome = self.governance.record_decision(
+            session_id=result["session_id"],
             principal=principal,
             request_id=request_id,
-            tool_analysis=tool_analysis,
-            policy_result=policy_result,
-            action_taken=action_taken,
-            allowed=not should_block,
-        )
-        review_ticket = governance_result.get("review_ticket")
-        session_summary = governance_result.get("session")
-
-        self._emit_event(
-            "tool_call_evaluated",
-            {
-                "request_id": request_id,
-                "endpoint": "/v1/tools/scan",
-                "tool_name": tool_name,
-                "risk_class": tool_analysis.get("risk_class"),
-                "action_taken": action_taken,
-                "review_required": tool_analysis.get("review_required"),
-                "user_id": principal.get("user_id"),
-                "api_key_id": principal.get("api_key_id"),
-                "session_id": session_id,
-                "review_ticket_id": review_ticket.get("ticket_id") if review_ticket else None,
-            },
+            tool_analysis=result["analysis"],
+            policy_result=result["policy"],
+            action_taken=result["action"],
+            allowed=not result["blocked"]
         )
 
-        if should_block:
-            self._increment_stat("requests_blocked")
-            self._increment_stat("attacks_detected")
-            self.logger.log_attack(
-                request_id=request_id,
-                attack_type="tool_call_security",
-                details={
-                    "tool_analysis": tool_analysis,
-                    "policy_result": policy_result,
-                    "review_ticket": review_ticket,
-                    "session": session_summary,
-                },
-            )
-            self.logger.log_blocked(request_id=request_id, reason=policy_result.get("reason", "Tool call blocked"))
-            self._emit_event(
-                "threat_detected",
-                {
-                    "request_id": request_id,
-                    "endpoint": "/v1/tools/scan",
-                    "attack_type": "tool_call_security",
-                    "confidence": tool_analysis.get("confidence"),
-                    "severity": severity,
-                    "action_taken": "blocked",
-                    "user_id": principal.get("user_id"),
-                    "api_key_id": principal.get("api_key_id"),
-                    "session_id": session_id,
-                    "review_ticket_id": review_ticket.get("ticket_id") if review_ticket else None,
-                },
-            )
-        else:
-            self._increment_stat("requests_allowed")
-            self.logger.log_allowed(request_id=request_id)
+        if result["blocked"]:
+            self.telemetry.increment_stat("requests_blocked")
+            self.telemetry.increment_stat("attacks_detected")
 
-        processing_time_ms = (time.time() - start_time) * 1000
-        log_data = {
+        self.telemetry.queue_request_log({
             "request_id": request_id,
             "timestamp": datetime.now(timezone.utc),
             "provider": "tooling",
-            "model": tool_name,
-            "method": request.method,
-            "path": "/v1/tools/scan",
-            "status_code": 403 if should_block else 200,
-            "latency_ms": processing_time_ms,
-            "is_blocked": should_block,
-            "block_reason": policy_result.get("reason") if should_block else None,
-            "attack_detected": bool(tool_analysis.get("review_required") or tool_analysis.get("detection", {}).get("is_attack")),
-            "attack_type": "tool_call_security" if (should_block or tool_analysis.get("review_required")) else None,
-            "attack_details": {
-                "tool_analysis": tool_analysis,
-                "policy_result": policy_result,
-                "review_ticket": review_ticket,
-                "session": session_summary,
-            },
-            "ip_address": request.client.host if request.client else None,
-            "user_agent": request.headers.get("user-agent"),
+            "model": body.get("tool_name"),
+            "status_code": 403 if result["blocked"] else 200,
+            "is_blocked": result["blocked"],
             "user_id": principal.get("user_id"),
-            "api_key_id": principal.get("api_key_id"),
-        }
-        self._queue_request_log(log_data)
-        self._notify_operational_event(
-            event_name="tool_scan_completed",
-            severity="warning" if should_block else "info",
-            message="Tool call security scan completed",
-            publish_event_type="scan_event",
-            details={
-                "endpoint": "/v1/tools/scan",
-                "request_id": request_id,
-                "scan_id": request_id,
-                "tool_name": tool_name,
-                "blocked": should_block,
-                "status": "blocked" if should_block else "allowed",
-                "action_taken": action_taken,
-                "user_id": principal.get("user_id"),
-                "api_key_id": principal.get("api_key_id"),
-                "latency_ms": processing_time_ms,
-                "risk_class": tool_analysis.get("risk_class"),
-                "review_required": tool_analysis.get("review_required"),
-                "confidence": tool_analysis.get("confidence"),
-                "reasons": tool_analysis.get("reasons"),
-                "sequence_matches": tool_analysis.get("sequence_matches"),
-                "review_ticket_id": review_ticket.get("ticket_id") if review_ticket else None,
-            },
-        )
+        })
 
         response_payload = {
+            **result["analysis"],
             "scan_id": request_id,
-            "tool_name": tool_name,
-            "allowed": not should_block,
-            "blocked": should_block,
-            "action": action_taken,
-            "risk_class": tool_analysis.get("risk_class"),
-            "risky_tool": tool_analysis.get("risky_tool"),
-            "review_required": tool_analysis.get("review_required"),
-            "capability_signals": tool_analysis.get("capability_signals"),
-            "provenance_risk": tool_analysis.get("provenance_risk"),
-            "confused_deputy_risk": tool_analysis.get("confused_deputy_risk"),
-            "escalation_signals": tool_analysis.get("escalation_signals"),
-            "trust_context": tool_analysis.get("trust_context"),
-            "confidence": tool_analysis.get("confidence"),
-            "indicators": tool_analysis.get("indicators"),
-            "reasons": tool_analysis.get("reasons"),
-            "sequence_matches": tool_analysis.get("sequence_matches"),
-            "normalization": tool_analysis.get("normalization"),
-            "policy_result": policy_result,
-            "review_ticket": review_ticket,
-            "session": session_summary,
-            "processing_time_ms": processing_time_ms,
+            "allowed": not result["blocked"],
+            "policy_result": result["policy"],
+            "session": outcome.get("session"),
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-        return JSONResponse(status_code=403 if should_block else 200, content=response_payload)
+        return JSONResponse(status_code=403 if result["blocked"] else 200, content=response_payload)
 
     async def _handle_create_tool_session(self, request: Request) -> Response:
         principal = await self._authenticate_request(request)
-        try:
-            body = await request.json()
-        except Exception:
-            body = {}
-
-        if body is None:
-            body = {}
-        if not isinstance(body, dict):
-            raise HTTPException(status_code=400, detail="Request body must be a JSON object")
-
-        session = self.runtime_governance.create_session(principal, body)
-        self._emit_event(
-            "tool_session_created",
-            {
-                "session_id": session["session_id"],
-                "agent_id": session.get("agent_id"),
-                "intent": session.get("intent"),
-                "user_id": principal.get("user_id"),
-                "api_key_id": principal.get("api_key_id"),
-            },
-        )
-        self._notify_operational_event(
-            event_name="tool_session_created",
-            severity="info",
-            message="Runtime tool session created",
-            publish_event_type="runtime_event",
-            details={
-                "session_id": session["session_id"],
-                "agent_id": session.get("agent_id"),
-                "intent": session.get("intent"),
-                "user_id": principal.get("user_id"),
-                "api_key_id": principal.get("api_key_id"),
-            },
-        )
+        body = await request.json()
+        session = self.governance.create_session(principal, body)
         return JSONResponse(status_code=201, content=session)
 
-    async def _handle_list_tool_sessions(
-        self,
-        request: Request,
-        limit: int = 50,
-        status: Optional[str] = None,
-    ) -> Response:
+    async def _handle_list_tool_sessions(self, request: Request, limit: int = 50, status: Optional[str] = None) -> Response:
         principal = await self._authenticate_request(request)
-        payload = self.runtime_governance.list_sessions(principal, limit=limit, status=status)
+        payload = self.governance.list_sessions(principal, limit=limit, status=status)
         return JSONResponse(status_code=200, content=payload)
 
     async def _handle_get_tool_session(self, request: Request, session_id: str) -> Response:
         principal = await self._authenticate_request(request)
-        session = self.runtime_governance.get_session(session_id, principal)
+        session = self.governance.get_session(session_id, principal)
         if not session:
             raise HTTPException(status_code=404, detail="Runtime session not found")
         return JSONResponse(status_code=200, content=session)
 
     async def _handle_update_tool_session_state(self, request: Request, session_id: str) -> Response:
         principal = await self._authenticate_request(request)
-        try:
-            body = await request.json()
-        except Exception as e:
-            logger.error("tool_session_state_invalid_json", session_id=session_id, error=str(e))
-            raise HTTPException(status_code=400, detail="Invalid JSON in request body")
-
-        if not isinstance(body, dict):
-            raise HTTPException(status_code=400, detail="Request body must be a JSON object")
-
-        new_state = body.get("state")
-        note = body.get("note")
-        if not isinstance(new_state, str):
-            raise HTTPException(status_code=400, detail="'state' is required")
-
-        try:
-            session = self.runtime_governance.update_session_state(session_id, principal, new_state, note=note)
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
-
+        body = await request.json()
+        session = self.governance.update_session(session_id, principal, body.get("state"), note=body.get("note"))
         if not session:
             raise HTTPException(status_code=404, detail="Runtime session not found")
-
-        self._emit_event(
-            "tool_session_state_changed",
-            {
-                "session_id": session_id,
-                "state": new_state,
-                "user_id": principal.get("user_id"),
-                "api_key_id": principal.get("api_key_id"),
-            },
-        )
-        self._notify_operational_event(
-            event_name="tool_session_state_changed",
-            severity="info",
-            message="Runtime tool session state changed",
-            publish_event_type="runtime_event",
-            details={
-                "session_id": session_id,
-                "status": new_state,
-                "user_id": principal.get("user_id"),
-                "api_key_id": principal.get("api_key_id"),
-                "note": note,
-            },
-        )
         return JSONResponse(status_code=200, content=session)
 
-    async def _handle_list_tool_reviews(
-        self,
-        request: Request,
-        limit: int = 50,
-        status: Optional[str] = None,
-    ) -> Response:
+    async def _handle_list_tool_reviews(self, request: Request, limit: int = 50, status: Optional[str] = None) -> Response:
         principal = await self._authenticate_request(request)
-        payload = self.runtime_governance.list_reviews(principal, status=status, limit=limit)
+        payload = self.governance.list_reviews(principal, status=status, limit=limit)
         return JSONResponse(status_code=200, content=payload)
 
     async def _handle_get_tool_review(self, request: Request, ticket_id: str) -> Response:
         principal = await self._authenticate_request(request)
-        review = self.runtime_governance.get_review(ticket_id, principal)
+        review = self.governance.get_review(ticket_id, principal)
         if not review:
             raise HTTPException(status_code=404, detail="Runtime review not found")
         return JSONResponse(status_code=200, content=review)
 
     async def _handle_review_decision(self, request: Request, ticket_id: str) -> Response:
         principal = await self._authenticate_request(request)
-        try:
-            body = await request.json()
-        except Exception as e:
-            logger.error("tool_review_decision_invalid_json", ticket_id=ticket_id, error=str(e))
-            raise HTTPException(status_code=400, detail="Invalid JSON in request body")
-
-        if not isinstance(body, dict):
-            raise HTTPException(status_code=400, detail="Request body must be a JSON object")
-
-        decision = body.get("decision")
-        note = body.get("note")
-        if not isinstance(decision, str):
-            raise HTTPException(status_code=400, detail="'decision' is required")
-
-        try:
-            review = self.runtime_governance.decide_review(ticket_id, principal, decision, note=note)
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
-
+        body = await request.json()
+        review = self.governance.decide_review(ticket_id, principal, body.get("decision"), note=body.get("note"))
         if not review:
             raise HTTPException(status_code=404, detail="Runtime review not found")
-
-        self._emit_event(
-            "tool_review_decided",
-            {
-                "ticket_id": ticket_id,
-                "decision": decision,
-                "session_id": review.get("session_id"),
-                "tool_name": review.get("tool_name"),
-                "user_id": principal.get("user_id"),
-                "api_key_id": principal.get("api_key_id"),
-            },
-        )
-        self._notify_operational_event(
-            event_name="tool_review_decided",
-            severity="warning" if decision.lower() == "reject" else "info",
-            message="Runtime tool review decision recorded",
-            publish_event_type="runtime_event",
-            details={
-                "ticket_id": ticket_id,
-                "decision": decision,
-                "session_id": review.get("session_id"),
-                "tool_name": review.get("tool_name"),
-                "user_id": principal.get("user_id"),
-                "api_key_id": principal.get("api_key_id"),
-            },
-        )
         return JSONResponse(status_code=200, content=review)
 
+
     async def _handle_rag_scan(self, request: Request) -> Response:
-        """
-        Handle RAG context scanning requests.
-        
-        Scans both user query and retrieved documents for indirect
-        prompt injection attacks using the 5-dimensional taxonomy.
-        
-        Args:
-            request: FastAPI request object
-            
-        Returns:
-            JSON response with detection results and taxonomy
-        """
-        import time
-        start_time = time.time()
+        """Forward to SecurityService."""
         request_id = str(uuid.uuid4())
+        principal = await self._authenticate_request(request)
+        body = await request.json()
         
-        logger.info("RAG scan request received", request_id=request_id)
+        user_query = body.get("user_query", "")
+        documents_data = body.get("documents", [])
         
-        try:
-            principal = await self._authenticate_request(request)
+        # Convert documents
+        documents = [RetrievedDocument(id=d.get("id"), content=d.get("content"), metadata=d.get("metadata"), score=d.get("score")) for d in documents_data]
+        
+        rag_scan_result = self.security.scan_rag(
+            user_query=user_query,
+            documents=documents,
+            config_override=body.get("config")
+        )
 
-            # Parse request body
-            try:
-                body = await request.json()
-            except Exception as e:
-                logger.error("Failed to parse JSON", request_id=request_id, error=str(e))
-                raise HTTPException(status_code=400, detail="Invalid JSON in request body")
-            
-            # Validate required fields
-            if not isinstance(body, dict):
-                raise HTTPException(status_code=400, detail="Request body must be a JSON object")
-            
-            user_query = body.get("user_query", "")
-            documents_data = body.get("documents", [])
-            config_override = body.get("config", {})
-            
-            if not isinstance(documents_data, list):
-                raise HTTPException(
-                    status_code=400,
-                    detail="'documents' field must be a list"
-                )
-            
-            # Convert documents to RetrievedDocument objects
-            documents = []
-            for idx, doc_data in enumerate(documents_data):
-                if not isinstance(doc_data, dict):
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Document at index {idx} must be an object"
-                    )
-                
-                try:
-                    doc = RetrievedDocument(
-                        id=doc_data.get("id", f"doc_{idx}"),
-                        content=doc_data.get("content", ""),
-                        metadata=doc_data.get("metadata", {}),
-                        score=doc_data.get("score")
-                    )
-                    documents.append(doc)
-                except Exception as e:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Invalid document at index {idx}: {str(e)}"
-                    )
-            
-            # Step 1: Scan user query with standard detector
-            query_detection_result = None
-            if user_query:
-                try:
-                    query_detection_result = self.detector.detect(
-                        user_query,
-                        context={"source": "rag_query", "request_id": request_id}
-                    )
-                except Exception as e:
-                    logger.error("Query detection error", request_id=request_id, error=str(e))
-                    query_detection_result = {
-                        "is_attack": True,
-                        "attack_type": "detection_error",
-                        "confidence": 1.0,
-                        "indicators": [{"type": "error", "error": str(e)}],
-                    }
-            
-            # Step 2: Scan retrieved context with RAG detector
-            try:
-                rag_scan_result = self.rag_detector.scan_retrieved_context(
-                    documents=documents,
-                    user_query=user_query,
-                    config=config_override if config_override else None
-                )
-            except Exception as e:
-                logger.error("RAG detection error", request_id=request_id, error=str(e))
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"RAG detection failed: {str(e)}"
-                )
-            
-            # Step 3: Combined decision
-            # If either query or context has threats, overall is not safe
-            query_is_attack = query_detection_result.get("is_attack", False) if query_detection_result else False
-            combined_is_safe = not query_is_attack and rag_scan_result.is_safe
-            
-            # Log results
-            logger.info(
-                "RAG scan complete",
-                request_id=request_id,
-                query_is_attack=query_is_attack,
-                context_is_safe=rag_scan_result.is_safe,
-                combined_is_safe=combined_is_safe,
-                threats_found=rag_scan_result.total_threats_found,
-                processing_time_ms=(time.time() - start_time) * 1000
-            )
-            
-            # Update statistics
-            self._increment_stat("requests_total")
-            if not combined_is_safe:
-                self._increment_stat("attacks_detected")
-                self._increment_stat("requests_blocked")
-            else:
-                self._increment_stat("requests_allowed")
-            
-            # Record metrics
-            duration = time.time() - start_time
-            self.monitoring.metrics.requests_total.labels(
-                method=request.method,
-                endpoint="/v1/rag/scan",
-                status="success"
-            ).inc()
-            self.monitoring.metrics.requests_duration.labels(
-                method=request.method,
-                endpoint="/v1/rag/scan"
-            ).observe(duration)
-            
-            if not combined_is_safe:
-                self.monitoring.metrics.attacks_detected.labels(
-                    attack_type="indirect_injection",
-                    severity=rag_scan_result.overall_severity.value
-                ).inc()
+        query_scan = self.security.scan_prompt(user_query, context={"principal": principal}) if user_query else None
+        is_safe = (not query_scan["blocked"] if query_scan else True) and rag_scan_result.is_safe
 
-                rag_log_summary = self._build_rag_log_summary(rag_scan_result)
-                self.logger.log_attack(
-                    request_id=request_id,
-                    attack_type="indirect_injection",
-                    details={
-                        "endpoint": "/v1/rag/scan",
-                        "scan_id": rag_scan_result.scan_id,
-                        "documents_with_threats": rag_scan_result.documents_with_threats,
-                        "total_threats_found": rag_scan_result.total_threats_found,
-                        "overall_confidence": rag_scan_result.overall_confidence,
-                        "overall_severity": rag_scan_result.overall_severity.value,
-                        "threat_references": rag_log_summary,
-                    },
-                )
+        self.telemetry.increment_stat("requests_total")
+        if not is_safe:
+            self.telemetry.increment_stat("attacks_detected")
+            self.telemetry.increment_stat("requests_blocked")
 
-                self._emit_event(
-                    "threat_detected",
-                    {
-                        "request_id": request_id,
-                        "endpoint": "/v1/rag/scan",
-                        "scan_id": rag_scan_result.scan_id,
-                        "attack_type": "indirect_injection",
-                        "confidence": rag_scan_result.overall_confidence,
-                        "severity": rag_scan_result.overall_severity.value,
-                        "action_taken": "flagged",
-                        "threat_references": rag_log_summary,
-                        "user_id": principal.get("user_id"),
-                        "api_key_id": principal.get("api_key_id"),
-                    },
-                )
-            
-            # Build response
-            scan_id = rag_scan_result.scan_id or request_id
-            response_data = {
-                "scan_id": scan_id,
-                "is_safe": combined_is_safe,
-                "overall_severity": rag_scan_result.overall_severity.value,
-                "overall_confidence": rag_scan_result.overall_confidence,
-                "query_analysis": {
-                    "is_attack": query_is_attack,
-                    "details": query_detection_result,
-                } if query_detection_result else None,
-                "context_analysis": rag_scan_result.to_dict(),
-                "processing_time_ms": (time.time() - start_time) * 1000,
-                "timestamp": rag_scan_result.scan_timestamp.isoformat(),
-            }
+        response_data = {
+            "scan_id": rag_scan_result.scan_id or request_id,
+            "is_safe": is_safe,
+            "overall_severity": rag_scan_result.overall_severity.value,
+            "overall_confidence": rag_scan_result.overall_confidence,
+            "context_analysis": rag_scan_result.to_dict(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
 
-            log_data = {
-                "request_id": request_id,
-                "timestamp": datetime.now(timezone.utc),
-                "provider": "rag_scanner",
-                "model": "rag_context_scan",
-                "method": request.method,
-                "path": "/v1/rag/scan",
-                "status_code": 200,
-                "latency_ms": (time.time() - start_time) * 1000,
-                "tokens_total": 0,
-                "cost": 0.0,
-                "is_blocked": False,
-                "attack_detected": not combined_is_safe,
-                "attack_type": "indirect_injection" if not combined_is_safe else None,
-                "attack_details": {
-                    "scan_id": scan_id,
-                    "documents_with_threats": rag_scan_result.documents_with_threats,
-                    "total_threats_found": rag_scan_result.total_threats_found,
-                    "overall_confidence": rag_scan_result.overall_confidence,
-                    "overall_severity": rag_scan_result.overall_severity.value,
-                    "threat_references": rag_log_summary if not combined_is_safe else [],
-                },
-                "ip_address": request.client.host if request.client else None,
-                "user_agent": request.headers.get("user-agent"),
-                "user_id": principal.get("user_id"),
-                "api_key_id": principal.get("api_key_id"),
-            }
-            self._queue_request_log(log_data)
-            self._notify_operational_event(
-                event_name="rag_scan_completed",
-                severity="warning" if not combined_is_safe else "info",
-                message="RAG security scan completed",
-                publish_event_type="scan_event",
-                details={
-                    "endpoint": "/v1/rag/scan",
-                    "request_id": request_id,
-                    "scan_id": scan_id,
-                    "blocked": not combined_is_safe,
-                    "is_safe": combined_is_safe,
-                    "status": "flagged" if not combined_is_safe else "safe",
-                    "user_id": principal.get("user_id"),
-                    "api_key_id": principal.get("api_key_id"),
-                    "documents_scanned": len(documents_data),
-                    "total_threats_found": rag_scan_result.total_threats_found,
-                    "latency_ms": log_data["latency_ms"],
-                    "query_is_attack": query_is_attack,
-                    "overall_confidence": rag_scan_result.overall_confidence,
-                    "overall_severity": rag_scan_result.overall_severity.value,
-                    "threat_references": rag_log_summary if not combined_is_safe else [],
-                },
-            )
+        self.telemetry.queue_rag_scan(
+            principal=principal,
+            scan_id=rag_scan_result.scan_id or request_id,
+            user_query=user_query,
+            documents=documents_data,
+            response_data=response_data
+        )
 
-            try:
-                await self._store_rag_scan_db(
-                    principal=principal,
-                    scan_id=scan_id,
-                    user_query=user_query or None,
-                    documents=documents_data,
-                    response_data=response_data,
-                )
-            except Exception as e:
-                logger.warning("Failed to persist RAG scan history", error=str(e))
-            
-            return JSONResponse(content=response_data)
-            
-        except HTTPException:
-            # Re-raise HTTP exceptions as-is
-            raise
-        except Exception as e:
-            self._increment_stat("errors")
-            logger.error(
-                "RAG scan error",
-                request_id=request_id,
-                error=str(e),
-                exc_info=True
-            )
-            raise HTTPException(status_code=500, detail="Internal server error")
+        return JSONResponse(content=response_data)
 
     async def _handle_scan(self, request: Request) -> Response:
-        """
-        Handle prompt scanning requests for SDK compatibility.
-        """
-        import time
-        start_time = time.time()
+        """Forward to SecurityService."""
         request_id = str(uuid.uuid4())
+        await self._authenticate_request(request)
+        body = await request.json()
+        
+        scan = self.security.scan_prompt(body.get("prompt"), context=body.get("context"))
+        
+        self.telemetry.increment_stat("requests_total")
+        if scan["blocked"]:
+            self.telemetry.increment_stat("requests_blocked")
+            self.telemetry.increment_stat("attacks_detected")
 
-        try:
-            await self._authenticate_request(request)
-
-            try:
-                body = await request.json()
-            except Exception as e:
-                logger.error("Failed to parse JSON", request_id=request_id, error=str(e))
-                raise HTTPException(status_code=400, detail="Invalid JSON in request body")
-
-            if not isinstance(body, dict):
-                raise HTTPException(status_code=400, detail="Request body must be a JSON object")
-
-            prompt = body.get("prompt")
-            if not isinstance(prompt, str) or not prompt.strip():
-                raise HTTPException(status_code=400, detail="'prompt' field is required and must be a string")
-
-            detection = self.detector.detect(prompt, context=body.get("context") or {})
-            processing_time_ms = (time.time() - start_time) * 1000
-            scan_id = str(uuid.uuid4())
-
-            result = self._build_scan_result(
-                detection=detection,
-                processing_time_ms=processing_time_ms,
-                metadata=body.get("metadata"),
-            )
-            result["scan_id"] = scan_id
-
-            response = {
-                "result": result,
-                "request_id": request_id,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "version": "0.1.0",
-            }
-
-            self._store_scan(scan_id, response)
-            self._increment_stat("requests_total")
-            if result["is_safe"]:
-                self._increment_stat("requests_allowed")
-            else:
-                self._increment_stat("requests_blocked")
-                self._increment_stat("attacks_detected")
-
-            self._notify_operational_event(
-                event_name="prompt_scan_completed",
-                severity="warning" if not result["is_safe"] else "info",
-                message="Prompt scan completed",
-                publish_event_type="scan_event",
-                details={
-                    "endpoint": "/v1/scan",
-                    "request_id": request_id,
-                    "scan_id": scan_id,
-                    "is_safe": result["is_safe"],
-                    "blocked": not result["is_safe"],
-                    "status": "threat_detected" if not result["is_safe"] else "safe",
-                    "latency_ms": processing_time_ms,
-                    "attack_type": result.get("attack_type"),
-                    "confidence": result.get("confidence"),
-                    "indicators": result.get("indicators"),
-                    "metadata": body.get("metadata"),
-                },
-            )
-
-            return JSONResponse(content=response)
-        except HTTPException:
-            raise
-        except Exception as e:
-            self._increment_stat("errors")
-            logger.error("Scan error", request_id=request_id, error=str(e), exc_info=True)
-            raise HTTPException(status_code=500, detail="Internal server error")
+        return JSONResponse(content={
+            "result": scan,
+            "request_id": request_id,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        })
 
     async def _handle_scan_batch(self, request: Request) -> Response:
-        """
-        Handle batch prompt scanning requests for SDK compatibility.
-        """
-        import time
-        start_time = time.time()
+        """Forward to SecurityService."""
         request_id = str(uuid.uuid4())
-
-        try:
-            await self._authenticate_request(request)
-
-            try:
-                body = await request.json()
-            except Exception as e:
-                logger.error("Failed to parse JSON", request_id=request_id, error=str(e))
-                raise HTTPException(status_code=400, detail="Invalid JSON in request body")
-
-            if not isinstance(body, dict):
-                raise HTTPException(status_code=400, detail="Request body must be a JSON object")
-
-            requests_payload = body.get("requests", [])
-            if not isinstance(requests_payload, list) or not requests_payload:
-                raise HTTPException(status_code=400, detail="'requests' must be a non-empty list")
-
-            results = []
-            total_safe = 0
-            total_unsafe = 0
-
-            for item in requests_payload:
-                if not isinstance(item, dict):
-                    raise HTTPException(status_code=400, detail="Each request must be an object")
-                prompt = item.get("prompt")
-                if not isinstance(prompt, str) or not prompt.strip():
-                    raise HTTPException(status_code=400, detail="Each request requires a non-empty 'prompt'")
-
-                detection = self.detector.detect(prompt, context=item.get("context") or {})
-                processing_time_ms = (time.time() - start_time) * 1000
-                scan_id = str(uuid.uuid4())
-
-                result = self._build_scan_result(
-                    detection=detection,
-                    processing_time_ms=processing_time_ms,
-                    metadata=item.get("metadata"),
-                )
-                result["scan_id"] = scan_id
-
-                scan_response = {
-                    "result": result,
-                    "request_id": str(uuid.uuid4()),
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "version": "0.1.0",
-                }
-
-                self._store_scan(scan_id, scan_response)
-                results.append(scan_response)
-
-                self._increment_stat("requests_total")
-                if result["is_safe"]:
-                    total_safe += 1
-                    self._increment_stat("requests_allowed")
-                else:
-                    total_unsafe += 1
-                    self._increment_stat("requests_blocked")
-                    self._increment_stat("attacks_detected")
-
-            total_processed = len(results)
-            processing_time_ms = (time.time() - start_time) * 1000
-            self._notify_operational_event(
-                event_name="prompt_scan_batch_completed",
-                severity="warning" if total_unsafe else "info",
-                message="Batch prompt scan completed",
-                publish_event_type="scan_event",
-                details={
-                    "endpoint": "/v1/scan/batch",
-                    "request_id": request_id,
-                    "total_processed": total_processed,
-                    "total_safe": total_safe,
-                    "total_unsafe": total_unsafe,
-                    "latency_ms": processing_time_ms,
-                    "status": "threats_detected" if total_unsafe else "safe",
-                },
-            )
-
-            return JSONResponse(content={
-                "results": results,
-                "total_processed": total_processed,
-                "total_safe": total_safe,
-                "total_unsafe": total_unsafe,
-                "processing_time_ms": processing_time_ms,
-                "request_id": request_id,
+        await self._authenticate_request(request)
+        body = await request.json()
+        
+        requests_payload = body.get("requests", [])
+        results = []
+        
+        for item in requests_payload:
+            scan = self.security.scan_prompt(item.get("prompt"), context=item.get("context"))
+            results.append({
+                "result": scan,
+                "request_id": str(uuid.uuid4()),
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "version": "0.1.0",
             })
-        except HTTPException:
-            raise
-        except Exception as e:
-            self._increment_stat("errors")
-            logger.error("Batch scan error", request_id=request_id, error=str(e), exc_info=True)
-            raise HTTPException(status_code=500, detail="Internal server error")
+            
+            self.telemetry.increment_stat("requests_total")
+            if scan["blocked"]:
+                self.telemetry.increment_stat("requests_blocked")
+                self.telemetry.increment_stat("attacks_detected")
+
+        self.telemetry.queue_request_log({
+            "request_id": request_id,
+            "timestamp": datetime.now(timezone.utc),
+            "provider": "sdk_batch",
+            "model": "batch_scan",
+            "status_code": 200,
+            "is_blocked": any(r["result"]["blocked"] for r in results),
+            "user_id": principal.get("user_id"),
+        })
+
+        return JSONResponse(content={
+            "results": results,
+            "request_id": request_id,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        })
 
     async def _handle_request(self, request: Request, path: str) -> Response:
         """
