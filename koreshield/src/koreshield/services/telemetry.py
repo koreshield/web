@@ -111,7 +111,8 @@ class TelemetryService:
             
             asyncio.create_task(log_async())
 
-    def queue_rag_scan(self, principal, scan_id, user_query, documents, response_data):
+    def queue_rag_scan(self, principal: dict, scan_id: str, user_query: str,
+                       documents: list, response_data: dict) -> None:
         """Record a RAG scan and persist asynchronously."""
         if not self.db_session_factory:
             # Fallback to audit log
@@ -130,8 +131,13 @@ class TelemetryService:
                         documents=documents,
                         response=response_data,
                         is_safe=bool(response_data.get("is_safe", True)),
-                        total_threats_found=int(response_data.get("context_analysis", {}).get("total_threats_found", 0)),
-                        processing_time_ms=float(response_data.get("latency_ms", 0.0)),
+                        total_threats_found=int(
+                            response_data.get("context_analysis", {})
+                                         .get("total_threats_found", 0)
+                        ),
+                        processing_time_ms=float(
+                            response_data.get("latency_ms", 0.0)
+                        ),
                     )
                     session.add(entry)
                     await session.commit()
