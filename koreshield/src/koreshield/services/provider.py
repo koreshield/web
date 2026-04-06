@@ -11,8 +11,8 @@ from typing import List, Any
 from pathlib import Path
 import sys
 
-from providers.manager import ProviderManager
-from providers.health_monitor import HealthMonitor
+from ..providers.manager import ProviderManager
+from ..providers.health_monitor import HealthMonitor
 
 logger = structlog.get_logger(__name__)
 
@@ -25,11 +25,11 @@ class ProviderService:
         
         # Provider Catalog (Metadata)
         # This will be used to initialize the actual provider classes
-        from providers.openai import OpenAIProvider
-        from providers.anthropic import AnthropicProvider
-        from providers.deepseek import DeepSeekProvider
-        from providers.gemini import GeminiProvider
-        from providers.azure_openai import AzureOpenAIProvider
+        from ..providers.openai import OpenAIProvider
+        from ..providers.anthropic import AnthropicProvider
+        from ..providers.deepseek import DeepSeekProvider
+        from ..providers.gemini import GeminiProvider
+        from ..providers.azure_openai import AzureOpenAIProvider
         
         self.provider_catalog = [
             ("deepseek", ["DEEPSEEK_API_KEY"], DeepSeekProvider),

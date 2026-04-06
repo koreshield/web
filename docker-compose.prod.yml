@@ -1,6 +1,7 @@
 services:
         # Backend API Service
         api:
+                container_name: koreshield-api
                 build:
                         context: ./koreshield
                         dockerfile: Dockerfile
@@ -44,8 +45,8 @@ services:
                         - GOOGLE_API_KEY=${GOOGLE_API_KEY}
                         - GEMINI_API_KEY=${GEMINI_API_KEY}
                         - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
-                        # Add API Keys here or in a .env file on the VPS
-                        # - OPENAI_API_KEY=${OPENAI_API_KEY}
+                        - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+                        - ENABLED_PROVIDERS=${ENABLED_PROVIDERS}
                 healthcheck:
                         test: [ "CMD-SHELL", "python3 -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")'" ]
                         interval: 30s
@@ -62,6 +63,7 @@ services:
 
         # Frontend Web Service
         web:
+                container_name: koreshield-web
                 build:
                         context: ./koreshield-web
                         dockerfile: Dockerfile
@@ -96,8 +98,8 @@ services:
 
         # PostgreSQL Database
         postgres:
-                image: postgres:15-alpine
                 container_name: koreshield-postgres
+                image: postgres:15-alpine
                 environment:
                         POSTGRES_USER: ${POSTGRES_USER}
                         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -115,15 +117,16 @@ services:
                 logging:
                         driver: "json-file"
                         options:
-                                max-size: "50m" # Database logs are valuable, keeping more
-                                max-file: "5"
+                                max-size: "10m"
+                                max-file: "3"
 
         # Redis Cache
         redis:
-                image: redis:7-alpine
                 container_name: koreshield-redis
+                image: redis:7-alpine
                 volumes:
                         - redis_data:/data
+                command: redis-server --appendonly yes
                 healthcheck:
                         test: [ "CMD", "redis-cli", "ping" ]
                         interval: 10s
@@ -135,6 +138,7 @@ services:
 
         # Caddy Reverse Proxy
         caddy:
+                container_name: koreshield-caddy
                 image: caddy:2-alpine
                 restart: always
                 ports:

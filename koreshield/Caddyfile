@@ -1,3 +1,12 @@
 api.koreshield.com {
-    reverse_proxy koreshield:8000
+    # Status JSON for the frontend
+    handle /status.json {
+        root * /www/status
+        file_server
+    }
+
+    # API Proxy
+    handle {
+        reverse_proxy api:8000
+    }
 }

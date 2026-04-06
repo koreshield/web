@@ -200,7 +200,7 @@ class KoreShieldProxy:
             for provider_name in providers_config:
                 providers_config[provider_name]["enabled"] = provider_name in enabled_list
                 # Log if we are overriding
-                self.logger.info(f"Provider {provider_name} status overridden by ENABLED_PROVIDERS: {providers_config[provider_name]['enabled']}")
+                self.logger.logger.info(f"Provider {provider_name} status overridden by ENABLED_PROVIDERS: {providers_config[provider_name]['enabled']}")
 
         self.provider_service = ProviderService(config, redis_client=self.redis_client)
         self.security = SecurityService(config)

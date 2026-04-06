@@ -10,7 +10,7 @@ server:
 logging:
   level: INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
   json_logs: false  # Set to true for production
-  container_mode: false  # Set to true for containerized deployments (stdout only)
+  container_mode: true  # Set to true for containerized deployments (stdout only)
   file: logs/koreshield.log
 
 # Security policies
@@ -27,114 +27,40 @@ security:
     detection: true
     policy_enforcement: true
 
-  # Allowlist/blocklist storage (optional)
-  lists:
-    # storage_path: /var/lib/koreshield/lists
-    # Optional threat intel feeds. Local JSON files are loaded on startup and
-    # merged into the configured list type.
-    feeds:
-      - name: "default-malicious-patterns"
-        enabled: false
-        list_type: "blocklist"
-        default_entry_type: "keyword"
-        source: "config/threat-intel/known_malicious_patterns.json"
-
 # Provider configurations
 providers:
   deepseek:
     enabled: true
     base_url: "https://api.deepseek.com/v1"
-    # api_key should be set via environment variable: DEEPSEEK_API_KEY
   
   openai:
     enabled: false
     base_url: "https://api.openai.com/v1"
-    # api_key should be set via environment variable: OPENAI_API_KEY
   
   anthropic:
     enabled: false
     base_url: "https://api.anthropic.com/v1"
-    # api_key should be set via environment variable: ANTHROPIC_API_KEY
   
   gemini:
     enabled: false
     base_url: "https://generativelanguage.googleapis.com/v1beta"
-    # api_key should be set via environment variable: GOOGLE_API_KEY or GEMINI_API_KEY
   
   azure_openai:
     enabled: false
-    base_url: "https://your-resource-name.openai.azure.com"
-    # api_key should be set via environment variable: AZURE_OPENAI_API_KEY
+    base_url: "${AZURE_OPENAI_ENDPOINT}"
+    api_version: "2024-10-21"
 
 # Redis configuration (for distributed rate limiting and statistics)
 redis:
   enabled: true
-  url: "redis://localhost:6379/0"  # Redis connection URL
-  # Alternative format: "redis://:password@localhost:6379/0"
-  # For Redis Cluster: "redis://localhost:7000,localhost:7001,localhost:7002"
+  url: "${REDIS_URL}"
 
-# JWT Authentication (required for management and protected API endpoints)
+# JWT Authentication
 jwt:
-  # Use one mode only:
-  # 1) HS256: set JWT_SECRET env var (minimum 32 chars)
-  # 2) RS256: set JWT_PUBLIC_KEY/JWT_PRIVATE_KEY env vars
   issuer: "koreshield-auth"
   audience: "koreshield-api"
-
-# Alerting configuration
-alerting:
-  enabled: false
-  
-  # Alert rules
-  rules:
-    - name: "High Attack Rate"
-      condition: "attacks_detected > 10"
-      severity: "warning"
-      channels: ["email", "slack"]
-      cooldown_minutes: 5
-      description: "Alert when attack detection rate is high"
-      enabled: true
-      
-    - name: "Provider Down"
-      condition: "healthy_providers == 0"
-      severity: "critical"
-      channels: ["email", "webhook", "pagerduty"]
-      cooldown_minutes: 10
-      description: "Alert when all providers are down"
-      enabled: true
-  
-  # Email alerting
-  email:
-    enabled: false
-    smtp_server: "smtp.gmail.com"
-    smtp_port: 587
-    use_tls: true
-    username: "your-email@gmail.com"
-    from_address: "alerts@koreshield.com"
-    recipients: ["security-team@yourcompany.com"]
-  
-  # Webhook alerting
-  webhook:
-    enabled: false
-    url: "https://your-webhook-url.com/alert"
-  
-  # Slack alerting
-  slack:
-    enabled: false
-    webhook_url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
-  
-  # Microsoft Teams alerting
-  teams:
-    enabled: false
-    webhook_url: "https://your-org.webhook.office.com/webhook/YOUR-TEAMS-WEBHOOK"
-  
-  # PagerDuty alerting
-  pagerduty:
-    enabled: false
-    routing_key: "your-pagerduty-routing-key"
 
 # Monitoring configuration
 monitoring:
   enabled: true
   check_interval_seconds: 60
-  slack: null
