@@ -205,4 +205,7 @@ class AzureOpenAIProvider(BaseProvider):
                 f"Deployment check failed: {deployment_error}. "
                 f"Fallback chat checks failed: {' | '.join(chat_errors)}"
             )
+            # Log the full error for easier VPS-side debugging
+            from ..services.telemetry import logger as telemetry_logger
+            telemetry_logger.error("Azure OpenAI health check failed", error=self.last_error)
             return False
