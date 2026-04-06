@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  koreshield:
+  api:
     container_name: koreshield-api
     build:
       context: .
@@ -33,7 +33,7 @@ services:
     command: >
       sh -c "pip install requests && python /app/status_updater.py"
     depends_on:
-      - koreshield
+      - api
 
   prometheus:
     image: prom/prometheus:latest
@@ -46,7 +46,7 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     depends_on:
-      - koreshield
+      - api
 
   grafana:
     image: grafana/grafana:latest
@@ -75,7 +75,7 @@ services:
       - caddy_config:/config
       - status_data:/www/status:ro
     depends_on:
-      - koreshield
+      - api
       - grafana
 
   postgres:

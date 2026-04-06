@@ -5,5 +5,5 @@ global:
 scrape_configs:
   - job_name: 'koreshield-api'
     static_configs:
-      - targets: ['koreshield-api:8000']
+      - targets: ['api:8000']
     metrics_path: '/metrics'

@@ -3,7 +3,7 @@ import json
 import requests
 import os
 
-API_URL = "http://koreshield-api:8000/health/providers"
+API_URL = "http://api:8000/health/providers"
 OUTPUT_PATH = "/data/status.json"
 CHECK_INTERVAL = 60
 
