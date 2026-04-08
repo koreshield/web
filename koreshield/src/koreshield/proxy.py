@@ -364,7 +364,7 @@ class KoreShieldProxy:
 
     @asynccontextmanager
     async def _lifespan(self, app: FastAPI):
-        monitor_task = asyncio.create_task(self.health_monitor.start_monitoring())
+        monitor_task = asyncio.create_task(self.provider_service.health_monitor.start_monitoring())
         try:
             yield
         finally:

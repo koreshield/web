@@ -17,7 +17,7 @@ os.environ.setdefault("JWT_AUDIENCE", "koreshield-api")
 os.environ.setdefault("JWT_SECRET", "test-secret-with-minimum-32-characters!!")
 os.environ.setdefault("KORESHIELD_EAGER_APP_INIT", "false")
 
-from src.koreshield.proxy import create_app
+from koreshield.proxy import create_app
 
 
 @pytest.fixture

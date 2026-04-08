@@ -20,7 +20,7 @@ os.environ.setdefault("JWT_AUDIENCE", "koreshield-api")
 os.environ.setdefault("JWT_SECRET", "test-secret-with-minimum-32-characters!!")
 os.environ.setdefault("KORESHIELD_EAGER_APP_INIT", "false")
 
-from src.koreshield.proxy import KoreShieldProxy
+from koreshield.proxy import KoreShieldProxy
 
 
 @pytest.fixture
@@ -499,7 +499,7 @@ def api_key_proxy(proxy, monkeypatch):
         return _FakeAsyncSession(key_map, lambda: current_key["value"])
 
     proxy.auth.db_session_factory = fake_session_local
-    monkeypatch.setattr("src.koreshield.services.auth.APIKey.hash_key", staticmethod(fake_hash_key))
+    monkeypatch.setattr("koreshield.services.auth.APIKey.hash_key", staticmethod(fake_hash_key))
     return proxy, valid_key
 
 

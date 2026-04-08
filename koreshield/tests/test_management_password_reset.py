@@ -13,9 +13,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.koreshield.api import management
-from src.koreshield.models.base import Base
-from src.koreshield.models.user import User, utcnow_naive
+from koreshield.api import management
+from koreshield.models.base import Base
+from koreshield.models.user import User, utcnow_naive
 
 
 def _build_test_client(tmp_path: Path) -> tuple[TestClient, sessionmaker, list[dict], object, object]:
