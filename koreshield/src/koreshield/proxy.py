@@ -132,7 +132,6 @@ class KoreShieldProxy:
         )
 
         # 1. Initialize Logging
-        from .logger import FirewallLogger
         self.logger = FirewallLogger()
 
         # 2. Initialize Redis connection
@@ -730,7 +729,6 @@ class KoreShieldProxy:
         Returns:
             Response with either the LLM response or an error
         """
-        import time
         start_time = time.time()
 
         # Record request metrics

@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import type { ThreatEvent } from '../services/websocket';
+import type { WebSocketEvent, ThreatDetectedEvent } from '../lib/websocket-client';
 
 interface ThreatStore {
-    threats: ThreatEvent[];
-    addThreat: (threat: ThreatEvent) => void;
+    threats: WebSocketEvent<ThreatDetectedEvent>[];
+    addThreat: (event: WebSocketEvent<ThreatDetectedEvent>) => void;
     clearThreats: () => void;
     maxThreats: number;
 }
