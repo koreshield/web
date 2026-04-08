@@ -222,7 +222,14 @@ class KoreShieldProxy:
         # 7. Setup Routers & Middleware
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=["*"], # Simplified for now, should use config
+            allow_origins=[
+                "https://koreshield.com",
+                "https://www.koreshield.com",
+                "https://api.koreshield.com",
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://localhost:8000"
+            ],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
