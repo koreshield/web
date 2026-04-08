@@ -2,7 +2,7 @@
 Tests for the policy engine.
 """
 
-from src.koreshield.policy import PolicyEngine, UserRole, Permission
+from koreshield.policy import PolicyEngine, UserRole, Permission
 
 
 def test_policy_initialization():

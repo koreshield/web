@@ -3,7 +3,7 @@ Tests for the custom rule engine.
 """
 
 import pytest
-from src.koreshield.rule_engine import RuleEngine, CustomRule, RuleSeverity, RuleAction
+from koreshield.rule_engine import RuleEngine, CustomRule, RuleSeverity, RuleAction
 
 
 class TestRuleEngine:

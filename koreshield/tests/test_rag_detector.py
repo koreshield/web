@@ -3,8 +3,8 @@ Tests for RAG context detector.
 """
 
 import pytest
-from src.koreshield.rag_detector import RAGContextDetector
-from src.koreshield.rag_taxonomy import (
+from koreshield.rag_detector import RAGContextDetector
+from koreshield.rag_taxonomy import (
     InjectionVector,
     OperationalTarget,
     PersistenceMechanism,

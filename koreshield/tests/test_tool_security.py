@@ -1,7 +1,7 @@
 """Tests for server-side tool-call trust and provenance heuristics."""
 
-from src.koreshield.detector import AttackDetector
-from src.koreshield.tool_security import ToolCallSecurityAnalyzer
+from koreshield.detector import AttackDetector
+from koreshield.tool_security import ToolCallSecurityAnalyzer
 
 
 def test_tool_security_detects_confused_deputy_escalation():
