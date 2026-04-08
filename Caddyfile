@@ -1,7 +1,9 @@
 api.koreshield.com {
+    tls internal
     reverse_proxy api:8000
 }
 
 koreshield.com, www.koreshield.com {
+    tls internal
     reverse_proxy web:80
 }
