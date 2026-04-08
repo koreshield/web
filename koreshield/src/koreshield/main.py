@@ -3,22 +3,20 @@ Main entry point for the LLM Firewall application.
 """
 
 import os
+import re
 from pathlib import Path
+import yaml
+import structlog
+import uvicorn
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
-import structlog
-import uvicorn
-import os
-import re
-from pathlib import Path
-
-import yaml
-
 from .logger import setup_logging
 from .proxy import KoreShieldProxy
+
+logger = structlog.get_logger(__name__)
 
 
 def expand_env_vars(config: dict) -> dict:
@@ -59,10 +57,10 @@ def load_config(config_path: str = "config/config.yaml") -> dict:
         # Try example config
         example_config = Path("config/config.example.yaml")
         if example_config.exists():
-            print(f"Warning: {config_path} not found. Using example config.")
+            logger.warning(f"{config_path} not found. Using example config.")
             config_file = example_config
         else:
-            print("Warning: No config file found. Using defaults.")
+            logger.warning("No config file found. Using defaults.")
             return {}
 
     with open(config_file, "r") as f:
@@ -110,7 +108,7 @@ try:
     proxy = KoreShieldProxy(config)
     app = proxy.app
 except Exception as e:
-    print(f"Failed to initialize app: {e}")
+    logger.error("Failed to initialize app", error=str(e))
     # Fallback/dummy app to prevent import error crashing uvicorn immediately if config fails
     # But usually we want it to fail specific to config
     raise e
@@ -120,7 +118,6 @@ def main(config_path: str = "config/config.yaml"):
     Main entry point for script execution.
     """
     # ... existing main logic if needed, or just run uvicorn on the global app ...
-    import uvicorn
     # Get server config
     host = config.get("server", {}).get("host", "0.0.0.0")
     port = config.get("server", {}).get("port", 8000)
