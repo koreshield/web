@@ -255,41 +255,12 @@ class KoreShieldProxy:
             await self._handle_event_broadcast("system_status", {"status": "shutdown"})
             await self.stop_monitoring()
 
-    @property
-    def providers(self) -> List[Any]:
-        """Shim for legacy tests accessing providers list directly."""
-        return self.provider_service.providers
-
-    @providers.setter
-    def providers(self, value: List[Any]):
-        self.provider_service.providers = value
-
-    @property
-    def provider_manager(self) -> Any:
-        """Shim for legacy tests accessing provider_manager directly."""
-        return self.provider_service.provider_manager
-
-    @property
-    def provider_priority(self) -> List[str]:
-        """Shim for legacy tests accessing provider_priority directly."""
-        return self.provider_service.provider_priority
-
-    @provider_priority.setter
-    def provider_priority(self, value: List[str]):
-        self.provider_service.provider_priority = value
-
-    @property
-    def health_monitor(self) -> Any:
-        """Shim for legacy tests accessing health_monitor directly."""
-        return self.provider_service.health_monitor
-
-    def _init_providers(self):
-        """No-op shim for legacy tests that patch this internal method."""
-        pass
-
-    def _increment_stat(self, name: str, amount: int = 1):
-        """Legacy shim for incrementing statistics."""
-        self.telemetry.increment_stat(name, amount)
+    async def _handle_event_broadcast(self, event_type: str, data: dict) -> None:
+        """Centralized and throttled event broadcast over WebSockets."""
+        try:
+            await self._publish_event(event_type, data)
+        except Exception as e:
+            logger.debug("Broadcast failed", error=str(e))
 
     async def _background_heartbeat(self):
         """Periodically refresh system health and broadcast changes."""
@@ -339,7 +310,7 @@ class KoreShieldProxy:
         
         return JSONResponse(content={
             "providers": snapshot,
-            "total_providers": len(self.providers), # Use shim property
+            "total_providers": len(self.provider_service.providers),
             "healthy_providers": healthy_count,
             "enabled_providers": enabled_count,
             "configured": True
@@ -374,7 +345,7 @@ class KoreShieldProxy:
     @property
     def provider(self):
         """Get the primary (highest priority) provider."""
-        return self.providers[0] if self.providers else None
+        return self.provider_service.providers[0] if self.provider_service.providers else None
 
     async def start_monitoring(self):
         """Start the monitoring system."""
@@ -778,7 +749,7 @@ class KoreShieldProxy:
                 combined_prompt = ""  # Empty string for analysis
 
             # Update statistics
-            self._increment_stat("requests_total")
+            self.telemetry.increment_stat("requests_total")
 
             self.logger.log_request(
                 request_id=request_id,
@@ -870,7 +841,7 @@ class KoreShieldProxy:
                 detail="Provider service error",
             )
         except Exception as e:
-            self._increment_stat("errors")
+            self.telemetry.increment_stat("errors")
             logger.error(
                 "Request handling error", request_id=request_id, error=str(e), exc_info=True
             )

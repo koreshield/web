@@ -44,12 +44,16 @@ def proxy(mock_config):
             "JWT_AUDIENCE": "koreshield-api",
             "JWT_PUBLIC_KEY": "",
             "JWT_PRIVATE_KEY": "",
+            "OPENAI_API_KEY": "",
+            "ANTHROPIC_API_KEY": "",
+            "GOOGLE_API_KEY": "",
+            "DEEPSEEK_API_KEY": "",
+            "AZURE_OPENAI_API_KEY": "",
         },
         clear=False,
     ):
-        with patch.object(KoreShieldProxy, '_init_providers'):
-            proxy = KoreShieldProxy(mock_config)
-            return proxy
+        proxy = KoreShieldProxy(mock_config)
+        return proxy
 
 
 @pytest.fixture
@@ -83,10 +87,9 @@ def test_proxy_initialization(mock_config):
         },
         clear=False,
     ):
-        with patch.object(KoreShieldProxy, '_init_providers'):
-            proxy = KoreShieldProxy(mock_config)
-            assert proxy is not None
-            assert proxy.app is not None
+        proxy = KoreShieldProxy(mock_config)
+        assert proxy is not None
+        assert proxy.app is not None
 
 
 def test_health_endpoint(proxy):
@@ -155,11 +158,12 @@ async def test_proxy_forwards_safe_requests(proxy, auth_headers):
     )
 
     # Set up providers list for multi-provider support (modify in place to keep reference)
-    proxy.providers.clear()
-    proxy.providers.append(mock_provider)
+    proxy.provider_service.providers.clear()
+    proxy.provider_service.providers.append(mock_provider)
     # Must re-initialize health tracking since we added a provider after init
-    proxy.provider_manager._initialize_health_tracking()
-    proxy.provider_priority = ["openai"]
+    proxy.provider_service.provider_manager.providers = proxy.provider_service.providers
+    proxy.provider_service.provider_manager._initialize_health_tracking()
+    proxy.provider_service.provider_priority = ["openai"]
 
     client = TestClient(proxy.app)
 
@@ -422,8 +426,8 @@ def test_provider_health_endpoint(proxy):
     first_provider.health_check = AsyncMock(return_value=True)
     second_provider = MagicMock()
     second_provider.health_check = AsyncMock(return_value=False)
-    proxy.providers = [first_provider, second_provider]
-    proxy.provider_priority = ["openai", "anthropic"]
+    proxy.provider_service.providers = [first_provider, second_provider]
+    proxy.provider_service.provider_priority = ["openai", "anthropic"]
 
     client = TestClient(proxy.app)
 
