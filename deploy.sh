@@ -64,6 +64,10 @@ declare -A REQUIRED_VARS=(
   ["TELEGRAM_ALERTS_ENABLED"]="true"
   ["AZURE_OPENAI_ENDPOINT"]="https://koreshieldai.cognitiveservices.azure.com/"
   ["ENABLED_PROVIDERS"]="gemini,azure_openai,deepseek,openai"
+  ["RESEND_API_KEY"]=""
+  ["KORESHIELD_EAGER_APP_INIT"]="true"
+  ["COOKIE_SECURE"]="true"
+  ["COOKIE_SAMESITE"]="lax"
 )
 
 # Vars that must be non-empty but have secret values we don't hardcode here
