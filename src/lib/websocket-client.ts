@@ -79,7 +79,6 @@ class WebSocketClient {
     connect() {
         // Don't connect if user is not authenticated
         if (!authService.isAuthenticated()) {
-            console.warn('[WebSocket] No auth token available. Skipping connection.');
             return;
         }
 
@@ -88,7 +87,6 @@ class WebSocketClient {
 
         try {
             const wsUrl = `${WS_BASE_URL}/ws/events`;
-            console.log(`[WebSocket] Connecting to ${wsUrl} using secure auth flow`);
 
             this.ws = new WebSocket(wsUrl);
             this.isIntentionalDisconnect = false;
@@ -121,8 +119,6 @@ class WebSocketClient {
             }
             this.ws = null;
         }
-
-        console.log('[WebSocket] Disconnected');
     }
 
     /**
@@ -179,7 +175,6 @@ class WebSocketClient {
      * Handle WebSocket connection open
      */
     private handleOpen() {
-        console.log('[WebSocket] Connected successfully');
         this.reconnectAttempts = 0;
         this.reconnectDelay = 1000;
         this.startHeartbeat();
@@ -199,7 +194,6 @@ class WebSocketClient {
     private handleMessage(event: MessageEvent) {
         try {
             const message: WebSocketEvent = JSON.parse(event.data);
-            console.log('[WebSocket] Message received:', message.type);
 
             // Route event to handlers
             this.routeEvent(message);
@@ -232,7 +226,6 @@ class WebSocketClient {
      */
     private invalidateCaches(event: WebSocketEvent) {
         if (!queryClient) {
-            console.warn('[WebSocket] Query client not initialized');
             return;
         }
 
@@ -274,18 +267,8 @@ class WebSocketClient {
     /**
      * Handle WebSocket close
      */
-    private handleClose(event: CloseEvent) {
-        const isDev = import.meta.env.VITE_ENV !== 'production';
-        
-        // Reduce log spam in development
-        if (event.code === 1006) {
-            if (isDev && this.reconnectAttempts === 0) {
-                console.log('[WebSocket] Connection closed (backend not reachable)');
-            }
-        } else {
-            console.log(`[WebSocket] Connection closed (code: ${event.code}, reason: ${event.reason})`);
-        }
-        
+    private handleClose(_event: CloseEvent) {
+        // Silent in production
         this.stopHeartbeat();
 
         // Only reconnect if it wasn't an intentional disconnect
