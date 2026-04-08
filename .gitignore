@@ -335,3 +335,6 @@ personal-docs/answers/2026-03-14-client-ready-midddleman-pitch.docx
 *.exp
 vps-fix.sh
 *.sh
+koreshield/vps_pass.txt
+temp_vps_env/web.env
+temp_vps_env/root.env
