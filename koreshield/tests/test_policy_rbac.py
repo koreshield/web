@@ -3,7 +3,7 @@ Tests for the enhanced policy engine with RBAC.
 """
 
 import pytest
-from src.koreshield.policy import PolicyEngine, UserRole, Permission
+from koreshield.policy import PolicyEngine, UserRole, Permission
 
 
 class TestPolicyEngine:

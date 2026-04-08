@@ -5,7 +5,7 @@ Tests for LLM provider integrations.
 import pytest
 from unittest.mock import AsyncMock, patch, Mock
 
-from src.providers import (
+from koreshield.providers import (
     AnthropicProvider,
     AzureOpenAIProvider,
     BaseProvider,

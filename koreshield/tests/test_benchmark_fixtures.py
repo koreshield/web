@@ -7,9 +7,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from src.koreshield.detector import AttackDetector
-from src.koreshield.rag_detector import RAGContextDetector
-from src.koreshield.rag_taxonomy import RetrievedDocument
+from koreshield.detector import AttackDetector
+from koreshield.rag_detector import RAGContextDetector
+from koreshield.rag_taxonomy import RetrievedDocument
 
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
