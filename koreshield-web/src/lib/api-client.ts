@@ -241,7 +241,7 @@ class ApiClient {
 		});
 	}
 
-	async updateMe(data: { name?: string }) {
+	async updateMe(data: { name?: string; company?: string; job_title?: string }) {
 		return this.fetch('/v1/management/me', {
 			method: 'PATCH',
 			body: JSON.stringify(data),

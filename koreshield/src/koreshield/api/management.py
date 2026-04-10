@@ -2,6 +2,7 @@ import json
 import os
 import re
 import secrets
+from uuid import UUID
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -144,6 +145,8 @@ async def get_me(
 
 class UpdateProfileRequest(BaseModel):
     name: str | None = None
+    company: str | None = None
+    job_title: str | None = None
 
 
 @router.patch("/me", summary="Update Profile", tags=["Authentication"])
@@ -152,15 +155,37 @@ async def update_me(
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Update the authenticated user's profile (name only for now)."""
+    """Update the authenticated user's profile."""
     user_id = current_user.get("id")
-    result = await db.execute(select(User).where(User.id == user_id))
+    try:
+        user_uuid = UUID(str(user_id))
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail="Invalid user identifier") from exc
+
+    result = await db.execute(select(User).where(User.id == user_uuid))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
     if request.name is not None:
         user.name = request.name.strip() or user.name
+
+    metadata = dict(user.user_metadata or {})
+    if request.company is not None:
+        company = request.company.strip()
+        if company:
+            metadata["company"] = company
+        else:
+            metadata.pop("company", None)
+
+    if request.job_title is not None:
+        job_title = request.job_title.strip()
+        if job_title:
+            metadata["job_title"] = job_title
+        else:
+            metadata.pop("job_title", None)
+
+    user.user_metadata = metadata
 
     await db.commit()
     await db.refresh(user)
