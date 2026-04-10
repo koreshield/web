@@ -26,6 +26,8 @@ export function ProfilePage() {
 	// Edit state
 	const [editing, setEditing] = useState(false);
 	const [editName, setEditName] = useState('');
+	const [editCompany, setEditCompany] = useState('');
+	const [editJobTitle, setEditJobTitle] = useState('');
 	const [saving, setSaving] = useState(false);
 
 	useEffect(() => {
@@ -46,12 +48,16 @@ export function ProfilePage() {
 
 	const handleStartEdit = () => {
 		setEditName(user?.name || '');
+		setEditCompany(user?.company || '');
+		setEditJobTitle(user?.job_title || '');
 		setEditing(true);
 	};
 
 	const handleCancelEdit = () => {
 		setEditing(false);
 		setEditName('');
+		setEditCompany('');
+		setEditJobTitle('');
 	};
 
 	const handleSave = async () => {
@@ -61,12 +67,21 @@ export function ProfilePage() {
 		}
 		setSaving(true);
 		try {
-			const result = await api.updateMe({ name: editName.trim() }) as { user?: Record<string, unknown> };
+			const result = await api.updateMe({
+				name: editName.trim(),
+				company: editCompany.trim(),
+				job_title: editJobTitle.trim(),
+			}) as { user?: Record<string, unknown> };
 			// Update the local auth session so the name is reflected everywhere immediately
 			if (result?.user && user) {
-				authService.setSession({ ...user, name: editName.trim() });
+				authService.setSession({
+					...user,
+					name: editName.trim(),
+					company: editCompany.trim() || null,
+					job_title: editJobTitle.trim() || null,
+				});
 			}
-			toast.success('Profile updated', 'Your display name has been saved.');
+			toast.success('Profile updated', 'Your profile details have been saved.');
 			setEditing(false);
 		} catch (err: unknown) {
 			const msg = err instanceof Error ? err.message : 'Please try again.';
@@ -150,6 +165,44 @@ export function ProfilePage() {
 								) : (
 									<div className="p-3 bg-muted rounded-md text-foreground font-medium">
 										{user.name || <span className="text-muted-foreground italic">Not set</span>}
+									</div>
+								)}
+							</div>
+
+							<div className="space-y-2">
+								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+									<Building className="w-4 h-4" /> Company
+								</label>
+								{editing ? (
+									<input
+										type="text"
+										value={editCompany}
+										onChange={(e) => setEditCompany(e.target.value)}
+										className={inputClass}
+										placeholder="Your company"
+									/>
+								) : (
+									<div className="p-3 bg-muted rounded-md text-foreground font-medium">
+										{user.company || <span className="text-muted-foreground italic">Not set</span>}
+									</div>
+								)}
+							</div>
+
+							<div className="space-y-2">
+								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+									<BookOpen className="w-4 h-4" /> Job Title
+								</label>
+								{editing ? (
+									<input
+										type="text"
+										value={editJobTitle}
+										onChange={(e) => setEditJobTitle(e.target.value)}
+										className={inputClass}
+										placeholder="Your role"
+									/>
+								) : (
+									<div className="p-3 bg-muted rounded-md text-foreground font-medium">
+										{user.job_title || <span className="text-muted-foreground italic">Not set</span>}
 									</div>
 								)}
 							</div>
