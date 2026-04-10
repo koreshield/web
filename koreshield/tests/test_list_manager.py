@@ -7,7 +7,7 @@ import tempfile
 import os
 import json
 from datetime import datetime, timedelta
-from src.koreshield.list_manager import ListManager, ListType, ListEntry
+from koreshield.list_manager import ListManager, ListType, ListEntry
 
 
 class TestListManager:

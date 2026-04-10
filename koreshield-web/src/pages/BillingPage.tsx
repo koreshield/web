@@ -35,6 +35,56 @@ type BillingActionResponse = {
 	url?: string;
 };
 
+type BillingAccountMetadata = {
+	recurring_interval?: string;
+	active_meter_count?: number;
+	granted_benefits?: unknown[];
+	internal_unlimited?: boolean;
+	protected_requests?: string;
+	team_access?: string;
+	retention?: string;
+	support?: string;
+};
+
+function normalizeBillingAccount(raw: unknown): BillingAccount | null {
+	if (!raw || typeof raw !== 'object') {
+		return null;
+	}
+
+	const value = raw as Record<string, unknown>;
+	const metadataRaw =
+		value.metadata && typeof value.metadata === 'object' ? (value.metadata as Record<string, unknown>) : {};
+	const grantedBenefits = Array.isArray(metadataRaw.granted_benefits) ? metadataRaw.granted_benefits : [];
+	const metadata: BillingAccountMetadata = {
+		recurring_interval:
+			typeof metadataRaw.recurring_interval === 'string' ? metadataRaw.recurring_interval : undefined,
+		active_meter_count:
+			typeof metadataRaw.active_meter_count === 'number' ? metadataRaw.active_meter_count : 0,
+		granted_benefits: grantedBenefits,
+		internal_unlimited: metadataRaw.internal_unlimited === true,
+		protected_requests:
+			typeof metadataRaw.protected_requests === 'string' ? metadataRaw.protected_requests : undefined,
+		team_access: typeof metadataRaw.team_access === 'string' ? metadataRaw.team_access : undefined,
+		retention: typeof metadataRaw.retention === 'string' ? metadataRaw.retention : undefined,
+		support: typeof metadataRaw.support === 'string' ? metadataRaw.support : undefined,
+	};
+
+	return {
+		id: typeof value.id === 'string' ? value.id : 'unknown',
+		status: typeof value.status === 'string' ? value.status : 'inactive',
+		plan_slug: typeof value.plan_slug === 'string' ? value.plan_slug : 'free',
+		plan_name: typeof value.plan_name === 'string' ? value.plan_name : null,
+		subscription_status:
+			typeof value.subscription_status === 'string' ? value.subscription_status : null,
+		current_period_end:
+			typeof value.current_period_end === 'string' ? value.current_period_end : null,
+		billing_email: typeof value.billing_email === 'string' ? value.billing_email : null,
+		external_customer_id:
+			typeof value.external_customer_id === 'string' ? value.external_customer_id : '',
+		metadata,
+	};
+}
+
 const hostedPlans = PRICING_PLANS.filter(
 	(plan): plan is (typeof PRICING_PLANS)[number] & { id: HostedPlanId } =>
 		plan.id === 'growth' || plan.id === 'scale',
@@ -61,7 +111,11 @@ export default function BillingPage() {
 		setError('');
 		setLoading(true);
 		try {
-			const data = await api.getBillingAccount() as BillingAccount;
+			const raw = await api.getBillingAccount();
+			const data = normalizeBillingAccount(raw);
+			if (!data) {
+				throw new Error('Billing account payload was invalid');
+			}
 			setAccount(data);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Unable to load billing account');
@@ -133,7 +187,11 @@ export default function BillingPage() {
 		setBusyAction('sync');
 		setError('');
 		try {
-			const data = await api.syncBillingAccount() as BillingAccount;
+			const raw = await api.syncBillingAccount();
+			const data = normalizeBillingAccount(raw);
+			if (!data) {
+				throw new Error('Billing sync payload was invalid');
+			}
 			setAccount(data);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Unable to sync billing account');
