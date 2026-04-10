@@ -241,6 +241,7 @@ function GeneralContactForm({ initialSubject }: { initialSubject: string }) {
 						`${formData.message}`,
 				});
 				toast.info('Opening your email app', 'We routed this enquiry to hello@koreshield.com because browser email sending is not configured here.');
+				setFormData({ name: '', email: '', subject: '', message: '' });
 				return;
 			}
 
@@ -261,8 +262,13 @@ function GeneralContactForm({ initialSubject }: { initialSubject: string }) {
 			);
 			toast.success('Message sent!', "We'll get back to you within 24 to 48 hours.");
 			setFormData({ name: '', email: '', subject: '', message: '' });
-		} catch (err: any) {
-			toast.error('Failed to send', err?.text || err?.message || 'Please try again or email hello@koreshield.com directly.');
+		} catch (err: unknown) {
+			const details =
+				err && typeof err === 'object'
+					? (err as { text?: string; message?: string }).text ||
+					  (err as { text?: string; message?: string }).message
+					: undefined;
+			toast.error('Failed to send', details || 'Please try again or email hello@koreshield.com directly.');
 		} finally {
 			setLoading(false);
 		}
@@ -272,21 +278,21 @@ function GeneralContactForm({ initialSubject }: { initialSubject: string }) {
 		<form onSubmit={handleSubmit} className="space-y-5">
 			<div className="grid md:grid-cols-2 gap-5">
 				<div>
-					<label className={labelClass}>Full name *</label>
-					<input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} placeholder="Jane Smith" />
+					<label htmlFor="general-name" className={labelClass}>Full name *</label>
+					<input id="general-name" type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} placeholder="Jane Smith" />
 				</div>
 				<div>
-					<label className={labelClass}>Email address *</label>
-					<input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} placeholder="you@company.com" />
+					<label htmlFor="general-email" className={labelClass}>Email address *</label>
+					<input id="general-email" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} placeholder="you@company.com" />
 				</div>
 			</div>
 			<div>
-				<label className={labelClass}>Subject *</label>
-				<input type="text" required value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} className={inputClass} placeholder="How can we help?" />
+				<label htmlFor="general-subject" className={labelClass}>Subject *</label>
+				<input id="general-subject" type="text" required value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} className={inputClass} placeholder="How can we help?" />
 			</div>
 			<div>
-				<label className={labelClass}>Message *</label>
-				<textarea required rows={6} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className={inputClass} placeholder="Tell us more…" />
+				<label htmlFor="general-message" className={labelClass}>Message *</label>
+				<textarea id="general-message" required rows={6} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className={inputClass} placeholder="Tell us more…" />
 			</div>
 			<button type="submit" disabled={loading} className={submitClass}>
 				{loading ? 'Sending…' : 'Send message'}
@@ -327,6 +333,16 @@ function TechnicalSupportForm() {
 						`Environment:\n${formData.environment || 'Not provided'}`,
 				});
 				toast.info('Opening your email app', 'We routed this support request to support@koreshield.com because browser email sending is not configured here.');
+				setFormData({
+					name: '',
+					email: '',
+					tier: getPlanById('growth')?.name ?? 'Growth',
+					severity: 'low',
+					category: 'bug',
+					subject: '',
+					description: '',
+					environment: '',
+				});
 				return;
 			}
 
@@ -361,8 +377,13 @@ function TechnicalSupportForm() {
 				description: '',
 				environment: '',
 			});
-		} catch (err: any) {
-			toast.error('Failed to send', err?.text || err?.message || 'Please try again or email support@koreshield.com directly.');
+		} catch (err: unknown) {
+			const details =
+				err && typeof err === 'object'
+					? (err as { text?: string; message?: string }).text ||
+					  (err as { text?: string; message?: string }).message
+					: undefined;
+			toast.error('Failed to send', details || 'Please try again or email support@koreshield.com directly.');
 		} finally {
 			setLoading(false);
 		}
@@ -374,12 +395,12 @@ function TechnicalSupportForm() {
 		<form onSubmit={handleSubmit} className="space-y-5">
 			<div className="grid md:grid-cols-2 gap-5">
 				<div>
-					<label className={labelClass}>Full name *</label>
-					<input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} placeholder="Jane Smith" />
+					<label htmlFor="technical-name" className={labelClass}>Full name *</label>
+					<input id="technical-name" type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} placeholder="Jane Smith" />
 				</div>
 				<div>
-					<label className={labelClass}>Email address *</label>
-					<input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} placeholder="you@company.com" />
+					<label htmlFor="technical-email" className={labelClass}>Email address *</label>
+					<input id="technical-email" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} placeholder="you@company.com" />
 				</div>
 			</div>
 			<div className="grid md:grid-cols-3 gap-5">
@@ -414,16 +435,16 @@ function TechnicalSupportForm() {
 				</div>
 			</div>
 			<div>
-				<label className={labelClass}>Subject *</label>
-				<input type="text" required value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} className={inputClass} placeholder="Brief description of the issue" />
+				<label htmlFor="technical-subject" className={labelClass}>Subject *</label>
+				<input id="technical-subject" type="text" required value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} className={inputClass} placeholder="Brief description of the issue" />
 			</div>
 			<div>
-				<label className={labelClass}>Description *</label>
-				<textarea required rows={6} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={inputClass} placeholder="Steps to reproduce, error messages, expected vs actual behaviour…" />
+				<label htmlFor="technical-description" className={labelClass}>Description *</label>
+				<textarea id="technical-description" required rows={6} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={inputClass} placeholder="Steps to reproduce, error messages, expected vs actual behaviour…" />
 			</div>
 			<div>
-				<label className={labelClass}>Environment details</label>
-				<textarea rows={3} value={formData.environment} onChange={(e) => setFormData({ ...formData, environment: e.target.value })} className={inputClass} placeholder="KoreShield version, deployment method, Python/Node version, OS…" />
+				<label htmlFor="technical-environment" className={labelClass}>Environment details</label>
+				<textarea id="technical-environment" rows={3} value={formData.environment} onChange={(e) => setFormData({ ...formData, environment: e.target.value })} className={inputClass} placeholder="KoreShield version, deployment method, Python/Node version, OS…" />
 			</div>
 			<button type="submit" disabled={loading} className={submitClass}>
 				{loading ? 'Submitting…' : 'Submit support ticket'}
