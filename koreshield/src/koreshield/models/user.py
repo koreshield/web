@@ -36,6 +36,7 @@ class User(Base):
     
     def to_dict(self):
         """Convert user to dictionary (excluding password)."""
+        metadata = self.user_metadata or {}
         return {
             'id': str(self.id),
             'email': self.email,
@@ -43,6 +44,8 @@ class User(Base):
             'role': self.role,
             'status': self.status,
             'email_verified': self.email_verified,
+            'company': metadata.get('company'),
+            'job_title': metadata.get('job_title'),
             'last_login_at': self.last_login_at.isoformat() if self.last_login_at else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }

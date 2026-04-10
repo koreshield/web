@@ -10,6 +10,8 @@ export interface AuthUser {
 	email: string;
 	role: string;
 	status?: string;
+	company?: string | null;
+	job_title?: string | null;
 }
 
 export interface LoginResponse {

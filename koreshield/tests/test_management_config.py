@@ -17,7 +17,7 @@ os.environ.setdefault("JWT_AUDIENCE", "koreshield-api")
 os.environ.setdefault("JWT_SECRET", "test-secret-with-minimum-32-characters!!")
 os.environ.setdefault("KORESHIELD_EAGER_APP_INIT", "false")
 
-from src.koreshield.proxy import KoreShieldProxy
+from koreshield.proxy import KoreShieldProxy
 
 
 def _build_admin_headers(secret: str) -> dict:
@@ -64,16 +64,15 @@ def test_management_config_dev_returns_redacted_values():
         },
         clear=True,
     ):
-        with patch.object(KoreShieldProxy, "_init_providers"):
-            proxy = KoreShieldProxy(config)
-            client = TestClient(proxy.app)
-            response = client.get("/v1/management/config", headers=_build_admin_headers(secret))
-            assert response.status_code == 200
-            body = response.json()
+        proxy = KoreShieldProxy(config)
+        client = TestClient(proxy.app)
+        response = client.get("/v1/management/config", headers=_build_admin_headers(secret))
+        assert response.status_code == 200
+        body = response.json()
 
-            assert body["database"]["password"] == "***redacted***"
-            assert body["nested"]["service_token"] == "***redacted***"
-            assert body["nested"]["safe_value"] == "visible"
+        assert body["database"]["password"] == "***redacted***"
+        assert body["nested"]["service_token"] == "***redacted***"
+        assert body["nested"]["safe_value"] == "visible"
 
 
 def test_management_config_non_dev_returns_404():
@@ -95,12 +94,11 @@ def test_management_config_non_dev_returns_404():
         },
         clear=True,
     ):
-        with patch.object(KoreShieldProxy, "_init_providers"):
-            proxy = KoreShieldProxy(config)
-            client = TestClient(proxy.app)
-            response = client.get("/v1/management/config", headers=_build_admin_headers(secret))
-            assert response.status_code == 404
-            assert "disabled" in response.json()["detail"].lower()
+        proxy = KoreShieldProxy(config)
+        client = TestClient(proxy.app)
+        response = client.get("/v1/management/config", headers=_build_admin_headers(secret))
+        assert response.status_code == 404
+        assert "disabled" in response.json()["detail"].lower()
 
 
 def test_management_me_endpoint_returns_authenticated_user():
@@ -122,10 +120,9 @@ def test_management_me_endpoint_returns_authenticated_user():
         },
         clear=True,
     ):
-        with patch.object(KoreShieldProxy, "_init_providers"):
-            proxy = KoreShieldProxy(config)
-            client = TestClient(proxy.app)
-            response = client.get("/v1/management/me", headers=_build_admin_headers(secret))
-            assert response.status_code == 200
-            assert "user" in response.json()
-            assert response.json()["user"]["email"] == "admin@example.com"
+        proxy = KoreShieldProxy(config)
+        client = TestClient(proxy.app)
+        response = client.get("/v1/management/me", headers=_build_admin_headers(secret))
+        assert response.status_code == 200
+        assert "user" in response.json()
+        assert response.json()["user"]["email"] == "admin@example.com"

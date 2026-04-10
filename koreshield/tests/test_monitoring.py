@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.koreshield.config import AlertingConfig
-from src.koreshield.monitoring import (
+from koreshield.config import AlertingConfig
+from koreshield.monitoring import (
     Alert,
     AlertChannel,
     AlertManager,

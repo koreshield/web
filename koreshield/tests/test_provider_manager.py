@@ -6,8 +6,8 @@ import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.providers import BaseProvider
-from src.providers.manager import ProviderManager, ProviderStatus
+from koreshield.providers import BaseProvider
+from koreshield.providers.manager import ProviderManager, ProviderStatus
 
 
 class MockProviderA(BaseProvider):

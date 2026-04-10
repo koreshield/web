@@ -6,8 +6,8 @@ import asyncio
 import pytest
 from unittest.mock import AsyncMock
 
-from src.providers.health_monitor import HealthMonitor, HealthStatus
-from src.providers.base import BaseProvider
+from koreshield.providers.health_monitor import HealthMonitor, HealthStatus
+from koreshield.providers.base import BaseProvider
 
 
 class MockProviderA(BaseProvider):
