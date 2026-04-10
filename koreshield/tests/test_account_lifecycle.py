@@ -171,6 +171,32 @@ def test_regular_user_session_lifecycle_supports_me_and_logout(tmp_path: Path):
         asyncio.run(_dispose_engine(engine))
 
 
+def test_authenticated_user_can_update_profile_details(tmp_path: Path):
+    client, _session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
+    try:
+        _signup(client)
+
+        response = client.patch(
+            "/v1/management/me",
+            json={
+                "name": "Isaac Nsisong",
+                "company": "KoreShield",
+                "job_title": "Co-founder & CTO",
+            },
+        )
+        assert response.status_code == 200
+        payload = response.json()["user"]
+
+        assert payload["name"] == "Isaac Nsisong"
+        assert payload["company"] == "KoreShield"
+        assert payload["job_title"] == "Co-founder & CTO"
+    finally:
+        management.send_welcome_email, management.send_verification_email = original_senders
+        client.close()
+        env_patcher.stop()
+        asyncio.run(_dispose_engine(engine))
+
+
 def test_login_promotes_legacy_user_when_workspace_has_no_privileged_users(tmp_path: Path):
     client, session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
     try:
