@@ -14,7 +14,7 @@ os.environ.setdefault("JWT_AUDIENCE", "koreshield-api")
 os.environ.setdefault("JWT_SECRET", "test-secret-with-minimum-32-characters!!")
 os.environ.setdefault("KORESHIELD_EAGER_APP_INIT", "false")
 
-from src.koreshield.proxy import KoreShieldProxy
+from koreshield.proxy import KoreShieldProxy
 
 
 @pytest.fixture
@@ -30,12 +30,11 @@ def proxy_app():
         },
     }
     with patch.dict(os.environ, {"JWT_PUBLIC_KEY": "", "JWT_PRIVATE_KEY": ""}, clear=False):
-        with patch.object(KoreShieldProxy, "_init_providers"):
-            return KoreShieldProxy(config).app
+        return KoreShieldProxy(config).app
 
 
 def test_websocket_auth_accepts_authorization_header(proxy_app):
-    with patch("src.koreshield.api.websocket.verify_jwt_token", return_value={"id": "user-1"}):
+    with patch("koreshield.api.websocket.verify_jwt_token", return_value={"id": "user-1"}):
         with TestClient(proxy_app) as client:
             with client.websocket_connect(
                 "/ws/events",
@@ -47,7 +46,7 @@ def test_websocket_auth_accepts_authorization_header(proxy_app):
 
 
 def test_websocket_subprotocol_token_no_longer_authorizes(proxy_app):
-    with patch("src.koreshield.api.websocket.verify_jwt_token", return_value={"id": "user-2"}):
+    with patch("koreshield.api.websocket.verify_jwt_token", return_value={"id": "user-2"}):
         with TestClient(proxy_app) as client:
             with pytest.raises(Exception):
                 with client.websocket_connect(
@@ -58,7 +57,7 @@ def test_websocket_subprotocol_token_no_longer_authorizes(proxy_app):
 
 
 def test_websocket_query_token_no_longer_authorizes(proxy_app):
-    with patch("src.koreshield.api.websocket.verify_jwt_token", return_value={"id": "user-3"}):
+    with patch("koreshield.api.websocket.verify_jwt_token", return_value={"id": "user-3"}):
         with TestClient(proxy_app) as client:
             with pytest.raises(Exception):
                 with client.websocket_connect("/ws/events?token=test.jwt.token"):

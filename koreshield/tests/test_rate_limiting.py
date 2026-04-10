@@ -6,7 +6,7 @@ import asyncio
 import pytest
 from unittest.mock import AsyncMock, patch
 
-from src.providers.rate_limiting import CostOptimizer, RateLimitManager, RateLimitType, RateLimit
+from koreshield.providers.rate_limiting import CostOptimizer, RateLimitManager, RateLimitType, RateLimit
 
 
 class TestCostOptimizer:
@@ -27,7 +27,7 @@ class TestCostOptimizer:
 
     def test_select_cheapest_provider(self):
         """Test cheapest provider selection."""
-        from src.providers.base import BaseProvider
+        from koreshield.providers.base import BaseProvider
 
         class MockProvider(BaseProvider):
             def __init__(self, name: str):

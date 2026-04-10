@@ -108,4 +108,29 @@ describe('BillingPage', () => {
 			expect(button).toBeDisabled();
 		});
 	});
+
+	it('does not crash when billing metadata is malformed', async () => {
+		getBillingAccount.mockResolvedValue({
+			id: 'acct_weird',
+			status: 'active',
+			plan_slug: 'scale',
+			subscription_status: 'active',
+			external_customer_id: null,
+			metadata: 'broken-payload',
+		});
+
+		render(
+			<MemoryRouter initialEntries={['/billing']}>
+				<Routes>
+					<Route path="/billing" element={<BillingPage />} />
+				</Routes>
+			</MemoryRouter>,
+		);
+
+		await waitFor(() => {
+			expect(screen.getByText(/^Scale$/i)).toBeInTheDocument();
+		});
+
+		expect(screen.getAllByText(/^0$/i).length).toBeGreaterThan(0);
+	});
 });

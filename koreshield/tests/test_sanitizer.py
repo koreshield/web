@@ -2,7 +2,7 @@
 Tests for the sanitization engine.
 """
 
-from src.koreshield.sanitizer import SanitizationEngine
+from koreshield.sanitizer import SanitizationEngine
 
 
 def test_sanitizer_initialization():

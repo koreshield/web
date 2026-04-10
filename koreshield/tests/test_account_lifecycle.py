@@ -16,12 +16,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.koreshield.api import billing, management, rbac, reports, teams
-from src.koreshield.api.auth import init_jwt_config
-from src.koreshield.models.base import Base
-from src.koreshield.models.report import Report
-from src.koreshield.models.team import Team, TeamMember
-from src.koreshield.models.user import User
+from koreshield.api import billing, management, rbac, reports, teams
+from koreshield.api.auth import init_jwt_config
+from koreshield.models.base import Base
+from koreshield.models.report import Report
+from koreshield.models.team import Team, TeamMember
+from koreshield.models.user import User
 
 
 def _build_test_client(tmp_path: Path) -> tuple[TestClient, sessionmaker, object, tuple[object, object], object]:
@@ -164,6 +164,32 @@ def test_regular_user_session_lifecycle_supports_me_and_logout(tmp_path: Path):
 
         after_logout_response = client.get("/v1/management/me")
         assert after_logout_response.status_code == 401
+    finally:
+        management.send_welcome_email, management.send_verification_email = original_senders
+        client.close()
+        env_patcher.stop()
+        asyncio.run(_dispose_engine(engine))
+
+
+def test_authenticated_user_can_update_profile_details(tmp_path: Path):
+    client, _session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
+    try:
+        _signup(client)
+
+        response = client.patch(
+            "/v1/management/me",
+            json={
+                "name": "Isaac Nsisong",
+                "company": "KoreShield",
+                "job_title": "Co-founder & CTO",
+            },
+        )
+        assert response.status_code == 200
+        payload = response.json()["user"]
+
+        assert payload["name"] == "Isaac Nsisong"
+        assert payload["company"] == "KoreShield"
+        assert payload["job_title"] == "Co-founder & CTO"
     finally:
         management.send_welcome_email, management.send_verification_email = original_senders
         client.close()
@@ -339,8 +365,8 @@ def test_billing_checkout_normalizes_payload_for_polar(tmp_path: Path):
             },
             clear=False,
         ):
-            with patch("src.koreshield.api.billing.PolarClient") as client_mock, patch(
-                "src.koreshield.api.billing.get_polar_config"
+            with patch("koreshield.api.billing.PolarClient") as client_mock, patch(
+                "koreshield.api.billing.get_polar_config"
             ) as config_mock:
                 checkout_mock = AsyncMock(
                     return_value={"url": "https://sandbox-checkout.polar.sh/session/test"}
@@ -390,8 +416,8 @@ def test_billing_checkout_retries_without_currency_when_product_currency_mismatc
             },
             clear=False,
         ):
-            with patch("src.koreshield.api.billing.PolarClient") as client_mock, patch(
-                "src.koreshield.api.billing.get_polar_config"
+            with patch("koreshield.api.billing.PolarClient") as client_mock, patch(
+                "koreshield.api.billing.get_polar_config"
             ) as config_mock:
                 request = httpx.Request("POST", "https://sandbox-api.polar.sh/v1/checkouts/")
                 response = httpx.Response(

@@ -2,7 +2,7 @@
 Tests for the attack detection engine.
 """
 
-from src.koreshield.detector import AttackDetector
+from koreshield.detector import AttackDetector
 
 
 def test_detector_initialization():

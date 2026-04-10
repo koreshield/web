@@ -10,7 +10,7 @@ import pytest
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.requests import Request
 
-from src.koreshield.api.auth import (
+from koreshield.api.auth import (
     get_current_admin,
     init_jwt_config,
     issue_jwt_token,
@@ -121,7 +121,7 @@ class TestFastAPIDependencies:
             "email": "admin@example.com",
             "role": "admin",
         }
-        with patch("src.koreshield.api.auth.verify_jwt_token", return_value=payload):
+        with patch("koreshield.api.auth.verify_jwt_token", return_value=payload):
             result = await get_current_admin(_request(), credentials)
             assert result["id"] == "user123"
             assert result["role"] == "admin"
@@ -132,7 +132,7 @@ class TestFastAPIDependencies:
             scheme="Bearer",
             credentials="invalid.jwt.token",
         )
-        with patch("src.koreshield.api.auth.verify_jwt_token", return_value=None):
+        with patch("koreshield.api.auth.verify_jwt_token", return_value=None):
             with pytest.raises(Exception) as exc_info:
                 await get_current_admin(_request(), credentials)
             assert exc_info.value.status_code == 401
@@ -149,7 +149,7 @@ class TestFastAPIDependencies:
             "email": "user@example.com",
             "role": "user",
         }
-        with patch("src.koreshield.api.auth.verify_jwt_token", return_value=payload):
+        with patch("koreshield.api.auth.verify_jwt_token", return_value=payload):
             with pytest.raises(Exception) as exc_info:
                 await get_current_admin(_request(), credentials)
             assert exc_info.value.status_code == 403
@@ -177,7 +177,7 @@ def test_issue_jwt_token_uses_initialized_config():
 
 
 def test_verify_session_token_delegates_to_jwt():
-    with patch("src.koreshield.api.auth.verify_jwt_token") as mock_verify:
+    with patch("koreshield.api.auth.verify_jwt_token") as mock_verify:
         mock_verify.return_value = {"test": "payload"}
         result = verify_session_token("test.token")
         mock_verify.assert_called_once_with("test.token")
