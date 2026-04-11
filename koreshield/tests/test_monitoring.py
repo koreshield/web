@@ -323,6 +323,61 @@ class TestAlertManager:
         assert "provider_status_gemini" in payload["text"]
         assert "old_status" in payload["text"]
 
+    @pytest.mark.asyncio
+    async def test_send_telegram_alert_honors_retry_after(self, alert_manager):
+        """Telegram 429 responses should open a retry window instead of spamming."""
+        alert = Alert(
+            rule_name="provider_status_openai",
+            severity=AlertSeverity.ERROR,
+            message="Provider route changed state",
+            details={"provider": "openai", "old_status": "healthy", "new_status": "unhealthy"},
+            timestamp=time.time()
+        )
+
+        alert_manager.config.channels.telegram.enabled = True
+        alert_manager.config.channels.telegram.bot_token = "telegram-token"
+        alert_manager.config.channels.telegram.channel_id = "-1001234567890"
+
+        first_response = MagicMock()
+        first_response.status_code = 429
+        first_response.text = '{"ok":false}'
+        first_response.json.return_value = {"parameters": {"retry_after": 5}}
+        alert_manager.client.post = AsyncMock(return_value=first_response)
+
+        first_result = await alert_manager.send_alert(alert, AlertChannel.TELEGRAM)
+        second_result = await alert_manager.send_alert(alert, AlertChannel.TELEGRAM)
+
+        assert first_result is False
+        assert second_result is False
+        assert alert_manager.client.post.await_count == 1
+
+    @pytest.mark.asyncio
+    async def test_send_telegram_alert_respects_minimum_interval(self, alert_manager):
+        """Telegram sends should be throttled between successful messages."""
+        alert = Alert(
+            rule_name="component_status_monitoring",
+            severity=AlertSeverity.INFO,
+            message="Component changed state",
+            details={"component": "monitoring", "old_status": "degraded", "new_status": "operational"},
+            timestamp=time.time(),
+        )
+
+        alert_manager.config.channels.telegram.enabled = True
+        alert_manager.config.channels.telegram.bot_token = "telegram-token"
+        alert_manager.config.channels.telegram.channel_id = "-1001234567890"
+        alert_manager.config.channels.telegram.minimum_interval_seconds = 60
+
+        ok_response = MagicMock()
+        ok_response.status_code = 200
+        alert_manager.client.post = AsyncMock(return_value=ok_response)
+
+        first_result = await alert_manager.send_alert(alert, AlertChannel.TELEGRAM)
+        second_result = await alert_manager.send_alert(alert, AlertChannel.TELEGRAM)
+
+        assert first_result is True
+        assert second_result is False
+        assert alert_manager.client.post.await_count == 1
+
     def test_build_telegram_message_respects_payload_toggle(self, alert_manager):
         """Telegram payload block can be disabled for cleaner operational alerts."""
         alert = Alert(

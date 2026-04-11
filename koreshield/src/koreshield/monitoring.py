@@ -254,6 +254,8 @@ class AlertManager:
         self.alert_rules: List[AlertRule] = []
         self.active_alerts: List[Alert] = []
         self.client = httpx.AsyncClient(timeout=10.0)
+        self._telegram_rate_limited_until: float = 0.0
+        self._last_telegram_sent_at: float = 0.0
 
         # Load alert rules from config
         self._load_alert_rules()
@@ -488,6 +490,24 @@ Details:
             logger.error("Telegram alert failed: missing bot token or channel id")
             return False
 
+        now = time.time()
+        if self._telegram_rate_limited_until and now < self._telegram_rate_limited_until:
+            logger.warning(
+                "Telegram alert suppressed during retry window",
+                retry_at=self._telegram_rate_limited_until,
+                rule_name=alert.rule_name,
+            )
+            return False
+
+        min_interval_seconds = max(float(getattr(telegram_config, "minimum_interval_seconds", 1.0) or 0.0), 0.0)
+        if self._last_telegram_sent_at and (now - self._last_telegram_sent_at) < min_interval_seconds:
+            logger.warning(
+                "Telegram alert throttled",
+                minimum_interval_seconds=min_interval_seconds,
+                rule_name=alert.rule_name,
+            )
+            return False
+
         message = self._build_telegram_message(alert)
 
         payload = {
@@ -510,13 +530,24 @@ Details:
             return False
 
         if response.status_code != 200:
+            retry_after_seconds = 0
+            if response.status_code == 429:
+                try:
+                    retry_after_seconds = int((response.json().get("parameters") or {}).get("retry_after") or 0)
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    retry_after_seconds = 0
+                if retry_after_seconds > 0:
+                    self._telegram_rate_limited_until = time.time() + retry_after_seconds
             logger.error(
                 "Telegram alert rejected",
                 status_code=response.status_code,
                 response_text=response.text,
+                retry_after_seconds=retry_after_seconds,
             )
             return False
 
+        self._telegram_rate_limited_until = 0.0
+        self._last_telegram_sent_at = now
         logger.info("Telegram alert sent", channel_id=telegram_config.channel_id)
         return True
 

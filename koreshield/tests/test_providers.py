@@ -122,6 +122,41 @@ class TestOpenAIProvider:
 
             assert result == mock_response
 
+    @pytest.mark.asyncio
+    async def test_health_check_prefers_model_listing(self, provider):
+        """OpenAI health checks should use the lightweight models endpoint first."""
+        mock_response = Mock()
+        mock_response.json.return_value = {"data": [{"id": "gpt-4o-mini"}]}
+        mock_response.raise_for_status = Mock()
+
+        mock_client = AsyncMock()
+        mock_client.get.return_value = mock_response
+
+        with patch.object(provider, 'get_client', new_callable=AsyncMock) as mock_get_client:
+            mock_get_client.return_value = mock_client
+
+            result = await provider.health_check()
+
+        assert result is True
+        mock_client.get.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_health_check_falls_back_to_chat_completion(self, provider):
+        """OpenAI health checks should fall back if listing models fails."""
+        with patch.object(provider, "list_models", new_callable=AsyncMock) as mock_list_models, \
+             patch.object(provider, "chat_completion", new_callable=AsyncMock) as mock_chat_completion:
+            mock_list_models.side_effect = Exception("models endpoint unavailable")
+            mock_chat_completion.return_value = {"id": "fallback-ok"}
+
+            result = await provider.health_check()
+
+        assert result is True
+        mock_chat_completion.assert_awaited_once_with(
+            [{"role": "user", "content": "Hello"}],
+            model="gpt-4o-mini",
+            max_tokens=1,
+        )
+
 
 class TestDeepSeekProvider:
     """Test DeepSeek provider."""
