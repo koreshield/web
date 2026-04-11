@@ -115,6 +115,9 @@ class TelegramChannel(BaseModel):
     health_digest_interval_minutes: int = Field(
         default_factory=lambda: int(os.getenv("TELEGRAM_HEALTH_DIGEST_INTERVAL_MINUTES", "15") or "15")
     )
+    minimum_interval_seconds: float = Field(
+        default_factory=lambda: float(os.getenv("TELEGRAM_MINIMUM_INTERVAL_SECONDS", "1.0") or "1.0")
+    )
     include_payload: bool = Field(
         default_factory=lambda: os.getenv("TELEGRAM_INCLUDE_ALERT_PAYLOAD", "true").strip().lower() in {"1", "true", "yes", "on"}
     )

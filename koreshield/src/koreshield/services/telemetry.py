@@ -11,6 +11,11 @@ from collections import deque
 
 logger = structlog.get_logger(__name__)
 
+
+def _utcnow_naive() -> datetime:
+    """Return UTC now as a naive datetime for DB compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
 class TelemetryService:
     def __init__(self, monitoring_system, redis_client=None, db_session_factory=None):
         self.monitoring = monitoring_system
@@ -93,9 +98,35 @@ class TelemetryService:
         if entry:
             self.audit_log_store.appendleft(entry)
 
+    def _normalize_log_data(self, log_data: dict) -> dict:
+        """Normalize request log payloads to match the current DB schema."""
+        normalized = dict(log_data)
+
+        timestamp = normalized.get("timestamp")
+        if isinstance(timestamp, datetime):
+            normalized["timestamp"] = (
+                timestamp.astimezone(timezone.utc).replace(tzinfo=None)
+                if timestamp.tzinfo
+                else timestamp
+            )
+        elif timestamp is None:
+            normalized["timestamp"] = _utcnow_naive()
+
+        normalized.setdefault("method", "POST")
+        normalized.setdefault("path", "/unknown")
+        normalized.setdefault("latency_ms", 0.0)
+        normalized.setdefault("tokens_prompt", 0)
+        normalized.setdefault("tokens_completion", 0)
+        normalized.setdefault("tokens_total", 0)
+        normalized.setdefault("cost", 0.0)
+        normalized.setdefault("attack_detected", False)
+        normalized.setdefault("attack_details", {})
+        return normalized
+
     def queue_request_log(self, log_data: dict) -> None:
         """Record a request log and persist asynchronously."""
-        entry = self.build_audit_entry(log_data)
+        normalized_log_data = self._normalize_log_data(log_data)
+        entry = self.build_audit_entry(normalized_log_data)
         self.append_audit_log(entry)
         
         if self.db_session_factory:
@@ -103,7 +134,7 @@ class TelemetryService:
             async def log_async():
                 try:
                     async with self.db_session_factory() as session:
-                        log_entry = RequestLog(**log_data)
+                        log_entry = RequestLog(**normalized_log_data)
                         session.add(log_entry)
                         await session.commit()
                 except Exception as e:

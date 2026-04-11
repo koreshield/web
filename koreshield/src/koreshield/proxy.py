@@ -6,39 +6,29 @@ import json
 import io
 import zipfile
 import os
-import sys
 import uuid
 import time
 import contextlib
 import copy
 from collections import deque
-from pathlib import Path
 from contextlib import asynccontextmanager
-from typing import List, Optional, Any
+from typing import Optional
 from datetime import datetime, timezone
 import asyncio
 
 import httpx
 import structlog
-import redis
-import redis.asyncio as aioredis
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
-from sqlalchemy import select, or_, func, delete
+from sqlalchemy import select, func, delete
 
 from .detector import AttackDetector
 from .logger import FirewallLogger
-from .policy import PolicyEngine
-from .sanitizer import SanitizationEngine
-from .rag_detector import RAGContextDetector
 from .rag_taxonomy import RetrievedDocument
-from .runtime_governance import RuntimeGovernanceManager
-from .tool_security import ToolCallSecurityAnalyzer
 from .database import AsyncSessionLocal
 from .models.request_log import RequestLog
 from .models.rag_scan import RagScan
-from .models.api_key import APIKey
-from .api.auth import get_request_token, verify_jwt_token, init_jwt_config
+from .api.auth import init_jwt_config
 
 # New Service Architecture
 from .services.auth import AuthService
@@ -66,7 +56,6 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-from limits.storage import RedisStorage
 
 class KoreShieldProxy:
     """
@@ -290,13 +279,6 @@ class KoreShieldProxy:
                 logger.error("Heartbeat monitoring error", error=str(e))
                 
             await asyncio.sleep(60) # Refresh every minute
-
-    async def _handle_event_broadcast(self, event_type: str, data: dict) -> None:
-        """Centralized and throttled event broadcast over WebSockets."""
-        try:
-            await self._publish_event(event_type, data)
-        except Exception as e:
-            logger.debug("Broadcast failed", error=str(e))
 
     async def _publish_event(self, event_type: str, data: dict) -> None:
         """Publish an event over the WebSocket pub/sub channel."""
@@ -818,6 +800,8 @@ class KoreShieldProxy:
                     "timestamp": datetime.now(timezone.utc),
                     "provider": provider_name,
                     "model": model,
+                    "method": request.method,
+                    "path": "/v1/chat/completions",
                     "status_code": 200,
                     "latency_ms": duration * 1000,
                     "tokens_total": response.get("usage", {}).get("total_tokens", 0),
@@ -857,52 +841,109 @@ class KoreShieldProxy:
     async def _handle_tool_scan(self, request: Request) -> Response:
         """Forward to GovernanceService."""
         request_id = str(uuid.uuid4())
-        principal = await self._authenticate_request(request)
-        body = await request.json()
-        
-        result = self.governance.analyze_tool_call(
-            tool_name=body.get("tool_name"),
-            args=body.get("args", {}),
-            context=body.get("context", {}),
-            principal=principal
-        )
+        start_time = time.time()
+        try:
+            principal = await self._authenticate_request(request)
+            body = await request.json()
 
-        outcome = self.governance.record_decision(
-            session_id=result["session_id"],
-            principal=principal,
-            request_id=request_id,
-            tool_analysis=result["analysis"],
-            policy_result=result["policy"],
-            action_taken=result["action"],
-            allowed=not result["blocked"]
-        )
+            # Accept both flat format {tool_name, args, context}
+            # and OpenAI-style nested format {tool_call: {name, arguments}}
+            nested = body.get("tool_call") or {}
+            tool_name = (
+                body.get("tool_name")
+                or nested.get("name")
+                or nested.get("function", {}).get("name")
+            )
+            args = (
+                body.get("args")
+                or body.get("arguments")            # Accept "arguments" as flat field too
+                or nested.get("arguments")
+                or nested.get("function", {}).get("arguments")
+                or {}
+            )
+            # arguments may arrive as a JSON string (OpenAI format)
+            if isinstance(args, str):
+                try:
+                    args = json.loads(args)
+                except (json.JSONDecodeError, ValueError):
+                    args = {"raw": args}
 
-        if result["blocked"]:
-            self.telemetry.increment_stat("requests_blocked")
-            self.telemetry.increment_stat("attacks_detected")
+            context = body.get("context", {})
 
-        self.telemetry.queue_request_log({
-            "request_id": request_id,
-            "timestamp": datetime.now(timezone.utc),
-            "provider": "tooling",
-            "model": body.get("tool_name"),
-            "status_code": 403 if result["blocked"] else 200,
-            "is_blocked": result["blocked"],
-            "user_id": principal.get("user_id"),
-        })
+            if not tool_name:
+                return JSONResponse(
+                    status_code=400,
+                    content={"error": "tool_name is required (flat: tool_name, or nested: tool_call.name)"},
+                )
 
-        response_payload = {
-            **result["analysis"],
-            "scan_id": request_id,
-            "allowed": not result["blocked"],
-            "blocked": result["blocked"],
-            "policy_result": result["policy"],
-            "review_ticket": outcome.get("review_ticket"), # Restore explicitly for tests
-            "session": outcome.get("session"),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
+            result = self.governance.analyze_tool_call(
+                tool_name=tool_name,
+                args=args,
+                context=context,
+                principal=principal,
+            )
 
-        return JSONResponse(status_code=403 if result["blocked"] else 200, content=response_payload)
+            outcome = self.governance.record_decision(
+                session_id=result["session_id"],
+                principal=principal,
+                request_id=request_id,
+                tool_analysis=result["analysis"],
+                policy_result=result["policy"],
+                action_taken=result["action"],
+                allowed=not result["blocked"],
+            )
+
+            if result["blocked"]:
+                self.telemetry.increment_stat("requests_blocked")
+                self.telemetry.increment_stat("attacks_detected")
+
+            self.telemetry.queue_request_log({
+                "request_id": request_id,
+                "timestamp": datetime.now(timezone.utc),
+                "provider": "tooling",
+                "model": tool_name,
+                "method": request.method,
+                "path": "/v1/tools/scan",
+                "status_code": 403 if result["blocked"] else 200,
+                "latency_ms": (time.time() - start_time) * 1000,
+                "is_blocked": result["blocked"],
+                "attack_detected": result["blocked"],
+                "attack_details": result["analysis"],
+                "user_id": principal.get("user_id"),
+            })
+
+            # Build a JSON-safe response — strip non-serializable values
+            analysis = result["analysis"].copy()
+            analysis.pop("args", None)  # raw args may not be serializable; serialized_args is already present
+
+            response_payload = {
+                **analysis,
+                "scan_id": request_id,
+                "allowed": not result["blocked"],
+                "blocked": result["blocked"],
+                "policy_result": result["policy"],
+                "review_ticket": outcome.get("review_ticket"),
+                "session": outcome.get("session"),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+
+            return JSONResponse(
+                status_code=403 if result["blocked"] else 200,
+                content=response_payload,
+            )
+
+        except HTTPException:
+            raise
+        except Exception as exc:  # noqa: BLE001
+            logger.error("tool_scan_unhandled_error", request_id=request_id, error=str(exc), exc_info=True)
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "error": "Internal error during tool scan",
+                    "request_id": request_id,
+                    "detail": str(exc),
+                },
+            )
 
     async def _handle_create_tool_session(self, request: Request) -> Response:
         principal = await self._authenticate_request(request)
@@ -1077,6 +1118,7 @@ class KoreShieldProxy:
         """Forward to SecurityService."""
         request_id = str(uuid.uuid4())
         principal = await self._authenticate_request(request)
+        start_time = time.time()
         body = await request.json()
         
         requests_payload = body.get("requests", [])
@@ -1103,7 +1145,10 @@ class KoreShieldProxy:
             "timestamp": datetime.now(timezone.utc),
             "provider": "sdk_batch",
             "model": "batch_scan",
+            "method": request.method,
+            "path": "/v1/scan/batch",
             "status_code": 200,
+            "latency_ms": (time.time() - start_time) * 1000,
             "is_blocked": any(r["result"]["blocked"] for r in results),
             "user_id": principal.get("user_id"),
         })
