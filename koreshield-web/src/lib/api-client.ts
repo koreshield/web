@@ -590,6 +590,22 @@ class ApiClient {
 		return this.fetch('/v1/analytics/costs/summary');
 	}
 
+	async getAttackVectors(timeRange: '7d' | '30d' | '90d' | '1y' | 'today' = '7d') {
+		return this.fetch(`/v1/analytics/attack-vectors?time_range=${timeRange}`);
+	}
+
+	async getTopEndpoints(timeRange: '7d' | '30d' | '90d' | '1y' | 'today' = '7d', limit = 10) {
+		return this.fetch(`/v1/analytics/top-endpoints?time_range=${timeRange}&limit=${limit}`);
+	}
+
+	async getProviderMetrics(timeRange: '7d' | '30d' | '90d' | '1y' | 'today' = '7d') {
+		return this.fetch(`/v1/analytics/provider-metrics?time_range=${timeRange}`);
+	}
+
+	async getCompliancePosture() {
+		return this.fetch('/v1/analytics/compliance-posture');
+	}
+
 	// Export functionality
 	async exportData(type: 'csv' | 'pdf', endpoint: string, params?: JsonRecord) {
 		const response = await fetch(`${this.baseUrl}${endpoint}`, {
