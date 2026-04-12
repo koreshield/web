@@ -131,6 +131,11 @@ export function ComplianceReportsPage() {
 			</header>
 
 			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+				{/* Sample data notice */}
+				<div className="mb-6 flex items-start gap-3 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded-lg px-4 py-3 text-sm">
+					<span className="mt-0.5 flex-shrink-0">⚠</span>
+					<span><strong>Preview data</strong> — Automated compliance report generation is coming soon. The control statuses and scores shown are illustrative examples.</span>
+				</div>
 				<div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-8">
 					{MOCK_REPORTS.map((report) => (
 						<div
