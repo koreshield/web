@@ -43,7 +43,6 @@ class BaseProvider(ABC):
     @abstractmethod
     def _get_default_url(self) -> str:
         """Get the default API URL for this provider."""
-        pass
 
     @abstractmethod
     async def chat_completion(self, messages: list, **kwargs) -> Dict[str, Any]:
@@ -57,7 +56,6 @@ class BaseProvider(ABC):
         Returns:
             Response dictionary
         """
-        pass
 
     async def chat_completion_cached(self, messages: list, **kwargs) -> Dict[str, Any]:
         """
@@ -112,4 +110,3 @@ class BaseProvider(ABC):
     async def close(self):
         """Close the HTTP client."""
         # Note: We don't close shared pool clients here as they're managed by the pool
-        pass

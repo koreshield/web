@@ -69,7 +69,7 @@ describe('StatusPage', () => {
 		expect(screen.getAllByText('1').length).toBeGreaterThan(0);
 		expect(screen.getByRole('link', { name: /Subscribe to Alerts/i })).toHaveAttribute(
 			'href',
-			expect.stringContaining('mailto:status@koreshield.com'),
+			expect.stringContaining('mailto:hello@koreshield.com'),
 		);
 		expect(screen.getByRole('link', { name: /RSS Feed/i })).toHaveAttribute('href', '/status-feed.xml');
 		expect(screen.getByText(/All 1 initialized provider routes are healthy/i)).toBeInTheDocument();

@@ -15,7 +15,6 @@ from .rag_taxonomy import (
     InjectionVector,
     OperationalTarget,
     PersistenceMechanism,
-    EnterpriseContext,
     DetectionComplexity,
     ThreatSeverity,
     DocumentThreat,

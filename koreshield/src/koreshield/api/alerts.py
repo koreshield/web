@@ -5,7 +5,7 @@ Provides CRUD operations for managing alert rules and notification channels.
 """
 
 from fastapi import APIRouter, HTTPException, Depends, status
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import structlog
 from datetime import datetime

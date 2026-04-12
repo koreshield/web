@@ -1,14 +1,11 @@
 """Framework-specific integration helpers for KoreShield SDK."""
 
-from typing import Dict, List, Optional, Any, Callable, Union
-from functools import wraps
+from typing import List, Optional, Any, Callable, Union
 import asyncio
 import inspect
-import time
 
 from ..async_client import AsyncKoreShieldClient
-from ..types import DetectionResult, SecurityPolicy, ThreatLevel
-from ..exceptions import KoreShieldError
+from ..types import DetectionResult, ThreatLevel
 
 # Expose Flask globals at module scope so tests can patch them consistently.
 request = None
@@ -62,7 +59,7 @@ class FastAPIIntegration:
 
     def create_middleware(self):
         """Create FastAPI middleware for automatic security scanning."""
-        from fastapi import Request, Response, HTTPException
+        from fastapi import Request
         from fastapi.responses import JSONResponse
         import json
 
@@ -209,7 +206,6 @@ class FlaskIntegration:
             request = flask_request
             jsonify = flask_jsonify
             g = flask_g
-        import json
 
         def koreshield_middleware():
             # Skip excluded paths
@@ -302,7 +298,6 @@ class DjangoIntegration:
     def create_middleware(self):
         """Create Django middleware for automatic security scanning."""
         from django.http import JsonResponse
-        from django.core.exceptions import MiddlewareNotUsed
         import json
         import asyncio
 

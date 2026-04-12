@@ -3,7 +3,6 @@ Authentication service for KoreShield.
 Handles JWT and API Key validation.
 """
 
-import os
 import uuid
 import structlog
 from datetime import datetime, timezone

@@ -88,22 +88,18 @@ class CRMTemplate(ABC):
     @abstractmethod
     def get_security_policy(self) -> CRMSecurityPolicy:
         """Get the default security policy for this CRM platform."""
-        pass
 
     @abstractmethod
     def get_attack_patterns(self) -> List[CRMAttackPattern]:
         """Get CRM-specific attack patterns."""
-        pass
 
     @abstractmethod
     def get_pii_patterns(self) -> List[Dict[str, Any]]:
         """Get PII detection patterns specific to this CRM."""
-        pass
 
     @abstractmethod
     def get_business_logic_rules(self) -> List[Dict[str, Any]]:
         """Get business logic protection rules."""
-        pass
 
     def validate_configuration(self, config: Dict[str, Any]) -> List[str]:
         """Validate CRM-specific configuration. Returns list of validation errors."""

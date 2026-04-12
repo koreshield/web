@@ -152,7 +152,7 @@ export default function CareersPage() {
 										</div>
 									</div>
 									<a
-										href={`mailto:careers@koreshield.com?subject=Application: ${encodeURIComponent(role.title)}`}
+										href={`mailto:hello@koreshield.com?subject=Application: ${encodeURIComponent(role.title)}`}
 										className="shrink-0 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
 									>
 										Apply <ArrowRight className="w-3.5 h-3.5" />

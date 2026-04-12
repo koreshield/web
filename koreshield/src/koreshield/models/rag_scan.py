@@ -1,17 +1,12 @@
 import uuid
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from sqlalchemy import Boolean, Column, DateTime, Float, Integer, JSON, String, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base
-
-
-def utcnow_naive() -> datetime:
-    """UTC now as naive datetime for existing DB schema compatibility."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+from ..utils import utcnow_naive
 
 
 class RagScan(Base):

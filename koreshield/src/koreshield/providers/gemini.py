@@ -2,8 +2,12 @@
 Google Gemini API provider integration.
 """
 
-from typing import Any, Dict, List, Optional
 import json
+import time
+import uuid
+from typing import Any, AsyncIterator, Dict, List, Optional
+
+import httpx
 
 from .base import BaseProvider
 
@@ -13,6 +17,7 @@ class GeminiProvider(BaseProvider):
     Integration for Google Gemini API.
 
     Supports both text-only and multimodal models.
+    Streaming output is converted to OpenAI SSE format for a consistent proxy surface.
     """
 
     def __init__(
@@ -65,70 +70,125 @@ class GeminiProvider(BaseProvider):
         ]
 
     async def chat_completion(
-        self, messages: list, model: str = "gemini-pro", **kwargs
+        self, messages: list, model: str = "gemini-1.5-flash", **kwargs
     ) -> Dict[str, Any]:
         """
         Send a chat completion request to Google Gemini.
 
         Args:
             messages: List of message dictionaries
-            model: Model to use (e.g., "gemini-pro", "gemini-pro-vision")
+            model: Model to use (e.g., "gemini-1.5-flash", "gemini-1.5-pro")
             **kwargs: Additional parameters
 
         Returns:
             Response dictionary in OpenAI-compatible format
-
-        Raises:
-            Exception: For API errors
         """
-        # Convert OpenAI format to Gemini format
         gemini_contents = self._convert_messages_to_gemini(messages)
 
-        # Prepare request data
         data = {
             "contents": gemini_contents,
             "safetySettings": self.safety_settings,
-            **kwargs
         }
-
-        # Remove OpenAI-specific parameters that Gemini doesn't understand
-        data.pop('model', None)  # Gemini gets model from URL
-        data.pop('stream', None)  # Streaming not supported in same way
+        # Map OpenAI generation params to Gemini equivalents where applicable
+        if "max_tokens" in kwargs:
+            data.setdefault("generationConfig", {})["maxOutputTokens"] = kwargs["max_tokens"]
+        if "temperature" in kwargs:
+            data.setdefault("generationConfig", {})["temperature"] = kwargs["temperature"]
+        if "top_p" in kwargs:
+            data.setdefault("generationConfig", {})["topP"] = kwargs["top_p"]
 
         url = f"{self.base_url}/models/{model}:generateContent?key={self.api_key}"
 
-        try:
-            response = await (await self.get_client()).post(
-                url,
-                json=data,
-                timeout=60.0  # Gemini can take longer
-            )
-            response.raise_for_status()
-            result = response.json()
+        response = await (await self.get_client()).post(url, json=data, timeout=60.0)
+        response.raise_for_status()
+        result = response.json()
 
-            # Check for Gemini-specific errors
-            if "error" in result:
-                error = result["error"]
-                raise Exception(f"Gemini API error: {error.get('message', 'Unknown error')}")
+        if "error" in result:
+            error = result["error"]
+            raise Exception(f"Gemini API error: {error.get('message', 'Unknown error')}")
 
-            # Convert Gemini response back to OpenAI-like format for consistency
-            return self._convert_gemini_to_openai(result, model)
+        return self._convert_gemini_to_openai(result, model)
 
-        except Exception as e:
-            # Enhanced error handling
-            if hasattr(response, 'status_code') and response:
-                if response.status_code == 400:
-                    raise Exception("Invalid request to Gemini API")
-                elif response.status_code == 401:
-                    raise Exception("Invalid Gemini API key")
-                elif response.status_code == 403:
-                    raise Exception("Gemini API access denied")
-                elif response.status_code == 429:
-                    raise Exception("Gemini API rate limit exceeded")
-                elif response.status_code == 500:
-                    raise Exception("Gemini API internal error")
+    async def chat_completion_stream(
+        self, messages: list, model: str = "gemini-1.5-flash", **kwargs
+    ) -> AsyncIterator[bytes]:
+        """
+        Stream a chat completion from Gemini, converting each SSE event to
+        OpenAI SSE format for a consistent proxy surface.
+        """
+        gemini_contents = self._convert_messages_to_gemini(messages)
 
-            raise Exception(f"Gemini API error: {str(e)}")
+        data: Dict[str, Any] = {
+            "contents": gemini_contents,
+            "safetySettings": self.safety_settings,
+        }
+        if "max_tokens" in kwargs:
+            data.setdefault("generationConfig", {})["maxOutputTokens"] = kwargs["max_tokens"]
+        if "temperature" in kwargs:
+            data.setdefault("generationConfig", {})["temperature"] = kwargs["temperature"]
+        if "top_p" in kwargs:
+            data.setdefault("generationConfig", {})["topP"] = kwargs["top_p"]
+
+        url = f"{self.base_url}/models/{model}:streamGenerateContent?key={self.api_key}&alt=sse"
+
+        completion_id = f"chatcmpl-{uuid.uuid4().hex[:24]}"
+        created = int(time.time())
+
+        # Emit role chunk first
+        role_chunk = {
+            "id": completion_id,
+            "object": "chat.completion.chunk",
+            "created": created,
+            "model": model,
+            "choices": [{"index": 0, "delta": {"role": "assistant", "content": ""}, "finish_reason": None}],
+        }
+        yield f"data: {json.dumps(role_chunk)}\n\n".encode()
+
+        async with httpx.AsyncClient(timeout=httpx.Timeout(connect=10, read=120, write=10, pool=10)) as client:
+            async with client.stream("POST", url, json=data) as response:
+                response.raise_for_status()
+
+                async for line in response.aiter_lines():
+                    if not line.startswith("data: "):
+                        continue
+                    raw = line[6:].strip()
+                    if not raw:
+                        continue
+                    try:
+                        evt = json.loads(raw)
+                    except json.JSONDecodeError:
+                        continue
+
+                    # Each Gemini streaming event is a full generateContent response fragment
+                    candidates = evt.get("candidates", [])
+                    for candidate in candidates:
+                        content = candidate.get("content", {})
+                        parts = content.get("parts", [])
+                        for part in parts:
+                            text = part.get("text", "")
+                            if text:
+                                chunk = {
+                                    "id": completion_id,
+                                    "object": "chat.completion.chunk",
+                                    "created": created,
+                                    "model": model,
+                                    "choices": [{"index": 0, "delta": {"content": text}, "finish_reason": None}],
+                                }
+                                yield f"data: {json.dumps(chunk)}\n\n".encode()
+
+                        finish_reason = candidate.get("finishReason")
+                        if finish_reason and finish_reason != "FINISH_REASON_UNSPECIFIED":
+                            oai_finish = "stop" if finish_reason in ("STOP", "MAX_TOKENS") else "stop"
+                            final = {
+                                "id": completion_id,
+                                "object": "chat.completion.chunk",
+                                "created": created,
+                                "model": model,
+                                "choices": [{"index": 0, "delta": {}, "finish_reason": oai_finish}],
+                            }
+                            yield f"data: {json.dumps(final)}\n\n".encode()
+
+        yield b"data: [DONE]\n\n"
 
     def _convert_messages_to_gemini(self, messages: list) -> list:
         """
@@ -184,14 +244,10 @@ class GeminiProvider(BaseProvider):
                 if item.get("type") == "text":
                     parts.append({"text": item.get("text", "")})
                 elif item.get("type") == "image_url":
-                    # Gemini expects base64 encoded images
                     image_data = item.get("image_url", {})
                     if isinstance(image_data, dict) and "url" in image_data:
-                        # Extract base64 data from data URL
                         data_url = image_data["url"]
                         if data_url.startswith("data:image/"):
-                            # This is a simplified version - real implementation
-                            # would need proper base64 extraction
                             parts.append({"text": "[Image content not supported in this demo]"})
                         else:
                             parts.append({"text": "[External image URLs not supported]"})
@@ -203,43 +259,34 @@ class GeminiProvider(BaseProvider):
     def _convert_gemini_to_openai(self, gemini_response: dict, model: str) -> dict:
         """
         Convert Gemini response to OpenAI-like format.
-
-        Handles both successful responses and error cases.
         """
         candidates = gemini_response.get("candidates", [])
         if not candidates:
             return {
-                "id": f"chatcmpl-{hash(str(gemini_response))}",
+                "id": f"chatcmpl-{uuid.uuid4().hex[:24]}",
                 "object": "chat.completion",
-                "created": 0,
+                "created": int(time.time()),
                 "model": model,
                 "choices": [],
                 "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
             }
 
-        # Get the first candidate
         candidate = candidates[0]
         content = candidate.get("content", {})
         parts = content.get("parts", [])
 
-        # Extract text from parts
-        text_content = ""
-        for part in parts:
-            if "text" in part:
-                text_content += part["text"]
+        text_content = "".join(part.get("text", "") for part in parts if "text" in part)
 
-        # Get finish reason
-        finish_reason = candidate.get("finishReason", "stop").lower()
+        finish_reason = candidate.get("finishReason", "STOP").lower()
         if finish_reason == "max_tokens":
             finish_reason = "length"
         elif finish_reason not in ["stop", "length"]:
             finish_reason = "stop"
 
-        # Convert to OpenAI format
         return {
-            "id": f"chatcmpl-{hash(str(gemini_response))}",
+            "id": f"chatcmpl-{uuid.uuid4().hex[:24]}",
             "object": "chat.completion",
-            "created": 0,  # Gemini doesn't provide timestamp
+            "created": int(time.time()),
             "model": model,
             "choices": [{
                 "index": 0,
@@ -259,29 +306,18 @@ class GeminiProvider(BaseProvider):
     async def list_models(self) -> Dict[str, Any]:
         """
         List available Gemini models.
-
-        Returns:
-            Dictionary containing available models
         """
         url = f"{self.base_url}/models?key={self.api_key}"
-
         response = await (await self.get_client()).get(url)
         response.raise_for_status()
         return response.json()
 
     async def health_check(self) -> bool:
-        """
-        Perform Gemini-specific health check.
-
-        Returns:
-            True if healthy, False otherwise
-        """
+        """Perform Gemini-specific health check."""
         try:
-            # Try to list models as a lightweight health check
             await self.list_models()
             return True
         except Exception:
-            # Fallback to basic chat completion check
             try:
                 test_messages = [{"role": "user", "content": "Hello"}]
                 await self.chat_completion(test_messages, max_tokens=1)

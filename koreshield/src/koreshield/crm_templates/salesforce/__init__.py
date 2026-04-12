@@ -11,7 +11,7 @@ Security template for Salesforce Einstein AI features including:
 - Einstein Opportunity Scoring
 """
 
-from typing import Dict, List, Any, Set
+from typing import Dict, List, Any
 from .. import (
     CRMTemplate, CRMSecurityPolicy, CRMAttackPattern, CRMPlatform, CRMFeature
 )

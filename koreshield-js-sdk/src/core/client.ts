@@ -567,6 +567,112 @@ export class KoreShieldClient {
     }
   }
 
+  /**
+   * Stream a chat completion as an async generator (modern async-first API).
+   *
+   * KoreShield scans the prompt before forwarding.  Model-aware routing is
+   * applied automatically: `gpt-*` → OpenAI, `claude-*` → Anthropic,
+   * `gemini-*` → Gemini, `deepseek-*` → DeepSeek.
+   *
+   * @example
+   * ```ts
+   * for await (const token of client.chatCompletionStream({
+   *   model: 'gpt-4o',
+   *   messages: [{ role: 'user', content: 'Hello' }],
+   * })) {
+   *   process.stdout.write(token);
+   * }
+   * ```
+   */
+  async *chatCompletionStream(
+    request: ChatCompletionRequest,
+    securityOptions?: SecurityOptions
+  ): AsyncGenerator<string, void, unknown> {
+    const payload: any = { ...request, stream: true };
+    if (securityOptions) payload.security = securityOptions;
+
+    const url = `${this.config.baseURL}/v1/chat/completions`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+        'Authorization': `Bearer ${this.config.apiKey}`,
+        'User-Agent': 'koreshield-js-sdk/0.3.5',
+        ...this.config.headers,
+      } as Record<string, string>,
+      body: JSON.stringify(payload),
+    });
+
+    if (response.status === 403) {
+      const data = await response.json().catch(() => ({}));
+      const err: KoreShieldError = new Error(
+        (data as any)?.reason || 'Prompt blocked by KoreShield'
+      ) as KoreShieldError;
+      err.code = 'PROMPT_BLOCKED';
+      err.statusCode = 403;
+      err.details = data as Record<string, any>;
+      throw err;
+    }
+
+    if (!response.ok) {
+      const err: KoreShieldError = new Error(
+        `KoreShield proxy error (HTTP ${response.status})`
+      ) as KoreShieldError;
+      err.code = 'PROXY_ERROR';
+      err.statusCode = response.status;
+      throw err;
+    }
+
+    if (!response.body) {
+      throw new Error('Response body is null — streaming not supported in this environment');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const raw = line.slice(6).trim();
+          if (raw === '[DONE]') return;
+
+          let chunk: any;
+          try {
+            chunk = JSON.parse(raw);
+          } catch {
+            continue;
+          }
+
+          if (chunk?.error) {
+            const err: KoreShieldError = new Error(
+              chunk.error.message || 'Provider streaming error'
+            ) as KoreShieldError;
+            err.code = chunk.error.code || 'PROVIDER_ERROR';
+            throw err;
+          }
+
+          const content: string | undefined = chunk?.choices?.[0]?.delta?.content;
+          if (content) {
+            this.metrics.streamingChunksProcessed++;
+            yield content;
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  }
+
   private handleError(error: any): KoreShieldError {
     const koreShieldError: KoreShieldError = new Error(
       error.response?.data?.message || error.message || 'Unknown error'

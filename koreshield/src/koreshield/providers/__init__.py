@@ -6,7 +6,7 @@ from .anthropic import AnthropicProvider
 from .azure_openai import AzureOpenAIProvider
 from .base import BaseProvider
 from .cache_manager import CacheManager
-from .client_pool import SharedClientPool, get_shared_client_pool
+from .client_pool import get_shared_client_pool
 from .deepseek import DeepSeekProvider
 from .gemini import GeminiProvider
 from .health_monitor import HealthMonitor

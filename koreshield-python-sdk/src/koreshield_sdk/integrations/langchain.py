@@ -1,9 +1,8 @@
 """LangChain integration for KoreShield."""
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.outputs import LLMResult
-from langchain_core.messages import BaseMessage
 
 from ..client import KoreShieldClient
 from ..async_client import AsyncKoreShieldClient
@@ -11,7 +10,6 @@ from ..types import (
     DetectionResult,
     ThreatLevel,
     RAGDocument,
-    RAGScanResponse,
     RAGScanConfig,
 )
 from ..exceptions import KoreShieldError

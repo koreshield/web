@@ -1,16 +1,12 @@
 import uuid
-from datetime import datetime, timezone
 
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base
+from ..utils import utcnow_naive
 
-
-def utcnow_naive() -> datetime:
-    """UTC now as naive datetime for existing DB schema compatibility."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class Team(Base):
     """Team/Tenant model for multi-tenancy."""

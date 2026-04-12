@@ -6,19 +6,16 @@ Handles database connections, schema isolation, and tenant-specific data operati
 """
 
 import os
-import asyncio
 import time
-from typing import Dict, List, Optional, Any, AsyncGenerator
+from typing import Dict, Optional, Any, AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import datetime
-import uuid
 
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from .tenant_models import Tenant, TenantContext, generate_tenant_schema_name
+from .tenant_models import TenantContext, generate_tenant_schema_name
 from .tenant_utils import get_current_tenant
 from .logger import FirewallLogger
 

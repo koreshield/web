@@ -2,12 +2,6 @@
 
 # Optional imports for langchain integration
 try:
-    from .langchain import (
-        KoreShieldCallbackHandler,
-        AsyncKoreShieldCallbackHandler,
-        create_koreshield_callback,
-        create_async_koreshield_callback,
-    )
     _langchain_available = True
 except ImportError:
     _langchain_available = False

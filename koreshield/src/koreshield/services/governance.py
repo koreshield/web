@@ -4,7 +4,7 @@ Handles tool security and runtime session management.
 """
 
 import structlog
-from typing import Optional, Any
+from typing import Any
 
 from ..tool_security import ToolCallSecurityAnalyzer
 from ..runtime_governance import RuntimeGovernanceManager

@@ -2,6 +2,7 @@ import json
 import os
 import re
 import secrets
+import uuid
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
 
@@ -1028,7 +1029,7 @@ async def export_threat_logs(
             policy = details.get("policy") or {}
             confidence = detection.get("confidence") or ""
             triggered_policy = policy.get("reason") or policy.get("policy_id") or ""
-            explanation = detection.get("attack_type") or log.attack_type or ""
+            detection.get("attack_type") or log.attack_type or ""
 
             rows.append({
                 "timestamp": log.timestamp.isoformat() if log.timestamp else "",
@@ -1075,3 +1076,116 @@ async def export_threat_logs(
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+# ---------------------------------------------------------------------------
+# Internal: test key provisioning (used by CI / security regression workflows)
+# ---------------------------------------------------------------------------
+
+class _TestKeyRequest(BaseModel):
+    name: str = "ci-test-key"
+    type: str = "test"
+
+
+@router.post(
+    "/internal/test-keys",
+    summary="Provision CI Test API Key",
+    tags=["Management"],
+    include_in_schema=False,  # Hidden from public Swagger docs
+)
+async def provision_test_key(
+    request: Request,
+    body: _TestKeyRequest,
+    db: AsyncSession | None = Depends(get_optional_db),
+):
+    """
+    Create a short-lived test API key for CI/CD regression suites.
+
+    Authentication uses the ``X-Internal-Secret`` header (must match the
+    ``SECRET_KEY`` environment variable).  This endpoint is intentionally
+    not exposed in the public OpenAPI schema.
+
+    Returns:
+        ``{"key": "<full_api_key>", "key_id": "<uuid>", "name": "<name>"}``
+    """
+    secret_key = os.getenv("SECRET_KEY", "")
+    provided = request.headers.get("X-Internal-Secret", "")
+
+    # Constant-time comparison to prevent timing attacks
+    import hmac as _hmac
+    if not secret_key or not _hmac.compare_digest(
+        provided.encode("utf-8"), secret_key.encode("utf-8")
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid or missing X-Internal-Secret header",
+        )
+
+    full_key, key_hash, key_prefix = APIKey.generate_key()
+
+    if db is not None:
+        # Provision an ephemeral key (24-hour TTL) attached to a stable CI user.
+        # Fresh CI databases do not have an admin yet, so we create a service
+        # owner instead of returning an in-memory key that normal API auth
+        # cannot validate.
+        try:
+            admin_result = await db.execute(
+                select(User).where(User.role.in_(["admin", "owner", "superuser"])).limit(1)
+            )
+            admin_user = admin_result.scalar_one_or_none()
+
+            if admin_user is None:
+                ci_email = "ci-security@koreshield.local"
+                ci_user_result = await db.execute(
+                    select(User).where(User.email == ci_email).limit(1)
+                )
+                admin_user = ci_user_result.scalar_one_or_none()
+
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
+            if admin_user is None:
+                admin_user = User(
+                    id=uuid.uuid4(),
+                    email="ci-security@koreshield.local",
+                    password_hash=_hash_password(secrets.token_urlsafe(32)),
+                    name="CI Security Service",
+                    role="owner",
+                    status="active",
+                    email_verified=True,
+                    created_at=now,
+                    updated_at=now,
+                    user_metadata={"system_user": True, "purpose": "security_ci"},
+                )
+                db.add(admin_user)
+                await db.flush()
+                logger.info(
+                    "CI security service user created",
+                    user_id=str(admin_user.id),
+                    email=admin_user.email,
+                )
+
+            api_key_record = APIKey(
+                user_id=admin_user.id,
+                key_hash=key_hash,
+                key_prefix=key_prefix,
+                name=body.name,
+                description=f"CI test key (type={body.type})",
+                expires_at=now + timedelta(hours=24),
+            )
+            db.add(api_key_record)
+            await db.commit()
+            await db.refresh(api_key_record)
+            logger.info(
+                "CI test key provisioned",
+                key_id=str(api_key_record.id),
+                name=body.name,
+                user_id=str(admin_user.id),
+            )
+            return {"key": full_key, "key_id": str(api_key_record.id), "name": body.name}
+        except Exception as exc:
+            await db.rollback()
+            logger.warning("Could not persist CI test key to DB", error=str(exc))
+
+    # Fallback: return the key without DB persistence (still usable for
+    # auth-less smoke tests that don't hit the DB-backed key lookup).
+    logger.info("CI test key issued (in-memory fallback)", name=body.name)
+    return {"key": full_key, "key_id": str(uuid.uuid4()), "name": body.name}

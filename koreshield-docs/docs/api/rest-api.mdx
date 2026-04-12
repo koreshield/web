@@ -3,7 +3,7 @@ title: REST API
 description: Generated OpenAPI contract, authentication model, and endpoint reference for KoreShield APIs.
 slug: /api/rest-api
 last_update:
-  date: 2026-03-10
+  date: 2026-04-12
 ---
 
 # REST API
@@ -18,9 +18,9 @@ KoreShield's REST API contract is generated from the live FastAPI app.
 
 Protected endpoints require authentication via one of these methods:
 
-1. `Authorization: Bearer <jwt>`  -  JWT issued via the dashboard login
-2. `X-API-Key: ks_...`  -  API key provisioned via the dashboard
-3. `ks_access_token` httpOnly cookie  -  JWT set during login
+1. `Authorization: Bearer <jwt>` — JWT issued via the dashboard login
+2. `X-API-Key: ks_...` — API key provisioned via the dashboard
+3. `ks_access_token` httpOnly cookie — JWT set during login
 
 JWT validation is strict:
 
@@ -37,21 +37,37 @@ JWT validation is strict:
 |---|---|---|---|
 | `/health` | GET | None | Basic health check |
 | `/health/providers` | GET | None | Per-provider health status |
-| `/status` | GET | None | Full status with statistics and provider info |
+| `/status` | GET | None | Full system status with statistics |
 | `/metrics` | GET | None | Prometheus-format metrics |
 
 ### Security Proxy
 
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
-| `/v1/chat/completions` | POST | Required | OpenAI-compatible chat endpoint with security scanning |
+| `/v1/chat/completions` | POST | Required | OpenAI-compatible chat endpoint — scan + forward + return |
 | `/v1/rag/scan` | POST | Required | RAG context scanning for indirect injection |
-| `/v1/scan` | POST | Required | Scan a single prompt or message |
-| `/v1/scan/batch` | POST | Required | Scan multiple inputs in one request |
-| `/v1/scans` | GET | Required | List recent scan results |
-| `/v1/scans/{scan_id}` | GET | Required | Fetch a single scan result |
+| `/v1/rag/scans` | GET | Required | List RAG scan history |
+| `/v1/rag/scans/{id}` | GET | Required | Retrieve a RAG scan by ID |
+| `/v1/rag/scans/{id}/pack` | GET | Required | Download full RAG scan pack (ZIP) |
+| `/v1/scan` | POST | Required | Scan a single prompt for threats |
+| `/v1/scan/batch` | POST | Required | Scan multiple prompts in one request |
+| `/v1/scans` | GET | Required | List recent prompt scan results |
+| `/v1/scans/{scan_id}` | GET | Required | Fetch a single scan result by ID |
 
 All protected proxy endpoints are rate-limited via SlowAPI (default: `60/minute`, configurable via `security.rate_limit` in config).
+
+### Tool Governance
+
+| Endpoint | Method | Auth | Description |
+|---|---|---|---|
+| `/v1/tools/scan` | POST | Required | Scan a tool/function call for security risks |
+| `/v1/tools/sessions` | POST | Required | Create a governed runtime session |
+| `/v1/tools/sessions` | GET | Required | List active/recent tool sessions |
+| `/v1/tools/sessions/{id}` | GET | Required | Retrieve a session by ID |
+| `/v1/tools/sessions/{id}/state` | POST | Required | Update session state |
+| `/v1/tools/reviews` | GET | Required | List pending human-review tickets |
+| `/v1/tools/reviews/{id}` | GET | Required | Retrieve a review ticket |
+| `/v1/tools/reviews/{id}/decision` | POST | Required | Approve or reject a review ticket |
 
 ### Analytics & Reports
 
@@ -59,6 +75,120 @@ All protected proxy endpoints are rate-limited via SlowAPI (default: `60/minute`
 |---|---|---|---|
 | `/v1/analytics/*` | Various | Required | Usage and security analytics |
 | `/v1/reports/*` | Various | Required | Generate and download reports |
+
+### Management
+
+| Endpoint | Method | Auth | Description |
+|---|---|---|---|
+| `/v1/management/signup` | POST | None | Create an account |
+| `/v1/management/login` | POST | None | Obtain a JWT token |
+| `/v1/management/api-keys` | POST | Required | Generate an API key |
+| `/v1/management/api-keys` | GET | Required | List API keys |
+| `/v1/management/api-keys/{id}` | DELETE | Required | Revoke an API key |
+| `/v1/management/logs` | GET | Required | Request audit logs |
+
+## `/v1/chat/completions` — Proxy Endpoint
+
+### Streaming
+
+Pass `"stream": true` in the JSON body to receive a `text/event-stream` (Server-Sent Events) response. Tokens arrive as OpenAI SSE chunks (`data: {...}\n\n`) and the stream ends with `data: [DONE]\n\n`. This works the same way regardless of which backend provider is selected.
+
+```bash
+curl -s -N -X POST https://api.koreshield.com/v1/chat/completions \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": true
+  }'
+```
+
+### Automatic Model Routing
+
+KoreShield routes requests to the correct upstream provider based on the model name prefix — no extra configuration needed:
+
+| Model prefix | Provider |
+|---|---|
+| `gpt-*`, `o1-*`, `o3-*`, `o4-*` | OpenAI |
+| `claude-*` | Anthropic |
+| `gemini-*` | Google Gemini |
+| `deepseek-*` | DeepSeek |
+
+If the preferred provider is unhealthy, KoreShield automatically fails over to the next available provider.
+
+### Blocked Request Response
+
+When the prompt scan blocks a request, the endpoint returns **HTTP 403**:
+
+```json
+{
+  "blocked": true,
+  "reason": "High-confidence prompt injection detected",
+  "risk_class": "high",
+  "review_required": true,
+  "capability_signals": ["ignore_instructions", "role_override"],
+  "error": {
+    "code": "prompt_injection",
+    "message": "Blocked: High-confidence prompt injection detected"
+  }
+}
+```
+
+## `/v1/scan` — Prompt Scan Response
+
+### Response Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `blocked` | boolean | Whether the prompt was blocked |
+| `confidence` | float | Detection confidence 0–1 |
+| `attack_type` | string \| null | Primary detected attack category |
+| `attack_categories` | string[] | All detected attack categories |
+| `indicators` | string[] | Specific patterns that triggered detection |
+| `message` | string | Human-readable scan summary |
+| `request_id` | string | Unique ID for this scan (use in audit logs) |
+| `severity` | string | `none` \| `low` \| `medium` \| `high` \| `critical` |
+| `threat_level` | string | Detailed threat level string |
+| `reason` | string \| null | Detailed block reason (if blocked) |
+| `processing_time_ms` | float | Server-side processing time |
+| `timestamp` | string | ISO 8601 UTC timestamp |
+
+Returns **HTTP 403** when `blocked: true`, **HTTP 200** otherwise.
+
+```json title="Example safe response (HTTP 200)"
+{
+  "blocked": false,
+  "confidence": 0.04,
+  "attack_type": null,
+  "attack_categories": [],
+  "indicators": [],
+  "message": "Prompt is safe.",
+  "request_id": "3e4f5a6b-...",
+  "severity": "none",
+  "threat_level": "none",
+  "reason": null,
+  "processing_time_ms": 8.2,
+  "timestamp": "2026-04-12T10:30:00Z"
+}
+```
+
+```json title="Example blocked response (HTTP 403)"
+{
+  "blocked": true,
+  "confidence": 0.94,
+  "attack_type": "prompt_injection",
+  "attack_categories": ["prompt_injection", "system_override"],
+  "indicators": ["ignore previous instructions", "reveal system prompt"],
+  "message": "Threat detected: High-confidence prompt injection.",
+  "request_id": "9a8b7c6d-...",
+  "severity": "high",
+  "threat_level": "high",
+  "reason": "Multiple injection patterns detected with high confidence",
+  "processing_time_ms": 11.4,
+  "timestamp": "2026-04-12T10:30:01Z"
+}
+```
 
 ## WebSocket
 

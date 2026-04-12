@@ -13,18 +13,15 @@ REST API endpoints for tenant administration including:
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 from datetime import datetime
-import secrets
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .tenant_models import (
     Tenant, TenantCreate, TenantUpdate, TenantConfigurationUpdate,
     TenantAPIKeyCreate, TenantStatus, TenantTier, generate_api_key, hash_api_key
 )
-from .tenant_utils import get_current_tenant, require_tenant, require_active_tenant
 from .tenant_database import get_tenant_db_session, get_tenant_config_manager
 from .tenant_quotas import get_resource_quota_manager
 from .tenant_security import get_tenant_audit_logger

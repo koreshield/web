@@ -2,17 +2,13 @@
 
 import asyncio
 import time
-import json
-from typing import Dict, List, Optional, Any, Union, AsyncGenerator, Callable
-from contextlib import asynccontextmanager
+from typing import Dict, List, Optional, Any, Union, Callable
 import httpx
 
 from .types import (
     AuthConfig,
     ScanRequest,
     ScanResponse,
-    BatchScanRequest,
-    BatchScanResponse,
     DetectionIndicator,
     DetectionResult,
     DetectionType,
@@ -21,11 +17,9 @@ from .types import (
     RAGPreflightResult,
     RAGScanRequest,
     RAGScanResponse,
-    StreamingScanRequest,
     StreamingScanResponse,
     SecurityPolicy,
     PerformanceMetrics,
-    ThreatLevel,
     ToolScanResponse,
     ToolCallPreflightResult,
     ToolTrustContext,
@@ -102,7 +96,7 @@ class AsyncKoreShieldClient:
             headers={
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
-                "User-Agent": f"koreshield-python-sdk/0.3.5",
+                "User-Agent": f"koreshield-python-sdk/0.3.6",
             },
         )
 
@@ -758,3 +752,96 @@ class AsyncKoreShieldClient:
                 status_code=response.status_code,
                 response_data=data,
             )
+
+    # ------------------------------------------------------------------
+    # LLM Proxy — chat completions (scan → forward → return)
+    # ------------------------------------------------------------------
+
+    async def chat_completion(
+        self,
+        messages: List[Dict[str, Any]],
+        model: str = "gpt-4o-mini",
+        **kwargs,
+    ) -> Dict[str, Any]:
+        """Async version of ``KoreShieldClient.chat_completion``.
+
+        Args:
+            messages: OpenAI-format message list.
+            model: Model identifier.  KoreShield routes automatically by prefix
+                (gpt-* → OpenAI, claude-* → Anthropic, gemini-* → Gemini, etc.).
+            **kwargs: Additional provider parameters.
+
+        Returns:
+            OpenAI-compatible chat completion response dict.
+        """
+        payload: Dict[str, Any] = {"messages": messages, "model": model, **kwargs}
+        payload.pop("stream", None)
+        return await self._make_request("POST", "/v1/chat/completions", data=payload)
+
+    async def chat_completion_stream(
+        self,
+        messages: List[Dict[str, Any]],
+        model: str = "gpt-4o-mini",
+        **kwargs,
+    ):
+        """Async streaming chat completion through the KoreShield proxy.
+
+        Yields text delta strings as they arrive from the upstream provider.
+        The prompt is scanned before streaming begins.
+
+        Args:
+            messages: OpenAI-format message list.
+            model: Model identifier.
+            **kwargs: Additional provider parameters.
+
+        Yields:
+            str: Content delta from each SSE chunk.
+
+        Example::
+
+            async for token in client.chat_completion_stream(
+                model="claude-3-5-sonnet-20241022",
+                messages=[{"role": "user", "content": "Hello"}],
+            ):
+                print(token, end="", flush=True)
+        """
+        import json as _json
+
+        url = f"{self.auth_config.base_url}/v1/chat/completions"
+        payload: Dict[str, Any] = {
+            "messages": messages,
+            "model": model,
+            "stream": True,
+            **{k: v for k, v in kwargs.items() if k != "stream"},
+        }
+        headers = {
+            "Authorization": f"Bearer {self.auth_config.api_key}",
+            "Content-Type": "application/json",
+            "Accept": "text/event-stream",
+        }
+
+        async with self.client.stream("POST", url, json=payload, headers=headers) as response:
+            if response.status_code == 403:
+                data = response.json() if response.content else {}
+                raise ServerError(
+                    data.get("reason", "Prompt blocked by KoreShield"),
+                    status_code=403,
+                    response_data=data,
+                )
+            response.raise_for_status()
+
+            async for line in response.aiter_lines():
+                if not line.startswith("data: "):
+                    continue
+                payload_str = line[6:].strip()
+                if payload_str == "[DONE]":
+                    break
+                try:
+                    chunk = _json.loads(payload_str)
+                except _json.JSONDecodeError:
+                    continue
+                choices = chunk.get("choices", [])
+                if choices:
+                    content = choices[0].get("delta", {}).get("content", "")
+                    if content:
+                        yield content

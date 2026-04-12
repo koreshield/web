@@ -82,7 +82,7 @@ function HomepageHero() {
 
 				<p className={styles.heroSubtitle}>
 					KoreShield detects and blocks prompt injection, data exfiltration, and adversarial
-					inputs before they reach your AI models  -  in under 1ms.
+					inputs before they reach your AI models  -  in under 30ms.
 				</p>
 
 				<div className={styles.heroCta}>

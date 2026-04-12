@@ -13,14 +13,12 @@ Automated tenant provisioning system that handles:
 
 from typing import Dict, List, Optional, Any
 from uuid import UUID
-import asyncio
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from .tenant_models import (
     Tenant, TenantCreate, TenantTier, TenantStatus,
-    TenantConfiguration, TenantResourceUsage, TenantAPIKey,
-    generate_api_key, hash_api_key
+    TenantAPIKey, generate_api_key, hash_api_key
 )
 from .tenant_database import TenantDatabaseManager, TenantConfigurationManager
 from .tenant_quotas import ResourceQuotaManager
@@ -559,17 +557,14 @@ class TenantDeprovisioner:
     async def _cleanup_configurations(self, tenant_id: str):
         """Clean up tenant configurations."""
         # Configuration cleanup would be handled by the config manager
-        pass
 
     async def _cleanup_quotas(self, tenant_id: str):
         """Clean up resource quotas."""
         # Quota cleanup would be handled by the quota manager
-        pass
 
     async def _cleanup_audit_logs(self, tenant_id: str):
         """Clean up audit logs."""
         # Audit log cleanup would be handled by retention policies
-        pass
 
     async def _drop_tenant_schema(self, tenant_id: str):
         """Drop the tenant's database schema."""

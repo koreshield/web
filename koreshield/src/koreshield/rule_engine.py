@@ -2,7 +2,7 @@
 Custom Rule Engine with Domain-Specific Language (DSL) for flexible pattern matching.
 """
 
-from typing import Dict, List, Optional, Any, Callable, cast
+from typing import Dict, List, Optional, Any, cast
 import re
 import structlog
 from dataclasses import dataclass, field
@@ -105,11 +105,21 @@ class RuleEngine:
             CustomRule(
                 id="credential_theft",
                 name="Credential Theft Attempts",
-                description="Detects attempts to extract credentials",
-                pattern=r"(api[_-]?key|password|secret|token|auth)",
+                description="Detects intent to steal, dump, or enumerate credentials — NOT benign mentions of 'password' or 'token' (e.g. 'reset my password')",
+                # Require an explicit extraction/theft verb paired with the credential noun,
+                # OR the credential noun paired with an attacker-controlled destination.
+                # This prevents false positives on 'resetting my password', 'OAuth token expired', etc.
+                pattern=(
+                    r"(?:steal|harvest|dump|exfiltrate|extract|enumerate|scrape|grab|leak)\s+"
+                    r"(?:all\s+)?(?:the\s+)?(?:api[_-]?key|password|secret|token|credentials?|auth\s*key)"
+                    r"|"
+                    r"(?:api[_-]?key|password|secret|token|credentials?)\s+(?:to\s+attacker|to\s+external|for\s+exfil|dump|theft|breach)"
+                    r"|"
+                    r"list\s+all\s+(?:stored\s+)?(?:api[_-]?key|password|token|credentials?)"
+                ),
                 pattern_type="regex",
-                severity=RuleSeverity.MEDIUM,
-                action=RuleAction.WARN,
+                severity=RuleSeverity.HIGH,
+                action=RuleAction.BLOCK,
                 tags=["credentials", "privacy"],
             ),
         ]

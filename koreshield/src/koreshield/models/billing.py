@@ -1,16 +1,11 @@
 import uuid
-from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, JSON, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base
-
-
-def utcnow_naive() -> datetime:
-    """UTC now as naive datetime for existing DB schema compatibility."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+from ..utils import utcnow_naive
 
 
 class BillingAccount(Base):

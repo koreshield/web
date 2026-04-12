@@ -49,38 +49,39 @@ export class KoreShieldService implements OnDestroy {
     this.isConnectedSubject.next(false);
   }
 
+  /**
+   * Returns the initialized client or throws a descriptive error.
+   * Centralises the null-guard so individual methods stay clean.
+   */
+  private get assertedClient(): KoreShieldClient {
+    if (!this.client) {
+      throw new Error(
+        'KoreShield client is not initialized. Call initialize(config) before using this service.'
+      );
+    }
+    return this.client;
+  }
+
   async createChatCompletion(
     request: ChatCompletionRequest,
     securityOptions?: SecurityOptions
   ): Promise<ChatCompletionResponse> {
-    if (!this.client) {
-      throw new Error('KoreShield client not initialized');
-    }
-    return this.client.createChatCompletion(request, securityOptions);
+    return this.assertedClient.createChatCompletion(request, securityOptions);
   }
 
   async getSecurityEvents(
     limit: number = 50,
     offset: number = 0
   ): Promise<SecurityEvent[]> {
-    if (!this.client) {
-      throw new Error('KoreShield client not initialized');
-    }
-    return this.client.getSecurityEvents(limit, offset);
+    return this.assertedClient.getSecurityEvents(limit, offset);
   }
 
   async getMetrics(): Promise<MetricsResponse> {
-    if (!this.client) {
-      throw new Error('KoreShield client not initialized');
-    }
-    return this.client.getMetrics();
+    return this.assertedClient.getMetrics();
   }
 
   async health(): Promise<{ status: string; version: string; uptime: number }> {
-    if (!this.client) {
-      throw new Error('KoreShield client not initialized');
-    }
-    return this.client.health();
+    return this.assertedClient.health();
   }
 
   ngOnDestroy(): void {

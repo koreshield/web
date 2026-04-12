@@ -10,8 +10,8 @@ Multi-tenant architecture with complete isolation between tenants including:
 - Tenant-specific audit logging
 """
 
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Set
+from datetime import datetime
+from typing import Dict, List, Optional, Any
 from enum import Enum
 from dataclasses import dataclass, field
 import uuid
@@ -19,8 +19,7 @@ import hashlib
 
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, JSON, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
-from sqlalchemy.orm import relationship, declarative_base
-from sqlalchemy.schema import CreateSchema
+from sqlalchemy.orm import relationship
 from pydantic import BaseModel, Field, field_validator
 
 from .models.base import Base

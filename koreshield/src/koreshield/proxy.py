@@ -19,7 +19,7 @@ import asyncio
 import httpx
 import structlog
 from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy import select, func, delete
 
 from .detector import AttackDetector
@@ -40,7 +40,7 @@ from .services.governance import GovernanceService
 logger = structlog.get_logger(__name__)
 
 from fastapi.middleware.cors import CORSMiddleware
-from .api.management import router as management_router
+from .api.management import router as management_router, provision_test_key as _provision_test_key
 from .api.analytics import router as analytics_router
 from .api.rbac import router as rbac_router
 from .api.reports import router as reports_router
@@ -234,6 +234,17 @@ class KoreShieldProxy:
         self.app.include_router(billing_router, prefix="/v1")
         self.app.include_router(websocket_router)
 
+        # Internal CI/CD management endpoints (no prefix → /internal/…)
+        from fastapi import APIRouter as _APIRouter
+        _internal_router = _APIRouter(prefix="/internal", tags=["Internal"])
+        _internal_router.add_api_route(
+            "/test-keys",
+            _provision_test_key,
+            methods=["POST"],
+            include_in_schema=False,
+        )
+        self.app.include_router(_internal_router)
+
         if self.redis_async_client:
             websocket_module.set_redis_client(self.redis_async_client)
         
@@ -380,7 +391,24 @@ class KoreShieldProxy:
             return await self._handle_metrics()
 
         # OpenAI-compatible chat completions endpoint
-        @self.app.post("/v1/chat/completions", tags=["Chat"], summary="Protected Chat Completions", description="OpenAI-compatible chat completions endpoint with built-in threat detection. Drop-in replacement for OpenAI's /v1/chat/completions.")
+        @self.app.post(
+            "/v1/chat/completions",
+            tags=["Chat"],
+            summary="Protected Chat Completions",
+            description=(
+                "OpenAI-compatible chat completions endpoint with built-in threat detection. "
+                "Drop-in replacement for OpenAI's `/v1/chat/completions`.\n\n"
+                "**Streaming**: Pass `\"stream\": true` in the request body to receive a "
+                "`text/event-stream` (Server-Sent Events) response in OpenAI SSE format.\n\n"
+                "**Model routing** (automatic — no config needed):\n"
+                "- `gpt-*` / `o1-*` / `o3-*` → OpenAI\n"
+                "- `claude-*` → Anthropic\n"
+                "- `gemini-*` → Google Gemini\n"
+                "- `deepseek-*` → DeepSeek\n\n"
+                "If the preferred provider is unavailable, KoreShield fails over to the next "
+                "healthy provider automatically."
+            ),
+        )
         @self.limiter.limit(rate_limit)
         async def chat_completions(request: Request):
             return await self._handle_chat_completion(request)
@@ -542,7 +570,25 @@ class KoreShieldProxy:
             return Response(content=buffer.read(), media_type="application/zip", headers=headers)
 
         # Prompt scanning endpoints
-        @self.app.post("/v1/scan", tags=["Scan"], summary="Scan Prompt", description="Scan a single prompt for threats including prompt injection, PII leakage, and policy violations. Returns a threat assessment with confidence scores and a policy decision.")
+        @self.app.post(
+            "/v1/scan",
+            tags=["Scan"],
+            summary="Scan Prompt",
+            description=(
+                "Scan a single prompt for threats including prompt injection, PII leakage, "
+                "jailbreak attempts, and policy violations.\n\n"
+                "**Response fields** (stable contract):\n"
+                "- `blocked` — whether KoreShield blocked this prompt\n"
+                "- `confidence` — detection confidence 0–1\n"
+                "- `attack_type` — primary attack category or `null`\n"
+                "- `attack_categories` — all detected categories\n"
+                "- `indicators` — specific patterns that triggered detection\n"
+                "- `message` — human-readable summary\n"
+                "- `request_id` — unique identifier for audit purposes\n"
+                "- `severity` — `none | low | medium | high | critical`\n\n"
+                "Returns **HTTP 403** when `blocked: true`, **HTTP 200** otherwise."
+            ),
+        )
         @self.limiter.limit(rate_limit)
         async def scan_prompt(request: Request):
             return await self._handle_scan(request)
@@ -681,13 +727,16 @@ class KoreShieldProxy:
 
     async def _handle_chat_completion(self, request: Request) -> Response:
         """
-        Handle OpenAI chat completion requests with security checks.
+        Handle OpenAI-compatible chat completion requests with security scanning.
 
-        Args:
-            request: FastAPI request object
+        Supports both standard (non-streaming) and streaming (Server-Sent Events)
+        responses.  When ``stream: true`` is present in the request body the
+        method returns a ``StreamingResponse`` with ``text/event-stream`` content
+        type that forwards raw SSE bytes from the selected LLM provider.
 
-        Returns:
-            Response with either the LLM response or an error
+        Model-aware routing automatically selects the correct upstream provider
+        (OpenAI for ``gpt-*``, Anthropic for ``claude-*``, etc.) and falls back
+        to any other healthy provider if the preferred one is unavailable.
         """
         start_time = time.time()
 
@@ -703,14 +752,13 @@ class KoreShieldProxy:
         try:
             principal = await self._authenticate_request(request)
 
-            # Parse request body
+            # ── Parse body ──────────────────────────────────────────────────
             try:
                 body = await request.json()
             except Exception as e:
                 logger.error("Failed to parse JSON", request_id=request_id, error=str(e))
                 raise HTTPException(status_code=400, detail="Invalid JSON in request body")
 
-            # Validate required fields
             if not isinstance(body, dict):
                 raise HTTPException(status_code=400, detail="Request body must be a JSON object")
 
@@ -720,26 +768,22 @@ class KoreShieldProxy:
                     status_code=400, detail="'messages' field is required and must be a list"
                 )
 
-            model = body.get("model", "gpt-3.5-turbo")
+            model = body.get("model", "gpt-4o-mini")
+            stream = bool(body.get("stream", False))
 
-            # Extract user messages for analysis
-            user_messages = []
-            for msg in messages:
-                if isinstance(msg, dict) and msg.get("role") == "user":
-                    content = msg.get("content", "")
-                    if isinstance(content, str):
-                        user_messages.append(content)
+            # ── Extract user content for security scanning ───────────────────
+            user_messages = [
+                msg.get("content", "")
+                for msg in messages
+                if isinstance(msg, dict) and msg.get("role") == "user"
+                and isinstance(msg.get("content", ""), str)
+            ]
+            combined_prompt = " ".join(user_messages)
 
-            combined_prompt = " ".join(user_messages) if user_messages else ""
-
-            # If no user content found, still process but log warning
             if not combined_prompt:
                 logger.warning("No user message content found", request_id=request_id)
-                combined_prompt = ""  # Empty string for analysis
 
-            # Update statistics
             self.telemetry.increment_stat("requests_total")
-
             self.logger.log_request(
                 request_id=request_id,
                 method="POST",
@@ -748,10 +792,9 @@ class KoreShieldProxy:
                 message_count=len(messages),
             )
 
-            # Enhanced Security Scan
+            # ── Security scan ────────────────────────────────────────────────
             scan = self.security.scan_prompt(combined_prompt, context={"principal": principal})
             should_block = scan["blocked"]
-            reason = scan["reason"]
 
             if scan["detection"].get("is_attack"):
                 await self._handle_event_broadcast(
@@ -768,32 +811,82 @@ class KoreShieldProxy:
                 )
 
             if should_block:
+                self.telemetry.increment_stat("requests_blocked")
+                self.telemetry.increment_stat("attacks_detected")
                 return JSONResponse(
                     status_code=403,
                     content={
                         "blocked": True,
-                        "reason": reason,
+                        "reason": scan["reason"],
                         "risk_class": scan.get("severity", "high"),
                         "review_required": True,
                         "capability_signals": scan.get("detection", {}).get("indicators", []),
                         "error": {
                             "code": "prompt_injection",
-                            "message": f"Blocked: {reason}"
-                        }
+                            "message": f"Blocked: {scan['reason']}",
+                        },
                     },
                 )
 
-            # Forward to provider via ProviderService
+            # ── Provider passthrough kwargs (everything except messages/model/stream) ──
+            passthrough = {
+                k: v for k, v in body.items()
+                if k not in ("messages", "model", "stream")
+            }
+
+            # ── Streaming response ───────────────────────────────────────────
+            if stream:
+                async def _sse_generator():
+                    try:
+                        async for chunk in self.provider_service.chat_completion_stream(
+                            messages=messages,
+                            model=model,
+                            **passthrough,
+                        ):
+                            yield chunk
+                    except Exception as exc:
+                        logger.error("Streaming provider error", request_id=request_id, error=str(exc))
+                        import json as _json
+                        err = {"error": {"message": "Provider streaming error", "type": "server_error"}}
+                        yield f"data: {_json.dumps(err)}\n\n".encode()
+                        yield b"data: [DONE]\n\n"
+
+                self.telemetry.increment_stat("requests_allowed")
+                # Fire-and-forget telemetry (we don't have token counts yet)
+                self.telemetry.queue_request_log({
+                    "request_id": request_id,
+                    "timestamp": datetime.now(timezone.utc),
+                    "provider": self.provider_service.get_last_used_provider(),
+                    "model": model,
+                    "method": request.method,
+                    "path": "/v1/chat/completions",
+                    "status_code": 200,
+                    "latency_ms": (time.time() - start_time) * 1000,
+                    "is_blocked": False,
+                    "user_id": principal.get("user_id"),
+                })
+
+                return StreamingResponse(
+                    _sse_generator(),
+                    media_type="text/event-stream",
+                    headers={
+                        "Cache-Control": "no-cache",
+                        "X-Accel-Buffering": "no",
+                        "X-Request-Id": request_id,
+                    },
+                )
+
+            # ── Non-streaming response ───────────────────────────────────────
             try:
                 response = await self.provider_service.chat_completion(
                     messages=messages,
                     model=model,
-                    **{k: v for k, v in body.items() if k not in ["messages", "model"]},
+                    **passthrough,
                 )
 
                 duration = time.time() - start_time
                 provider_name = self.provider_service.get_last_used_provider()
-                
+
                 self.telemetry.increment_stat("requests_allowed")
                 self.telemetry.queue_request_log({
                     "request_id": request_id,
@@ -813,24 +906,19 @@ class KoreShieldProxy:
 
             except Exception as e:
                 self.telemetry.increment_stat("errors")
-                logger.error("Provider error", error=str(e))
-                raise HTTPException(status_code=500, detail="Provider service unavailable")
+                logger.error("Provider error", request_id=request_id, error=str(e))
+                raise HTTPException(status_code=502, detail=f"Provider error: {e}")
 
         except HTTPException:
-            # Re-raise HTTP exceptions as-is
             raise
         except json.JSONDecodeError as e:
             logger.error("JSON decode error", request_id=request_id, error=str(e))
             raise HTTPException(status_code=400, detail="Invalid JSON in request body")
         except httpx.HTTPStatusError as e:
-            # Provider API errors
             logger.error(
                 "Provider API error", request_id=request_id, status_code=e.response.status_code
             )
-            raise HTTPException(
-                status_code=e.response.status_code,
-                detail="Provider service error",
-            )
+            raise HTTPException(status_code=e.response.status_code, detail="Provider service error")
         except Exception as e:
             self.telemetry.increment_stat("errors")
             logger.error(
@@ -1081,38 +1169,82 @@ class KoreShieldProxy:
         return JSONResponse(content=response_data)
 
     async def _handle_scan(self, request: Request) -> Response:
-        """Forward request to SecurityService for analysis."""
+        """
+        Scan a prompt for threats and return a structured assessment.
+
+        Response fields match the KoreShield Client Usage Guide contract:
+        ``blocked``, ``confidence``, ``attack_type``, ``attack_categories``,
+        ``indicators``, ``message``, ``request_id``, ``timestamp``.
+        """
         request_id = str(uuid.uuid4())
+        start_time = time.time()
         await self._authenticate_request(request)
         body = await request.json()
         scan = self.security.scan_prompt(
             body.get("prompt"),
-            context=body.get("context")
+            context=body.get("context"),
         )
+
         self.telemetry.increment_stat("requests_total")
         if scan["blocked"]:
             self.telemetry.increment_stat("requests_blocked")
             self.telemetry.increment_stat("attacks_detected")
-            
-            # Notify monitoring system for tests/dashboard
             asyncio.create_task(self.monitoring.notify_operational_event(
                 event_name="prompt_scan_completed",
                 severity="warning",
-                message=f"Prompt scan result: {'blocked' if scan['blocked'] else 'allowed'}",
+                message=f"Prompt scan blocked: {scan.get('reason', 'threat detected')}",
                 details={
                     "request_id": request_id,
                     "attack_type": scan["detection"].get("attack_type", "prompt_injection"),
                     "severity": scan["severity"],
-                    "action": "blocked"
+                    "action": "blocked",
                 },
-                publish_event_type="scan_event"
+                publish_event_type="scan_event",
             ))
 
-        return JSONResponse(content={
-            **scan,
-            "request_id": request_id,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        detection = scan.get("detection", {})
+        attack_type = detection.get("attack_type") or (
+            "prompt_injection" if scan["blocked"] else None
+        )
+        # Derive human-readable attack categories from indicators
+        indicators: list = detection.get("indicators", [])
+        # Build a concise human-facing message
+        if scan["blocked"]:
+            human_message = f"Threat detected: {scan.get('reason', attack_type or 'unknown')}."
+        elif detection.get("is_attack"):
+            human_message = "Potential threat detected but allowed by policy."
+        else:
+            human_message = "Prompt is safe."
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                # Primary guide-contract fields
+                "blocked": scan["blocked"],
+                "confidence": detection.get("confidence", scan.get("confidence", 0.0)),
+                "attack_type": attack_type,
+                "attack_categories": list({
+                    i.get("category") or i.get("type") or "unknown"
+                    for i in indicators
+                    if isinstance(i, dict)
+                } | ({attack_type} if attack_type else set())),
+                "indicators": [
+                    i.get("pattern") or i.get("name") or str(i)
+                    for i in indicators
+                    if i
+                ],
+                "message": human_message,
+                "request_id": request_id,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                # Extended fields — useful for dashboards and SOC workflows
+                "is_safe": scan.get("is_safe", not scan["blocked"]),
+                "severity": scan.get("severity", "none"),
+                "threat_level": scan.get("threat_level", "none"),
+                "reason": scan.get("reason"),
+                "processing_time_ms": (time.time() - start_time) * 1000,
+                "policy": scan.get("policy", {}),
+            },
+        )
 
     async def _handle_scan_batch(self, request: Request) -> Response:
         """Forward to SecurityService."""

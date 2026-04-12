@@ -13,29 +13,23 @@ class KoreShieldError(Exception):
 
 class AuthenticationError(KoreShieldError):
     """Raised when authentication fails."""
-    pass
 
 
 class ValidationError(KoreShieldError):
     """Raised when request validation fails."""
-    pass
 
 
 class RateLimitError(KoreShieldError):
     """Raised when rate limit is exceeded."""
-    pass
 
 
 class ServerError(KoreShieldError):
     """Raised when server returns an error."""
-    pass
 
 
 class NetworkError(KoreShieldError):
     """Raised when network communication fails."""
-    pass
 
 
 class TimeoutError(KoreShieldError):
     """Raised when request times out."""
-    pass

@@ -2,7 +2,7 @@
 Blocklist and Allowlist Management API for KoreShield.
 """
 
-from typing import Dict, List, Optional, Set, Any
+from typing import Dict, List, Optional, Any
 import structlog
 import json
 import os

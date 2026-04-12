@@ -1,0 +1,236 @@
+name: Security — Attack Detection Gate
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  # Allow manual trigger for ad-hoc regression runs
+  workflow_dispatch:
+
+# Only one security run per ref at a time; cancel in-flight runs on new push.
+concurrency:
+  group: security-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-regression:
+    name: SOC Regression Suite
+    runs-on: ubuntu-latest
+
+    env:
+      # Minimal stack config — no real cloud keys needed for detection tests
+      DEEPSEEK_API_KEY: "dummy_key_for_ci"
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/koreshield"
+      REDIS_URL: "redis://localhost:6379/0"
+      SECRET_KEY: "ci_secret_key_at_least_32_chars_long!!"
+      JWT_SECRET: "ci-jwt-secret-with-minimum-32-characters!!"
+      JWT_ISSUER: "koreshield-auth"
+      JWT_AUDIENCE: "koreshield-api"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "koreshield"
+      # Thresholds — gate criteria
+      MIN_DETECTION_RATE: "99"
+      MAX_FALSE_POSITIVE_RATE: "0"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── 1. Start the stack ───────────────────────────────────────────────────
+      - name: Start KoreShield stack (Docker Compose)
+        working-directory: ./koreshield
+        run: |
+          docker compose up -d --build
+          echo "Waiting for API to become healthy…"
+          if ! timeout 180s bash -c 'until curl -sf http://localhost:8000/health; do sleep 5; done'; then
+            echo "❌ Stack failed to start within 180s — dumping logs"
+            docker compose logs koreshield postgres redis
+            docker compose down
+            exit 1
+          fi
+          echo "✅ Stack is healthy"
+
+      # ── 2. Provision a CI test API key ───────────────────────────────────────
+      - name: Provision CI test API key
+        id: provision
+        working-directory: ./koreshield
+        run: |
+          set -euo pipefail
+
+          # Create a fresh test key via the management API.
+          # The management endpoint is internal-only and uses the SECRET_KEY header.
+          response_file=$(mktemp)
+          status_code=$(curl -sS -o "$response_file" -w "%{http_code}" -X POST http://localhost:8000/internal/test-keys \
+            -H "X-Internal-Secret: ${SECRET_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{"name": "ci-security-regression", "type": "test"}' \
+          ) || status_code="000"
+
+          # Fall back to env var if the management endpoint doesn't exist yet
+          # (pre-v0.4 stacks). The KS_CI_API_KEY secret must then be set in
+          # GitHub repo settings: Settings → Secrets → Actions.
+          if [ "$status_code" = "404" ]; then
+            if [ -z "${{ secrets.KS_CI_API_KEY }}" ]; then
+              echo "KS_CI_API_KEY is not configured and /internal/test-keys returned 404."
+              exit 1
+            fi
+
+            echo "Management endpoint not available — using KS_CI_API_KEY secret"
+            echo "api_key=${{ secrets.KS_CI_API_KEY }}" >> "$GITHUB_OUTPUT"
+          elif [ "$status_code" != "200" ]; then
+            echo "Failed to provision CI API key via /internal/test-keys (HTTP $status_code)."
+            cat "$response_file"
+            exit 1
+          else
+            KEY=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['key'])" "$response_file")
+            if [ -z "$KEY" ]; then
+              echo "Provisioning endpoint returned an empty key payload."
+              cat "$response_file"
+              exit 1
+            fi
+            echo "api_key=${KEY}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── 3. Set up Python for the test scripts ────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test script dependencies
+        run: pip install scikit-learn
+
+      # ── 4. Run 47-payload attack regression suite ────────────────────────────
+      - name: Run attack regression suite (attack_sim.py)
+        id: attack_sim
+        working-directory: ./soc
+        env:
+          KS_API_KEY: ${{ steps.provision.outputs.api_key }}
+        run: |
+          python attack_sim.py \
+            --api-base http://localhost:8000 \
+            --api-key "${KS_API_KEY}" \
+            --output /tmp/attack_results.json
+
+          # Parse results and enforce gate thresholds
+          python3 - <<'PYEOF'
+          import json, sys
+
+          with open("/tmp/attack_results.json") as f:
+              report = json.load(f)
+
+          s = report["summary"]
+          det  = s["detection_rate_pct"]
+          fp   = s["false_positive_rate_pct"]
+          errs = s["errors"]
+
+          print(f"\n{'='*60}")
+          print(f"  Attack Regression Results")
+          print(f"  Detection rate   : {det}%  (gate: >={int('${{ env.MIN_DETECTION_RATE }}')}%)")
+          print(f"  False positives  : {fp}%   (gate: =={int('${{ env.MAX_FALSE_POSITIVE_RATE }}')}%)")
+          print(f"  Errors           : {errs}")
+
+          if report.get("missed_attacks"):
+              print("\n  MISSED ATTACKS:")
+              for m in report["missed_attacks"]:
+                  name = m.get("name") or m.get("description") or "UNKNOWN_NAME"
+                  severity = m.get("severity", "UNKNOWN_SEVERITY")
+                  print(f"    [{m.get('id', 'UNKNOWN_ID')}] {name} ({severity})")
+
+          if report.get("false_positives"):
+              print("\n  FALSE POSITIVES:")
+              for fp_item in report["false_positives"]:
+                  name = fp_item.get("name") or fp_item.get("description") or "UNKNOWN_NAME"
+                  print(f"    [{fp_item.get('id', 'UNKNOWN_ID')}] {name}")
+          print('='*60)
+
+          failed = False
+          if det < ${{ env.MIN_DETECTION_RATE }}:
+              print(f"\n❌ GATE FAILED: detection rate {det}% < required {int('${{ env.MIN_DETECTION_RATE }}')}%")
+              failed = True
+          if fp > ${{ env.MAX_FALSE_POSITIVE_RATE }}:
+              print(f"\n❌ GATE FAILED: false positive rate {fp}% > allowed {int('${{ env.MAX_FALSE_POSITIVE_RATE }}')}%")
+              failed = True
+          if errs > 0:
+              print(f"\n⚠️  WARNING: {errs} test error(s) — review logs above")
+
+          if not failed:
+              print("\n✅ Attack regression gate PASSED")
+          sys.exit(1 if failed else 0)
+          PYEOF
+
+      # ── 5. Run 33-test tenant isolation suite ────────────────────────────────
+      - name: Run tenant isolation suite (tenant_isolation_test.py)
+        id: tenant_isolation
+        working-directory: ./soc
+        env:
+          KS_API_KEY: ${{ steps.provision.outputs.api_key }}
+        run: |
+          python tenant_isolation_test.py \
+            --api-base http://localhost:8000 \
+            --api-key "${KS_API_KEY}" \
+            --output /tmp/tenant_results.json
+
+          python3 - <<'PYEOF'
+          import json, sys
+
+          with open("/tmp/tenant_results.json") as f:
+              report = json.load(f)
+
+          s = report["summary"]
+          det  = s["detection_rate_pct"]
+          fp   = s["false_positive_rate_pct"]
+          errs = s["errors"]
+
+          print(f"\n{'='*60}")
+          print(f"  Tenant Isolation Results")
+          print(f"  Detection rate   : {det}%  (gate: >={int('${{ env.MIN_DETECTION_RATE }}')}%)")
+          print(f"  False positives  : {fp}%   (gate: =={int('${{ env.MAX_FALSE_POSITIVE_RATE }}')}%)")
+          print(f"  Errors           : {errs}")
+
+          if report.get("missed_attacks"):
+              print("\n  MISSED ATTACKS:")
+              for m in report["missed_attacks"]:
+                  name = m.get("name") or m.get("description") or "UNKNOWN_NAME"
+                  severity = m.get("severity", "UNKNOWN_SEVERITY")
+                  print(f"    [{m.get('id', 'UNKNOWN_ID')}] {name} ({severity})")
+
+          if report.get("false_positives"):
+              print("\n  FALSE POSITIVES:")
+              for fp_item in report["false_positives"]:
+                  name = fp_item.get("name") or fp_item.get("description") or "UNKNOWN_NAME"
+                  print(f"    [{fp_item.get('id', 'UNKNOWN_ID')}] {name}")
+          print('='*60)
+
+          failed = False
+          if det < ${{ env.MIN_DETECTION_RATE }}:
+              print(f"\n❌ GATE FAILED: detection rate {det}% < required {int('${{ env.MIN_DETECTION_RATE }}')}%")
+              failed = True
+          if fp > ${{ env.MAX_FALSE_POSITIVE_RATE }}:
+              print(f"\n❌ GATE FAILED: false positive rate {fp}% > allowed {int('${{ env.MAX_FALSE_POSITIVE_RATE }}')}%")
+              failed = True
+          if errs > 0:
+              print(f"\n⚠️  WARNING: {errs} test error(s) — review logs above")
+
+          if not failed:
+              print("\n✅ Tenant isolation gate PASSED")
+          sys.exit(1 if failed else 0)
+          PYEOF
+
+      # ── 6. Upload results as artifacts ───────────────────────────────────────
+      - name: Upload test result artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-test-results-${{ github.run_id }}
+          path: |
+            /tmp/attack_results.json
+            /tmp/tenant_results.json
+          retention-days: 30
+
+      # ── 7. Tear down stack ───────────────────────────────────────────────────
+      - name: Tear down stack
+        if: always()
+        working-directory: ./koreshield
+        run: docker compose down -v

@@ -3,7 +3,6 @@ Azure OpenAI API provider integration.
 """
 
 from typing import Any, Dict, Optional
-import json
 
 from .base import BaseProvider
 
