@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { api } from '../lib/api-client';
-import { authService } from '../lib/auth';
+import { useAuthState } from '../hooks/useAuthState';
 import { useToast } from '../components/ToastNotification';
 
 interface TeamMember {
@@ -72,6 +72,7 @@ export function TeamDetailsPage() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { success, error } = useToast();
+	const { user: currentUser } = useAuthState();
 	const [showInviteModal, setShowInviteModal] = useState(false);
 	const [showDashboardModal, setShowDashboardModal] = useState(false);
 	const [isDeletingTeam, setIsDeletingTeam] = useState(false);
@@ -251,7 +252,7 @@ export function TeamDetailsPage() {
 
 	const canManageTeam = ['owner', 'admin'].includes(team.my_role);
 	const isOwner = team.my_role === 'owner';
-	const currentUserId = authService.getCurrentUser()?.id;
+	const currentUserId = currentUser?.id;
 
 	return (
 		<div>

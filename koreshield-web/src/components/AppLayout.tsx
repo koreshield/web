@@ -30,6 +30,7 @@ import { useTheme } from '../context/ThemeContext';
 import { authService } from '../lib/auth';
 import { useAuthState } from '../hooks/useAuthState';
 import { wsClient } from '../lib/websocket-client';
+import { ThemeToggle } from './ThemeToggle';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -376,6 +377,27 @@ export function AppLayout() {
 		wsClient.subscribe(['threat_detected', 'provider_health_change', 'cost_threshold_alert', 'system_status_update']);
 	}, [isAuthenticated]);
 
+	useEffect(() => {
+		if (!mobileOpen) {
+			document.body.style.overflow = '';
+			return;
+		}
+
+		document.body.style.overflow = 'hidden';
+
+		const handleEscape = (event: KeyboardEvent) => {
+			if (event.key === 'Escape') {
+				setMobileOpen(false);
+			}
+		};
+
+		window.addEventListener('keydown', handleEscape);
+		return () => {
+			document.body.style.overflow = '';
+			window.removeEventListener('keydown', handleEscape);
+		};
+	}, [mobileOpen]);
+
 	const handleLogout = () => {
 		wsClient.disconnect();
 		authService.logout();
@@ -469,6 +491,7 @@ export function AppLayout() {
 
 					{/* Right side controls */}
 					<div className="flex items-center gap-2">
+						<ThemeToggle className="px-2.5 py-1.5" />
 						<WsStatus />
 						<UserMenu onLogout={handleLogout} />
 					</div>

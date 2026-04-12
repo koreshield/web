@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 import { SEOConfig } from '../lib/seo-config';
@@ -7,27 +7,38 @@ import { SEOConfig } from '../lib/seo-config';
 const team = [
 	{
 		name: 'Teslim O. Kazeem',
-		role: 'Co-founder & CEO',
-		bio: 'MSc Data Science. Leading the vision for enterprise-grade LLM security.',
+		role: 'CEO & Product Lead',
+		bio: 'MSc Data Science. Leading the vision for enterprise grade LLM security.',
 		image: '/team/teslim-kazeem.png',
+		linkedin: 'https://www.linkedin.com/in/teslim-kazeem/',
 	},
 	{
 		name: 'Isaac Emmanuel',
-		role: 'Co-founder & CTO',
-		bio: '15+ years full-stack engineering. Architecting scalable security infrastructure.',
+		role: 'CTO & Engineering Lead',
+		bio: '15+ years fullstack engineering. Mathematician & Computer Scientist. Architecting scalable security infrastructure.',
 		image: '/team/isaac-emmanuel.jpg',
+		linkedin: 'https://www.linkedin.com/in/isaacnsisong/',
 	},
 	{
 		name: 'Ahmed Oladapo',
-		role: 'Co-founder & Security Engineer (Blue Team)',
+		role: 'Security Engineer (IR)',
 		bio: 'Security engineer focused on detection coverage, and response workflows.',
 		image: '/team/ahmed-oladapo.png',
+		linkedin: 'https://www.linkedin.com/in/ahmed-oladapo',
+	},
+	{
+		name: 'Uwagba Obinna',
+		role: 'AI Risk & GRC Lead',
+		bio: 'Leading governance, risk, and compliance workflows across KoreShield.',
+		image: null,
+		linkedin: 'https://www.linkedin.com/in/uwagba-obinna',
 	},
 	{
 		name: 'Victor Emmanuel',
 		role: 'Frontend Engineer & Designer',
 		bio: 'Crafting intuitive interfaces for complex security workflows.',
 		image: null,
+		linkedin: null,
 	},
 ];
 
@@ -208,6 +219,18 @@ export default function AboutPage() {
 									{member.role}
 								</span>
 								<p className="text-sm text-muted-foreground leading-relaxed">{member.bio}</p>
+								{member.linkedin ? (
+									<a
+										href={member.linkedin}
+										target="_blank"
+										rel="noreferrer noopener"
+										className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-electric-green hover:text-electric-green/80 transition-colors"
+										aria-label={`${member.name} on LinkedIn`}
+									>
+										<Linkedin className="w-4 h-4" />
+										LinkedIn
+									</a>
+								) : null}
 							</motion.div>
 						))}
 					</div>
