@@ -24,17 +24,6 @@ interface EndpointData {
 	blockedCount: number;
 }
 
-const MOCK_THREAT_LOCATIONS: ThreatLocation[] = [
-	{ id: '1', coordinates: [-74.006, 40.7128], country: 'United States', threatType: 'Prompt Injection', severity: 'critical', timestamp: new Date().toISOString() },
-	{ id: '2', coordinates: [0.1278, 51.5074], country: 'United Kingdom', threatType: 'Data Exfiltration', severity: 'high', timestamp: new Date().toISOString() },
-	{ id: '3', coordinates: [139.6917, 35.6895], country: 'Japan', threatType: 'Jailbreak', severity: 'medium', timestamp: new Date().toISOString() },
-	{ id: '4', coordinates: [2.3522, 48.8566], country: 'France', threatType: 'PII Leakage', severity: 'high', timestamp: new Date().toISOString() },
-	{ id: '5', coordinates: [13.405, 52.52], country: 'Germany', threatType: 'Malicious Code', severity: 'critical', timestamp: new Date().toISOString() },
-	{ id: '6', coordinates: [151.2093, -33.8688], country: 'Australia', threatType: 'Prompt Injection', severity: 'medium', timestamp: new Date().toISOString() },
-	{ id: '7', coordinates: [77.2090, 28.6139], country: 'India', threatType: 'Social Engineering', severity: 'low', timestamp: new Date().toISOString() },
-	{ id: '8', coordinates: [-43.1729, -22.9068], country: 'Brazil', threatType: 'Data Exfiltration', severity: 'high', timestamp: new Date().toISOString() },
-];
-
 const MOCK_ATTACK_VECTORS = {
 	'Prompt Injection': 145,
 	'Data Exfiltration': 89,
@@ -57,7 +46,7 @@ const MOCK_TOP_ENDPOINTS: EndpointData[] = [
 ];
 
 export function ThreatMapPage() {
-	const [threats, setThreats] = useState<ThreatLocation[]>(MOCK_THREAT_LOCATIONS);
+	const [threats, setThreats] = useState<ThreatLocation[]>([]);
 	const [attackVectors] = useState(MOCK_ATTACK_VECTORS);
 	const [topEndpoints] = useState(MOCK_TOP_ENDPOINTS);
 	const [wsConnected, setWsConnected] = useState(false);
@@ -160,6 +149,11 @@ export function ThreatMapPage() {
 			</header>
 
 			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
+				{/* Data status notice */}
+				<div className="mb-6 flex items-start gap-3 bg-blue-500/10 border border-blue-500/30 text-blue-700 dark:text-blue-400 rounded-lg px-4 py-3 text-sm">
+					<span className="mt-0.5 flex-shrink-0">ℹ</span>
+					<span>The map updates in <strong>real-time</strong> via WebSocket as threats are detected. Attack vector statistics and top endpoints reflect <strong>sample data</strong> while live aggregation API endpoints are in development.</span>
+				</div>
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
 					<div className="bg-card border border-border rounded-lg p-6">
 						<div className="flex items-center justify-between mb-2">

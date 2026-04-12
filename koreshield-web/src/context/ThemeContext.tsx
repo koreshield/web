@@ -22,19 +22,37 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
+function resolveInitialTheme(storageKey: string, defaultTheme: Theme): Theme {
+    if (typeof window === 'undefined') {
+        return defaultTheme;
+    }
+
+    try {
+        const storedTheme = localStorage.getItem(storageKey);
+        if (storedTheme === 'light' || storedTheme === 'dark') {
+            return storedTheme;
+        }
+    } catch {
+        // Ignore storage access failures and fall back to system/default theme.
+    }
+
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
 export function ThemeProvider({
     children,
     defaultTheme = 'dark',
     storageKey = 'vite-ui-theme',
 }: ThemeProviderProps) {
     const [theme, setTheme] = useState<Theme>(
-        () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+        () => resolveInitialTheme(storageKey, defaultTheme)
     );
 
     useEffect(() => {
         const root = window.document.documentElement;
         root.classList.remove('light', 'dark');
         root.classList.add(theme);
+        root.style.colorScheme = theme;
         localStorage.setItem(storageKey, theme);
     }, [theme, storageKey]);
 
