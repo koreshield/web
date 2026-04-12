@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { api } from '../lib/api-client';
-import { authService } from '../lib/auth';
+import { useAuthState } from '../hooks/useAuthState';
 import { SEOMeta } from '../components/SEOMeta';
 import { analyzeThreat } from '../lib/threat-engine';
 
@@ -226,7 +226,7 @@ export default function PlaygroundPage() {
 	const [history, setHistory] = useState<ScanResult[]>([]);
 	const [showHistory, setShowHistory] = useState(false);
 
-	const isAuthenticated = authService.isAuthenticated();
+	const { isAuthenticated } = useAuthState();
 
 	// Map API severity/threat_level to PlaygroundPage severity scale
 	const mapApiSeverity = (s: string): ScanResult['severity'] => {

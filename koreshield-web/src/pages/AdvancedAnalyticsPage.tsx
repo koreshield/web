@@ -125,6 +125,11 @@ export function AdvancedAnalyticsPage() {
 			</header>
 
 			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
+				{/* Sample data notice */}
+				<div className="mb-6 flex items-start gap-3 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded-lg px-4 py-3 text-sm">
+					<span className="mt-0.5 flex-shrink-0">⚠</span>
+					<span><strong>Preview data</strong> — Cost analytics API is coming soon. The figures shown are illustrative examples to demonstrate the interface.</span>
+				</div>
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
 					<div className="bg-card border border-border rounded-lg p-6">
 						<div className="flex items-center justify-between mb-2">
