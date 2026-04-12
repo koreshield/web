@@ -17,7 +17,10 @@ import {
     XCircle
 } from 'lucide-react';
 import { useState } from 'react';
+import { api } from '../lib/api-client';
+import { authService } from '../lib/auth';
 import { SEOMeta } from '../components/SEOMeta';
+import { analyzeThreat } from '../lib/threat-engine';
 
 // Comprehensive preset attacks organized by category
 const ATTACK_CATEGORIES = {
@@ -188,6 +191,33 @@ interface ScanResult {
 	prompt: string;
 }
 
+const mapThreatSeverityToPlaygroundSeverity = (severity: 'critical' | 'high' | 'medium' | 'low' | 'none'): ScanResult['severity'] => {
+	if (severity === 'critical' || severity === 'high') return 'critical';
+	if (severity === 'medium') return 'major';
+	if (severity === 'low') return 'minor';
+	return 'none';
+};
+
+const buildLocalScanResult = async (inputPrompt: string): Promise<ScanResult> => {
+	await new Promise((resolve) => setTimeout(resolve, 250 + Math.random() * 350));
+
+	const analysis = analyzeThreat(inputPrompt);
+	const attackTypes = analysis.signals.length > 0
+		? Array.from(new Set(analysis.signals.map((signal) => signal.category)))
+		: [];
+
+	return {
+		blocked: analysis.blocked,
+		confidence: Math.min(0.99, Math.max(0.2, analysis.score / 100)),
+		latency: analysis.processingMs,
+		attackTypes,
+		severity: mapThreatSeverityToPlaygroundSeverity(analysis.severity),
+		details: analysis.explanation,
+		timestamp: new Date(),
+		prompt: inputPrompt,
+	};
+};
+
 export default function PlaygroundPage() {
 	const [prompt, setPrompt] = useState('');
 	const [loading, setLoading] = useState(false);
@@ -196,81 +226,44 @@ export default function PlaygroundPage() {
 	const [history, setHistory] = useState<ScanResult[]>([]);
 	const [showHistory, setShowHistory] = useState(false);
 
-	// Simulate API call to KoreShield (replace with actual API in production)
+	const isAuthenticated = authService.isAuthenticated();
+
+	// Map API severity/threat_level to PlaygroundPage severity scale
+	const mapApiSeverity = (s: string): ScanResult['severity'] => {
+		if (s === 'critical') return 'critical';
+		if (s === 'high') return 'critical';
+		if (s === 'medium') return 'major';
+		if (s === 'low') return 'minor';
+		return 'none';
+	};
+
+	// Call the real /v1/scan endpoint; falls back to local simulation when unauthenticated
 	const scanPrompt = async (inputPrompt: string): Promise<ScanResult> => {
 		const startTime = Date.now();
 
-		// Simulate network delay
-		await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 400));
-
-		const lowerPrompt = inputPrompt.toLowerCase();
-		const attackTypes: string[] = [];
-		let blocked = false;
-		let confidence = 0;
-		let severity: 'critical' | 'major' | 'minor' | 'none' = 'none';
-		let details = 'No threats detected. Prompt appears safe.';
-
-		// Detection logic (simplified for demo - real API would be more sophisticated)
-		if (lowerPrompt.includes('ignore') && lowerPrompt.includes('instruction')) {
-			attackTypes.push('Prompt Injection');
-			blocked = true;
-			severity = 'critical';
-			confidence = 0.95;
-			details = 'Detected attempt to override system instructions';
-		}
-		if (lowerPrompt.includes('dan') || lowerPrompt.includes('god mode') || lowerPrompt.includes('jailbreak')) {
-			attackTypes.push('Jailbreak');
-			blocked = true;
-			severity = 'critical';
-			confidence = 0.98;
-			details = 'Jailbreak attempt detected';
-		}
-		if (lowerPrompt.includes('rm -rf') || lowerPrompt.includes('<script>') || lowerPrompt.includes('eval(')) {
-			attackTypes.push('Code Injection');
-			blocked = true;
-			severity = 'critical';
-			confidence = 0.99;
-			details = 'Malicious code execution attempt detected';
-		}
-		if (lowerPrompt.includes('send to') || lowerPrompt.includes('upload') || lowerPrompt.includes('email me')) {
-			attackTypes.push('Data Exfiltration');
-			blocked = true;
-			severity = 'critical';
-			confidence = 0.96;
-			details = 'Data exfiltration attempt detected';
-		}
-		if (lowerPrompt.includes('drop table') || lowerPrompt.includes("' or '1'='1") || lowerPrompt.includes('--')) {
-			attackTypes.push('SQL Injection');
-			blocked = true;
-			severity = 'critical';
-			confidence = 0.97;
-			details = 'SQL injection pattern detected';
-		}
-		if (lowerPrompt.includes('system prompt') || lowerPrompt.includes('your instructions') || lowerPrompt.includes('system message')) {
-			attackTypes.push('Prompt Leaking');
-			blocked = true;
-			severity = 'major';
-			confidence = 0.92;
-			details = 'Attempt to extract system prompt detected';
+		if (isAuthenticated) {
+			try {
+				const raw = await api.scanText(inputPrompt) as any;
+				const attackCategories: string[] = raw.attack_categories || (raw.attack_type ? [raw.attack_type] : []);
+				return {
+					blocked: Boolean(raw.blocked),
+					confidence: Number(raw.confidence ?? 0),
+					latency: Number(raw.processing_time_ms ?? (Date.now() - startTime)),
+					attackTypes: attackCategories,
+					severity: mapApiSeverity(raw.severity || raw.threat_level || 'none'),
+					details: raw.message || (raw.blocked ? 'Threat detected and blocked.' : 'No threats detected.'),
+					timestamp: new Date(),
+					prompt: inputPrompt,
+				};
+			} catch {
+				// If scan fails for any reason, fall through to simulation
+			}
 		}
 
-		// If no attacks detected
-		if (attackTypes.length === 0) {
-			confidence = 0.99;
-			details = 'Prompt passed all security checks';
-		}
-
-		const latency = Date.now() - startTime;
-
+		const localResult = await buildLocalScanResult(inputPrompt);
 		return {
-			blocked,
-			confidence,
-			latency,
-			attackTypes,
-			severity,
-			details,
-			timestamp: new Date(),
-			prompt: inputPrompt
+			...localResult,
+			latency: localResult.latency || (Date.now() - startTime),
 		};
 	};
 
@@ -362,6 +355,11 @@ export default function PlaygroundPage() {
 						<p className="text-lg text-muted-foreground max-w-3xl mx-auto">
 							Test our detection engine with real attack examples. See how KoreShield protects against prompt injection, jailbreaks, code injection, and more.
 						</p>
+						{!isAuthenticated && (
+							<p className="mt-4 text-amber-400 text-sm font-medium">
+								Running in simulation mode — <a href="/login" className="underline hover:text-amber-300">sign in</a> to run live scans against your KoreShield tenant.
+							</p>
+						)}
 					</motion.div>
 				</div>
 			</section>

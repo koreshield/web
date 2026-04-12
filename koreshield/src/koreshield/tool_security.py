@@ -24,12 +24,159 @@ RISK_RANK = {
     "critical": 3,
 }
 
+# ── Static threat patterns ────────────────────────────────────────────────────
+
+# TOOL-003: File paths that expose sensitive system data.
+# Any read_file / open / cat / cat tool call targeting these paths must be blocked.
+_DANGEROUS_PATH_RE = re.compile(
+    r"""
+    # Unix sensitive system files
+    /etc/(?:passwd|shadow|sudoers|crontab|cron\.d|ssh|ssl|nginx|apache2?|hosts(?:\.allow|\.deny)?|gshadow|master\.passwd)
+    | /etc/                # any /etc/* file (overly permissive read)
+    | /proc/(?:self|[0-9]+)/(?:mem|environ|cmdline|maps|fd)  # process memory/env
+    | /root/               # root's home dir
+    | /home/[^/]+/\.ssh/   # any user's SSH keys
+    | /home/[^/]+/\.aws/   # any user's AWS credentials
+    | /home/[^/]+/\.env    # user .env files
+    # Common credential file names in privileged user locations. Workspace paths
+    # are handled as runtime sequence signals instead of hard blocks.
+    | (?:^|/)(?:\.aws/credentials|\.ssh/(?:id_rsa|id_ed25519|authorized_keys)|\.bash_history|\.zsh_history|\.netrc)
+    # Windows equivalents
+    | [Cc]:\\(?:Windows|System32|Users\\[^\\]+\\(?:\.ssh|AppData\\Roaming|NTUSER\.DAT))
+    | \bSAM\b | \bNTDS\.dit\b | \bsecurity\.evtx\b
+    # Docker / Kubernetes secrets
+    | /var/run/secrets/kubernetes\.io
+    | /run/secrets/
+    # Path traversal — any ../ or ..\ sequence (cross-directory access)
+    | \.\.(?:/|\\)
+    # Cross-tenant file access patterns
+    | /tenants?/[^/]+/
+    | /customers?/[^/]+/(?:config|secrets?|keys?|credentials?)
+    """,
+    re.VERBOSE | re.IGNORECASE,
+)
+
+# TOOL-004: SQL DDL and destructive DML that should never be allowed through an LLM tool call.
+_SQL_DDL_RE = re.compile(
+    r"""
+    \b(?:
+        DROP\s+(?:TABLE|DATABASE|SCHEMA|VIEW|INDEX|TRIGGER|PROCEDURE|FUNCTION|USER)
+      | TRUNCATE\s+(?:TABLE\s+)?
+      | ALTER\s+(?:TABLE|DATABASE|SCHEMA|USER)
+      | CREATE\s+(?:USER|LOGIN|ROLE|GRANT)\b  # privilege creation
+      | (?:GRANT|REVOKE)\s+(?:ALL|SELECT|INSERT|UPDATE|DELETE|DROP|ALTER)
+      | DELETE\s+FROM\s+\w+\s+(?:;|$)         # unconstrained DELETE (no WHERE)
+      | ;[ \t]*DROP\b                           # classic SQL injection terminator
+      | --\s*$                                  # SQL comment terminator (injection trail)
+      | xp_cmdshell                             # MSSQL command execution
+      | EXEC(?:UTE)?\s+(?:xp_|sp_)             # stored proc abuse
+      | LOAD\s+DATA\s+(?:LOCAL\s+)?INFILE      # MySQL arbitrary file read
+      | INTO\s+(?:OUTFILE|DUMPFILE)            # MySQL arbitrary file write
+    )\b
+    """,
+    re.VERBOSE | re.IGNORECASE,
+)
+
+# TOOL-004: Also catch SSRF / metadata service patterns in network tool calls
+_SSRF_RE = re.compile(
+    r"""
+    169\.254\.169\.254          # AWS/GCP/Azure instance metadata service
+    | metadata\.google\.internal
+    | fd00:ec2::254             # IPv6 IMDS
+    | 100\.100\.100\.200        # Alibaba Cloud IMDS
+    | (?:^|[/\s])localhost(?:[:/]|$)(?!.*(?:8000|3000|5000))  # localhost (but not common dev ports)
+    | 127\.0\.0\.[0-9]+         # loopback
+    | 0\.0\.0\.0                # unspecified (often SSRF gadget)
+    | (?:file|gopher|dict|ldap|ftp)://  # dangerous URI schemes
+    """,
+    re.VERBOSE | re.IGNORECASE,
+)
+
 
 class ToolCallSecurityAnalyzer:
     """Analyze tool calls for runtime security enforcement."""
 
     def __init__(self, detector: AttackDetector):
         self.detector = detector
+
+    # ── Static threat checkers ────────────────────────────────────────────────
+
+    def _dangerous_path_check(self, tool_name: str, serialized_args: str) -> Optional[str]:
+        """Return a description string if a dangerous system path is referenced, else None.
+
+        Applies to tools with 'read', 'cat', 'open', 'file', 'list' in the name,
+        as well as any tool whose args reference sensitive filesystem locations.
+        """
+        if _DANGEROUS_PATH_RE.search(serialized_args):
+            return f"Tool '{tool_name}' references a sensitive system path in its arguments."
+        return None
+
+    def _sql_ddl_check(self, tool_name: str, serialized_args: str) -> Optional[str]:
+        """Return a description string if destructive SQL/DDL is detected, else None."""
+        # Only apply to database-capable tools
+        lowered_name = tool_name.lower()
+        is_db_tool = any(kw in lowered_name for kw in ("sql", "query", "db", "database", "postgres", "mysql", "sqlite"))
+        if is_db_tool and _SQL_DDL_RE.search(serialized_args):
+            return f"Tool '{tool_name}' contains destructive DDL or SQL injection patterns."
+        # Also catch DDL in any tool if it looks like a raw SQL string
+        if _SQL_DDL_RE.search(serialized_args) and "query" in serialized_args.lower():
+            return f"Tool call contains destructive SQL patterns (DDL/injection)."
+        return None
+
+    def _ssrf_check(self, tool_name: str, serialized_args: str) -> Optional[str]:
+        """Return a description string if SSRF / metadata endpoint access is detected."""
+        lowered_name = tool_name.lower()
+        is_network_tool = any(kw in lowered_name for kw in ("fetch", "http", "request", "web", "url", "get", "post", "search", "browse", "webhook", "send"))
+        if is_network_tool and _SSRF_RE.search(serialized_args):
+            return f"Tool '{tool_name}' targets an SSRF-prone or metadata-service endpoint."
+        if _SSRF_RE.search(serialized_args):
+            return f"Tool arguments contain SSRF indicators (metadata service or loopback URL)."
+        return None
+
+    # EXFIL patterns: external data exfiltration via webhook/network tool calls
+    _EXFIL_RE = re.compile(
+        r"""
+        (?:data|secrets?|credentials?|keys?|tokens?|api[\s_-]?keys?|all[\s_-]?secrets?)
+        \s*[=:,]?\s*
+        (?:all[\s_-]?(?:tenant|customer|secret|credential|key)s?|include[\s_-]?api[\s_-]?keys?|secrets?|credentials?)
+        """,
+        re.VERBOSE | re.IGNORECASE,
+    )
+
+    # PRIV patterns: privileged admin function access attempts
+    _PRIV_FUNC_RE = re.compile(
+        r"""
+        (?:function|tool|method|endpoint)\s*[=:,]?\s*
+        (?:admin|root|sudo|superuser|privileged|system)[\s._-]
+        |
+        (?:list|get|dump|export|fetch)\s+all\s+(?:tenants?|users?|customers?|api[\s_-]?keys?|secrets?)
+        """,
+        re.VERBOSE | re.IGNORECASE,
+    )
+
+    def _exfil_check(self, tool_name: str, serialized_args: str) -> Optional[str]:
+        """Detect data exfiltration patterns in network tool calls (e.g. sending secrets to external webhook)."""
+        lowered_name = tool_name.lower()
+        is_network_tool = any(kw in lowered_name for kw in (
+            "webhook", "send", "post", "http", "fetch", "upload", "export", "transmit", "notify", "request"
+        ))
+        if is_network_tool and self._EXFIL_RE.search(serialized_args):
+            return f"Tool '{tool_name}' appears to send sensitive data (secrets/credentials) to an external endpoint."
+        return None
+
+    def _priv_func_check(self, tool_name: str, serialized_args: str) -> Optional[str]:
+        """Detect privileged admin function calls attempting unauthorized access."""
+        combined = f"{tool_name} {serialized_args}".lower()
+        # Admin function names in the tool_name itself
+        if any(kw in tool_name.lower() for kw in ("admin", "root", "sudo", "superuser", "privileged")):
+            if any(kw in combined for kw in ("tenant", "credential", "secret", "api_key", "all_user")):
+                return f"Tool '{tool_name}' appears to request privileged admin access to sensitive resources."
+        # Admin function references in args
+        if self._PRIV_FUNC_RE.search(serialized_args):
+            return f"Tool arguments contain references to privileged/admin function calls."
+        return None
+
+    # ── Main analysis ──────────────────────────────────────────────────────────
 
     def analyze(self, tool_name: str, args: Any, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Analyze a tool call using KoreShield-native detection and capability heuristics."""
@@ -40,14 +187,43 @@ class ToolCallSecurityAnalyzer:
         trust_context = self._normalize_context(context)
         provenance = self._provenance_analysis(tool_name, capability_signals, trust_context)
         sequence_matches = self._sequence_analysis(capability_signals, serialized_args, trust_context)
-        risk_class = self._risk_class(
-            capability_signals,
-            detection_result,
-            provenance["risk_class"],
-            sequence_matches,
-        )
+
+        # ── Static threat checks (override risk class unconditionally) ─────────
+        static_block_reasons: List[str] = []
+
+        path_threat = self._dangerous_path_check(tool_name, serialized_args)
+        if path_threat:
+            static_block_reasons.append(path_threat)
+
+        ddl_threat = self._sql_ddl_check(tool_name, serialized_args)
+        if ddl_threat:
+            static_block_reasons.append(ddl_threat)
+
+        ssrf_threat = self._ssrf_check(tool_name, serialized_args)
+        if ssrf_threat:
+            static_block_reasons.append(ssrf_threat)
+
+        exfil_threat = self._exfil_check(tool_name, serialized_args)
+        if exfil_threat:
+            static_block_reasons.append(exfil_threat)
+
+        priv_threat = self._priv_func_check(tool_name, serialized_args)
+        if priv_threat:
+            static_block_reasons.append(priv_threat)
+
+        # If any static threat fires → always critical / block
+        if static_block_reasons:
+            risk_class = "critical"
+        else:
+            risk_class = self._risk_class(
+                capability_signals,
+                detection_result,
+                provenance["risk_class"],
+                sequence_matches,
+            )
+
         review_required = risk_class in {"high", "critical"}
-        reasons: List[str] = []
+        reasons: List[str] = list(static_block_reasons)
 
         if capability_signals:
             reasons.append("Capability signals: " + ", ".join(capability_signals))
@@ -71,10 +247,11 @@ class ToolCallSecurityAnalyzer:
             "tool_name": tool_name,
             "args": args,
             "serialized_args": serialized_args,
-            "risky_tool": bool(capability_signals),
+            "risky_tool": bool(capability_signals) or bool(static_block_reasons),
             "risk_class": risk_class,
             "provenance_risk": provenance["risk_class"],
             "capability_signals": capability_signals,
+            "static_threats": static_block_reasons,
             "review_required": review_required,
             "suggested_action": suggested_action,
             "confidence": detection_result.get("confidence", 0.0),
@@ -110,7 +287,8 @@ class ToolCallSecurityAnalyzer:
         confidence = float(detection_result.get("confidence", 0.0) or 0.0)
         base_risk = "low"
 
-        if attack and any(signal in capability_signals for signal in ("execution", "network", "credential_access")):
+        if attack and any(signal in capability_signals for signal in ("execution", "network", "credential_access", "database")):
+            # Database + attack = critical (catches TOOL-004 SQL injection / DDL)
             base_risk = "critical"
         elif attack or any(signal in capability_signals for signal in ("execution", "credential_access")):
             base_risk = "high"

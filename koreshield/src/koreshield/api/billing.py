@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
@@ -17,6 +17,7 @@ from ..models.team import Team, TeamMember
 from ..models.user import User
 from ..services.polar import PolarClient, PolarConfigurationError, get_polar_config
 from .auth import get_current_user
+from ..utils import utcnow_naive
 
 logger = structlog.get_logger(__name__)
 
@@ -35,9 +36,6 @@ STATE_REFRESH_EVENTS = {
     "order.paid",
     "order.refunded",
 }
-
-def utcnow_naive() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def compact_dict(payload: dict[str, Any]) -> dict[str, Any]:

@@ -1,10 +1,10 @@
 """
-Provider manager with failover and load balancing capabilities.
+Provider manager with failover, load balancing, and streaming capabilities.
 """
 
 import asyncio
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, AsyncIterator, Dict, List, Optional
 from dataclasses import dataclass
 from enum import Enum
 
@@ -231,6 +231,7 @@ class ProviderManager:
         model: str = "",
         max_retries: int = 3,
         estimated_tokens: int = 1000,
+        preferred_provider: Optional["BaseProvider"] = None,
         **kwargs
     ) -> Dict[str, Any]:
         """
@@ -256,8 +257,25 @@ class ProviderManager:
         errors = []
         attempted_providers = set()
 
+        # Build ordered provider list: preferred first, then rest by quality
+        def _ordered_providers() -> List["BaseProvider"]:
+            if preferred_provider is not None:
+                pname = self._get_provider_name(preferred_provider)
+                health = self.provider_health.get(pname)
+                if health and health.status == ProviderStatus.HEALTHY:
+                    rest = [p for p in self.providers if p is not preferred_provider]
+                    return [preferred_provider] + rest
+            return self.providers[:]
+
+        all_providers = _ordered_providers()
+
         for attempt in range(max_retries):
-            provider = self.get_best_provider(model, estimated_tokens)
+            # Prefer the model-appropriate provider on the first attempt; fall
+            # back to the standard health-based selector on subsequent attempts.
+            if attempt == 0 and all_providers:
+                provider = all_providers[0]
+            else:
+                provider = self.get_best_provider(model, estimated_tokens)
 
             if provider is None:
                 break
@@ -285,6 +303,7 @@ class ProviderManager:
                 )
 
                 # Success - update health and record usage
+                self._last_used_provider = provider_name
                 health = self.provider_health[provider_name]
                 health.consecutive_failures = 0
                 health.status = ProviderStatus.HEALTHY
@@ -398,3 +417,77 @@ class ProviderManager:
                 await self._check_provider_health(provider)
         else:
             await self._perform_health_checks()
+
+    async def chat_completion_stream_with_failover(
+        self,
+        messages: List[Dict[str, Any]],
+        model: str = "",
+        preferred_provider: Optional["BaseProvider"] = None,
+        **kwargs,
+    ) -> AsyncIterator[bytes]:
+        """
+        Stream a chat completion with automatic failover.
+
+        Tries the preferred (model-appropriate) provider first.  If that
+        provider doesn't support streaming or raises an error, falls back to
+        the next healthy provider.
+
+        Yields:
+            Raw bytes in OpenAI SSE format (``data: {...}\\n\\n`` lines).
+        """
+        candidates: List["BaseProvider"] = []
+        if preferred_provider is not None:
+            pname = self._get_provider_name(preferred_provider)
+            health = self.provider_health.get(pname)
+            if health and health.status == ProviderStatus.HEALTHY:
+                candidates.append(preferred_provider)
+        for p in self.providers:
+            if p not in candidates:
+                pname = self._get_provider_name(p)
+                health = self.provider_health.get(pname)
+                if health and health.status == ProviderStatus.HEALTHY:
+                    candidates.append(p)
+
+        if not candidates:
+            error_chunk = {
+                "error": {
+                    "message": "No healthy providers available",
+                    "type": "server_error",
+                    "code": "no_providers",
+                }
+            }
+            import json as _json
+            yield f"data: {_json.dumps(error_chunk)}\n\n".encode()
+            yield b"data: [DONE]\n\n"
+            return
+
+        for provider in candidates:
+            provider_name = self._get_provider_name(provider)
+            stream_fn = getattr(provider, "chat_completion_stream", None)
+            if stream_fn is None:
+                continue
+            try:
+                self._last_used_provider = provider_name
+                async for chunk in stream_fn(messages, model, **kwargs):
+                    yield chunk
+                # Mark as healthy on success
+                health = self.provider_health[provider_name]
+                health.consecutive_failures = 0
+                health.status = ProviderStatus.HEALTHY
+                return
+            except Exception as e:
+                self._mark_provider_failure(provider_name, str(e))
+                # Try next provider
+                continue
+
+        # All failed – emit an error SSE event
+        import json as _json
+        error_chunk = {
+            "error": {
+                "message": "All providers failed during streaming",
+                "type": "server_error",
+                "code": "all_providers_failed",
+            }
+        }
+        yield f"data: {_json.dumps(error_chunk)}\n\n".encode()
+        yield b"data: [DONE]\n\n"

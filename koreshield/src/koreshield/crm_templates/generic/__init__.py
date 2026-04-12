@@ -7,7 +7,7 @@ Provides a flexible framework for implementing security policies for
 unsupported or custom CRM platforms.
 """
 
-from typing import Dict, List, Any, Set, Optional
+from typing import Dict, List, Any
 from .. import (
     CRMTemplate, CRMSecurityPolicy, CRMAttackPattern, CRMPlatform, CRMFeature
 )

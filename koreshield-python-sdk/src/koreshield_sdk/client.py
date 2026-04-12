@@ -1,6 +1,6 @@
 """Synchronous KoreShield client."""
 
-import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, List, Optional, Any, Union
 import requests
 from requests.adapters import HTTPAdapter
@@ -71,7 +71,7 @@ class KoreShieldClient:
         self.session.headers.update({
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            "User-Agent": f"koreshield-python-sdk/0.3.5",
+            "User-Agent": f"koreshield-python-sdk/0.3.6",
         })
 
     def scan_prompt(self, prompt: str, **kwargs) -> DetectionResult:
@@ -325,26 +325,36 @@ class KoreShieldClient:
         Raises:
             Same exceptions as scan_rag_context
         """
-        results = []
+        if not parallel:
+            # Sequential processing
+            results = []
+            for item in queries_and_docs:
+                results.append(self.scan_rag_context(
+                    user_query=item["user_query"],
+                    documents=item["documents"],
+                    config=item.get("config"),
+                ))
+            return results
 
-        if parallel:
-            # For now, sequential implementation
-            # TODO: Add true parallel processing with ThreadPoolExecutor
-            for item in queries_and_docs:
-                result = self.scan_rag_context(
-                    user_query=item["user_query"],
-                    documents=item["documents"],
-                    config=item.get("config")
-                )
-                results.append(result)
-        else:
-            for item in queries_and_docs:
-                result = self.scan_rag_context(
-                    user_query=item["user_query"],
-                    documents=item["documents"],
-                    config=item.get("config")
-                )
-                results.append(result)
+        # Parallel processing using ThreadPoolExecutor
+        results: List["RAGScanResponse"] = [None] * len(queries_and_docs)  # type: ignore[list-item]
+
+        def _scan(index_and_item):
+            idx, item = index_and_item
+            return idx, self.scan_rag_context(
+                user_query=item["user_query"],
+                documents=item["documents"],
+                config=item.get("config"),
+            )
+
+        with ThreadPoolExecutor(max_workers=max_concurrent) as executor:
+            futures = {
+                executor.submit(_scan, (idx, item)): idx
+                for idx, item in enumerate(queries_and_docs)
+            }
+            for future in as_completed(futures):
+                idx, result = future.result()
+                results[idx] = result
 
         return results
 
@@ -432,3 +442,110 @@ class KoreShieldClient:
                 status_code=response.status_code,
                 response_data=data,
             )
+
+    # ------------------------------------------------------------------
+    # LLM Proxy — chat completions (scan → forward → return)
+    # ------------------------------------------------------------------
+
+    def chat_completion(
+        self,
+        messages: List[Dict[str, Any]],
+        model: str = "gpt-4o-mini",
+        **kwargs,
+    ) -> Dict[str, Any]:
+        """Send a chat completion through the KoreShield proxy.
+
+        The prompt is automatically scanned before being forwarded to the
+        upstream LLM provider.  KoreShield performs model-aware routing:
+
+        * ``gpt-*`` / ``o1-*`` → OpenAI
+        * ``claude-*`` → Anthropic
+        * ``gemini-*`` → Google Gemini
+        * ``deepseek-*`` → DeepSeek
+
+        Args:
+            messages: OpenAI-format message list, e.g.
+                ``[{"role": "user", "content": "Hello"}]``
+            model: Model identifier.
+            **kwargs: Additional parameters forwarded to the provider
+                (``temperature``, ``max_tokens``, etc.).
+
+        Returns:
+            OpenAI-compatible chat completion response dict.
+
+        Raises:
+            ServerError: If KoreShield blocks the prompt (403) or all
+                providers fail (502).
+        """
+        payload: Dict[str, Any] = {"messages": messages, "model": model, **kwargs}
+        payload.pop("stream", None)
+        return self._make_request("POST", "/v1/chat/completions", data=payload)
+
+    def chat_completion_stream(
+        self,
+        messages: List[Dict[str, Any]],
+        model: str = "gpt-4o-mini",
+        **kwargs,
+    ):
+        """Stream a chat completion through the KoreShield proxy.
+
+        The prompt is scanned before streaming begins.  Yields text delta
+        strings as they arrive from the upstream provider.
+
+        Args:
+            messages: OpenAI-format message list.
+            model: Model identifier.
+            **kwargs: Additional parameters (``temperature``, ``max_tokens``, …).
+
+        Yields:
+            str: Content delta from each SSE chunk.
+
+        Raises:
+            ServerError: If the prompt is blocked or all providers fail.
+
+        Example::
+
+            for token in client.chat_completion_stream(
+                model="gpt-4o",
+                messages=[{"role": "user", "content": "Hello"}],
+            ):
+                print(token, end="", flush=True)
+        """
+        import json as _json
+
+        url = f"{self.auth_config.base_url}/v1/chat/completions"
+        payload: Dict[str, Any] = {
+            "messages": messages,
+            "model": model,
+            "stream": True,
+            **{k: v for k, v in kwargs.items() if k != "stream"},
+        }
+
+        with self.session.post(url, json=payload, stream=True, timeout=self.auth_config.timeout * 4) as response:
+            if response.status_code == 403:
+                data = response.json() if response.content else {}
+                raise ServerError(
+                    data.get("reason", "Prompt blocked by KoreShield"),
+                    status_code=403,
+                    response_data=data,
+                )
+            response.raise_for_status()
+
+            for raw_line in response.iter_lines():
+                if not raw_line:
+                    continue
+                line = raw_line.decode("utf-8") if isinstance(raw_line, bytes) else raw_line
+                if not line.startswith("data: "):
+                    continue
+                payload_str = line[6:].strip()
+                if payload_str == "[DONE]":
+                    break
+                try:
+                    chunk = _json.loads(payload_str)
+                except _json.JSONDecodeError:
+                    continue
+                choices = chunk.get("choices", [])
+                if choices:
+                    content = choices[0].get("delta", {}).get("content", "")
+                    if content:
+                        yield content

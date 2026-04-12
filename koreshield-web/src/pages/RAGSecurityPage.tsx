@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
 	Upload,
@@ -26,8 +26,9 @@ import {
 import { SEOMeta } from '../components/SEOMeta';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
-import { authService } from '../lib/auth';
 import { getDocumentReadErrorMessage, readUploadedDocument } from '../lib/documentExtraction';
+import { useAuthState } from '../hooks/useAuthState';
+import { analyzeThreat, type ThreatResult } from '../lib/threat-engine';
 
 // Types based on backend schema
 interface RetrievedDocument {
@@ -134,6 +135,8 @@ type RAGApiResponse = {
 	overall_confidence?: number;
 	query_analysis?: {
 		is_attack?: boolean;
+		attack_type?: string;
+		confidence?: number;
 		details?: {
 			attack_type?: string;
 			confidence?: number;
@@ -211,12 +214,157 @@ function getDocumentDisplayName(document: RetrievedDocument, index: number) {
 		? document.metadata.filename
 		: `Document ${index + 1}`;
 }
+
 const buildTaxonomyCounts = (values: string[] | undefined): Record<string, number> => {
 	if (!values) return {};
 	return values.reduce<Record<string, number>>((acc, value) => {
 		acc[value] = (acc[value] || 0) + 1;
 		return acc;
 	}, {});
+};
+
+const slugifyThreatType = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'unknown';
+
+const mapThreatSeverityToRagSeverity = (severity: ThreatResult['severity']): DocumentThreat['severity'] => {
+	switch (severity) {
+		case 'critical':
+			return 'critical';
+		case 'high':
+			return 'high';
+		case 'medium':
+			return 'medium';
+		case 'low':
+		case 'none':
+		default:
+			return 'low';
+	}
+};
+
+const mapThreatCategoryToInjectionVector = (category: ThreatResult['category']) => {
+	if (category === 'Indirect Prompt Injection' || category === 'Markdown / Image Injection') {
+		return 'document';
+	}
+	if (category === 'Data Exfiltration' || category === 'PII Exfiltration') {
+		return 'database';
+	}
+	if (category === 'Social Engineering') {
+		return 'chat_message';
+	}
+	return 'document';
+};
+
+const mapThreatCategoryToOperationalTarget = (category: ThreatResult['category']) => {
+	if (category === 'Data Exfiltration' || category === 'PII Exfiltration') {
+		return 'data_access';
+	}
+	if (category === 'Tool / Function Abuse' || category === 'Privilege Escalation') {
+		return 'tool_execution';
+	}
+	return 'instruction_override';
+};
+
+const createLocalDocumentThreat = (
+	document: RetrievedDocument,
+	analysis: ThreatResult,
+	maxExcerptLength: number
+): DocumentThreat => {
+	const excerpt = document.content.slice(0, Math.min(maxExcerptLength, document.content.length));
+	return {
+		document_id: document.id,
+		threat_type: slugifyThreatType(analysis.category),
+		severity: mapThreatSeverityToRagSeverity(analysis.severity),
+		confidence: analysis.score / 100,
+		excerpt,
+		references: [
+			{
+				excerpt,
+				location: {
+					start: 0,
+					end: excerpt.length,
+					basis: 'original',
+				},
+			},
+		],
+		location: {
+			start: 0,
+			end: excerpt.length,
+			basis: 'original',
+		},
+		taxonomy: {
+			injection_vector: mapThreatCategoryToInjectionVector(analysis.category),
+			operational_target: mapThreatCategoryToOperationalTarget(analysis.category),
+			persistence_mechanism: 'single_document',
+			enterprise_context: 'knowledge_base',
+			detection_complexity: analysis.entropyFlag ? 'obfuscated' : 'straightforward',
+		},
+		explanation: analysis.explanation,
+	};
+};
+
+const buildLocalRagScanResult = (
+	sourceDocuments: RetrievedDocument[],
+	userQueryValue: string,
+	config: ScanConfig
+): RAGScanResult => {
+	const maxExcerptLength = config.max_excerpt_length ?? 200;
+	const documentThreats = sourceDocuments.flatMap((document) => {
+		const analysis = analyzeThreat(document.content);
+		return analysis.blocked ? [createLocalDocumentThreat(document, analysis, maxExcerptLength)] : [];
+	});
+	const queryAnalysis = userQueryValue.trim() ? analyzeThreat(userQueryValue.trim()) : null;
+	const unsafeDocumentIds = Array.from(new Set(documentThreats.map((threat) => threat.document_id)));
+	const safeDocuments = sourceDocuments
+		.map((document) => document.id)
+		.filter((id) => !unsafeDocumentIds.includes(id));
+	const crossDocumentThreats: CrossDocumentThreat[] =
+		config.enable_cross_document_analysis !== false && unsafeDocumentIds.length > 1
+			? [
+				{
+					threat_type: 'multi_document_attack_chain',
+					severity: 'medium',
+					confidence: 0.78,
+					involved_documents: unsafeDocumentIds,
+					chain_description: 'Multiple retrieved documents contain suspicious instructions that could combine into a staged RAG poisoning attempt.',
+					attack_stages: unsafeDocumentIds.map((documentId, index) => ({
+						stage_number: index + 1,
+						document_id: documentId,
+						component_description: 'Suspicious instruction-bearing content detected in guest sandbox analysis.',
+					})),
+				},
+			]
+			: [];
+	const queryResult = queryAnalysis?.blocked
+		? {
+			is_attack: true,
+			attack_type: slugifyThreatType(queryAnalysis.category),
+			confidence: queryAnalysis.score / 100,
+		}
+		: undefined;
+	const totalThreatsFound = documentThreats.length + crossDocumentThreats.length + (queryResult?.is_attack ? 1 : 0);
+
+	return {
+		is_safe: totalThreatsFound === 0,
+		total_threats_found: totalThreatsFound,
+		document_threats: documentThreats,
+		cross_document_threats: crossDocumentThreats,
+		safe_documents: safeDocuments,
+		unsafe_documents: unsafeDocumentIds,
+		taxonomy_summary: {
+			injection_vectors: buildTaxonomyCounts(documentThreats.map((threat) => threat.taxonomy.injection_vector)),
+			operational_targets: buildTaxonomyCounts(documentThreats.map((threat) => threat.taxonomy.operational_target)),
+			persistence_mechanisms: buildTaxonomyCounts(documentThreats.map((threat) => threat.taxonomy.persistence_mechanism)),
+			enterprise_contexts: buildTaxonomyCounts(documentThreats.map((threat) => threat.taxonomy.enterprise_context)),
+			detection_complexities: buildTaxonomyCounts(documentThreats.map((threat) => threat.taxonomy.detection_complexity)),
+		},
+		scan_metadata: {
+			scan_id: `local-${Date.now()}`,
+			timestamp: new Date().toISOString(),
+			documents_scanned: sourceDocuments.length,
+			processing_time_ms: documentThreats.reduce((sum, threat) => sum + threat.confidence * 100, 0),
+			user_query_included: Boolean(userQueryValue.trim()),
+		},
+		query_result: queryResult,
+	};
 };
 
 const normalizeRagResponse = (
@@ -304,8 +452,8 @@ const normalizeRagResponse = (
 		query_result: apiPayload?.query_analysis
 			? {
 					is_attack: Boolean(apiPayload.query_analysis.is_attack),
-					attack_type: apiPayload.query_analysis.details?.attack_type || 'unknown',
-					confidence: apiPayload.query_analysis.details?.confidence || 0,
+					attack_type: apiPayload.query_analysis.details?.attack_type || apiPayload.query_analysis.attack_type || 'unknown',
+					confidence: apiPayload.query_analysis.details?.confidence || apiPayload.query_analysis.confidence || 0,
 				}
 			: undefined,
 	};
@@ -335,7 +483,7 @@ const CRM_TEMPLATES = {
 
 export function RAGSecurityPage() {
 	const { success, error: showError } = useToast();
-	const currentUser = authService.getCurrentUser();
+	const { isAuthenticated, isHydrating, user } = useAuthState();
 	const [documents, setDocuments] = useState<RetrievedDocument[]>([]);
 	const [userQuery, setUserQuery] = useState('');
 	const [scanResult, setScanResult] = useState<RAGScanResult | null>(null);
@@ -361,16 +509,22 @@ export function RAGSecurityPage() {
 	const [historyLoading, setHistoryLoading] = useState(false);
 	const [historyError, setHistoryError] = useState<string | null>(null);
 
-	const refreshHistory = async () => {
+	const refreshHistory = useCallback(async () => {
+		if (!isAuthenticated) {
+			setScanHistory([]);
+			setHistoryError(null);
+			setHistoryLoading(false);
+			return;
+		}
 		setHistoryLoading(true);
 		setHistoryError(null);
 		try {
-				const response = await api.getRagScanHistory(20, 0) as RAGHistoryResponse;
-				const scans = response?.scans || [];
-				const mapped = scans.map((item) => {
-					const documentsList = item.documents || [];
-					const responsePayload = item.response || item.result || item;
-					const normalized = normalizeRagResponse(responsePayload, documentsList, item.user_query || '');
+			const response = await api.getRagScanHistory(20, 0) as RAGHistoryResponse;
+			const scans = response?.scans || [];
+			const mapped = scans.map((item) => {
+				const documentsList = item.documents || [];
+				const responsePayload = item.response || item.result || item;
+				const normalized = normalizeRagResponse(responsePayload, documentsList, item.user_query || '');
 				return {
 					id: item.scan_id || normalized.scan_metadata.scan_id,
 					timestamp: item.timestamp || normalized.scan_metadata.timestamp,
@@ -380,16 +534,16 @@ export function RAGSecurityPage() {
 				} as RAGScanHistoryItem;
 			});
 			setScanHistory(mapped);
-			} catch (error) {
-				setHistoryError(getErrorMessage(error, 'Failed to load scan history'));
-			} finally {
+		} catch (error) {
+			setHistoryError(getErrorMessage(error, 'Failed to load scan history'));
+		} finally {
 			setHistoryLoading(false);
 		}
-	};
+	}, [isAuthenticated]);
 
 	useEffect(() => {
-		refreshHistory();
-	}, [currentUser?.id]);
+		void refreshHistory();
+	}, [refreshHistory, user?.id]);
 
 	const maxFileSizeBytes = 10 * 1024 * 1024;
 
@@ -502,6 +656,10 @@ export function RAGSecurityPage() {
 	};
 
 	const handleClearHistory = () => {
+		if (!isAuthenticated) {
+			showError('Sign in to manage scan history');
+			return;
+		}
 		api.clearRagScans()
 			.then(() => {
 				setScanHistory([]);
@@ -520,6 +678,10 @@ export function RAGSecurityPage() {
 	};
 
 	const handleDeleteHistory = (id: string) => {
+		if (!isAuthenticated) {
+			showError('Sign in to manage scan history');
+			return;
+		}
 		api.deleteRagScan(id)
 			.then(() => {
 				setScanHistory((prev) => prev.filter((item) => item.id !== id));
@@ -530,6 +692,10 @@ export function RAGSecurityPage() {
 	};
 
 	const handleDownloadPack = async (scanId: string) => {
+		if (!isAuthenticated) {
+			showError('Sign in to download server scan packs');
+			return;
+		}
 		try {
 			const blob = await api.downloadRagScanPack(scanId);
 			const url = URL.createObjectURL(blob);
@@ -555,24 +721,35 @@ export function RAGSecurityPage() {
 
 		setLoading(true);
 		try {
-			const response = await api.scanRAGContext({
-				user_query: userQuery.trim() || undefined,
-				documents,
-				config: scanConfig
-			});
-			const normalized = normalizeRagResponse(response, documents, userQuery);
+			const normalized = isAuthenticated
+				? normalizeRagResponse(
+					await api.scanRAGContext({
+						user_query: userQuery.trim() || undefined,
+						documents,
+						config: scanConfig
+					}),
+					documents,
+					userQuery
+				)
+				: buildLocalRagScanResult(documents, userQuery, scanConfig);
 			setScanResult(normalized);
-			await refreshHistory();
+			if (isAuthenticated) {
+				await refreshHistory();
+			}
 
 			if (normalized.is_safe) {
-				success('No threats detected - Documents are safe!');
+				success(isAuthenticated ? 'No threats detected - Documents are safe!' : 'Guest sandbox scan complete - no threats detected.');
 			} else {
-				showError(`${normalized.total_threats_found} threat(s) detected!`);
+				showError(
+					isAuthenticated
+						? `${normalized.total_threats_found} threat(s) detected!`
+						: `Guest sandbox found ${normalized.total_threats_found} potential threat(s).`
+				);
 			}
-			} catch (error) {
-				showError(getErrorMessage(error, 'Failed to scan documents'));
-				console.error('RAG scan error:', error);
-			} finally {
+		} catch (error) {
+			showError(getErrorMessage(error, 'Failed to scan documents'));
+			console.error('RAG scan error:', error);
+		} finally {
 			setLoading(false);
 		}
 	};
@@ -644,6 +821,13 @@ export function RAGSecurityPage() {
 							<h1 className="text-2xl sm:text-3xl font-bold mb-2">RAG Security Scanner</h1>
 							<p className="text-sm sm:text-base text-muted-foreground">
 								Detect indirect prompt injection attacks in retrieved documents
+							</p>
+							<p className="text-xs sm:text-sm text-muted-foreground mt-2">
+								{isAuthenticated
+									? 'Signed in: scans are saved to your account history and scan packs can be downloaded.'
+									: isHydrating
+										? 'Checking your session...'
+										: 'Guest sandbox: scans run locally in the browser. Sign in to save history and download full scan packs.'}
 							</p>
 						</div>
 						<Shield className="hidden sm:block w-12 h-12 text-primary opacity-50 flex-shrink-0" />
@@ -944,14 +1128,16 @@ export function RAGSecurityPage() {
 						<div className="bg-card border border-border rounded-lg p-4 sm:p-6 space-y-4">
 								<div className="flex items-center justify-between">
 									<h2 className="text-lg font-semibold">Scan Results</h2>
-									<div className="flex items-center gap-3">
-										<button
-											onClick={() => handleDownloadPack(scanResult.scan_metadata.scan_id)}
-											className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
-										>
-											<Download className="w-4 h-4" />
-											Download Scan Pack
-										</button>
+								<div className="flex items-center gap-3">
+										{isAuthenticated && (
+											<button
+												onClick={() => handleDownloadPack(scanResult.scan_metadata.scan_id)}
+												className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
+											>
+												<Download className="w-4 h-4" />
+												Download Scan Pack
+											</button>
+										)}
 										<button
 											onClick={handleExport}
 											className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
@@ -1058,9 +1244,13 @@ export function RAGSecurityPage() {
 								)}
 							</div>
 							<p className="text-xs text-muted-foreground">
-								Stored securely in your account history for future review and downloads.
+								{isAuthenticated
+									? 'Stored securely in your account history for future review and downloads.'
+									: 'Sign in to save scan history. Guest sandbox scans stay in this session only.'}
 							</p>
-							{historyLoading ? (
+							{!isAuthenticated && !isHydrating ? (
+								<div className="text-sm text-muted-foreground">Guest mode does not persist scan history.</div>
+							) : historyLoading ? (
 								<div className="text-sm text-muted-foreground">Loading scan history...</div>
 							) : historyError ? (
 								<div className="text-sm text-red-500">{historyError}</div>

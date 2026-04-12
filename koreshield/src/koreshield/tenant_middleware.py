@@ -5,19 +5,16 @@ Tenant Middleware for Request Routing and Context Management
 Handles tenant identification, context setup, and request routing in multi-tenant environment.
 """
 
-import asyncio
 import time
-from typing import Dict, List, Optional, Any, Callable
-from contextvars import ContextVar
+from typing import Dict, Optional, Any
 import uuid
-import re
 
-from fastapi import Request, Response, HTTPException
+from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from .tenant_models import TenantContext, Tenant, TenantStatus, TenantTier, ResourceType, TenantAPIKey
+from .tenant_models import TenantContext, Tenant, TenantTier, ResourceType, TenantAPIKey
 from .logger import FirewallLogger
 from .tenant_database import get_tenant_db_session
 from .tenant_utils import tenant_context, request_id_context

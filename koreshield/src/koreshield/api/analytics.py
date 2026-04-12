@@ -4,12 +4,12 @@ Provides endpoints for tracking and analyzing API costs across providers and ten
 """
 
 from fastapi import APIRouter, HTTPException, Query, Depends
-from pydantic import BaseModel, Field
-from typing import List, Dict, Optional
+from pydantic import BaseModel
+from typing import List, Optional
 from datetime import datetime, timedelta
 from enum import Enum
 import structlog
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .auth import get_current_admin

@@ -13,7 +13,7 @@ import {
   ThreatLevel,
 } from '../types';
 
-const invisibleChars = /[\u200B\u200C\u200D\uFEFF\u00AD\u034F\u061C\u2060\u2061\u2062\u2063\u2064]/g;
+const invisibleChars = /(?:\u200B|\u200C|\u200D|\uFEFF|\u00AD|\u034F|\u061C|\u2060|\u2061|\u2062|\u2063|\u2064)/g;
 const whitespace = /\s+/g;
 const markdownLinks = /\[([^\]]+)\]\(([^)]+)\)/g;
 const markdownHeaders = /^\s{0,3}#{1,6}\s+/gm;
