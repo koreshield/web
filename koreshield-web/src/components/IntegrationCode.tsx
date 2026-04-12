@@ -12,7 +12,7 @@ const codeExamples = {
 client = koreshield.Client(api_key="ks_...")
 # requests are automatically sanitized
 response = client.chat.completions.create(
-    model="gpt-4",
+    model="gpt-4o-mini",
     messages=[{"role": "user", "content": user_input}]
 )`,
     javascript: `import { KoreShield } from '@koreshield/sdk';

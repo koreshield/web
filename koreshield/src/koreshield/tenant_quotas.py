@@ -9,17 +9,12 @@ Manages per-tenant resource limits including:
 - Active session limits
 """
 
-import asyncio
 import time
-import json
 import os
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
-from dataclasses import dataclass, field
-import uuid
 
-from .tenant_models import TenantContext, ResourceType, TenantResourceUsage
-from .tenant_utils import get_current_tenant
+from .tenant_models import TenantContext, ResourceType
 from .logger import FirewallLogger
 
 class ResourceQuotaManager:

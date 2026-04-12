@@ -1,14 +1,10 @@
 import uuid
-from datetime import datetime, timezone
-from sqlalchemy import Column, String, DateTime, Boolean, JSON, Enum, ForeignKey
+from sqlalchemy import Column, String, DateTime, JSON, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from .base import Base
+from ..utils import utcnow_naive
 
-
-def utcnow_naive() -> datetime:
-    """UTC now as naive datetime for existing DB schema compatibility."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class ReportSchedule(str, Enum):
     MANUAL = "manual"

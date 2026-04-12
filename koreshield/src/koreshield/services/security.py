@@ -5,7 +5,7 @@ Handles sanitization, detection, and policy evaluation.
 
 import time
 import structlog
-from typing import Optional, Any
+from typing import Optional
 
 from ..detector import AttackDetector
 from ..sanitizer import SanitizationEngine
@@ -60,11 +60,16 @@ class SecurityService:
             "is_safe": not should_block,
             "blocked": should_block,
             "reason": reason if should_block else None,
+            # Surface confidence at top level so clients don't need to dig into detection.confidence.
+            # Previously all /v1/scan responses showed conf=0.00 in monitoring tools because
+            # this field was absent and clients defaulted to 0.0.
+            "confidence": round(float(detection_result.get("confidence", 0.0)), 4),
+            "threat_level": self.derive_severity(detection_result) if should_block else "safe",
             "sanitization": sanitization_result,
             "detection": detection_result,
             "policy": policy_result,
             "processing_time_ms": processing_time_ms,
-            "severity": self.derive_severity(detection_result) if should_block else "safe"
+            "severity": self.derive_severity(detection_result) if should_block else "safe",
         }
 
     def derive_severity(self, detection_result: dict) -> str:

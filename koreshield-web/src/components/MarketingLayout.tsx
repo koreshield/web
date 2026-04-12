@@ -1,6 +1,6 @@
 import { Github, Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuthState } from '../hooks/useAuthState';
 import Footer from './Footer';
@@ -10,17 +10,11 @@ const mobileNavLinkClass = 'text-base font-medium py-3 border-b border-white/[0.
 
 export function MarketingLayout() {
 	const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-	const location = useLocation();
 	const { isAuthenticated, isHydrating } = useAuthState();
 	const { theme } = useTheme();
 	const logoSrc = theme === 'light' ? '/logo/SVG/Black.svg' : '/logo/SVG/White.svg';
 
 	const closeMobile = () => setMobileMenuOpen(false);
-
-	// Auto-close drawer on navigation
-	useEffect(() => {
-		closeMobile();
-	}, [location.pathname]);
 
 	// Disable body overflow when drawer is open
 	useEffect(() => {

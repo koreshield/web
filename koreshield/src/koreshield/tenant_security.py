@@ -5,15 +5,12 @@ Cross-Tenant Security Measures and Tenant-Specific Audit Logging
 Ensures complete isolation between tenants and comprehensive audit trails.
 """
 
-import asyncio
 import json
-import hashlib
 from typing import Dict, List, Optional, Any, Set, Tuple
 from datetime import datetime, timedelta
-import uuid
 
-from .tenant_models import TenantContext, TenantAuditLog, Tenant
-from .tenant_utils import get_current_tenant, get_current_request_id
+from .tenant_models import TenantContext, TenantAuditLog
+from .tenant_utils import get_current_request_id
 from .logger import FirewallLogger
 
 class CrossTenantSecurityEnforcer:

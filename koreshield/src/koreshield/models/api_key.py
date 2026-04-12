@@ -4,16 +4,10 @@ API Key database models for authentication.
 import uuid
 import secrets
 import hashlib
-from datetime import datetime, timedelta, timezone
 from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
 from .base import Base
-
-
-def utcnow_naive() -> datetime:
-    """UTC now as naive datetime for existing DB schema compatibility."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+from ..utils import utcnow_naive
 
 
 class APIKey(Base):

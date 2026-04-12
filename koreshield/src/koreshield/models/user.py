@@ -2,15 +2,11 @@
 User database models for authentication.
 """
 import uuid
-from datetime import datetime, timezone
 from sqlalchemy import Column, String, Boolean, DateTime, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from .base import Base
+from ..utils import utcnow_naive
 
-
-def utcnow_naive() -> datetime:
-    """UTC now as naive datetime for existing DB schema compatibility."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class User(Base):
     __tablename__ = 'users'

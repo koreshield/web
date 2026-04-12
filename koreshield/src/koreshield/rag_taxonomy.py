@@ -268,6 +268,3 @@ class RetrievedDocument:
             raise ValueError("Document ID cannot be empty")
         if not self.content:
             raise ValueError("Document content cannot be empty")
-def utcnow_aware() -> datetime:
-    """Timezone-aware UTC timestamp."""
-    return datetime.now(timezone.utc)
