@@ -22,7 +22,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Your rights',
-				body: 'Under UK GDPR and EU GDPR you have the right to access, correct, or delete your personal data. To exercise these rights email legal@koreshield.com.',
+				body: 'Under UK GDPR and EU GDPR you have the right to access, correct, or delete your personal data. To exercise these rights email hello@koreshield.com.',
 			},
 			{
 				heading: 'Cookies',
@@ -30,7 +30,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Contact',
-				body: 'Data controller: Koreshield Labs Ltd, incorporated in England and Wales (Co. No. 17057784). Questions about this policy: legal@koreshield.com.',
+				body: 'Data controller: Koreshield Labs Ltd, incorporated in England and Wales (Co. No. 17057784). Questions about this policy: hello@koreshield.com.',
 			},
 		],
 	},
@@ -90,7 +90,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Contact',
-				body: 'Questions about our cookie usage: legal@koreshield.com.',
+				body: 'Questions about our cookie usage: hello@koreshield.com.',
 			},
 		],
 	},
@@ -127,7 +127,7 @@ export default function LegalPage() {
 
 					<div className="mt-16 pt-8 border-t border-border text-xs text-muted-foreground">
 						Questions? Email{' '}
-						<a href="mailto:legal@koreshield.com" className="text-primary hover:underline">legal@koreshield.com</a>
+						<a href="mailto:hello@koreshield.com" className="text-primary hover:underline">hello@koreshield.com</a>
 					</div>
 				</motion.div>
 			</div>

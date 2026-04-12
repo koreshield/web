@@ -307,10 +307,10 @@ export class ErrorBoundary extends Component<Props, State> {
                 If this problem persists, please{' '}
                 contact support at{' '}
                 <a
-                  href="mailto:support@koreshield.com"
+                  href="mailto:hello@koreshield.com"
                   className="text-primary hover:underline"
                 >
-                  support@koreshield.com
+                  hello@koreshield.com
                 </a>
               </p>
             </div>

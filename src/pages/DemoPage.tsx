@@ -2,9 +2,9 @@ import * as LucideIcons from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../components/ToastNotification';
+import { useAuthState } from '../hooks/useAuthState';
 import { api } from '../lib/api-client';
-import { authService } from '../lib/auth';
-import { PRESET_ATTACKS, type ThreatLogEntry, type ThreatResult, type ThreatSignal } from '../lib/threat-engine';
+import { PRESET_ATTACKS, analyzeThreat, type ThreatLogEntry, type ThreatResult, type ThreatSignal } from '../lib/threat-engine';
 
 const Icon = ({ name, className }: { name: string; className?: string }) => {
 	const LucideIcon = (LucideIcons as any)[name];
@@ -16,29 +16,22 @@ const Icon = ({ name, className }: { name: string; className?: string }) => {
 
 type ScanState = 'idle' | 'scanning' | 'done';
 
-type ScanApiIndicator = {
-	type: string;
-	severity: string;
+// Flat response shape returned by POST /v1/scan
+type FlatScanResult = {
+	blocked: boolean;
 	confidence: number;
-	description: string;
-	metadata?: Record<string, any>;
-};
-
-type ScanApiResult = {
-	is_safe: boolean;
-	threat_level: string;
-	confidence: number;
-	indicators: ScanApiIndicator[];
-	processing_time_ms: number;
-	metadata: Record<string, any>;
-	scan_id?: string;
-};
-
-type ScanApiResponse = {
-	result: ScanApiResult;
+	attack_type: string | null;
+	attack_categories: string[];
+	indicators: string[];          // matched pattern strings
+	message: string;
 	request_id: string;
 	timestamp: string;
-	version: string;
+	is_safe: boolean;
+	severity: string;
+	threat_level: string;
+	reason: string | null;
+	processing_time_ms: number;
+	policy?: Record<string, any>;
 };
 
 const threatLevelToSeverity: Record<string, ThreatResult['severity']> = {
@@ -49,17 +42,32 @@ const threatLevelToSeverity: Record<string, ThreatResult['severity']> = {
 	critical: 'critical',
 };
 
-const indicatorTypeToCategory: Record<string, ThreatResult['category']> = {
+// Maps attack_type / attack_categories values from the API to display categories
+const attackTypeToCategory: Record<string, ThreatResult['category']> = {
+	prompt_injection: 'Prompt Injection',
+	jailbreak: 'Jailbreak Attempt',
+	role_manipulation: 'Jailbreak Attempt',
+	role_play_bypass: 'Role-play Bypass',
+	keyword_match: 'Prompt Injection',
+	code_block_injection: 'Prompt Injection',
+	encoding_attempt: 'Payload Obfuscation',
+	prompt_leaking: 'System Prompt Leak',
+	data_exfiltration: 'Data Exfiltration',
+	url_exfiltration: 'Data Exfiltration',
+	privilege_escalation: 'Privilege Escalation',
+	adversarial_suffix: 'Adversarial Input',
+	multi_turn_injection: 'Prompt Injection',
+	sanitization_threat: 'Adversarial Input',
+	semantic_attack: 'Adversarial Input',
+	sql_injection: 'SQL Injection',
+	tag_extraction: 'System Prompt Leak',
+	ml_detection: 'Adversarial Input',
+	// legacy keys kept for backward compat
 	keyword: 'Prompt Injection',
 	rule: 'Prompt Injection',
 	blocklist: 'Data Exfiltration',
 	allowlist: 'Clean',
 	ml: 'Adversarial Input',
-	code_block_injection: 'Prompt Injection',
-	role_manipulation: 'Jailbreak Attempt',
-	encoding_attempt: 'Payload Obfuscation',
-	prompt_leaking: 'System Prompt Leak',
-	data_exfiltration: 'Data Exfiltration',
 };
 
 const mapConfidenceLevel = (confidence: number): ThreatResult['confidence'] => {
@@ -85,37 +93,43 @@ const mitreRefBySeverity: Record<ThreatResult['severity'], string> = {
 	none: 'ATLAS AML.T0000',
 };
 
-const buildThreatResult = (scan: ScanApiResult): ThreatResult => {
+const buildThreatResult = (scan: FlatScanResult): ThreatResult => {
+	// indicators are matched pattern strings from the API
 	const indicators = scan.indicators || [];
 	const severity = threatLevelToSeverity[scan.threat_level] || (scan.is_safe ? 'none' : 'low');
-	const signals: ThreatSignal[] = indicators.map((indicator, index) => {
-		const rawType = indicator.metadata?.type || indicator.type;
-		const category = indicatorTypeToCategory[rawType] || indicatorTypeToCategory[indicator.type] || (scan.is_safe ? 'Clean' : 'Adversarial Input');
-		const ruleId = indicator.metadata?.rule_id || indicator.metadata?.keyword || `KRS-${String(index + 1).padStart(3, '0')}`;
-		return {
-			ruleId,
-			category,
-			severity,
-			score: Math.round((indicator.confidence ?? scan.confidence) * 100),
-			matchedPattern: indicator.description || indicator.type,
-			explanation: `Matched indicator: ${indicator.description || indicator.type}.`,
-			remediation: remediationBySeverity[severity],
-			mitreRef: mitreRefBySeverity[severity],
-		};
-	});
+
+	// Derive primary category from attack_type or attack_categories
+	const primaryAttackKey = scan.attack_type || scan.attack_categories?.[0] || '';
+	const primaryCategory: ThreatResult['category'] =
+		attackTypeToCategory[primaryAttackKey] || (scan.blocked ? 'Adversarial Input' : 'Clean');
+
+	// Build one signal per matched indicator string
+	const signals: ThreatSignal[] = indicators.map((pattern, index) => ({
+		ruleId: `KRS-${String(index + 1).padStart(3, '0')}`,
+		category: primaryCategory,
+		severity,
+		score: Math.round(scan.confidence * 100),
+		matchedPattern: pattern,
+		explanation: `Matched pattern: ${pattern}.`,
+		remediation: remediationBySeverity[severity],
+		mitreRef: mitreRefBySeverity[severity],
+	}));
 
 	const primarySignal = signals[0];
-	const scanIdShort = scan.scan_id ? `SCAN-${scan.scan_id.slice(0, 6).toUpperCase()}` : 'SCAN-000';
+	const scanIdShort = scan.request_id
+		? `SCAN-${scan.request_id.slice(0, 6).toUpperCase()}`
+		: 'SCAN-000';
 
 	return {
-		blocked: !scan.is_safe,
-		category: primarySignal?.category || (scan.is_safe ? 'Clean' : 'Adversarial Input'),
+		blocked: scan.blocked,
+		category: primaryCategory,
 		severity,
 		score: Math.round(scan.confidence * 100),
 		confidence: mapConfidenceLevel(scan.confidence),
-		explanation: scan.is_safe
-			? 'No threats detected. Prompt cleared for downstream processing.'
-			: `Detected ${signals.length} indicator${signals.length === 1 ? '' : 's'} across ${scan.threat_level} severity.`,
+		explanation: scan.message ||
+			(scan.is_safe
+				? 'No threats detected. Prompt cleared for downstream processing.'
+				: `Detected ${signals.length} indicator${signals.length === 1 ? '' : 's'} across ${scan.threat_level} severity.`),
 		matchedPattern: primarySignal?.matchedPattern || null,
 		processingMs: Math.round(scan.processing_time_ms),
 		ruleId: primarySignal?.ruleId || scanIdShort,
@@ -123,7 +137,8 @@ const buildThreatResult = (scan: ScanApiResult): ThreatResult => {
 		signals,
 		remediation: remediationBySeverity[severity],
 		mitreRef: mitreRefBySeverity[severity],
-		entropyFlag: indicators.some((indicator) => indicator.type === 'ml' || indicator.metadata?.type === 'ml_detection'),
+		entropyFlag: scan.attack_type === 'encoding_attempt' ||
+			(scan.attack_categories || []).includes('encoding_attempt'),
 	};
 };
 
@@ -455,23 +470,26 @@ export default function DemoPage() {
 	const [currentResult, setCurrentResult] = useState<ThreatResult | null>(null);
 	const [log, setLog] = useState<ThreatLogEntry[]>([]);
 	const [stats, setStats] = useState({ total: 0, blocked: 0, allowed: 0 });
-	const { error: showError, info } = useToast();
-	const isAuthenticated = authService.isAuthenticated();
+	const { info } = useToast();
+	const { isAuthenticated } = useAuthState();
 
 	const handlePrompt = useCallback(async (prompt: string) => {
 		if (scanState === 'scanning') return;
-		if (!authService.isAuthenticated()) {
-			showError('Sign in required', 'Log in to run a live scan against your KoreShield tenant.');
-			return;
-		}
 
 		setScanState('scanning');
 		setCurrentResult(null);
 
 		try {
-			const response = await api.scanText(prompt);
-			const scanResponse = response as ScanApiResponse;
-			const result = buildThreatResult(scanResponse.result);
+			let result: ThreatResult;
+
+			if (isAuthenticated) {
+				const response = await api.scanText(prompt);
+				result = buildThreatResult(response as FlatScanResult);
+			} else {
+				await new Promise((resolve) => setTimeout(resolve, 300));
+				result = analyzeThreat(prompt);
+			}
+
 			setCurrentResult(result);
 			setScanState('done');
 
@@ -494,7 +512,7 @@ export default function DemoPage() {
 			info('Scan failed', 'The API could not complete the scan. Check your session and try again.');
 			console.error('Scan failed', err);
 		}
-	}, [scanState, showError, info]);
+	}, [isAuthenticated, scanState, info]);
 
 	return (
 		<div className="min-h-screen bg-slate-950 text-white">
@@ -539,17 +557,17 @@ export default function DemoPage() {
 			<div className="text-center py-8 md:py-10 px-4 md:px-6">
 				<div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-electric-green/30 bg-electric-green/10 text-electric-green text-xs font-medium mb-4">
 					<div className="w-1.5 h-1.5 rounded-full bg-electric-green animate-pulse" />
-					Live API Demo  -  Login required for scans
+					{isAuthenticated ? 'Live API Demo' : 'Guest Sandbox Demo'}
 				</div>
 				<h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 text-foreground">
 					See KoreShield Stop Real AI Attacks
 				</h1>
 				<p className="text-slate-400 text-base md:text-lg max-w-xl mx-auto">
-					Type any prompt below or pick a preset attack. Watch the firewall intercept threats in real time against your tenant policies.
+					Type any prompt below or pick a preset attack. Guest mode runs the local detection sandbox, while signed-in sessions use your live KoreShield tenant.
 				</p>
 				{!isAuthenticated && (
 					<p className="text-amber-300 text-sm mt-4">
-						Sign in to enable live scans. Guest mode keeps the UI visible but disables API calls.
+						Sign in any time to switch from the sandbox to live API-backed scans and tenant policy results.
 					</p>
 				)}
 			</div>
@@ -557,7 +575,7 @@ export default function DemoPage() {
 			{/* 3-Pane Layout */}
 			<div className="max-w-7xl mx-auto px-6 pb-12">
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ minHeight: '540px' }}>
-					<ChatPane onSubmit={handlePrompt} isScanning={scanState === 'scanning'} disabled={!isAuthenticated} />
+					<ChatPane onSubmit={handlePrompt} isScanning={scanState === 'scanning'} disabled={false} />
 					<FirewallPane result={currentResult} state={scanState} />
 					<ThreatLogPane entries={log} />
 				</div>

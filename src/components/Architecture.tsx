@@ -55,7 +55,7 @@ function Architecture() {
                                     <Zap className="w-3 h-3" /> Outgoing Request
                                 </div>
                                 <span className="text-foreground/70">client.chat.completions.create(</span><br />
-                                <span className="ml-4 text-foreground/70">model=<span className="text-blue-400">"gpt-4"</span>,</span><br />
+                                <span className="ml-4 text-foreground/70">model=<span className="text-blue-400">"gpt-4o-mini"</span>,</span><br />
                                 <span className="ml-4 text-foreground/70">messages=[&#123;...&#125;]</span><br />
                                 <span className="text-foreground/70">)</span>
                             </div>

@@ -83,7 +83,7 @@ const supportOptions = [
 		title: 'Email Support',
 		description: 'For technical issues, bug reports, or feature requests. Our engineering team reviews every ticket.',
 		cta: 'Email Us',
-		link: 'mailto:support@koreshield.com',
+		link: 'mailto:hello@koreshield.com',
 		external: true,
 	},
 	{
@@ -321,7 +321,7 @@ function TechnicalSupportForm() {
 		try {
 			if (!emailConfigAvailable) {
 				openMailClient({
-					to: 'support@koreshield.com',
+					to: 'hello@koreshield.com',
 					subject: formData.subject || 'Technical support request',
 					body:
 						`Name: ${formData.name}\n` +
@@ -332,7 +332,7 @@ function TechnicalSupportForm() {
 						`Description:\n${formData.description}\n\n` +
 						`Environment:\n${formData.environment || 'Not provided'}`,
 				});
-				toast.info('Opening your email app', 'We routed this support request to support@koreshield.com because browser email sending is not configured here.');
+				toast.info('Opening your email app', 'We routed this support request to hello@koreshield.com because browser email sending is not configured here.');
 				setFormData({
 					name: '',
 					email: '',
@@ -383,7 +383,7 @@ function TechnicalSupportForm() {
 					? (err as { text?: string; message?: string }).text ||
 					  (err as { text?: string; message?: string }).message
 					: undefined;
-			toast.error('Failed to send', details || 'Please try again or email support@koreshield.com directly.');
+			toast.error('Failed to send', details || 'Please try again or email hello@koreshield.com directly.');
 		} finally {
 			setLoading(false);
 		}
