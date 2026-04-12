@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Activity, TrendingUp, Shield, Download } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { MapPin, Activity, TrendingUp, Shield, Download, Loader2 } from 'lucide-react';
 import { ThreatMap } from '../components/ThreatMap';
 import { AttackVectorChart } from '../components/AttackVectorChart';
 import { TopEndpointsWidget } from '../components/TopEndpointsWidget';
 import { wsClient, type ThreatDetectedEvent, type WebSocketEvent } from '../lib/websocket-client';
+import { api } from '../lib/api-client';
 import { SEOMeta } from '../components/SEOMeta';
 import { format } from 'date-fns';
 
@@ -24,57 +26,77 @@ interface EndpointData {
 	blockedCount: number;
 }
 
-const MOCK_ATTACK_VECTORS = {
-	'Prompt Injection': 145,
-	'Data Exfiltration': 89,
-	'Jailbreak': 67,
-	'PII Leakage': 54,
-	'Malicious Code': 43,
-	'Social Engineering': 32,
-	'Other': 18
-};
-
-const MOCK_TOP_ENDPOINTS: EndpointData[] = [
-	{ endpoint: '/api/v1/chat/completions', attackCount: 234, lastAttack: new Date().toISOString(), severity: 'critical', blockedCount: 198 },
-	{ endpoint: '/api/v1/embeddings', attackCount: 156, lastAttack: new Date().toISOString(), severity: 'high', blockedCount: 142 },
-	{ endpoint: '/api/v1/completions', attackCount: 123, lastAttack: new Date().toISOString(), severity: 'high', blockedCount: 109 },
-	{ endpoint: '/api/v1/search', attackCount: 98, lastAttack: new Date().toISOString(), severity: 'medium', blockedCount: 87 },
-	{ endpoint: '/api/v1/analyze', attackCount: 76, lastAttack: new Date().toISOString(), severity: 'medium', blockedCount: 65 },
-	{ endpoint: '/api/v1/summarize', attackCount: 54, lastAttack: new Date().toISOString(), severity: 'low', blockedCount: 48 },
-	{ endpoint: '/api/v1/translate', attackCount: 43, lastAttack: new Date().toISOString(), severity: 'low', blockedCount: 39 },
-	{ endpoint: '/api/v1/classify', attackCount: 32, lastAttack: new Date().toISOString(), severity: 'low', blockedCount: 28 },
-];
+type TimeRange = '7d' | '30d' | '90d';
 
 export function ThreatMapPage() {
 	const [threats, setThreats] = useState<ThreatLocation[]>([]);
-	const [attackVectors] = useState(MOCK_ATTACK_VECTORS);
-	const [topEndpoints] = useState(MOCK_TOP_ENDPOINTS);
-	const [wsConnected, setWsConnected] = useState(false);
+	const [wsConnected, setWsConnected] = useState(() => wsClient.isConnected());
 	const [selectedThreat, setSelectedThreat] = useState<ThreatLocation | null>(null);
+	const [timeRange, setTimeRange] = useState<TimeRange>('7d');
 
+	// Real attack vector distribution from backend
+	const { data: attackVectorData, isLoading: loadingVectors } = useQuery({
+		queryKey: ['attack-vectors', timeRange],
+		queryFn: () => api.getAttackVectors(timeRange),
+		refetchInterval: 30_000,
+		retry: false,
+	});
+
+	// Real top targeted endpoints from backend
+	const { data: topEndpointData, isLoading: loadingEndpoints } = useQuery({
+		queryKey: ['top-endpoints', timeRange],
+		queryFn: () => api.getTopEndpoints(timeRange, 10),
+		refetchInterval: 30_000,
+		retry: false,
+	});
+
+	// Transform API response → component prop shapes
+	const attackVectors: Record<string, number> = {};
+	if (Array.isArray(attackVectorData)) {
+		for (const item of attackVectorData as Array<{ attack_type: string; count: number }>) {
+			attackVectors[item.attack_type] = item.count;
+		}
+	}
+
+	const topEndpoints: EndpointData[] = Array.isArray(topEndpointData)
+		? (topEndpointData as Array<{
+				endpoint: string;
+				attack_count: number;
+				blocked_count: number;
+				last_attack: string | null;
+				severity: 'critical' | 'high' | 'medium' | 'low';
+		  }>).map(e => ({
+				endpoint: e.endpoint,
+				attackCount: e.attack_count,
+				blockedCount: e.blocked_count,
+				lastAttack: e.last_attack ?? new Date().toISOString(),
+				severity: e.severity,
+		  }))
+		: [];
+
+	// WebSocket for live threat map updates
 	useEffect(() => {
 		wsClient.connect();
-		// eslint-disable-next-line react-hooks/set-state-in-effect
-		setWsConnected(wsClient.isConnected());
-
 		wsClient.subscribe(['threat_detected']);
 
 		const cleanupConnection = wsClient.on('connection_established', () => {
 			setWsConnected(true);
 		});
 
-		const cleanupThreats = wsClient.on<ThreatDetectedEvent>('threat_detected', (event: WebSocketEvent<ThreatDetectedEvent>) => {
-			const newThreat: ThreatLocation = {
-				id: event.data.threat_id,
-				coordinates: [Math.random() * 360 - 180, Math.random() * 180 - 90],
-				country: 'Unknown',
-				threatType: event.data.attack_type,
-				severity: event.data.severity,
-				timestamp: event.timestamp
-			};
-
-			setThreats(prev => [newThreat, ...prev.slice(0, 49)]);
-		});
+		const cleanupThreats = wsClient.on<ThreatDetectedEvent>(
+			'threat_detected',
+			(event: WebSocketEvent<ThreatDetectedEvent>) => {
+				const newThreat: ThreatLocation = {
+					id: event.data.threat_id,
+					coordinates: [Math.random() * 360 - 180, Math.random() * 180 - 90],
+					country: 'Unknown',
+					threatType: event.data.attack_type,
+					severity: event.data.severity,
+					timestamp: event.timestamp,
+				};
+				setThreats(prev => [newThreat, ...prev.slice(0, 49)]);
+			}
+		);
 
 		return () => {
 			cleanupConnection();
@@ -85,7 +107,7 @@ export function ThreatMapPage() {
 	const stats = {
 		total: threats.length,
 		critical: threats.filter(t => t.severity === 'critical').length,
-		countries: new Set(threats.map(t => t.country)).size
+		countries: new Set(threats.map(t => t.country)).size,
 	};
 
 	const exportData = () => {
@@ -93,9 +115,8 @@ export function ThreatMapPage() {
 			threats,
 			attackVectors,
 			topEndpoints,
-			exportedAt: new Date().toISOString()
+			exportedAt: new Date().toISOString(),
 		};
-
 		const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
@@ -125,6 +146,17 @@ export function ThreatMapPage() {
 							</p>
 						</div>
 						<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+							{/* Time range selector */}
+							<select
+								value={timeRange}
+								onChange={e => setTimeRange(e.target.value as TimeRange)}
+								className="px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+							>
+								<option value="7d">Last 7 days</option>
+								<option value="30d">Last 30 days</option>
+								<option value="90d">Last 90 days</option>
+							</select>
+
 							{wsConnected ? (
 								<div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/50 rounded-lg">
 									<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -157,11 +189,11 @@ export function ThreatMapPage() {
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
 					<div className="bg-card border border-border rounded-lg p-6">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Total Threats</span>
+							<span className="text-sm font-medium text-muted-foreground">Live Threats</span>
 							<Activity className="w-5 h-5 text-blue-500" />
 						</div>
 						<div className="text-3xl font-bold">{stats.total}</div>
-						<p className="text-xs text-muted-foreground mt-1">Last 24 hours</p>
+						<p className="text-xs text-muted-foreground mt-1">Current session</p>
 					</div>
 
 					<div className="bg-card border border-border rounded-lg p-6">
@@ -175,11 +207,11 @@ export function ThreatMapPage() {
 
 					<div className="bg-card border border-border rounded-lg p-6">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Countries</span>
+							<span className="text-sm font-medium text-muted-foreground">Attack Types</span>
 							<TrendingUp className="w-5 h-5 text-green-500" />
 						</div>
-						<div className="text-3xl font-bold">{stats.countries}</div>
-						<p className="text-xs text-muted-foreground mt-1">Affected regions</p>
+						<div className="text-3xl font-bold">{Object.keys(attackVectors).length}</div>
+						<p className="text-xs text-muted-foreground mt-1">Distinct attack categories</p>
 					</div>
 				</div>
 
@@ -187,21 +219,33 @@ export function ThreatMapPage() {
 					<div className="lg:col-span-2">
 						<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
 							<h2 className="text-lg sm:text-xl font-semibold mb-4">Geographic Threat Distribution</h2>
+							<p className="text-xs text-muted-foreground mb-3">
+								Map populates in real-time as threats are detected via WebSocket.
+							</p>
 							<div className="h-[300px] sm:h-[500px] w-full overflow-hidden">
-								<ThreatMap
-									threats={threats}
-									onMarkerClick={setSelectedThreat}
-								/>
+								<ThreatMap threats={threats} onMarkerClick={setSelectedThreat} />
 							</div>
 						</div>
 					</div>
 
 					<div className="lg:col-span-1">
-						<AttackVectorChart data={attackVectors} />
+						{loadingVectors ? (
+							<div className="bg-card border border-border rounded-lg p-6 flex items-center justify-center h-64">
+								<Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+							</div>
+						) : (
+							<AttackVectorChart data={attackVectors} />
+						)}
 					</div>
 				</div>
 
-				<TopEndpointsWidget endpoints={topEndpoints} />
+				{loadingEndpoints ? (
+					<div className="bg-card border border-border rounded-lg p-6 flex items-center justify-center h-40">
+						<Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+					</div>
+				) : (
+					<TopEndpointsWidget endpoints={topEndpoints} />
+				)}
 			</main>
 
 			{selectedThreat && (

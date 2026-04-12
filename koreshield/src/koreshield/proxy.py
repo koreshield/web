@@ -75,20 +75,20 @@ class KoreShieldProxy:
         init_jwt_config(self.config)
         self.app = FastAPI(
             title="KoreShield API",
-            version="1.0.0",
+            version="1.1.0",
             description="""
             Enterprise LLM Security Platform
-            
+
             ## Getting Started
             1. Sign up: Create an account at /v1/management/signup
             2. Login: Get your JWT token from /v1/management/login
             3. Authorize: Click the Authorize button above and paste your token
             4. Use the API: Send prompts through /v1/chat/completions with automatic security scanning
-            
+
             ## Core Features
             - Real-time Threat Detection: Automatic scanning of all LLM interactions
             - Multi-Provider Support: OpenAI, Anthropic, DeepSeek, Gemini, Azure OpenAI
-            - Analytics and Monitoring: Track costs, usage, and security events
+            - Analytics and Monitoring: Track costs, usage, attack vectors, provider performance, and compliance posture
             - Policy Management: Configure security rules and access controls
             - Team Collaboration: Multi-tenant support with RBAC
             """,
@@ -100,7 +100,7 @@ class KoreShieldProxy:
                 {"name": "Management", "description": "Dashboard configuration, request logs, security policies, and platform statistics"},
                 {"name": "Rules", "description": "Custom detection rules: create, update, delete, and test pattern-based rules"},
                 {"name": "Alerts", "description": "Alert rules and notification channels: configure conditions, severities, cooldowns, and delivery channels"},
-                {"name": "Analytics", "description": "Usage analytics, cost tracking, and per-tenant metrics"},
+                {"name": "Analytics", "description": "Usage analytics, cost tracking, attack vector distribution, top targeted endpoints, provider performance metrics, and real-time compliance posture"},
                 {"name": "RBAC", "description": "Role-based access control: manage users, roles, and permission assignments"},
                 {"name": "Reports", "description": "Security reports: templates, scheduling, generation, and download"},
                 {"name": "Teams", "description": "Team and organisation management: members, roles, invites, and shared dashboards"},
@@ -109,8 +109,8 @@ class KoreShieldProxy:
                 {"name": "Health", "description": "System health checks, provider status, Prometheus metrics, and live statistics"},
             ],
             contact={
-                "name": "KoreShield Support",
-                "email": "support@koreshield.com",
+                "name": "KoreShield",
+                "email": "hello@koreshield.com",
                 "url": "https://koreshield.com"
             },
             license_info={
@@ -153,6 +153,37 @@ class KoreShieldProxy:
         self.app.state.limiter = self.limiter
         self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
         self.app.add_middleware(SlowAPIMiddleware)
+
+        # Global fallback: ensure unhandled exceptions return JSON with CORS headers
+        # (Starlette's ServerErrorMiddleware would otherwise return a bare 500 HTML
+        # response before CORSMiddleware can attach Allow-Origin headers, causing
+        # the browser to report a CORS error instead of the real HTTP 500.)
+        @self.app.exception_handler(Exception)
+        async def _unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+            logger.error(
+                "unhandled_exception",
+                path=str(request.url.path),
+                error=str(exc),
+                exc_info=True,
+            )
+            origin = request.headers.get("origin", "")
+            cors_origins = [
+                "https://koreshield.com",
+                "https://www.koreshield.com",
+                "https://api.koreshield.com",
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://localhost:8000",
+            ]
+            headers = {}
+            if origin in cors_origins:
+                headers["Access-Control-Allow-Origin"] = origin
+                headers["Access-Control-Allow-Credentials"] = "true"
+            return JSONResponse(
+                status_code=500,
+                content={"error": "internal_server_error", "message": "An unexpected error occurred."},
+                headers=headers,
+            )
 
         # 3. Initialize Base Security Components
         security_config = config.get("security", {})
@@ -1178,73 +1209,98 @@ class KoreShieldProxy:
         """
         request_id = str(uuid.uuid4())
         start_time = time.time()
-        await self._authenticate_request(request)
-        body = await request.json()
-        scan = self.security.scan_prompt(
-            body.get("prompt"),
-            context=body.get("context"),
-        )
+        try:
+            await self._authenticate_request(request)
 
-        self.telemetry.increment_stat("requests_total")
-        if scan["blocked"]:
-            self.telemetry.increment_stat("requests_blocked")
-            self.telemetry.increment_stat("attacks_detected")
-            asyncio.create_task(self.monitoring.notify_operational_event(
-                event_name="prompt_scan_completed",
-                severity="warning",
-                message=f"Prompt scan blocked: {scan.get('reason', 'threat detected')}",
-                details={
+            try:
+                body = await request.json()
+            except Exception:
+                raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+
+            if not isinstance(body, dict):
+                raise HTTPException(status_code=400, detail="Request body must be a JSON object")
+
+            scan = self.security.scan_prompt(
+                body.get("prompt") or "",
+                context=body.get("context") if isinstance(body.get("context"), dict) else None,
+            )
+
+            self.telemetry.increment_stat("requests_total")
+            if scan["blocked"]:
+                self.telemetry.increment_stat("requests_blocked")
+                self.telemetry.increment_stat("attacks_detected")
+                try:
+                    asyncio.create_task(self.monitoring.notify_operational_event(
+                        event_name="prompt_scan_completed",
+                        severity="warning",
+                        message=f"Prompt scan blocked: {scan.get('reason', 'threat detected')}",
+                        details={
+                            "request_id": request_id,
+                            "attack_type": scan["detection"].get("attack_type", "prompt_injection"),
+                            "severity": scan["severity"],
+                            "action": "blocked",
+                        },
+                        publish_event_type="scan_event",
+                    ))
+                except Exception as notify_err:
+                    logger.warning("scan_notify_failed", error=str(notify_err))
+
+            detection = scan.get("detection", {})
+            attack_type = detection.get("attack_type") or (
+                "prompt_injection" if scan["blocked"] else None
+            )
+            # Derive human-readable attack categories from indicators
+            indicators: list = detection.get("indicators", [])
+            # Build a concise human-facing message
+            if scan["blocked"]:
+                human_message = f"Threat detected: {scan.get('reason', attack_type or 'unknown')}."
+            elif detection.get("is_attack"):
+                human_message = "Potential threat detected but allowed by policy."
+            else:
+                human_message = "Prompt is safe."
+
+            return JSONResponse(
+                status_code=200,
+                content={
+                    # Primary guide-contract fields
+                    "blocked": scan["blocked"],
+                    "confidence": detection.get("confidence", scan.get("confidence", 0.0)),
+                    "attack_type": attack_type,
+                    "attack_categories": list({
+                        i.get("category") or i.get("type") or "unknown"
+                        for i in indicators
+                        if isinstance(i, dict)
+                    } | ({attack_type} if attack_type else set())),
+                    "indicators": [
+                        i.get("pattern") or i.get("name") or str(i)
+                        for i in indicators
+                        if i
+                    ],
+                    "message": human_message,
                     "request_id": request_id,
-                    "attack_type": scan["detection"].get("attack_type", "prompt_injection"),
-                    "severity": scan["severity"],
-                    "action": "blocked",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    # Extended fields — useful for dashboards and SOC workflows
+                    "is_safe": scan.get("is_safe", not scan["blocked"]),
+                    "severity": scan.get("severity", "none"),
+                    "threat_level": scan.get("threat_level", "none"),
+                    "reason": scan.get("reason"),
+                    "processing_time_ms": (time.time() - start_time) * 1000,
+                    "policy": scan.get("policy", {}),
                 },
-                publish_event_type="scan_event",
-            ))
+            )
 
-        detection = scan.get("detection", {})
-        attack_type = detection.get("attack_type") or (
-            "prompt_injection" if scan["blocked"] else None
-        )
-        # Derive human-readable attack categories from indicators
-        indicators: list = detection.get("indicators", [])
-        # Build a concise human-facing message
-        if scan["blocked"]:
-            human_message = f"Threat detected: {scan.get('reason', attack_type or 'unknown')}."
-        elif detection.get("is_attack"):
-            human_message = "Potential threat detected but allowed by policy."
-        else:
-            human_message = "Prompt is safe."
-
-        return JSONResponse(
-            status_code=200,
-            content={
-                # Primary guide-contract fields
-                "blocked": scan["blocked"],
-                "confidence": detection.get("confidence", scan.get("confidence", 0.0)),
-                "attack_type": attack_type,
-                "attack_categories": list({
-                    i.get("category") or i.get("type") or "unknown"
-                    for i in indicators
-                    if isinstance(i, dict)
-                } | ({attack_type} if attack_type else set())),
-                "indicators": [
-                    i.get("pattern") or i.get("name") or str(i)
-                    for i in indicators
-                    if i
-                ],
-                "message": human_message,
-                "request_id": request_id,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                # Extended fields — useful for dashboards and SOC workflows
-                "is_safe": scan.get("is_safe", not scan["blocked"]),
-                "severity": scan.get("severity", "none"),
-                "threat_level": scan.get("threat_level", "none"),
-                "reason": scan.get("reason"),
-                "processing_time_ms": (time.time() - start_time) * 1000,
-                "policy": scan.get("policy", {}),
-            },
-        )
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error("scan_handler_error", request_id=request_id, error=str(e), exc_info=True)
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "error": "scan_failed",
+                    "message": "An internal error occurred while processing the scan request.",
+                    "request_id": request_id,
+                },
+            )
 
     async def _handle_scan_batch(self, request: Request) -> Response:
         """Forward to SecurityService."""
