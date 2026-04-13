@@ -5,51 +5,64 @@ on:
     branches: [ main ]
     paths:
       - 'koreshield/**'
+      - 'koreshield-web/**'
       - '.github/workflows/deploy.yml'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
 
-    # Deploy to VPS via SCP
-    - name: Copy files via SCP
+    # ── Copy backend source ────────────────────────────────────────────────────
+    - name: Copy backend via SCP
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USERNAME }}
         password: ${{ secrets.VPS_PASSWORD }}
-        # Copy entire backend directory to preserve structure
         source: "koreshield"
         target: "/opt/koreshield_deploy"
         strip_components: 0
 
+    # ── Copy frontend source ───────────────────────────────────────────────────
+    - name: Copy frontend via SCP
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        source: "koreshield-web"
+        target: "/opt/koreshield_deploy"
+        strip_components: 0
+
+    # ── SSH deploy (password auth — no SSH key required) ───────────────────────
     - name: Execute Remote Deployment
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USERNAME }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+        password: ${{ secrets.VPS_PASSWORD }}
         script: |
-          # Create destination if not exists
-          mkdir -p /opt/koreshield
-          
-          # Sync backend directory to /opt/koreshield/koreshield
-          rsync -av --delete /opt/koreshield_deploy/koreshield /opt/koreshield/
-          
-          # We deploy config files inside koreshield/
-          # So we run docker-compose FROM /opt/koreshield/koreshield
-          cd /opt/koreshield/koreshield
-          
-          # Ensure we use the .env from the parent directory (/opt/koreshield/.env)
-          # We can symlink it or pass --env-file
-          ln -sf ../.env .env
-          
-          # Rebuild and restart
-          docker-compose -f docker-compose.prod.yml up -d --build --remove-orphans
-          
-          # Prune unused images
+          set -e
+
+          # Sync source files into the production directory that the compose
+          # file at /opt/koreshield/docker-compose.prod.yml builds from.
+          rsync -av --delete /opt/koreshield_deploy/koreshield/  /opt/koreshield/koreshield/
+          rsync -av --delete /opt/koreshield_deploy/koreshield-web/ /opt/koreshield/koreshield-web/
+
+          # Ensure the backend build context can find .env
+          ln -sf /opt/koreshield/.env /opt/koreshield/koreshield/.env 2>/dev/null || true
+
+          cd /opt/koreshield
+
+          # Rebuild only the app containers.
+          # --no-deps: never touch postgres, redis, or caddy — they manage themselves.
+          # docker compose v2 (not legacy docker-compose) to avoid naming quirks.
+          docker compose -f docker-compose.prod.yml up -d --build --no-deps api web
+
+          # Prune dangling images to reclaim disk space
           docker image prune -f
+
+          echo "Deploy complete."
