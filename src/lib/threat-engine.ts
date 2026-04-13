@@ -338,6 +338,10 @@ const RULES: ThreatRule[] = [
 			/exfiltrate\s+(all\s+)?(user|customer|personal|private)/i,
 			/email\s+(me|to\s+.{0,40}@)\s+(all\s+)?(user|the|your|customer)/i,
 			/forward\s+(all\s+)?(data|credentials?|keys?|tokens?)\s+to/i,
+			// General-language PII dump — catches manually typed prompts
+			/(?:extract|dump|export|get|fetch|retrieve|list|show|give\s+me|return)\s+(?:all\s+|every\s+)?(?:user|customer|client|account|member)\s*(?:data|records?|emails?|passwords?|phone\s+numbers?|addresses?|names?|credentials?|pii|personal\s+information)/i,
+			/(?:SELECT\s+\*|dump|extract)\s+(?:FROM\s+)?(?:users?|accounts?|customers?|members?|employees?|staff)\s+(?:WHERE|table|database|schema|all)/i,
+			/(?:send|email|upload|transmit|post|leak|exfiltrate)\s+(?:all\s+|the\s+)?(?:user|customer|client)\s+(?:data|emails?|records?|information|details?|passwords?|credentials?)/i,
 		],
 		explanation:
 			'PII or credential exfiltration detected. The input contains or attempts to extract sensitive personal information, API keys, or authentication credentials.',
@@ -432,6 +436,11 @@ const RULES: ThreatRule[] = [
 			/\.internal\b/i,
 			/kubernetes\.default/i,
 			/\.svc\.cluster\.local/i,
+			// General-language SSRF — catches manually typed prompts
+			/(?:fetch|get|retrieve|request|access|load|read|download|curl|wget)\s+(?:the\s+)?(?:contents?\s+of\s+)?https?:\/\/(?:169\.254|127\.|10\.|172\.1[6-9]\.|172\.2\d\.|172\.3[01]\.|192\.168\.|0\.0\.0\.0|localhost)/i,
+			/(?:fetch|retrieve|request|access|load|read\s+from)\s+(?:the\s+)?(?:internal|private|local|cloud)\s+(?:api|endpoint|service|server|url|address|network|metadata)/i,
+			/(?:make|send|issue)\s+(?:a\s+)?(?:get|post|http|https)\s+request\s+to\s+(?:the\s+)?(?:internal|private|local|metadata|cloud)/i,
+			/access\s+(?:the\s+)?(?:instance|cloud|ec2|gce|azure)\s+metadata/i,
 		],
 		explanation:
 			'SSRF (Server-Side Request Forgery) attempt detected. The prompt is trying to make the model fetch internal network resources, cloud metadata endpoints, or localhost services.',
@@ -501,15 +510,18 @@ const RULES: ThreatRule[] = [
 		severity: 'medium',
 		score: 68,
 		patterns: [
-			/repeat\s+(the\s+word|"?\w+"?)\s+(forever|infinitely|\d{4,}\s+times?)/i,
+			/repeat\s+(the\s+word|"?\w+"?)\s+(forever|infinitely|\d{3,}\s+times?)/i,
+			/(?:say|write|output|print|generate)\s+(?:the\s+following\s+)?(?:text|word|phrase|sentence|string)?\s*(?:exactly\s+)?\d{3,}\s+times/i,
 			/generate\s+(?:a\s+)?(?:\d{4,}[-\s]word|\d{4,}\s+paragraphs?)/i,
 			/write\s+(me\s+)?\d{4,}\s+(words?|sentences?|paragraphs?|tokens?)/i,
 			/(.)(\1){30,}/, // character flooding
 			/loop\s+(forever|infinite(ly)?)/i,
+			/(?:loop|iterate|run|execute|repeat)\s+(?:this\s+)?(?:indefinitely|forever|infinitely|without\s+stopping|in\s+an?\s+infinite\s+loop)/i,
 			/never\s+stop\s+(generating|writing|responding)/i,
 			/maximum\s+(possible\s+)?length\s+response/i,
 			/as\s+(many|much)\s+(tokens?|words?|text)\s+as\s+(possible|you\s+can)/i,
 			/fill\s+(the\s+)?(entire\s+)?(context|output|response)\s+(window|buffer|limit)/i,
+			/(?:generate|write|produce|output|create)\s+(?:exactly\s+)?(?:[1-9]\d{4,}|(?:one\s+|a\s+)?million|(?:ten\s+|a\s+)?thousand)\s+(?:words?|tokens?|characters?|lines?|paragraphs?)/i,
 		],
 		explanation:
 			'Model Denial of Service (DoS) attempt detected. The prompt is designed to exhaust compute resources by triggering extremely long or infinite outputs.',
@@ -677,6 +689,9 @@ const RULES: ThreatRule[] = [
 			/run\s+(this\s+)?(arbitrary|untrusted|remote)\s+(code|script|command)/i,
 			/plugin\..*\.(execute|run|call|invoke)/i,
 			/action\s*:\s*\{.*"type"\s*:\s*"(function|tool)"/i,
+			// General-language tool abuse — catches manually typed prompts
+			/(?:call|invoke|execute|run|use)\s+(?:the\s+)?(?:following\s+)?(?:function|method|api|tool|command)\s*[:(]\s*(?:exec|eval|system|popen|subprocess|shell|run_command|execute_command)/i,
+			/(?:call|execute|run|invoke|eval|exec)\s*\(?\s*(?:os\.system|subprocess\.|exec\s*\(|eval\s*\(|__import__|compile\s*\(|Runtime\.exec|ProcessBuilder|popen|shell_exec|system\s*\()/i,
 		],
 		explanation:
 			'Tool / function call abuse detected. The input is attempting to manipulate AI tool-use mechanisms (function calling, code interpreter, plugins) to execute unauthorized operations.',

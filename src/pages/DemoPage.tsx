@@ -207,7 +207,7 @@ function ScanAnimation() {
 
 function FirewallPane({ result, state }: { result: ThreatResult | null; state: ScanState }) {
 	return (
-		<div className="flex flex-col h-full bg-slate-900/60 border border-slate-700/50 rounded-2xl overflow-hidden">
+		<div className="flex flex-col min-h-[380px] lg:h-full bg-slate-900/60 border border-slate-700/50 rounded-2xl overflow-hidden">
 			{/* Header */}
 			<div className="px-5 py-4 border-b border-slate-700/50 flex items-center gap-3">
 				<div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
@@ -328,7 +328,7 @@ function ThreatLogPane({ entries }: { entries: ThreatLogEntry[] }) {
 	}, [entries]);
 
 	return (
-		<div className="flex flex-col h-full bg-slate-900/60 border border-slate-700/50 rounded-2xl overflow-hidden">
+		<div className="flex flex-col min-h-[300px] max-h-[480px] lg:max-h-none lg:h-full bg-slate-900/60 border border-slate-700/50 rounded-2xl overflow-hidden">
 			<div className="px-5 py-4 border-b border-slate-700/50 flex items-center gap-3">
 				<div className="w-2 h-2 rounded-full bg-emerald-500" />
 				<span className="text-sm font-semibold text-slate-200">Threat Log</span>
@@ -396,7 +396,7 @@ function ChatPane({
 	};
 
 	return (
-		<div className="flex flex-col h-full bg-slate-900/60 border border-slate-700/50 rounded-2xl overflow-hidden">
+		<div className="flex flex-col min-h-[420px] lg:h-full bg-slate-900/60 border border-slate-700/50 rounded-2xl overflow-hidden">
 			<div className="px-5 py-4 border-b border-slate-700/50 flex items-center gap-3">
 				<div className="w-2 h-2 rounded-full bg-violet-500" />
 				<span className="text-sm font-semibold text-slate-200">LLM Prompt Input</span>
@@ -554,7 +554,7 @@ export default function DemoPage() {
 			</div>
 
 			{/* Hero */}
-			<div className="text-center py-8 md:py-10 px-4 md:px-6">
+			<div className="text-center py-5 md:py-10 px-4 md:px-6">
 				<div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-electric-green/30 bg-electric-green/10 text-electric-green text-xs font-medium mb-4">
 					<div className="w-1.5 h-1.5 rounded-full bg-electric-green animate-pulse" />
 					{isAuthenticated ? 'Live API Demo' : 'Guest Sandbox Demo'}
@@ -573,8 +573,8 @@ export default function DemoPage() {
 			</div>
 
 			{/* 3-Pane Layout */}
-			<div className="max-w-7xl mx-auto px-6 pb-12">
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ minHeight: '540px' }}>
+			<div className="max-w-7xl mx-auto px-3 sm:px-6 pb-12">
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:[min-height:540px]">
 					<ChatPane onSubmit={handlePrompt} isScanning={scanState === 'scanning'} disabled={false} />
 					<FirewallPane result={currentResult} state={scanState} />
 					<ThreatLogPane entries={log} />
