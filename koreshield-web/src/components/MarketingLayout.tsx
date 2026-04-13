@@ -46,7 +46,7 @@ function MobileNavSection({
 
 export function MarketingLayout() {
 	const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-	const { isAuthenticated, isHydrating } = useAuthState();
+	const { isAuthenticated } = useAuthState();
 	const { theme } = useTheme();
 	const logoSrc = theme === 'light' ? '/logo/SVG/Black.svg' : '/logo/SVG/White.svg';
 
@@ -88,7 +88,7 @@ export function MarketingLayout() {
 					</Link>
 
 					<nav className="hidden items-center gap-6 md:flex">
-						{!isAuthenticated && !isHydrating ? (
+						{!isAuthenticated ? (
 							<>
 								{productLinks.map((item) => (
 									<Link key={item.to} to={item.to} className={desktopNavLinkClass}>
@@ -133,7 +133,7 @@ export function MarketingLayout() {
 							>
 								Dashboard
 							</Link>
-						) : !isHydrating ? (
+						) : (
 							<div className="flex items-center gap-2">
 								<Link
 									to="/login"
@@ -148,11 +148,29 @@ export function MarketingLayout() {
 									Book Demo
 								</Link>
 							</div>
-						) : null}
+						)}
 					</nav>
 
 					<div className="flex items-center gap-2 md:hidden">
 						<ThemeToggle className="px-2.5 py-2" />
+
+						{/* Direct auth link always visible in mobile header — no wait, no tap-the-drawer */}
+						{isAuthenticated ? (
+							<Link
+								to="/dashboard"
+								className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+							>
+								Dashboard
+							</Link>
+						) : (
+							<Link
+								to="/login"
+								className="rounded-full border border-border bg-card/80 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary/30 hover:bg-card"
+							>
+								Sign In
+							</Link>
+						)}
+
 						<button
 							type="button"
 							onClick={() => setMobileMenuOpen((open) => !open)}
@@ -223,7 +241,7 @@ export function MarketingLayout() {
 									>
 										Go to Dashboard
 									</Link>
-								) : !isHydrating ? (
+								) : (
 									<div className="grid grid-cols-2 gap-3">
 										<Link
 											to="/login"
@@ -240,7 +258,7 @@ export function MarketingLayout() {
 											Book Demo
 										</Link>
 									</div>
-								) : null}
+								)}
 							</div>
 						</div>
 					</div>
