@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 import bcrypt
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -1200,8 +1200,21 @@ async def provision_test_key(
 # OAuth Endpoints
 
 class OAuthCallbackRequest(BaseModel):
-    code: str
-    state: str
+    """Payload sent by the frontend callback page after the OAuth provider redirects."""
+    code: str = Field(..., description="Authorization code returned by the OAuth provider")
+    state: str = Field(..., description="CSRF state token issued by the login endpoint")
+
+
+class OAuthLoginResponse(BaseModel):
+    """Returned by the login initiation endpoint."""
+    auth_url: str = Field(..., description="Full authorization URL to redirect the user to")
+    state: str = Field(..., description="CSRF state token — store in sessionStorage and send back with the callback")
+
+
+class OAuthCallbackResponse(BaseModel):
+    """Returned after a successful OAuth callback."""
+    user: dict = Field(..., description="Authenticated user object")
+    token: str = Field(..., description="JWT access token (also set as an HttpOnly cookie)")
 
 
 # TTL (seconds) for the CSRF state token stored in Redis
@@ -1288,9 +1301,19 @@ def _set_auth_cookie(response: Response, token: str) -> None:
 
 @router.get(
     "/oauth/github/login",
-    summary="GitHub OAuth Login",
-    description="Returns the GitHub authorization URL. The frontend redirects the user there.",
+    response_model=OAuthLoginResponse,
+    summary="Initiate GitHub OAuth",
+    description=(
+        "Generates a GitHub authorization URL and a CSRF state token. "
+        "The frontend should redirect the user to `auth_url`. "
+        "GitHub will redirect back to `https://koreshield.com/auth/github-callback?code=...&state=...`. "
+        "Store `state` in `sessionStorage` and pass it to the callback endpoint."
+    ),
     tags=["Authentication", "OAuth"],
+    responses={
+        400: {"description": "GitHub OAuth is not configured on the server"},
+        500: {"description": "Unexpected server error"},
+    },
 )
 async def github_login(request: Request, redirect_url: str | None = None):
     """Initiate GitHub OAuth flow."""
@@ -1315,9 +1338,18 @@ async def github_login(request: Request, redirect_url: str | None = None):
 
 @router.post(
     "/oauth/github/callback",
-    summary="GitHub OAuth Callback",
-    description="Exchanges code+state for a KoreShield session. Called by the frontend callback page.",
+    response_model=OAuthCallbackResponse,
+    summary="Complete GitHub OAuth",
+    description=(
+        "Validates the CSRF state, exchanges the authorization code with GitHub, "
+        "and returns a JWT token + user object. An `HttpOnly` session cookie is also set. "
+        "Called by the `/auth/github-callback` frontend page."
+    ),
     tags=["Authentication", "OAuth"],
+    responses={
+        400: {"description": "Invalid or expired state, or GitHub rejected the authorization code"},
+        500: {"description": "Unexpected server error"},
+    },
 )
 async def github_callback(
     request: Request,
@@ -1363,9 +1395,19 @@ async def github_callback(
 
 @router.get(
     "/oauth/google/login",
-    summary="Google OAuth Login",
-    description="Returns the Google authorization URL. The frontend redirects the user there.",
+    response_model=OAuthLoginResponse,
+    summary="Initiate Google OAuth",
+    description=(
+        "Generates a Google authorization URL and a CSRF state token. "
+        "The frontend should redirect the user to `auth_url`. "
+        "Google will redirect back to `https://koreshield.com/auth/google-callback?code=...&state=...`. "
+        "Store `state` in `sessionStorage` and pass it to the callback endpoint."
+    ),
     tags=["Authentication", "OAuth"],
+    responses={
+        400: {"description": "Google OAuth is not configured on the server"},
+        500: {"description": "Unexpected server error"},
+    },
 )
 async def google_login(request: Request, redirect_url: str | None = None):
     """Initiate Google OAuth flow."""
@@ -1390,9 +1432,18 @@ async def google_login(request: Request, redirect_url: str | None = None):
 
 @router.post(
     "/oauth/google/callback",
-    summary="Google OAuth Callback",
-    description="Exchanges code+state for a KoreShield session. Called by the frontend callback page.",
+    response_model=OAuthCallbackResponse,
+    summary="Complete Google OAuth",
+    description=(
+        "Validates the CSRF state, exchanges the authorization code with Google, "
+        "and returns a JWT token + user object. An `HttpOnly` session cookie is also set. "
+        "Called by the `/auth/google-callback` frontend page."
+    ),
     tags=["Authentication", "OAuth"],
+    responses={
+        400: {"description": "Invalid or expired state, or Google rejected the authorization code"},
+        500: {"description": "Unexpected server error"},
+    },
 )
 async def google_callback(
     request: Request,
