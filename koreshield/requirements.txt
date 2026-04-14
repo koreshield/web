@@ -22,6 +22,8 @@ redis>=5.0.0
 slowapi>=0.1.9
 greenlet>=3.0.0
 scikit-learn>=1.4.0
+authlib>=1.3.0
+requests>=2.31.0
 
 
 # Development dependencies (install with: pip install -r requirements-dev.txt)

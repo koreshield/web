@@ -26,6 +26,11 @@ class User(Base):
     created_at = Column(DateTime, nullable=False, default=utcnow_naive)
     updated_at = Column(DateTime, nullable=False, default=utcnow_naive, onupdate=utcnow_naive)
     user_metadata = Column(JSON, default={})
+    
+    # OAuth provider fields
+    github_id = Column(String(255), nullable=True, unique=True, index=True)
+    google_id = Column(String(255), nullable=True, unique=True, index=True)
+    oauth_provider = Column(String(50), nullable=True)  # 'github', 'google', or null for email/password
 
     # Relationships
     # Note: `owned_teams` and `team_memberships` are defined in Team and TeamMember using backref/back_populates
