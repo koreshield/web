@@ -57,10 +57,14 @@ jobs:
 
           cd /opt/koreshield
 
-          # Remove any stopped containers left over from previous deploy cycles.
-          # Docker Compose renames old containers with a hash prefix during recreation;
-          # if a prior deploy was interrupted those ghost containers block the next run.
+          # Remove any stopped containers AND any hash-prefixed app containers left
+          # over from previous deploy cycles. Docker Compose renames running containers
+          # to "{shortId}_{name}" before recreating them; if a prior deploy was
+          # interrupted those renamed containers persist and block the next run.
           docker container prune -f
+          docker ps -a --format '{{.Names}}' \
+            | grep -E '^[a-f0-9]+_koreshield-(api|web)$' \
+            | xargs -r docker rm -f || true
 
           # Rebuild only the app containers.
           # --no-deps: never touch postgres, redis, or caddy — they manage themselves.
