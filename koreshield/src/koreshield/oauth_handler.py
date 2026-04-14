@@ -4,10 +4,8 @@ Handles GitHub and Google OAuth flows.
 """
 
 import os
-import json
-import secrets
-from typing import Optional
-from datetime import datetime, timedelta, timezone
+import uuid
+from urllib.parse import urlencode
 
 import httpx
 import structlog
@@ -19,7 +17,9 @@ from .utils import utcnow_naive
 
 logger = structlog.get_logger(__name__)
 
-# Configuration
+# ---------------------------------------------------------------------------
+# Configuration — loaded once at import time
+# ---------------------------------------------------------------------------
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", "")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET", "")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
@@ -28,6 +28,7 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 GITHUB_AUTH_URL = "https://github.com/login/oauth/authorize"
 GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token"
 GITHUB_USER_URL = "https://api.github.com/user"
+GITHUB_EMAILS_URL = "https://api.github.com/user/emails"
 
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
@@ -35,35 +36,37 @@ GOOGLE_USER_URL = "https://www.googleapis.com/oauth2/v2/userinfo"
 
 
 class OAuthException(Exception):
-    """Base OAuth exception."""
+    """Raised when an OAuth operation cannot proceed."""
     pass
 
 
+# ---------------------------------------------------------------------------
+# GitHub
+# ---------------------------------------------------------------------------
+
 class GitHubOAuthHandler:
     """Handle GitHub OAuth flows."""
-    
+
     @staticmethod
     def get_authorization_url(state: str, redirect_uri: str) -> str:
-        """Generate GitHub authorization URL."""
+        """Return the GitHub authorization URL to redirect the user to."""
         if not GITHUB_CLIENT_ID:
             raise OAuthException("GitHub OAuth not configured")
-        
         params = {
             "client_id": GITHUB_CLIENT_ID,
             "redirect_uri": redirect_uri,
             "scope": "user:email",
             "state": state,
         }
-        query_string = "&".join(f"{k}={v}" for k, v in params.items())
-        return f"{GITHUB_AUTH_URL}?{query_string}"
-    
+        return f"{GITHUB_AUTH_URL}?{urlencode(params)}"
+
     @staticmethod
     async def exchange_code_for_token(code: str, redirect_uri: str) -> str:
-        """Exchange authorization code for access token."""
+        """Exchange authorization code for an access token."""
         if not GITHUB_CLIENT_ID or not GITHUB_CLIENT_SECRET:
             raise OAuthException("GitHub OAuth credentials not configured")
-        
-        async with httpx.AsyncClient() as client:
+
+        async with httpx.AsyncClient(timeout=10) as client:
             response = await client.post(
                 GITHUB_TOKEN_URL,
                 data={
@@ -76,52 +79,91 @@ class GitHubOAuthHandler:
             )
             response.raise_for_status()
             data = response.json()
-            return data.get("access_token")
-    
+            token = data.get("access_token")
+            if not token:
+                raise OAuthException(
+                    f"GitHub did not return an access token: {data.get('error_description', data)}"
+                )
+            return token
+
     @staticmethod
     async def get_user_info(access_token: str) -> dict:
-        """Fetch user info from GitHub."""
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                GITHUB_USER_URL,
-                headers={"Authorization": f"Bearer {access_token}"},
-            )
-            response.raise_for_status()
-            data = response.json()
+        """Fetch user profile from GitHub.
+
+        GitHub users can hide their primary email — if ``email`` is None in the
+        /user response we fall back to /user/emails and pick the primary
+        verified address.
+        """
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Accept": "application/vnd.github+json",
+        }
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(GITHUB_USER_URL, headers=headers)
+            resp.raise_for_status()
+            data = resp.json()
+
+            email = data.get("email")
+
+            # Fall back to the emails endpoint for users with private emails
+            if not email:
+                emails_resp = await client.get(GITHUB_EMAILS_URL, headers=headers)
+                if emails_resp.status_code == 200:
+                    for entry in emails_resp.json():
+                        if entry.get("primary") and entry.get("verified"):
+                            email = entry["email"]
+                            break
+                    # Last resort: any verified address
+                    if not email:
+                        for entry in emails_resp.json():
+                            if entry.get("verified"):
+                                email = entry["email"]
+                                break
+
+            if not email:
+                raise OAuthException(
+                    "Could not retrieve a verified email address from GitHub. "
+                    "Please make sure your GitHub account has a verified email."
+                )
+
             return {
-                "id": str(data.get("id")),
-                "email": data.get("email"),
+                "id": str(data["id"]),
+                "email": email,
                 "name": data.get("name") or data.get("login", ""),
                 "provider": "github",
             }
 
 
+# ---------------------------------------------------------------------------
+# Google
+# ---------------------------------------------------------------------------
+
 class GoogleOAuthHandler:
     """Handle Google OAuth flows."""
-    
+
     @staticmethod
     def get_authorization_url(state: str, redirect_uri: str) -> str:
-        """Generate Google authorization URL."""
+        """Return the Google authorization URL to redirect the user to."""
         if not GOOGLE_CLIENT_ID:
             raise OAuthException("Google OAuth not configured")
-        
         params = {
             "client_id": GOOGLE_CLIENT_ID,
             "redirect_uri": redirect_uri,
             "response_type": "code",
             "scope": "openid email profile",
             "state": state,
+            "access_type": "online",
+            "prompt": "select_account",
         }
-        query_string = "&".join(f"{k}={v}" for k, v in params.items())
-        return f"{GOOGLE_AUTH_URL}?{query_string}"
-    
+        return f"{GOOGLE_AUTH_URL}?{urlencode(params)}"
+
     @staticmethod
     async def exchange_code_for_token(code: str, redirect_uri: str) -> str:
-        """Exchange authorization code for access token."""
+        """Exchange authorization code for an access token."""
         if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
             raise OAuthException("Google OAuth credentials not configured")
-        
-        async with httpx.AsyncClient() as client:
+
+        async with httpx.AsyncClient(timeout=10) as client:
             response = await client.post(
                 GOOGLE_TOKEN_URL,
                 data={
@@ -134,25 +176,37 @@ class GoogleOAuthHandler:
             )
             response.raise_for_status()
             data = response.json()
-            return data.get("access_token")
-    
+            token = data.get("access_token")
+            if not token:
+                raise OAuthException(
+                    f"Google did not return an access token: {data.get('error_description', data)}"
+                )
+            return token
+
     @staticmethod
     async def get_user_info(access_token: str) -> dict:
-        """Fetch user info from Google."""
-        async with httpx.AsyncClient() as client:
+        """Fetch user profile from Google."""
+        async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(
                 GOOGLE_USER_URL,
-                params={"access_token": access_token},
+                headers={"Authorization": f"Bearer {access_token}"},
             )
             response.raise_for_status()
             data = response.json()
+            email = data.get("email")
+            if not email:
+                raise OAuthException("Google did not return an email address.")
             return {
-                "id": data.get("id"),
-                "email": data.get("email"),
+                "id": data["id"],
+                "email": email,
                 "name": data.get("name", ""),
                 "provider": "google",
             }
 
+
+# ---------------------------------------------------------------------------
+# Shared user creation
+# ---------------------------------------------------------------------------
 
 async def find_or_create_oauth_user(
     db: AsyncSession,
@@ -161,77 +215,65 @@ async def find_or_create_oauth_user(
     email: str,
     name: str,
 ) -> User:
-    """Find existing user or create new one from OAuth provider."""
-    
+    """Find an existing user or create a new one from an OAuth provider."""
+
+    # 1. Look up by provider ID (fastest path — already linked)
     if provider == "github":
-        result = await db.execute(
-            select(User).where(User.github_id == provider_user_id)
-        )
-        user = result.scalar_one_or_none()
-        if user:
-            return user
-    elif provider == "google":
-        result = await db.execute(
-            select(User).where(User.google_id == provider_user_id)
-        )
-        user = result.scalar_one_or_none()
-        if user:
-            return user
-    
-    # Check if email already exists
+        result = await db.execute(select(User).where(User.github_id == provider_user_id))
+    else:
+        result = await db.execute(select(User).where(User.google_id == provider_user_id))
+
+    user = result.scalar_one_or_none()
+    if user:
+        return user
+
+    # 2. Email match — link the provider to an existing account
     result = await db.execute(select(User).where(User.email == email))
     existing_user = result.scalar_one_or_none()
-    
+
     if existing_user:
-        # Link provider to existing user
         if provider == "github":
             existing_user.github_id = provider_user_id
-        elif provider == "google":
+        else:
             existing_user.google_id = provider_user_id
-        
         if not existing_user.oauth_provider:
             existing_user.oauth_provider = provider
-        
         existing_user.updated_at = utcnow_naive()
         await db.commit()
         await db.refresh(existing_user)
         return existing_user
-    
-    # Create new user
-    import uuid
+
+    # 3. Brand-new user
+    # Promote the very first user in the system to owner
+    result = await db.execute(select(User).limit(1))
+    is_first_user = result.scalar_one_or_none() is None
+
     user = User(
         id=uuid.uuid4(),
         email=email,
-        password_hash="",  # No password for OAuth users
+        password_hash="",       # OAuth users have no password
         name=name,
-        role="user",
+        role="owner" if is_first_user else "user",
         status="active",
-        email_verified=True,  # Assume OAuth provider verified email
+        email_verified=True,    # OAuth provider has already verified the address
         created_at=utcnow_naive(),
         updated_at=utcnow_naive(),
         oauth_provider=provider,
     )
-    
+
     if provider == "github":
         user.github_id = provider_user_id
-    elif provider == "google":
+    else:
         user.google_id = provider_user_id
-    
-    # Promote to owner if first user
-    result = await db.execute(select(User))
-    all_users = result.scalars().all()
-    if len(all_users) == 0:
-        user.role = "owner"
-    
+
     db.add(user)
     await db.commit()
     await db.refresh(user)
-    
+
     logger.info(
         "oauth_user_created",
         user_id=str(user.id),
         email=user.email,
         provider=provider,
     )
-    
     return user
