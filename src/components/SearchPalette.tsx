@@ -55,7 +55,6 @@ export function SearchPalette({ mobile }: SearchPaletteProps) {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
-  // ... (fuse and results logic remains same)
   const fuse = useMemo(
     () =>
       new Fuse(searchIndex, {

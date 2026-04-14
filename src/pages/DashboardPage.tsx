@@ -1,16 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Activity, Shield, AlertTriangle, CheckCircle, Rocket, Code, BookOpen, ArrowRight, Key, Users, ScanSearch } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useStats, useRecentAttacks } from '../hooks/useApi';
 import { useAuthState } from '../hooks/useAuthState';
 import { AttackDetailModal } from '../components/AttackDetailModal';
 import { ThreatTypeBreakdown, ThreatTimeline, ThreatSummary } from '../components/ThreatAnalytics';
-import { wsClient, type ThreatDetectedEvent } from '../lib/websocket-client';
-
 export function DashboardPage() {
-	const { user, isAuthenticated } = useAuthState();
+	const { user } = useAuthState();
 	const [selectedAttack, setSelectedAttack] = useState<any>(null);
-	const [_latestThreats, setLatestThreats] = useState<ThreatDetectedEvent[]>([]);
 
 	// Data fetching
 	const { data: stats, isLoading: statsLoading, error: statsError } = useStats();
@@ -25,17 +22,6 @@ export function DashboardPage() {
 	}, {});
 
 	const isNewUser = !loading && (((stats as any)?.statistics?.requests_total ?? 0) === 0);
-
-	// Listen for real-time threat events (WS is connected by AppLayout)
-	useEffect(() => {
-		if (!isAuthenticated) return;
-
-		const cleanupThreats = wsClient.on<ThreatDetectedEvent>('threat_detected', (event) => {
-			setLatestThreats(prev => [event.data, ...prev.slice(0, 4)]);
-		});
-
-		return () => { cleanupThreats(); };
-	}, [isAuthenticated]);
 
 	if (statsError) {
 		return (
