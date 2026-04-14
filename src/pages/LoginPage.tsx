@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { authService } from '../lib/auth';
-import { Lock, Mail, ShieldCheck } from 'lucide-react';
+import { Lock, Mail, ShieldCheck, Github, Chrome } from 'lucide-react';
 
 interface LocationState {
 	from?: {
@@ -42,6 +42,26 @@ export function LoginPage() {
             setError(err instanceof Error ? err.message : 'Invalid email or password');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleGitHubLogin = async () => {
+        setError('');
+        try {
+            const { auth_url } = await authService.initializeGitHubOAuth();
+            window.location.href = auth_url;
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to initialize GitHub login');
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        setError('');
+        try {
+            const { auth_url } = await authService.initializeGoogleOAuth();
+            window.location.href = auth_url;
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to initialize Google login');
         }
     };
 
@@ -166,6 +186,36 @@ export function LoginPage() {
                         >
                             {loading ? 'Signing in…' : 'Sign in'}
                         </button>
+
+                        <div className="relative my-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-border"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-gradient-to-b from-background to-background text-muted-foreground">
+                                    or continue with
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={handleGitHubLogin}
+                                className="flex items-center justify-center gap-2 px-4 py-3 bg-background hover:bg-muted border border-border rounded-lg font-medium text-foreground transition-colors text-sm"
+                            >
+                                <Github className="w-4 h-4" />
+                                GitHub
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleGoogleLogin}
+                                className="flex items-center justify-center gap-2 px-4 py-3 bg-background hover:bg-muted border border-border rounded-lg font-medium text-foreground transition-colors text-sm"
+                            >
+                                <Chrome className="w-4 h-4" />
+                                Google
+                            </button>
+                        </div>
 
                         <div className="text-center text-sm">
                             <span className="text-muted-foreground">Don't have an account? </span>
