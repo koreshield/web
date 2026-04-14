@@ -57,6 +57,11 @@ jobs:
 
           cd /opt/koreshield
 
+          # Remove any stopped containers left over from previous deploy cycles.
+          # Docker Compose renames old containers with a hash prefix during recreation;
+          # if a prior deploy was interrupted those ghost containers block the next run.
+          docker container prune -f
+
           # Rebuild only the app containers.
           # --no-deps: never touch postgres, redis, or caddy — they manage themselves.
           # docker compose v2 (not legacy docker-compose) to avoid naming quirks.
