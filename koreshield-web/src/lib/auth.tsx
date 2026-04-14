@@ -159,6 +159,68 @@ export const authService = {
 		}
 	},
 
+	async initializeGitHubOAuth(redirectUrl?: string): Promise<{ auth_url: string; state: string }> {
+		const response = await fetch(`${API_BASE_URL}/v1/management/oauth/github/login?redirect_url=${encodeURIComponent(redirectUrl || '/dashboard')}`, {
+			method: 'GET',
+		});
+
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({ detail: 'GitHub OAuth not configured' }));
+			throw new Error(error.detail || 'Failed to initialize GitHub OAuth');
+		}
+
+		return response.json();
+	},
+
+	async initializeGoogleOAuth(redirectUrl?: string): Promise<{ auth_url: string; state: string }> {
+		const response = await fetch(`${API_BASE_URL}/v1/management/oauth/google/login?redirect_url=${encodeURIComponent(redirectUrl || '/dashboard')}`, {
+			method: 'GET',
+		});
+
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({ detail: 'Google OAuth not configured' }));
+			throw new Error(error.detail || 'Failed to initialize Google OAuth');
+		}
+
+		return response.json();
+	},
+
+	async handleGitHubCallback(code: string, state: string): Promise<AuthUser> {
+		const response = await fetch(`${API_BASE_URL}/v1/management/oauth/github/callback`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			credentials: 'include',
+			body: JSON.stringify({ code, state })
+		});
+
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({ detail: 'GitHub callback failed' }));
+			throw new Error(error.detail || 'GitHub login failed');
+		}
+
+		const data: LoginResponse = await response.json();
+		persistSession(data.user, data.token);
+		return data.user;
+	},
+
+	async handleGoogleCallback(code: string, state: string): Promise<AuthUser> {
+		const response = await fetch(`${API_BASE_URL}/v1/management/oauth/google/callback`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			credentials: 'include',
+			body: JSON.stringify({ code, state })
+		});
+
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({ detail: 'Google callback failed' }));
+			throw new Error(error.detail || 'Google login failed');
+		}
+
+		const data: LoginResponse = await response.json();
+		persistSession(data.user, data.token);
+		return data.user;
+	},
+
 	on(event: AuthEventType, handler: AuthEventHandler) {
 		eventEmitter.on(event, handler);
 	},
