@@ -1204,55 +1204,119 @@ class OAuthCallbackRequest(BaseModel):
     state: str
 
 
-def _get_oauth_frontend_redirect_url(base_url: str) -> str:
-    """Construct the OAuth callback redirect URL for the frontend."""
-    return f"{base_url}/auth/github-callback"
+# TTL (seconds) for the CSRF state token stored in Redis
+_OAUTH_STATE_TTL = 600  # 10 minutes
 
 
-def _get_oauth_backend_redirect_url(request: Request, provider: str) -> str:
-    """Construct the OAuth callback redirect URL for the backend."""
-    # Use the request's base URL to construct the redirect_uri
-    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
-    server_name = request.headers.get("x-forwarded-host", request.url.netloc)
-    return f"{scheme}://{server_name}/v1/management/oauth/{provider}/callback"
+def _oauth_redirect_uri(provider: str) -> str:
+    """Return the frontend callback URL that OAuth providers must redirect to.
+
+    GitHub / Google are configured with:
+      Authorised redirect URI = https://koreshield.com/auth/github-callback
+                                https://koreshield.com/auth/google-callback
+
+    FRONTEND_BASE_URL must be set in .env (e.g. https://koreshield.com).
+    Falls back to localhost for local development.
+    """
+    base = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173").rstrip("/")
+    return f"{base}/auth/{provider}-callback"
+
+
+async def _store_oauth_state(request: Request, provider: str, state: str, payload: dict) -> None:
+    """Persist the CSRF state token in Redis with a 10-minute TTL.
+
+    Falls back to a process-local dict when Redis is unavailable (dev only).
+    """
+    import json as _json
+    redis = getattr(request.app.state, "redis_async_client", None)
+    key = f"oauth_state:{provider}:{state}"
+    if redis:
+        await redis.set(key, _json.dumps(payload), ex=_OAUTH_STATE_TTL)
+    else:
+        # Dev fallback — store on the app state dict (single-process only)
+        store = getattr(request.app.state, "_oauth_state_store", {})
+        store[key] = payload
+        request.app.state._oauth_state_store = store
+
+
+async def _consume_oauth_state(request: Request, provider: str, state: str) -> dict:
+    """Retrieve and delete the CSRF state from Redis (atomic get-and-delete).
+
+    Raises HTTPException 400 if the state is missing or expired.
+    """
+    import json as _json
+    redis = getattr(request.app.state, "redis_async_client", None)
+    key = f"oauth_state:{provider}:{state}"
+    if redis:
+        raw = await redis.getdel(key)
+        if raw is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired OAuth state. Please try signing in again.",
+            )
+        return _json.loads(raw)
+    else:
+        store = getattr(request.app.state, "_oauth_state_store", {})
+        payload = store.pop(key, None)
+        if payload is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired OAuth state. Please try signing in again.",
+            )
+        return payload
+
+
+def _set_auth_cookie(response: Response, token: str) -> None:
+    """Set the auth cookie with environment-appropriate settings."""
+    cookie_samesite = os.getenv("COOKIE_SAMESITE")
+    if not cookie_samesite:
+        env = os.getenv("ENVIRONMENT", "").lower()
+        cookie_samesite = "none" if env in {"production", "staging"} else "lax"
+    cookie_secure = os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"}
+    if cookie_samesite == "none":
+        cookie_secure = True
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value=f"Bearer {token}",
+        httponly=True,
+        samesite=cookie_samesite,
+        secure=cookie_secure,
+        max_age=24 * 60 * 60,
+        path="/",
+    )
 
 
 @router.get(
     "/oauth/github/login",
     summary="GitHub OAuth Login",
-    description="Redirect to GitHub to authenticate user.",
+    description="Returns the GitHub authorization URL. The frontend redirects the user there.",
     tags=["Authentication", "OAuth"],
 )
 async def github_login(request: Request, redirect_url: str | None = None):
     """Initiate GitHub OAuth flow."""
     try:
         state = secrets.token_urlsafe(32)
-        # Store state in session or cache (simplified: store in response for now)
-        request.state_cache = getattr(request, "state_cache", {})
-        request.state_cache["github_" + state] = {"redirect_url": redirect_url or "/dashboard"}
-        
-        redirect_uri = _get_oauth_backend_redirect_url(request, "github")
+        redirect_uri = _oauth_redirect_uri("github")
+        await _store_oauth_state(
+            request, "github", state,
+            {"redirect_url": redirect_url or "/dashboard", "redirect_uri": redirect_uri},
+        )
         auth_url = GitHubOAuthHandler.get_authorization_url(state, redirect_uri)
-        
         return {"auth_url": auth_url, "state": state}
     except OAuthException as e:
         logger.warning("github_login_oauth_not_configured", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="GitHub OAuth is not configured",
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("github_login_error", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="GitHub login failed",
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="GitHub login failed")
 
 
 @router.post(
     "/oauth/github/callback",
     summary="GitHub OAuth Callback",
-    description="Handle GitHub OAuth callback and create/login user.",
+    description="Exchanges code+state for a KoreShield session. Called by the frontend callback page.",
     tags=["Authentication", "OAuth"],
 )
 async def github_callback(
@@ -1263,17 +1327,13 @@ async def github_callback(
 ):
     """Handle OAuth callback from GitHub."""
     try:
-        redirect_uri = _get_oauth_backend_redirect_url(request, "github")
-        
-        # Exchange code for token
-        access_token = await GitHubOAuthHandler.exchange_code_for_token(
-            body.code, redirect_uri
-        )
-        
-        # Get user info
+        # Validate CSRF state — raises 400 if invalid/expired
+        cached = await _consume_oauth_state(request, "github", body.state)
+        redirect_uri = cached["redirect_uri"]
+
+        access_token = await GitHubOAuthHandler.exchange_code_for_token(body.code, redirect_uri)
         user_info = await GitHubOAuthHandler.get_user_info(access_token)
-        
-        # Find or create user
+
         user = await find_or_create_oauth_user(
             db,
             provider="github",
@@ -1281,98 +1341,57 @@ async def github_callback(
             email=user_info["email"],
             name=user_info["name"],
         )
-        
-        # Update last login
         user.last_login_at = _utcnow_naive()
         await db.commit()
-        
-        # Issue JWT token
-        token = issue_jwt_token(
-            user_id=str(user.id),
-            email=user.email,
-            role=user.role,
-        )
-        
-        cookie_samesite = os.getenv("COOKIE_SAMESITE")
-        if not cookie_samesite:
-            env = os.getenv("ENVIRONMENT", "").lower()
-            cookie_samesite = "none" if env in {"production", "staging"} else "lax"
-        cookie_secure = os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"}
-        if cookie_samesite == "none":
-            cookie_secure = True
-        
-        response.set_cookie(
-            key=AUTH_COOKIE_NAME,
-            value=f"Bearer {token}",
-            httponly=True,
-            samesite=cookie_samesite,
-            secure=cookie_secure,
-            max_age=24 * 60 * 60,
-            path="/",
-        )
-        
-        logger.info(
-            "github_oauth_login_success",
-            user_id=str(user.id),
-            email=user.email,
-        )
-        
-        return {
-            "user": user.to_dict(),
-            "token": token,
-        }
-    
+
+        token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
+        _set_auth_cookie(response, token)
+
+        logger.info("github_oauth_login_success", user_id=str(user.id), email=user.email)
+        return {"user": user.to_dict(), "token": token}
+
     except OAuthException as e:
         logger.warning("github_callback_oauth_error", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("github_callback_error", error=str(e))
         await db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="GitHub callback handling failed",
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="GitHub callback handling failed")
 
 
 @router.get(
     "/oauth/google/login",
     summary="Google OAuth Login",
-    description="Redirect to Google to authenticate user.",
+    description="Returns the Google authorization URL. The frontend redirects the user there.",
     tags=["Authentication", "OAuth"],
 )
 async def google_login(request: Request, redirect_url: str | None = None):
     """Initiate Google OAuth flow."""
     try:
         state = secrets.token_urlsafe(32)
-        # Store state in session or cache (simplified: store in response for now)
-        request.state_cache = getattr(request, "state_cache", {})
-        request.state_cache["google_" + state] = {"redirect_url": redirect_url or "/dashboard"}
-        
-        redirect_uri = _get_oauth_backend_redirect_url(request, "google")
+        redirect_uri = _oauth_redirect_uri("google")
+        await _store_oauth_state(
+            request, "google", state,
+            {"redirect_url": redirect_url or "/dashboard", "redirect_uri": redirect_uri},
+        )
         auth_url = GoogleOAuthHandler.get_authorization_url(state, redirect_uri)
-        
         return {"auth_url": auth_url, "state": state}
     except OAuthException as e:
         logger.warning("google_login_oauth_not_configured", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Google OAuth is not configured",
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("google_login_error", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Google login failed",
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Google login failed")
 
 
 @router.post(
     "/oauth/google/callback",
     summary="Google OAuth Callback",
-    description="Handle Google OAuth callback and create/login user.",
+    description="Exchanges code+state for a KoreShield session. Called by the frontend callback page.",
     tags=["Authentication", "OAuth"],
 )
 async def google_callback(
@@ -1383,17 +1402,13 @@ async def google_callback(
 ):
     """Handle OAuth callback from Google."""
     try:
-        redirect_uri = _get_oauth_backend_redirect_url(request, "google")
-        
-        # Exchange code for token
-        access_token = await GoogleOAuthHandler.exchange_code_for_token(
-            body.code, redirect_uri
-        )
-        
-        # Get user info
+        # Validate CSRF state — raises 400 if invalid/expired
+        cached = await _consume_oauth_state(request, "google", body.state)
+        redirect_uri = cached["redirect_uri"]
+
+        access_token = await GoogleOAuthHandler.exchange_code_for_token(body.code, redirect_uri)
         user_info = await GoogleOAuthHandler.get_user_info(access_token)
-        
-        # Find or create user
+
         user = await find_or_create_oauth_user(
             db,
             provider="google",
@@ -1401,57 +1416,21 @@ async def google_callback(
             email=user_info["email"],
             name=user_info["name"],
         )
-        
-        # Update last login
         user.last_login_at = _utcnow_naive()
         await db.commit()
-        
-        # Issue JWT token
-        token = issue_jwt_token(
-            user_id=str(user.id),
-            email=user.email,
-            role=user.role,
-        )
-        
-        cookie_samesite = os.getenv("COOKIE_SAMESITE")
-        if not cookie_samesite:
-            env = os.getenv("ENVIRONMENT", "").lower()
-            cookie_samesite = "none" if env in {"production", "staging"} else "lax"
-        cookie_secure = os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"}
-        if cookie_samesite == "none":
-            cookie_secure = True
-        
-        response.set_cookie(
-            key=AUTH_COOKIE_NAME,
-            value=f"Bearer {token}",
-            httponly=True,
-            samesite=cookie_samesite,
-            secure=cookie_secure,
-            max_age=24 * 60 * 60,
-            path="/",
-        )
-        
-        logger.info(
-            "google_oauth_login_success",
-            user_id=str(user.id),
-            email=user.email,
-        )
-        
-        return {
-            "user": user.to_dict(),
-            "token": token,
-        }
-    
+
+        token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
+        _set_auth_cookie(response, token)
+
+        logger.info("google_oauth_login_success", user_id=str(user.id), email=user.email)
+        return {"user": user.to_dict(), "token": token}
+
     except OAuthException as e:
         logger.warning("google_callback_oauth_error", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("google_callback_error", error=str(e))
         await db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Google callback handling failed",
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Google callback handling failed")
