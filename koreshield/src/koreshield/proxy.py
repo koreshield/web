@@ -127,9 +127,13 @@ class KoreShieldProxy:
         # 2. Initialize Redis connection
         redis_config = config.get("redis", {})
         redis_enabled = redis_config.get("enabled", True)
-        # Prefer config file value; fall back to REDIS_URL env var; then localhost default.
-        # An empty string in the config (e.g. config.example.yaml) is treated as unset.
-        redis_url = redis_config.get("url") or os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        # The example config stores url as "${REDIS_URL}" (a YAML literal that Python
+        # does NOT expand). Detect unexpanded placeholders and fall back to the env var.
+        _redis_url_raw = str(redis_config.get("url") or "")
+        if not _redis_url_raw or "${" in _redis_url_raw:
+            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        else:
+            redis_url = _redis_url_raw
 
         if redis_enabled:
             try:
