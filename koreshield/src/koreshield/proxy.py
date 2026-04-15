@@ -94,6 +94,7 @@ class KoreShieldProxy:
             """,
             openapi_tags=[
                 {"name": "Authentication", "description": "User signup, login, JWT authentication, and account management"},
+                {"name": "OAuth", "description": "Sign in with GitHub or Google — initiates the OAuth flow and exchanges the authorization code for a KoreShield session"},
                 {"name": "API Keys", "description": "Generate, list, inspect, and revoke API keys for SDK and direct API access"},
                 {"name": "Chat", "description": "OpenAI-compatible chat completions endpoint with built-in threat detection and provider routing"},
                 {"name": "Scan", "description": "Direct prompt scanning, batch scanning, tool call scanning, governed runtime sessions, and review workflows"},
@@ -126,8 +127,10 @@ class KoreShieldProxy:
         # 2. Initialize Redis connection
         redis_config = config.get("redis", {})
         redis_enabled = redis_config.get("enabled", True)
-        redis_url = redis_config.get("url", "redis://localhost:6379/0")
-        
+        # Prefer config file value; fall back to REDIS_URL env var; then localhost default.
+        # An empty string in the config (e.g. config.example.yaml) is treated as unset.
+        redis_url = redis_config.get("url") or os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
         if redis_enabled:
             try:
                 import redis
