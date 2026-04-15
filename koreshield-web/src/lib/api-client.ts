@@ -131,7 +131,8 @@ class ApiClient {
 	}
 
 	async getStats(): Promise<AttackStats> {
-		return this.fetch<AttackStats>('/status');
+		// Per-account stats scoped to the authenticated user — never platform-wide
+		return this.fetch<AttackStats>('/v1/management/stats');
 	}
 
 	async getMetrics(): Promise<string> {
