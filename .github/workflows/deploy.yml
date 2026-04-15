@@ -57,14 +57,14 @@ jobs:
 
           cd /opt/koreshield
 
-          # Remove any stopped containers AND any hash-prefixed app containers left
-          # over from previous deploy cycles. Docker Compose renames running containers
-          # to "{shortId}_{name}" before recreating them; if a prior deploy was
-          # interrupted those renamed containers persist and block the next run.
-          docker container prune -f
-          docker ps -a --format '{{.Names}}' \
-            | grep -E '^[a-f0-9]+_koreshield-(api|web)$' \
-            | xargs -r docker rm -f || true
+          # Pre-clean: remove ALL containers (any name, any state) that match
+          # koreshield-api or koreshield-web — including any hash-prefixed
+          # intermediate containers Docker Compose creates during recreation.
+          # Using --filter name= which does substring matching so it catches
+          # both "koreshield-api" and "abc123_koreshield-api".
+          # --force works on running containers too; || true so it never fails.
+          docker ps -aq --filter "name=koreshield-api" | xargs -r docker rm -f || true
+          docker ps -aq --filter "name=koreshield-web"  | xargs -r docker rm -f || true
 
           # Rebuild only the app containers.
           # --no-deps: never touch postgres, redis, or caddy — they manage themselves.
