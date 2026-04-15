@@ -691,65 +691,88 @@ async def get_account_stats(
     },
 )
 async def get_audit_logs(
+    request: Request,
     limit: int = 100,
     offset: int = 0,
     current_user: dict = Depends(get_current_user),
     db: AsyncSession | None = Depends(get_optional_db),
 ):
-    """Return request logs scoped to the authenticated user only."""
+    """Return request logs scoped to the authenticated user only.
+
+    Merges two sources:
+    1. Persisted rows in the ``request_logs`` table (filtered by user_id).
+    2. In-memory ``audit_log_store`` entries that haven't yet been flushed to
+       the DB (e.g. RAG scan results) — also filtered by user_id.
+    """
     try:
         user_uuid = UUID(current_user["id"])
     except (KeyError, ValueError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user identity")
 
-    if db is None:
-        return {"logs": [], "total": 0, "limit": limit, "offset": offset}
+    user_id_str = str(user_uuid)
+    logs: list[dict] = []
+    seen_ids: set[str] = set()
 
-    try:
-        result = await db.execute(
-            select(RequestLog)
-            .where(RequestLog.user_id == user_uuid)
-            .order_by(desc(RequestLog.timestamp))
-            .offset(offset)
-            .limit(limit)
-        )
-        request_logs = result.scalars().all()
+    # ── 1. In-memory audit_log_store (RAG scans, fast-path entries) ─────────
+    audit_store = getattr(request.app.state, "audit_log_store", None)
+    if audit_store:
+        for entry in audit_store:
+            entry_uid = entry.get("user_id")
+            # user_id may be a UUID object or a string depending on origin
+            if entry_uid is None or str(entry_uid) != user_id_str:
+                continue
+            rid = str(entry.get("request_id") or entry.get("id") or "")
+            if rid and rid in seen_ids:
+                continue
+            if rid:
+                seen_ids.add(rid)
+            logs.append(entry)
 
-        count_result = await db.execute(
-            select(func.count(RequestLog.id)).where(RequestLog.user_id == user_uuid)
-        )
-        total_count = count_result.scalar() or 0
-    except Exception as e:
-        logger.error("audit_logs_query_failed", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to retrieve logs")
+    # ── 2. Persisted DB rows ─────────────────────────────────────────────────
+    if db is not None:
+        try:
+            result = await db.execute(
+                select(RequestLog)
+                .where(RequestLog.user_id == user_uuid)
+                .order_by(desc(RequestLog.timestamp))
+                .limit(limit + len(logs))   # over-fetch slightly to fill page after dedup
+            )
+            for entry in result.scalars().all():
+                rid = entry.request_id or str(entry.id)
+                if rid in seen_ids:
+                    continue
+                seen_ids.add(rid)
+                logs.append({
+                    "id": str(entry.id),
+                    "request_id": entry.request_id,
+                    "timestamp": entry.timestamp.isoformat(),
+                    "event": "request_log",
+                    "path": entry.path,
+                    "method": entry.method,
+                    "provider": entry.provider,
+                    "model": entry.model,
+                    "status": "failure" if entry.is_blocked or entry.status_code >= 400 else "success",
+                    "status_code": entry.status_code,
+                    "latency_ms": entry.latency_ms,
+                    "tokens_total": entry.tokens_total,
+                    "cost": entry.cost,
+                    "is_blocked": entry.is_blocked,
+                    "attack_detected": entry.attack_detected,
+                    "attack_type": entry.attack_type,
+                    "attack_details": entry.attack_details or {},
+                    "user_id": str(entry.user_id) if entry.user_id else None,
+                    "ip": entry.ip_address,
+                    "user_agent": entry.user_agent,
+                })
+        except Exception as e:
+            logger.error("audit_logs_query_failed", error=str(e))
 
-    logs = [
-        {
-            "id": str(entry.id),
-            "request_id": entry.request_id,
-            "timestamp": entry.timestamp.isoformat(),
-            "event": "request_log",
-            "path": entry.path,
-            "method": entry.method,
-            "provider": entry.provider,
-            "model": entry.model,
-            "status": "failure" if entry.is_blocked or entry.status_code >= 400 else "success",
-            "status_code": entry.status_code,
-            "latency_ms": entry.latency_ms,
-            "tokens_total": entry.tokens_total,
-            "cost": entry.cost,
-            "is_blocked": entry.is_blocked,
-            "attack_detected": entry.attack_detected,
-            "attack_type": entry.attack_type,
-            "attack_details": entry.attack_details or {},
-            "user_id": str(entry.user_id) if entry.user_id else None,
-            "ip": entry.ip_address,
-            "user_agent": entry.user_agent,
-        }
-        for entry in request_logs
-    ]
+    # Sort newest-first, paginate
+    logs.sort(key=lambda e: e.get("timestamp") or "", reverse=True)
+    total_count = len(logs)
+    paginated = logs[offset: offset + limit]
 
-    return {"logs": logs, "total": total_count, "limit": limit, "offset": offset}
+    return {"logs": paginated, "total": total_count, "limit": limit, "offset": offset}
 
 class Policy(BaseModel):
     id: str
