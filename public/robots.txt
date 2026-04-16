@@ -5,12 +5,8 @@ Allow: /
 # Sitemap location
 Sitemap: https://koreshield.com/sitemap.xml
 
-# Crawl delay (optional, adjust as needed)
+# Crawl delay
 Crawl-delay: 1
-
-# Disallow admin/private routes (if any)
-# Disallow: /admin/
-# Disallow: /api/
 
 # Allow all major search engines
 User-agent: Googlebot
@@ -26,7 +22,4 @@ User-agent: DuckDuckBot
 Allow: /
 
 User-agent: Baiduspider
-Allow: /
-
-User-agent: YandexBot
 Allow: /
