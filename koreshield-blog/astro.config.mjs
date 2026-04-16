@@ -12,6 +12,8 @@ import svelte from '@astrojs/svelte';
 
 import icon from 'astro-icon';
 
+import sitemap from '@astrojs/sitemap';
+
 import remarkDirective from 'remark-directive';
 import rehypeComponents from 'rehype-components';
 import { parseDirectiveNode } from './src/plugins/remark-directive-rehype.js';
@@ -41,6 +43,7 @@ export default defineConfig({
 		markdoc(),
 		svelte(),
 		icon(),
+		sitemap(),
 		/* sanity({
 			projectId: process.env.PUBLIC_SANITY_PROJECT_ID || 'rdas6fhs',
 			dataset: process.env.PUBLIC_SANITY_DATASET || 'production',
