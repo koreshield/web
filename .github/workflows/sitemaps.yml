@@ -11,6 +11,9 @@ on:
       - '.github/workflows/sitemaps.yml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   generate-sitemaps:
     runs-on: ubuntu-latest
