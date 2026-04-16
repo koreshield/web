@@ -1,0 +1,92 @@
+name: Generate & Submit Sitemaps
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'koreshield-web/**'
+      - 'koreshield-blog/**'
+      - 'koreshield-docs/**'
+      - 'generate_sitemaps.py'
+      - '.github/workflows/sitemaps.yml'
+  workflow_dispatch:
+
+jobs:
+  generate-sitemaps:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Generate Sitemaps
+        run: |
+          python3 generate_sitemaps.py
+
+      - name: Commit and push sitemaps
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Check if there are changes
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add \
+              koreshield-web/public/sitemap.xml \
+              koreshield-web/public/robots.txt \
+              koreshield-blog/public/sitemap.xml \
+              koreshield-blog/public/robots.txt \
+              koreshield-docs/static/sitemap.xml \
+              koreshield-docs/static/robots.txt \
+              sitemap_index.xml
+            
+            git commit -m "chore: regenerate sitemaps [skip ci]"
+            git push
+          fi
+
+  # Optional: Submit to Google Search Console if credentials are set up
+  submit-gsc:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    needs: generate-sitemaps
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Google API client
+        run: |
+          pip install google-auth-oauthlib google-auth-httplib2 google-api-python-client
+
+      - name: Submit sitemaps to Google Search Console
+        continue-on-error: true
+        run: |
+          echo "To enable GSC submissions:"
+          echo "1. Set up OAuth credentials in Google Cloud Console"
+          echo "2. Add credentials.json to repository secrets"
+          echo "3. Uncomment and configure this step"
+          # python3 scripts/submit_sitemaps_gsc.py
+
+  # Verify XML validity
+  validate-sitemaps:
+    runs-on: ubuntu-latest
+    needs: generate-sitemaps
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate XML
+        run: |
+          python3 -m xml.dom.minidom koreshield-web/public/sitemap.xml > /dev/null && echo "✓ Main sitemap valid"
+          python3 -m xml.dom.minidom koreshield-blog/public/sitemap.xml > /dev/null && echo "✓ Blog sitemap valid"
+          python3 -m xml.dom.minidom koreshield-docs/static/sitemap.xml > /dev/null && echo "✓ Docs sitemap valid"
+          python3 -m xml.dom.minidom sitemap_index.xml > /dev/null && echo "✓ Sitemap index valid"
