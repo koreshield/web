@@ -3,6 +3,7 @@ import os
 import re
 import secrets
 import uuid
+from urllib.parse import urlparse
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
 
@@ -1288,17 +1289,39 @@ class OAuthCallbackResponse(BaseModel):
 _OAUTH_STATE_TTL = 600  # 10 minutes
 
 
-def _oauth_redirect_uri(provider: str) -> str:
+def _resolve_frontend_base_url(request: Request) -> str:
+    """Resolve the frontend base URL for OAuth callbacks."""
+    configured = os.getenv("FRONTEND_BASE_URL")
+    if configured:
+        return configured.rstrip("/")
+
+    origin = request.headers.get("origin")
+    if origin:
+        return origin.rstrip("/")
+
+    referer = request.headers.get("referer")
+    if referer:
+        parsed = urlparse(referer)
+        if parsed.scheme and parsed.netloc:
+            return f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+
+    host = request.headers.get("host", "localhost:3000")
+    scheme = "http" if host.startswith(("localhost", "127.0.0.1")) else "https"
+    return f"{scheme}://{host}".rstrip("/")
+
+
+def _oauth_redirect_uri(request: Request, provider: str) -> str:
     """Return the frontend callback URL that OAuth providers must redirect to.
 
     GitHub / Google are configured with:
       Authorised redirect URI = https://koreshield.com/auth/github-callback
                                 https://koreshield.com/auth/google-callback
 
-    FRONTEND_BASE_URL must be set in .env (e.g. https://koreshield.com).
-    Falls back to localhost for local development.
+    FRONTEND_BASE_URL is preferred, but we can also derive the active frontend
+    origin from the incoming request so local Docker and reverse-proxy setups
+    do not depend on a separate manual env setting.
     """
-    base = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173").rstrip("/")
+    base = _resolve_frontend_base_url(request)
     return f"{base}/auth/{provider}-callback"
 
 
@@ -1386,7 +1409,7 @@ async def github_login(request: Request, redirect_url: str | None = None):
     """Initiate GitHub OAuth flow."""
     try:
         state = secrets.token_urlsafe(32)
-        redirect_uri = _oauth_redirect_uri("github")
+        redirect_uri = _oauth_redirect_uri(request, "github")
         await _store_oauth_state(
             request, "github", state,
             {"redirect_url": redirect_url or "/dashboard", "redirect_uri": redirect_uri},
@@ -1480,7 +1503,7 @@ async def google_login(request: Request, redirect_url: str | None = None):
     """Initiate Google OAuth flow."""
     try:
         state = secrets.token_urlsafe(32)
-        redirect_uri = _oauth_redirect_uri("google")
+        redirect_uri = _oauth_redirect_uri(request, "google")
         await _store_oauth_state(
             request, "google", state,
             {"redirect_url": redirect_url or "/dashboard", "redirect_uri": redirect_uri},
