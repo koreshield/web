@@ -8,7 +8,8 @@ retrieved context for adversarial instructions that could compromise the LLM.
 import re
 import uuid
 from typing import List, Optional, Dict, Any, Set
-from datetime import datetime, UTC
+from datetime import datetime, timezone as _tz
+UTC = _tz.utc
 import structlog
 
 from .rag_taxonomy import (
