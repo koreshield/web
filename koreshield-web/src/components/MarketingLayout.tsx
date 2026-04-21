@@ -9,9 +9,15 @@ import { ThemeToggle } from './ThemeToggle';
 const mobileNavLinkClass =
 	'flex items-center justify-between rounded-2xl border border-border/70 bg-card/70 px-4 py-3 text-sm font-medium text-foreground transition-all hover:border-primary/30 hover:bg-card';
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type DropdownItem =
+	| { label: string; to: string; href?: never; desc?: string }
+	| { label: string; href: string; to?: never; desc?: string };
+
 // ── Nav data ─────────────────────────────────────────────────────────────────
 
-const solutionsLinks = [
+const solutionsLinks: Array<{ label: string; to: string; desc: string }> = [
 	{
 		label: 'AI Detection & Response',
 		to: '/solutions/ai-detection-response',
@@ -39,14 +45,14 @@ const solutionsLinks = [
 	},
 ];
 
-const companyLinks = [
+const companyLinks: Array<{ label: string; to: string }> = [
 	{ label: 'About', to: '/about' },
 	{ label: 'Contact', to: '/contact' },
 	{ label: 'Changelog', to: '/changelog' },
 	{ label: 'Careers', to: '/careers' },
 ];
 
-const resourceLinks: { label: string; href?: string; to?: string }[] = [
+const resourceLinks: DropdownItem[] = [
 	{ label: 'Research', to: '/research' },
 	{ label: 'Docs', href: 'https://docs.koreshield.com' },
 	{ label: 'Blog', href: 'https://blog.koreshield.com' },
@@ -54,10 +60,6 @@ const resourceLinks: { label: string; href?: string; to?: string }[] = [
 ];
 
 // ── Dropdown component ────────────────────────────────────────────────────────
-
-type DropdownItem =
-	| { label: string; to: string; href?: never; desc?: string }
-	| { label: string; href: string; to?: never; desc?: string };
 
 function NavDropdown({
 	label,
