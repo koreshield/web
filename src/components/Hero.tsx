@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Play } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import TerminalAnimation from './TerminalAnimation';
 
@@ -43,9 +43,7 @@ function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.4 }}
 					>
-						KoreShield intercepts every request between your app and LLM providers, blocking prompt injection, jailbreaks, and data exfiltration in{' '}
-						<span className="text-foreground font-semibold">under 30ms</span>, with{' '}
-						<span className="text-electric-green font-semibold">95% detection accuracy</span>.
+						KoreShield intercepts every request between your app and LLM providers, blocking prompt injection, jailbreaks, and data exfiltration before unsafe traffic reaches the model.
 					</motion.p>
 
 					<motion.div
@@ -55,13 +53,12 @@ function Hero() {
 						transition={{ duration: 0.8, delay: 0.6 }}
 					>
 						<Link
-							to="/demo"
+							to="/signup"
 							rel="noopener"
 							className="group relative bg-electric-green hover:bg-emerald-bright text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 w-full sm:w-auto overflow-hidden"
 						>
 							<span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-							<Play className="w-4 h-4 fill-white relative z-10 shrink-0" />
-							<span className="relative z-10">See Live Demo</span>
+							<span className="relative z-10">Start Free</span>
 							<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10 shrink-0" />
 						</Link>
 

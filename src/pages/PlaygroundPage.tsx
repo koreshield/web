@@ -357,7 +357,7 @@ export default function PlaygroundPage() {
 						</p>
 						{!isAuthenticated && (
 							<p className="mt-4 text-amber-400 text-sm font-medium">
-								Running in simulation mode — <a href="/login" className="underline hover:text-amber-300">sign in</a> to run live scans against your KoreShield tenant.
+								<a href="/login" className="underline hover:text-amber-300">Sign in</a> to run live scans against your KoreShield tenant.
 							</p>
 						)}
 					</motion.div>

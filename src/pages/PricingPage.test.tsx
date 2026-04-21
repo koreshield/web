@@ -36,11 +36,11 @@ describe('PricingPage', () => {
 			</HelmetProvider>,
 		);
 
-		expect(await screen.findByRole('heading', { name: /secure every ai request before it reaches the model/i })).toBeInTheDocument();
+		expect(await screen.findByRole('heading', { name: /the firewall every llm deployment is missing/i })).toBeInTheDocument();
 		await user.click(screen.getByRole('button', { name: /toggle annual pricing/i }));
 		expect(screen.getByText('£950')).toBeInTheDocument();
 		expect(screen.getByText(/100,000 protected requests\/month/i)).toBeInTheDocument();
 		expect(screen.getByText(/what is a protected request/i)).toBeInTheDocument();
-		expect(screen.getAllByRole('link', { name: /talk to sales/i }).length).toBeGreaterThan(0);
+		expect(screen.getAllByRole('link', { name: /get a scoped quote/i }).length).toBeGreaterThan(0);
 	});
 });
