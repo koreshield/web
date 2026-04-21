@@ -549,9 +549,9 @@ async def admin_logout(response: Response, current_user: dict = Depends(get_curr
     logger.info("user_logout", user_id=current_user.get("id"), email=current_user.get("email"))
     return {"status": "logged_out"}
 
-@router.get("/stats", summary="Platform Statistics", description="Return live request counts, block rates, threat detections, and provider health statistics for the dashboard.")
-async def get_stats(request: Request, current_user: dict = Depends(get_current_user)):
-    """Get current proxy statistics."""
+@router.get("/stats/live", summary="Live Platform Statistics", description="Return raw in-memory runtime statistics for operator diagnostics.")
+async def get_live_stats(request: Request, current_user: dict = Depends(get_current_admin)):
+    """Get unscoped in-memory proxy statistics for admin diagnostics."""
     # Access the proxy instance from the app state or request
     if hasattr(request.app.state, "stats"):
         return request.app.state.stats
@@ -850,6 +850,17 @@ class APIKeyResponse(BaseModel):
 class CreateAPIKeyResponse(APIKeyResponse):
     api_key: str  # Full key - only shown once!
 
+
+def _current_user_uuid(current_user: dict) -> UUID:
+    """Normalize authenticated user ids for UUID-backed models and queries."""
+    try:
+        return UUID(str(current_user["id"]))
+    except (KeyError, ValueError, TypeError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user identity",
+        ) from exc
+
 @router.post(
     "/api-keys",
     status_code=status.HTTP_201_CREATED,
@@ -869,6 +880,8 @@ async def generate_api_key(
     **Important**: The full API key is only returned once. Store it securely!
     """
     try:
+        user_id = _current_user_uuid(current_user)
+
         # Generate API key
         full_key, key_hash, key_prefix = APIKey.generate_key()
 
@@ -899,7 +912,7 @@ async def generate_api_key(
 
         # Create API key record
         api_key = APIKey(
-            user_id=current_user["id"],
+            user_id=user_id,
             key_hash=key_hash,
             key_prefix=key_prefix,
             name=request.name,
@@ -913,7 +926,7 @@ async def generate_api_key(
 
         logger.info(
             "API key generated",
-            user_id=str(current_user["id"]),
+            user_id=str(user_id),
             key_id=str(api_key.id),
             key_prefix=key_prefix
         )
@@ -950,9 +963,10 @@ async def list_api_keys(
     Note: Full keys are never shown again after creation.
     """
     try:
+        user_id = _current_user_uuid(current_user)
         result = await db.execute(
             select(APIKey)
-            .where(APIKey.user_id == current_user["id"])
+            .where(APIKey.user_id == user_id)
             .order_by(APIKey.created_at.desc())
         )
         api_keys = result.scalars().all()
@@ -981,11 +995,12 @@ async def revoke_api_key(
     Revoke an API key. The key will be marked as revoked and can no longer be used.
     """
     try:
+        user_id = _current_user_uuid(current_user)
         # Find the API key
         result = await db.execute(
             select(APIKey)
             .where(APIKey.id == key_id)
-            .where(APIKey.user_id == current_user["id"])
+            .where(APIKey.user_id == user_id)
         )
         api_key = result.scalar_one_or_none()
 
@@ -1001,7 +1016,7 @@ async def revoke_api_key(
 
         logger.info(
             "API key revoked",
-            user_id=str(current_user["id"]),
+            user_id=str(user_id),
             key_id=str(api_key.id),
             key_prefix=api_key.key_prefix
         )
@@ -1035,10 +1050,11 @@ async def get_api_key(
     Note: The full key is never returned, only the prefix.
     """
     try:
+        user_id = _current_user_uuid(current_user)
         result = await db.execute(
             select(APIKey)
             .where(APIKey.id == key_id)
-            .where(APIKey.user_id == current_user["id"])
+            .where(APIKey.user_id == user_id)
         )
         api_key = result.scalar_one_or_none()
 

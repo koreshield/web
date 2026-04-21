@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 interface Provider {
 	name: string;
-	status: 'healthy' | 'down';
+	status: 'healthy' | 'down' | 'disabled';
 	priority: number;
 	type: string | null;
 	error?: string;
@@ -14,9 +14,11 @@ interface Provider {
 
 type ProviderHealthResponse = {
 	providers?: Record<string, {
+		enabled?: boolean;
 		healthy?: boolean;
 		priority?: number;
 		type?: string | null;
+		status?: string;
 		error?: string;
 	}>;
 };
@@ -25,12 +27,16 @@ export function ProviderHealthPage() {
 	const [wsConnected, setWsConnected] = useState(false);
 
 	// Fetch provider health data
-	const { data: healthData, isLoading } = useProviderHealth();
+	const { data: healthData, isLoading, error } = useProviderHealth();
 	const providersRaw = ((healthData as ProviderHealthResponse | undefined)?.providers) || {};
 	const providers: Record<string, Provider> = Object.entries(providersRaw).reduce((acc, [name, provider]) => {
+		if (provider?.enabled === false) {
+			return acc;
+		}
+		const providerStatus = provider?.status || (provider?.healthy ? 'healthy' : 'down');
 		acc[name] = {
 			name,
-			status: provider?.healthy ? 'healthy' : 'down',
+			status: providerStatus === 'healthy' ? 'healthy' : providerStatus === 'disabled' ? 'disabled' : 'down',
 			priority: provider?.priority ?? 0,
 			type: provider?.type ?? null,
 			error: provider?.error,
@@ -74,6 +80,7 @@ export function ProviderHealthPage() {
 		switch (status) {
 			case 'healthy': return 'text-green-500';
 			case 'down': return 'text-red-500';
+			case 'disabled': return 'text-muted-foreground';
 			default: return 'text-muted-foreground';
 		}
 	};
@@ -82,6 +89,7 @@ export function ProviderHealthPage() {
 		switch (status) {
 			case 'healthy': return 'bg-green-500/10 border-green-500/50';
 			case 'down': return 'bg-red-500/10 border-red-500/50';
+			case 'disabled': return 'bg-muted/40 border-border';
 			default: return 'bg-muted border-border';
 		}
 	};
@@ -98,13 +106,20 @@ export function ProviderHealthPage() {
 		switch (status) {
 			case 'healthy': return '#22c55e';
 			case 'down': return '#ef4444';
+			case 'disabled': return '#9ca3af';
 			default: return '#6b7280';
 		}
 	};
 
-	const healthyCount = Object.values(providers).filter(p => p.status === 'healthy').length;
-	const downCount = Object.values(providers).filter(p => p.status === 'down').length;
-	const hasProviders = Object.values(providers).length > 0;
+	const summary = healthData as Record<string, unknown> | undefined;
+	const healthyCount = typeof summary?.healthy_providers === 'number'
+		? summary.healthy_providers
+		: Object.values(providers).filter(p => p.status === 'healthy').length;
+	const configuredCount = typeof summary?.enabled_providers === 'number'
+		? summary.enabled_providers
+		: Object.values(providers).length;
+	const downCount = Math.max(0, configuredCount - healthyCount);
+	const hasProviders = configuredCount > 0;
 
 	return (
 		<div className="bg-background">
@@ -164,7 +179,7 @@ export function ProviderHealthPage() {
 							<span className="text-sm font-medium text-muted-foreground">Providers</span>
 							<Zap className="w-5 h-5 text-blue-500" />
 						</div>
-						<div className="text-3xl font-bold">{Object.values(providers).length}</div>
+						<div className="text-3xl font-bold">{configuredCount}</div>
 						<p className="text-xs text-muted-foreground mt-1">Configured</p>
 					</div>
 				</div>
@@ -179,6 +194,13 @@ export function ProviderHealthPage() {
 					{isLoading ? (
 						<div className="flex items-center justify-center py-12">
 							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+						</div>
+					) : error ? (
+						<div className="rounded-lg border border-red-500/20 bg-card p-8">
+							<h3 className="text-lg font-semibold mb-2 text-red-600">Unable to load provider health</h3>
+							<p className="text-sm text-muted-foreground">
+								The dashboard could not fetch provider status from the API. Retry after checking the backend connection and provider configuration.
+							</p>
 						</div>
 					) : !hasProviders ? (
 						<div className="rounded-lg border border-border bg-card p-8">
