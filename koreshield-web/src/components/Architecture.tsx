@@ -31,7 +31,7 @@ function Architecture() {
                         Zero Rearchitecting Required
                     </h2>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                        Point KoreShield at your existing LLM provider. Every request is inspected, scored, and either passed through or stopped  -  without changing a line of your application code.
+                        Point KoreShield at your existing LLM provider. Every request is inspected, scored, and either passed through or stopped, without changing a line of your application code.
                     </p>
                 </motion.div>
 

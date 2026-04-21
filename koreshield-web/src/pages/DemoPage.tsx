@@ -19,7 +19,7 @@ const whatYoullSee = [
 	{
 		icon: <Shield className="h-5 w-5 text-electric-green" />,
 		title: 'Live threat interception',
-		body: 'Watch Koreshield catch prompt injection, jailbreaks, and PII exfiltration attempts in real time — the same way it works in production.',
+		body: 'Watch Koreshield catch prompt injection, jailbreaks, and PII exfiltration attempts in real time, the same way it works in production.',
 	},
 	{
 		icon: <Zap className="h-5 w-5 text-electric-green" />,
@@ -172,7 +172,7 @@ export default function DemoPage() {
 							<Link to="/signup?plan=free" className="font-semibold text-foreground underline underline-offset-2 hover:text-electric-green transition-colors">
 								Start for free
 							</Link>{' '}
-							— no credit card required.
+							(no credit card required).
 						</p>
 					</motion.div>
 

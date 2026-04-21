@@ -152,7 +152,7 @@ export function LoginPage() {
 					<div className="space-y-4">
 						{[
 							'95% detection accuracy across 50+ attack patterns',
-							'Sub-30ms interception  -  zero perceptible latency',
+							'Sub-30ms interception, zero perceptible latency',
 							'Zero prompt data stored or retained',
 						].map((item) => (
 							<div key={item} className="flex items-start gap-3">
@@ -178,7 +178,7 @@ export function LoginPage() {
 
 					{locationState?.passwordReset && (
 						<div className="mb-6 p-3 bg-electric-green/10 border border-electric-green/20 rounded-lg text-sm text-electric-green font-medium">
-							Password updated  -  sign in with your new credentials.
+							Password updated. Sign in with your new credentials.
 						</div>
 					)}
 

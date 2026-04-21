@@ -12,7 +12,7 @@ const capabilities = [
 	{
 		icon: <Users className="h-6 w-6 text-electric-green" />,
 		title: 'Per-key and per-team policy scoping',
-		body: 'Different API keys can carry different policy profiles. An internal engineering key and a customer-facing key can be governed by different rules — all enforced at the proxy, not in application code.',
+		body: 'Different API keys can carry different policy profiles. An internal engineering key and a customer-facing key can be governed by different rules, all enforced at the proxy, not in application code.',
 	},
 	{
 		icon: <FileText className="h-6 w-6 text-electric-green" />,
@@ -50,7 +50,7 @@ export default function SolutionUsageControlPage() {
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="AI Usage Control | Koreshield"
-				description="Define and enforce policies over what your AI can and cannot do. Configurable rules, per-key scoping, and audit logs — without touching your model."
+				description="Define and enforce policies over what your AI can and cannot do. Configurable rules, per-key scoping, and audit logs, without touching your model."
 			/>
 
 			{/* Hero */}
@@ -66,7 +66,7 @@ export default function SolutionUsageControlPage() {
 							Define what your AI can and cannot do.
 						</h1>
 						<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-							Policy enforcement without model retraining. Koreshield applies configurable rules to every LLM request and response — blocking, logging, and alerting based on what you define.
+							Policy enforcement without model retraining. Koreshield applies configurable rules to every LLM request and response: blocking, logging, and alerting based on what you define.
 						</p>
 						<div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
 							<Link to="/signup?plan=free" className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500">
