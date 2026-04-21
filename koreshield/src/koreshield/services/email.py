@@ -36,7 +36,7 @@ async def send_email(
     to: str,
     subject: str,
     html: str,
-    from_email: str = "KoreShield <noreply@koreshield.com>",
+    from_email: str = "KoreShield <hello@koreshield.com>",
 ) -> bool:
     """
     Send email via Resend API.
