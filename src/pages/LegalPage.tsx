@@ -63,7 +63,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Your rights under UK GDPR',
-				body: 'You have the following rights in relation to personal data we hold about you as data controller. To exercise any of these rights, email privacy@koreshield.com. We will respond within one calendar month.\n\nRight of access (Art. 15): request a copy of the personal data we hold about you. Right to rectification (Art. 16): ask us to correct inaccurate or incomplete data. Right to erasure (Art. 17): ask us to delete your data in certain circumstances. Right to restrict processing (Art. 18): ask us to pause processing while a complaint is investigated. Right to data portability (Art. 20): request your data in a structured machine-readable format where processing is automated and based on consent or contract. Right to object (Art. 21): object to processing based on legitimate interests. We will stop unless we have compelling legitimate grounds. Right to withdraw consent (Art. 7(3)): where we rely on consent, you can withdraw it at any time without affecting prior processing.\n\nNote on prompt data: given our zero-log architecture, DSARs relating to prompt content will receive a response confirming that data is not held. Account information, billing records, and support communications can be provided on request.\n\nIf you are not satisfied with how we have handled a privacy concern you can complain to the Information Commissioner\'s Office (ICO) at <a href="https://ico.org.uk" class="underline">ico.org.uk</a> or call 0303 123 1113.',
+				body: 'You have the following rights in relation to personal data we hold about you as data controller. To exercise any of these rights, email hello@koreshield.com. We will respond within one calendar month.\n\nRight of access (Art. 15): request a copy of the personal data we hold about you. Right to rectification (Art. 16): ask us to correct inaccurate or incomplete data. Right to erasure (Art. 17): ask us to delete your data in certain circumstances. Right to restrict processing (Art. 18): ask us to pause processing while a complaint is investigated. Right to data portability (Art. 20): request your data in a structured machine-readable format where processing is automated and based on consent or contract. Right to object (Art. 21): object to processing based on legitimate interests. We will stop unless we have compelling legitimate grounds. Right to withdraw consent (Art. 7(3)): where we rely on consent, you can withdraw it at any time without affecting prior processing.\n\nNote on prompt data: given our zero-log architecture, DSARs relating to prompt content will receive a response confirming that data is not held. Account information, billing records, and support communications can be provided on request.\n\nIf you are not satisfied with how we have handled a privacy concern you can complain to the Information Commissioner\'s Office (ICO) at <a href="https://ico.org.uk" class="underline">ico.org.uk</a> or call 0303 123 1113.',
 			},
 			{
 				heading: 'Security',
@@ -79,7 +79,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Contact',
-				body: 'Privacy enquiries and Data Subject Access Requests: privacy@koreshield.com (subject line: DSAR Request). Security and breach notifications: security@koreshield.com. Post: Koreshield Labs Ltd, 3rd Floor, 86-90 Paul Street, London, EC2A 4NE. ICO: <a href="https://ico.org.uk" class="underline">ico.org.uk</a> · 0303 123 1113.',
+				body: 'Privacy enquiries, Data Subject Access Requests, security enquiries, and breach notifications: hello@koreshield.com. Post: Koreshield Labs Ltd, 3rd Floor, 86-90 Paul Street, London, EC2A 4NE. ICO: <a href="https://ico.org.uk" class="underline">ico.org.uk</a> · 0303 123 1113.',
 			},
 		],
 	},
@@ -102,7 +102,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Account and API key security',
-				body: 'You are responsible for maintaining the confidentiality of your account credentials and API keys, all activities that occur under your account whether or not authorised, and promptly notifying us at security@koreshield.com of any unauthorised access. API keys must be stored securely and must not be embedded in client-side code, committed to public repositories, or shared with unauthorised parties. API keys are prefixed with ks_ and shown once at creation. Store them securely. If you lose one, generate a new key from the dashboard.',
+				body: 'You are responsible for maintaining the confidentiality of your account credentials and API keys, all activities that occur under your account whether or not authorised, and promptly notifying us at hello@koreshield.com of any unauthorised access. API keys must be stored securely and must not be embedded in client-side code, committed to public repositories, or shared with unauthorised parties. API keys are prefixed with ks_ and shown once at creation. Store them securely. If you lose one, generate a new key from the dashboard.',
 			},
 			{
 				heading: 'Acceptable use: what you may not do',
@@ -142,7 +142,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Term and termination',
-				body: 'These Terms commence when you first access the Services and continue until terminated. You may cancel at any time by cancelling your subscription in the Platform or emailing legal@koreshield.com; cancellation takes effect at the end of the current billing period.\n\nWe may suspend or terminate your access: immediately if you materially breach the acceptable use or confidentiality provisions; with 30 days\' notice for any other material breach uncured after 14 days\' notice; immediately on your insolvency; or with 30 days\' notice for convenience.\n\nOn termination all licences cease immediately, you must stop using the Services, API, and SDK, and you have 30 days to export your detection log data before account deletion. Accrued payment obligations survive termination, as do the clauses on intellectual property, confidentiality, warranties, limitation of liability, and governing law.',
+				body: 'These Terms commence when you first access the Services and continue until terminated. You may cancel at any time by cancelling your subscription in the Platform or emailing hello@koreshield.com; cancellation takes effect at the end of the current billing period.\n\nWe may suspend or terminate your access: immediately if you materially breach the acceptable use or confidentiality provisions; with 30 days\' notice for any other material breach uncured after 14 days\' notice; immediately on your insolvency; or with 30 days\' notice for convenience.\n\nOn termination all licences cease immediately, you must stop using the Services, API, and SDK, and you have 30 days to export your detection log data before account deletion. Accrued payment obligations survive termination, as do the clauses on intellectual property, confidentiality, warranties, limitation of liability, and governing law.',
 			},
 			{
 				heading: 'General',
@@ -154,7 +154,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Contact',
-				body: 'Legal enquiries: legal@koreshield.com. Security and vulnerability disclosure: security@koreshield.com. Support: support@koreshield.com. Post: Koreshield Labs Ltd, 3rd Floor, 86-90 Paul Street, London, EC2A 4NE.',
+				body: 'Legal enquiries, security and vulnerability disclosure, and support: hello@koreshield.com. Post: Koreshield Labs Ltd, 3rd Floor, 86-90 Paul Street, London, EC2A 4NE.',
 			},
 		],
 	},
@@ -192,7 +192,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 		sections: [
 			{
 				heading: 'What this agreement is',
-				body: 'This Data Processing Agreement sets out how KoreShield handles personal data on your behalf when you use our services. It is a legal document required by UK GDPR Article 28 whenever a company processes personal data on behalf of another company.\n\nIn plain terms: you are the Controller (you decide what data gets processed and why). We are the Processor (we handle data on your instructions). This agreement sets out what each of us is responsible for.\n\nThis agreement is part of our Terms of Service. If there is a conflict between the two on anything related to personal data, this agreement takes precedence.\n\nKoreShield Labs Ltd, 3rd Floor, 86-90 Paul Street, London, EC2A 4NE (Company No. 17057784). Questions: privacy@koreshield.com.',
+				body: 'This Data Processing Agreement sets out how KoreShield handles personal data on your behalf when you use our services. It is a legal document required by UK GDPR Article 28 whenever a company processes personal data on behalf of another company.\n\nIn plain terms: you are the Controller (you decide what data gets processed and why). We are the Processor (we handle data on your instructions). This agreement sets out what each of us is responsible for.\n\nThis agreement is part of our Terms of Service. If there is a conflict between the two on anything related to personal data, this agreement takes precedence.\n\nKoreShield Labs Ltd, 3rd Floor, 86-90 Paul Street, London, EC2A 4NE (Company No. 17057784). Questions: hello@koreshield.com.',
 			},
 			{
 				heading: 'Key terms explained',
@@ -220,7 +220,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'International data transfers',
-				body: 'Hosted customer account data and threat records are operated primarily from the EEA. Depending on your deployment and the providers enabled for analysis or support functions, limited service data may also be processed outside the UK or EEA.\n\nWhen such processing occurs, KoreShield uses the contractual and operational safeguards available for the relevant providers and reviews those relationships as part of vendor management. Customers with stricter residency or deployment requirements should contact privacy@koreshield.com before enabling the relevant provider configuration.',
+				body: 'Hosted customer account data and threat records are operated primarily from the EEA. Depending on your deployment and the providers enabled for analysis or support functions, limited service data may also be processed outside the UK or EEA.\n\nWhen such processing occurs, KoreShield uses the contractual and operational safeguards available for the relevant providers and reviews those relationships as part of vendor management. Customers with stricter residency or deployment requirements should contact hello@koreshield.com before enabling the relevant provider configuration.',
 			},
 			{
 				heading: 'Security',
@@ -298,7 +298,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Customer options',
-				body: 'Enterprise and customer-specific deployments may support different provider selections, retention controls, or private deployment models. If your organisation needs stricter residency boundaries, contact privacy@koreshield.com before rollout so the available options can be scoped appropriately.',
+				body: 'Enterprise and customer-specific deployments may support different provider selections, retention controls, or private deployment models. If your organisation needs stricter residency boundaries, contact hello@koreshield.com before rollout so the available options can be scoped appropriately.',
 			},
 		],
 	},
