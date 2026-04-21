@@ -498,8 +498,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - [Documentation](https://docs.koreshield.com)
 - [Issues](https://github.com/koreshield/node-sdk/issues)
 - [Discussions](https://github.com/koreshield/node-sdk/discussions)
-- [Email Support](mailto:support@koreshield.com)
+- [Email Support](mailto:hello@koreshield.com)
 
 ## Security
 
-If you discover a security vulnerability, please email security@koreshield.com instead of creating a public issue.
+If you discover a security vulnerability, please email hello@koreshield.com instead of creating a public issue.

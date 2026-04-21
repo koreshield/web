@@ -270,6 +270,11 @@ export function LoginPage() {
 						{error && (
 							<div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
 								{error}
+								{error.includes('Privileged sign-in requires an email verification code') ? (
+									<p className="mt-2 text-xs text-destructive/80">
+										This account is using admin MFA. The backend could not send the code email.
+									</p>
+								) : null}
 							</div>
 						)}
 

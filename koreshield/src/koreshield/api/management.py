@@ -234,7 +234,7 @@ async def _issue_admin_mfa_challenge(user: User) -> dict:
         _MFA_CHALLENGE_STORE.pop(challenge_token, None)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Unable to deliver the admin verification code right now",
+            detail="Privileged sign-in requires an email verification code, but email delivery is not configured correctly right now",
         )
 
     payload = {
@@ -660,7 +660,7 @@ async def resend_admin_mfa(
     if not sent:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Unable to resend the admin verification code right now",
+            detail="Privileged sign-in requires an email verification code, but email delivery is not configured correctly right now",
         )
 
     payload = {
