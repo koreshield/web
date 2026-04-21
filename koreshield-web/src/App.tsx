@@ -56,6 +56,12 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ defaul
 const BillingPage = lazy(() => import('./pages/BillingPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
 const CareersPage = lazy(() => import('./pages/CareersPage'));
+// Solution pages
+const SolutionDetectionResponsePage = lazy(() => import('./pages/SolutionDetectionResponsePage'));
+const SolutionApplicationProtectionPage = lazy(() => import('./pages/SolutionApplicationProtectionPage'));
+const SolutionAgentsSecurityPage = lazy(() => import('./pages/SolutionAgentsSecurityPage'));
+const SolutionUsageControlPage = lazy(() => import('./pages/SolutionUsageControlPage'));
+const SolutionRAGSecurityPage = lazy(() => import('./pages/SolutionRAGSecurityPage'));
 
 function AppContent() {
 	const { addToast } = useToast();
@@ -357,6 +363,57 @@ function AppContent() {
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<CareersPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					{/* Solution pages */}
+					<Route
+						path="/solutions/ai-detection-response"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<SolutionDetectionResponsePage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/solutions/ai-application-protection"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<SolutionApplicationProtectionPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/solutions/ai-agents-security"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<SolutionAgentsSecurityPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/solutions/ai-usage-control"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<SolutionUsageControlPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/solutions/rag-security"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<SolutionRAGSecurityPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}

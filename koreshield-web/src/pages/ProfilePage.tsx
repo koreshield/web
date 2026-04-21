@@ -282,7 +282,7 @@ export function ProfilePage() {
 									<div className="text-xs uppercase tracking-wide text-muted-foreground">Plan</div>
 									<div className="mt-1 font-medium">
 										{billingState === 'ready'
-											? billing?.plan_name || billing?.plan_slug || 'Free'
+											? billing?.plan_name || billing?.plan_slug || 'Dev'
 											: billingState === 'loading'
 												? 'Loading…'
 												: 'Unavailable'}

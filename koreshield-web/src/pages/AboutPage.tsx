@@ -33,13 +33,6 @@ const team = [
 		image: null,
 		linkedin: 'https://www.linkedin.com/in/uwagba-obinna',
 	},
-	{
-		name: 'Victor Emmanuel',
-		role: 'Frontend Engineer & Designer',
-		bio: 'Crafting intuitive interfaces for complex security workflows.',
-		image: null,
-		linkedin: null,
-	},
 ];
 
 const values = [
