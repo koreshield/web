@@ -24,6 +24,9 @@ services:
                         - DATABASE_URL=${DATABASE_URL}
                         - REDIS_URL=redis://redis:6379/0
                         - ENVIRONMENT=production
+                        - KORESHIELD_APP_URL=${KORESHIELD_APP_URL:-https://koreshield.com}
+                        - FRONTEND_BASE_URL=${FRONTEND_BASE_URL:-https://koreshield.com}
+                        - APP_BASE_URL=${APP_BASE_URL:-https://koreshield.com}
                         - JWT_SECRET=${JWT_SECRET}
                         - JWT_ISSUER=koreshield-auth
                         - JWT_AUDIENCE=koreshield-api
@@ -51,6 +54,7 @@ services:
                         - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
                         - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
                         - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+                        - RESEND_API_KEY=${RESEND_API_KEY}
                         - ENABLED_PROVIDERS=${ENABLED_PROVIDERS}
                 healthcheck:
                         test: [ "CMD-SHELL", "python3 -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")'" ]
