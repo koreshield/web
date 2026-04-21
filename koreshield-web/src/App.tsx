@@ -271,7 +271,27 @@ function AppContent() {
 						}
 					/>
 					<Route
+						path="/privacy"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
 						path="/terms-of-service"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/terms"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
@@ -291,7 +311,37 @@ function AppContent() {
 						}
 					/>
 					<Route
+						path="/cookies"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
 						path="/dpa"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/legal/sub-processors"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/legal/transfer-policy"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
