@@ -109,6 +109,7 @@ function Footer() {
 							<li><Link to="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Privacy Policy</Link></li>
 							<li><Link to="/terms-of-service" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Terms of Service</Link></li>
 							<li><Link to="/cookie-policy" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Cookie Policy</Link></li>
+							<li><Link to="/dpa" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Data Processing Agreement</Link></li>
 						</ul>
 					</div>
 				</div>

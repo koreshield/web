@@ -291,6 +291,17 @@ function AppContent() {
 						}
 					/>
 					<Route
+						path="/dpa"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<LegalPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					
+					<Route
 						path="/careers"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
