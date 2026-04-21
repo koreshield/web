@@ -119,14 +119,22 @@ export const authService = {
 		return { status: 'authenticated', user: data.user };
 	},
 
-	logout(): void {
+	async logout(): Promise<void> {
+		// Clear local state first — UI updates immediately
 		clearSession();
 		clearPendingMfa();
-		void fetch(`${API_BASE_URL}/v1/management/logout`, {
-			method: 'POST',
-			credentials: 'include',
-		}).catch(() => undefined);
 		eventEmitter.emit('logout');
+
+		// Await backend so the HttpOnly cookie is properly cleared
+		// before the caller navigates away
+		try {
+			await fetch(`${API_BASE_URL}/v1/management/logout`, {
+				method: 'POST',
+				credentials: 'include',
+			});
+		} catch {
+			// Network error — local session already cleared. Cookie expires naturally.
+		}
 	},
 
 	isAuthenticated(): boolean {

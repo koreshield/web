@@ -9,10 +9,17 @@ import { ThemeToggle } from './ThemeToggle';
 const desktopNavLinkClass = 'text-sm font-medium text-muted-foreground transition-colors hover:text-foreground';
 const mobileNavLinkClass = 'flex items-center justify-between rounded-2xl border border-border/70 bg-card/70 px-4 py-3 text-sm font-medium text-foreground transition-all hover:border-primary/30 hover:bg-card';
 
+const solutionsLinks = [
+	{ label: 'AI Detection & Response', to: '/solutions/ai-detection-response' },
+	{ label: 'Application Protection', to: '/solutions/ai-application-protection' },
+	{ label: 'AI Agents Security', to: '/solutions/ai-agents-security' },
+	{ label: 'AI Usage Control', to: '/solutions/ai-usage-control' },
+	{ label: 'RAG Security', to: '/solutions/rag-security' },
+];
+
 const productLinks = [
 	{ label: 'Pricing', to: '/pricing' },
 	{ label: 'Demo', to: '/demo' },
-	{ label: 'RAG Security', to: '/rag-security' },
 ];
 
 const companyLinks = [
@@ -90,6 +97,11 @@ export function MarketingLayout() {
 					<nav className="hidden items-center gap-6 md:flex">
 						{!isAuthenticated ? (
 							<>
+								{solutionsLinks.map((item) => (
+									<Link key={item.to} to={item.to} className={desktopNavLinkClass}>
+										{item.label}
+									</Link>
+								))}
 								{productLinks.map((item) => (
 									<Link key={item.to} to={item.to} className={desktopNavLinkClass}>
 										{item.label}
@@ -197,6 +209,15 @@ export function MarketingLayout() {
 
 							<div className="max-h-[calc(100vh-11rem)] overflow-y-auto px-5 py-5">
 								<div className="space-y-6">
+									<MobileNavSection title="Solutions">
+										{solutionsLinks.map((item) => (
+											<Link key={item.to} to={item.to} onClick={closeMobile} className={mobileNavLinkClass}>
+												<span>{item.label}</span>
+												<Sparkles className="h-4 w-4 text-primary/80" />
+											</Link>
+										))}
+									</MobileNavSection>
+
 									<MobileNavSection title="Product">
 										{productLinks.map((item) => (
 											<Link key={item.to} to={item.to} onClick={closeMobile} className={mobileNavLinkClass}>
