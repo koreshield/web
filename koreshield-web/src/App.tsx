@@ -8,6 +8,9 @@ import { PageLoader, SuspenseFallback } from './components/LoadingStates';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ToastProvider, setGlobalToast, useToast } from './components/ToastNotification';
 import { ThemeProvider } from './context/ThemeContext';
+import { DashboardPage } from './pages/DashboardPage';
+import GettingStartedPage from './pages/GettingStartedPage';
+import { ApiKeysPage } from './pages/ApiKeysPage';
 
 // Lazy load pages for code splitting
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -28,7 +31,6 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
 const GitHubCallbackPage = lazy(() => import('./pages/GitHubCallbackPage').then(m => ({ default: m.GitHubCallbackPage })));
 const GoogleCallbackPage = lazy(() => import('./pages/GoogleCallbackPage').then(m => ({ default: m.GoogleCallbackPage })));
-const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const IntegrationsPage = lazy(() => import('./pages/IntegrationsPage'));
 const ChangelogPage = lazy(() => import('./pages/ChangelogPage'));
 const PoliciesPage = lazy(() => import('./pages/PoliciesPage').then(m => ({ default: m.PoliciesPage })));
@@ -42,7 +44,6 @@ const RBACPage = lazy(() => import('./pages/RBACPage').then(m => ({ default: m.R
 const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
 const TeamsPage = lazy(() => import('./pages/TeamsPage').then(m => ({ default: m.TeamsPage })));
 const TeamDetailsPage = lazy(() => import('./pages/TeamDetailsPage').then(m => ({ default: m.TeamDetailsPage })));
-const ApiKeysPage = lazy(() => import('./pages/ApiKeysPage').then(m => ({ default: m.ApiKeysPage })));
 const RAGSecurityPage = lazy(() => import('./pages/RAGSecurityPage').then(m => ({ default: m.RAGSecurityPage })));
 const ThreatMonitoringPage = lazy(() => import('./pages/ThreatMonitoringPage').then(m => ({ default: m.ThreatMonitoringPage })));
 const ThreatMapPage = lazy(() => import('./pages/ThreatMapPage').then(m => ({ default: m.ThreatMapPage })));
@@ -52,7 +53,6 @@ const AuditLogsPage = lazy(() => import('./pages/AuditLogsPage'));
 const AdvancedAnalyticsPage = lazy(() => import('./pages/AdvancedAnalyticsPage').then(m => ({ default: m.AdvancedAnalyticsPage })));
 const ComplianceReportsPage = lazy(() => import('./pages/ComplianceReportsPage').then(m => ({ default: m.ComplianceReportsPage })));
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
-const GettingStartedPage = lazy(() => import('./pages/GettingStartedPage'));
 const BillingPage = lazy(() => import('./pages/BillingPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
 const CareersPage = lazy(() => import('./pages/CareersPage'));

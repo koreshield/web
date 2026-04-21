@@ -14,7 +14,9 @@ export function DashboardPage() {
 	const { data: attacksData, isLoading: attacksLoading } = useRecentAttacks(10);
 
 	const loading = statsLoading || attacksLoading;
-	const recentAttacks = (attacksData as any)?.logs || [];
+	const recentAttacks = (((attacksData as any)?.logs) || []).filter((entry: any) =>
+		Boolean(entry?.attack_detected || entry?.is_blocked || entry?.status === 'failure')
+	);
 	const attackTypeCounts = recentAttacks.reduce((acc: Record<string, number>, attack: any) => {
 		const type = attack.threat_type || attack.attack_type || attack.type || 'Unknown';
 		acc[type] = (acc[type] || 0) + 1;
@@ -178,9 +180,24 @@ const client = new OpenAI({
 			)}
 
 			{loading ? (
-				<div className="flex items-center justify-center py-20">
-					<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
-				</div>
+				<>
+					<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+						{Array.from({ length: 4 }).map((_, index) => (
+							<div key={index} className="bg-card border border-border rounded-lg p-5 animate-pulse">
+								<div className="h-3 w-20 bg-muted rounded mb-4" />
+								<div className="h-8 w-16 bg-muted rounded" />
+							</div>
+						))}
+					</div>
+					<div className="bg-card border border-border rounded-lg p-6">
+						<div className="h-5 w-32 bg-muted rounded mb-4 animate-pulse" />
+						<div className="space-y-3">
+							{Array.from({ length: 3 }).map((_, index) => (
+								<div key={index} className="h-16 rounded-lg bg-muted/50 animate-pulse" />
+							))}
+						</div>
+					</div>
+				</>
 			) : (
 				<>
 					{/* Stats Grid */}
@@ -243,7 +260,7 @@ const client = new OpenAI({
 										className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted transition-colors cursor-pointer"
 									>
 										<div className="mt-0.5 shrink-0">
-											{attack.action_taken === 'blocked' ? (
+											{(attack.action_taken === 'blocked' || attack.is_blocked || attack.status === 'failure') ? (
 												<AlertTriangle className="w-4 h-4 text-red-500" />
 											) : (
 												<CheckCircle className="w-4 h-4 text-yellow-500" />
@@ -253,11 +270,11 @@ const client = new OpenAI({
 											<div className="flex items-center gap-2 mb-0.5">
 												<span className="text-sm font-medium">{attack.threat_type || 'Unknown'}</span>
 												<span className={`text-xs px-1.5 py-0.5 rounded-full ${
-													attack.action_taken === 'blocked'
+													(attack.action_taken === 'blocked' || attack.is_blocked || attack.status === 'failure')
 														? 'bg-red-500/10 text-red-500'
 														: 'bg-yellow-500/10 text-yellow-500'
 												}`}>
-													{attack.action_taken}
+													{attack.action_taken || (attack.is_blocked || attack.status === 'failure' ? 'blocked' : 'flagged')}
 												</span>
 												{attack.confidence != null && (
 												<span className="text-xs text-muted-foreground">

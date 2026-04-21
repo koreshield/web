@@ -34,7 +34,12 @@ class ApiClient {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
-	private async fetch<T>(endpoint: string, options: RequestInit = {}, retries = this.maxRetries): Promise<T> {
+	private async fetch<T>(
+		endpoint: string,
+		options: RequestInit = {},
+		retries = this.maxRetries,
+		allowedErrorStatuses: number[] = [],
+	): Promise<T> {
 		const url = `${this.baseUrl}${endpoint}`;
 		const controller = new AbortController();
 		const timeoutId = setTimeout(() => controller.abort(), this.timeout);
@@ -64,6 +69,9 @@ class ApiClient {
 
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}));
+				if (allowedErrorStatuses.includes(response.status)) {
+					return errorData as T;
+				}
 				const errorMessage = this.getErrorMessage(response.status, errorData);
 				const error = new Error(errorMessage) as Error & APIError;
 				error.code = response.status;
@@ -78,7 +86,7 @@ class ApiClient {
 				// Retry on 5xx errors
 				if (response.status >= 500 && retries > 0) {
 					await this.delay(1000 * (this.maxRetries - retries + 1));
-					return this.fetch<T>(endpoint, options, retries - 1);
+					return this.fetch<T>(endpoint, options, retries - 1, allowedErrorStatuses);
 				}
 
 				throw error;
@@ -95,7 +103,7 @@ class ApiClient {
 			// Retry on network errors
 			if (error instanceof Error && error.name !== 'AbortError' && retries > 0) {
 				await this.delay(1000 * (this.maxRetries - retries + 1));
-				return this.fetch<T>(endpoint, options, retries - 1);
+				return this.fetch<T>(endpoint, options, retries - 1, allowedErrorStatuses);
 			}
 
 			console.error(`Request failed: ${endpoint}`, error);
@@ -153,7 +161,7 @@ class ApiClient {
 		return this.fetch('/v1/scan', {
 			method: 'POST',
 			body: JSON.stringify({ prompt: content, metadata }),
-		});
+		}, this.maxRetries, [403]);
 	}
 
 	async getAuditLogs(limit = 100, offset = 0, level?: string) {
