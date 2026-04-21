@@ -64,6 +64,7 @@ def auth_headers():
             "sub": "11111111-1111-1111-1111-111111111111",
             "email": "test@example.com",
             "role": "admin",
+            "mfa_verified": True,
             "iss": "koreshield-auth",
             "aud": "koreshield-api",
             "iat": now,

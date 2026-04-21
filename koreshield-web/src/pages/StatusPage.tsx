@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Activity,
@@ -25,8 +25,8 @@ interface Component {
   name: string;
   description: string;
   status: ComponentStatus;
-  uptime: number;
-  responseTime?: number;
+  uptime: number | null;
+  responseTime?: number | null;
   lastChecked: Date;
 }
 
@@ -94,6 +94,48 @@ interface StatusApiResponse {
   components?: Record<string, { status?: ComponentStatus; detail?: string }>;
 }
 
+interface OperationalStatusResponse extends StatusApiResponse {
+  incidents?: Array<{
+    id: string;
+    title: string;
+    severity: IncidentSeverity;
+    status: IncidentStatus;
+    affected_components?: string[];
+    created_at: string;
+    updated_at: string;
+    resolved_at?: string | null;
+    updates?: Array<{
+      message: string;
+      timestamp: string;
+      status: IncidentStatus;
+    }>;
+  }>;
+  maintenance_windows?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    scheduled_start: string;
+    scheduled_end: string;
+    affected_components?: string[];
+    status: 'scheduled' | 'in_progress' | 'completed';
+  }>;
+  uptime_history?: Array<{
+    date: string;
+    uptime_percentage: number;
+    incidents: number;
+    sample_count?: number;
+  }>;
+  evidence?: {
+    snapshot_count?: number;
+    first_recorded_at?: string | null;
+    last_recorded_at?: string | null;
+    incident_count?: number;
+    maintenance_count?: number;
+    breach_record_count?: number;
+    retention_days?: number;
+  };
+}
+
 interface ProviderHealthApiResponse {
   providers?: Record<string, {
     enabled?: boolean;
@@ -158,234 +200,59 @@ const COMPONENT_CATALOG: Record<(typeof COMPONENT_ORDER)[number], Omit<Component
     id: 'api-gateway',
     name: 'API Gateway',
     description: 'Primary ingress for proxied chat, scan, and management traffic.',
-    uptime: 99.99,
-    responseTime: 58,
+    uptime: null,
+    responseTime: null,
   },
   'detection-engine': {
     id: 'detection-engine',
     name: 'Detection Engine',
     description: 'Prompt injection, jailbreak, and content risk analysis.',
-    uptime: 99.98,
-    responseTime: 124,
+    uptime: null,
+    responseTime: null,
   },
   'policy-engine': {
     id: 'policy-engine',
     name: 'Policy Engine',
     description: 'Rule enforcement, access controls, and runtime decisions.',
-    uptime: 99.97,
-    responseTime: 41,
+    uptime: null,
+    responseTime: null,
   },
   'rag-scanner': {
     id: 'rag-scanner',
     name: 'RAG Security Scanner',
     description: 'Retrieved-document scanning, evidence extraction, and reference highlights.',
-    uptime: 99.95,
-    responseTime: 162,
+    uptime: null,
+    responseTime: null,
   },
   billing: {
     id: 'billing',
     name: 'Billing and Checkout',
     description: 'Hosted billing account sync, checkout, and customer portal orchestration.',
-    uptime: 99.94,
-    responseTime: 88,
+    uptime: null,
+    responseTime: null,
   },
   dashboard: {
     id: 'dashboard',
     name: 'Web Dashboard',
     description: 'Customer dashboard, onboarding surfaces, and audit workflows.',
-    uptime: 99.97,
-    responseTime: 76,
+    uptime: null,
+    responseTime: null,
   },
   'audit-log-stream': {
     id: 'audit-log-stream',
     name: 'Audit Logs and Alerts',
     description: 'Security event capture, review queues, and alert rule execution.',
-    uptime: 99.96,
-    responseTime: 67,
+    uptime: null,
+    responseTime: null,
   },
   'provider-routing': {
     id: 'provider-routing',
     name: 'Provider Routing',
     description: 'Per-environment model provider routing and fallback orchestration.',
-    uptime: 99.92,
-    responseTime: 145,
+    uptime: null,
+    responseTime: null,
   },
 };
-
-const historicalIncidents: Incident[] = [
-  {
-    id: 'inc-001',
-    title: 'Increased API latency - OpenAI integration',
-    severity: 'minor',
-    status: 'resolved',
-    affectedComponents: ['provider-routing', 'api-gateway'],
-    createdAt: new Date('2026-01-28T14:30:00Z'),
-    updatedAt: new Date('2026-01-28T16:45:00Z'),
-    resolvedAt: new Date('2026-01-28T16:45:00Z'),
-    updates: [
-      {
-        message: 'We investigated elevated latency on requests routed to OpenAI-backed workloads.',
-        timestamp: new Date('2026-01-28T14:30:00Z'),
-        status: 'investigating',
-      },
-      {
-        message: 'We identified upstream rate limiting behavior and enabled more defensive retry handling.',
-        timestamp: new Date('2026-01-28T15:15:00Z'),
-        status: 'identified',
-      },
-      {
-        message: 'Retry changes were deployed and traffic was stabilizing.',
-        timestamp: new Date('2026-01-28T16:00:00Z'),
-        status: 'monitoring',
-      },
-      {
-        message: 'Latency returned to baseline and the incident was closed.',
-        timestamp: new Date('2026-01-28T16:45:00Z'),
-        status: 'resolved',
-      },
-    ],
-  },
-  {
-    id: 'inc-002',
-    title: 'Delayed document ingestion in the RAG scanner',
-    severity: 'minor',
-    status: 'resolved',
-    affectedComponents: ['rag-scanner', 'dashboard'],
-    createdAt: new Date('2026-02-17T10:20:00Z'),
-    updatedAt: new Date('2026-02-17T11:05:00Z'),
-    resolvedAt: new Date('2026-02-17T11:05:00Z'),
-    updates: [
-      {
-        message: 'We received reports of uploaded PDF and DOCX files taking longer than expected to parse.',
-        timestamp: new Date('2026-02-17T10:20:00Z'),
-        status: 'investigating',
-      },
-      {
-        message: 'The issue was traced to document parsing overhead in the dashboard upload path.',
-        timestamp: new Date('2026-02-17T10:38:00Z'),
-        status: 'identified',
-      },
-      {
-        message: 'The parser loading path was optimized and queued uploads began clearing normally.',
-        timestamp: new Date('2026-02-17T10:50:00Z'),
-        status: 'monitoring',
-      },
-      {
-        message: 'Upload latency returned to normal and the backlog was cleared.',
-        timestamp: new Date('2026-02-17T11:05:00Z'),
-        status: 'resolved',
-      },
-    ],
-  },
-  {
-    id: 'inc-003',
-    title: 'Short-lived checkout initialization errors',
-    severity: 'minor',
-    status: 'resolved',
-    affectedComponents: ['billing', 'dashboard'],
-    createdAt: new Date('2026-03-13T09:10:00Z'),
-    updatedAt: new Date('2026-03-13T10:00:00Z'),
-    resolvedAt: new Date('2026-03-13T10:00:00Z'),
-    updates: [
-      {
-        message: 'A subset of hosted billing checkouts failed to initialize for one product and currency combination.',
-        timestamp: new Date('2026-03-13T09:10:00Z'),
-        status: 'investigating',
-      },
-      {
-        message: 'We confirmed the issue was isolated to a billing catalog mismatch rather than platform downtime.',
-        timestamp: new Date('2026-03-13T09:28:00Z'),
-        status: 'identified',
-      },
-      {
-        message: 'Billing fallback logic was deployed and checkout creation recovered.',
-        timestamp: new Date('2026-03-13T09:46:00Z'),
-        status: 'monitoring',
-      },
-      {
-        message: 'Checkout creation and billing sync returned to normal behavior.',
-        timestamp: new Date('2026-03-13T10:00:00Z'),
-        status: 'resolved',
-      },
-    ],
-  },
-  {
-    id: 'inc-004',
-    title: 'Dashboard route load errors after frontend refresh',
-    severity: 'minor',
-    status: 'resolved',
-    affectedComponents: ['dashboard'],
-    createdAt: new Date('2026-04-03T10:00:00Z'),
-    updatedAt: new Date('2026-04-03T10:35:00Z'),
-    resolvedAt: new Date('2026-04-03T10:35:00Z'),
-    updates: [
-      {
-        message: 'A subset of dashboard routes showed a generic page-load error after the frontend bundle changed during local rebuilds.',
-        timestamp: new Date('2026-04-03T10:00:00Z'),
-        status: 'investigating',
-      },
-      {
-        message: 'We traced the issue to route-level rendering failures that were being masked by a generic fallback state.',
-        timestamp: new Date('2026-04-03T10:12:00Z'),
-        status: 'identified',
-      },
-      {
-        message: 'The fallback now records the route, classifies the failure, and surfaces a reference ID for debugging.',
-        timestamp: new Date('2026-04-03T10:24:00Z'),
-        status: 'monitoring',
-      },
-      {
-        message: 'The updated bundle was deployed and route-level failures now show actionable diagnostics instead of a vague refresh prompt.',
-        timestamp: new Date('2026-04-03T10:35:00Z'),
-        status: 'resolved',
-      },
-    ],
-  },
-  {
-    id: 'inc-005',
-    title: 'Azure OpenAI route health mismatch during provider rollout',
-    severity: 'minor',
-    status: 'resolved',
-    affectedComponents: ['provider-routing', 'api-gateway'],
-    createdAt: new Date('2026-04-03T11:30:00Z'),
-    updatedAt: new Date('2026-04-03T12:20:00Z'),
-    resolvedAt: new Date('2026-04-03T12:20:00Z'),
-    updates: [
-      {
-        message: 'Azure OpenAI credentials were present, but health checks still reported the route as unavailable.',
-        timestamp: new Date('2026-04-03T11:30:00Z'),
-        status: 'investigating',
-      },
-      {
-        message: 'We confirmed the deployment was using the newer Azure Cognitive Services endpoint shape with a live gpt-4o deployment.',
-        timestamp: new Date('2026-04-03T11:48:00Z'),
-        status: 'identified',
-      },
-      {
-        message: 'Provider initialization and health probes were updated to follow the deployed gpt-4o route correctly.',
-        timestamp: new Date('2026-04-03T12:05:00Z'),
-        status: 'monitoring',
-      },
-      {
-        message: 'Azure OpenAI routing is now healthy and visible in live provider health checks.',
-        timestamp: new Date('2026-04-03T12:20:00Z'),
-        status: 'resolved',
-      },
-    ],
-  },
-];
-
-const maintenanceWindows: MaintenanceWindow[] = [
-  {
-    id: 'maint-001',
-    title: 'Scheduled datastore and provider-routing maintenance',
-    description: 'Routine PostgreSQL indexing, Redis memory tuning, and provider route validation for hosted environments. Expected customer impact is under 5 minutes.',
-    scheduledStart: new Date('2026-04-18T01:00:00Z'),
-    scheduledEnd: new Date('2026-04-18T02:30:00Z'),
-    affectedComponents: ['api-gateway', 'billing', 'audit-log-stream', 'provider-routing'],
-    status: 'scheduled',
-  },
-];
 
 function buildDefaultComponents(now: Date): Component[] {
   return COMPONENT_ORDER.map((id) => ({
@@ -395,77 +262,16 @@ function buildDefaultComponents(now: Date): Component[] {
   }));
 }
 
-function buildUptimeHistory(referenceDate: Date): UptimeDay[] {
-  const incidentByDate = new Map<string, { uptime: number; incidents: number }>();
-
-  for (const incident of historicalIncidents) {
-    const key = incident.createdAt.toISOString().slice(0, 10);
-    incidentByDate.set(key, {
-      uptime: incident.severity === 'major' ? 97.8 : 99.42,
-      incidents: (incidentByDate.get(key)?.incidents || 0) + 1,
-    });
-  }
-
-  for (const maintenance of maintenanceWindows) {
-    const key = maintenance.scheduledStart.toISOString().slice(0, 10);
-    if (!incidentByDate.has(key)) {
-      incidentByDate.set(key, { uptime: 99.88, incidents: 0 });
-    }
-  }
-
-  return Array.from({ length: 90 }, (_, offset) => {
-    const date = new Date(referenceDate);
-    date.setHours(0, 0, 0, 0);
-    date.setDate(referenceDate.getDate() - (89 - offset));
-    const key = date.toISOString().slice(0, 10);
-    const special = incidentByDate.get(key);
-    return {
-      date,
-      uptime: special?.uptime ?? 100,
-      incidents: special?.incidents ?? 0,
-    };
-  });
-}
-
 export default function StatusPage() {
   const [components, setComponents] = useState<Component[]>(() => buildDefaultComponents(new Date()));
   const [statusSummary, setStatusSummary] = useState<StatusApiResponse | null>(null);
   const [providerHealth, setProviderHealth] = useState<ProviderHealthApiResponse | null>(null);
   const [statusError, setStatusError] = useState('');
   const [providerRoutes, setProviderRoutes] = useState<ProviderRoute[]>([]);
-  const uptimeHistory = useMemo(() => {
-    const history = buildUptimeHistory(new Date());
-    const latestDay = history[history.length - 1];
-    if (!latestDay) {
-      return history;
-    }
-
-    const currentStatus = statusSummary?.status;
-    const blockedRequests = statusSummary?.statistics?.requests_blocked ?? 0;
-    const providerIncidents = providerRoutes.filter(
-      (provider) => provider.enabled && (!provider.initialized || provider.healthy === false),
-    ).length;
-
-    const todaysIncidents = blockedRequests > 0 ? 1 : 0;
-    const todaysUptime =
-      currentStatus === 'healthy'
-        ? providerIncidents > 0
-          ? 99.86
-          : 100
-        : providerIncidents > 0
-          ? 99.4
-          : 99.7;
-
-    return history.map((day, index) =>
-      index === history.length - 1
-        ? {
-            ...day,
-            incidents: Math.max(day.incidents, todaysIncidents),
-            uptime: Math.min(day.uptime, todaysUptime),
-          }
-        : day,
-    );
-  }, [providerRoutes, statusSummary]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [maintenanceWindows, setMaintenanceWindows] = useState<MaintenanceWindow[]>([]);
+  const [uptimeHistory, setUptimeHistory] = useState<UptimeDay[]>([]);
+  const [statusEvidence, setStatusEvidence] = useState<OperationalStatusResponse['evidence'] | null>(null);
 
   const getOverallStatus = (): ComponentStatus => {
     const statuses = components.map((component) => component.status);
@@ -477,8 +283,11 @@ export default function StatusPage() {
   };
 
   const getAverageUptime = () => {
-    const total = components.reduce((sum, component) => sum + component.uptime, 0);
-    return (total / components.length).toFixed(2);
+    if (uptimeHistory.length === 0) {
+      return null;
+    }
+    const total = uptimeHistory.reduce((sum, day) => sum + day.uptime, 0);
+    return (total / uptimeHistory.length).toFixed(2);
   };
 
   const getStatusColor = (status: ComponentStatus) => {
@@ -531,14 +340,16 @@ export default function StatusPage() {
       const now = new Date();
 
       try {
-        const [health, statsResponse, providerResponse] = await Promise.all([
+        const [health, statsResponse, providerResponse, operationalResponse] = await Promise.all([
           api.getHealth(),
           api.getStats(),
           api.getProviderHealth(),
+          api.getOperationalStatus(),
         ]);
 
         const stats = statsResponse as StatusApiResponse;
         const providerState = providerResponse as ProviderHealthApiResponse;
+        const operational = operationalResponse as OperationalStatusResponse;
 
         if (cancelled) {
           return;
@@ -555,6 +366,42 @@ export default function StatusPage() {
         setStatusSummary(stats);
         setProviderHealth(providerState);
         setStatusError('');
+        setStatusEvidence(operational.evidence || null);
+        setIncidents(
+          operational.incidents?.map((incident) => ({
+            id: incident.id,
+            title: incident.title,
+            severity: incident.severity,
+            status: incident.status,
+            affectedComponents: incident.affected_components || [],
+            createdAt: new Date(incident.created_at),
+            updatedAt: new Date(incident.updated_at),
+            resolvedAt: incident.resolved_at ? new Date(incident.resolved_at) : undefined,
+            updates: (incident.updates || []).map((update) => ({
+              message: update.message,
+              timestamp: new Date(update.timestamp),
+              status: update.status,
+            })),
+          })) || [],
+        );
+        setMaintenanceWindows(
+          operational.maintenance_windows?.map((window) => ({
+            id: window.id,
+            title: window.title,
+            description: window.description,
+            scheduledStart: new Date(window.scheduled_start),
+            scheduledEnd: new Date(window.scheduled_end),
+            affectedComponents: window.affected_components || [],
+            status: window.status,
+          })) || [],
+        );
+        setUptimeHistory(
+          operational.uptime_history?.map((day) => ({
+            date: new Date(day.date),
+            uptime: day.uptime_percentage,
+            incidents: day.incidents,
+          })) || [],
+        );
         setProviderRoutes(
           Object.entries(providerSnapshot)
             .filter(([, provider]) => provider.enabled || provider.initialized || provider.credentials_present)
@@ -641,8 +488,13 @@ export default function StatusPage() {
         }
       } catch {
         if (!cancelled) {
-          setStatusError('Live status data is temporarily unavailable. Showing the last known platform snapshot.');
+          setStatusError('Live status data is temporarily unavailable.');
           setComponents(buildDefaultComponents(now));
+          setIncidents([]);
+          setMaintenanceWindows([]);
+          setUptimeHistory([]);
+          setStatusEvidence(null);
+          setProviderRoutes([]);
         }
       }
     };
@@ -729,9 +581,14 @@ export default function StatusPage() {
                       : 'Service disruption detected'}
                 </h2>
                 <p className="text-muted-foreground mt-1">
-                  Average uptime: {averageUptime}% over the last 90 days
+                  {averageUptime ? `Average uptime: ${averageUptime}% over the last 90 days` : 'Not enough recorded uptime evidence yet.'}
                 </p>
                 {statusError && <p className="text-sm text-muted-foreground mt-2">{statusError}</p>}
+                {statusEvidence?.last_recorded_at && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Evidence last recorded {new Date(statusEvidence.last_recorded_at).toLocaleString()} from {statusEvidence.snapshot_count || 0} live snapshots.
+                  </p>
+                )}
               </div>
             </div>
             <div className="flex gap-3 flex-wrap">
@@ -785,7 +642,11 @@ export default function StatusPage() {
         >
           <h2 className="text-2xl font-bold text-foreground mb-6">Live Provider Routes</h2>
           <div className="grid md:grid-cols-2 gap-4">
-            {providerRoutes.map((provider) => (
+            {providerRoutes.length === 0 ? (
+              <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
+                No provider route data is available for this environment yet.
+              </div>
+            ) : providerRoutes.map((provider) => (
               <div key={provider.id} className="rounded-xl border border-border bg-card p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -898,11 +759,19 @@ export default function StatusPage() {
             Uptime History (Last 90 Days)
           </h2>
           <div className="bg-card rounded-xl shadow-lg p-8 border border-border">
-            <UptimeChart data={uptimeHistory} />
-            <div className="flex justify-between items-center mt-6 text-sm text-muted-foreground">
-              <span>90 days ago</span>
-              <span>Today</span>
-            </div>
+            {uptimeHistory.length === 0 ? (
+              <div className="text-sm text-muted-foreground">
+                No uptime history has been recorded yet.
+              </div>
+            ) : (
+              <>
+                <UptimeChart data={uptimeHistory} />
+                <div className="flex justify-between items-center mt-6 text-sm text-muted-foreground">
+                  <span>90 days ago</span>
+                  <span>Today</span>
+                </div>
+              </>
+            )}
           </div>
         </motion.div>
 
@@ -913,7 +782,11 @@ export default function StatusPage() {
         >
           <h2 className="text-2xl font-bold text-foreground mb-6">Recent Incidents</h2>
           <div className="space-y-4">
-            {historicalIncidents.map((incident) => (
+            {incidents.length === 0 ? (
+              <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
+                No incidents have been published.
+              </div>
+            ) : incidents.map((incident) => (
               <IncidentCard key={incident.id} incident={incident} getSeverityColor={getSeverityColor} isHistorical />
             ))}
           </div>
@@ -956,10 +829,10 @@ function ComponentStatusRow({
         </div>
         <div className="flex items-center gap-8 text-sm text-muted-foreground">
           <div className="text-right">
-            <div className="font-semibold text-foreground">{component.uptime}%</div>
+            <div className="font-semibold text-foreground">{component.uptime !== null ? `${component.uptime}%` : 'N/A'}</div>
             <div className="text-xs">Uptime</div>
           </div>
-          {component.responseTime && (
+          {component.responseTime !== null && component.responseTime !== undefined && (
             <div className="text-right">
               <div className="font-semibold text-foreground">{component.responseTime}ms</div>
               <div className="text-xs">Response Time</div>
@@ -984,9 +857,9 @@ function ComponentStatusRow({
             </div>
             <div>
               <div className="text-muted-foreground mb-1">Uptime (90d)</div>
-              <div className="font-medium text-foreground">{component.uptime}%</div>
+              <div className="font-medium text-foreground">{component.uptime !== null ? `${component.uptime}%` : 'N/A'}</div>
             </div>
-            {component.responseTime && (
+            {component.responseTime !== null && component.responseTime !== undefined && (
               <div>
                 <div className="text-muted-foreground mb-1">Avg Response</div>
                 <div className="font-medium text-foreground">{component.responseTime}ms</div>

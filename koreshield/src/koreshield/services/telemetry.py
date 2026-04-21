@@ -24,10 +24,11 @@ def _build_integrity_hash(payload: dict) -> str:
     return hashlib.sha256(canonical_payload.encode("utf-8")).hexdigest()
 
 class TelemetryService:
-    def __init__(self, monitoring_system, redis_client=None, db_session_factory=None):
+    def __init__(self, monitoring_system, redis_client=None, db_session_factory=None, audit_integrity_service=None):
         self.monitoring = monitoring_system
         self.redis_client = redis_client
         self.db_session_factory = db_session_factory
+        self.audit_integrity_service = audit_integrity_service
         
         self.stats_keys = {
             "requests_total": "koreshield:stats:requests_total",
@@ -66,7 +67,7 @@ class TelemetryService:
         else:
             self.stats[stat_name] = self.stats.get(stat_name, 0) + amount
 
-    def build_audit_entry(self, log_data: dict) -> dict:
+    def build_audit_entry(self, log_data: dict, integrity_metadata: dict | None = None) -> dict:
         """Normalize request log payloads for management log responses."""
         timestamp = log_data.get("timestamp")
         if isinstance(timestamp, datetime):
@@ -77,7 +78,7 @@ class TelemetryService:
         status_code = log_data.get("status_code", 200)
         is_blocked = bool(log_data.get("is_blocked"))
 
-        return {
+        entry = {
             "id": str(uuid.uuid4()),
             "request_id": log_data.get("request_id"),
             "timestamp": timestamp_value,
@@ -114,6 +115,17 @@ class TelemetryService:
                 }
             ),
         }
+        if integrity_metadata:
+            entry.update(
+                {
+                    "ledger_sequence": integrity_metadata.get("sequence"),
+                    "previous_chain_hash": integrity_metadata.get("previous_chain_hash"),
+                    "chain_hash": integrity_metadata.get("chain_hash"),
+                    "storage_backend": integrity_metadata.get("storage_backend"),
+                    "verification_status": integrity_metadata.get("verification_status"),
+                }
+            )
+        return entry
 
     def append_audit_log(self, entry: dict) -> None:
         """Store an audit entry in memory."""
@@ -148,7 +160,13 @@ class TelemetryService:
     def queue_request_log(self, log_data: dict) -> None:
         """Record a request log and persist asynchronously."""
         normalized_log_data = self._normalize_log_data(log_data)
-        entry = self.build_audit_entry(normalized_log_data)
+        integrity_metadata = None
+        if self.audit_integrity_service:
+            try:
+                integrity_metadata = self.audit_integrity_service.append_entry(normalized_log_data)
+            except Exception as exc:
+                logger.error("Failed to append audit ledger entry", error=str(exc))
+        entry = self.build_audit_entry(normalized_log_data, integrity_metadata)
         self.append_audit_log(entry)
         
         if self.db_session_factory:

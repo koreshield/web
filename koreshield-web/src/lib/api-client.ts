@@ -153,6 +153,10 @@ class ApiClient {
 		return this.fetch('/health/providers');
 	}
 
+	async getOperationalStatus() {
+		return this.fetch('/health/status');
+	}
+
 	async getRecentAttacks(limit = 10) {
 		return this.getAuditLogs(limit, 0);
 	}
@@ -173,6 +177,49 @@ class ApiClient {
 			params.append('level', level);
 		}
 		return this.fetch(`/v1/management/logs?${params.toString()}`);
+	}
+
+	async verifyAuditLogs(limit = 200) {
+		return this.fetch(`/v1/management/logs/verify?limit=${limit}`);
+	}
+
+	async getOperationalState() {
+		return this.fetch('/v1/management/operations');
+	}
+
+	async createIncident(payload: JsonRecord) {
+		return this.fetch('/v1/management/operations/incidents', {
+			method: 'POST',
+			body: JSON.stringify(payload),
+		});
+	}
+
+	async addIncidentUpdate(incidentId: string, payload: JsonRecord) {
+		return this.fetch(`/v1/management/operations/incidents/${incidentId}/updates`, {
+			method: 'POST',
+			body: JSON.stringify(payload),
+		});
+	}
+
+	async scheduleMaintenance(payload: JsonRecord) {
+		return this.fetch('/v1/management/operations/maintenance', {
+			method: 'POST',
+			body: JSON.stringify(payload),
+		});
+	}
+
+	async createBreachRecord(payload: JsonRecord) {
+		return this.fetch('/v1/management/operations/breaches', {
+			method: 'POST',
+			body: JSON.stringify(payload),
+		});
+	}
+
+	async addBreachUpdate(breachId: string, payload: JsonRecord) {
+		return this.fetch(`/v1/management/operations/breaches/${breachId}/updates`, {
+			method: 'POST',
+			body: JSON.stringify(payload),
+		});
 	}
 
 	async getRuntimeReviews(limit = 50, status?: string) {

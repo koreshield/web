@@ -36,6 +36,8 @@ from .services.telemetry import TelemetryService
 from .services.provider import ProviderService
 from .services.security import SecurityService
 from .services.governance import GovernanceService
+from .services.operational_status import OperationalStatusService
+from .services.audit_integrity import AuditIntegrityService
 
 logger = structlog.get_logger(__name__)
 
@@ -197,7 +199,10 @@ class KoreShieldProxy:
         self.detector = AttackDetector(security_config)
         self.app.state.detector = self.detector
 
-        # 4. Initialize Monitoring System
+        # 4. Initialize status and monitoring systems
+        self.audit_integrity = AuditIntegrityService()
+        self.operational_status = OperationalStatusService()
+
         from .monitoring import MonitoringSystem
         from .config import KoreShieldConfig
         kore_config = KoreShieldConfig()
@@ -214,7 +219,8 @@ class KoreShieldProxy:
         self.telemetry = TelemetryService(
             monitoring_system=self.monitoring,
             redis_client=self.redis_client,
-            db_session_factory=AsyncSessionLocal
+            db_session_factory=AsyncSessionLocal,
+            audit_integrity_service=self.audit_integrity,
         )
         self.auth = AuthService(db_session_factory=AsyncSessionLocal)
         
@@ -238,7 +244,9 @@ class KoreShieldProxy:
         self.app.state.scan_index = {}
         self.app.state.rag_scan_store = deque(maxlen=250)
         self.app.state.rag_scan_index = {}
-        self.app.state.audit_log_store = deque(maxlen=1000)
+        self.app.state.audit_log_store = self.telemetry.audit_log_store
+        self.app.state.audit_integrity = self.audit_integrity
+        self.app.state.operational_status = self.operational_status
         
         # Router-required state
         self.app.state.policy_engine = self.security.policy_engine
@@ -292,6 +300,7 @@ class KoreShieldProxy:
         @self.app.on_event("startup")
         async def _startup_event():
             # Start background health monitoring
+            await self.start_monitoring()
             asyncio.create_task(self._background_heartbeat())
             await self._handle_event_broadcast("system_status", {"status": "online", "version": self.app.version})
 
@@ -333,28 +342,28 @@ class KoreShieldProxy:
         """Publish an event over the WebSocket pub/sub channel."""
         await websocket_module.publish_event(event_type, data)
 
-    async def _handle_health(self) -> Response:
+    async def _handle_health(self) -> dict:
         """Health check endpoint."""
-        return JSONResponse(content={
+        return {
             "status": "healthy",
             "version": "0.1.0"
-        })
+        }
 
-    async def _handle_health_providers(self) -> Response:
+    async def _handle_health_providers(self) -> dict:
         """Health check for all configured LLM providers."""
         snapshot = await self.provider_service.get_health_snapshot()
         healthy_count = len([p for p in snapshot.values() if p.get("status") == "healthy"])
         enabled_count = len([p for p in snapshot.values() if p.get("enabled")])
         
-        return JSONResponse(content={
+        return {
             "providers": snapshot,
             "total_providers": len(self.provider_service.providers),
             "healthy_providers": healthy_count,
             "enabled_providers": enabled_count,
             "configured": True
-        })
+        }
 
-    async def _handle_status(self) -> Response:
+    async def _handle_status(self) -> dict:
         """Dashboard status endpoint."""
         stats = self.telemetry.get_stats()
         providers = await self.provider_service.get_health_snapshot()
@@ -364,7 +373,7 @@ class KoreShieldProxy:
         if any(p.get("status") != "healthy" for p in providers.values()):
             routing_status = "degraded"
             
-        return JSONResponse(content={
+        snapshot = {
             "status": "healthy",
             "version": "0.1.0",
             "statistics": stats,
@@ -373,7 +382,11 @@ class KoreShieldProxy:
                 "provider_routing": {"status": routing_status}
             },
             "total_providers": len(providers),
-        })
+            "enabled_providers": len([p for p in providers.values() if p.get("enabled")]),
+            "initialized_providers": len([p for p in providers.values() if p.get("initialized")]),
+        }
+        await self.operational_status.record_snapshot(snapshot)
+        return snapshot
 
     async def _handle_metrics(self) -> Response:
         """Prometheus metrics endpoint."""
@@ -411,17 +424,23 @@ class KoreShieldProxy:
         # Health check endpoint
         @self.app.get("/health", tags=["Health"], summary="Health Check")
         async def health():
-            return await self._handle_health()
+            return JSONResponse(content=await self._handle_health())
 
         # Provider health check endpoint
         @self.app.get("/health/providers", tags=["Health"], summary="Provider Health")
         async def provider_health():
-            return await self._handle_health_providers()
+            return JSONResponse(content=await self._handle_health_providers())
 
         # Status/metrics endpoint
         @self.app.get("/status", tags=["Health"], summary="System Status")
         async def status():
-            return await self._handle_status()
+            return JSONResponse(content=await self._handle_status())
+
+        @self.app.get("/health/status", tags=["Health"], summary="Operational Status Report")
+        async def operational_status():
+            snapshot = await self._handle_status()
+            report = await self.operational_status.get_public_status_report(snapshot)
+            return JSONResponse(content=report)
 
         # Prometheus metrics endpoint
         @self.app.get("/metrics", tags=["Health"], summary="Prometheus Metrics")
