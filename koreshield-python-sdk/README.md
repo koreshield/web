@@ -760,4 +760,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - [Documentation](https://docs.koreshield.com)
 - [Issue Tracker](https://github.com/koreshield/python-sdk/issues)
 - [Discussions](https://github.com/koreshield/python-sdk/discussions)
-- [Email Support](mailto:support@koreshield.com)
+- [Email Support](mailto:hello@koreshield.com)
