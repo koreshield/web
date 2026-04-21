@@ -30,7 +30,7 @@ const team = [
 		name: 'Uwagba Obinna',
 		role: 'AI Risk & GRC Lead',
 		bio: 'Leading governance, risk, and compliance workflows across KoreShield.',
-		image: null,
+		image: '/team/obinna.jpeg',
 		linkedin: 'https://www.linkedin.com/in/uwagba-obinna',
 	},
 ];
