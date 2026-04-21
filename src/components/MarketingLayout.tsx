@@ -46,7 +46,8 @@ const companyLinks = [
 	{ label: 'Careers', to: '/careers' },
 ];
 
-const resourceLinks: { label: string; href: string }[] = [
+const resourceLinks: { label: string; href?: string; to?: string }[] = [
+	{ label: 'Research', to: '/research' },
 	{ label: 'Docs', href: 'https://docs.koreshield.com' },
 	{ label: 'Blog', href: 'https://blog.koreshield.com' },
 	{ label: 'GitHub', href: 'https://github.com/koreshield/' },
@@ -339,18 +340,30 @@ export function MarketingLayout() {
 									</MobileNavSection>
 
 									<MobileNavSection title="Resources">
-										{resourceLinks.map((item) => (
-											<a
-												key={item.href}
-												href={item.href}
-												target="_blank"
-												rel="noreferrer noopener"
-												className={mobileNavLinkClass}
-											>
-												<span>{item.label}</span>
-												<span className="text-xs text-muted-foreground">External</span>
-											</a>
-										))}
+										{resourceLinks.map((item) =>
+											item.to ? (
+												<Link
+													key={item.to}
+													to={item.to}
+													onClick={closeMobile}
+													className={mobileNavLinkClass}
+												>
+													<span>{item.label}</span>
+													<span className="text-xs text-muted-foreground">Open</span>
+												</Link>
+											) : (
+												<a
+													key={item.href}
+													href={item.href}
+													target="_blank"
+													rel="noreferrer noopener"
+													className={mobileNavLinkClass}
+												>
+													<span>{item.label}</span>
+													<span className="text-xs text-muted-foreground">External</span>
+												</a>
+											),
+										)}
 									</MobileNavSection>
 								</div>
 							</div>

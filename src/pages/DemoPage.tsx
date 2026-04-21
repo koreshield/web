@@ -120,14 +120,14 @@ export default function DemoPage() {
 			/>
 
 			<div className="mx-auto max-w-7xl px-4 py-20">
-				<div className="grid gap-16 lg:grid-cols-[1fr,1.1fr] lg:items-start">
+				<div className="grid gap-16 lg:grid-cols-[1fr,1.1fr] lg:items-start lg:gap-20">
 
 					{/* ── Left: value props ─────────────────────────────── */}
 					<motion.div
 						initial={{ opacity: 0, x: -20 }}
 						animate={{ opacity: 1, x: 0 }}
 						transition={{ duration: 0.6 }}
-						className="lg:sticky lg:top-24"
+						className="relative z-0 lg:sticky lg:top-24"
 					>
 						<span className="inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-electric-green">
 							<span className="h-1.5 w-1.5 rounded-full bg-electric-green animate-pulse" />
@@ -181,6 +181,7 @@ export default function DemoPage() {
 						initial={{ opacity: 0, x: 20 }}
 						animate={{ opacity: 1, x: 0 }}
 						transition={{ duration: 0.6, delay: 0.1 }}
+						className="relative z-10"
 					>
 						<div className="rounded-3xl border border-border bg-card p-8 shadow-xl">
 							{submitted ? (

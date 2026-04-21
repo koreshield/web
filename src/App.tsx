@@ -56,6 +56,7 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ defaul
 const BillingPage = lazy(() => import('./pages/BillingPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
 const CareersPage = lazy(() => import('./pages/CareersPage'));
+const ResearchPage = lazy(() => import('./pages/ResearchPage'));
 // Solution pages
 const SolutionDetectionResponsePage = lazy(() => import('./pages/SolutionDetectionResponsePage'));
 const SolutionApplicationProtectionPage = lazy(() => import('./pages/SolutionApplicationProtectionPage'));
@@ -363,6 +364,16 @@ function AppContent() {
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<CareersPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/research"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ResearchPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}
