@@ -7,11 +7,19 @@ from urllib.parse import urlencode
 
 import httpx
 import structlog
+from dotenv import load_dotenv
 
 logger = structlog.get_logger(__name__)
 
-RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+load_dotenv(".env.local")
+load_dotenv(".env")
+
 RESEND_API_URL = "https://api.resend.com/emails"
+
+
+def _get_resend_api_key() -> str:
+    """Read the Resend API key lazily so runtime env loading works reliably."""
+    return os.getenv("RESEND_API_KEY", "").strip()
 
 
 def _get_public_app_base_url() -> str:
@@ -50,7 +58,9 @@ async def send_email(
     Returns:
         bool: True if email sent successfully, False otherwise
     """
-    if not RESEND_API_KEY:
+    resend_api_key = _get_resend_api_key()
+
+    if not resend_api_key:
         logger.error("resend_api_key_not_configured")
         return False
 
@@ -59,7 +69,7 @@ async def send_email(
             response = await client.post(
                 RESEND_API_URL,
                 headers={
-                    "Authorization": f"Bearer {RESEND_API_KEY}",
+                    "Authorization": f"Bearer {resend_api_key}",
                     "Content-Type": "application/json",
                 },
                 json={
