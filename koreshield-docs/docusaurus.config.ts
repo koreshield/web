@@ -203,7 +203,7 @@ const config: Config = {
 						},
 						{
 							label: 'Support',
-							href: 'mailto:support@koreshield.com',
+							href: 'mailto:hello@koreshield.com',
 						},
 					],
 				},
