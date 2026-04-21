@@ -21,8 +21,8 @@ export function GoogleCallbackPage() {
             }
 
             try {
-                await authService.handleGoogleCallback(code, state);
-                navigate('/dashboard', { replace: true });
+                const result = await authService.handleGoogleCallback(code, state);
+                navigate(result.status === 'mfa_required' ? '/login' : '/dashboard', { replace: true });
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Authentication failed');
                 setLoading(false);

@@ -72,6 +72,7 @@ const NAV_GROUPS: NavGroup[] = [
 		label: 'Config',
 		items: [
 			{ label: 'API Keys', to: '/api-key-management', icon: Key },
+			{ label: 'Billing', to: '/billing', icon: DollarSign },
 			{ label: 'Rules', to: '/rules', icon: ListFilter },
 			{ label: 'Policies', to: '/policies', icon: Shield, adminOnly: true },
 			{ label: 'Teams', to: '/teams', icon: Users },
