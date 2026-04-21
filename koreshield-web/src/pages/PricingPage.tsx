@@ -252,7 +252,7 @@ export default function PricingPage() {
 							<div className="flex-1">
 								<div className="flex items-center gap-3">
 									<span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-primary">Enterprise</span>
-									<span className="text-xs text-muted-foreground">Special case — scoped to your requirements</span>
+									<span className="text-xs text-muted-foreground">Special case, scoped to your requirements</span>
 								</div>
 								<h2 className="mt-4 text-2xl font-bold tracking-tight">{enterprisePlan?.description}</h2>
 								<p className="mt-2 text-sm text-muted-foreground leading-relaxed">

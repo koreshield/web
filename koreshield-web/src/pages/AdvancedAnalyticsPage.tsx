@@ -311,7 +311,7 @@ export function AdvancedAnalyticsPage() {
 						) : (
 							<>
 								<div className="text-3xl font-bold">
-									${costSummary?.projected_monthly_cost?.toFixed(2) ?? '—'}
+									${costSummary?.projected_monthly_cost?.toFixed(2) ?? 'N/A'}
 								</div>
 								<p className="text-xs text-muted-foreground mt-1">Based on recent trend</p>
 							</>
@@ -328,7 +328,7 @@ export function AdvancedAnalyticsPage() {
 						) : (
 							<>
 								<div className="text-3xl font-bold">
-									{providers.length ? `${avgSuccessRate.toFixed(1)}%` : '—'}
+									{providers.length ? `${avgSuccessRate.toFixed(1)}%` : 'N/A'}
 								</div>
 								<p className="text-xs text-muted-foreground mt-1">Across all providers</p>
 							</>
@@ -346,7 +346,7 @@ export function AdvancedAnalyticsPage() {
 							</div>
 						) : optimizations.length === 0 ? (
 							<div className="text-center py-10 text-muted-foreground text-sm">
-								<p>No recommendations yet — recommendations are generated automatically as your request volume grows.</p>
+								<p>No recommendations yet. Recommendations are generated automatically as your request volume grows.</p>
 							</div>
 						) : (
 							<div className="space-y-3">
@@ -485,7 +485,7 @@ export function AdvancedAnalyticsPage() {
 												border: '1px solid hsl(var(--border))',
 												borderRadius: '8px',
 											}}
-											formatter={(v: number | undefined) => [v != null ? `$${v.toFixed(6)}` : '—', 'Cost']}
+											formatter={(v: number | undefined) => [v != null ? `$${v.toFixed(6)}` : 'N/A', 'Cost']}
 										/>
 									</PieChart>
 								</ResponsiveContainer>

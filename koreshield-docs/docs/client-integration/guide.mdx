@@ -8,7 +8,7 @@ last_update:
 
 # Client Integration Guide
 
-This guide covers **client‑side integration** with KoreShield's API and SDKs. It does not require access to the private KoreShield core repository.
+This guide covers **client-side integration** with KoreShield's API and SDKs. It does not require access to the private KoreShield core repository.
 
 ## Choose Your Integration
 
@@ -28,14 +28,14 @@ This guide covers **client‑side integration** with KoreShield's API and SDKs. 
 
 All API calls require one of:
 
-- `Authorization: Bearer <JWT>` — token obtained from `/v1/management/login`
-- `Authorization: Bearer ks_...` — API key from the dashboard or `/v1/management/api-keys`
+- `Authorization: Bearer <JWT>`: token obtained from `/v1/management/login`
+- `Authorization: Bearer ks_...`: API key from the dashboard or `/v1/management/api-keys`
 
 Your account team will provide credentials and issuer/audience details if you're using JWT.
 
 ---
 
-## Proxy Mode — `/v1/chat/completions`
+## Proxy Mode: `/v1/chat/completions`
 
 KoreShield scans the prompt, then forwards the request to the appropriate LLM provider and returns the response. This is a **drop-in replacement** for the OpenAI API.
 
@@ -106,7 +106,7 @@ data: {"id":"chatcmpl-...","object":"chat.completion.chunk","choices":[{"delta":
 data: [DONE]
 ```
 
-### SDK — Python
+### SDK: Python
 
 ```python
 from koreshield_sdk import KoreShieldClient
@@ -131,7 +131,7 @@ for token in client.chat_completion_stream(
     print(token, end="", flush=True)
 ```
 
-### SDK — JavaScript / TypeScript
+### SDK: JavaScript / TypeScript
 
 ```ts
 import { KoreShieldClient } from 'koreshield';
@@ -159,7 +159,7 @@ for await (const token of client.chatCompletionStream({
 
 ---
 
-## Prompt Scan — `/v1/scan`
+## Prompt Scan: `/v1/scan`
 
 Scan a single prompt without forwarding it to any LLM. Use this when you want to check a prompt before deciding whether to proceed.
 
@@ -175,12 +175,12 @@ curl -s -X POST https://api.koreshield.com/v1/scan \
 | Field | Type | Description |
 |---|---|---|
 | `blocked` | boolean | Whether KoreShield blocked this prompt |
-| `confidence` | float | Detection confidence 0–1 |
+| `confidence` | float | Detection confidence from 0 to 1 |
 | `attack_type` | string \| null | Primary detected attack category |
 | `attack_categories` | string[] | All detected attack categories |
 | `indicators` | string[] | Patterns that triggered detection |
 | `message` | string | Human-readable scan summary |
-| `request_id` | string | Unique ID — include in bug reports and audit logs |
+| `request_id` | string | Unique ID. Include this in bug reports and audit logs |
 | `severity` | string | `none` \| `low` \| `medium` \| `high` \| `critical` |
 | `reason` | string \| null | Detailed block reason (when `blocked: true`) |
 | `processing_time_ms` | float | Server-side processing time |
@@ -203,7 +203,7 @@ Returns **HTTP 403** when `blocked: true`, **HTTP 200** otherwise.
 }
 ```
 
-### SDK — Python
+### SDK: Python
 
 ```python
 from koreshield_sdk import KoreShieldClient
@@ -219,7 +219,7 @@ else:
 
 ---
 
-## RAG Pre-scan — `/v1/rag/scan`
+## RAG Pre-scan: `/v1/rag/scan`
 
 Scan retrieved documents for indirect prompt injection **before** passing them to the LLM.
 
@@ -250,7 +250,7 @@ curl -L -H "Authorization: Bearer <TOKEN>" \
 
 ---
 
-## Tool Scan — `/v1/tools/scan`
+## Tool Scan: `/v1/tools/scan`
 
 Evaluate a tool/function call for security risks (confused-deputy attacks, excessive permissions, unsafe argument patterns).
 
@@ -283,7 +283,7 @@ try:
     )
 except ServerError as e:
     if e.status_code == 403:
-        # Prompt was blocked — inform the user without exposing internals
+        # Prompt was blocked. Inform the user without exposing internals.
         return {"error": "Your message was flagged. Please rephrase and try again."}
     raise
 ```
