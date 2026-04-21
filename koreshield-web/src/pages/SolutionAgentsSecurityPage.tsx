@@ -7,7 +7,7 @@ const challenges = [
 	{
 		icon: <Network className="h-6 w-6 text-electric-green" />,
 		title: 'Tool call policy enforcement',
-		body: 'Koreshield inspects every tool call an agent attempts before execution. If an agent tries to invoke a tool outside its permitted scope, the call is blocked — before it runs.',
+		body: 'Koreshield inspects every tool call an agent attempts before execution. If an agent tries to invoke a tool outside its permitted scope, the call is blocked before it runs.',
 	},
 	{
 		icon: <GitBranch className="h-6 w-6 text-electric-green" />,
@@ -55,7 +55,7 @@ export default function SolutionAgentsSecurityPage() {
 							Agentic AI expands the attack surface. We close it.
 						</h1>
 						<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-							Agents that browse, execute, and retrieve are exposed to every piece of content they touch. Koreshield enforces policy at the proxy level — tool calls, retrieved content, and outputs — before the agent acts.
+							Agents that browse, execute, and retrieve are exposed to every piece of content they touch. Koreshield enforces policy at the proxy level (tool calls, retrieved content, and outputs) before the agent acts.
 						</p>
 						<div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
 							<Link to="/signup?plan=free" className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500">
@@ -75,7 +75,7 @@ export default function SolutionAgentsSecurityPage() {
 					<div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-8 mb-12">
 						<h2 className="text-xl font-bold text-foreground">Why agentic AI is a different threat model</h2>
 						<p className="mt-3 text-muted-foreground leading-relaxed">
-							Traditional LLM security focuses on what users send to the model. Agents also consume outputs from external systems — retrieved documents, API responses, web pages — and act on them autonomously. An attacker who plants a malicious instruction in a document your agent retrieves can hijack the entire chain without ever interacting with your application directly.
+							Traditional LLM security focuses on what users send to the model. Agents also consume outputs from external systems (retrieved documents, API responses, web pages) and act on them autonomously. An attacker who plants a malicious instruction in a document your agent retrieves can hijack the entire chain without ever interacting with your application directly.
 						</p>
 					</div>
 					<div className="grid gap-8 md:grid-cols-2">
