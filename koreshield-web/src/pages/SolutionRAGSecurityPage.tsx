@@ -7,7 +7,7 @@ const howItWorks = [
 	{
 		icon: <FileSearch className="h-6 w-6 text-electric-green" />,
 		title: 'Retrieved content is scanned before the model sees it',
-		body: 'In a RAG pipeline, documents retrieved from your index are passed to the model as context. Koreshield scans that content for injected instructions before it reaches the LLM — not after.',
+		body: 'In a RAG pipeline, documents retrieved from your index are passed to the model as context. Koreshield scans that content for injected instructions before it reaches the LLM, not after.',
 	},
 	{
 		icon: <TriangleAlert className="h-6 w-6 text-electric-green" />,
@@ -16,7 +16,7 @@ const howItWorks = [
 	},
 	{
 		icon: <Database className="h-6 w-6 text-electric-green" />,
-		title: 'Included in all plans — not an add-on',
+		title: 'Included in all plans, not an add-on',
 		body: 'RAG scanning is a core capability, not a premium feature. Indirect prompt injection via retrieved documents is one of the most commonly exploited vectors in production LLM systems. It belongs in the default stack.',
 	},
 	{
@@ -39,7 +39,7 @@ export default function SolutionRAGSecurityPage() {
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="RAG Security | Koreshield"
-				description="Protect your RAG pipelines against indirect prompt injection. Koreshield scans retrieved content before it reaches the model — included in all plans."
+				description="Protect your RAG pipelines against indirect prompt injection. Koreshield scans retrieved content before it reaches the model. Included in all plans."
 			/>
 
 			{/* Hero */}
@@ -55,7 +55,7 @@ export default function SolutionRAGSecurityPage() {
 							The attack is in your documents. Not your prompts.
 						</h1>
 						<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-							Indirect prompt injection — malicious instructions hidden inside content your RAG pipeline retrieves — is one of the most exploited vulnerabilities in production LLM systems. Koreshield catches it before the model acts on it.
+							Indirect prompt injection, malicious instructions hidden inside content your RAG pipeline retrieves, is one of the most exploited vulnerabilities in production LLM systems. Koreshield catches it before the model acts on it.
 						</p>
 						<div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
 							<Link to="/signup?plan=free" className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500">
