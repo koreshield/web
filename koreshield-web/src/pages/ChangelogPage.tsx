@@ -180,13 +180,13 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		entries: [
 			{
 				date: '2026-02-10',
-				title: 'v0.3.0 — Web Platform & Dashboard Launch',
+				title: 'v0.3.0: Web Platform & Dashboard Launch',
 				isMajor: true,
 				category: 'Added',
 				summary:
 					'The KoreShield hosted web platform launched with a comprehensive monitoring and management dashboard, marking the transition from API-only to a fully integrated product.',
 				customerImpact:
-					'Customers can now monitor threats, manage API keys, audit activity, and test policies through a dedicated dashboard — no custom tooling required.',
+					'Customers can now monitor threats, manage API keys, audit activity, and test policies through a dedicated dashboard, with no custom tooling required.',
 				items: [
 					'Live Threat Monitoring: real-time threat detection and visualization across all protected endpoints.',
 					'Provider Health Dashboard: monitor LLM provider status and performance.',
@@ -325,7 +325,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				title: 'Prompt scan pipeline wired end-to-end',
 				category: 'Security',
 				summary:
-					'The core prompt screening pipeline — from request receipt through detector evaluation to audit log write and policy decision — was completed and validated in a staging environment.',
+					'The core prompt screening pipeline, from request receipt through detector evaluation to audit log write and policy decision, was completed and validated in a staging environment.',
 				customerImpact:
 					'KoreShield can now intercept, evaluate, and enforce policy on real AI requests rather than running synthetic simulations.',
 				items: [
@@ -377,7 +377,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		entries: [
 			{
 				date: '2025-12-31',
-				title: 'v0.2.0 — Research Paper Preprint Release',
+				title: 'v0.2.0: Research Paper Preprint Release',
 				isMajor: true,
 				category: 'Added',
 				summary:
@@ -396,7 +396,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				title: 'Production infrastructure provisioned on VPS with Caddy and Docker',
 				category: 'Infra',
 				summary:
-					'The production environment was provisioned with a Docker Compose stack, Caddy reverse proxy with automatic TLS, PostgreSQL, and Redis — ready for the first real deployment.',
+					'The production environment was provisioned with a Docker Compose stack, Caddy reverse proxy with automatic TLS, PostgreSQL, and Redis, ready for the first real deployment.',
 				customerImpact:
 					'KoreShield has a stable, self-hosted production foundation with HTTPS and proper service isolation from day one.',
 				items: [
@@ -462,13 +462,13 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		entries: [
 			{
 				date: '2025-11-15',
-				title: 'v0.1.0 — Initial Release',
+				title: 'v0.1.0: Initial Release',
 				isMajor: true,
 				category: 'Added',
 				summary:
 					'KoreShield\'s first public release shipped with core LLM security features: multi-provider support, real-time prompt injection detection, Python and JavaScript SDKs, basic RAG context scanning, and Docker-based deployment.',
 				customerImpact:
-					'Developers can immediately protect LLM applications across OpenAI, Anthropic, and DeepSeek with a drop-in SDK — no infrastructure changes required.',
+					'Developers can immediately protect LLM applications across OpenAI, Anthropic, and DeepSeek with a drop-in SDK, with no infrastructure changes required.',
 				items: [
 					'Multi-provider LLM support: OpenAI, Anthropic, and DeepSeek out of the box.',
 					'Real-time prompt injection detection on every request.',
