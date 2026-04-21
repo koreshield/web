@@ -6,7 +6,7 @@ const config: Config = {
 	// === SITE METADATA ===
 	title: 'Koreshield',
 	tagline: 'Security platform protecting LLM applications from prompt injection attacks',
-	favicon: 'img/favicon.png',
+	favicon: 'img/favicon.ico',
 
 	future: {
 		v4: true,
