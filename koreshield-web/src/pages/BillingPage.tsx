@@ -267,7 +267,7 @@ export default function BillingPage() {
 					</div>
 				) : null}
 				<div className="rounded-lg border border-border bg-card px-4 py-3 text-xs text-muted-foreground sm:text-sm">
-					KoreShield presents hosted plans publicly as Free, Growth, and Scale. The current checkout mapping still uses your existing Polar product IDs underneath, so public plan names and billing wiring stay aligned without breaking the current integration.
+					KoreShield presents hosted plans publicly as Dev, Growth, and Scale. The current checkout mapping still uses your existing Polar product IDs underneath, so public plan names and billing wiring stay aligned without breaking the current integration.
 				</div>
 
 				<section className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[1.1fr,0.9fr]">
@@ -288,7 +288,7 @@ export default function BillingPage() {
 							<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
 								<div className="rounded-xl bg-muted p-4">
 									<div className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">Plan</div>
-									<div className="text-xl font-semibold">{displayPlan?.name || account?.plan_name || account?.plan_slug || 'Free'}</div>
+									<div className="text-xl font-semibold">{displayPlan?.name || account?.plan_name || account?.plan_slug || 'Dev'}</div>
 								</div>
 								<div className="rounded-xl bg-muted p-4">
 									<div className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">Status</div>
