@@ -7,12 +7,12 @@ const howItWorks = [
 	{
 		icon: <Eye className="h-6 w-6 text-electric-green" />,
 		title: 'Every request inspected in real time',
-		body: 'Koreshield sits between your application and the LLM. Every prompt and every response passes through the detection engine before it completes — under 50ms of overhead.',
+		body: 'Koreshield sits between your application and the LLM. Every prompt and every response passes through the detection engine before it completes, adding under 50ms of overhead.',
 	},
 	{
 		icon: <AlertTriangle className="h-6 w-6 text-electric-green" />,
 		title: 'Threat classification across 50+ patterns',
-		body: 'Prompt injection, jailbreak framing, PII exfiltration, credential leakage, indirect RAG injection, tool abuse — classified by type, severity, and confidence before the model ever sees it.',
+		body: 'Prompt injection, jailbreak framing, PII exfiltration, credential leakage, indirect RAG injection, tool abuse: all classified by type, severity, and confidence before the model ever sees them.',
 	},
 	{
 		icon: <Shield className="h-6 w-6 text-electric-green" />,
@@ -39,7 +39,7 @@ export default function SolutionDetectionResponsePage() {
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="AI Detection & Response | Koreshield"
-				description="Koreshield detects and blocks LLM threats in real time — prompt injection, jailbreaks, PII, and more — before they reach your model. Under 50ms overhead."
+				description="Koreshield detects and blocks LLM threats in real time: prompt injection, jailbreaks, PII, and more, before they reach your model. Under 50ms overhead."
 			/>
 
 			{/* Hero */}
@@ -103,7 +103,7 @@ export default function SolutionDetectionResponsePage() {
 					<div className="grid gap-12 md:grid-cols-2 md:items-center">
 						<div>
 							<h2 className="text-3xl font-bold tracking-tight">What it catches</h2>
-							<p className="mt-4 text-muted-foreground">Detection runs on every request and response — not just on inputs your app explicitly flags.</p>
+							<p className="mt-4 text-muted-foreground">Detection runs on every request and response, not just on inputs your app explicitly flags.</p>
 							<ul className="mt-8 space-y-3">
 								{useCases.map((item) => (
 									<li key={item} className="flex items-start gap-3 text-sm">

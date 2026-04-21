@@ -39,7 +39,7 @@ export default function SolutionApplicationProtectionPage() {
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="AI Application Protection | Koreshield"
-				description="Protect any LLM-powered application with one URL change. Koreshield inspects every request and response — zero-log, zero code rewrite."
+				description="Protect any LLM-powered application with one URL change. Koreshield inspects every request and response: zero-log, zero code rewrite."
 			/>
 
 			{/* Hero */}
@@ -55,7 +55,7 @@ export default function SolutionApplicationProtectionPage() {
 							Protect your AI app. No rewrite required.
 						</h1>
 						<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-							One URL change is all it takes. Koreshield becomes the security layer between your application and any LLM provider — inspecting every interaction before it completes.
+							One URL change is all it takes. Koreshield becomes the security layer between your application and any LLM provider, inspecting every interaction before it completes.
 						</p>
 						<div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
 							<Link to="/signup?plan=free" className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500">

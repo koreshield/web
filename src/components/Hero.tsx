@@ -43,7 +43,7 @@ function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.4 }}
 					>
-						KoreShield intercepts every request between your app and LLM providers  -  blocking prompt injection, jailbreaks, and data exfiltration in{' '}
+						KoreShield intercepts every request between your app and LLM providers, blocking prompt injection, jailbreaks, and data exfiltration in{' '}
 						<span className="text-foreground font-semibold">under 30ms</span>, with{' '}
 						<span className="text-electric-green font-semibold">95% detection accuracy</span>.
 					</motion.p>
