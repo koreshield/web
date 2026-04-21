@@ -5,6 +5,8 @@ on:
     branches: [ main ]
   push:
     branches: [ main ]
+  schedule:
+    - cron: "0 6 1 1,4,7,10 *"
   # Allow manual trigger for ad-hoc regression runs
   workflow_dispatch:
 
