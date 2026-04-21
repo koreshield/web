@@ -207,7 +207,7 @@ def test_scan_endpoint_emits_operational_notification(proxy, auth_headers):
         headers=auth_headers,
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 403
     proxy.monitoring.notify_operational_event.assert_awaited_once()
     kwargs = proxy.monitoring.notify_operational_event.await_args.kwargs
     assert kwargs["event_name"] == "prompt_scan_completed"

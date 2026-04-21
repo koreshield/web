@@ -10,6 +10,7 @@ Provides real-time updates for:
 
 import json
 import asyncio
+import contextlib
 from datetime import datetime, timezone
 from typing import Dict, Any
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
@@ -175,7 +176,7 @@ async def websocket_events(
             await websocket.close(code=WS_AUTH_CLOSE_CODE)
             return
 
-        user_id = user.get("id", "unknown")
+        user_id = str(user.get("id") or user.get("sub") or user.get("user_id") or "unknown")
         client_id = f"{user_id}_{id(websocket)}"
         
         # Accept connection
@@ -218,15 +219,17 @@ async def websocket_events(
             except WebSocketDisconnect:
                 break
             except json.JSONDecodeError:
-                await websocket.send_json({
-                    "type": "error",
-                    "data": {"message": "Invalid JSON format"}
-                })
-    
+                with contextlib.suppress(RuntimeError, WebSocketDisconnect):
+                    await websocket.send_json({
+                        "type": "error",
+                        "data": {"message": "Invalid JSON format"}
+                    })
+
     except Exception as e:
         logger.error("websocket_error", user_id=user_id, error=str(e))
-        if websocket.client_state.value == 1:  # CONNECTED
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        with contextlib.suppress(RuntimeError, WebSocketDisconnect):
+            if websocket.client_state.value == 1:  # CONNECTED
+                await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
     
     finally:
         if client_id and user_id:

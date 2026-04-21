@@ -759,6 +759,24 @@ class KoreShieldProxy:
         self._append_audit_log(self._build_request_audit_entry(log_data))
         asyncio.create_task(self._log_request_async(log_data))
 
+    @staticmethod
+    def _principal_log_fields(principal: dict | None) -> dict:
+        """Extract request-log ownership fields from an authenticated principal."""
+        if not principal:
+            return {}
+        return {
+            "user_id": principal.get("user_id"),
+            "api_key_id": principal.get("api_key_id"),
+        }
+
+    def _record_scan_result(self, payload: dict) -> None:
+        """Store a prompt scan result for the `/v1/scans` history endpoints."""
+        scan_id = payload.get("request_id")
+        if not scan_id:
+            return
+        self.app.state.scan_index[scan_id] = payload
+        self.app.state.scan_store.appendleft(payload)
+
     async def _authenticate_request(self, request: Request) -> dict:
         """Forward to AuthService."""
         return await self.auth.authenticate_request(request)
@@ -851,6 +869,21 @@ class KoreShieldProxy:
             if should_block:
                 self.telemetry.increment_stat("requests_blocked")
                 self.telemetry.increment_stat("attacks_detected")
+                self.telemetry.queue_request_log({
+                    "request_id": request_id,
+                    "timestamp": datetime.now(timezone.utc),
+                    "provider": "koreshield",
+                    "model": model,
+                    "method": request.method,
+                    "path": "/v1/chat/completions",
+                    "status_code": 403,
+                    "latency_ms": (time.time() - start_time) * 1000,
+                    "is_blocked": True,
+                    "attack_detected": True,
+                    "attack_type": scan["detection"].get("attack_type"),
+                    "attack_details": scan["detection"],
+                    **self._principal_log_fields(principal),
+                })
                 return JSONResponse(
                     status_code=403,
                     content={
@@ -901,7 +934,7 @@ class KoreShieldProxy:
                     "status_code": 200,
                     "latency_ms": (time.time() - start_time) * 1000,
                     "is_blocked": False,
-                    "user_id": principal.get("user_id"),
+                    **self._principal_log_fields(principal),
                 })
 
                 return StreamingResponse(
@@ -937,13 +970,27 @@ class KoreShieldProxy:
                     "latency_ms": duration * 1000,
                     "tokens_total": response.get("usage", {}).get("total_tokens", 0),
                     "is_blocked": False,
-                    "user_id": principal.get("user_id"),
+                    **self._principal_log_fields(principal),
                 })
 
                 return JSONResponse(content=response)
 
             except Exception as e:
                 self.telemetry.increment_stat("errors")
+                self.telemetry.queue_request_log({
+                    "request_id": request_id,
+                    "timestamp": datetime.now(timezone.utc),
+                    "provider": self.provider_service.get_last_used_provider() or "koreshield",
+                    "model": model,
+                    "method": request.method,
+                    "path": "/v1/chat/completions",
+                    "status_code": 502,
+                    "latency_ms": (time.time() - start_time) * 1000,
+                    "is_blocked": False,
+                    "attack_detected": False,
+                    "attack_details": {"provider_error": str(e)},
+                    **self._principal_log_fields(principal),
+                })
                 logger.error("Provider error", request_id=request_id, error=str(e))
                 raise HTTPException(status_code=502, detail=f"Provider error: {e}")
 
@@ -1035,7 +1082,7 @@ class KoreShieldProxy:
                 "is_blocked": result["blocked"],
                 "attack_detected": result["blocked"],
                 "attack_details": result["analysis"],
-                "user_id": principal.get("user_id"),
+                **self._principal_log_fields(principal),
             })
 
             # Build a JSON-safe response — strip non-serializable values
@@ -1181,20 +1228,25 @@ class KoreShieldProxy:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-        # Track in memory for dashboard/tests
-        self._append_audit_log(self._build_request_audit_entry({
+        self.telemetry.queue_request_log({
             "request_id": response_data["scan_id"],
             "timestamp": datetime.now(timezone.utc),
+            "provider": "koreshield",
+            "model": "rag_scan",
+            "method": request.method,
             "path": "/v1/rag/scan",
-            "method": "POST",
             "status_code": 200,
             "latency_ms": processing_time_ms,
             "is_blocked": not is_safe,
             "attack_detected": not is_safe,
             "attack_type": "indirect_injection" if not is_safe else None,
-            "attack_details": {"threat_references": response_data["context_analysis"].get("document_threats", [])},
-            "user_id": principal.get("user_id"),
-        }))
+            "attack_details": {
+                "threat_references": response_data["context_analysis"].get("document_threats", []),
+                "total_threats_found": response_data["context_analysis"].get("statistics", {}).get("total_threats_found", 0),
+                "severity": response_data["overall_severity"],
+            },
+            **self._principal_log_fields(principal),
+        })
 
         self.telemetry.queue_rag_scan(
             principal=principal,
@@ -1217,7 +1269,7 @@ class KoreShieldProxy:
         request_id = str(uuid.uuid4())
         start_time = time.time()
         try:
-            await self._authenticate_request(request)
+            principal = await self._authenticate_request(request)
 
             try:
                 body = await request.json()
@@ -1266,34 +1318,58 @@ class KoreShieldProxy:
             else:
                 human_message = "Prompt is safe."
 
-            return JSONResponse(
-                status_code=200,
-                content={
-                    # Primary guide-contract fields
-                    "blocked": scan["blocked"],
-                    "confidence": detection.get("confidence", scan.get("confidence", 0.0)),
-                    "attack_type": attack_type,
-                    "attack_categories": list({
-                        i.get("category") or i.get("type") or "unknown"
-                        for i in indicators
-                        if isinstance(i, dict)
-                    } | ({attack_type} if attack_type else set())),
-                    "indicators": [
-                        i.get("pattern") or i.get("name") or str(i)
-                        for i in indicators
-                        if i
-                    ],
-                    "message": human_message,
-                    "request_id": request_id,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    # Extended fields — useful for dashboards and SOC workflows
-                    "is_safe": scan.get("is_safe", not scan["blocked"]),
-                    "severity": scan.get("severity", "none"),
-                    "threat_level": scan.get("threat_level", "none"),
-                    "reason": scan.get("reason"),
-                    "processing_time_ms": (time.time() - start_time) * 1000,
-                    "policy": scan.get("policy", {}),
+            response_payload = {
+                # Primary guide-contract fields
+                "blocked": scan["blocked"],
+                "confidence": detection.get("confidence", scan.get("confidence", 0.0)),
+                "attack_type": attack_type,
+                "attack_categories": list({
+                    i.get("category") or i.get("type") or "unknown"
+                    for i in indicators
+                    if isinstance(i, dict)
+                } | ({attack_type} if attack_type else set())),
+                "indicators": [
+                    i.get("pattern") or i.get("name") or str(i)
+                    for i in indicators
+                    if i
+                ],
+                "message": human_message,
+                "request_id": request_id,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                # Extended fields — useful for dashboards and SOC workflows
+                "is_safe": scan.get("is_safe", not scan["blocked"]),
+                "severity": scan.get("severity", "none"),
+                "threat_level": scan.get("threat_level", "none"),
+                "reason": scan.get("reason"),
+                "processing_time_ms": (time.time() - start_time) * 1000,
+                "policy": scan.get("policy", {}),
+            }
+
+            self._record_scan_result(response_payload)
+            self.telemetry.queue_request_log({
+                "request_id": request_id,
+                "timestamp": datetime.now(timezone.utc),
+                "provider": "koreshield",
+                "model": "prompt_scan",
+                "method": request.method,
+                "path": "/v1/scan",
+                "status_code": 403 if scan["blocked"] else 200,
+                "latency_ms": response_payload["processing_time_ms"],
+                "is_blocked": scan["blocked"],
+                "attack_detected": bool(detection.get("is_attack") or scan["blocked"]),
+                "attack_type": attack_type,
+                "attack_details": {
+                    "confidence": response_payload["confidence"],
+                    "indicators": indicators,
+                    "policy": response_payload["policy"],
+                    "reason": response_payload["reason"],
                 },
+                **self._principal_log_fields(principal),
+            })
+
+            return JSONResponse(
+                status_code=403 if scan["blocked"] else 200,
+                content=response_payload,
             )
 
         except HTTPException:
@@ -1345,7 +1421,7 @@ class KoreShieldProxy:
             "status_code": 200,
             "latency_ms": (time.time() - start_time) * 1000,
             "is_blocked": any(r["result"]["blocked"] for r in results),
-            "user_id": principal.get("user_id"),
+            **self._principal_log_fields(principal),
         })
 
         return JSONResponse(content={
