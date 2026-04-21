@@ -363,3 +363,8 @@ KoreShield_GRC_Control_Framework.docx
 nsisong-blog.docx
 koreshield-blog.docx
 scripts/submit_sitemaps_gsc.py
+.claude/*.json
+.claude/*.log
+.claude/*.txt
+.claude/*.csv
+.claude/*.md
