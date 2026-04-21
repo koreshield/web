@@ -24,54 +24,63 @@ export type PricingPlan = {
 
 export const PRICING_FAQS = [
 	{
+		question: 'Does Koreshield store my prompts or responses?',
+		answer:
+			'No. Koreshield is zero-log by default. Requests and responses are inspected in memory and discarded immediately. Nothing is retained unless you explicitly configure a retention policy on Scale or Enterprise.',
+	},
+	{
+		question: 'How long does integration actually take?',
+		answer:
+			'Under 30 minutes for most teams. You change one URL in your LLM client configuration. No code rewrite, no SDK migration, no architectural changes required.',
+	},
+	{
 		question: 'How do you bill?',
 		answer:
-			'KoreShield uses a platform-fee-plus-usage model. Paid hosted plans include a block of protected requests each month, and overages are billed on top of that included usage. Enterprise plans are sold through annual contracts.',
+			'You pay a fixed monthly platform fee that includes a block of protected requests. If you exceed that block, overages are billed at £12 per 100,000 requests. Annual plans apply a flat 20% discount.',
 	},
 	{
 		question: 'What is a protected request?',
 		answer:
-			'One protected request is one screened AI interaction routed through KoreShield. A proxied chat completion counts as one protected request. Standard RAG scans are bundled fairly per request, with larger scans consuming additional request units once they exceed plan thresholds.',
+			'One protected request equals one screened AI interaction routed through Koreshield. Standard RAG scans are bundled at the per-request rate.',
 	},
 	{
 		question: 'Do you charge per seat?',
 		answer:
-			'No. KoreShield is priced around protected usage, not seat counts. Paid hosted plans include collaborative access for engineering, product, and security teams without making seats the primary billing meter.',
+			'No. Koreshield pricing is built around AI traffic, not headcount. Your entire product, security, and engineering team can access the platform on paid plans.',
 	},
 	{
 		question: 'How do overages work?',
 		answer:
-			'Growth includes 100,000 protected requests and charges £12 per additional 100,000. Scale includes 1,000,000 protected requests and also charges £12 per additional 100,000. Enterprise volume is handled contractually.',
+			'Overages are billed at £12 per 100,000 protected requests beyond your monthly plan limit. You can monitor usage in real time from the dashboard.',
 	},
 	{
 		question: 'What about RAG scanning?',
 		answer:
-			'RAG scanning is included within the protected-request model up to a fair bundled threshold per request, such as up to 20 documents or a capped total context size. Bulk or unusually large scans can consume additional request units.',
+			'RAG scanning is included in all plans. Indirect prompt injection via retrieved documents is one of the most common attack vectors in production LLM systems, so we treat it as a core capability, not an add-on.',
 	},
 	{
 		question: 'What is included on Enterprise?',
 		answer:
-			'Enterprise is where we reserve advanced identity, deployment, and governance controls such as SSO/SAML, SIEM export, private or self-hosted deployment, custom retention, SLA commitments, dedicated onboarding, and security review support.',
+			'VPC, private, or self-hosted deployment, SSO and SAML, SIEM export, custom retention and SLA, and dedicated onboarding and security review support. Pricing is scoped to your protected-request volume and deployment requirements.',
 	},
 	{
 		question: 'Is annual pricing available?',
 		answer:
-			'Yes. Growth and Scale use a flat 20% annual discount compared with their monthly equivalent. Enterprise contracts are typically annual by default.',
+			'Yes. Annual plans apply a flat 20% discount across Dev, Growth, and Scale tiers. Enterprise contracts are scoped individually.',
 	},
 ];
 
 export const PRICING_PLANS: PricingPlan[] = [
 	{
 		id: 'free',
-		name: 'Free',
-		description: 'For evaluation, internal prototypes, and the first protected AI workflows.',
+		name: 'Dev',
+		description: 'For internal evaluation and prototyping.',
 		monthlyPriceLabel: '£0',
 		monthlyPriceValue: 0,
 		annualPriceValue: 0,
 		includedRequests: '10,000 protected requests/month',
-		overage: '£12 per extra 100,000 protected requests',
 		retention: '7-day retention',
-		cta: 'Start Free',
+		cta: 'Start building',
 		features: [
 			'Baseline prompt and RAG screening',
 			'Basic dashboard visibility',
@@ -87,7 +96,7 @@ export const PRICING_PLANS: PricingPlan[] = [
 		id: 'growth',
 		name: 'Growth',
 		badge: 'Most Popular',
-		description: 'For startups and small teams shipping AI features into real production traffic.',
+		description: "For teams shipping LLMs in production who can't afford a breach.",
 		monthlyPriceLabel: '£99',
 		annualPriceLabel: '£950',
 		monthlyPriceValue: 99,
@@ -96,10 +105,11 @@ export const PRICING_PLANS: PricingPlan[] = [
 		includedRequests: '100,000 protected requests/month',
 		overage: '£12 per extra 100,000 protected requests',
 		retention: '30-day retention',
-		cta: 'Choose Growth',
+		cta: 'Start for £99',
 		checkoutSlug: 'growth',
 		popular: true,
 		features: [
+			'Advanced prompt and RAG screening',
 			'Policies and alerts',
 			'API key management',
 			'Teams and collaboration',
@@ -110,7 +120,7 @@ export const PRICING_PLANS: PricingPlan[] = [
 	{
 		id: 'scale',
 		name: 'Scale',
-		description: 'For serious production usage, governance, and higher-volume protected AI traffic.',
+		description: 'For serious production usage, governance, and higher-volume protected traffic.',
 		monthlyPriceLabel: '£399',
 		annualPriceLabel: '£3,830',
 		monthlyPriceValue: 399,
@@ -119,9 +129,10 @@ export const PRICING_PLANS: PricingPlan[] = [
 		includedRequests: '1,000,000 protected requests/month',
 		overage: '£12 per extra 100,000 protected requests',
 		retention: '90-day retention',
-		cta: 'Choose Scale',
+		cta: 'Start for £399',
 		checkoutSlug: 'scale',
 		features: [
+			'Everything in Growth',
 			'RBAC and audit logs',
 			'Advanced analytics and reporting',
 			'Provider health visibility',
@@ -132,15 +143,16 @@ export const PRICING_PLANS: PricingPlan[] = [
 	{
 		id: 'enterprise',
 		name: 'Enterprise',
-		description: 'For regulated, high-volume, or security-sensitive deployments that need contract-backed controls.',
+		description: 'Contract-backed protection for regulated and high-volume AI deployments.',
 		monthlyPriceLabel: 'From £1,500',
 		annualPriceLabel: 'From £18,000',
 		monthlyPriceValue: 1500,
 		annualPriceValue: 18000,
 		includedRequests: 'Custom protected-request volume',
 		retention: 'Custom retention',
-		cta: 'Talk to Sales',
+		cta: 'Get a scoped quote',
 		features: [
+			'Everything in Scale',
 			'SSO and SAML',
 			'SIEM export',
 			'VPC, private, or self-hosted deployment',
