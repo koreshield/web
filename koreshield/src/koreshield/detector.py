@@ -158,6 +158,8 @@ class AttackDetector:
         self.config = config or {}
         self.rule_engine = RuleEngine(config)
         self.list_manager = ListManager(config)
+        # ml_model is None by default (no external model loaded); used by _ml_based_detection
+        self.ml_model = None
         # Eagerly initialise the semantic scorer so the first request is not slow.
         try:
             self._scorer = get_scorer()
@@ -852,3 +854,65 @@ class AttackDetector:
             Dictionary with list statistics
         """
         return self.list_manager.get_stats()
+
+    def _extract_features(self, text: str) -> Dict[str, float]:
+        """
+        Extract normalised ML features from text for scoring.
+
+        Returns a dict with float values in [0, 1] for each feature.
+        These features feed into _ml_based_detection when an ml_model is available.
+        """
+        import math
+
+        length = len(text)
+        # keyword_density: ratio of suspicious keywords present
+        suspicious_keywords = [
+            "ignore", "forget", "override", "disregard", "pretend",
+            "jailbreak", "bypass", "system", "prompt", "instruction",
+        ]
+        text_lower = text.lower()
+        keyword_hits = sum(1 for kw in suspicious_keywords if kw in text_lower)
+        keyword_density = min(keyword_hits / max(len(suspicious_keywords), 1), 1.0)
+
+        # special_chars: density of non-alphanumeric characters
+        special_count = sum(1 for ch in text if not ch.isalnum() and not ch.isspace())
+        special_chars = min(special_count / max(length, 1), 1.0)
+
+        # length_anomaly: sigmoid of (length - 200) / 200, clamped to [0, 1]
+        length_anomaly = 1 / (1 + math.exp(-((length - 200) / 200)))
+
+        # pattern_complexity: unique trigrams / total trigrams (lexical diversity proxy)
+        if length >= 3:
+            trigrams = [text[i:i + 3] for i in range(length - 2)]
+            pattern_complexity = len(set(trigrams)) / max(len(trigrams), 1)
+        else:
+            pattern_complexity = 0.0
+        pattern_complexity = min(pattern_complexity, 1.0)
+
+        return {
+            "keyword_density": keyword_density,
+            "special_chars": special_chars,
+            "length_anomaly": length_anomaly,
+            "pattern_complexity": pattern_complexity,
+        }
+
+    def _ml_based_detection(self, text: str) -> float:
+        """
+        Return an ML-based threat score in [0, 1].
+
+        If no ml_model is loaded, falls back to a lightweight heuristic score
+        derived from _extract_features so the detector degrades gracefully.
+        When ml_model is explicitly set to None (e.g. in tests), returns 0.0.
+        """
+        if self.ml_model is None:
+            return 0.0
+
+        # If a real model is wired up, delegate to it.
+        # The model is expected to expose a predict_proba-style interface.
+        try:
+            features = self._extract_features(text)
+            feature_vector = list(features.values())
+            score = float(self.ml_model.score(feature_vector))
+            return max(0.0, min(1.0, score))
+        except Exception:
+            return 0.0

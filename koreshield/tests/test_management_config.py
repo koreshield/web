@@ -27,6 +27,7 @@ def _build_admin_headers(secret: str) -> dict:
             "sub": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
             "email": "admin@example.com",
             "role": "admin",
+            "mfa_verified": True,
             "iss": "koreshield-auth",
             "aud": "koreshield-api",
             "iat": now,
