@@ -24,251 +24,348 @@ function GoogleIcon() {
 }
 
 export function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [oauthLoading, setOauthLoading] = useState<'github' | 'google' | null>(null);
-    const navigate = useNavigate();
-    const location = useLocation();
-    const locationState = location.state as LocationState | null;
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [mfaCode, setMfaCode] = useState('');
+	const [error, setError] = useState('');
+	const [loading, setLoading] = useState(false);
+	const [oauthLoading, setOauthLoading] = useState<'github' | 'google' | null>(null);
+	const [resendingCode, setResendingCode] = useState(false);
+	const [pendingMfa, setPendingMfa] = useState(() => authService.getPendingMfaChallenge());
+	const navigate = useNavigate();
+	const location = useLocation();
+	const locationState = location.state as LocationState | null;
 
-    useEffect(() => {
-        if (authService.isAuthenticated()) {
-            const fromLocation = locationState?.from;
-            const from = fromLocation ? `${fromLocation.pathname}${fromLocation.search || ''}` : '/dashboard';
-            navigate(from, { replace: true });
-        }
-    }, [locationState, navigate]);
+	useEffect(() => {
+		if (authService.isAuthenticated()) {
+			const fromLocation = locationState?.from;
+			const from = fromLocation ? `${fromLocation.pathname}${fromLocation.search || ''}` : '/dashboard';
+			navigate(from, { replace: true });
+		}
+	}, [locationState, navigate]);
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
+	const handleLogin = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setError('');
+		setLoading(true);
 
-        try {
-            await authService.login(email, password);
-            const fromLocation = locationState?.from;
-            const from = fromLocation ? `${fromLocation.pathname}${fromLocation.search || ''}` : '/dashboard';
-            navigate(from, { replace: true });
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Invalid email or password');
-        } finally {
-            setLoading(false);
-        }
-    };
+		try {
+			const result = await authService.login(email, password);
+			if (result.status === 'mfa_required') {
+				setPendingMfa(result.challenge);
+				setMfaCode('');
+				return;
+			}
+			const fromLocation = locationState?.from;
+			const from = fromLocation ? `${fromLocation.pathname}${fromLocation.search || ''}` : '/dashboard';
+			navigate(from, { replace: true });
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Invalid email or password');
+		} finally {
+			setLoading(false);
+		}
+	};
 
-    const handleGitHubLogin = async () => {
-        if (oauthLoading) return;
-        setError('');
-        setOauthLoading('github');
-        try {
-            const { auth_url } = await authService.initializeGitHubOAuth();
-            window.location.href = auth_url;
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to initialize GitHub login');
-            setOauthLoading(null);
-        }
-    };
+	const handleVerifyMfa = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setError('');
+		setLoading(true);
 
-    const handleGoogleLogin = async () => {
-        if (oauthLoading) return;
-        setError('');
-        setOauthLoading('google');
-        try {
-            const { auth_url } = await authService.initializeGoogleOAuth();
-            window.location.href = auth_url;
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to initialize Google login');
-            setOauthLoading(null);
-        }
-    };
+		try {
+			await authService.verifyMfaCode(mfaCode);
+			setPendingMfa(null);
+			const fromLocation = locationState?.from;
+			const from = fromLocation ? `${fromLocation.pathname}${fromLocation.search || ''}` : '/dashboard';
+			navigate(from, { replace: true });
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Verification failed');
+		} finally {
+			setLoading(false);
+		}
+	};
 
-    const anyLoading = loading || oauthLoading !== null;
+	const handleGitHubLogin = async () => {
+		if (oauthLoading) return;
+		setError('');
+		setOauthLoading('github');
+		try {
+			const { auth_url } = await authService.initializeGitHubOAuth();
+			window.location.href = auth_url;
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Failed to initialize GitHub login');
+			setOauthLoading(null);
+		}
+	};
 
-    return (
-        <div className="min-h-screen bg-background flex">
-            {/* Left brand panel — hidden on mobile */}
-            <div className="hidden lg:flex lg:w-[45%] bg-card border-r border-white/[0.06] flex-col justify-between p-12 relative overflow-hidden">
-                {/* Subtle ambient gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-electric-green/[0.04] via-transparent to-transparent pointer-events-none" />
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-electric-green/[0.03] rounded-full translate-x-1/2 translate-y-1/2 blur-3xl pointer-events-none" />
+	const handleGoogleLogin = async () => {
+		if (oauthLoading) return;
+		setError('');
+		setOauthLoading('google');
+		try {
+			const { auth_url } = await authService.initializeGoogleOAuth();
+			window.location.href = auth_url;
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Failed to initialize Google login');
+			setOauthLoading(null);
+		}
+	};
 
-                {/* Logo */}
-                <div className="relative z-10 flex items-center gap-3">
-                    <img src="/logo/SVG/Black.svg" alt="KoreShield" className="w-8 h-8 dark:hidden" />
-                    <img src="/logo/SVG/White.svg" alt="KoreShield" className="w-8 h-8 hidden dark:block" />
-                    <span className="text-xl font-bold text-foreground tracking-tight">KoreShield</span>
-                </div>
+	const handleResendMfa = async () => {
+		setError('');
+		setResendingCode(true);
+		try {
+			await authService.resendMfaCode();
+			setPendingMfa(authService.getPendingMfaChallenge());
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Unable to resend verification code');
+		} finally {
+			setResendingCode(false);
+		}
+	};
 
-                {/* Testimonial / value prop */}
-                <div className="relative z-10 space-y-8">
-                    <blockquote className="text-2xl font-semibold text-foreground leading-snug tracking-tight">
-                        "The security layer your LLM provider doesn't include."
-                    </blockquote>
+	const clearPendingMfa = () => {
+		authService.clearPendingMfaChallenge();
+		setPendingMfa(null);
+		setMfaCode('');
+		setError('');
+	};
 
-                    <div className="space-y-4">
-                        {[
-                            '95% detection accuracy across 50+ attack patterns',
-                            'Sub-30ms interception  -  zero perceptible latency',
-                            'Zero prompt data stored or retained',
-                        ].map((item) => (
-                            <div key={item} className="flex items-start gap-3">
-                                <ShieldCheck className="w-5 h-5 text-electric-green mt-0.5 shrink-0" />
-                                <span className="text-sm text-muted-foreground">{item}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+	const anyLoading = loading || oauthLoading !== null;
 
-                <p className="relative z-10 text-xs text-muted-foreground/60">
-                    © {new Date().getFullYear()} KoreShield. All rights reserved.
-                </p>
-            </div>
+	return (
+		<div className="min-h-screen bg-background flex">
+			<div className="hidden lg:flex lg:w-[45%] bg-card border-r border-white/[0.06] flex-col justify-between p-12 relative overflow-hidden">
+				<div className="absolute inset-0 bg-gradient-to-br from-electric-green/[0.04] via-transparent to-transparent pointer-events-none" />
+				<div className="absolute bottom-0 right-0 w-96 h-96 bg-electric-green/[0.03] rounded-full translate-x-1/2 translate-y-1/2 blur-3xl pointer-events-none" />
 
-            {/* Right form panel */}
-            <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
-                <div className="w-full max-w-md">
-                    {/* Mobile logo */}
-                    <div className="flex items-center gap-2 mb-8 lg:hidden">
-                        <img src="/logo/SVG/Black.svg" alt="KoreShield" className="w-7 h-7 dark:hidden" />
-                        <img src="/logo/SVG/White.svg" alt="KoreShield" className="w-7 h-7 hidden dark:block" />
-                        <span className="font-bold text-foreground">KoreShield</span>
-                    </div>
+				<div className="relative z-10 flex items-center gap-3">
+					<img src="/logo/SVG/Black.svg" alt="KoreShield" className="w-8 h-8 dark:hidden" />
+					<img src="/logo/SVG/White.svg" alt="KoreShield" className="w-8 h-8 hidden dark:block" />
+					<span className="text-xl font-bold text-foreground tracking-tight">KoreShield</span>
+				</div>
 
-                    {locationState?.passwordReset && (
-                        <div className="mb-6 p-3 bg-electric-green/10 border border-electric-green/20 rounded-lg text-sm text-electric-green font-medium">
-                            Password updated  -  sign in with your new credentials.
-                        </div>
-                    )}
+				<div className="relative z-10 space-y-8">
+					<blockquote className="text-2xl font-semibold text-foreground leading-snug tracking-tight">
+						"The security layer your LLM provider doesn't include."
+					</blockquote>
 
-                    <div className="mb-8">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 tracking-tight">Welcome back</h1>
-                        <p className="text-muted-foreground">Your security dashboard is one step away.</p>
-                    </div>
+					<div className="space-y-4">
+						{[
+							'95% detection accuracy across 50+ attack patterns',
+							'Sub-30ms interception  -  zero perceptible latency',
+							'Zero prompt data stored or retained',
+						].map((item) => (
+							<div key={item} className="flex items-start gap-3">
+								<ShieldCheck className="w-5 h-5 text-electric-green mt-0.5 shrink-0" />
+								<span className="text-sm text-muted-foreground">{item}</span>
+							</div>
+						))}
+					</div>
+				</div>
 
-                    <form onSubmit={handleLogin} className="space-y-5">
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium mb-2 text-foreground">
-                                Work email
-                            </label>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <input
-                                    id="email"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-colors"
-                                    placeholder="you@company.com"
-                                    required
-                                    disabled={anyLoading}
-                                />
-                            </div>
-                        </div>
+				<p className="relative z-10 text-xs text-muted-foreground/60">
+					© {new Date().getFullYear()} KoreShield. All rights reserved.
+				</p>
+			</div>
 
-                        <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                                    Password
-                                </label>
-                                <Link
-                                    to="/forgot-password"
-                                    className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                                >
-                                    Forgot password?
-                                </Link>
-                            </div>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <input
-                                    id="password"
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-colors"
-                                    placeholder="••••••••"
-                                    required
-                                    disabled={anyLoading}
-                                />
-                            </div>
-                        </div>
+			<div className="flex-1 flex items-center justify-center p-6 sm:p-12">
+				<div className="w-full max-w-md">
+					<div className="flex items-center gap-2 mb-8 lg:hidden">
+						<img src="/logo/SVG/Black.svg" alt="KoreShield" className="w-7 h-7 dark:hidden" />
+						<img src="/logo/SVG/White.svg" alt="KoreShield" className="w-7 h-7 hidden dark:block" />
+						<span className="font-bold text-foreground">KoreShield</span>
+					</div>
 
-                        {error && (
-                            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-                                {error}
-                            </div>
-                        )}
+					{locationState?.passwordReset && (
+						<div className="mb-6 p-3 bg-electric-green/10 border border-electric-green/20 rounded-lg text-sm text-electric-green font-medium">
+							Password updated  -  sign in with your new credentials.
+						</div>
+					)}
 
-                        <button
-                            type="submit"
-                            disabled={anyLoading}
-                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                        >
-                            {loading ? 'Signing in…' : 'Sign in'}
-                        </button>
+					<div className="mb-8">
+						<h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 tracking-tight">
+							{pendingMfa ? 'Verify privileged access' : 'Welcome back'}
+						</h1>
+						<p className="text-muted-foreground">
+							{pendingMfa
+								? `Enter the 6-digit code we sent to ${pendingMfa.user.email}.`
+								: 'Your security dashboard is one step away.'}
+						</p>
+					</div>
 
-                        {/* ── Social sign-in ── */}
-                        <div className="relative my-6">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-border" />
-                            </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-gradient-to-b from-background to-background text-muted-foreground">
-                                    or continue with
-                                </span>
-                            </div>
-                        </div>
+					<form onSubmit={pendingMfa ? handleVerifyMfa : handleLogin} className="space-y-5">
+						{!pendingMfa && (
+							<div>
+								<label htmlFor="email" className="block text-sm font-medium mb-2 text-foreground">
+									Work email
+								</label>
+								<div className="relative">
+									<Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+									<input
+										id="email"
+										type="email"
+										value={email}
+										onChange={(e) => setEmail(e.target.value)}
+										className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-colors"
+										placeholder="you@company.com"
+										required
+										disabled={anyLoading}
+									/>
+								</div>
+							</div>
+						)}
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <button
-                                type="button"
-                                onClick={handleGitHubLogin}
-                                disabled={anyLoading}
-                                className="flex items-center justify-center gap-2 px-4 py-3 bg-background hover:bg-muted border border-border rounded-lg font-medium text-foreground transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {oauthLoading === 'github' ? (
-                                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
-                                    </svg>
-                                ) : (
-                                    <Github className="w-4 h-4 shrink-0" />
-                                )}
-                                GitHub
-                            </button>
+						{!pendingMfa && (
+							<div>
+								<div className="flex items-center justify-between mb-2">
+									<label htmlFor="password" className="block text-sm font-medium text-foreground">
+										Password
+									</label>
+									<Link
+										to="/forgot-password"
+										className="text-xs text-muted-foreground hover:text-primary transition-colors"
+									>
+										Forgot password?
+									</Link>
+								</div>
+								<div className="relative">
+									<Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+									<input
+										id="password"
+										type="password"
+										value={password}
+										onChange={(e) => setPassword(e.target.value)}
+										className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-colors"
+										placeholder="••••••••"
+										required
+										disabled={anyLoading}
+									/>
+								</div>
+							</div>
+						)}
 
-                            <button
-                                type="button"
-                                onClick={handleGoogleLogin}
-                                disabled={anyLoading}
-                                className="flex items-center justify-center gap-2 px-4 py-3 bg-background hover:bg-muted border border-border rounded-lg font-medium text-foreground transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {oauthLoading === 'google' ? (
-                                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
-                                    </svg>
-                                ) : (
-                                    <GoogleIcon />
-                                )}
-                                Google
-                            </button>
-                        </div>
+						{pendingMfa && (
+							<div>
+								<label htmlFor="mfa-code" className="block text-sm font-medium mb-2 text-foreground">
+									Verification code
+								</label>
+								<input
+									id="mfa-code"
+									type="text"
+									inputMode="numeric"
+									autoComplete="one-time-code"
+									value={mfaCode}
+									onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+									className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-center text-lg tracking-[0.4em] transition-colors"
+									placeholder="000000"
+									required
+									disabled={anyLoading}
+								/>
+								<p className="mt-2 text-xs text-muted-foreground">
+									Privileged dashboard access now requires a second factor for owners, admins, and superusers.
+								</p>
+							</div>
+						)}
 
-                        <div className="text-center text-sm">
-                            <span className="text-muted-foreground">Don't have an account? </span>
-                            <Link
-                                to={{ pathname: '/signup', search: location.search }}
-                                state={location.state}
-                                className="text-primary hover:underline font-medium"
-                            >
-                                Get started
-                            </Link>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    );
+						{error && (
+							<div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+								{error}
+							</div>
+						)}
+
+						<button
+							type="submit"
+							disabled={anyLoading}
+							className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+						>
+							{loading ? (pendingMfa ? 'Verifying…' : 'Signing in…') : (pendingMfa ? 'Verify and continue' : 'Sign in')}
+						</button>
+
+						{pendingMfa && (
+							<div className="flex items-center justify-between gap-3 text-sm">
+								<button
+									type="button"
+									onClick={handleResendMfa}
+									disabled={anyLoading || resendingCode}
+									className="text-primary hover:underline disabled:opacity-50"
+								>
+									{resendingCode ? 'Resending…' : 'Resend code'}
+								</button>
+								<button
+									type="button"
+									onClick={clearPendingMfa}
+									disabled={anyLoading}
+									className="text-muted-foreground hover:text-foreground"
+								>
+									Use another account
+								</button>
+							</div>
+						)}
+
+						{!pendingMfa && (
+							<>
+								<div className="relative my-6">
+									<div className="absolute inset-0 flex items-center">
+										<div className="w-full border-t border-border" />
+									</div>
+									<div className="relative flex justify-center text-sm">
+										<span className="px-2 bg-gradient-to-b from-background to-background text-muted-foreground">
+											or continue with
+										</span>
+									</div>
+								</div>
+
+								<div className="grid grid-cols-2 gap-3">
+									<button
+										type="button"
+										onClick={handleGitHubLogin}
+										disabled={anyLoading}
+										className="flex items-center justify-center gap-2 px-4 py-3 bg-background hover:bg-muted border border-border rounded-lg font-medium text-foreground transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+									>
+										{oauthLoading === 'github' ? (
+											<svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+												<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+												<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+											</svg>
+										) : (
+											<Github className="w-4 h-4 shrink-0" />
+										)}
+										GitHub
+									</button>
+
+									<button
+										type="button"
+										onClick={handleGoogleLogin}
+										disabled={anyLoading}
+										className="flex items-center justify-center gap-2 px-4 py-3 bg-background hover:bg-muted border border-border rounded-lg font-medium text-foreground transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+									>
+										{oauthLoading === 'google' ? (
+											<svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+												<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+												<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+											</svg>
+										) : (
+											<GoogleIcon />
+										)}
+										Google
+									</button>
+								</div>
+
+								<div className="text-center text-sm">
+									<span className="text-muted-foreground">Don't have an account? </span>
+									<Link
+										to={{ pathname: '/signup', search: location.search }}
+										state={location.state}
+										className="text-primary hover:underline font-medium"
+									>
+										Get started
+									</Link>
+								</div>
+							</>
+						)}
+					</form>
+				</div>
+			</div>
+		</div>
+	);
 }

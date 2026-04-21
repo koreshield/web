@@ -17,10 +17,26 @@ export interface AuthUser {
 export interface LoginResponse {
 	token?: string;
 	user: AuthUser;
+	mfa_required?: boolean;
+	challenge_token?: string;
+	delivery?: string;
+	expires_in_seconds?: number;
 }
 
 const API_BASE_URL = resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 const USER_STORAGE_KEY = 'admin_user';
+const MFA_STORAGE_KEY = 'admin_mfa_challenge';
+
+export interface PendingMFAChallenge {
+	challengeToken: string;
+	user: AuthUser;
+	delivery: string;
+	expiresInSeconds: number;
+}
+
+export type AuthFlowResult =
+	| { status: 'authenticated'; user: AuthUser }
+	| { status: 'mfa_required'; user: AuthUser; challenge: PendingMFAChallenge };
 
 type AuthEventType = 'login' | 'logout';
 type AuthEventHandler = () => void;
@@ -64,8 +80,16 @@ function clearSession() {
 	sessionStorage.removeItem(USER_STORAGE_KEY);
 }
 
+function persistPendingMfa(challenge: PendingMFAChallenge) {
+	sessionStorage.setItem(MFA_STORAGE_KEY, JSON.stringify(challenge));
+}
+
+function clearPendingMfa() {
+	sessionStorage.removeItem(MFA_STORAGE_KEY);
+}
+
 export const authService = {
-	async login(email: string, password: string): Promise<AuthUser> {
+	async login(email: string, password: string): Promise<AuthFlowResult> {
 		const response = await fetch(`${API_BASE_URL}/v1/management/login`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -79,12 +103,25 @@ export const authService = {
 		}
 
 		const data: LoginResponse = await response.json();
+		if (data.mfa_required && data.challenge_token) {
+			const challenge = {
+				challengeToken: data.challenge_token,
+				user: data.user,
+				delivery: data.delivery || 'email',
+				expiresInSeconds: data.expires_in_seconds || 600,
+			};
+			clearSession();
+			persistPendingMfa(challenge);
+			return { status: 'mfa_required', user: data.user, challenge };
+		}
+		clearPendingMfa();
 		persistSession(data.user, data.token);
-		return data.user;
+		return { status: 'authenticated', user: data.user };
 	},
 
 	logout(): void {
 		clearSession();
+		clearPendingMfa();
 		void fetch(`${API_BASE_URL}/v1/management/logout`, {
 			method: 'POST',
 			credentials: 'include',
@@ -123,6 +160,63 @@ export const authService = {
 	getCurrentUser(): AuthUser | null {
 		const userStr = sessionStorage.getItem(USER_STORAGE_KEY);
 		return userStr ? JSON.parse(userStr) : null;
+	},
+
+	getPendingMfaChallenge(): PendingMFAChallenge | null {
+		const raw = sessionStorage.getItem(MFA_STORAGE_KEY);
+		return raw ? JSON.parse(raw) : null;
+	},
+
+	clearPendingMfaChallenge(): void {
+		clearPendingMfa();
+	},
+
+	async verifyMfaCode(code: string): Promise<AuthUser> {
+		const challenge = this.getPendingMfaChallenge();
+		if (!challenge) {
+			throw new Error('No admin verification challenge is in progress');
+		}
+
+		const response = await fetch(`${API_BASE_URL}/v1/management/mfa/verify`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			credentials: 'include',
+			body: JSON.stringify({ challenge_token: challenge.challengeToken, code }),
+		});
+
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({ detail: 'Verification failed' }));
+			throw new Error(error.detail || 'Verification failed');
+		}
+
+		const data: LoginResponse = await response.json();
+		clearPendingMfa();
+		persistSession(data.user, data.token);
+		return data.user;
+	},
+
+	async resendMfaCode(): Promise<void> {
+		const challenge = this.getPendingMfaChallenge();
+		if (!challenge) {
+			throw new Error('No admin verification challenge is in progress');
+		}
+
+		const response = await fetch(`${API_BASE_URL}/v1/management/mfa/resend`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ challenge_token: challenge.challengeToken }),
+		});
+
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({ detail: 'Unable to resend code' }));
+			throw new Error(error.detail || 'Unable to resend code');
+		}
+
+		const data = await response.json().catch(() => ({}));
+		persistPendingMfa({
+			...challenge,
+			expiresInSeconds: Number(data.expires_in_seconds || challenge.expiresInSeconds),
+		});
 	},
 
 	getToken(): string | null {
@@ -185,7 +279,7 @@ export const authService = {
 		return response.json();
 	},
 
-	async handleGitHubCallback(code: string, state: string): Promise<AuthUser> {
+	async handleGitHubCallback(code: string, state: string): Promise<AuthFlowResult> {
 		const response = await fetch(`${API_BASE_URL}/v1/management/oauth/github/callback`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -199,11 +293,23 @@ export const authService = {
 		}
 
 		const data: LoginResponse = await response.json();
+		if (data.mfa_required && data.challenge_token) {
+			const challenge = {
+				challengeToken: data.challenge_token,
+				user: data.user,
+				delivery: data.delivery || 'email',
+				expiresInSeconds: data.expires_in_seconds || 600,
+			};
+			clearSession();
+			persistPendingMfa(challenge);
+			return { status: 'mfa_required', user: data.user, challenge };
+		}
+		clearPendingMfa();
 		persistSession(data.user, data.token);
-		return data.user;
+		return { status: 'authenticated', user: data.user };
 	},
 
-	async handleGoogleCallback(code: string, state: string): Promise<AuthUser> {
+	async handleGoogleCallback(code: string, state: string): Promise<AuthFlowResult> {
 		const response = await fetch(`${API_BASE_URL}/v1/management/oauth/google/callback`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -217,8 +323,20 @@ export const authService = {
 		}
 
 		const data: LoginResponse = await response.json();
+		if (data.mfa_required && data.challenge_token) {
+			const challenge = {
+				challengeToken: data.challenge_token,
+				user: data.user,
+				delivery: data.delivery || 'email',
+				expiresInSeconds: data.expires_in_seconds || 600,
+			};
+			clearSession();
+			persistPendingMfa(challenge);
+			return { status: 'mfa_required', user: data.user, challenge };
+		}
+		clearPendingMfa();
 		persistSession(data.user, data.token);
-		return data.user;
+		return { status: 'authenticated', user: data.user };
 	},
 
 	on(event: AuthEventType, handler: AuthEventHandler) {
