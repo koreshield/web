@@ -3,6 +3,19 @@ import { ArrowLeft } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
+function canonicalPathname(pathname: string): string {
+	switch (pathname) {
+		case '/privacy':
+			return '/privacy-policy';
+		case '/terms':
+			return '/terms-of-service';
+		case '/cookies':
+			return '/cookie-policy';
+		default:
+			return pathname;
+	}
+}
+
 const pages: Record<string, { title: string; effective: string; sections: { heading: string; body: string }[] }> = {
 	'/privacy-policy': {
 		title: 'Privacy Policy',
@@ -14,7 +27,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'The most important thing: zero-log architecture',
-				body: 'KoreShield does not log or store raw prompt content. Prompts, system messages, and conversation history submitted to the API are processed in working memory for the duration of the security scan (target: under 50 milliseconds) and are not written to any persistent storage in the default configuration. The threat classification metadata stored in the monitoring dashboard does not include the raw text of the prompt that was scanned. This is not a policy choice we might change in a future update. It is the core architecture of the product.\n\nThe exception is where you have opted in to audit logging of flagged prompts within your own environment. This is available on the Growth and Enterprise tiers, and in the on-premise deployment model where data never leaves your infrastructure. In that case, you control and are responsible for that data.',
+				body: 'KoreShield does not log or store raw prompt content in the default hosted configuration. Prompts, system messages, and conversation history submitted to the API are processed in working memory for the duration of the security scan and are not written to persistent storage by default. The threat classification metadata stored in the monitoring dashboard does not include the raw text of the prompt that was scanned.\n\nThe exception is where additional audit capture is explicitly enabled for a customer deployment or self-hosted environment. In that case, the retention and control model for that data is governed by the customer configuration or contract.',
 			},
 			{
 				heading: 'Personal data we collect: what you provide',
@@ -38,11 +51,11 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Who we share your data with',
-				body: 'We use the following sub-processors. Our full versioned Sub-Processor List is at <a href="https://koreshield.com/legal/sub-processors" class="underline">koreshield.com/legal/sub-processors</a>\n\nHetzner Online GmbH (Germany, EU): cloud infrastructure hosting, ISO 27001 certified, our primary data centre. Cloudflare: CDN, DDoS protection, and TLS termination, Privacy Shield certified, SOC 2 Type II. Polar: subscription billing and payment processing, PCI-DSS compliant. Sanity: blog and documentation CMS. EmailJS: transactional email delivery. OpenAI, Google (Gemini / Vertex AI), Microsoft Azure OpenAI: LLM providers used in the detection engine, each governed by their own published DPA and SCCs. DeepSeek: LLM provider used in the detection engine; DeepSeek is incorporated in China and a Transfer Impact Assessment is currently in progress. Enterprise customers with strict data residency requirements should contact privacy@koreshield.com.\n\nWhen our detection engine calls an LLM for semantic analysis, it transmits a structured analysis prompt, not your raw user input verbatim. We do not sell your personal data to third parties and do not operate an advertising model.',
+				body: 'We use a limited set of infrastructure, billing, communications, and model providers to operate KoreShield. Our current public sub-processor list is at <a href="https://koreshield.com/legal/sub-processors" class="underline">koreshield.com/legal/sub-processors</a>.\n\nThat list includes core hosting, delivery, billing, documentation, email, and model-analysis providers used by the service. We do not sell your personal data to third parties and do not operate an advertising model.',
 			},
 			{
 				heading: 'International data transfers',
-				body: 'KoreShield\'s primary infrastructure is hosted by Hetzner in Germany (EU). Account data, threat metadata, and operational data are stored within the EEA and do not require further transfer safeguards under UK GDPR. Transfers to LLM sub-processors (OpenAI, Google, Microsoft Azure) outside the UK and EEA are made under International Data Transfer Agreements (IDTAs) or Standard Contractual Clauses (SCCs). Our Cross-Border Data Transfer Policy is at <a href="https://koreshield.com/legal/transfer-policy" class="underline">koreshield.com/legal/transfer-policy</a>',
+				body: 'KoreShield\'s primary hosted infrastructure is operated from the EEA. Some supporting providers and model-analysis providers may process limited service data outside the UK or EEA depending on the deployment and provider configuration. Our current transfer guidance is published at <a href="https://koreshield.com/legal/transfer-policy" class="underline">koreshield.com/legal/transfer-policy</a>.\n\nWhen cross-border processing is required, we rely on the safeguards and contractual terms made available for the relevant service providers, together with our vendor review process and any customer-specific contractual terms where applicable.',
 			},
 			{
 				heading: 'Data retention',
@@ -54,11 +67,11 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Security',
-				body: 'We implement appropriate technical and organisational security measures to protect your personal data, including: TLS 1.2/1.3 encryption for all data in transit; bcrypt hashing for account passwords; SHA-256 hashing for API keys with plaintext never stored after creation; logical tenant isolation enforced at the API layer and at the PostgreSQL database layer via Row-Level Security; multi-factor authentication required for all administrative access to production systems; and infrastructure hosted in Hetzner\'s ISO 27001 certified EU data centres.\n\nIf a personal data breach occurs that poses a risk to your rights and freedoms we will notify the ICO within 72 hours and notify affected individuals without undue delay where required by UK GDPR Article 34.',
+				body: 'We implement appropriate technical and organisational security measures to protect your personal data, including TLS encryption for data in transit, hashed passwords and API keys, tenant-scoped access controls, and restricted administrative access to production systems. Our hosted infrastructure is operated through managed cloud providers and protected by operational logging and access controls appropriate to the service.\n\nIf a personal data breach occurs, we will respond in line with applicable law and any contractual commitments in place with the affected customer.',
 			},
 			{
 				heading: 'Cookies',
-				body: 'We use strictly necessary cookies for authentication and platform security (no consent required) and optional analytics cookies to understand how the Platform is used (consent required). See our Cookie Policy at <a href="https://koreshield.com/cookies" class="underline">koreshield.com/cookies</a> for full details including a complete list of every cookie we set, its purpose, duration, and how to manage your preferences.',
+				body: 'We use strictly necessary cookies for authentication and platform security and may use limited analytics or preference cookies where configured. See our Cookie Policy at <a href="https://koreshield.com/cookies" class="underline">koreshield.com/cookies</a> for the current description of categories we use and how to manage them.',
 			},
 			{
 				heading: 'Changes to this policy',
@@ -85,7 +98,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Service tiers',
-				body: 'Free (£0/month): up to 10,000 protected requests per month, 7-day log retention, £12 per extra 100,000 requests. Baseline prompt and RAG screening, basic dashboard, core logs and scan history. Community support via GitHub, no contractual SLA.\n\nGrowth (£99/month): up to 100,000 requests per month, 30-day log retention, £12 per extra 100,000 requests. Policies and alerts, API key management, teams and collaboration, basic reports. Email support with 24-hour response target for standard issues and 4-hour response for Severity 1 incidents. 99.95% uptime SLA.\n\nScale (£399/month): up to 1,000,000 requests per month, 90-day log retention, £12 per extra 100,000 requests. RBAC and audit logs, advanced analytics, provider health visibility. Priority support with 4-hour standard and 1-hour Severity 1 response targets. 99.9% uptime SLA.\n\nEnterprise (from £1,500/month, custom agreement): custom protected-request volume, custom log retention, SSO and SAML, SIEM export, VPC or self-hosted deployment, dedicated onboarding and security review support. Custom SLA.\n\nOn reaching your monthly request limit, your account is throttled (soft limit) rather than hard-blocked. KoreShield will notify you via the dashboard and email when approaching the limit. Enterprise customers may negotiate burst allowances.',
+				body: 'KoreShield offers hosted and enterprise plans with different request allowances, retention windows, support channels, and administrative features. Current public pricing and feature summaries are published at <a href="https://koreshield.com/pricing" class="underline">koreshield.com/pricing</a>.\n\nEnterprise deployments may also be governed by an Order Form, statement of work, or separate commercial agreement covering deployment model, support expectations, retention, and any additional security or compliance commitments.',
 			},
 			{
 				heading: 'Account and API key security',
@@ -105,7 +118,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Data processing and privacy',
-				body: 'To the extent the Services involve KoreShield processing personal data on your behalf, the parties are bound by the KoreShield Data Processing Agreement (DPA), at <a href="https://koreshield.com/dpa" class="underline">koreshield.com/dpa</a> and incorporated into these Terms by reference. If there is any conflict between these Terms and the DPA regarding the processing of personal data, the DPA prevails.\n\nKoreShield operates a zero-log default architecture: raw prompt content is not stored. Threat classification metadata is retained for 90 days by default. The default for all tiers is that your data does not contribute to model improvement without your explicit opt-in. Enterprise customers may contractually exclude their data from any aggregation. Our Privacy Policy is at <a href="https://koreshield.com/privacy" class="underline">koreshield.com/privacy</a>',
+				body: 'To the extent the Services involve KoreShield processing personal data on your behalf, the parties are bound by the KoreShield Data Processing Agreement (DPA), at <a href="https://koreshield.com/dpa" class="underline">koreshield.com/dpa</a> and incorporated into these Terms by reference. If there is any conflict between these Terms and the DPA regarding the processing of personal data, the DPA prevails.\n\nKoreShield operates a zero-log default architecture for raw prompt content in the hosted product. Threat metadata retention and any model-improvement or audit-capture options depend on your plan, deployment, and configuration. Our Privacy Policy is at <a href="https://koreshield.com/privacy" class="underline">koreshield.com/privacy</a>.',
 			},
 			{
 				heading: 'Billing and payment',
@@ -113,7 +126,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Service levels and credits',
-				body: 'Monthly uptime commitments: Free: no SLA; Growth: 99.95% (approx. 21.9 minutes downtime per month); Scale: 99.9% (approx. 43.8 minutes per month); Enterprise: custom per contract, target 99.99%.\n\nSLA exclusions include: scheduled maintenance (72 hours advance notice), your system or software failures, LLM provider outages, force majeure, your breach of these Terms, and denial-of-service attacks beyond our reasonable control.\n\nWhere we fail to meet the uptime SLA in a calendar month, your sole remedy is service credits: Growth: 10% credit per hour of Severity 1 outage exceeding the SLA window, capped at 30% of the monthly fee; Scale: 15% per hour capped at 50%. Enterprise: per contract. Credits must be claimed within 30 days of the affected month, are applied to future invoices, and have no cash value.',
+				body: 'Unless we expressly agree otherwise in writing, the Services are provided without a separate contractual service level agreement or service credit regime. Where service levels, response targets, or service credits are offered, they are set out in the applicable pricing page, plan terms, or enterprise agreement and apply only to the customer and service scope described there.',
 			},
 			{
 				heading: 'Warranties and security disclaimer',
@@ -187,7 +200,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'What we actually process',
-				body: 'What we do: we sit as a security proxy between your application and your LLM provider. Every API request passes through our inspection layer in real time. We check it for threats, block or pass it through, and do the same on the way back.\n\nPrompt content: the actual text of the prompts your users send is processed entirely in working memory. It is never written to disk in the default configuration. We hold it for under 50 milliseconds while we scan it, then it is gone. There is nothing to return, delete, or hand over because we never stored it.\n\nWhat we do store: threat classification records. When something is flagged or blocked, we record the threat type, block decision, timestamp, and an identifier for your account and the request. We do not store the prompt text alongside these records.\n\nPurpose: to detect and block prompt injection, RAG poisoning, jailbreaks, PII leakage, credential exposure, and other LLM security threats in your application.\n\nWho it affects: your end users, whose prompts pass through our system.\n\nHow long we keep it: threat records are kept for 7 days on Free, 30 days on Growth, 90 days on Scale, and a custom period on Enterprise. Account data is kept for the life of your account plus 12 months.',
+				body: 'What we do: we sit as a security proxy between your application and your LLM provider. Every API request passes through our inspection layer in real time. We check it for threats, block or pass it through, and do the same on the way back.\n\nPrompt content: the actual text of the prompts your users send is processed in working memory for the duration of the scan and is not persisted by default in the hosted configuration. There is nothing to return, delete, or hand over where raw prompt content was never stored.\n\nWhat we do store: threat classification records. When something is flagged or blocked, we record the threat type, block decision, timestamp, and an identifier for your account and the request. We do not store the prompt text alongside these records by default.\n\nPurpose: to detect and block prompt injection, RAG poisoning, jailbreaks, PII leakage, credential exposure, and other LLM security threats in your application.\n\nWho it affects: your end users, whose prompts pass through our system.\n\nHow long we keep it: retention depends on your plan, deployment, and account lifecycle. Public plan summaries are available on the pricing page, and customer-specific retention may be governed by contract or configuration.',
 			},
 			{
 				heading: 'What we will and will not do',
@@ -203,19 +216,19 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 			{
 				heading: 'Sub-processors',
-				body: 'These are the third-party companies we use to deliver the service. We have a data processing agreement in place with each of them. We will give you at least 30 days notice by email if we add or replace a sub-processor. If you object and we cannot resolve it, you may leave without penalty.\n\nHetzner Online GmbH (Germany, EU): our primary data centre. This is where your account data and threat records are stored. ISO 27001 certified. EU-based, so no international transfer issues.\n\nCloudflare (global): handles our CDN, DDoS protection, and TLS. Sees IP addresses and request metadata but not prompt content. Privacy Shield certified, SOC 2 Type II.\n\nPolar (EU/US): our payment processor. Handles your billing and subscription data. PCI-DSS compliant. We do not store your card details.\n\nSanity (EU/US): our content management system for the blog and documentation. Does not handle your personal data from scanning.\n\nEmailJS (US/EU): sends transactional emails such as account notifications and alerts.\n\nOpenAI (US): used internally by our detection engine for semantic threat analysis. When our engine calls OpenAI, it sends a structured analysis prompt, not your raw user input. Governed by OpenAI\'s DPA.\n\nGoogle Gemini / Vertex AI (US/global): used internally by our detection engine. Same principle as above. Governed by Google Cloud DPA.\n\nMicrosoft Azure OpenAI (US/EU): used internally by our detection engine. ISO 27001 and SOC 2 Type II certified. Governed by Microsoft\'s DPA.\n\nDeepSeek (China): used internally by our detection engine. Important: DeepSeek is based in China, which does not have a UK adequacy decision for data transfers. We are conducting a Transfer Impact Assessment. If you have strict data residency requirements, contact privacy@koreshield.com and we will tell you how to restrict or exclude DeepSeek from your deployment.\n\nOne important distinction: the LLM your application connects to (such as OpenAI, Anthropic, Google, or Azure) is your sub-processor, not ours. KoreShield sits in front of your chosen LLM as a proxy. You are responsible for your own agreement with that provider.',
+				body: 'These are the categories of third-party providers we use to deliver the service: hosting and infrastructure, network delivery and TLS termination, subscription billing, documentation and website tooling, transactional email, and model-analysis providers used by the detection engine.\n\nOur current public sub-processor list identifies the providers we use at the time of publication. We may update that list as the service evolves and will handle customer notice obligations through the applicable contract, account communications, or customer success process where required.\n\nOne important distinction: the LLM your application connects to directly remains your provider relationship. KoreShield may also use separate model-analysis providers within the detection engine depending on service configuration.',
 			},
 			{
 				heading: 'International data transfers',
-				body: 'Your account data and threat records are stored on Hetzner in Germany. They stay within the EU and do not need any special transfer arrangements.\n\nWhere our detection engine calls LLM providers based outside the UK and EU (OpenAI, Google, Microsoft Azure), we use International Data Transfer Agreements (IDTAs) approved by the ICO, or Standard Contractual Clauses (SCCs). These are the legal mechanisms that make such transfers lawful.\n\nFor DeepSeek specifically (China), we are still completing our Transfer Impact Assessment. We can tell you more about your specific deployment options on request.\n\nYou are responsible for ensuring you have a lawful basis for any transfers you make to our infrastructure. Where the SCCs are required, they are incorporated into this agreement.',
+				body: 'Hosted customer account data and threat records are operated primarily from the EEA. Depending on your deployment and the providers enabled for analysis or support functions, limited service data may also be processed outside the UK or EEA.\n\nWhen such processing occurs, KoreShield uses the contractual and operational safeguards available for the relevant providers and reviews those relationships as part of vendor management. Customers with stricter residency or deployment requirements should contact privacy@koreshield.com before enabling the relevant provider configuration.',
 			},
 			{
 				heading: 'Security',
-				body: 'We implement appropriate technical and organisational measures to protect your data. Here is what that means in practice.\n\nThreat detection: every prompt passes through our detection engine in real time. We scan for prompt injection, jailbreaks, RAG poisoning, PII leakage, credential exposure, and a range of other attack categories. Both the request and the response are inspected before anything reaches your application.\n\nTenant isolation: your data is kept completely separate from every other customer. Your API key only works for your account, and our database architecture makes cross-customer data access impossible even in the event of a bug.\n\nCredential security: passwords are hashed and never stored in plaintext. API keys are hashed at creation and shown to you only once.\n\nEncryption: all data in transit uses TLS 1.2 or 1.3. Our database runs on a private network not exposed to the internet.\n\nAudit trail: every scan is logged with the outcome, threat type, timestamp, and request identifier. These records are immutable once written.\n\nAccess controls: multi-factor authentication is required for all administrative access to production systems. Only a small number of named people have access.\n\nRegular testing: we run a structured set of security tests on a quarterly basis and after every code change. Any change that degrades our detection capability is automatically blocked from reaching production.\n\nIf KoreShield becomes unavailable, requests fail rather than pass through unscanned. This is by design.',
+				body: 'We implement technical and organisational measures to protect your data. In practice this includes request inspection before provider forwarding, tenant-scoped access controls, hashed credentials, encrypted transport, restricted administrative access, and automated testing in the development workflow.\n\nKoreShield records operational and threat metadata needed to run the service and investigate issues, but the exact retention and mutability characteristics of those records depend on the storage system, deployment model, and customer configuration.\n\nIf KoreShield becomes unavailable, requests may fail or be rejected rather than being processed normally through the service. Customers are responsible for implementing the retry and fallback behavior appropriate for their own application architecture.',
 			},
 			{
 				heading: 'If there is a data breach',
-				body: 'If we discover a personal data breach affecting your data, we will notify you within 48 hours. We will tell you what happened, what data was affected, what we think the consequences are, and what we are doing about it. We may send an initial notification and follow up with more detail as we investigate.\n\nYou are responsible for deciding whether to notify the ICO (you have 72 hours from when you become aware) and whether to tell your affected end users. We will help you with both.\n\nOur telling you about a breach does not mean we are accepting liability for it.',
+				body: 'If we discover a personal data breach affecting your data, we will notify the affected customer without undue delay after becoming aware of it, together with the information reasonably available at the time. Follow-up updates may be provided as the investigation continues.\n\nYou are responsible for deciding whether to notify regulators or your end users where the law requires it, and we will provide reasonable cooperation required under applicable law or contract.\n\nOur notice of a breach does not by itself constitute an admission of liability.',
 			},
 			{
 				heading: 'Your data when you leave',
@@ -240,11 +253,61 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 		],
 	},
 
+	'/legal/sub-processors': {
+		title: 'Sub-Processor List',
+		effective: '21 April 2026',
+		sections: [
+			{
+				heading: 'About this list',
+				body: 'This page identifies the third-party providers KoreShield uses to operate the hosted service at the time of publication. It is a public summary for customer review and does not replace any customer-specific DPA, Order Form, or enterprise security schedule.',
+			},
+			{
+				heading: 'Infrastructure and delivery',
+				body: 'Hetzner Online GmbH is used for primary hosted infrastructure. Cloudflare is used for CDN, TLS termination, and edge delivery functions. These providers support availability, traffic routing, and service delivery for the hosted platform.',
+			},
+			{
+				heading: 'Billing and communications',
+				body: 'Polar is used for hosted billing and subscription management. EmailJS is used for transactional email delivery. Sanity is used for blog and documentation content management. These providers support customer communications and commercial operations rather than prompt scanning itself.',
+			},
+			{
+				heading: 'Detection and model-analysis providers',
+				body: 'Depending on service configuration, KoreShield may use model-analysis providers such as OpenAI, Google Gemini or Vertex AI, Microsoft Azure OpenAI, and DeepSeek as part of the detection engine. Provider availability depends on configuration, enabled integrations, and customer deployment choices.',
+			},
+			{
+				heading: 'Updates',
+				body: 'We may update this list from time to time as the service evolves. Where a customer contract requires notice or objection handling for sub-processor changes, those obligations are managed through the applicable contract or customer communication channel.',
+			},
+		],
+	},
+
+	'/legal/transfer-policy': {
+		title: 'Cross-Border Transfer Policy',
+		effective: '21 April 2026',
+		sections: [
+			{
+				heading: 'Hosted service footprint',
+				body: 'KoreShield operates its primary hosted service footprint from the EEA. Customer account records, operational metadata, and threat metadata are intended to remain within that hosted footprint unless a supporting provider or customer-selected configuration requires otherwise.',
+			},
+			{
+				heading: 'When cross-border processing can occur',
+				body: 'Cross-border processing can arise when customers enable third-party analysis providers, use globally distributed delivery services, or contract for support and communications workflows that involve providers outside the UK or EEA. The exact data involved depends on the provider and workflow in use.',
+			},
+			{
+				heading: 'How we approach safeguards',
+				body: 'KoreShield reviews provider terms, available contractual safeguards, and deployment implications as part of vendor onboarding and ongoing service operation. Customers with stricter residency or sovereignty requirements should request a deployment review before enabling the relevant provider configuration.',
+			},
+			{
+				heading: 'Customer options',
+				body: 'Enterprise and customer-specific deployments may support different provider selections, retention controls, or private deployment models. If your organisation needs stricter residency boundaries, contact privacy@koreshield.com before rollout so the available options can be scoped appropriately.',
+			},
+		],
+	},
+
 };
 
 export default function LegalPage() {
 	const { pathname } = useLocation();
-	const page = pages[pathname];
+	const page = pages[canonicalPathname(pathname)];
 
 	if (!page) return null;
 
