@@ -777,7 +777,7 @@ async def reset_password(
 @router.post("/logout", summary="Logout", description="Invalidate the current session cookie and log out the authenticated user.", tags=["Authentication"])
 async def admin_logout(response: Response, current_user: dict = Depends(get_current_user)):
     """Logout endpoint for any authenticated user."""
-    response.delete_cookie(key=AUTH_COOKIE_NAME, path="/")
+    _delete_auth_cookie(response)
     logger.info("user_logout", user_id=current_user.get("id"), email=current_user.get("email"))
     return {"status": "logged_out"}
 
@@ -1839,6 +1839,33 @@ def _set_auth_cookie(response: Response, token: str) -> None:
         samesite=cookie_samesite,
         secure=cookie_secure,
         max_age=24 * 60 * 60,
+        path="/",
+    )
+
+
+def _delete_auth_cookie(response: Response) -> None:
+    """Delete the auth cookie using the same attributes it was set with.
+
+    Browsers only honour a Set-Cookie deletion (max_age=0 / expires in the past)
+    when the SameSite, Secure, HttpOnly, and Path attributes match the original
+    cookie exactly.  Using plain delete_cookie() without these attributes leaves
+    the cookie alive in production (SameSite=None; Secure) environments.
+    """
+    cookie_samesite = os.getenv("COOKIE_SAMESITE")
+    if not cookie_samesite:
+        env = os.getenv("ENVIRONMENT", "").lower()
+        cookie_samesite = "none" if env in {"production", "staging"} else "lax"
+    cookie_secure = os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"}
+    if cookie_samesite == "none":
+        cookie_secure = True
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value="",
+        httponly=True,
+        samesite=cookie_samesite,
+        secure=cookie_secure,
+        max_age=0,
+        expires=0,
         path="/",
     )
 

@@ -399,9 +399,9 @@ export function AppLayout() {
 		};
 	}, [mobileOpen]);
 
-	const handleLogout = () => {
+	const handleLogout = async () => {
 		wsClient.disconnect();
-		authService.logout();
+		await authService.logout();
 		navigate('/');
 	};
 
