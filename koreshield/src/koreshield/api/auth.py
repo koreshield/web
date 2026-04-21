@@ -117,7 +117,14 @@ def init_jwt_config(config: dict):
     )
 
 
-def issue_jwt_token(user_id: str, email: str, role: str, expires_hours: Optional[int] = None) -> str:
+def issue_jwt_token(
+    user_id: str,
+    email: str,
+    role: str,
+    expires_hours: Optional[int] = None,
+    *,
+    extra_claims: Optional[Dict[str, Any]] = None,
+) -> str:
     """Issue a signed JWT for a user using the configured signing key."""
     if not JWT_SIGNING_KEY or not JWT_ISSUER or not JWT_AUDIENCE:
         raise RuntimeError("JWT signing configuration is incomplete.")
@@ -134,6 +141,8 @@ def issue_jwt_token(user_id: str, email: str, role: str, expires_hours: Optional
         "iat": now,
         "exp": now + timedelta(hours=ttl_hours),
     }
+    if extra_claims:
+        payload.update(extra_claims)
     return jwt.encode(payload, JWT_SIGNING_KEY, algorithm=JWT_ALGORITHM)
 
 
@@ -221,6 +230,8 @@ async def get_current_user(
         "name": payload.get("name"),
         "email": payload.get("email"),
         "role": payload.get("role", "user"),
+        "mfa_verified": bool(payload.get("mfa_verified", False)),
+        "auth_method": payload.get("auth_method", "password"),
     }
 
     logger.info("user_authenticated", user_id=user.get("id"), email=user.get("email"), role=user.get("role"))
@@ -238,6 +249,12 @@ async def get_current_admin(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Insufficient permissions",
+        )
+
+    if not user.get("mfa_verified", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Multi-factor authentication required for admin access",
         )
 
     return user

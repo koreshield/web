@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Integer, Float, DateTime, Boolean, JSON, ForeignKey
+from sqlalchemy import Column, String, Integer, Float, DateTime, Boolean, JSON, ForeignKey, event
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from .base import Base
@@ -63,3 +63,11 @@ class RequestLog(Base):
             "is_blocked": self.is_blocked,
             "attack_detected": self.attack_detected,
         }
+
+
+def _prevent_request_log_mutation(*_args, **_kwargs):
+    raise ValueError("RequestLog entries are append-only and cannot be updated or deleted")
+
+
+event.listen(RequestLog, "before_update", _prevent_request_log_mutation)
+event.listen(RequestLog, "before_delete", _prevent_request_log_mutation)

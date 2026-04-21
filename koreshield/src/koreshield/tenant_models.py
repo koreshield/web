@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 import uuid
 import hashlib
 
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, JSON, ForeignKey, Index
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, JSON, ForeignKey, Index, event
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel, Field, field_validator
@@ -213,6 +213,14 @@ class TenantAuditLog(Base):
         Index('idx_audit_category', 'tenant_id', 'event_category'),
         Index('idx_audit_severity', 'tenant_id', 'severity'),
     )
+
+
+def _prevent_tenant_audit_log_mutation(*_args, **_kwargs):
+    raise ValueError("TenantAuditLog entries are append-only and cannot be updated or deleted")
+
+
+event.listen(TenantAuditLog, "before_update", _prevent_tenant_audit_log_mutation)
+event.listen(TenantAuditLog, "before_delete", _prevent_tenant_audit_log_mutation)
 
 class TenantAPIKey(Base):
     """Tenant API keys with scoped permissions."""

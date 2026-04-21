@@ -280,3 +280,47 @@ async def send_password_reset_email(email: str, token: str, name: Optional[str] 
         subject="Reset your KoreShield password",
         html=html,
     )
+
+
+async def send_admin_mfa_email(email: str, code: str, name: Optional[str] = None) -> bool:
+    """Send a one-time MFA code for privileged dashboard access."""
+    display_name = name or email.split("@")[0]
+
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background: linear-gradient(135deg, #111827 0%, #0f766e 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+            .content {{ background: #ffffff; padding: 40px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; }}
+            .code {{ background: #f3f4f6; padding: 18px; border-radius: 8px; font-family: monospace; font-size: 28px; text-align: center; letter-spacing: 8px; font-weight: 700; }}
+            .footer {{ text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1 style="margin: 0; font-size: 28px;">Admin verification required</h1>
+            </div>
+            <div class="content">
+                <p>Hi {display_name},</p>
+                <p>Use this verification code to complete your privileged KoreShield sign-in:</p>
+                <div class="code">{code}</div>
+                <p style="margin-top: 24px;">This code expires in 10 minutes and can only be used once.</p>
+                <p>If you did not attempt to sign in to a privileged KoreShield session, ignore this email and rotate your password if needed.</p>
+            </div>
+            <div class="footer">
+                <p>KoreShield privileged access verification</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    return await send_email(
+        to=email,
+        subject="Your KoreShield admin verification code",
+        html=html,
+    )

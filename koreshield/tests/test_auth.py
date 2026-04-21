@@ -120,6 +120,7 @@ class TestFastAPIDependencies:
             "name": "Admin User",
             "email": "admin@example.com",
             "role": "admin",
+            "mfa_verified": True,
         }
         with patch("koreshield.api.auth.verify_jwt_token", return_value=payload):
             result = await get_current_admin(_request(), credentials)
@@ -153,6 +154,25 @@ class TestFastAPIDependencies:
             with pytest.raises(Exception) as exc_info:
                 await get_current_admin(_request(), credentials)
             assert exc_info.value.status_code == 403
+
+    @pytest.mark.asyncio
+    async def test_get_current_admin_requires_mfa_for_privileged_roles(self):
+        credentials = HTTPAuthorizationCredentials(
+            scheme="Bearer",
+            credentials="valid.jwt.token",
+        )
+        payload = {
+            "sub": "user123",
+            "name": "Admin User",
+            "email": "admin@example.com",
+            "role": "admin",
+            "mfa_verified": False,
+        }
+        with patch("koreshield.api.auth.verify_jwt_token", return_value=payload):
+            with pytest.raises(Exception) as exc_info:
+                await get_current_admin(_request(), credentials)
+            assert exc_info.value.status_code == 403
+            assert "Multi-factor authentication required" in exc_info.value.detail
 
 
 def test_issue_jwt_token_uses_initialized_config():
