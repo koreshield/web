@@ -231,13 +231,14 @@ class WebSocketClient {
 
         switch (event.type) {
             case 'threat_detected':
-                queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+                queryClient.invalidateQueries({ queryKey: ['stats'] });
+                queryClient.invalidateQueries({ queryKey: ['recent-attacks'] });
                 queryClient.invalidateQueries({ queryKey: ['analytics'] });
                 break;
 
             case 'provider_health_change':
                 queryClient.invalidateQueries({ queryKey: ['provider-health'] });
-                queryClient.invalidateQueries({ queryKey: ['system-status'] });
+                queryClient.invalidateQueries({ queryKey: ['stats'] });
                 break;
 
             case 'cost_threshold_alert':
