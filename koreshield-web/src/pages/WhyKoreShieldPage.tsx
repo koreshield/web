@@ -78,7 +78,7 @@ const deploymentOptions = [
 		icon: <Cloud className="w-5 h-5 text-blue-400" />,
 		title: 'Managed Cloud',
 		description: 'Let us handle infrastructure, scaling, and updates. Focus on your product.',
-		bullets: ['99.9% uptime SLA', 'Automatic scaling', 'Zero maintenance', 'Global edge deployment'],
+		bullets: ['Managed reliability', 'Automatic scaling', 'Zero maintenance', 'Global edge deployment'],
 		border: 'border-blue-400/20',
 		bg: 'bg-blue-400/5',
 	},
