@@ -6,6 +6,8 @@ Handles metrics, logging, and statistics.
 import uuid
 import structlog
 import asyncio
+import hashlib
+import json
 from datetime import datetime, timezone
 from collections import deque
 
@@ -15,6 +17,11 @@ logger = structlog.get_logger(__name__)
 def _utcnow_naive() -> datetime:
     """Return UTC now as a naive datetime for DB compatibility."""
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def _build_integrity_hash(payload: dict) -> str:
+    canonical_payload = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
+    return hashlib.sha256(canonical_payload.encode("utf-8")).hexdigest()
 
 class TelemetryService:
     def __init__(self, monitoring_system, redis_client=None, db_session_factory=None):
@@ -91,6 +98,21 @@ class TelemetryService:
             "user_id": str(log_data.get("user_id")) if log_data.get("user_id") else None,
             "ip": log_data.get("ip_address"),
             "user_agent": log_data.get("user_agent"),
+            "integrity_hash": _build_integrity_hash(
+                {
+                    "request_id": log_data.get("request_id"),
+                    "timestamp": timestamp_value,
+                    "provider": log_data.get("provider"),
+                    "model": log_data.get("model"),
+                    "path": log_data.get("path"),
+                    "method": log_data.get("method"),
+                    "status_code": status_code,
+                    "is_blocked": is_blocked,
+                    "attack_detected": bool(log_data.get("attack_detected")),
+                    "attack_type": log_data.get("attack_type"),
+                    "user_id": str(log_data.get("user_id")) if log_data.get("user_id") else None,
+                }
+            ),
         }
 
     def append_audit_log(self, entry: dict) -> None:

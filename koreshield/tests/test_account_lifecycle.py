@@ -24,7 +24,7 @@ from koreshield.models.team import Team, TeamMember
 from koreshield.models.user import User
 
 
-def _build_test_client(tmp_path: Path) -> tuple[TestClient, sessionmaker, object, tuple[object, object], object]:
+def _build_test_client(tmp_path: Path) -> tuple[TestClient, sessionmaker, object, tuple[object, object, object], object]:
     db_path = tmp_path / "account-lifecycle.sqlite3"
     engine = create_async_engine(f"sqlite+aiosqlite:///{db_path}", future=True)
     session_factory = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
@@ -37,6 +37,7 @@ def _build_test_client(tmp_path: Path) -> tuple[TestClient, sessionmaker, object
     env_patcher = patch.dict(
         os.environ,
         {
+            "ENVIRONMENT": "test",
             "JWT_SECRET": "test-secret-with-minimum-32-characters!!",
             "JWT_ISSUER": "koreshield-auth",
             "JWT_AUDIENCE": "koreshield-api",
@@ -81,9 +82,17 @@ def _build_test_client(tmp_path: Path) -> tuple[TestClient, sessionmaker, object
     async def fake_send_verification_email(email: str, token: str, name: str | None = None) -> bool:
         return True
 
-    original_senders = (management.send_welcome_email, management.send_verification_email)
+    async def fake_send_admin_mfa_email(email: str, code: str, name: str | None = None) -> bool:
+        return True
+
+    original_senders = (
+        management.send_welcome_email,
+        management.send_verification_email,
+        management.send_admin_mfa_email,
+    )
     management.send_welcome_email = fake_send_welcome_email
     management.send_verification_email = fake_send_verification_email
+    management.send_admin_mfa_email = fake_send_admin_mfa_email
 
     client = TestClient(app)
     return client, session_factory, engine, original_senders, env_patcher
@@ -148,6 +157,30 @@ def _signup(client: TestClient, email: str = "user@example.com", password: str =
     return response.json()
 
 
+def _login_with_mfa_if_needed(
+    client: TestClient,
+    email: str = "user@example.com",
+    password: str = "Password123!",
+) -> dict:
+    response = client.post(
+        "/v1/management/login",
+        json={"email": email, "password": password},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    if payload.get("mfa_required"):
+        verify_response = client.post(
+            "/v1/management/mfa/verify",
+            json={
+                "challenge_token": payload["challenge_token"],
+                "code": payload["debug_code"],
+            },
+        )
+        assert verify_response.status_code == 200
+        return verify_response.json()
+    return payload
+
+
 def test_regular_user_session_lifecycle_supports_me_and_logout(tmp_path: Path):
     client, _session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
     try:
@@ -165,7 +198,7 @@ def test_regular_user_session_lifecycle_supports_me_and_logout(tmp_path: Path):
         after_logout_response = client.get("/v1/management/me")
         assert after_logout_response.status_code == 401
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -191,7 +224,7 @@ def test_authenticated_user_can_update_profile_details(tmp_path: Path):
         assert payload["company"] == "KoreShield"
         assert payload["job_title"] == "Co-founder & CTO"
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -211,13 +244,27 @@ def test_login_promotes_legacy_user_when_workspace_has_no_privileged_users(tmp_p
             json={"email": "user@example.com", "password": "Password123!"},
         )
         assert login_response.status_code == 200
-        assert login_response.json()["user"]["role"] == "owner"
+        login_payload = login_response.json()
+        assert login_payload["user"]["role"] == "owner"
+        assert login_payload["mfa_required"] is True
+        assert login_payload["challenge_token"]
+        assert login_payload["debug_code"]
+
+        verify_response = client.post(
+            "/v1/management/mfa/verify",
+            json={
+                "challenge_token": login_payload["challenge_token"],
+                "code": login_payload["debug_code"],
+            },
+        )
+        assert verify_response.status_code == 200
+        assert verify_response.json()["user"]["role"] == "owner"
 
         me_response = client.get("/v1/management/me")
         assert me_response.status_code == 200
         assert me_response.json()["user"]["role"] == "owner"
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -240,7 +287,7 @@ def test_billing_account_created_for_authenticated_user_scope(tmp_path: Path):
         assert payload["status"] == "inactive"
         assert payload["external_customer_id"] == f"user:{user_id}"
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -265,7 +312,7 @@ def test_billing_account_prefers_team_scope_for_owner(tmp_path: Path):
         assert payload["external_customer_id"] == f"team:{team.id}"
         assert payload["billing_email"] == "user@example.com"
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -306,7 +353,7 @@ def test_internal_team_emails_receive_unlimited_enterprise_billing_state(tmp_pat
         assert portal_response.status_code == 400
         assert "unlimited enterprise access" in portal_response.json()["detail"]
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -325,7 +372,7 @@ def test_billing_checkout_returns_503_without_polar_configuration(tmp_path: Path
         assert response.status_code == 503
         assert response.json()["detail"] == "POLAR_ACCESS_TOKEN is not configured"
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -344,7 +391,7 @@ def test_billing_portal_returns_503_without_polar_configuration(tmp_path: Path):
         assert response.status_code == 503
         assert response.json()["detail"] == "POLAR_ACCESS_TOKEN is not configured"
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -395,7 +442,7 @@ def test_billing_checkout_normalizes_payload_for_polar(tmp_path: Path):
                 assert "team_id" not in sent_payload["metadata"]
                 assert "team_slug" not in sent_payload["metadata"]
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -458,7 +505,7 @@ def test_billing_checkout_retries_without_currency_when_product_currency_mismatc
                 assert "currency" not in second_payload
                 assert second_payload["product_id"] == "prod_test_123"
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -487,7 +534,7 @@ def test_teams_collection_routes_work_without_redirects(tmp_path: Path):
         assert trailing_list_response.status_code == 200
         assert len(trailing_list_response.json()) == 1
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -553,7 +600,7 @@ def test_team_invites_and_shared_dashboards_flow(tmp_path: Path):
         cancel_invite_response = client.delete(f"/v1/teams/{team_id}/invites/{invite_id}")
         assert cancel_invite_response.status_code == 204
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))
@@ -563,6 +610,8 @@ def test_reports_update_delete_and_download_flow(tmp_path: Path):
     client, session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
     try:
         _signup(client)
+        client.post("/v1/management/logout")
+        _login_with_mfa_if_needed(client)
 
         create_response = client.post(
             "/v1/reports",
@@ -611,7 +660,7 @@ def test_reports_update_delete_and_download_flow(tmp_path: Path):
         delete_response = client.delete(f"/v1/reports/{report_id}")
         assert delete_response.status_code == 204
     finally:
-        management.send_welcome_email, management.send_verification_email = original_senders
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
         env_patcher.stop()
         asyncio.run(_dispose_engine(engine))

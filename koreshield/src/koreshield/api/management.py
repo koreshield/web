@@ -2,6 +2,7 @@ import json
 import os
 import re
 import secrets
+import hashlib
 import uuid
 from urllib.parse import urlparse
 from uuid import UUID
@@ -25,6 +26,7 @@ from ..oauth_handler import (
     OAuthException,
 )
 from ..services.email import (
+    send_admin_mfa_email,
     send_password_reset_email,
     send_verification_email,
     send_welcome_email,
@@ -34,6 +36,9 @@ from .auth import AUTH_COOKIE_NAME, get_current_admin, get_current_user, issue_j
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["Management"])
+PRIVILEGED_ROLES = {"admin", "owner", "superuser"}
+_MFA_CODE_TTL_SECONDS = 10 * 60
+_MFA_CHALLENGE_STORE: dict[str, dict] = {}
 
 SENSITIVE_KEY_PATTERN = re.compile(
     r"(password|secret|token|private[_-]?key|api[_-]?key|dsn|connection|credential|auth)",
@@ -78,6 +83,15 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class MFAVerifyRequest(BaseModel):
+    challenge_token: str
+    code: str = Field(..., min_length=6, max_length=6)
+
+
+class MFAResendRequest(BaseModel):
+    challenge_token: str
+
+
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 
@@ -108,6 +122,110 @@ def _validate_password_strength(password: str) -> None:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Password must be at least 8 characters long",
         )
+
+
+def _cleanup_expired_mfa_challenges() -> None:
+    now = _utcnow_naive()
+    expired_tokens = [
+        token
+        for token, challenge in _MFA_CHALLENGE_STORE.items()
+        if challenge.get("expires_at") and challenge["expires_at"] <= now
+    ]
+    for token in expired_tokens:
+        _MFA_CHALLENGE_STORE.pop(token, None)
+
+
+def _generate_mfa_code() -> str:
+    return "".join(secrets.choice("0123456789") for _ in range(6))
+
+
+def _hash_mfa_code(code: str, salt: str) -> str:
+    return hashlib.sha256(f"{salt}:{code}".encode("utf-8")).hexdigest()
+
+
+def _build_log_integrity_hash(entry: dict) -> str:
+    canonical_payload = json.dumps(
+        {
+            "request_id": entry.get("request_id"),
+            "timestamp": entry.get("timestamp"),
+            "provider": entry.get("provider"),
+            "model": entry.get("model"),
+            "path": entry.get("path"),
+            "method": entry.get("method"),
+            "status_code": entry.get("status_code"),
+            "is_blocked": entry.get("is_blocked"),
+            "attack_detected": entry.get("attack_detected"),
+            "attack_type": entry.get("attack_type"),
+            "user_id": entry.get("user_id"),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    )
+    return hashlib.sha256(canonical_payload.encode("utf-8")).hexdigest()
+
+
+def _build_auth_response(user: User, token: str) -> dict:
+    return {
+        "user": user.to_dict(),
+        "token": token,
+        "mfa_required": False,
+    }
+
+
+async def _issue_admin_mfa_challenge(user: User) -> dict:
+    _cleanup_expired_mfa_challenges()
+    challenge_token = secrets.token_urlsafe(32)
+    code = _generate_mfa_code()
+    code_salt = secrets.token_hex(16)
+    expires_at = _utcnow_naive() + timedelta(seconds=_MFA_CODE_TTL_SECONDS)
+
+    _MFA_CHALLENGE_STORE[challenge_token] = {
+        "user_id": str(user.id),
+        "email": user.email,
+        "role": user.role,
+        "name": user.name,
+        "code_hash": _hash_mfa_code(code, code_salt),
+        "code_salt": code_salt,
+        "expires_at": expires_at,
+        "delivery": "email",
+        "auth_method": user.oauth_provider or "password",
+    }
+
+    sent = await send_admin_mfa_email(user.email, code, user.name)
+    if not sent:
+        _MFA_CHALLENGE_STORE.pop(challenge_token, None)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Unable to deliver the admin verification code right now",
+        )
+
+    payload = {
+        "user": user.to_dict(),
+        "mfa_required": True,
+        "challenge_token": challenge_token,
+        "delivery": "email",
+        "expires_in_seconds": _MFA_CODE_TTL_SECONDS,
+    }
+    if _is_dev_mode():
+        payload["debug_code"] = code
+    return payload
+
+
+async def _complete_login(response: Response, user: User, *, mfa_verified: bool, auth_method: str) -> dict:
+    user.last_login_at = _utcnow_naive()
+    token = issue_jwt_token(
+        user_id=str(user.id),
+        email=user.email,
+        role=user.role,
+        extra_claims={
+            "mfa_verified": mfa_verified,
+            "auth_method": auth_method,
+            "name": user.name,
+        },
+    )
+    _set_auth_cookie(response, token)
+    return _build_auth_response(user, token)
 
 
 async def _count_privileged_users(db: AsyncSession) -> int:
@@ -295,25 +413,17 @@ async def signup(
 
         logger.info("user_signup_success", user_id=str(user.id), email=user.email)
 
-        token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
-
-        cookie_samesite = os.getenv("COOKIE_SAMESITE")
-        if not cookie_samesite:
-            env = os.getenv("ENVIRONMENT", "").lower()
-            cookie_samesite = "none" if env in {"production", "staging"} else "lax"
-        cookie_secure = os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"}
-        if cookie_samesite == "none":
-            cookie_secure = True
-
-        response.set_cookie(
-            key=AUTH_COOKIE_NAME,
-            value=f"Bearer {token}",
-            httponly=True,
-            samesite=cookie_samesite,
-            secure=cookie_secure,
-            max_age=24 * 60 * 60,
-            path="/",
+        token = issue_jwt_token(
+            user_id=str(user.id),
+            email=user.email,
+            role=user.role,
+            extra_claims={
+                "mfa_verified": False,
+                "auth_method": "password",
+                "name": user.name,
+            },
         )
+        _set_auth_cookie(response, token)
 
         return {
             "user": user.to_dict(),
@@ -402,35 +512,29 @@ async def admin_login(
 
         role_changed = await _promote_to_owner_if_workspace_unclaimed(db, user)
 
-        # Update last login
-        user.last_login_at = _utcnow_naive()
         await db.commit()
 
-        token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
-        cookie_samesite = os.getenv("COOKIE_SAMESITE")
-        if not cookie_samesite:
-            env = os.getenv("ENVIRONMENT", "").lower()
-            cookie_samesite = "none" if env in {"production", "staging"} else "lax"
-        cookie_secure = os.getenv("COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"}
-        if cookie_samesite == "none":
-            cookie_secure = True
+        if user.role in PRIVILEGED_ROLES:
+            logger.info(
+                "login_mfa_challenge_issued",
+                user_id=str(user.id),
+                email=user.email,
+                role=user.role,
+                role_changed=role_changed,
+            )
+            return await _issue_admin_mfa_challenge(user)
 
-        response.set_cookie(
-            key=AUTH_COOKIE_NAME,
-            value=f"Bearer {token}",
-            httponly=True,
-            samesite=cookie_samesite,
-            secure=cookie_secure,
-            max_age=24 * 60 * 60,
-            path="/",
+        auth_response = await _complete_login(
+            response,
+            user,
+            mfa_verified=False,
+            auth_method="password",
         )
+        await db.commit()
 
         logger.info("login_success", user_id=str(user.id), email=user.email, role=user.role, role_changed=role_changed)
 
-        return {
-            "user": user.to_dict(),
-            "token": token
-        }
+        return auth_response
 
     except HTTPException:
         raise
@@ -440,6 +544,97 @@ async def admin_login(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Login failed. Please try again later."
         )
+
+
+@router.post(
+    "/mfa/verify",
+    summary="Verify Admin MFA",
+    description="Complete privileged sign-in by verifying the one-time code sent to the admin email address.",
+    tags=["Authentication"],
+)
+async def verify_admin_mfa(
+    request: MFAVerifyRequest,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    _cleanup_expired_mfa_challenges()
+    challenge = _MFA_CHALLENGE_STORE.get(request.challenge_token)
+    if not challenge:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="MFA challenge is invalid or has expired",
+        )
+
+    expected_hash = _hash_mfa_code(request.code.strip(), challenge["code_salt"])
+    if not secrets.compare_digest(expected_hash, challenge["code_hash"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid verification code",
+        )
+
+    result = await db.execute(select(User).where(User.id == UUID(challenge["user_id"])))
+    user = result.scalar_one_or_none()
+    if not user:
+        _MFA_CHALLENGE_STORE.pop(request.challenge_token, None)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    auth_method = challenge.get("auth_method", user.oauth_provider or "password")
+    auth_response = await _complete_login(
+        response,
+        user,
+        mfa_verified=True,
+        auth_method=auth_method,
+    )
+    await db.commit()
+    _MFA_CHALLENGE_STORE.pop(request.challenge_token, None)
+
+    logger.info("admin_mfa_verified", user_id=str(user.id), email=user.email, role=user.role)
+    return auth_response
+
+
+@router.post(
+    "/mfa/resend",
+    summary="Resend Admin MFA Code",
+    description="Resend the one-time admin verification code for an active privileged login challenge.",
+    tags=["Authentication"],
+)
+async def resend_admin_mfa(
+    request: MFAResendRequest,
+):
+    _cleanup_expired_mfa_challenges()
+    challenge = _MFA_CHALLENGE_STORE.get(request.challenge_token)
+    if not challenge:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="MFA challenge is invalid or has expired",
+        )
+
+    code = _generate_mfa_code()
+    code_salt = secrets.token_hex(16)
+    challenge["code_salt"] = code_salt
+    challenge["code_hash"] = _hash_mfa_code(code, code_salt)
+    challenge["expires_at"] = _utcnow_naive() + timedelta(seconds=_MFA_CODE_TTL_SECONDS)
+
+    sent = await send_admin_mfa_email(
+        challenge["email"],
+        code,
+        challenge.get("name"),
+    )
+    if not sent:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Unable to resend the admin verification code right now",
+        )
+
+    payload = {
+        "status": "resent",
+        "challenge_token": request.challenge_token,
+        "delivery": challenge.get("delivery", "email"),
+        "expires_in_seconds": _MFA_CODE_TTL_SECONDS,
+    }
+    if _is_dev_mode():
+        payload["debug_code"] = code
+    return payload
 
 
 @router.post(
@@ -764,6 +959,21 @@ async def get_audit_logs(
                     "user_id": str(entry.user_id) if entry.user_id else None,
                     "ip": entry.ip_address,
                     "user_agent": entry.user_agent,
+                    "integrity_hash": _build_log_integrity_hash(
+                        {
+                            "request_id": entry.request_id,
+                            "timestamp": entry.timestamp.isoformat(),
+                            "provider": entry.provider,
+                            "model": entry.model,
+                            "path": entry.path,
+                            "method": entry.method,
+                            "status_code": entry.status_code,
+                            "is_blocked": entry.is_blocked,
+                            "attack_detected": entry.attack_detected,
+                            "attack_type": entry.attack_type,
+                            "user_id": str(entry.user_id) if entry.user_id else None,
+                        }
+                    ),
                 })
         except Exception as e:
             logger.error("audit_logs_query_failed", error=str(e))
@@ -1298,7 +1508,11 @@ class OAuthLoginResponse(BaseModel):
 class OAuthCallbackResponse(BaseModel):
     """Returned after a successful OAuth callback."""
     user: dict = Field(..., description="Authenticated user object")
-    token: str = Field(..., description="JWT access token (also set as an HttpOnly cookie)")
+    token: str | None = Field(None, description="JWT access token (also set as an HttpOnly cookie)")
+    mfa_required: bool = Field(False, description="Whether a second factor is required before admin access is granted")
+    challenge_token: str | None = Field(None, description="Opaque MFA challenge token when privileged verification is pending")
+    delivery: str | None = Field(None, description="How the second factor was delivered")
+    expires_in_seconds: int | None = Field(None, description="Challenge lifetime in seconds")
 
 
 # TTL (seconds) for the CSRF state token stored in Redis
@@ -1479,14 +1693,22 @@ async def github_callback(
             email=user_info["email"],
             name=user_info["name"],
         )
-        user.last_login_at = _utcnow_naive()
         await db.commit()
 
-        token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
-        _set_auth_cookie(response, token)
+        if user.role in PRIVILEGED_ROLES:
+            logger.info("github_oauth_mfa_challenge_issued", user_id=str(user.id), email=user.email, role=user.role)
+            return await _issue_admin_mfa_challenge(user)
+
+        auth_response = await _complete_login(
+            response,
+            user,
+            mfa_verified=False,
+            auth_method="github",
+        )
+        await db.commit()
 
         logger.info("github_oauth_login_success", user_id=str(user.id), email=user.email)
-        return {"user": user.to_dict(), "token": token}
+        return auth_response
 
     except OAuthException as e:
         logger.warning("github_callback_oauth_error", error=str(e))
@@ -1573,14 +1795,22 @@ async def google_callback(
             email=user_info["email"],
             name=user_info["name"],
         )
-        user.last_login_at = _utcnow_naive()
         await db.commit()
 
-        token = issue_jwt_token(user_id=str(user.id), email=user.email, role=user.role)
-        _set_auth_cookie(response, token)
+        if user.role in PRIVILEGED_ROLES:
+            logger.info("google_oauth_mfa_challenge_issued", user_id=str(user.id), email=user.email, role=user.role)
+            return await _issue_admin_mfa_challenge(user)
+
+        auth_response = await _complete_login(
+            response,
+            user,
+            mfa_verified=False,
+            auth_method="google",
+        )
+        await db.commit()
 
         logger.info("google_oauth_login_success", user_id=str(user.id), email=user.email)
-        return {"user": user.to_dict(), "token": token}
+        return auth_response
 
     except OAuthException as e:
         logger.warning("google_callback_oauth_error", error=str(e))
