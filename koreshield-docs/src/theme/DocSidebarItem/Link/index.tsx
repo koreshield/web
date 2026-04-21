@@ -12,7 +12,7 @@ import React from 'react';
 import OriginalDocSidebarItemLink from '@theme-original/DocSidebarItem/Link';
 import type { Props } from '@theme/DocSidebarItem/Link';
 
-export default function DocSidebarItemLink(props: Props): JSX.Element {
+export default function DocSidebarItemLink(props: Props): React.JSX.Element {
 	const { item } = props;
 	const icon = item.customProps?.icon as string | undefined;
 

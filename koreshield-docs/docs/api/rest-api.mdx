@@ -18,9 +18,9 @@ KoreShield's REST API contract is generated from the live FastAPI app.
 
 Protected endpoints require authentication via one of these methods:
 
-1. `Authorization: Bearer <jwt>` — JWT issued via the dashboard login
-2. `X-API-Key: ks_...` — API key provisioned via the dashboard
-3. `ks_access_token` httpOnly cookie — JWT set during login
+1. `Authorization: Bearer <jwt>`: JWT issued via the dashboard login
+2. `X-API-Key: ks_...`: API key provisioned via the dashboard
+3. `ks_access_token` httpOnly cookie: JWT set during login
 
 JWT validation is strict:
 
@@ -44,7 +44,7 @@ JWT validation is strict:
 
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
-| `/v1/chat/completions` | POST | Required | OpenAI-compatible chat endpoint — scan + forward + return |
+| `/v1/chat/completions` | POST | Required | OpenAI-compatible chat endpoint: scan, forward, and return |
 | `/v1/rag/scan` | POST | Required | RAG context scanning for indirect injection |
 | `/v1/rag/scans` | GET | Required | List RAG scan history |
 | `/v1/rag/scans/{id}` | GET | Required | Retrieve a RAG scan by ID |
@@ -87,7 +87,7 @@ All protected proxy endpoints are rate-limited via SlowAPI (default: `60/minute`
 | `/v1/management/api-keys/{id}` | DELETE | Required | Revoke an API key |
 | `/v1/management/logs` | GET | Required | Request audit logs |
 
-## `/v1/chat/completions` — Proxy Endpoint
+## `/v1/chat/completions`: Proxy Endpoint
 
 ### Streaming
 
@@ -106,7 +106,7 @@ curl -s -N -X POST https://api.koreshield.com/v1/chat/completions \
 
 ### Automatic Model Routing
 
-KoreShield routes requests to the correct upstream provider based on the model name prefix — no extra configuration needed:
+KoreShield routes requests to the correct upstream provider based on the model name prefix, with no extra configuration needed:
 
 | Model prefix | Provider |
 |---|---|
@@ -135,14 +135,14 @@ When the prompt scan blocks a request, the endpoint returns **HTTP 403**:
 }
 ```
 
-## `/v1/scan` — Prompt Scan Response
+## `/v1/scan`: Prompt Scan Response
 
 ### Response Fields
 
 | Field | Type | Description |
 |---|---|---|
 | `blocked` | boolean | Whether the prompt was blocked |
-| `confidence` | float | Detection confidence 0–1 |
+| `confidence` | float | Detection confidence from 0 to 1 |
 | `attack_type` | string \| null | Primary detected attack category |
 | `attack_categories` | string[] | All detected attack categories |
 | `indicators` | string[] | Specific patterns that triggered detection |

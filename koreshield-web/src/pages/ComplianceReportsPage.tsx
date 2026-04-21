@@ -66,7 +66,7 @@ function scoreToStatus(score: number): string {
 export function ComplianceReportsPage() {
 	const [selectedFramework, setSelectedFramework] = useState<string | null>(null);
 
-	// Real compliance posture from backend — derived from actual system state
+	// Real compliance posture from backend, derived from actual system state
 	const {
 		data: postureDataRaw,
 		isLoading,
@@ -86,12 +86,12 @@ export function ComplianceReportsPage() {
 
 	const exportReport = (framework: string, controls: ComplianceControl[]) => {
 		const lines = [
-			`KoreShield Compliance Report — ${framework}`,
+			`KoreShield Compliance Report: ${framework}`,
 			`Generated: ${format(new Date(), 'PPpp')}`,
 			'',
 			'CONTROLS:',
 			...controls.map(
-				c => `[${c.status.toUpperCase()}] ${c.id} — ${c.name}\n  ${c.description}\n  Evidence: ${c.evidence}`
+				c => `[${c.status.toUpperCase()}] ${c.id}: ${c.name}\n  ${c.description}\n  Evidence: ${c.evidence}`
 			),
 		];
 		const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
@@ -193,7 +193,7 @@ export function ComplianceReportsPage() {
 									<>
 										<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 											<p className="text-sm text-muted-foreground">
-												Control statuses are assessed from your live system — auth, logging, threat detection, and uptime.
+												Control statuses are assessed from your live system: auth, logging, threat detection, and uptime.
 											</p>
 											<button
 												onClick={() => exportReport(selectedFramework, selectedPosture.controls)}
@@ -210,7 +210,7 @@ export function ComplianceReportsPage() {
 														<div className="flex items-center gap-2">
 															{getStatusIcon(control.status)}
 															<span className="font-semibold text-sm">
-																{control.id} — {control.name}
+																{control.id}: {control.name}
 															</span>
 														</div>
 														<span className={`text-xs px-2 py-1 rounded-full border whitespace-nowrap flex-shrink-0 ${getStatusColor(control.status)}`}>

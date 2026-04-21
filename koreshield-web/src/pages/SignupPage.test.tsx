@@ -10,6 +10,7 @@ const { setSession } = vi.hoisted(() => ({
 
 vi.mock('../lib/auth', () => ({
 	authService: {
+		isAuthenticated: vi.fn(() => false),
 		setSession,
 	},
 }));

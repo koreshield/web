@@ -24,7 +24,7 @@ const differentiators = [
 	{
 		icon: <Zap className="w-6 h-6" />,
 		title: 'Lightning Fast',
-		description: '10–50ms latency overhead. Won\'t slow down your application. Optimised for production.',
+		description: 'Low latency overhead designed for production deployments and fast request paths.',
 		color: 'text-yellow-400',
 		bg: 'bg-yellow-400/10',
 	},
