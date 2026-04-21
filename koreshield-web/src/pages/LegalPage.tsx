@@ -152,43 +152,23 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 		sections: [
 			{
 				heading: 'What are cookies?',
-				body: 'Cookies are small text files placed on your device when you visit a website or use a web application. We also use local storage and session storage in your browser where necessary for the Platform to function. References to "cookies" in this policy include these similar technologies. KoreShield uses cookies for two purposes only: making the Platform work securely, and understanding how the Platform is used so we can improve it.',
-			},
-			{
-				heading: 'What we do not do',
-				body: 'We do not use cookies for advertising, retargeting, or behavioural profiling. We do not set or permit advertising or retargeting cookies of any kind, third-party social media tracking pixels (Facebook, LinkedIn, Twitter/X, or others), cross-site tracking cookies that follow you beyond our own domains, or fingerprinting scripts. We do not sell or share cookie data with advertising networks or data brokers. KoreShield products are ad-free.',
+				body: 'Cookies are small text files stored on your device when you visit a website. They help us recognise your session, remember preferences, and understand how the site is used.',
 			},
 			{
 				heading: 'Strictly necessary cookies',
-				body: 'These cookies are required for the Platform to function and cannot be disabled. No consent is required for these cookies under the UK Privacy and Electronic Communications Regulations (PECR).\n\nks_session: authenticates your logged-in session. Set as HttpOnly, Secure, and SameSite=Strict. Signed as a JWT using HS256. Expires on browser close or after 24 hours of inactivity.\n\nks_csrf: CSRF protection token for form submissions and state-changing API requests. Session duration.\n\nks_oauth_state: per-request state token for OAuth login flows (GitHub and Google). Protects against CSRF during authentication. Stored in Redis server-side with a 10-minute TTL; the cookie expires correspondingly.\n\nks_prefs: stores your in-session UI preferences such as dashboard layout and selected filters. Contains no personal data. Session duration.\n\ncookie_consent: records your cookie consent choice so we do not present the consent banner on return visits. Retained for 12 months.',
+				body: 'These cookies are required for the platform to function. They include session tokens (to keep you logged in) and CSRF protection tokens. These cannot be disabled.',
 			},
 			{
 				heading: 'Analytics cookies',
-				body: 'These cookies are set only with your consent. They help us understand how developers use the Platform and documentation so we can improve the product. We do not use Google Analytics, Hotjar, Intercom, Segment, HubSpot, or any other third-party analytics platform that would track you across other websites.\n\nks_analytics: tracks anonymised usage events within the Platform: pages visited, features used, API call counts. No prompt content, no personal identifiers, no cross-site tracking. Retained for 30 days.\n\nks_docs_session: tracks anonymised documentation page views to understand which guides are most used. No personal identifiers. Session duration.',
+				body: 'We use privacy-respecting analytics (no cross-site tracking, IP anonymisation enabled) to understand which features are most used and where users encounter friction. These are optional.',
 			},
 			{
-				heading: 'Third-party cookies: Cloudflare',
-				body: 'Our Platform uses Cloudflare for CDN and DDoS protection. Cloudflare may set the following cookies as a necessary part of the infrastructure that keeps the Platform available and secure. These cookies are set by Cloudflare, not by KoreShield.\n\n__cf_bm: bot management cookie that distinguishes between human visitors and automated traffic. Duration: 30 minutes.\n\n_cfuvid: used by Cloudflare for rate limiting. Not set for all visitors. Session duration.\n\nThese are the only third-party cookies on our Platform. See Cloudflare\'s Cookie Policy at <a href="https://cloudflare.com/cookie-policy" class="underline">cloudflare.com/cookie-policy</a> for more detail.',
-			},
-			{
-				heading: 'Managing your preferences',
-				body: 'When you first visit the Platform or website you will be presented with a cookie consent banner where you can accept all cookies, accept necessary cookies only, or manage your preferences by category. You can update your choices at any time by clicking the Cookie Settings link in the footer of any page on <a href="https://koreshield.com" class="underline hover:text-foreground transition-colors">koreshield.com</a> or <a href="https://app.koreshield.com" class="underline">app.koreshield.com</a>\n\nYou can also control cookies through your browser settings to view, delete, or block cookies, or ask your browser to notify you before one is set. Note that disabling strictly necessary cookies will prevent you from logging in to the Platform.',
-			},
-			{
-				heading: 'Withdrawing consent',
-				body: 'You can withdraw consent for analytics cookies at any time via the cookie settings control on the Platform. Withdrawal does not affect the lawfulness of processing that occurred before withdrawal. When you withdraw consent, analytics cookies will be deleted from your device and will not be reset until you consent again.',
-			},
-			{
-				heading: 'Do Not Track',
-				body: 'Some browsers send a Do Not Track (DNT) signal to websites. We respect DNT signals: if your browser sends a DNT signal we will not set analytics cookies for your session, regardless of your saved cookie preferences.',
-			},
-			{
-				heading: 'Changes to this policy',
-				body: 'We may update this Cookie Policy from time to time to reflect changes in the cookies we use or in applicable law. We will notify you of material changes by updating the version number and date at the top of this document and, where required, by presenting a new consent banner on your next visit. Your continued use of the Platform after the effective date constitutes your acceptance of the changes.',
+				heading: 'Managing cookies',
+				body: 'You can disable optional cookies in your browser settings. Disabling strictly necessary cookies will prevent you from logging in to the dashboard.',
 			},
 			{
 				heading: 'Contact',
-				body: 'Questions about this Cookie Policy or how we use cookies: privacy@koreshield.com. Data controller: Koreshield Labs Ltd, 3rd Floor, 86-90 Paul Street, London, EC2A 4NE (Co. No. 17057784). Supervisory authority: Information Commissioner\'s Office, <a href="https://ico.org.uk" class="underline">ico.org.uk</a>, 0303 123 1113.\n\nThis Cookie Policy should be read alongside our <a href="https://koreshield.com/privacy" class="underline">koreshield.com/privacy</a> and <a href="https://koreshield.com/terms" class="underline">koreshield.com/terms</a>',
+				body: 'Questions about our cookie usage: hello@koreshield.com.',
 			},
 		],
 	},
@@ -259,6 +239,7 @@ const pages: Record<string, { title: string; effective: string; sections: { head
 			},
 		],
 	},
+
 };
 
 export default function LegalPage() {
