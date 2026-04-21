@@ -105,6 +105,43 @@ class SecurityConfigUpdate(BaseModel):
     default_action: str | None = None
 
 
+class IncidentCreateRequest(BaseModel):
+    title: str
+    severity: str = Field(..., pattern="^(critical|major|minor|maintenance)$")
+    affected_components: list[str] = Field(default_factory=list)
+    message: str
+    incident_type: str = "service_disruption"
+    status: str = Field(default="investigating", pattern="^(investigating|identified|monitoring|resolved|scheduled)$")
+
+
+class IncidentUpdateRequest(BaseModel):
+    message: str
+    status: str = Field(..., pattern="^(investigating|identified|monitoring|resolved|scheduled)$")
+
+
+class MaintenanceCreateRequest(BaseModel):
+    title: str
+    description: str
+    scheduled_start: str
+    scheduled_end: str
+    affected_components: list[str] = Field(default_factory=list)
+    status: str = Field(default="scheduled", pattern="^(scheduled|in_progress|completed)$")
+
+
+class BreachCreateRequest(BaseModel):
+    title: str
+    severity: str = Field(..., pattern="^(critical|major|minor)$")
+    summary: str
+    status: str = Field(default="investigating", pattern="^(investigating|identified|monitoring|resolved)$")
+    disclosure_required: bool = False
+    regulatory_due_at: str | None = None
+
+
+class BreachUpdateRequest(BaseModel):
+    message: str
+    status: str = Field(..., pattern="^(investigating|identified|monitoring|resolved)$")
+
+
 def _utcnow_naive() -> datetime:
     """Return naive UTC datetime for current schema compatibility."""
     return datetime.now(timezone.utc).replace(tzinfo=None)
@@ -908,6 +945,7 @@ async def get_audit_logs(
     user_id_str = str(user_uuid)
     logs: list[dict] = []
     seen_ids: set[str] = set()
+    audit_integrity = getattr(request.app.state, "audit_integrity", None)
 
     # ── 1. In-memory audit_log_store (RAG scans, fast-path entries) ─────────
     audit_store = getattr(request.app.state, "audit_log_store", None)
@@ -974,6 +1012,11 @@ async def get_audit_logs(
                             "user_id": str(entry.user_id) if entry.user_id else None,
                         }
                     ),
+                    **(
+                        audit_integrity.get_metadata(entry.request_id)
+                        if audit_integrity and entry.request_id
+                        else {"verification_status": "unavailable", "storage_backend": "db_only"}
+                    ),
                 })
         except Exception as e:
             logger.error("audit_logs_query_failed", error=str(e))
@@ -984,6 +1027,187 @@ async def get_audit_logs(
     paginated = logs[offset: offset + limit]
 
     return {"logs": paginated, "total": total_count, "limit": limit, "offset": offset}
+
+
+@router.get(
+    "/logs/verify",
+    summary="Verify Audit Log Chain",
+    description="Verify ledger-backed hash-chain metadata for this account's audit logs.",
+    tags=["Management"],
+)
+async def verify_audit_log_chain(
+    request: Request,
+    limit: int = 200,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession | None = Depends(get_optional_db),
+):
+    logs_response = await get_audit_logs(
+        request=request,
+        limit=limit,
+        offset=0,
+        current_user=current_user,
+        db=db,
+    )
+    request_ids = [entry.get("request_id") for entry in logs_response["logs"] if entry.get("request_id")]
+    audit_integrity = getattr(request.app.state, "audit_integrity", None)
+    if not audit_integrity:
+        return {
+            "checked": 0,
+            "missing": request_ids,
+            "latest_chain_hash": None,
+            "storage_backend": "unavailable",
+            "verification_status": "unavailable",
+        }
+    return audit_integrity.verify_request_ids(request_ids)
+
+
+@router.get(
+    "/operations",
+    summary="Operational State",
+    description="Get the current operational incident, maintenance, breach, and uptime evidence state.",
+    tags=["Management"],
+)
+async def get_operational_state(
+    request: Request,
+    current_user: dict = Depends(get_current_admin),
+):
+    operational_status = getattr(request.app.state, "operational_status", None)
+    if not operational_status:
+        raise HTTPException(status_code=500, detail="Operational status service not available")
+    return await operational_status.get_admin_state()
+
+
+@router.post(
+    "/operations/incidents",
+    summary="Create Incident",
+    description="Create a customer-facing operational incident entry and publish it in the status history.",
+    tags=["Management"],
+)
+async def create_incident(
+    request: Request,
+    payload: IncidentCreateRequest,
+    current_user: dict = Depends(get_current_admin),
+):
+    operational_status = getattr(request.app.state, "operational_status", None)
+    if not operational_status:
+        raise HTTPException(status_code=500, detail="Operational status service not available")
+    incident = await operational_status.create_incident(
+        title=payload.title,
+        severity=payload.severity,
+        affected_components=payload.affected_components,
+        message=payload.message,
+        incident_type=payload.incident_type,
+        status=payload.status,
+        source="manual",
+    )
+    logger.info("incident_created", actor=current_user.get("email"), incident_id=incident["id"])
+    return incident
+
+
+@router.post(
+    "/operations/incidents/{incident_id}/updates",
+    summary="Add Incident Update",
+    description="Append a timeline update to an operational incident and optionally resolve it.",
+    tags=["Management"],
+)
+async def add_incident_update(
+    incident_id: str,
+    request: Request,
+    payload: IncidentUpdateRequest,
+    current_user: dict = Depends(get_current_admin),
+):
+    operational_status = getattr(request.app.state, "operational_status", None)
+    if not operational_status:
+        raise HTTPException(status_code=500, detail="Operational status service not available")
+    try:
+        incident = await operational_status.add_incident_update(
+            incident_id,
+            message=payload.message,
+            status=payload.status,
+        )
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    logger.info("incident_updated", actor=current_user.get("email"), incident_id=incident_id, status=payload.status)
+    return incident
+
+
+@router.post(
+    "/operations/maintenance",
+    summary="Schedule Maintenance",
+    description="Create a scheduled maintenance window for the public status page.",
+    tags=["Management"],
+)
+async def schedule_maintenance(
+    request: Request,
+    payload: MaintenanceCreateRequest,
+    current_user: dict = Depends(get_current_admin),
+):
+    operational_status = getattr(request.app.state, "operational_status", None)
+    if not operational_status:
+        raise HTTPException(status_code=500, detail="Operational status service not available")
+    window = await operational_status.schedule_maintenance(
+        title=payload.title,
+        description=payload.description,
+        scheduled_start=payload.scheduled_start,
+        scheduled_end=payload.scheduled_end,
+        affected_components=payload.affected_components,
+        status=payload.status,
+    )
+    logger.info("maintenance_scheduled", actor=current_user.get("email"), maintenance_id=window["id"])
+    return window
+
+
+@router.post(
+    "/operations/breaches",
+    summary="Create Breach Record",
+    description="Open a security incident / breach record with disclosure and regulatory tracking fields.",
+    tags=["Management"],
+)
+async def create_breach_record(
+    request: Request,
+    payload: BreachCreateRequest,
+    current_user: dict = Depends(get_current_admin),
+):
+    operational_status = getattr(request.app.state, "operational_status", None)
+    if not operational_status:
+        raise HTTPException(status_code=500, detail="Operational status service not available")
+    record = await operational_status.create_breach_record(
+        title=payload.title,
+        severity=payload.severity,
+        summary=payload.summary,
+        status=payload.status,
+        disclosure_required=payload.disclosure_required,
+        regulatory_due_at=payload.regulatory_due_at,
+    )
+    logger.info("breach_record_created", actor=current_user.get("email"), breach_id=record["id"])
+    return record
+
+
+@router.post(
+    "/operations/breaches/{breach_id}/updates",
+    summary="Add Breach Update",
+    description="Append a timeline update to a breach record and keep disclosure tracking current.",
+    tags=["Management"],
+)
+async def add_breach_update(
+    breach_id: str,
+    request: Request,
+    payload: BreachUpdateRequest,
+    current_user: dict = Depends(get_current_admin),
+):
+    operational_status = getattr(request.app.state, "operational_status", None)
+    if not operational_status:
+        raise HTTPException(status_code=500, detail="Operational status service not available")
+    try:
+        record = await operational_status.add_breach_update(
+            breach_id,
+            message=payload.message,
+            status=payload.status,
+        )
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Breach record not found")
+    logger.info("breach_record_updated", actor=current_user.get("email"), breach_id=breach_id, status=payload.status)
+    return record
 
 class Policy(BaseModel):
     id: str
