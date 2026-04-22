@@ -140,7 +140,7 @@ export default function BillingPage() {
 		periodOverride?: BillingInterval,
 	) => {
 		if (!productId) {
-			setError('Missing product ID. Set the VITE_POLAR_*_PRODUCT_ID environment variable first.');
+			setError('Checkout is not available right now. Please contact support.');
 			return;
 		}
 
@@ -376,7 +376,7 @@ export default function BillingPage() {
 						{checkoutNotice ? <p className="mt-2 text-xs text-emerald-600 sm:text-sm">{checkoutNotice}</p> : null}
 						{isInternalUnlimited ? (
 							<p className="mt-2 text-xs text-emerald-600 sm:text-sm">
-								This account is internally provisioned on unlimited Enterprise access, so hosted upgrades and Polar checkout are intentionally disabled.
+								This account is provisioned with internal Enterprise access. Hosted checkout is not applicable.
 							</p>
 						) : null}
 					</div>
