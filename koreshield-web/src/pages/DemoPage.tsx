@@ -232,7 +232,7 @@ export default function DemoPage() {
 													autoComplete="given-name"
 													value={form.firstName}
 													onChange={handleChange}
-													placeholder="Isaac"
+													placeholder="Jane"
 													className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-electric-green/40"
 												/>
 											</div>
@@ -248,7 +248,7 @@ export default function DemoPage() {
 													autoComplete="family-name"
 													value={form.lastName}
 													onChange={handleChange}
-													placeholder="Emmanuel"
+													placeholder="Smith"
 													className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-electric-green/40"
 												/>
 											</div>
@@ -266,7 +266,7 @@ export default function DemoPage() {
 												autoComplete="email"
 												value={form.workEmail}
 												onChange={handleChange}
-												placeholder="isaac@yourcompany.com"
+												placeholder="jane@yourcompany.com"
 												className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-electric-green/40"
 											/>
 										</div>
