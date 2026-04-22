@@ -19,6 +19,7 @@ type BillingAccount = {
 	current_period_end?: string | null;
 	billing_email?: string | null;
 	external_customer_id: string;
+	polar_customer_id?: string | null;
 	metadata?: {
 		recurring_interval?: string;
 		active_meter_count?: number;
@@ -81,6 +82,8 @@ function normalizeBillingAccount(raw: unknown): BillingAccount | null {
 		billing_email: typeof value.billing_email === 'string' ? value.billing_email : null,
 		external_customer_id:
 			typeof value.external_customer_id === 'string' ? value.external_customer_id : '',
+		polar_customer_id:
+			typeof value.polar_customer_id === 'string' ? value.polar_customer_id : null,
 		metadata,
 	};
 }
@@ -102,10 +105,9 @@ export default function BillingPage() {
 	);
 	const autoCheckoutStarted = useRef(false);
 	const billingUnavailable =
-		error.includes('POLAR') ||
-		error.includes('Polar') ||
+		error.includes('POLAR_ACCESS_TOKEN') ||
 		error.includes('not configured') ||
-		error.includes('customer portal');
+		error.includes('Unable to create Polar');
 
 	const loadAccount = async () => {
 		setError('');
@@ -231,6 +233,7 @@ export default function BillingPage() {
 
 	const displayPlan = getHostedPlanBySlug(account?.plan_slug);
 	const isInternalUnlimited = account?.metadata?.internal_unlimited === true;
+	const hasPolarCustomer = Boolean(account?.polar_customer_id);
 
 	return (
 		<div>
@@ -311,6 +314,10 @@ export default function BillingPage() {
 							{isInternalUnlimited ? (
 								<div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-700 sm:text-sm">
 									This KoreShield team account is provisioned with internal unlimited enterprise access. Hosted checkout and customer portal are not needed.
+								</div>
+							) : !hasPolarCustomer ? (
+								<div className="rounded-lg border border-border bg-muted px-4 py-3 text-xs text-muted-foreground sm:text-sm">
+									Customer portal access becomes available after your first completed checkout. Choose a plan below, finish checkout, then refresh this page.
 								</div>
 							) : (
 								<button

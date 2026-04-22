@@ -46,6 +46,7 @@ describe('BillingPage', () => {
 			current_period_end: null,
 			billing_email: 'ops@koreshield.com',
 			external_customer_id: 'cus_123',
+			polar_customer_id: 'polcus_123',
 			metadata: {
 				recurring_interval: 'month',
 				active_meter_count: 1,
@@ -68,6 +69,7 @@ describe('BillingPage', () => {
 		expect(screen.getByText(/Hosted plans are sold as Growth and Scale/i)).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /choose growth/i })).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /choose scale/i })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /open customer portal/i })).toBeInTheDocument();
 	});
 
 	it('shows internal unlimited enterprise accounts as provisioned and disables upgrades', async () => {
@@ -132,5 +134,38 @@ describe('BillingPage', () => {
 		});
 
 		expect(screen.getAllByText(/^0$/i).length).toBeGreaterThan(0);
+	});
+
+	it('shows a checkout-first hint instead of a broken portal action when no Polar customer exists yet', async () => {
+		getBillingAccount.mockResolvedValue({
+			id: 'acct_new',
+			status: 'inactive',
+			plan_slug: 'free',
+			subscription_status: 'inactive',
+			current_period_end: null,
+			billing_email: 'hello@koreshield.com',
+			external_customer_id: 'user:test',
+			polar_customer_id: null,
+			metadata: {
+				recurring_interval: null,
+				active_meter_count: 0,
+				granted_benefits: [],
+			},
+		});
+
+		render(
+			<MemoryRouter initialEntries={['/billing']}>
+				<Routes>
+					<Route path="/billing" element={<BillingPage />} />
+				</Routes>
+			</MemoryRouter>,
+		);
+
+		await waitFor(() => {
+			expect(screen.getByText(/Customer portal access becomes available after your first completed checkout/i)).toBeInTheDocument();
+		});
+
+		expect(screen.queryByRole('button', { name: /open customer portal/i })).not.toBeInTheDocument();
+		expect(screen.queryByText(/Hosted billing is not fully configured in this environment yet/i)).not.toBeInTheDocument();
 	});
 });
