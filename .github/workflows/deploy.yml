@@ -115,10 +115,35 @@ jobs:
           docker compose -f docker-compose.prod.yml up -d --build --no-deps api web
 
           # Smoke-test SPA callback routes and key pages behind nginx before
-          # considering the deploy healthy.
-          curl -fsSI http://127.0.0.1:3000/auth/google-callback > /dev/null
-          curl -fsSI http://127.0.0.1:3000/auth/github-callback > /dev/null
-          curl -fsSI http://127.0.0.1:3000/billing > /dev/null
+          # considering the deploy healthy. Give nginx and the web container a
+          # short warm-up window so deploys do not fail on transient connection
+          # resets immediately after container start.
+          wait_for_url() {
+            local url="$1"
+            local label="$2"
+            local attempt=1
+            local max_attempts=20
+
+            while [ "$attempt" -le "$max_attempts" ]; do
+              if curl -fsSI "$url" > /dev/null; then
+                echo "  healthy: ${label}"
+                return 0
+              fi
+              echo "  waiting for ${label} (${attempt}/${max_attempts})"
+              sleep 3
+              attempt=$((attempt + 1))
+            done
+
+            echo "Timed out waiting for ${label}: ${url}" >&2
+            docker compose -f docker-compose.prod.yml ps >&2 || true
+            docker logs koreshield-web --tail 100 >&2 || true
+            docker logs koreshield-api --tail 100 >&2 || true
+            return 1
+          }
+
+          wait_for_url "http://127.0.0.1:3000/auth/google-callback" "google oauth callback route"
+          wait_for_url "http://127.0.0.1:3000/auth/github-callback" "github oauth callback route"
+          wait_for_url "http://127.0.0.1:3000/billing" "billing route"
 
           # Prune dangling images to reclaim disk space
           docker image prune -f
