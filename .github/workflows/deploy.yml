@@ -57,6 +57,48 @@ jobs:
 
           cd /opt/koreshield
 
+          # ── Patch .env with required VITE_ build-time vars ─────────────────
+          # These are baked into the frontend bundle at Docker build time.
+          # If the VPS .env is missing any of these, the frontend will show
+          # "Product ID missing" on billing and pricing pages.
+          patch_env() {
+            local var="$1" val="$2"
+            if grep -q "^${var}=" .env 2>/dev/null; then
+              current=$(grep "^${var}=" .env | head -1 | cut -d'=' -f2-)
+              if [ "$current" != "$val" ]; then
+                sed -i "s|^${var}=.*|${var}=${val}|" .env
+                echo "  patched: ${var}"
+              fi
+            else
+              echo "${var}=${val}" >> .env
+              echo "  added: ${var}"
+            fi
+          }
+          echo "Patching .env with required build-time and runtime vars..."
+          # Frontend VITE_ vars — baked into the bundle at Docker build time.
+          # Missing = "Product ID missing" on billing/pricing pages.
+          patch_env "VITE_POLAR_STARTUP_PRODUCT_ID"        "40723be6-3dbf-4cb9-b627-0b77cd6860d6"
+          patch_env "VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID" "72d8ce7d-c195-4467-a326-727ee16f2286"
+          patch_env "VITE_POLAR_GROWTH_PRODUCT_ID"         "2259942b-1680-4067-b3de-015dcec3a5bf"
+          patch_env "VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID"  "36fd15f6-7772-4fed-b95d-faa060725035"
+          patch_env "VITE_EMAILJS_SERVICE_ID"              "service_vtd0qcv"
+          patch_env "VITE_EMAILJS_TEMPLATE_ID"             "template_tgoe3z3"
+          patch_env "VITE_EMAILJS_TEMPLATE_ID_CONTACT"     "template_ww9dkkm"
+          patch_env "VITE_EMAILJS_PUBLIC_KEY"              "nB2BtJ_zcb1kkII0G"
+          # Backend runtime vars — passed via docker-compose environment: block.
+          patch_env "BILLING_INTERNAL_UNLIMITED_EMAILS"    "ei@nsisong.com,isaacnsisong@gmail.com,tes@koreshield.com,admin@koreshield.com,ei@koreshield.com"
+          patch_env "POLAR_SERVER"                         "production"
+          patch_env "POLAR_ORGANIZATION_SLUG"              "koreshield"
+          patch_env "POLAR_ORGANIZATION_ID"                "a8312734-2e5b-4bea-842e-5618430c27d2"
+          patch_env "POLAR_DEFAULT_CURRENCY"               "GBP"
+          patch_env "KORESHIELD_EAGER_APP_INIT"            "true"
+          patch_env "COOKIE_SECURE"                        "true"
+          patch_env "COOKIE_SAMESITE"                      "lax"
+          patch_env "ENABLED_PROVIDERS"                    "gemini,azure_openai,deepseek,openai"
+          patch_env "POSTGRES_USER"                        "koreshield"
+          patch_env "POSTGRES_DB"                          "koreshield"
+          echo "  done."
+
           # Pre-clean: remove ALL containers (any name, any state) that match
           # koreshield-api or koreshield-web — including any hash-prefixed
           # intermediate containers Docker Compose creates during recreation.
