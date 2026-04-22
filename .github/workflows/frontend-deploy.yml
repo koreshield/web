@@ -1,0 +1,51 @@
+name: Deploy Frontend to Cloudflare Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'koreshield-web/**'
+      - '.github/workflows/frontend-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: koreshield-web
+        run: npm ci
+
+      # Build with all VITE_ secrets baked in at CI time.
+      # This means Cloudflare Pages never needs to run its own build —
+      # we deploy pre-built artifacts directly.
+      - name: Build frontend
+        working-directory: koreshield-web
+        run: npm run build
+        env:
+          VITE_POLAR_STARTUP_PRODUCT_ID: ${{ secrets.VITE_POLAR_STARTUP_PRODUCT_ID }}
+          VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID: ${{ secrets.VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID }}
+          VITE_POLAR_GROWTH_PRODUCT_ID: ${{ secrets.VITE_POLAR_GROWTH_PRODUCT_ID }}
+          VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID: ${{ secrets.VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID }}
+          VITE_EMAILJS_SERVICE_ID: ${{ secrets.VITE_EMAILJS_SERVICE_ID }}
+          VITE_EMAILJS_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID }}
+          VITE_EMAILJS_TEMPLATE_ID_CONTACT: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID_CONTACT }}
+          VITE_EMAILJS_PUBLIC_KEY: ${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}
+
+      # Deploy pre-built dist directly to Cloudflare Pages.
+      # ⚠️  Check your Cloudflare dashboard and set --project-name to match
+      #     your Pages project name (Settings → Custom Domains shows it).
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy koreshield-web/dist --project-name=koreshield-web --branch=main --commit-dirty=true
