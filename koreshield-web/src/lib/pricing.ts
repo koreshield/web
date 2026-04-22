@@ -170,12 +170,12 @@ export const HOSTED_PLAN_DISPLAY_BY_INTERNAL_SLUG: Record<string, HostedPlanId |
 
 export const INTERNAL_HOSTED_PLAN_IDS: Record<HostedPlanId, { monthlyEnv: string; annualEnv: string }> = {
 	growth: {
-		monthlyEnv: 'VITE_POLAR_STARTUP_PRODUCT_ID',
-		annualEnv: 'VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID',
-	},
-	scale: {
 		monthlyEnv: 'VITE_POLAR_GROWTH_PRODUCT_ID',
 		annualEnv: 'VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID',
+	},
+	scale: {
+		monthlyEnv: 'VITE_POLAR_STARTUP_PRODUCT_ID',
+		annualEnv: 'VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID',
 	},
 };
 
