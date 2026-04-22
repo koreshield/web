@@ -56,11 +56,8 @@ export function ProviderHealthPage() {
 			setWsConnected(true);
 		});
 
-		const cleanupHealth = wsClient.on<ProviderHealthEvent>('provider_health_change', (event: WebSocketEvent<ProviderHealthEvent>) => {
-			console.log('[ProviderHealth] Status changed:', event.data);
-
-			// In a real implementation, this would trigger a refetch or optimistic update
-			// For now, React Query will auto-invalidate the cache
+		const cleanupHealth = wsClient.on<ProviderHealthEvent>('provider_health_change', (_event: WebSocketEvent<ProviderHealthEvent>) => {
+			// React Query auto-invalidates the cache on provider health changes
 		});
 
 		return () => {

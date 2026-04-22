@@ -207,7 +207,7 @@ export default function BillingPage() {
 			return;
 		}
 
-		setCheckoutNotice('Payment completed. Syncing your account with Polar now.');
+		setCheckoutNotice('Payment completed. Syncing your account now.');
 		void handleSync().finally(() => {
 			setSearchParams((current) => {
 				const next = new URLSearchParams(current);
@@ -243,7 +243,7 @@ export default function BillingPage() {
 						<div className="flex-1">
 							<h1 className="text-2xl font-bold sm:text-3xl">Billing</h1>
 							<p className="mt-2 max-w-2xl text-xs text-muted-foreground sm:text-sm">
-								Manage your KoreShield subscription, launch Polar checkout, and keep your account entitlement state in sync.
+								Manage your KoreShield subscription, upgrade your plan, and keep your account in sync.
 							</p>
 						</div>
 						<button
@@ -269,10 +269,6 @@ export default function BillingPage() {
 						Hosted billing is not fully configured in this environment yet. You can still create your account, manage API keys, and finish product onboarding while checkout and portal access are being wired up.
 					</div>
 				) : null}
-				<div className="rounded-lg border border-border bg-card px-4 py-3 text-xs text-muted-foreground sm:text-sm">
-					KoreShield presents hosted plans publicly as Dev, Growth, and Scale. The current checkout mapping still uses your existing Polar product IDs underneath, so public plan names and billing wiring stay aligned without breaking the current integration.
-				</div>
-
 				<section className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[1.1fr,0.9fr]">
 					<div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
 						<div className="mb-4 flex items-start gap-3 sm:mb-6 sm:items-center">
@@ -281,7 +277,7 @@ export default function BillingPage() {
 							</div>
 							<div className="min-w-0 flex-1">
 								<h2 className="text-lg font-semibold">Current account</h2>
-								<p className="text-xs text-muted-foreground sm:text-sm">Local billing state mirrored from Polar.</p>
+								<p className="text-xs text-muted-foreground sm:text-sm">Your active plan and subscription details.</p>
 							</div>
 						</div>
 
@@ -329,9 +325,6 @@ export default function BillingPage() {
 									Open customer portal
 								</button>
 							)}
-							<div className="self-center text-xs text-muted-foreground">
-								External customer ID: <span className="font-mono text-[10px] sm:text-xs">{account?.external_customer_id || 'pending'}</span>
-							</div>
 						</div>
 					</div>
 
@@ -341,8 +334,8 @@ export default function BillingPage() {
 								<ShieldCheck className="h-5 w-5 text-emerald-600" />
 							</div>
 							<div className="min-w-0 flex-1">
-								<h2 className="text-lg font-semibold">Entitlements snapshot</h2>
-								<p className="text-xs text-muted-foreground sm:text-sm">What the app currently understands about your Polar customer state.</p>
+								<h2 className="text-lg font-semibold">Plan details</h2>
+								<p className="text-xs text-muted-foreground sm:text-sm">Your active entitlements and usage allowances.</p>
 							</div>
 						</div>
 						<div className="space-y-2 text-xs sm:space-y-3 sm:text-sm">
@@ -378,7 +371,7 @@ export default function BillingPage() {
 					<div>
 						<h2 className="text-lg font-semibold sm:text-xl">Upgrade plans</h2>
 						<p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-							Hosted plans are sold as Growth and Scale. Polar product wiring stays in place under the hood while public pricing, feature gates, and overages follow the new request-based model.
+							Choose a plan that fits your protected-request volume. Switch between monthly and annual billing below.
 						</p>
 						{checkoutNotice ? <p className="mt-2 text-xs text-emerald-600 sm:text-sm">{checkoutNotice}</p> : null}
 						{isInternalUnlimited ? (
@@ -428,14 +421,11 @@ export default function BillingPage() {
 										{plan.overage ? <div className="mt-2">{plan.overage}</div> : null}
 									</div>
 
-									<div className="mt-4 flex items-center justify-between gap-4">
-										<div className="text-xs text-muted-foreground">
-											{missingProduct ? 'Product ID missing' : 'Checkout ready'}
+									{missingProduct ? (
+										<div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700">
+											Checkout is not available right now. Please contact support.
 										</div>
-										{productId ? (
-											<span className="font-mono text-[10px] text-muted-foreground">{productId}</span>
-										) : null}
-									</div>
+									) : null}
 
 									<button
 										onClick={() => void handleCheckout(productId, plan.id, billingPeriod)}
