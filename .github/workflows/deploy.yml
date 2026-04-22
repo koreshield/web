@@ -4,6 +4,8 @@ on:
   push:
     branches: [ main ]
     paths:
+      - 'docker-compose.prod.yml'
+      - 'Caddyfile'
       - 'koreshield/**'
       - 'koreshield-web/**'
       - '.github/workflows/deploy.yml'
@@ -14,6 +16,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Copy root deployment files via SCP
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        source: "docker-compose.prod.yml,Caddyfile"
+        target: "/opt/koreshield_deploy"
+        strip_components: 0
 
     # ── Copy backend source ────────────────────────────────────────────────────
     - name: Copy backend via SCP
@@ -44,8 +56,14 @@ jobs:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USERNAME }}
         password: ${{ secrets.VPS_PASSWORD }}
+        # Pass GitHub secrets into the remote shell as env vars.
+        # Each var is injected only if the corresponding secret is set.
+        envs: VITE_POLAR_STARTUP_PRODUCT_ID,VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID,VITE_POLAR_GROWTH_PRODUCT_ID,VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID,VITE_EMAILJS_SERVICE_ID,VITE_EMAILJS_TEMPLATE_ID,VITE_EMAILJS_TEMPLATE_ID_CONTACT,VITE_EMAILJS_PUBLIC_KEY
         script: |
           set -e
+
+          cp /opt/koreshield_deploy/docker-compose.prod.yml /opt/koreshield/docker-compose.prod.yml
+          cp /opt/koreshield_deploy/Caddyfile /opt/koreshield/Caddyfile
 
           # Sync source files into the production directory that the compose
           # file at /opt/koreshield/docker-compose.prod.yml builds from.
@@ -57,46 +75,29 @@ jobs:
 
           cd /opt/koreshield
 
-          # ── Patch .env with required VITE_ build-time vars ─────────────────
-          # These are baked into the frontend bundle at Docker build time.
-          # If the VPS .env is missing any of these, the frontend will show
-          # "Product ID missing" on billing and pricing pages.
+          # ── Patch .env from CI secrets ──────────────────────────────────────
+          # Values come from GitHub repository secrets, not hardcoded here.
+          # To add or update a var: go to the repo → Settings → Secrets →
+          # Actions → New repository secret.
           patch_env() {
             local var="$1" val="$2"
+            [ -z "$val" ] && return 0   # skip if secret not set in GitHub
             if grep -q "^${var}=" .env 2>/dev/null; then
-              current=$(grep "^${var}=" .env | head -1 | cut -d'=' -f2-)
-              if [ "$current" != "$val" ]; then
-                sed -i "s|^${var}=.*|${var}=${val}|" .env
-                echo "  patched: ${var}"
-              fi
+              sed -i "s|^${var}=.*|${var}=${val}|" .env
             else
               echo "${var}=${val}" >> .env
-              echo "  added: ${var}"
             fi
+            echo "  ensured: ${var}"
           }
-          echo "Patching .env with required build-time and runtime vars..."
-          # Frontend VITE_ vars — baked into the bundle at Docker build time.
-          # Missing = "Product ID missing" on billing/pricing pages.
-          patch_env "VITE_POLAR_STARTUP_PRODUCT_ID"        "40723be6-3dbf-4cb9-b627-0b77cd6860d6"
-          patch_env "VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID" "72d8ce7d-c195-4467-a326-727ee16f2286"
-          patch_env "VITE_POLAR_GROWTH_PRODUCT_ID"         "2259942b-1680-4067-b3de-015dcec3a5bf"
-          patch_env "VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID"  "36fd15f6-7772-4fed-b95d-faa060725035"
-          patch_env "VITE_EMAILJS_SERVICE_ID"              "service_vtd0qcv"
-          patch_env "VITE_EMAILJS_TEMPLATE_ID"             "template_tgoe3z3"
-          patch_env "VITE_EMAILJS_TEMPLATE_ID_CONTACT"     "template_ww9dkkm"
-          patch_env "VITE_EMAILJS_PUBLIC_KEY"              "nB2BtJ_zcb1kkII0G"
-          # Backend runtime vars — passed via docker-compose environment: block.
-          patch_env "BILLING_INTERNAL_UNLIMITED_EMAILS"    "ei@nsisong.com,isaacnsisong@gmail.com,tes@koreshield.com,admin@koreshield.com,ei@koreshield.com"
-          patch_env "POLAR_SERVER"                         "production"
-          patch_env "POLAR_ORGANIZATION_SLUG"              "koreshield"
-          patch_env "POLAR_ORGANIZATION_ID"                "a8312734-2e5b-4bea-842e-5618430c27d2"
-          patch_env "POLAR_DEFAULT_CURRENCY"               "GBP"
-          patch_env "KORESHIELD_EAGER_APP_INIT"            "true"
-          patch_env "COOKIE_SECURE"                        "true"
-          patch_env "COOKIE_SAMESITE"                      "lax"
-          patch_env "ENABLED_PROVIDERS"                    "gemini,azure_openai,deepseek,openai"
-          patch_env "POSTGRES_USER"                        "koreshield"
-          patch_env "POSTGRES_DB"                          "koreshield"
+          echo "Syncing env vars from CI secrets..."
+          patch_env "VITE_POLAR_STARTUP_PRODUCT_ID"        "$VITE_POLAR_STARTUP_PRODUCT_ID"
+          patch_env "VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID" "$VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID"
+          patch_env "VITE_POLAR_GROWTH_PRODUCT_ID"         "$VITE_POLAR_GROWTH_PRODUCT_ID"
+          patch_env "VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID"  "$VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID"
+          patch_env "VITE_EMAILJS_SERVICE_ID"              "$VITE_EMAILJS_SERVICE_ID"
+          patch_env "VITE_EMAILJS_TEMPLATE_ID"             "$VITE_EMAILJS_TEMPLATE_ID"
+          patch_env "VITE_EMAILJS_TEMPLATE_ID_CONTACT"     "$VITE_EMAILJS_TEMPLATE_ID_CONTACT"
+          patch_env "VITE_EMAILJS_PUBLIC_KEY"              "$VITE_EMAILJS_PUBLIC_KEY"
           echo "  done."
 
           # Pre-clean: remove ALL containers (any name, any state) that match
@@ -113,7 +114,22 @@ jobs:
           # docker compose v2 (not legacy docker-compose) to avoid naming quirks.
           docker compose -f docker-compose.prod.yml up -d --build --no-deps api web
 
+          # Smoke-test SPA callback routes and key pages behind nginx before
+          # considering the deploy healthy.
+          curl -fsSI http://127.0.0.1:3000/auth/google-callback > /dev/null
+          curl -fsSI http://127.0.0.1:3000/auth/github-callback > /dev/null
+          curl -fsSI http://127.0.0.1:3000/billing > /dev/null
+
           # Prune dangling images to reclaim disk space
           docker image prune -f
 
           echo "Deploy complete."
+      env:
+        VITE_POLAR_STARTUP_PRODUCT_ID: ${{ secrets.VITE_POLAR_STARTUP_PRODUCT_ID }}
+        VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID: ${{ secrets.VITE_POLAR_STARTUP_ANNUAL_PRODUCT_ID }}
+        VITE_POLAR_GROWTH_PRODUCT_ID: ${{ secrets.VITE_POLAR_GROWTH_PRODUCT_ID }}
+        VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID: ${{ secrets.VITE_POLAR_GROWTH_ANNUAL_PRODUCT_ID }}
+        VITE_EMAILJS_SERVICE_ID: ${{ secrets.VITE_EMAILJS_SERVICE_ID }}
+        VITE_EMAILJS_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID }}
+        VITE_EMAILJS_TEMPLATE_ID_CONTACT: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID_CONTACT }}
+        VITE_EMAILJS_PUBLIC_KEY: ${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}
