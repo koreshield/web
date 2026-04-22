@@ -9,6 +9,7 @@ on:
       - 'koreshield/**'
       - 'koreshield-web/**'
       - '.github/workflows/deploy.yml'
+  workflow_dispatch:
 
 jobs:
   deploy:
