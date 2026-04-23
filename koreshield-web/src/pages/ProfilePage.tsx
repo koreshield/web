@@ -1,4 +1,4 @@
-import { BookOpen, Building, CheckCircle2, CreditCard, Key, Mail, Pencil, Rocket, Shield, User, X } from 'lucide-react';
+import { AlertTriangle, BookOpen, Building, CheckCircle2, CreditCard, Key, Mail, Pencil, Rocket, Shield, Trash2, User, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../components/ToastNotification';
@@ -30,6 +30,11 @@ export function ProfilePage() {
 	const [editJobTitle, setEditJobTitle] = useState('');
 	const [saving, setSaving] = useState(false);
 
+	// Delete account state
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [deleteConfirmText, setDeleteConfirmText] = useState('');
+	const [deleting, setDeleting] = useState(false);
+
 	useEffect(() => {
 		if (!user) return;
 		let active = true;
@@ -58,6 +63,20 @@ export function ProfilePage() {
 		setEditName('');
 		setEditCompany('');
 		setEditJobTitle('');
+	};
+
+	const handleDeleteAccount = async () => {
+		if (deleteConfirmText !== user?.email) return;
+		setDeleting(true);
+		try {
+			await api.deleteMyAccount();
+			authService.clearSession();
+			window.location.href = '/';
+		} catch (err: unknown) {
+			const msg = err instanceof Error ? err.message : 'Please try again or contact support.';
+			toast.error('Failed to delete account', msg);
+			setDeleting(false);
+		}
 	};
 
 	const handleSave = async () => {
@@ -330,7 +349,81 @@ export function ProfilePage() {
 						</a>
 					</div>
 				</div>
+
+				{/* Danger zone */}
+				<div className="mt-6 bg-card border border-destructive/30 rounded-lg shadow-sm p-4 sm:p-6">
+					<div className="flex items-start justify-between gap-4">
+						<div>
+							<h2 className="text-lg font-semibold text-destructive flex items-center gap-2">
+								<AlertTriangle className="w-5 h-5" /> Danger zone
+							</h2>
+							<p className="text-sm text-muted-foreground mt-1">
+								Permanently delete your account and all associated data. This cannot be undone.
+							</p>
+						</div>
+						<button
+							type="button"
+							onClick={() => { setDeleteConfirmText(''); setShowDeleteModal(true); }}
+							className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-destructive/40 text-destructive hover:bg-destructive/10 transition-colors text-sm font-medium"
+						>
+							<Trash2 className="w-4 h-4" />
+							Delete account
+						</button>
+					</div>
+				</div>
 			</main>
+
+			{/* Delete account modal */}
+			{showDeleteModal && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+					<div className="bg-card border border-border rounded-xl shadow-xl w-full max-w-md p-6">
+						<div className="flex items-center gap-3 mb-4">
+							<div className="p-2 bg-destructive/10 rounded-lg">
+								<AlertTriangle className="w-5 h-5 text-destructive" />
+							</div>
+							<h3 className="text-lg font-semibold">Delete account</h3>
+						</div>
+						<p className="text-sm text-muted-foreground mb-2">
+							This will permanently delete your account, API keys, billing records, and all associated data. There is no way to recover this.
+						</p>
+						<p className="text-sm font-medium mb-3">
+							Type your email address to confirm:
+						</p>
+						<p className="text-xs font-mono bg-muted px-2 py-1 rounded mb-3 text-muted-foreground">{user.email}</p>
+						<input
+							type="text"
+							value={deleteConfirmText}
+							onChange={(e) => setDeleteConfirmText(e.target.value)}
+							className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-destructive text-sm mb-4"
+							placeholder={user.email}
+							autoComplete="off"
+						/>
+						<div className="flex gap-3">
+							<button
+								type="button"
+								onClick={() => setShowDeleteModal(false)}
+								disabled={deleting}
+								className="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium"
+							>
+								Cancel
+							</button>
+							<button
+								type="button"
+								onClick={() => void handleDeleteAccount()}
+								disabled={deleteConfirmText !== user.email || deleting}
+								className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors text-sm font-medium disabled:opacity-50"
+							>
+								{deleting ? (
+									<span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+								) : (
+									<Trash2 className="w-4 h-4" />
+								)}
+								{deleting ? 'Deleting…' : 'Delete permanently'}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

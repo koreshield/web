@@ -50,10 +50,23 @@ def get_internal_unlimited_emails() -> set[str]:
     }
 
 
+def get_internal_unlimited_domains() -> set[str]:
+    return {
+        domain.strip().lower().lstrip("@")
+        for domain in os.getenv("BILLING_INTERNAL_UNLIMITED_DOMAINS", "").split(",")
+        if domain.strip()
+    }
+
+
 def is_internal_unlimited_email(email: str | None) -> bool:
     if not email:
         return False
-    return email.strip().lower() in get_internal_unlimited_emails()
+    normalized = email.strip().lower()
+    if normalized in get_internal_unlimited_emails():
+        return True
+    # Auto-enterprise for any email matching internal domains
+    domain = normalized.split("@", 1)[-1] if "@" in normalized else ""
+    return bool(domain and domain in get_internal_unlimited_domains())
 
 
 def should_retry_checkout_without_currency(exc: httpx.HTTPStatusError) -> bool:
