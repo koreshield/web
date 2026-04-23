@@ -264,6 +264,13 @@ class ApiClient {
 		});
 	}
 
+	async deleteMyAccount() {
+		return this.fetch('/v1/management/me', {
+			method: 'DELETE',
+			body: JSON.stringify({ confirm: 'DELETE MY ACCOUNT' }),
+		});
+	}
+
 	async getBillingAccount() {
 		return this.fetch('/v1/billing/account');
 	}

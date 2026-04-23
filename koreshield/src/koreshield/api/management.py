@@ -12,7 +12,7 @@ import bcrypt
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy import desc, func, select
+from sqlalchemy import delete, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import AsyncSessionLocal, get_db
@@ -353,6 +353,85 @@ async def update_me(
     await db.commit()
     await db.refresh(user)
     return {"user": user.to_dict()}
+
+
+class DeleteAccountRequest(BaseModel):
+    confirm: str  # must equal "DELETE MY ACCOUNT"
+
+
+@router.delete(
+    "/me",
+    summary="Delete Account",
+    description="Permanently delete the authenticated user account and all associated data. This action cannot be undone.",
+    tags=["Authentication"],
+)
+async def delete_my_account(
+    request_body: DeleteAccountRequest,
+    response: Response,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Permanently delete the authenticated user account and all related data."""
+    if request_body.confirm != "DELETE MY ACCOUNT":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Confirmation text does not match. Send confirm: 'DELETE MY ACCOUNT'.",
+        )
+
+    user_id_str = current_user.get("id")
+    try:
+        user_uuid = UUID(str(user_id_str))
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user identity") from exc
+
+    result = await db.execute(select(User).where(User.id == user_uuid))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    try:
+        from ..models.api_key import APIKey
+        from ..models.billing import BillingAccount, BillingWebhookEvent
+        from ..models.team import TeamMember
+
+        # Delete API keys
+        await db.execute(
+            delete(APIKey).where(APIKey.user_id == user_uuid)
+        )
+        # Delete team memberships
+        await db.execute(
+            delete(TeamMember).where(TeamMember.user_id == user_uuid)
+        )
+        # Delete billing accounts (cascade clears webhook events via DB FK or manual cleanup)
+        billing_result = await db.execute(
+            select(BillingAccount).where(BillingAccount.owner_user_id == user_uuid)
+        )
+        billing_accounts = billing_result.scalars().all()
+        for billing_account in billing_accounts:
+            await db.execute(
+                delete(BillingWebhookEvent).where(
+                    BillingWebhookEvent.billing_account_id == billing_account.id
+                )
+            )
+        await db.execute(
+            delete(BillingAccount).where(
+                BillingAccount.owner_user_id == user_uuid
+            )
+        )
+        # Delete the user record
+        await db.delete(user)
+        await db.commit()
+    except Exception as exc:
+        await db.rollback()
+        logger.error("account_deletion_failed", user_id=str(user_uuid), error=str(exc))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete account. Please try again or contact support.",
+        ) from exc
+
+    _delete_auth_cookie(response)
+    logger.info("account_deleted", user_id=str(user_uuid), email=current_user.get("email"))
+    return {"status": "deleted", "message": "Your account has been permanently deleted."}
 
 
 @router.post(
