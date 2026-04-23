@@ -76,6 +76,7 @@ const NAV_GROUPS: NavGroup[] = [
 			{ label: 'Rules', to: '/rules', icon: ListFilter },
 			{ label: 'Policies', to: '/policies', icon: Shield, adminOnly: true },
 			{ label: 'Teams', to: '/teams', icon: Users },
+			{ label: 'Settings', to: '/settings', icon: User },
 		],
 	},
 	{
@@ -281,6 +282,14 @@ function UserMenu({ onLogout }: { onLogout: () => void }) {
 					>
 						<User className="w-4 h-4" />
 						Profile
+					</Link>
+					<Link
+						to="/settings"
+						onClick={() => setOpen(false)}
+						className="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
+					>
+						<Shield className="w-4 h-4" />
+						Settings
 					</Link>
 					<Link
 						to="/billing"
