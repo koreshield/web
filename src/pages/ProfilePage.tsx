@@ -70,7 +70,7 @@ export function ProfilePage() {
 		setDeleting(true);
 		try {
 			await api.deleteMyAccount();
-			authService.clearSession();
+			await authService.logout();
 			window.location.href = '/';
 		} catch (err: unknown) {
 			const msg = err instanceof Error ? err.message : 'Please try again or contact support.';
