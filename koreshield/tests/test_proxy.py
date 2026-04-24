@@ -197,6 +197,41 @@ def test_status_endpoint(proxy):
     assert data["providers"]["openai"]["status"] == "missing_credentials"
 
 
+def test_status_endpoint_ignores_disabled_providers_for_routing_health(proxy):
+    """Disabled providers should not mark provider routing as degraded."""
+    proxy.config["providers"] = {
+        "deepseek": {"enabled": True},
+        "anthropic": {"enabled": False},
+    }
+    client = TestClient(proxy.app)
+
+    async def fake_snapshot():
+        return {
+            "deepseek": {
+                "enabled": True,
+                "initialized": True,
+                "status": "healthy",
+                "base_url": "https://api.deepseek.com/v1",
+            },
+            "anthropic": {
+                "enabled": False,
+                "initialized": False,
+                "status": "disabled",
+                "base_url": "https://api.anthropic.com/v1",
+            },
+        }
+
+    proxy.provider_service.get_health_snapshot = fake_snapshot
+
+    response = client.get("/status")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["components"]["provider_routing"]["status"] == "healthy"
+    assert data["enabled_providers"] == 1
+    assert data["total_providers"] == 2
+
+
 def test_scan_endpoint_emits_operational_notification(proxy, auth_headers):
     """Prompt scans should notify the operational monitoring channel."""
     proxy.monitoring.notify_operational_event = AsyncMock(return_value=None)

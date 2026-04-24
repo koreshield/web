@@ -342,7 +342,7 @@ export default function StatusPage() {
       try {
         const [health, statsResponse, providerResponse, operationalResponse] = await Promise.all([
           api.getHealth(),
-          api.getStats(),
+          api.getPublicStats(),
           api.getProviderHealth(),
           api.getOperationalStatus(),
         ]);
