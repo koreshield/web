@@ -18,7 +18,7 @@ concurrency:
 jobs:
   security-regression:
     name: SOC Regression Suite
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
 
     env:
       # Minimal stack config — no real cloud keys needed for detection tests
@@ -95,13 +95,8 @@ jobs:
           fi
 
       # ── 3. Set up Python for the test scripts ────────────────────────────────
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
       - name: Install test script dependencies
-        run: pip install scikit-learn
+        run: pip3 install scikit-learn --break-system-packages 2>/dev/null || pip install scikit-learn
 
       # ── 4. Run 47-payload attack regression suite ────────────────────────────
       - name: Run attack regression suite (attack_sim.py)

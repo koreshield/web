@@ -13,7 +13,7 @@ jobs:
   # ── Python SAST with Bandit ──────────────────────────────────────────────────
   bandit-python:
     name: Bandit  -  Python Security Scan
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
     defaults:
       run:
         working-directory: ./koreshield
@@ -22,17 +22,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
       - name: Install Bandit
-        run: pip install bandit[toml]
+        run: pip3 install "bandit[toml]" --break-system-packages 2>/dev/null || pip install "bandit[toml]"
 
       - name: Run Bandit scan
         run: |
-          bandit -r src/ \
+          python3 -m bandit -r src/ \
             --exclude src/koreshield/tests \
             -f json \
             -o bandit-report.json \
@@ -64,10 +59,10 @@ jobs:
               print(f"Warning: Could not parse report: {e}")
           EOF
 
-  # ── TypeScript / Frontend  -  Build & Type Check ───────────────────────────────
+  # ── TypeScript / Frontend  -  Build & Type Check ─────────────────────────────
   typescript-check:
     name: TypeScript  -  Build & Type Check
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
     defaults:
       run:
         working-directory: ./koreshield-web
@@ -76,10 +71,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+      - name: Set up Node.js 18 (nvm)
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+          nvm use 18 2>/dev/null || nvm install 18
+          echo "NVM_DIR=$NVM_DIR" >> $GITHUB_ENV
+          echo "PATH=$HOME/.nvm/versions/node/v18.20.8/bin:$PATH" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: npm ci
