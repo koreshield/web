@@ -3,6 +3,7 @@
  * Uses secure HttpOnly cookie sessions with in-memory bearer fallback.
  */
 import { resolveApiBaseUrl } from './api-base';
+import { clearAuthenticatedQueryCache } from './query-client';
 
 export interface AuthUser {
 	id: string;
@@ -72,12 +73,14 @@ let inMemoryToken: string | null = null;
 function persistSession(user: AuthUser, token?: string | null) {
 	inMemoryToken = token ?? null;
 	sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+	clearAuthenticatedQueryCache();
 	eventEmitter.emit('login');
 }
 
 function clearSession() {
 	inMemoryToken = null;
 	sessionStorage.removeItem(USER_STORAGE_KEY);
+	clearAuthenticatedQueryCache();
 }
 
 function persistPendingMfa(challenge: PendingMFAChallenge) {

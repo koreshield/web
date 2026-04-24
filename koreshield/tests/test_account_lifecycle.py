@@ -148,6 +148,47 @@ async def _update_user_role(
         await session.commit()
 
 
+async def _create_user_directly(
+    session_factory: sessionmaker,
+    *,
+    email: str,
+    name: str,
+    password_hash: str,
+    role: str = "owner",
+) -> User:
+    async with session_factory() as session:
+        user = User(
+            email=email,
+            name=name,
+            password_hash=password_hash,
+            role=role,
+            status="active",
+            email_verified=True,
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        return user
+
+
+async def _add_team_member(
+    session_factory: sessionmaker,
+    *,
+    team_id: str,
+    user_id: str,
+    role: str = "owner",
+) -> None:
+    async with session_factory() as session:
+        session.add(
+            TeamMember(
+                team_id=UUID(team_id),
+                user_id=UUID(user_id),
+                role=role,
+            )
+        )
+        await session.commit()
+
+
 def _signup(client: TestClient, email: str = "user@example.com", password: str = "Password123!") -> dict:
     response = client.post(
         "/v1/management/signup",
@@ -311,6 +352,61 @@ def test_billing_account_prefers_team_scope_for_owner(tmp_path: Path):
         assert payload["team_id"] == str(team.id)
         assert payload["external_customer_id"] == f"team:{team.id}"
         assert payload["billing_email"] == "user@example.com"
+    finally:
+        management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
+        client.close()
+        env_patcher.stop()
+        asyncio.run(_dispose_engine(engine))
+
+
+def test_billing_account_reuses_existing_team_scope_for_second_owner(tmp_path: Path):
+    client, session_factory, engine, original_senders, env_patcher = _build_test_client(tmp_path)
+    try:
+        signup_data = _signup(client)
+        first_user_id = signup_data["user"]["id"]
+        team = asyncio.run(
+            _create_team_membership(
+                session_factory,
+                user_id=first_user_id,
+            )
+        )
+
+        first_response = client.get("/v1/billing/account")
+        assert first_response.status_code == 200
+        first_payload = first_response.json()
+
+        second_user = asyncio.run(
+            _create_user_directly(
+                session_factory,
+                email="second-owner@example.com",
+                name="Second Owner",
+                password_hash=management._hash_password("Password123!"),
+                role="owner",
+            )
+        )
+        asyncio.run(
+            _add_team_member(
+                session_factory,
+                team_id=str(team.id),
+                user_id=str(second_user.id),
+                role="owner",
+            )
+        )
+
+        client.post("/v1/management/logout")
+        _login_with_mfa_if_needed(
+            client,
+            email="second-owner@example.com",
+            password="Password123!",
+        )
+
+        second_response = client.get("/v1/billing/account")
+        assert second_response.status_code == 200
+        second_payload = second_response.json()
+
+        assert second_payload["id"] == first_payload["id"]
+        assert second_payload["team_id"] == str(team.id)
+        assert second_payload["external_customer_id"] == f"team:{team.id}"
     finally:
         management.send_welcome_email, management.send_verification_email, management.send_admin_mfa_email = original_senders
         client.close()
