@@ -62,8 +62,10 @@ export class KoreShieldClient {
       }
     });
 
-    if (this.config.apiKey && !this.hasCustomAuthorization && !this.client.defaults.headers.common['Authorization']) {
-      this.client.defaults.headers.common['Authorization'] = `Bearer ${this.config.apiKey}`;
+    // API keys are sent via X-API-Key.
+    // Authorization: Bearer is reserved for JWT session tokens.
+    if (this.config.apiKey && !this.hasCustomAuthorization) {
+      this.client.defaults.headers.common['X-API-Key'] = this.config.apiKey;
     }
 
     this.startTime = Date.now();
@@ -614,82 +616,82 @@ export class KoreShieldClient {
 
   /** Get cost analytics */
   async getCostAnalytics(params?: { time_range?: 'today' | '7d' | '30d' | '90d' | '1y' }): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/analytics/costs', { params })).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.get('/v1/analytics/costs', { params })).data; } catch (e: any) { throw this.handleError(e); }
   }
 
   /** Get attack vector analytics */
   async getAttackVectorAnalytics(params?: { time_range?: string }): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/analytics/attack-vectors', { params })).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.get('/v1/analytics/attack-vectors', { params })).data; } catch (e: any) { throw this.handleError(e); }
   }
 
   /** Get top endpoints analytics */
   async getTopEndpoints(params?: { limit?: number; time_range?: string }): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/analytics/top-endpoints', { params })).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.get('/v1/analytics/top-endpoints', { params })).data; } catch (e: any) { throw this.handleError(e); }
   }
 
   /** Get provider metrics analytics */
   async getProviderMetrics(params?: { time_range?: string }): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/analytics/provider-metrics', { params })).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.get('/v1/analytics/provider-metrics', { params })).data; } catch (e: any) { throw this.handleError(e); }
   }
 
-  /** Get compliance analytics */
+  /** Get compliance posture analytics */
   async getComplianceAnalytics(params?: { time_range?: string }): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/analytics/compliance', { params })).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.get('/v1/analytics/compliance-posture', { params })).data; } catch (e: any) { throw this.handleError(e); }
   }
 
-  /** List team members */
-  async listTeamMembers(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/teams/members', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  /** List members of a specific team */
+  async listTeamMembers(teamId: string, params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
+    try { return (await this.client.get(`/v1/teams/${teamId}/members`, { params })).data; } catch (e: any) { throw this.handleError(e); }
   }
 
-  /** Invite a team member */
-  async inviteTeamMember(data: { email: string; role: string }): Promise<Record<string, any>> {
-    try { return (await this.client.post('/v1/management/teams/invite', data)).data; } catch (e: any) { throw this.handleError(e); }
+  /** Add a member to a specific team */
+  async inviteTeamMember(teamId: string, data: { user_id: string; role: string }): Promise<Record<string, any>> {
+    try { return (await this.client.post(`/v1/teams/${teamId}/members`, data)).data; } catch (e: any) { throw this.handleError(e); }
   }
 
-  /** Remove a team member */
-  async removeTeamMember(userId: string): Promise<void> {
-    try { await this.client.delete(`/v1/management/teams/members/${userId}`); } catch (e: any) { throw this.handleError(e); }
+  /** Remove a member from a specific team */
+  async removeTeamMember(teamId: string, userId: string): Promise<void> {
+    try { await this.client.delete(`/v1/teams/${teamId}/members/${userId}`); } catch (e: any) { throw this.handleError(e); }
   }
 
   /** List RBAC users */
   async listRbacUsers(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/rbac/users', { params })).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.get('/v1/rbac/users', { params })).data; } catch (e: any) { throw this.handleError(e); }
   }
 
   /** Get RBAC roles */
   async getRbacRoles(): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/rbac/roles')).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.get('/v1/rbac/roles')).data; } catch (e: any) { throw this.handleError(e); }
   }
 
   /** Update a user's role */
-  async updateUserRole(userId: string, role: string): Promise<Record<string, any>> {
-    try { return (await this.client.patch(`/v1/management/rbac/users/${userId}/role`, { role })).data; } catch (e: any) { throw this.handleError(e); }
+  async updateUserRole(userId: string, data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.put(`/v1/rbac/users/${userId}`, data)).data; } catch (e: any) { throw this.handleError(e); }
   }
 
   /** List reports */
   async listReports(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/reports', { params })).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.get('/v1/reports', { params })).data; } catch (e: any) { throw this.handleError(e); }
   }
 
   /** Create a report */
   async createReport(data: Record<string, any>): Promise<Record<string, any>> {
-    try { return (await this.client.post('/v1/management/reports', data)).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.post('/v1/reports', data)).data; } catch (e: any) { throw this.handleError(e); }
   }
 
   /** Download a report */
   async downloadReport(reportId: string): Promise<Blob> {
-    try { return (await this.client.get(`/v1/management/reports/${reportId}/download`, { responseType: 'blob' })).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.get(`/v1/reports/${reportId}/download`, { responseType: 'blob' })).data; } catch (e: any) { throw this.handleError(e); }
   }
 
-  /** Get billing info */
+  /** Get billing account info */
   async getBillingInfo(): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/billing')).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.get('/v1/billing/account')).data; } catch (e: any) { throw this.handleError(e); }
   }
 
   /** Get RAG scan history */
   async getRagScanHistory(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/rag/history', { params })).data; } catch (e: any) { throw this.handleError(e); }
+    try { return (await this.client.get('/v1/rag/scans', { params })).data; } catch (e: any) { throw this.handleError(e); }
   }
 
   /** List tool sessions */
@@ -840,7 +842,7 @@ export class KoreShieldClient {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'text/event-stream',
-        'Authorization': `Bearer ${this.config.apiKey}`,
+        'X-API-Key': this.config.apiKey,
         'User-Agent': 'koreshield-js-sdk/0.3.7',
         ...this.config.headers,
       } as Record<string, string>,
