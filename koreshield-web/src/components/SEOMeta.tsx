@@ -58,7 +58,7 @@ export function SEOMeta({
 			url: SITE_URL,
 			logo: {
 				'@type': 'ImageObject',
-				url: 'https://koreshield.com/logo/PNG/White.png',
+				url: 'https://koreshield.com/logo/light/1x/White.png',
 			},
 			sameAs: [
 				'https://github.com/koreshield/',
