@@ -111,7 +111,7 @@ const jsonLd = {
 		name: "KoreShield",
 		logo: {
 			"@type": "ImageObject",
-			url: `https://koreshield.com/logo/light/1x/White.png`,
+			url: `${Astro.site}logo/light/1x/White.png`,
 		},
 	},
 	datePublished: formatDateToYYYYMMDD(entry.data.published),
@@ -124,7 +124,7 @@ const jsonLd = {
 	},
 	image: entry.data.cover
 		? `${Astro.site}${entry.data.cover}`
-		: `https://koreshield.com/logo/light/1x/White.png`,
+		: `${Astro.site}logo/light/1x/White.png`,
 	articleSection: entry.data.category?.title,
 	inLanguage: entry.data.lang
 		? entry.data.lang.replace("_", "-")
