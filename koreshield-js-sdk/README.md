@@ -96,18 +96,17 @@ KORESHIELD_TIMEOUT=30000
 KORESHIELD_DEBUG=true
 ```
 
-The SDK authenticates with an API key using the `Authorization: Bearer <key>` header.
-If your deployment requires `X-API-Key`, pass a custom header in `headers`:
+The SDK authenticates with an API key using the `X-API-Key` header (fixed in v0.3.8):
 
 ```typescript
 const client = createClient({
     baseURL: 'https://api.koreshield.com',
-    headers: { 'X-API-Key': 'your-api-key' }
+    apiKey: 'ks_live_your-api-key'   // sent as X-API-Key: <key>
 });
 ```
 
-Management endpoints (stats, logs, config) require a JWT. To call those endpoints,
-omit `apiKey` and pass the JWT as `Authorization`:
+Management endpoints (stats, logs, config) require a JWT session token. To call
+those endpoints, pass the JWT as `Authorization: Bearer`:
 
 ```typescript
 const client = createClient({
@@ -115,6 +114,10 @@ const client = createClient({
     headers: { Authorization: 'Bearer <jwt>' }
 });
 ```
+
+> **Note:** `Authorization: Bearer <token>` is for JWT session tokens only.
+> API keys must use the `X-API-Key` header (the default when you pass `apiKey`
+> to the constructor).
 ### Programmatic Configuration
 
 ```typescript
@@ -386,18 +389,26 @@ Main client class for interacting with KoreShield proxy.
 
 #### Methods
 
-- `scanPrompt(prompt, options?)` - Scan a prompt for threats
-- `scanBatch(prompts, options?)` - Batch prompt scanning
-- `createChatCompletion(request, securityOptions?)` - Create chat completion
-- `scanRAGContext(userQuery, documents, config?)` - Scan RAG documents
-- `scanRAGContextBatch(items, parallel?, maxConcurrent?)` - Batch RAG scanning
-- `getAuditLogs(limit?, offset?, level?)` - Get audit logs with pagination (management endpoint)
-- `getSecurityEvents(limit?, offset?, level?)` - Returns log entries only
-- `getMetrics()` - Get proxy stats (management endpoint)
-- `getPrometheusMetrics()` - Get Prometheus metrics
-- `health()` - Health check
-- `updateSecurityConfig(options)` - Update security configuration (management endpoint)
-- `testConnection()` - Test connection
+Stability labels: **stable** = covered by contract; **admin** = requires JWT admin + MFA; **experimental** = not yet covered by CI contract tests.
+
+**Core — API key auth (stable)**
+- `scanPrompt(prompt, options?)` — Scan a prompt for threats via `POST /v1/scan`
+- `scanBatch(prompts, options?)` — Batch prompt scanning via `POST /v1/scan/batch`
+- `createChatCompletion(request, securityOptions?)` — Protected chat completion via `POST /v1/chat/completions`
+- `scanRAGContext(userQuery, documents, config?)` — RAG injection scan via `POST /v1/rag/scan`
+- `scanRAGContextBatch(items, parallel?, maxConcurrent?)` — Batch RAG scanning
+- `health()` — Health check (`GET /health`, public)
+- `testConnection()` — Connection probe
+
+**Management — JWT admin required (admin)**
+- `getAuditLogs(limit?, offset?, level?)` — Audit logs; requires admin JWT
+- `getSecurityEvents(limit?, offset?, level?)` — Log entries only; requires admin JWT
+- `getMetrics()` — Platform statistics; requires admin JWT
+- `getPrometheusMetrics()` — Prometheus metrics text (public endpoint, no auth)
+- `updateSecurityConfig(options)` — Update security config; requires admin JWT
+
+**Analytics / Management helpers (experimental — not yet in CI)**
+- Team, RBAC, alert, report, billing, and analytics methods — these call server endpoints that exist but are not yet covered by automated SDK contract tests. Use with awareness that signatures may change.
 
 ### Utility Functions
 

@@ -26,7 +26,6 @@ from .detector import AttackDetector
 from .logger import FirewallLogger
 from .rag_taxonomy import RetrievedDocument
 from .database import AsyncSessionLocal
-from .models.request_log import RequestLog
 from .models.rag_scan import RagScan
 from .api.auth import init_jwt_config
 
@@ -303,6 +302,15 @@ class KoreShieldProxy:
             await self.start_monitoring()
             asyncio.create_task(self._background_heartbeat())
             await self._handle_event_broadcast("system_status", {"status": "online", "version": self.app.version})
+
+            # Load persisted custom rules into the in-memory detection engine
+            if AsyncSessionLocal:
+                try:
+                    from .api.rules import startup_load_rules
+                    async with AsyncSessionLocal() as db:
+                        await startup_load_rules(db)
+                except Exception as exc:
+                    logger.warning("Could not load custom rules from DB on startup", error=str(exc))
 
         @self.app.on_event("shutdown")
         async def _shutdown_event():
@@ -727,80 +735,22 @@ class KoreShieldProxy:
         # If needed, implement specific proxy endpoints instead
 
 
-    async def _log_request_async(self, log_data: dict):
-        """Log request to database asynchronously."""
-        if not AsyncSessionLocal:
-            return
-        try:
-            async with AsyncSessionLocal() as session:
-                log_entry = RequestLog(**log_data)
-                session.add(log_entry)
-                await session.commit()
-        except Exception as e:
-            logger.error("Failed to log request to DB", error=str(e))
-
-    def _build_request_audit_entry(self, log_data: dict) -> dict:
-        """Normalize request log payloads for management log responses."""
-        timestamp = log_data.get("timestamp")
-        if isinstance(timestamp, datetime):
-            timestamp_value = timestamp.isoformat()
-        else:
-            timestamp_value = str(timestamp or datetime.now(timezone.utc).isoformat())
-
-        status_code = log_data.get("status_code", 200)
-        is_blocked = bool(log_data.get("is_blocked"))
-
-        return {
-            "id": str(uuid.uuid4()),
-            "request_id": log_data.get("request_id"),
-            "timestamp": timestamp_value,
-            "event": "request_log",
-            "path": log_data.get("path"),
-            "method": log_data.get("method"),
-            "provider": log_data.get("provider"),
-            "model": log_data.get("model"),
-            "status": "failure" if is_blocked or status_code >= 400 else "success",
-            "status_code": status_code,
-            "latency_ms": log_data.get("latency_ms"),
-            "tokens_total": log_data.get("tokens_total", 0),
-            "cost": log_data.get("cost", 0.0),
-            "is_blocked": is_blocked,
-            "attack_detected": bool(log_data.get("attack_detected")),
-            "attack_type": log_data.get("attack_type"),
-            "attack_details": log_data.get("attack_details") or {},
-            "user_id": str(log_data.get("user_id")) if log_data.get("user_id") else None,
-            "ip": log_data.get("ip_address"),
-            "user_agent": log_data.get("user_agent"),
-        }
-
-    def _append_audit_log(self, entry: dict) -> None:
-        """Store an audit entry in memory for dashboard visibility."""
-        if not entry:
-            return
-        self.app.state.audit_log_store.appendleft(entry)
-
-    def _queue_request_log(self, log_data: dict) -> None:
-        """Record a request log immediately in memory and persist asynchronously."""
-        self._append_audit_log(self._build_request_audit_entry(log_data))
-        asyncio.create_task(self._log_request_async(log_data))
+    # ── Audit helpers (thin wrappers — implementation lives in services/audit.py) ──
 
     @staticmethod
     def _principal_log_fields(principal: dict | None) -> dict:
         """Extract request-log ownership fields from an authenticated principal."""
-        if not principal:
-            return {}
-        return {
-            "user_id": principal.get("user_id"),
-            "api_key_id": principal.get("api_key_id"),
-        }
+        from .services.audit import principal_log_fields
+        return principal_log_fields(principal)
 
     def _record_scan_result(self, payload: dict) -> None:
         """Store a prompt scan result for the `/v1/scans` history endpoints."""
-        scan_id = payload.get("request_id")
-        if not scan_id:
-            return
-        self.app.state.scan_index[scan_id] = payload
-        self.app.state.scan_store.appendleft(payload)
+        from .services.audit import record_scan_result
+        record_scan_result(
+            payload,
+            self.app.state.scan_store,
+            self.app.state.scan_index,
+        )
 
     async def _authenticate_request(self, request: Request) -> dict:
         """Forward to AuthService."""
