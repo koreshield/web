@@ -163,6 +163,35 @@ class KoreShieldProxy:
         self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
         self.app.add_middleware(SlowAPIMiddleware)
 
+        def _build_cors_headers(request: Request) -> dict:
+            origin = request.headers.get("origin", "")
+            cors_origins = [
+                "https://koreshield.com",
+                "https://www.koreshield.com",
+                "https://api.koreshield.com",
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://localhost:8000",
+            ]
+            if origin in cors_origins:
+                return {
+                    "Access-Control-Allow-Origin": origin,
+                    "Access-Control-Allow-Credentials": "true",
+                }
+            return {}
+
+        # Explicit HTTPException handler — must be registered BEFORE the generic
+        # Exception handler so Starlette's MRO-based lookup finds it first.
+        # Without this, @app.exception_handler(Exception) swallows all HTTP
+        # 401/403/404 etc. because HTTPException inherits from Exception.
+        @self.app.exception_handler(HTTPException)
+        async def _http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={"detail": exc.detail},
+                headers={**_build_cors_headers(request), **(exc.headers or {})},
+            )
+
         # Global fallback: ensure unhandled exceptions return JSON with CORS headers
         # (Starlette's ServerErrorMiddleware would otherwise return a bare 500 HTML
         # response before CORSMiddleware can attach Allow-Origin headers, causing
@@ -175,23 +204,10 @@ class KoreShieldProxy:
                 error=str(exc),
                 exc_info=True,
             )
-            origin = request.headers.get("origin", "")
-            cors_origins = [
-                "https://koreshield.com",
-                "https://www.koreshield.com",
-                "https://api.koreshield.com",
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://localhost:8000",
-            ]
-            headers = {}
-            if origin in cors_origins:
-                headers["Access-Control-Allow-Origin"] = origin
-                headers["Access-Control-Allow-Credentials"] = "true"
             return JSONResponse(
                 status_code=500,
                 content={"error": "internal_server_error", "message": "An unexpected error occurred."},
-                headers=headers,
+                headers=_build_cors_headers(request),
             )
 
         # 3. Initialize Base Security Components
