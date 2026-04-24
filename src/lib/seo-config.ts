@@ -43,7 +43,7 @@ export const SEOConfig = {
 			'@type': 'Organization',
 			name: 'KoreShield',
 			url: 'https://koreshield.com',
-			logo: 'https://koreshield.com/logo/PNG/White.png',
+			logo: 'https://koreshield.com/logo/light/1x/White.png',
 			description: 'Securing the AI-powered future with industry-standard LLM security solutions.',
 			foundingDate: '2023',
 			founders: [

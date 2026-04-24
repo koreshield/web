@@ -164,7 +164,7 @@ export function MarketingLayout() {
 	const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const { isAuthenticated } = useAuthState();
 	const { theme } = useTheme();
-	const logoSrc = theme === 'light' ? '/logo/SVG/Black.svg' : '/logo/SVG/White.svg';
+	const logoSrc = theme === 'light' ? '/logo/dark/SVG/Black.svg' : '/logo/light/SVG/White.svg';
 
 	const closeMobile = () => setMobileMenuOpen(false);
 
