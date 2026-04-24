@@ -158,7 +158,7 @@ function Sidebar({
 	onNavClick?: () => void;
 }) {
 	const { theme } = useTheme();
-	const logoSrc = theme === 'light' ? '/logo/SVG/Black.svg' : '/logo/SVG/White.svg';
+	const logoSrc = theme === 'light' ? '/logo/dark/SVG/Black.svg' : '/logo/light/SVG/White.svg';
 
 	return (
 		<div className="flex flex-col h-full">
@@ -485,12 +485,12 @@ export function AppLayout() {
 					{/* Mobile logo (shown when sidebar is hidden) */}
 					<Link to="/dashboard" className="md:hidden flex items-center gap-2 mr-2">
 						<img
-							src="/logo/SVG/White.svg"
+							src="/logo/light/SVG/White.svg"
 							alt="KoreShield"
 							className="w-6 h-6 dark:block hidden"
 						/>
 						<img
-							src="/logo/SVG/Black.svg"
+							src="/logo/dark/SVG/Black.svg"
 							alt="KoreShield"
 							className="w-6 h-6 dark:hidden"
 						/>
