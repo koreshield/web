@@ -127,8 +127,8 @@ export function SignupPage() {
 
                 {/* Logo */}
                 <div className="relative z-10 flex items-center gap-3">
-                    <img src="/logo/SVG/Black.svg" alt="KoreShield" className="w-8 h-8 dark:hidden" />
-                    <img src="/logo/SVG/White.svg" alt="KoreShield" className="w-8 h-8 hidden dark:block" />
+                    <img src="/logo/dark/SVG/Black.svg" alt="KoreShield" className="w-8 h-8 dark:hidden" />
+                    <img src="/logo/light/SVG/White.svg" alt="KoreShield" className="w-8 h-8 hidden dark:block" />
                     <span className="text-xl font-bold text-foreground tracking-tight">KoreShield</span>
                 </div>
 
@@ -166,8 +166,8 @@ export function SignupPage() {
                 <div className="w-full max-w-md">
                     {/* Mobile logo */}
                     <div className="flex items-center gap-2 mb-8 lg:hidden">
-                        <img src="/logo/SVG/Black.svg" alt="KoreShield" className="w-7 h-7 dark:hidden" />
-                        <img src="/logo/SVG/White.svg" alt="KoreShield" className="w-7 h-7 hidden dark:block" />
+                        <img src="/logo/dark/SVG/Black.svg" alt="KoreShield" className="w-7 h-7 dark:hidden" />
+                        <img src="/logo/light/SVG/White.svg" alt="KoreShield" className="w-7 h-7 hidden dark:block" />
                         <span className="font-bold text-foreground">KoreShield</span>
                     </div>
 
