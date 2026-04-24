@@ -7,8 +7,8 @@ function Footer() {
 				{/* Logo + Tagline */}
 				<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8 mb-12">
 					<div className="flex items-center gap-3">
-						<img src="/logo/SVG/Black.svg" alt="KoreShield Logo" className="w-8 h-8 dark:hidden" />
-						<img src="/logo/SVG/White.svg" alt="KoreShield Logo" className="w-8 h-8 hidden dark:block" />
+						<img src="/logo/dark/SVG/Black.svg" alt="KoreShield Logo" className="w-8 h-8 dark:hidden" />
+						<img src="/logo/light/SVG/White.svg" alt="KoreShield Logo" className="w-8 h-8 hidden dark:block" />
 						<div>
 							<div className="text-xl font-bold text-foreground tracking-tight">
 								KoreShield
