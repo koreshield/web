@@ -88,4 +88,12 @@ jobs:
         run: npx tsc --noEmit || true
 
       - name: Build (validates no runtime errors)
+        env:
+          VITE_API_BASE_URL: https://api.koreshield.com
+          VITE_WS_BASE_URL: wss://api.koreshield.com
+          VITE_ENV: ci
+          VITE_EMAILJS_SERVICE_ID: dummy
+          VITE_EMAILJS_TEMPLATE_ID: dummy
+          VITE_EMAILJS_TEMPLATE_ID_CONTACT: dummy
+          VITE_EMAILJS_PUBLIC_KEY: dummy
         run: npm run build
