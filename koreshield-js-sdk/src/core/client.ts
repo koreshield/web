@@ -57,7 +57,7 @@ export class KoreShieldClient {
       timeout: this.config.timeout,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'koreshield-js-sdk/0.3.6',
+        'User-Agent': 'koreshield-js-sdk/0.3.7',
         ...this.config.headers
       }
     });
@@ -542,11 +542,6 @@ export class KoreShieldClient {
     try { return (await this.client.get('/v1/management/stats/public')).data; } catch (e: any) { throw this.handleError(e); }
   }
 
-  /** Get audit / request logs */
-  async getAuditLogs(params?: { limit?: number; offset?: number; level?: string }): Promise<Record<string, any>> {
-    try { return (await this.client.get('/v1/management/logs', { params })).data; } catch (e: any) { throw this.handleError(e); }
-  }
-
   /** Get security configuration */
   async getSecurityConfig(): Promise<Record<string, any>> {
     try { return (await this.client.get('/v1/management/config/security')).data; } catch (e: any) { throw this.handleError(e); }
@@ -846,7 +841,7 @@ export class KoreShieldClient {
         'Content-Type': 'application/json',
         'Accept': 'text/event-stream',
         'Authorization': `Bearer ${this.config.apiKey}`,
-        'User-Agent': 'koreshield-js-sdk/0.3.6',
+        'User-Agent': 'koreshield-js-sdk/0.3.7',
         ...this.config.headers,
       } as Record<string, string>,
       body: JSON.stringify(payload),
