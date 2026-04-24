@@ -95,11 +95,13 @@ class AsyncKoreShieldClient:
             "keepalive_expiry": 30.0,
         }
 
+        # API keys are sent via X-API-Key.
+        # Authorization: Bearer is reserved for JWT session tokens.
         self.client = httpx.AsyncClient(
             timeout=httpx.Timeout(timeout, connect=10.0),
             limits=httpx.Limits(**pool_limits),
             headers={
-                "Authorization": f"Bearer {api_key}",
+                "X-API-Key": api_key,
                 "Content-Type": "application/json",
                 "User-Agent": f"koreshield-python-sdk/{__version__}",
             },
@@ -1118,7 +1120,7 @@ class AsyncKoreShieldClient:
             **{k: v for k, v in kwargs.items() if k != "stream"},
         }
         headers = {
-            "Authorization": f"Bearer {self.auth_config.api_key}",
+            "X-API-Key": self.auth_config.api_key,
             "Content-Type": "application/json",
             "Accept": "text/event-stream",
         }

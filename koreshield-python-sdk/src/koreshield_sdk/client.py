@@ -78,9 +78,11 @@ class KoreShieldClient:
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)
 
+        # API keys are sent via X-API-Key.
+        # Authorization: Bearer is reserved for JWT session tokens.
         self.session.headers.update(
             {
-                "Authorization": f"Bearer {api_key}",
+                "X-API-Key": api_key,
                 "Content-Type": "application/json",
                 "User-Agent": f"koreshield-python-sdk/{__version__}",
             }
