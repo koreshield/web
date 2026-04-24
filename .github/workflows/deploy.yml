@@ -11,6 +11,11 @@ on:
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
+# Only one deploy at a time. Cancel in-flight deploy if a newer push arrives.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
 jobs:
   deploy:
     # Runner IS the VPS — deploy locally, no SSH needed
