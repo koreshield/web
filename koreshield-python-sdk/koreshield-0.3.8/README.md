@@ -246,50 +246,41 @@ async with AsyncKoreShieldClient(api_key="your-key") as client:
 
 ## API Reference
 
-Stability labels: **stable** = covered by contract; **admin** = requires JWT admin + MFA; **experimental** = not yet covered by CI contract tests.
-
 ### KoreShieldClient
 
-#### Core — API key auth (stable)
+#### Methods
 
 - `scan_prompt(prompt: str, **kwargs) -> DetectionResult`
 - `scan_batch(prompts: List[str], parallel=True, max_concurrent=10) -> List[DetectionResult]`
 - `scan_rag_context(user_query: str, documents: List[Union[Dict, RAGDocument]], config: Optional[Dict] = None) -> RAGScanResponse`
 - `scan_rag_context_batch(queries_and_docs: List[Dict], parallel=True, max_concurrent=5) -> List[RAGScanResponse]`
-- `health_check() -> Dict`
-
-#### Management — JWT admin required (admin)
-
 - `get_scan_history(limit=50, offset=0, **filters) -> Dict`
 - `get_scan_details(scan_id: str) -> Dict`
+- `health_check() -> Dict`
 
 ### AsyncKoreShieldClient
 
-#### Core — API key auth (stable)
+#### Core Methods
 
 - `scan_prompt(prompt: str, **kwargs) -> DetectionResult` (async)
 - `scan_batch(prompts: List[str], parallel=True, max_concurrent=10, progress_callback=None) -> List[DetectionResult]` (async)
 - `scan_rag_context(user_query: str, documents: List[Union[Dict, RAGDocument]], config: Optional[Dict] = None) -> RAGScanResponse` (async)
-- `scan_rag_context_batch(queries_and_docs: List[Dict], parallel=True, max_concurrent=5) -> List[RAGScanResponse]` (async)
+- `scan_rag_context_batch(queries_and_docs: List[Dict], parallel=True, max_concurrent= 5) -> List[RAGScanResponse]` (async)
 - `scan_stream(content: str, chunk_size=1000, overlap=100, **kwargs) -> StreamingScanResponse` (async)
-- `health_check() -> Dict` (async)
-
-#### Management — JWT admin required (admin)
-
 - `get_scan_history(limit=50, offset=0, **filters) -> Dict` (async)
 - `get_scan_details(scan_id: str) -> Dict` (async)
+- `health_check() -> Dict` (async)
 
-#### Client-side helpers (no server call)
+#### Security Policy Methods
 
-- `apply_security_policy(policy: SecurityPolicy) -> None` — sets a local filter applied before each scan request
-- `get_security_policy() -> SecurityPolicy` — returns the currently active local policy
+- `apply_security_policy(policy: SecurityPolicy) -> None` (async)
+- `get_security_policy() -> SecurityPolicy` (async)
 
-#### Performance monitoring (experimental — local metrics only)
+#### Performance Monitoring Methods
 
 - `get_performance_metrics() -> PerformanceMetrics` (async)
 - `reset_metrics() -> None` (async)
-
-> **Note:** Performance metrics are in-process only. Enable via `enable_metrics=True` in the constructor. They are not persisted and reset on each new client instance.
+Note: metrics are enabled via the `enable_metrics` constructor flag.
 
 ### DetectionResult
 
@@ -351,16 +342,14 @@ class PerformanceMetrics:
 
 ### Authentication
 
-The SDK authenticates with an API key using the `X-API-Key` header (fixed in v0.3.8):
+The SDK authenticates with an API key using the `Authorization: Bearer <key>` header.
+If your deployment requires `X-API-Key`, you can override headers after initialization:
 
 ```python
 client = KoreShieldClient(api_key="your-api-key")
-# The X-API-Key: <key> header is set automatically.
+client.session.headers.pop("Authorization", None)
+client.session.headers["X-API-Key"] = "your-api-key"
 ```
-
-> **Note:** `Authorization: Bearer <token>` is for JWT session tokens only (login
-> flow).  API keys use `X-API-Key`.  Both the sync and async clients set the
-> correct header automatically when you pass `api_key` to the constructor.
 
 ### Environment Variables (Optional Helper in Your App)
 
