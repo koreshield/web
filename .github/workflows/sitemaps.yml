@@ -89,7 +89,30 @@ jobs:
 
       - name: Validate XML
         run: |
-          python3 -m xml.dom.minidom koreshield-web/public/sitemap.xml > /dev/null && echo "✓ Main sitemap valid"
-          python3 -m xml.dom.minidom koreshield-blog/public/sitemap.xml > /dev/null && echo "✓ Blog sitemap valid"
-          python3 -m xml.dom.minidom koreshield-docs/static/sitemap.xml > /dev/null && echo "✓ Docs sitemap valid"
-          python3 -m xml.dom.minidom sitemap_index.xml > /dev/null && echo "✓ Sitemap index valid"
+          python3 - <<'PYEOF'
+          import sys
+          from xml.dom import minidom
+          from pathlib import Path
+
+          files = {
+              "Main sitemap":   "koreshield-web/public/sitemap.xml",
+              "Blog sitemap":   "koreshield-blog/public/sitemap.xml",
+              "Docs sitemap":   "koreshield-docs/static/sitemap.xml",
+              "Sitemap index":  "sitemap_index.xml",
+          }
+
+          failed = False
+          for label, path in files.items():
+              p = Path(path)
+              if not p.exists():
+                  print(f"⚠  {label}: {path} not found — skipping")
+                  continue
+              try:
+                  minidom.parseString(p.read_bytes())
+                  print(f"✓ {label} valid")
+              except Exception as e:
+                  print(f"✗ {label}: {e}")
+                  failed = True
+
+          sys.exit(1 if failed else 0)
+          PYEOF
