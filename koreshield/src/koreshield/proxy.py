@@ -368,9 +368,15 @@ class KoreShieldProxy:
         stats = self.telemetry.get_stats()
         providers = await self.provider_service.get_health_snapshot()
         
-        # Check if any provider is degraded or unhealthy
+        # Only enabled providers should affect runtime routing health.
+        # Disabled providers can legitimately report a non-healthy status
+        # (for example "disabled") without meaning the live routing plane
+        # is degraded.
         routing_status = "healthy"
-        if any(p.get("status") != "healthy" for p in providers.values()):
+        if any(
+            p.get("enabled") and p.get("status") != "healthy"
+            for p in providers.values()
+        ):
             routing_status = "degraded"
             
         snapshot = {

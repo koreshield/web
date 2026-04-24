@@ -9,6 +9,7 @@ import structlog
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
@@ -211,11 +212,13 @@ async def get_or_create_billing_account(
     user_id = UUID(current_user["id"])
     default_team = await get_default_billing_team(db, user_id)
 
-    query = select(BillingAccount).where(BillingAccount.owner_user_id == user_id)
     if default_team:
-        query = query.where(BillingAccount.team_id == default_team.id)
+        query = select(BillingAccount).where(BillingAccount.team_id == default_team.id)
     else:
-        query = query.where(BillingAccount.team_id.is_(None))
+        query = select(BillingAccount).where(
+            BillingAccount.owner_user_id == user_id,
+            BillingAccount.team_id.is_(None),
+        )
 
     result = await db.execute(query)
     account = result.scalar_one_or_none()
@@ -236,7 +239,28 @@ async def get_or_create_billing_account(
         }),
     )
     db.add(account)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        # Another owner/admin may have created the shared team billing record
+        # concurrently. Refetch the canonical account instead of surfacing a 500.
+        if default_team:
+            result = await db.execute(
+                select(BillingAccount).where(BillingAccount.team_id == default_team.id)
+            )
+        else:
+            result = await db.execute(
+                select(BillingAccount).where(
+                    BillingAccount.owner_user_id == user_id,
+                    BillingAccount.team_id.is_(None),
+                )
+            )
+        account = result.scalar_one_or_none()
+        if account:
+            return account
+        raise
+
     await db.refresh(account)
     return account
 

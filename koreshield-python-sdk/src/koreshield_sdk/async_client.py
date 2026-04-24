@@ -1,9 +1,14 @@
 """Asynchronous KoreShield client with enhanced features."""
 
+from __future__ import annotations
+
 import asyncio
 import time
-from typing import Dict, List, Optional, Any, Union, Callable
+from typing import Any, Callable, Dict, List, Literal, Optional, Union
+
 import httpx
+
+from . import __version__
 
 from .types import (
     AuthConfig,
@@ -96,7 +101,7 @@ class AsyncKoreShieldClient:
             headers={
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
-                "User-Agent": f"koreshield-python-sdk/0.3.6",
+                "User-Agent": f"koreshield-python-sdk/{__version__}",
             },
         )
 
@@ -158,7 +163,7 @@ class AsyncKoreShieldClient:
 
         for attempt in range(self.auth_config.retry_attempts + 1):
             try:
-                response = await self._make_request("POST", "/v1/scan", request.dict())
+                response = await self._make_request("POST", "/v1/scan", request.model_dump())
                 scan_response = ScanResponse(**response)
 
                 processing_time = time.time() - start_time
@@ -663,6 +668,311 @@ class AsyncKoreShieldClient:
         tasks = [scan_with_semaphore(item) for item in queries_and_docs]
         return await asyncio.gather(*tasks)
 
+    # ──────────────────────────────────────────────────────────────────────────
+    # Management API — mirrors KoreShieldClient (sync)
+    # ──────────────────────────────────────────────────────────────────────────
+
+    async def get_me(self) -> Dict[str, Any]:
+        """Get the current authenticated user's profile."""
+        return await self._make_request("GET", "/v1/management/me")
+
+    async def update_me(self, name: Optional[str] = None, company: Optional[str] = None, job_title: Optional[str] = None) -> Dict[str, Any]:
+        """Update the current user's profile."""
+        payload = {k: v for k, v in {"name": name, "company": company, "job_title": job_title}.items() if v is not None}
+        return await self._make_request("PATCH", "/v1/management/me", data=payload)
+
+    async def list_api_keys(self) -> Dict[str, Any]:
+        """List all API keys for the current account."""
+        return await self._make_request("GET", "/v1/management/api-keys")
+
+    async def create_api_key(self, name: str, **kwargs: Any) -> Dict[str, Any]:
+        """Create a new API key."""
+        return await self._make_request("POST", "/v1/management/api-keys", data={"name": name, **kwargs})
+
+    async def get_api_key(self, key_id: str) -> Dict[str, Any]:
+        """Get details for a specific API key."""
+        return await self._make_request("GET", f"/v1/management/api-keys/{key_id}")
+
+    async def revoke_api_key(self, key_id: str) -> Dict[str, Any]:
+        """Revoke an API key."""
+        return await self._make_request("DELETE", f"/v1/management/api-keys/{key_id}")
+
+    async def get_stats(self) -> Dict[str, Any]:
+        """Get per-account statistics."""
+        return await self._make_request("GET", "/v1/management/stats")
+
+    async def get_audit_logs(self, limit: int = 100, offset: int = 0, level: Optional[str] = None) -> Dict[str, Any]:
+        """Get audit logs."""
+        params: Dict[str, Any] = {"limit": limit, "offset": offset}
+        if level:
+            params["level"] = level
+        return await self._make_request("GET", "/v1/management/logs", params=params)
+
+    async def get_security_config(self) -> Dict[str, Any]:
+        """Get current security configuration."""
+        return await self._make_request("GET", "/v1/management/config")
+
+    async def update_security_config(self, sensitivity: Optional[str] = None, default_action: Optional[str] = None) -> Dict[str, Any]:
+        """Update security configuration."""
+        payload = {k: v for k, v in {"sensitivity": sensitivity, "default_action": default_action}.items() if v is not None}
+        return await self._make_request("PATCH", "/v1/management/config/security", data=payload)
+
+    async def list_policies(self) -> Dict[str, Any]:
+        """List all security policies."""
+        return await self._make_request("GET", "/v1/management/policies")
+
+    async def create_policy(self, policy: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a new security policy."""
+        return await self._make_request("POST", "/v1/management/policies", data=policy)
+
+    async def delete_policy(self, policy_id: str) -> Dict[str, Any]:
+        """Delete a security policy."""
+        return await self._make_request("DELETE", f"/v1/management/policies/{policy_id}")
+
+    async def list_rules(self) -> Dict[str, Any]:
+        """List all detection rules."""
+        return await self._make_request("GET", "/v1/management/rules")
+
+    async def get_rule(self, rule_id: str) -> Dict[str, Any]:
+        """Get a specific rule by ID."""
+        return await self._make_request("GET", f"/v1/management/rules/{rule_id}")
+
+    async def create_rule(self, rule: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a new detection rule."""
+        return await self._make_request("POST", "/v1/management/rules", data=rule)
+
+    async def update_rule(self, rule_id: str, rule: Dict[str, Any]) -> Dict[str, Any]:
+        """Update an existing detection rule."""
+        return await self._make_request("PUT", f"/v1/management/rules/{rule_id}", data=rule)
+
+    async def delete_rule(self, rule_id: str) -> Dict[str, Any]:
+        """Delete a detection rule."""
+        return await self._make_request("DELETE", f"/v1/management/rules/{rule_id}")
+
+    async def test_rule(self, pattern: str, test_input: str) -> Dict[str, Any]:
+        """Test a rule pattern against a sample input."""
+        return await self._make_request("POST", "/v1/management/rules/test", data={"pattern": pattern, "test_input": test_input})
+
+    async def list_alert_rules(self) -> Dict[str, Any]:
+        """List all alert rules."""
+        return await self._make_request("GET", "/v1/management/alerts/rules")
+
+    async def get_alert_rule(self, rule_id: str) -> Dict[str, Any]:
+        """Get a specific alert rule."""
+        return await self._make_request("GET", f"/v1/management/alerts/rules/{rule_id}")
+
+    async def create_alert_rule(self, rule: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a new alert rule."""
+        return await self._make_request("POST", "/v1/management/alerts/rules", data=rule)
+
+    async def update_alert_rule(self, rule_id: str, rule: Dict[str, Any]) -> Dict[str, Any]:
+        """Update an alert rule."""
+        return await self._make_request("PUT", f"/v1/management/alerts/rules/{rule_id}", data=rule)
+
+    async def delete_alert_rule(self, rule_id: str) -> Dict[str, Any]:
+        """Delete an alert rule."""
+        return await self._make_request("DELETE", f"/v1/management/alerts/rules/{rule_id}")
+
+    async def list_alert_channels(self) -> Dict[str, Any]:
+        """List all alert channels."""
+        return await self._make_request("GET", "/v1/management/alerts/channels")
+
+    async def get_alert_channel(self, channel_id: str) -> Dict[str, Any]:
+        """Get a specific alert channel."""
+        return await self._make_request("GET", f"/v1/management/alerts/channels/{channel_id}")
+
+    async def create_alert_channel(self, channel: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a new alert channel."""
+        return await self._make_request("POST", "/v1/management/alerts/channels", data=channel)
+
+    async def update_alert_channel(self, channel_id: str, channel: Dict[str, Any]) -> Dict[str, Any]:
+        """Update an alert channel."""
+        return await self._make_request("PUT", f"/v1/management/alerts/channels/{channel_id}", data=channel)
+
+    async def delete_alert_channel(self, channel_id: str) -> Dict[str, Any]:
+        """Delete an alert channel."""
+        return await self._make_request("DELETE", f"/v1/management/alerts/channels/{channel_id}")
+
+    async def test_alert_channel(self, channel_id: str) -> Dict[str, Any]:
+        """Send a test alert to a channel."""
+        return await self._make_request("POST", f"/v1/management/alerts/channels/{channel_id}/test")
+
+    async def get_cost_analytics(self, time_range: str = "7d", provider: Optional[str] = None) -> Dict[str, Any]:
+        """Get cost analytics broken down by provider and model."""
+        params: Dict[str, Any] = {"time_range": time_range}
+        if provider:
+            params["provider"] = provider
+        return await self._make_request("GET", "/v1/analytics/costs", params=params)
+
+    async def get_cost_summary(self) -> Dict[str, Any]:
+        """Get aggregated cost summary."""
+        return await self._make_request("GET", "/v1/analytics/costs/summary")
+
+    async def get_attack_vectors(self, time_range: str = "7d") -> Dict[str, Any]:
+        """Get attack vector breakdown."""
+        return await self._make_request("GET", "/v1/analytics/attack-vectors", params={"time_range": time_range})
+
+    async def get_top_endpoints(self, time_range: str = "7d", limit: int = 10) -> Dict[str, Any]:
+        """Get top endpoints by request volume."""
+        return await self._make_request("GET", "/v1/analytics/top-endpoints", params={"time_range": time_range, "limit": limit})
+
+    async def get_provider_metrics(self, time_range: str = "7d") -> Dict[str, Any]:
+        """Get per-provider performance metrics."""
+        return await self._make_request("GET", "/v1/analytics/provider-metrics", params={"time_range": time_range})
+
+    async def get_compliance_posture(self) -> Dict[str, Any]:
+        """Get compliance posture report."""
+        return await self._make_request("GET", "/v1/analytics/compliance-posture")
+
+    async def get_provider_health(self) -> Dict[str, Any]:
+        """Get health status of all LLM providers."""
+        return await self._make_request("GET", "/health/providers")
+
+    async def list_teams(self) -> Dict[str, Any]:
+        """List all teams."""
+        return await self._make_request("GET", "/v1/teams/")
+
+    async def get_team(self, team_id: str) -> Dict[str, Any]:
+        """Get a team by ID."""
+        return await self._make_request("GET", f"/v1/teams/{team_id}")
+
+    async def create_team(self, name: str, **kwargs: Any) -> Dict[str, Any]:
+        """Create a new team."""
+        return await self._make_request("POST", "/v1/teams/", data={"name": name, **kwargs})
+
+    async def update_team(self, team_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update a team."""
+        return await self._make_request("PUT", f"/v1/teams/{team_id}", data=data)
+
+    async def delete_team(self, team_id: str) -> Dict[str, Any]:
+        """Delete a team."""
+        return await self._make_request("DELETE", f"/v1/teams/{team_id}")
+
+    async def list_team_members(self, team_id: str) -> Dict[str, Any]:
+        """List members of a team."""
+        return await self._make_request("GET", f"/v1/teams/{team_id}/members")
+
+    async def add_team_member(self, team_id: str, user_id: str, role: str = "member") -> Dict[str, Any]:
+        """Add a member to a team."""
+        return await self._make_request("POST", f"/v1/teams/{team_id}/members", data={"user_id": user_id, "role": role})
+
+    async def remove_team_member(self, team_id: str, user_id: str) -> Dict[str, Any]:
+        """Remove a member from a team."""
+        return await self._make_request("DELETE", f"/v1/teams/{team_id}/members/{user_id}")
+
+    async def list_users(self) -> Dict[str, Any]:
+        """List all users (admin only)."""
+        return await self._make_request("GET", "/v1/rbac/users")
+
+    async def get_user(self, user_id: str) -> Dict[str, Any]:
+        """Get a user by ID."""
+        return await self._make_request("GET", f"/v1/rbac/users/{user_id}")
+
+    async def update_user(self, user_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update a user."""
+        return await self._make_request("PUT", f"/v1/rbac/users/{user_id}", data=data)
+
+    async def delete_user(self, user_id: str) -> Dict[str, Any]:
+        """Delete a user."""
+        return await self._make_request("DELETE", f"/v1/rbac/users/{user_id}")
+
+    async def list_roles(self) -> Dict[str, Any]:
+        """List all roles."""
+        return await self._make_request("GET", "/v1/rbac/roles")
+
+    async def create_role(self, name: str, permissions: List[str]) -> Dict[str, Any]:
+        """Create a new role."""
+        return await self._make_request("POST", "/v1/rbac/roles", data={"name": name, "permissions": permissions})
+
+    async def update_role(self, role_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update a role."""
+        return await self._make_request("PUT", f"/v1/rbac/roles/{role_id}", data=data)
+
+    async def delete_role(self, role_id: str) -> Dict[str, Any]:
+        """Delete a role."""
+        return await self._make_request("DELETE", f"/v1/rbac/roles/{role_id}")
+
+    async def list_permissions(self) -> Dict[str, Any]:
+        """List all available permissions."""
+        return await self._make_request("GET", "/v1/rbac/permissions")
+
+    async def list_reports(self) -> Dict[str, Any]:
+        """List all reports."""
+        return await self._make_request("GET", "/v1/reports")
+
+    async def get_report(self, report_id: str) -> Dict[str, Any]:
+        """Get a specific report."""
+        return await self._make_request("GET", f"/v1/reports/{report_id}")
+
+    async def create_report(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a new report."""
+        return await self._make_request("POST", "/v1/reports", data=data)
+
+    async def generate_report(self, report_id: str) -> Dict[str, Any]:
+        """Trigger report generation."""
+        return await self._make_request("POST", f"/v1/reports/{report_id}/generate")
+
+    async def delete_report(self, report_id: str) -> Dict[str, Any]:
+        """Delete a report."""
+        return await self._make_request("DELETE", f"/v1/reports/{report_id}")
+
+    async def get_billing_account(self) -> Dict[str, Any]:
+        """Get billing account details and current plan."""
+        return await self._make_request("GET", "/v1/billing/account")
+
+    async def sync_billing(self) -> Dict[str, Any]:
+        """Sync billing account state with payment provider."""
+        return await self._make_request("POST", "/v1/billing/sync")
+
+    async def get_rag_scan_history(self, limit: int = 50, offset: int = 0) -> Dict[str, Any]:
+        """Get RAG scan history."""
+        return await self._make_request("GET", "/v1/rag/scans", params={"limit": limit, "offset": offset})
+
+    async def get_rag_scan_details(self, scan_id: str) -> Dict[str, Any]:
+        """Get details for a specific RAG scan."""
+        return await self._make_request("GET", f"/v1/rag/scans/{scan_id}")
+
+    async def delete_rag_scan(self, scan_id: str) -> Dict[str, Any]:
+        """Delete a specific RAG scan record."""
+        return await self._make_request("DELETE", f"/v1/rag/scans/{scan_id}")
+
+    async def list_tool_sessions(self, limit: int = 50, status: Optional[str] = None) -> Dict[str, Any]:
+        """List tool execution sessions."""
+        params: Dict[str, Any] = {"limit": limit}
+        if status:
+            params["status"] = status
+        return await self._make_request("GET", "/v1/tools/sessions", params=params)
+
+    async def list_tool_reviews(self, limit: int = 50, status: Optional[str] = None) -> Dict[str, Any]:
+        """List tool calls pending human review."""
+        params: Dict[str, Any] = {"limit": limit}
+        if status:
+            params["status"] = status
+        return await self._make_request("GET", "/v1/tools/reviews", params=params)
+
+    async def decide_tool_review(self, review_id: str, decision: Literal["approved", "rejected"], note: Optional[str] = None) -> Dict[str, Any]:
+        """Approve or reject a tool call in the review queue."""
+        payload: Dict[str, Any] = {"decision": decision}
+        if note:
+            payload["note"] = note
+        return await self._make_request("POST", f"/v1/tools/reviews/{review_id}/decision", data=payload)
+
+    async def get_operational_state(self) -> Dict[str, Any]:
+        """Get current operational state."""
+        return await self._make_request("GET", "/v1/management/operations")
+
+    async def create_incident(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create an incident record."""
+        return await self._make_request("POST", "/v1/management/operations/incidents", data=data)
+
+    async def add_incident_update(self, incident_id: str, update: Dict[str, Any]) -> Dict[str, Any]:
+        """Add an update to an existing incident."""
+        return await self._make_request("POST", f"/v1/management/operations/incidents/{incident_id}/updates", data=update)
+
+    async def schedule_maintenance(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Schedule a maintenance window."""
+        return await self._make_request("POST", "/v1/management/operations/maintenance", data=data)
+
     async def _make_request(
         self,
         method: str,
@@ -720,38 +1030,31 @@ class AsyncKoreShieldClient:
         except ValueError:
             data = {"message": "Invalid JSON response"}
 
-        if response.status_code == 200:
+        # Treat any 2xx as success
+        if response.status_code < 300:
             return data
-        elif response.status_code == 401:
-            raise AuthenticationError(
-                data.get("message", "Authentication failed"),
-                status_code=response.status_code,
-                response_data=data,
+
+        # Extract human-readable message from FastAPI error shapes
+        detail = data.get("detail")
+        if isinstance(detail, list):
+            message = "; ".join(
+                f"{'.'.join(str(l) for l in e.get('loc', []))}: {e.get('msg', '')}"
+                for e in detail
             )
-        elif response.status_code == 400:
-            raise ValidationError(
-                data.get("message", "Validation failed"),
-                status_code=response.status_code,
-                response_data=data,
-            )
-        elif response.status_code == 429:
-            raise RateLimitError(
-                data.get("message", "Rate limit exceeded"),
-                status_code=response.status_code,
-                response_data=data,
-            )
-        elif response.status_code >= 500:
-            raise ServerError(
-                data.get("message", "Server error"),
-                status_code=response.status_code,
-                response_data=data,
-            )
+        elif isinstance(detail, str):
+            message = detail
         else:
-            raise KoreShieldError(
-                data.get("message", f"Unexpected error: {response.status_code}"),
-                status_code=response.status_code,
-                response_data=data,
-            )
+            message = data.get("message", f"HTTP {response.status_code}")
+
+        if response.status_code == 401:
+            raise AuthenticationError(message, status_code=response.status_code, response_data=data)
+        if response.status_code in (400, 422):
+            raise ValidationError(message, status_code=response.status_code, response_data=data)
+        if response.status_code == 429:
+            raise RateLimitError(message, status_code=response.status_code, response_data=data)
+        if response.status_code >= 500:
+            raise ServerError(message, status_code=response.status_code, response_data=data)
+        raise KoreShieldError(message, status_code=response.status_code, response_data=data)
 
     # ------------------------------------------------------------------
     # LLM Proxy — chat completions (scan → forward → return)

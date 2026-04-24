@@ -989,6 +989,52 @@ async def get_account_stats(
 
 
 @router.get(
+    "/stats/public",
+    summary="Public Platform Statistics",
+    description=(
+        "Returns aggregate platform-wide statistics with no authentication required. "
+        "Safe to display on public status pages. Never includes per-user data."
+    ),
+    tags=["Management"],
+    responses={200: {"description": "Aggregate platform statistics"}},
+)
+async def get_public_stats(
+    db: AsyncSession | None = Depends(get_optional_db),
+):
+    """Return aggregate platform-wide stats — no auth required, safe for public status pages."""
+    if db is None:
+        return {"statistics": {"requests_total": 0, "requests_blocked": 0, "requests_allowed": 0, "attacks_detected": 0}}
+
+    try:
+        total_result = await db.execute(select(func.count(RequestLog.id)))
+        total = total_result.scalar() or 0
+
+        blocked_result = await db.execute(
+            select(func.count(RequestLog.id)).where(RequestLog.is_blocked == True)  # noqa: E712
+        )
+        blocked = blocked_result.scalar() or 0
+
+        attacks_result = await db.execute(
+            select(func.count(RequestLog.id)).where(RequestLog.attack_detected == True)  # noqa: E712
+        )
+        attacks = attacks_result.scalar() or 0
+
+        allowed = total - blocked
+    except Exception as e:
+        logger.error("public_stats_query_failed", error=str(e))
+        return {"statistics": {"requests_total": 0, "requests_blocked": 0, "requests_allowed": 0, "attacks_detected": 0}}
+
+    return {
+        "statistics": {
+            "requests_total": total,
+            "requests_blocked": blocked,
+            "requests_allowed": allowed,
+            "attacks_detected": attacks,
+        }
+    }
+
+
+@router.get(
     "/logs",
     summary="Audit Logs",
     description=(

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
+import { useAuthState } from './useAuthState';
 
 export function useHealth() {
     return useQuery({
@@ -10,8 +11,9 @@ export function useHealth() {
 }
 
 export function useStats() {
+    const { user } = useAuthState();
     return useQuery({
-        queryKey: ['stats'],
+        queryKey: ['stats', user?.id ?? 'anonymous'],
         queryFn: () => api.getStats(),
         refetchInterval: 5000, // 5 seconds
         retry: false, // Don't retry on 403/401
@@ -28,8 +30,9 @@ export function useProviderHealth() {
 }
 
 export function useRecentAttacks(limit = 10) {
+    const { user } = useAuthState();
     return useQuery({
-        queryKey: ['recent-attacks', limit],
+        queryKey: ['recent-attacks', user?.id ?? 'anonymous', limit],
         queryFn: () => api.getRecentAttacks(limit),
         refetchInterval: 10000, // 10 seconds
         retry: false, // Don't retry on 403/401

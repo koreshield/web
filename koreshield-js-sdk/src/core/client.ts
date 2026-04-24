@@ -57,7 +57,7 @@ export class KoreShieldClient {
       timeout: this.config.timeout,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'koreshield-js-sdk/0.3.5',
+        'User-Agent': 'koreshield-js-sdk/0.3.6',
         ...this.config.headers
       }
     });
@@ -174,16 +174,17 @@ export class KoreShieldClient {
   }
 
   /**
-   * Scan multiple prompts in batch
+   * Scan multiple prompts in batch via the server's /v1/scan/batch endpoint.
+   * Automatically chunks large arrays and reports progress.
+   *
    * @param prompts - Array of prompt texts to scan
-   * @param options - Batch processing options
-   * @returns Array of detection results
+   * @param options - Batch options (chunkSize, progressCallback)
+   * @returns Array of scan results in the same order as the input prompts
    */
   async scanBatch(
     prompts: string[],
     options?: {
-      parallel?: boolean;
-      maxConcurrent?: number;
+      chunkSize?: number;
       progressCallback?: (current: number, total: number) => void;
     }
   ): Promise<Array<{
@@ -196,45 +197,50 @@ export class KoreShieldClient {
     metadata?: Record<string, any>;
   }>> {
     const startTime = Date.now();
-    const { parallel = true, maxConcurrent = 10, progressCallback } = options || {};
-    
-    if (!parallel || prompts.length === 1) {
-      const results = [];
-      for (let i = 0; i < prompts.length; i++) {
-        const result = await this.scanPrompt(prompts[i]);
-        results.push(result);
-        if (progressCallback) {
-          progressCallback(i + 1, prompts.length);
-        }
-      }
-      
-      const processingTime = Date.now() - startTime;
-      this.metrics.batchEfficiency = prompts.length / (processingTime / 1000);
-      
-      return results;
-    }
+    const { chunkSize = 50, progressCallback } = options || {};
 
     const results: any[] = [];
     let completed = 0;
 
-    for (let i = 0; i < prompts.length; i += maxConcurrent) {
-      const batch = prompts.slice(i, i + maxConcurrent);
-      const batchResults = await Promise.all(
-        batch.map(async (prompt) => {
-          const result = await this.scanPrompt(prompt);
+    for (let i = 0; i < prompts.length; i += chunkSize) {
+      const chunk = prompts.slice(i, i + chunkSize);
+      try {
+        const response = await this.client.post('/v1/scan/batch', {
+          requests: chunk.map((prompt) => ({ prompt })),
+        });
+        const batchResults: any[] = response.data.results || [];
+        for (const item of batchResults) {
+          const scan = item.result || item;
+          results.push({
+            isSafe: scan.is_safe ?? !scan.blocked,
+            threatLevel: scan.threat_level ?? (scan.blocked ? 'high' : 'safe'),
+            confidence: scan.confidence ?? 0,
+            indicators: scan.detection?.indicators ?? scan.indicators ?? [],
+            processingTimeMs: scan.processing_time_ms ?? 0,
+            scanId: item.request_id,
+            metadata: scan.metadata,
+          });
           completed++;
-          if (progressCallback) {
-            progressCallback(completed, prompts.length);
+          if (progressCallback) progressCallback(completed, prompts.length);
+        }
+      } catch (error) {
+        // Fall back to individual scans for this chunk on error
+        for (const prompt of chunk) {
+          try {
+            const result = await this.scanPrompt(prompt);
+            results.push(result);
+          } catch {
+            results.push({ isSafe: true, threatLevel: 'safe' as ThreatLevel, confidence: 0, indicators: [], processingTimeMs: 0 });
           }
-          return result;
-        })
-      );
-      results.push(...batchResults);
+          completed++;
+          if (progressCallback) progressCallback(completed, prompts.length);
+        }
+      }
     }
 
     const processingTime = Date.now() - startTime;
     this.metrics.batchEfficiency = prompts.length / (processingTime / 1000);
-    
+    this.updateMetrics(processingTime);
     return results;
   }
 
@@ -494,6 +500,248 @@ export class KoreShieldClient {
     }
   }
 
+  // ── Management API ────────────────────────────────────────────────────────
+
+  /** Get the current authenticated user's profile */
+  async getMe(): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/me')).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Update the current user's profile (name, company, job_title) */
+  async updateMe(data: { name?: string; company?: string; job_title?: string }): Promise<Record<string, any>> {
+    try { return (await this.client.patch('/v1/management/me', data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Delete the current user's account permanently */
+  async deleteMe(): Promise<void> {
+    try { await this.client.delete('/v1/management/me'); } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** List API keys for the authenticated user */
+  async listApiKeys(): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/api-keys')).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Create a new API key */
+  async createApiKey(data: { name: string; description?: string; expires_in_days?: number }): Promise<Record<string, any>> {
+    try { return (await this.client.post('/v1/management/api-keys', data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Revoke an API key by ID */
+  async revokeApiKey(keyId: string): Promise<void> {
+    try { await this.client.delete(`/v1/management/api-keys/${keyId}`); } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get per-account request statistics */
+  async getStats(): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/stats')).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get public platform-wide aggregate statistics (no auth required) */
+  async getPublicStats(): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/stats/public')).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get audit / request logs */
+  async getAuditLogs(params?: { limit?: number; offset?: number; level?: string }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/logs', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get security configuration */
+  async getSecurityConfig(): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/config/security')).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Update security configuration */
+  async patchSecurityConfig(data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.patch('/v1/management/config/security', data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** List security policies */
+  async listPolicies(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/policies', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Create a security policy */
+  async createPolicy(data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.post('/v1/management/policies', data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Update a security policy by ID */
+  async updatePolicy(policyId: string, data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.patch(`/v1/management/policies/${policyId}`, data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Delete a security policy by ID */
+  async deletePolicy(policyId: string): Promise<void> {
+    try { await this.client.delete(`/v1/management/policies/${policyId}`); } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** List detection rules */
+  async listRules(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/rules', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Create a detection rule */
+  async createRule(data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.post('/v1/management/rules', data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Update a detection rule by ID */
+  async updateRule(ruleId: string, data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.patch(`/v1/management/rules/${ruleId}`, data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Delete a detection rule by ID */
+  async deleteRule(ruleId: string): Promise<void> {
+    try { await this.client.delete(`/v1/management/rules/${ruleId}`); } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** List alert rules */
+  async listAlertRules(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/alerts/rules', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Create an alert rule */
+  async createAlertRule(data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.post('/v1/management/alerts/rules', data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** List alert channels */
+  async listAlertChannels(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/alerts/channels', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Create an alert channel */
+  async createAlertChannel(data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.post('/v1/management/alerts/channels', data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get cost analytics */
+  async getCostAnalytics(params?: { time_range?: 'today' | '7d' | '30d' | '90d' | '1y' }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/analytics/costs', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get attack vector analytics */
+  async getAttackVectorAnalytics(params?: { time_range?: string }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/analytics/attack-vectors', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get top endpoints analytics */
+  async getTopEndpoints(params?: { limit?: number; time_range?: string }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/analytics/top-endpoints', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get provider metrics analytics */
+  async getProviderMetrics(params?: { time_range?: string }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/analytics/provider-metrics', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get compliance analytics */
+  async getComplianceAnalytics(params?: { time_range?: string }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/analytics/compliance', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** List team members */
+  async listTeamMembers(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/teams/members', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Invite a team member */
+  async inviteTeamMember(data: { email: string; role: string }): Promise<Record<string, any>> {
+    try { return (await this.client.post('/v1/management/teams/invite', data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Remove a team member */
+  async removeTeamMember(userId: string): Promise<void> {
+    try { await this.client.delete(`/v1/management/teams/members/${userId}`); } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** List RBAC users */
+  async listRbacUsers(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/rbac/users', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get RBAC roles */
+  async getRbacRoles(): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/rbac/roles')).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Update a user's role */
+  async updateUserRole(userId: string, role: string): Promise<Record<string, any>> {
+    try { return (await this.client.patch(`/v1/management/rbac/users/${userId}/role`, { role })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** List reports */
+  async listReports(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/reports', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Create a report */
+  async createReport(data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.post('/v1/management/reports', data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Download a report */
+  async downloadReport(reportId: string): Promise<Blob> {
+    try { return (await this.client.get(`/v1/management/reports/${reportId}/download`, { responseType: 'blob' })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get billing info */
+  async getBillingInfo(): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/billing')).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get RAG scan history */
+  async getRagScanHistory(params?: { limit?: number; offset?: number }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/rag/history', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** List tool sessions */
+  async listToolSessions(params?: { limit?: number; status?: string }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/tools/sessions', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** List pending tool reviews */
+  async listToolReviews(params?: { limit?: number; status?: string }): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/tools/reviews', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Submit a tool review decision */
+  async submitToolReviewDecision(ticketId: string, decision: 'approve' | 'reject', reason?: string): Promise<Record<string, any>> {
+    try { return (await this.client.post(`/v1/tools/reviews/${ticketId}/decision`, { decision, reason })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get operational status state (admin) */
+  async getOperationalState(): Promise<Record<string, any>> {
+    try { return (await this.client.get('/v1/management/operational')).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Create an operational incident */
+  async createIncident(data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.post('/v1/management/operational/incidents', data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Update an operational incident */
+  async updateIncident(incidentId: string, data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.patch(`/v1/management/operational/incidents/${incidentId}`, data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Create a maintenance window */
+  async createMaintenanceWindow(data: Record<string, any>): Promise<Record<string, any>> {
+    try { return (await this.client.post('/v1/management/operational/maintenance', data)).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Get provider health */
+  async getProviderHealth(): Promise<Record<string, any>> {
+    try { return (await this.client.get('/health/providers')).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
+  /** Export threat logs */
+  async exportThreatLogs(params?: { start_date?: string; end_date?: string; format?: 'json' | 'csv' }): Promise<any> {
+    try { return (await this.client.get('/v1/management/threat-logs/export', { params })).data; } catch (e: any) { throw this.handleError(e); }
+  }
+
   /**
    * Test connection to KoreShield
    */
@@ -598,7 +846,7 @@ export class KoreShieldClient {
         'Content-Type': 'application/json',
         'Accept': 'text/event-stream',
         'Authorization': `Bearer ${this.config.apiKey}`,
-        'User-Agent': 'koreshield-js-sdk/0.3.5',
+        'User-Agent': 'koreshield-js-sdk/0.3.6',
         ...this.config.headers,
       } as Record<string, string>,
       body: JSON.stringify(payload),
@@ -674,14 +922,20 @@ export class KoreShieldClient {
   }
 
   private handleError(error: any): KoreShieldError {
-    const koreShieldError: KoreShieldError = new Error(
-      error.response?.data?.message || error.message || 'Unknown error'
-    ) as KoreShieldError;
-
-    koreShieldError.code = error.response?.data?.code || 'UNKNOWN_ERROR';
+    const data = error.response?.data;
+    // FastAPI returns { detail: string | ValidationError[] }
+    let message: string;
+    if (Array.isArray(data?.detail)) {
+      message = data.detail
+        .map((e: any) => `${(e.loc ?? []).join('.')}: ${e.msg}`)
+        .join('; ');
+    } else {
+      message = data?.detail || data?.message || error.message || 'Unknown error';
+    }
+    const koreShieldError: KoreShieldError = new Error(message) as KoreShieldError;
+    koreShieldError.code = data?.code || 'UNKNOWN_ERROR';
     koreShieldError.statusCode = error.response?.status;
-    koreShieldError.details = error.response?.data;
-
+    koreShieldError.details = data;
     return koreShieldError;
   }
 }

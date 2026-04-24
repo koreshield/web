@@ -143,6 +143,11 @@ class ApiClient {
 		return this.fetch<AttackStats>('/v1/management/stats');
 	}
 
+	async getPublicStats(): Promise<AttackStats> {
+		// Aggregate platform-wide stats — no auth required, safe for the public status page
+		return this.fetch<AttackStats>('/v1/management/stats/public');
+	}
+
 	async getMetrics(): Promise<string> {
 		return this.fetch('/metrics', {
 			headers: { Accept: 'text/plain' }
@@ -640,10 +645,9 @@ class ApiClient {
 		return this.fetch('/v1/analytics/tenants');
 	}
 
-	async getCostAnalytics(params?: { start_date?: string; end_date?: string; provider?: string }) {
+	async getCostAnalytics(params?: { time_range?: 'today' | '7d' | '30d' | '90d' | '1y'; provider?: string }) {
 		const queryParams = new URLSearchParams();
-		if (params?.start_date) queryParams.append('start_date', params.start_date);
-		if (params?.end_date) queryParams.append('end_date', params.end_date);
+		if (params?.time_range) queryParams.append('time_range', params.time_range);
 		if (params?.provider) queryParams.append('provider', params.provider);
 		const query = queryParams.toString();
 		return this.fetch(`/v1/analytics/costs${query ? `?${query}` : ''}`);

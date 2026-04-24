@@ -29,10 +29,19 @@ interface CostBreakdown {
     color: string;
 }
 
+const TIME_RANGE_OPTIONS = [
+    { value: 'today', label: 'Today' },
+    { value: '7d', label: 'Last 7 Days' },
+    { value: '30d', label: 'Last 30 Days' },
+    { value: '90d', label: 'Last 90 Days' },
+    { value: '1y', label: 'Last Year' },
+] as const;
+
+type AnalyticsTimeRange = (typeof TIME_RANGE_OPTIONS)[number]['value'];
+
 export function CostAnalyticsPage() {
-    const [timeRange, setTimeRange] = useState('7d');
+    const [timeRange, setTimeRange] = useState<AnalyticsTimeRange>('7d');
     const [selectedProvider, setSelectedProvider] = useState('all');
-    const [selectedTenant, setSelectedTenant] = useState('all');
     const [exportFormat, setExportFormat] = useState<'csv' | 'pdf'>('csv');
 
     const { success, error: showError } = useToast();
@@ -41,28 +50,8 @@ export function CostAnalyticsPage() {
     const { data: costData = [] as CostData[], isLoading } = useQuery<CostData[]>({
         queryKey: ['costAnalytics', timeRange, selectedProvider],
         queryFn: async () => {
-            // Convert time_range to dates (backend expects start_date/end_date)
-            const end = new Date();
-            const start = new Date();
-            
-            switch(timeRange) {
-                case '24h':
-                    start.setHours(start.getHours() - 24);
-                    break;
-                case '7d':
-                    start.setDate(start.getDate() - 7);
-                    break;
-                case '30d':
-                    start.setDate(start.getDate() - 30);
-                    break;
-                case '90d':
-                    start.setDate(start.getDate() - 90);
-                    break;
-            }
-            
             const result = await api.getCostAnalytics({ 
-                start_date: start.toISOString().split('T')[0],
-                end_date: end.toISOString().split('T')[0],
+                time_range: timeRange,
                 provider: selectedProvider !== 'all' ? selectedProvider : undefined 
             });
             return result as CostData[];
@@ -84,13 +73,23 @@ export function CostAnalyticsPage() {
 
     const trend = calculateTrend();
     const currentPeriodCost = costData && costData.length > 0 ? costData[costData.length - 1].total_cost : 0;
+    const currentProviderCosts = costData && costData.length > 0 ? costData[costData.length - 1].provider_costs : [];
+    const currentRequests = currentProviderCosts.reduce((sum, provider) => sum + provider.requests, 0);
+    const avgCostPerRequest = currentRequests > 0 ? currentPeriodCost / currentRequests : 0;
+    const totalObservedCost = costData.reduce((sum, item) => sum + item.total_cost, 0);
+    const daysInRange =
+        timeRange === 'today' ? 1 :
+        timeRange === '7d' ? 7 :
+        timeRange === '30d' ? 30 :
+        timeRange === '90d' ? 90 : 365;
+    const projectedMonthlyCost = daysInRange > 0 ? (totalObservedCost / daysInRange) * 30 : 0;
 
     // Aggregate provider costs
     const providerCostBreakdown: CostBreakdown[] = costData && costData.length > 0
-        ? costData[costData.length - 1].provider_costs.map((p: any, idx: number) => ({
+        ? costData[costData.length - 1].provider_costs.map((p, idx: number) => ({
             category: p.provider,
             amount: p.cost,
-            percentage: (p.cost / currentPeriodCost) * 100,
+            percentage: currentPeriodCost > 0 ? (p.cost / currentPeriodCost) * 100 : 0,
             color: COLORS[idx % COLORS.length]
         }))
         : [];
@@ -106,7 +105,6 @@ export function CostAnalyticsPage() {
                 time_range: timeRange,
             };
             if (selectedProvider !== 'all') params.provider = selectedProvider;
-            if (selectedTenant !== 'all') params.tenant_id = selectedTenant;
 
             const blob = await api.exportData(exportFormat, '/v1/analytics/costs', params);
             
@@ -168,14 +166,12 @@ export function CostAnalyticsPage() {
                             <Calendar className="w-4 h-4 text-muted-foreground" />
                             <select
                                 value={timeRange}
-                                onChange={(e) => setTimeRange(e.target.value)}
+                                onChange={(e) => setTimeRange(e.target.value as AnalyticsTimeRange)}
                                 className="px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                             >
-                                <option value="24h">Last 24 Hours</option>
-                                <option value="7d">Last 7 Days</option>
-                                <option value="30d">Last 30 Days</option>
-                                <option value="90d">Last 90 Days</option>
-                                <option value="1y">Last Year</option>
+                                {TIME_RANGE_OPTIONS.map((option) => (
+                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
                             </select>
                         </div>
 
@@ -191,19 +187,6 @@ export function CostAnalyticsPage() {
                                 <option value="anthropic">Anthropic</option>
                                 <option value="deepseek">DeepSeek</option>
                                 <option value="gemini">Google Gemini</option>
-                            </select>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <Filter className="w-4 h-4 text-muted-foreground" />
-                            <select
-                                value={selectedTenant}
-                                onChange={(e) => setSelectedTenant(e.target.value)}
-                                className="px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                <option value="all">All Accounts</option>
-                                <option value="tenant1">Acme Corporation</option>
-                                <option value="tenant2">TechStart Inc</option>
                             </select>
                         </div>
                     </div>
@@ -222,7 +205,7 @@ export function CostAnalyticsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                             <div className="bg-card border border-border rounded-lg p-6">
                                 <div className="text-sm text-muted-foreground mb-1">Current Period Cost</div>
-                                <div className="text-3xl font-bold">${currentPeriodCost.toFixed(2)}</div>
+                                <div className="text-3xl font-bold">£{currentPeriodCost.toFixed(2)}</div>
                                 <div className={`flex items-center gap-1 text-sm mt-2 ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
                                     {trend.isPositive ? <TrendingDown className="w-4 h-4" /> : <TrendingUp className="w-4 h-4" />}
                                     {trend.value.toFixed(1)}% vs previous period
@@ -231,9 +214,9 @@ export function CostAnalyticsPage() {
 
                             <div className="bg-card border border-border rounded-lg p-6">
                                 <div className="text-sm text-muted-foreground mb-1">Avg Cost per Request</div>
-                                <div className="text-3xl font-bold">$0.0023</div>
+                                <div className="text-3xl font-bold">£{avgCostPerRequest.toFixed(4)}</div>
                                 <div className="text-sm text-muted-foreground mt-2">
-                                    Based on {(currentPeriodCost / 0.0023).toLocaleString()} requests
+                                    Based on {currentRequests.toLocaleString()} requests
                                 </div>
                             </div>
 
@@ -243,14 +226,14 @@ export function CostAnalyticsPage() {
                                     {providerCostBreakdown[0]?.category || 'N/A'}
                                 </div>
                                 <div className="text-sm text-muted-foreground mt-2">
-                                    ${providerCostBreakdown[0]?.amount.toFixed(2) || '0.00'} ({providerCostBreakdown[0]?.percentage.toFixed(1) || '0'}%)
+                                    £{providerCostBreakdown[0]?.amount.toFixed(2) || '0.00'} ({providerCostBreakdown[0]?.percentage.toFixed(1) || '0'}%)
                                 </div>
                             </div>
 
                             <div className="bg-card border border-border rounded-lg p-6">
                                 <div className="text-sm text-muted-foreground mb-1">Projected Monthly</div>
                                 <div className="text-3xl font-bold">
-                                    ${(currentPeriodCost * 30 / parseInt(timeRange)).toFixed(2)}
+                                    £{projectedMonthlyCost.toFixed(2)}
                                 </div>
                                 <div className="text-sm text-muted-foreground mt-2">
                                     Based on current usage rate
@@ -267,14 +250,14 @@ export function CostAnalyticsPage() {
                                     <XAxis dataKey="period" stroke="#9ca3af" />
                                     <YAxis stroke="#9ca3af" />
                                     <Tooltip
-                                        contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                                        labelStyle={{ color: '#f9fafb' }}
-                                    />
-                                    <Legend />
-                                    <Line type="monotone" dataKey="total_cost" stroke="#3b82f6" strokeWidth={2} name="Total Cost ($)" />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
+                                            contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
+                                            labelStyle={{ color: '#f9fafb' }}
+                                        />
+                                        <Legend />
+                                        <Line type="monotone" dataKey="total_cost" stroke="#3b82f6" strokeWidth={2} name="Total Cost (£)" />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
 
                         {/* Provider Cost Breakdown */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -302,7 +285,7 @@ export function CostAnalyticsPage() {
                                         </Pie>
                                         <Tooltip
                                             contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                                            formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Cost']}
+                                            formatter={(value: any) => [`£${Number(value).toFixed(2)}`, 'Cost']}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
@@ -317,7 +300,7 @@ export function CostAnalyticsPage() {
                                         <YAxis type="category" dataKey="tenant_name" stroke="#9ca3af" width={120} />
                                         <Tooltip
                                             contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                                            formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Cost']}
+                                            formatter={(value: any) => [`£${Number(value).toFixed(2)}`, 'Cost']}
                                         />
                                         <Bar dataKey="cost" fill="#3b82f6" />
                                     </BarChart>
@@ -342,13 +325,13 @@ export function CostAnalyticsPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {costData && costData.length > 0 && costData[costData.length - 1].provider_costs.map((provider: any) => (
+                                        {costData && costData.length > 0 && costData[costData.length - 1].provider_costs.map((provider) => (
                                             <tr key={provider.provider} className="border-b border-border hover:bg-muted/50 transition-colors">
                                                 <td className="py-3 px-4 font-medium">{provider.provider}</td>
                                                 <td className="py-3 px-4">{provider.requests.toLocaleString()}</td>
                                                 <td className="py-3 px-4">{provider.tokens.toLocaleString()}</td>
-                                                <td className="py-3 px-4 font-semibold">${provider.cost.toFixed(2)}</td>
-                                                <td className="py-3 px-4">${(provider.cost / provider.requests).toFixed(4)}</td>
+                                                <td className="py-3 px-4 font-semibold">£{provider.cost.toFixed(2)}</td>
+                                                <td className="py-3 px-4">£{(provider.requests > 0 ? provider.cost / provider.requests : 0).toFixed(4)}</td>
                                             </tr>
                                         ))}
                                     </tbody>
