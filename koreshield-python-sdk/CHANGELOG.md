@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.8] - 2026-04-24
+
+### Fixed
+- **Breaking fix**: API key authentication now correctly uses `X-API-Key` header instead
+  of `Authorization: Bearer`. Previous versions sent API keys as Bearer tokens which the
+  server rejected silently — any SDK-based integration using API keys was broken.
+  Both the sync (`KoreShieldClient`) and async (`AsyncKoreShieldClient`) clients are fixed,
+  including the streaming `chat_completion_stream` path which had its own hardcoded header.
+
+### Notes
+- `Authorization: Bearer <jwt>` remains correct for JWT session tokens.
+- `X-API-Key: ks_...` is the correct header for API key authentication.
+- No other behaviour changes. This is a drop-in replacement.
+
+---
+
 ## [0.1.0] - 2026-01-22
 
 ### Added

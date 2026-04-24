@@ -1,4 +1,12 @@
-"""Runtime session governance and human review workflows for tool calls."""
+"""Runtime session governance and human review workflows for tool calls.
+
+PERSISTENCE: INTENTIONALLY IN-MEMORY.
+Sessions and human-review queues are ephemeral by design — they represent
+active, in-flight tool-call state for the current process lifetime.
+There is no expectation that they survive a service restart; callers must
+re-establish sessions after restarts.  Do NOT add database persistence here
+without a deliberate product decision to change this model.
+"""
 
 from __future__ import annotations
 

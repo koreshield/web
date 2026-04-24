@@ -57,7 +57,7 @@ export class KoreShieldClient {
       timeout: this.config.timeout,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'koreshield-js-sdk/0.3.7',
+        'User-Agent': 'koreshield-js-sdk/0.3.8',
         ...this.config.headers
       }
     });
@@ -843,7 +843,7 @@ export class KoreShieldClient {
         'Content-Type': 'application/json',
         'Accept': 'text/event-stream',
         'X-API-Key': this.config.apiKey,
-        'User-Agent': 'koreshield-js-sdk/0.3.7',
+        'User-Agent': 'koreshield-js-sdk/0.3.8',
         ...this.config.headers,
       } as Record<string, string>,
       body: JSON.stringify(payload),

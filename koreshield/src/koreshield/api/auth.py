@@ -2,6 +2,10 @@
 JWT-based authentication for KoreShield.
 This module provides stateless authentication using JWT tokens.
 The auth service issues signed JWTs, and this firewall verifies signatures.
+
+AUTH SCOPES (see koreshield/AUTH_SCOPES.md for the full reference):
+  get_current_user  — JWT user (any role): Bearer token or ks_access_token cookie.
+  get_current_admin — JWT admin (role ∈ {admin,owner,superuser} AND mfa_verified).
 """
 
 import os
