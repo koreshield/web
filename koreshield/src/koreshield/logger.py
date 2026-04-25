@@ -7,11 +7,11 @@ from typing import Any, Dict, List, Callable
 import structlog
 
 
-
 import logging
 import os
 from logging.handlers import RotatingFileHandler
 import sys
+
 
 def setup_logging(log_level: str = "INFO", json_logs: bool = True, container_mode: bool = False):
     """
@@ -66,7 +66,6 @@ def setup_logging(log_level: str = "INFO", json_logs: bool = True, container_mod
         wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
-
 
 
 class FirewallLogger:

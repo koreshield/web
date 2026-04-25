@@ -24,6 +24,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from .models.base import Base
 
+
 class TenantStatus(Enum):
     """Tenant lifecycle status."""
     PROVISIONING = "provisioning"
@@ -31,12 +32,14 @@ class TenantStatus(Enum):
     SUSPENDED = "suspended"
     DEACTIVATED = "deactivated"
 
+
 class TenantTier(Enum):
     """Tenant subscription tiers."""
     FREE = "free"
     STARTER = "starter"
     PROFESSIONAL = "professional"
     ENTERPRISE = "enterprise"
+
 
 class ResourceType(Enum):
     """Types of resources that can be quota-limited."""
@@ -49,6 +52,7 @@ class ResourceType(Enum):
     ACTIVE_SESSIONS = "active_sessions"
 
 # Database Models
+
 
 class Tenant(Base):
     """Core tenant model with multi-tenant isolation."""
@@ -129,6 +133,7 @@ class Tenant(Base):
         limit = limits.get(resource_type, 0)
         return amount <= limit
 
+
 class TenantConfiguration(Base):
     """Tenant-specific configuration settings."""
     __tablename__ = "tenant_configurations"
@@ -153,6 +158,7 @@ class TenantConfiguration(Base):
         Index('idx_tenant_config_type', 'tenant_id', 'config_type'),
     )
 
+
 class TenantResourceUsage(Base):
     """Track resource usage per tenant for quota enforcement."""
     __tablename__ = "tenant_resource_usage"
@@ -173,6 +179,7 @@ class TenantResourceUsage(Base):
     __table_args__ = (
         Index('idx_resource_usage_tenant_period', 'tenant_id', 'resource_type', 'period_start', 'period_end'),
     )
+
 
 class TenantAuditLog(Base):
     """Tenant-specific audit logging with isolation."""
@@ -222,6 +229,7 @@ def _prevent_tenant_audit_log_mutation(*_args, **_kwargs):
 event.listen(TenantAuditLog, "before_update", _prevent_tenant_audit_log_mutation)
 event.listen(TenantAuditLog, "before_delete", _prevent_tenant_audit_log_mutation)
 
+
 class TenantAPIKey(Base):
     """Tenant API keys with scoped permissions."""
     __tablename__ = "tenant_api_keys"
@@ -253,6 +261,7 @@ class TenantAPIKey(Base):
 
 # Pydantic Models for API
 
+
 class TenantCreate(BaseModel):
     """Request model for creating a tenant."""
     tenant_id: str = Field(..., min_length=3, max_length=50, pattern=r'^[a-z0-9_-]+$')
@@ -269,6 +278,7 @@ class TenantCreate(BaseModel):
             raise ValueError('tenant_id must contain only alphanumeric characters, underscores, and hyphens')
         return v
 
+
 class TenantUpdate(BaseModel):
     """Request model for updating a tenant."""
     name: Optional[str] = Field(None, min_length=1, max_length=255)
@@ -282,12 +292,14 @@ class TenantUpdate(BaseModel):
     max_requests_per_day: Optional[int] = Field(None, gt=0)
     audit_retention_days: Optional[int] = Field(None, gt=0, le=2555)  # Max 7 years
 
+
 class TenantConfigurationUpdate(BaseModel):
     """Request model for updating tenant configuration."""
     config_key: str = Field(..., min_length=1, max_length=255)
     config_value: Any
     config_type: str = "security"
     description: Optional[str] = None
+
 
 class TenantAPIKeyCreate(BaseModel):
     """Request model for creating a tenant API key."""
@@ -297,6 +309,7 @@ class TenantAPIKeyCreate(BaseModel):
     allowed_endpoints: List[str] = Field(default_factory=list)
     rate_limit_override: Optional[int] = Field(None, gt=0)
     expires_at: Optional[datetime] = None
+
 
 @dataclass
 class TenantContext:
@@ -320,19 +333,23 @@ class TenantContext:
 
 # Utility functions
 
+
 def generate_tenant_schema_name(tenant_id: str) -> str:
     """Generate a safe schema name for a tenant."""
     # Ensure it's safe for PostgreSQL schema names
     safe_id = "".join(c for c in tenant_id if c.isalnum() or c in ('_', '-')).lower()
     return f"tenant_{safe_id}"
 
+
 def hash_api_key(api_key: str) -> str:
     """Hash an API key for storage."""
     return hashlib.sha256(api_key.encode()).hexdigest()
 
+
 def generate_api_key() -> str:
     """Generate a secure API key."""
     return f"ks_{uuid.uuid4().hex}_{uuid.uuid4().hex[:8]}"
+
 
 def create_tenant_schema(tenant_id: str) -> str:
     """Create the SQL for tenant schema creation."""

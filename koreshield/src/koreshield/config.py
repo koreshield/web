@@ -110,7 +110,13 @@ class TelegramChannel(BaseModel):
     channel_id: str = Field(default_factory=lambda: os.getenv("TELEGRAM_CHANNEL_ID", ""))
     message_thread_id: Optional[str] = Field(default_factory=lambda: os.getenv("TELEGRAM_MESSAGE_THREAD_ID", "") or None)
     health_digest_enabled: bool = Field(
-        default_factory=lambda: os.getenv("TELEGRAM_HEALTH_DIGEST_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on"}
+        default_factory=lambda: os.getenv(
+    "TELEGRAM_HEALTH_DIGEST_ENABLED",
+    "true").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+         "on"}
     )
     health_digest_interval_minutes: int = Field(
         default_factory=lambda: int(os.getenv("TELEGRAM_HEALTH_DIGEST_INTERVAL_MINUTES", "15") or "15")
@@ -119,7 +125,13 @@ class TelegramChannel(BaseModel):
         default_factory=lambda: float(os.getenv("TELEGRAM_MINIMUM_INTERVAL_SECONDS", "1.0") or "1.0")
     )
     include_payload: bool = Field(
-        default_factory=lambda: os.getenv("TELEGRAM_INCLUDE_ALERT_PAYLOAD", "true").strip().lower() in {"1", "true", "yes", "on"}
+        default_factory=lambda: os.getenv(
+    "TELEGRAM_INCLUDE_ALERT_PAYLOAD",
+    "true").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+         "on"}
     )
 
 

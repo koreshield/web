@@ -14,11 +14,12 @@ from ..rag_detector import RAGContextDetector
 
 logger = structlog.get_logger(__name__)
 
+
 class SecurityService:
     def __init__(self, config: dict):
         self.config = config
         security_config = config.get("security", {})
-        
+
         self.sanitizer = SanitizationEngine(security_config)
         self.detector = AttackDetector(security_config)
         self.policy_engine = PolicyEngine(config)
@@ -27,25 +28,25 @@ class SecurityService:
     def scan_prompt(self, prompt: str, context: Optional[dict] = None) -> dict:
         """Analyze a prompt for threats."""
         start_time = time.time()
-        
+
         # Step 1: Sanitize
         sanitization_result = self.sanitizer.sanitize(prompt or "")
-        
+
         # Step 2: Detect attacks
         detection_result = self.detector.detect(
-            prompt or "", 
+            prompt or "",
             context={"sanitization_result": sanitization_result, **(context or {})}
         )
-        
+
         # Step 3: Evaluate policy
         policy_result = self.policy_engine.evaluate(
             prompt or "",
             sanitization_result,
             detection_result
         )
-        
+
         processing_time_ms = (time.time() - start_time) * 1000
-        
+
         # Step 4: Decision
         default_action = self.config.get("security", {}).get("default_action", "block")
         if policy_result.get("allowed", True) is False:

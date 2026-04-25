@@ -11,7 +11,6 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import structlog
-from datetime import datetime
 import uuid
 
 from sqlalchemy import select
@@ -31,6 +30,7 @@ router = APIRouter(tags=["Alerts"])
 # Pydantic schemas
 # ─────────────────────────────────────────
 
+
 class AlertRuleCreateRequest(BaseModel):
     """Request model for creating an alert rule."""
     name: str = Field(..., min_length=1, max_length=200)
@@ -41,6 +41,7 @@ class AlertRuleCreateRequest(BaseModel):
     channels: List[str] = Field(default_factory=list, description="Channel IDs to send alerts to")
     cooldown_minutes: int = Field(default=30, ge=1, le=1440, description="Cooldown period in minutes")
 
+
 class AlertRuleUpdateRequest(BaseModel):
     """Request model for updating an alert rule."""
     name: Optional[str] = Field(None, min_length=1, max_length=200)
@@ -50,6 +51,7 @@ class AlertRuleUpdateRequest(BaseModel):
     enabled: Optional[bool] = None
     channels: Optional[List[str]] = None
     cooldown_minutes: Optional[int] = Field(None, ge=1, le=1440)
+
 
 class AlertRuleResponse(BaseModel):
     """Response model for an alert rule."""
@@ -66,6 +68,7 @@ class AlertRuleResponse(BaseModel):
     created_at: str
     updated_at: str
 
+
 class AlertChannelCreateRequest(BaseModel):
     """Request model for creating an alert channel."""
     type: str = Field(..., description="Channel type: email, slack, webhook, teams, telegram, pagerduty")
@@ -73,12 +76,14 @@ class AlertChannelCreateRequest(BaseModel):
     enabled: bool = Field(default=True)
     config: Dict[str, Any] = Field(..., description="Channel-specific configuration")
 
+
 class AlertChannelUpdateRequest(BaseModel):
     """Request model for updating an alert channel."""
     type: Optional[str] = None
     name: Optional[str] = Field(None, min_length=1, max_length=200)
     enabled: Optional[bool] = None
     config: Optional[Dict[str, Any]] = None
+
 
 class AlertChannelResponse(BaseModel):
     """Response model for an alert channel."""
@@ -90,10 +95,12 @@ class AlertChannelResponse(BaseModel):
     created_at: str
     updated_at: str
 
+
 class AlertChannelTestRequest(BaseModel):
     """Request model for testing an alert channel."""
     channel_id: str = Field(..., description="ID of the channel to test")
     test_message: str = Field(default="Test alert from KoreShield")
+
 
 _VALID_SEVERITIES = {"critical", "high", "medium", "low"}
 _VALID_CHANNEL_TYPES = {"email", "slack", "webhook", "teams", "telegram", "pagerduty"}
@@ -101,6 +108,7 @@ _VALID_CHANNEL_TYPES = {"email", "slack", "webhook", "teams", "telegram", "pager
 # ─────────────────────────────────────────
 # Alert Rules Endpoints
 # ─────────────────────────────────────────
+
 
 @router.get(
     "/management/alerts/rules",
@@ -284,6 +292,7 @@ async def delete_alert_rule(
 # ─────────────────────────────────────────
 # Alert Channels Endpoints
 # ─────────────────────────────────────────
+
 
 @router.get(
     "/management/alerts/channels",

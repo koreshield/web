@@ -331,7 +331,8 @@ async def sync_account_from_polar(account: BillingAccount, db: AsyncSession) -> 
     return account
 
 
-@router.get("/account", response_model=BillingAccountResponse, summary="Billing Account", description="Get the current billing account state including subscription plan, status, request usage, and entitlements.")
+@router.get("/account", response_model=BillingAccountResponse, summary="Billing Account",
+            description="Get the current billing account state including subscription plan, status, request usage, and entitlements.")
 async def get_billing_account(
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -350,7 +351,8 @@ async def get_billing_account(
     return serialize_account(account)
 
 
-@router.post("/checkout", summary="Create Checkout Session", description="Create a Polar checkout session for a given plan. Returns a redirect URL to the hosted checkout page.")
+@router.post("/checkout", summary="Create Checkout Session",
+             description="Create a Polar checkout session for a given plan. Returns a redirect URL to the hosted checkout page.")
 async def create_checkout_session(
     request: CheckoutRequest,
     current_user: dict = Depends(get_current_user),
@@ -419,7 +421,8 @@ async def create_checkout_session(
     return {"url": checkout.get("url"), "checkout": checkout}
 
 
-@router.post("/portal", summary="Customer Portal", description="Generate a Polar customer portal URL for managing the subscription, viewing invoices, and updating payment methods.")
+@router.post("/portal", summary="Customer Portal",
+             description="Generate a Polar customer portal URL for managing the subscription, viewing invoices, and updating payment methods.")
 async def create_customer_portal_session(
     request: PortalRequest,
     current_user: dict = Depends(get_current_user),
@@ -472,7 +475,8 @@ async def create_customer_portal_session(
     return {"url": portal.get("customer_portal_url") or portal.get("url"), "session": portal}
 
 
-@router.post("/sync", response_model=BillingAccountResponse, summary="Sync Billing State", description="Manually sync the subscription state from Polar. Useful after a plan change if webhooks are delayed.")
+@router.post("/sync", response_model=BillingAccountResponse, summary="Sync Billing State",
+             description="Manually sync the subscription state from Polar. Useful after a plan change if webhooks are delayed.")
 async def sync_billing_account(
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -494,7 +498,8 @@ async def sync_billing_account(
     return serialize_account(account)
 
 
-@router.post("/webhooks/polar", summary="Polar Webhook", description="Webhook receiver for Polar billing events (subscription created, updated, cancelled). Validates the Polar signature before processing.")
+@router.post("/webhooks/polar", summary="Polar Webhook",
+             description="Webhook receiver for Polar billing events (subscription created, updated, cancelled). Validates the Polar signature before processing.")
 async def polar_webhook(
     request: Request,
     db: AsyncSession = Depends(get_db),

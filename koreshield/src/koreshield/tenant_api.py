@@ -32,6 +32,7 @@ logger = FirewallLogger()
 
 # Request/Response Models
 
+
 class TenantResponse(BaseModel):
     """Tenant response model."""
     id: str
@@ -48,6 +49,7 @@ class TenantResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class TenantDetailResponse(TenantResponse):
     """Detailed tenant response with additional info."""
     max_requests_per_minute: int
@@ -58,6 +60,7 @@ class TenantDetailResponse(TenantResponse):
     max_storage_bytes: int
     max_active_sessions: int
     audit_retention_days: int
+
 
 class APIKeyResponse(BaseModel):
     """API key response model."""
@@ -70,6 +73,7 @@ class APIKeyResponse(BaseModel):
     created_at: str
     last_used_at: Optional[str]
 
+
 class ConfigurationResponse(BaseModel):
     """Configuration response model."""
     key: str
@@ -78,6 +82,7 @@ class ConfigurationResponse(BaseModel):
     description: Optional[str]
     encrypted: bool
     updated_at: str
+
 
 class UsageStatsResponse(BaseModel):
     """Usage statistics response model."""
@@ -88,6 +93,7 @@ class UsageStatsResponse(BaseModel):
     utilization_percent: float
 
 # Routes
+
 
 @router.post("", response_model=TenantResponse)
 async def create_tenant(
@@ -139,6 +145,7 @@ async def create_tenant(
         logger.error("tenant_creation_failed", error=str(e))
         raise HTTPException(status_code=500, detail="Failed to create tenant")
 
+
 @router.get("", response_model=List[TenantResponse])
 async def list_tenants(
     status: Optional[TenantStatus] = None,
@@ -168,6 +175,7 @@ async def list_tenants(
         logger.error("tenant_list_failed", error=str(e))
         raise HTTPException(status_code=500, detail="Failed to list tenants")
 
+
 @router.get("/{tenant_id}", response_model=TenantDetailResponse)
 async def get_tenant(
     tenant_id: str,
@@ -190,6 +198,7 @@ async def get_tenant(
     except Exception as e:
         logger.error("tenant_get_failed", tenant_id=tenant_id, error=str(e))
         raise HTTPException(status_code=500, detail="Failed to get tenant")
+
 
 @router.put("/{tenant_id}", response_model=TenantResponse)
 async def update_tenant(
@@ -235,6 +244,7 @@ async def update_tenant(
     except Exception as e:
         logger.error("tenant_update_failed", tenant_id=tenant_id, error=str(e))
         raise HTTPException(status_code=500, detail="Failed to update tenant")
+
 
 @router.delete("/{tenant_id}")
 async def delete_tenant(
@@ -283,6 +293,7 @@ async def delete_tenant(
         raise HTTPException(status_code=500, detail="Failed to delete tenant")
 
 # API Key Management
+
 
 @router.post("/{tenant_id}/api-keys", response_model=Dict[str, str])
 async def create_api_key(
@@ -344,6 +355,7 @@ async def create_api_key(
         logger.error("api_key_creation_failed", tenant_id=tenant_id, error=str(e))
         raise HTTPException(status_code=500, detail="Failed to create API key")
 
+
 @router.get("/{tenant_id}/api-keys", response_model=List[APIKeyResponse])
 async def list_api_keys(
     tenant_id: str,
@@ -376,6 +388,7 @@ async def list_api_keys(
         raise HTTPException(status_code=500, detail="Failed to list API keys")
 
 # Configuration Management
+
 
 @router.get("/{tenant_id}/config", response_model=Dict[str, List[ConfigurationResponse]])
 async def get_tenant_config(
@@ -419,6 +432,7 @@ async def get_tenant_config(
     except Exception as e:
         logger.error("config_get_failed", tenant_id=tenant_id, error=str(e))
         raise HTTPException(status_code=500, detail="Failed to get configuration")
+
 
 @router.put("/{tenant_id}/config")
 async def update_tenant_config(
@@ -467,6 +481,7 @@ async def update_tenant_config(
 
 # Usage Statistics
 
+
 @router.get("/{tenant_id}/usage", response_model=Dict[str, UsageStatsResponse])
 async def get_tenant_usage(
     tenant_id: str,
@@ -514,6 +529,7 @@ async def get_tenant_usage(
         raise HTTPException(status_code=500, detail="Failed to get usage statistics")
 
 # Audit Logs
+
 
 @router.get("/{tenant_id}/audit")
 async def get_tenant_audit_logs(

@@ -120,17 +120,19 @@ class ToolCallSecurityAnalyzer:
             return f"Tool '{tool_name}' contains destructive DDL or SQL injection patterns."
         # Also catch DDL in any tool if it looks like a raw SQL string
         if _SQL_DDL_RE.search(serialized_args) and "query" in serialized_args.lower():
-            return f"Tool call contains destructive SQL patterns (DDL/injection)."
+            return "Tool call contains destructive SQL patterns (DDL/injection)."
         return None
 
     def _ssrf_check(self, tool_name: str, serialized_args: str) -> Optional[str]:
         """Return a description string if SSRF / metadata endpoint access is detected."""
         lowered_name = tool_name.lower()
-        is_network_tool = any(kw in lowered_name for kw in ("fetch", "http", "request", "web", "url", "get", "post", "search", "browse", "webhook", "send"))
+        network_keywords = ("fetch", "http", "request", "web", "url", "get", "post",
+                            "search", "browse", "webhook", "send")
+        is_network_tool = any(kw in lowered_name for kw in network_keywords)
         if is_network_tool and _SSRF_RE.search(serialized_args):
             return f"Tool '{tool_name}' targets an SSRF-prone or metadata-service endpoint."
         if _SSRF_RE.search(serialized_args):
-            return f"Tool arguments contain SSRF indicators (metadata service or loopback URL)."
+            return "Tool arguments contain SSRF indicators (metadata service or loopback URL)."
         return None
 
     # EXFIL patterns: external data exfiltration via webhook/network tool calls
@@ -173,7 +175,7 @@ class ToolCallSecurityAnalyzer:
                 return f"Tool '{tool_name}' appears to request privileged admin access to sensitive resources."
         # Admin function references in args
         if self._PRIV_FUNC_RE.search(serialized_args):
-            return f"Tool arguments contain references to privileged/admin function calls."
+            return "Tool arguments contain references to privileged/admin function calls."
         return None
 
     # ── Main analysis ──────────────────────────────────────────────────────────
@@ -287,7 +289,8 @@ class ToolCallSecurityAnalyzer:
         confidence = float(detection_result.get("confidence", 0.0) or 0.0)
         base_risk = "low"
 
-        if attack and any(signal in capability_signals for signal in ("execution", "network", "credential_access", "database")):
+        if attack and any(signal in capability_signals for signal in (
+            "execution", "network", "credential_access", "database")):
             # Database + attack = critical (catches TOOL-004 SQL injection / DDL)
             base_risk = "critical"
         elif attack or any(signal in capability_signals for signal in ("execution", "credential_access")):
@@ -378,7 +381,8 @@ class ToolCallSecurityAnalyzer:
         ):
             raise_risk("high")
             confused_deputy_risk = True
-            escalation_signals.append("Cross-tool escalation detected from data access into exfiltration or mutation capabilities.")
+            escalation_signals.append(
+                "Cross-tool escalation detected from data access into exfiltration or mutation capabilities.")
 
         if tool_name.lower() in {tool.lower() for tool in prior_tools} and any(
             signal in capability_signals for signal in {"execution", "network"}
