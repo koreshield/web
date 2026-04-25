@@ -5,6 +5,11 @@ on:
     branches: [ main ]
     paths:
       - 'koreshield-blog/**'
+      # Exclude auto-generated files so sitemap regeneration commits and
+      # accidental sitemap inclusions in platform commits don't trigger a
+      # full Cloudflare Pages rebuild.
+      - '!koreshield-blog/public/sitemap.xml'
+      - '!koreshield-blog/public/robots.txt'
       - '.github/workflows/blog-deploy.yml'
 
 jobs:
