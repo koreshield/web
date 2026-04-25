@@ -17,9 +17,9 @@ const stats = [
 		sub: 'Prompt injection to SQL injection',
 	},
 	{
-		value: '1M+',
-		label: 'Requests Secured Daily',
-		sub: 'Across production deployments',
+		value: '4+',
+		label: 'LLM Providers',
+		sub: 'OpenAI, Anthropic, Gemini, DeepSeek',
 	},
 ];
 

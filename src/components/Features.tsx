@@ -34,8 +34,8 @@ const features = [
     },
     {
         icon: Activity,
-        title: 'Real-time Monitoring',
-        description: 'Sub-30ms interception with no perceptible latency overhead. Threats appear in your dashboard the moment they\'re detected, not after the fact.',
+        title: 'Threat Monitoring',
+        description: 'Sub-30ms interception overhead at the proxy layer. Scan results are logged immediately and surfaced in your audit dashboard for review.',
         highlight: false,
     },
 ];

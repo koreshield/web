@@ -130,7 +130,7 @@ export function ProviderHealthPage() {
 								Provider Health Dashboard
 							</h1>
 							<p className="text-sm sm:text-base text-muted-foreground mt-1">
-								Real-time monitoring of LLM provider infrastructure
+								{wsConnected ? 'Live monitoring of LLM provider infrastructure' : 'LLM provider health — connect to WebSocket for live updates'}
 							</p>
 						</div>
 						<div className="flex items-center gap-3">
