@@ -2,62 +2,63 @@
 Main proxy server that intercepts LLM API requests.
 """
 
-import json
-import io
-import zipfile
-import os
-import uuid
-import time
+import asyncio
 import contextlib
 import copy
+import io
+import json
+import os
+import time
+import uuid
+import zipfile
 from collections import deque
 from contextlib import asynccontextmanager
-from typing import Optional
 from datetime import datetime, timezone
-import asyncio
+from typing import Optional
 
 import httpx
 import structlog
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, StreamingResponse
-from sqlalchemy import select, func, delete
+from sqlalchemy import delete, func, select
 
+from .api.auth import init_jwt_config
+from .database import AsyncSessionLocal
 from .detector import AttackDetector
 from .logger import FirewallLogger
-from .rag_taxonomy import RetrievedDocument
-from .database import AsyncSessionLocal
 from .models.rag_scan import RagScan
-from .api.auth import init_jwt_config
+from .rag_taxonomy import RetrievedDocument
+from .services.audit_integrity import AuditIntegrityService
 
 # New Service Architecture
 from .services.auth import AuthService
-from .services.telemetry import TelemetryService
-from .services.provider import ProviderService
-from .services.security import SecurityService
 from .services.governance import GovernanceService
 from .services.operational_status import OperationalStatusService
-from .services.audit_integrity import AuditIntegrityService
+from .services.provider import ProviderService
+from .services.security import SecurityService
+from .services.telemetry import TelemetryService
 
 logger = structlog.get_logger(__name__)
 
 # These imports intentionally come after logger setup so the logger singleton
 # is available to any module-level code in the routers that runs at import time.
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
-from .api.management import router as management_router, provision_test_key as _provision_test_key  # noqa: E402
-from .api.analytics import router as analytics_router  # noqa: E402
-from .api.rbac import router as rbac_router  # noqa: E402
-from .api.reports import router as reports_router  # noqa: E402
-from .api.teams import router as teams_router  # noqa: E402
-from .api.rules import router as rules_router  # noqa: E402
-from .api.alerts import router as alerts_router  # noqa: E402
-from .api.billing import router as billing_router  # noqa: E402
-from .api import websocket as websocket_module  # noqa: E402
-from .api.websocket import router as websocket_router  # noqa: E402
-
 from slowapi import Limiter, _rate_limit_exceeded_handler  # noqa: E402
-from slowapi.util import get_remote_address  # noqa: E402
 from slowapi.errors import RateLimitExceeded  # noqa: E402
 from slowapi.middleware import SlowAPIMiddleware  # noqa: E402
+from slowapi.util import get_remote_address  # noqa: E402
+
+from .api import websocket as websocket_module  # noqa: E402
+from .api.alerts import router as alerts_router  # noqa: E402
+from .api.analytics import router as analytics_router  # noqa: E402
+from .api.billing import router as billing_router  # noqa: E402
+from .api.management import provision_test_key as _provision_test_key  # noqa: E402
+from .api.management import router as management_router  # noqa: E402
+from .api.rbac import router as rbac_router  # noqa: E402
+from .api.reports import router as reports_router  # noqa: E402
+from .api.rules import router as rules_router  # noqa: E402
+from .api.teams import router as teams_router  # noqa: E402
+from .api.websocket import router as websocket_router  # noqa: E402
 
 
 class KoreShieldProxy:
@@ -204,8 +205,8 @@ class KoreShieldProxy:
         self.audit_integrity = AuditIntegrityService()
         self.operational_status = OperationalStatusService()
 
-        from .monitoring import MonitoringSystem
         from .config import KoreShieldConfig
+        from .monitoring import MonitoringSystem
         kore_config = KoreShieldConfig()
         kore_config.load_from_dict(copy.deepcopy(config))
         self.monitoring = MonitoringSystem(
@@ -406,13 +407,21 @@ class KoreShieldProxy:
     @asynccontextmanager
     async def _lifespan(self, app: FastAPI):
         # ── startup ────────────────────────────────────────────────────────────
-        # Start both monitoring subsystems
-        await self.start_monitoring()
-        monitor_task = asyncio.create_task(self.provider_service.health_monitor.start_monitoring())
+        # Non-critical monitoring tasks are fire-and-forget so they do NOT block
+        # the server from accepting its first request (prevents smoke-test timeouts).
+        asyncio.create_task(self.start_monitoring())
+        monitor_task = asyncio.create_task(
+            self.provider_service.health_monitor.start_monitoring()
+        )
         asyncio.create_task(self._background_heartbeat())
-        await self._handle_event_broadcast("system_status", {"status": "online", "version": app.version})
+        asyncio.create_task(
+            self._handle_event_broadcast(
+                "system_status", {"status": "online", "version": app.version}
+            )
+        )
 
-        # Load persisted custom rules into the in-memory detection engine
+        # Load persisted custom rules into the in-memory detection engine.
+        # This IS awaited: detection must be armed before the first request arrives.
         if AsyncSessionLocal:
             try:
                 from .api.rules import startup_load_rules
@@ -1458,8 +1467,9 @@ def create_app(config_path: Optional[str] = None) -> FastAPI:
     Returns:
         Configured FastAPI application
     """
-    import yaml
     from pathlib import Path
+
+    import yaml
 
     # Auto-detect config path based on script location
     if config_path is None:
