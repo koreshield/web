@@ -1,3 +1,13 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# KoreShield backend — PROPRIETARY — DO NOT PUBLISH TO PyPI
+#
+# This file exists solely for local development (`pip install -e .[dev]`).
+# The KoreShield core platform is NOT open-source and is NOT distributed via
+# public package registries.  The public SDK packages are in:
+#   ../koreshield-python-sdk  (PyPI: koreshield)
+#   ../koreshield-js-sdk      (npm: koreshield)
+# ─────────────────────────────────────────────────────────────────────────────
+
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -5,7 +15,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "koreshield-server"
 version = "0.3.0"
-description = "Middleware proxy for protecting enterprise LLM integrations from prompt injection attacks"
+description = "KoreShield core platform is proprietary, not for public distribution. Middleware proxy for protecting enterprise LLM integrations from prompt injection attacks"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "Proprietary"}
@@ -14,6 +24,10 @@ authors = [
 ]
 keywords = ["llm", "security", "prompt-injection", "rag", "koreshield", "ai-safety"]
 classifiers = [
+    # "Private :: Do Not Upload" signals to PyPI tooling that this should not
+    # be uploaded.  Most upload tools (twine, flit) will reject a dist with
+    # this classifier.
+    "Private :: Do Not Upload",
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",

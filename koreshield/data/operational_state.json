@@ -5,6 +5,32 @@
       "affected_components": [
         "provider_routing"
       ],
+      "created_at": "2026-04-25T10:33:19.365356+00:00",
+      "id": "inc_c758dae46698",
+      "incident_type": "service_disruption",
+      "resolved_at": "2026-04-25T10:33:19.601770+00:00",
+      "severity": "minor",
+      "source": "system",
+      "status": "resolved",
+      "title": "Live service degradation detected",
+      "updated_at": "2026-04-25T10:33:19.601770+00:00",
+      "updates": [
+        {
+          "message": "Live monitoring detected degraded service on: provider_routing.",
+          "status": "investigating",
+          "timestamp": "2026-04-25T10:33:19.365356+00:00"
+        },
+        {
+          "message": "Live monitoring confirms affected components have recovered.",
+          "status": "resolved",
+          "timestamp": "2026-04-25T10:33:19.601770+00:00"
+        }
+      ]
+    },
+    {
+      "affected_components": [
+        "provider_routing"
+      ],
       "created_at": "2026-04-24T13:40:43.706915+00:00",
       "id": "inc_c0314cd95167",
       "incident_type": "service_disruption",
@@ -207,6 +233,82 @@
         "requests_total": 0
       },
       "timestamp": "2026-04-24T13:40:43.866832+00:00"
+    },
+    {
+      "components": {
+        "provider_routing": {
+          "status": "degraded"
+        }
+      },
+      "overall_status": "degraded",
+      "providers": {
+        "anthropic": {
+          "enabled": false,
+          "healthy": true,
+          "initialized": false,
+          "status": "disabled"
+        },
+        "azure_openai": {
+          "enabled": false,
+          "healthy": true,
+          "initialized": false,
+          "status": "disabled"
+        },
+        "deepseek": {
+          "enabled": false,
+          "healthy": true,
+          "initialized": false,
+          "status": "disabled"
+        },
+        "gemini": {
+          "enabled": false,
+          "healthy": true,
+          "initialized": false,
+          "status": "disabled"
+        },
+        "openai": {
+          "enabled": true,
+          "healthy": true,
+          "initialized": false,
+          "status": "missing_credentials"
+        }
+      },
+      "statistics": {
+        "attacks_detected": 0,
+        "errors": 0,
+        "requests_blocked": 0,
+        "requests_total": 0
+      },
+      "timestamp": "2026-04-25T10:33:19.365356+00:00"
+    },
+    {
+      "components": {
+        "provider_routing": {
+          "status": "healthy"
+        }
+      },
+      "overall_status": "operational",
+      "providers": {
+        "anthropic": {
+          "base_url": "https://api.anthropic.com/v1",
+          "enabled": false,
+          "initialized": false,
+          "status": "disabled"
+        },
+        "deepseek": {
+          "base_url": "https://api.deepseek.com/v1",
+          "enabled": true,
+          "initialized": true,
+          "status": "healthy"
+        }
+      },
+      "statistics": {
+        "attacks_detected": 0,
+        "errors": 0,
+        "requests_blocked": 0,
+        "requests_total": 0
+      },
+      "timestamp": "2026-04-25T10:33:19.601770+00:00"
     }
   ]
 }

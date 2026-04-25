@@ -30,6 +30,15 @@ The goal is for KoreShield to be the "security layer" for any LLM-powered enterp
 
 - [Preprint: LLM Firewall – A Novel Taxonomy of Indirect Prompt Injection Attacks in Enterprise RAG Systems](https://www.academia.edu/145685538/_Preprint_LLM_Firewall_A_Novel_Taxonomy_of_Indirect_Prompt_Injection_Attacks_in_Enterprise_RAG_Systems)
 
+## Quick reference
+
+| Doc | Purpose |
+|---|---|
+| [GOLDEN_PATH.md](GOLDEN_PATH.md) | **Start here** — the primary integration path, end-to-end |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Domain ownership map, startup sequence, persistence model |
+| [MATURITY.md](MATURITY.md) | Feature maturity matrix — what is production-backed today |
+| [koreshield/AUTH_SCOPES.md](koreshield/AUTH_SCOPES.md) | Auth scope reference — which endpoints need what |
+
 ## Why KoreShield?
 
 Prompt injection is a critical security risk for LLM-integrated systems. Attackers can:

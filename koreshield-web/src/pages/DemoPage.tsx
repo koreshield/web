@@ -19,7 +19,7 @@ const whatYoullSee = [
 	{
 		icon: <Shield className="h-5 w-5 text-electric-green" />,
 		title: 'Live threat interception',
-		body: 'Watch Koreshield catch prompt injection, jailbreaks, and PII exfiltration attempts in real time, the same way it works in production.',
+		body: 'Watch KoreShield catch prompt injection, jailbreaks, and PII exfiltration attempts in real time; routed through the real security proxy, not a simulation.',
 	},
 	{
 		icon: <Zap className="h-5 w-5 text-electric-green" />,
