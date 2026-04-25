@@ -1,0 +1,60 @@
+---
+title: Flask
+description: Integrate KoreShield with Flask applications
+icon: FileText
+---
+
+# Flask Integration Guide
+
+Protect your **Flask** applications from LLM attacks using KoreShield decorators or wrappers.
+
+## Setup
+
+Install the package:
+
+```bash
+pip install koreshield flask
+```
+
+## Usage
+
+The most idiomatic way to use KoreShield in Flask is via a **decorator**.
+
+```python
+from flask import Flask, request, abort
+from koreshield.client import KoreShieldClient
+from functools import wraps
+
+app = Flask(__name__)
+client = KoreShieldClient()
+
+def guard_route(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Extract prompt from JSON body, form data, or query params
+        data = request.get_json(silent=True) or {}
+        prompt = data.get("prompt") or data.get("message")
+        
+        if prompt:
+            # Synchronous check (requires async helper if client is async-only)
+            import asyncio
+            result = asyncio.run(client.guard(prompt))
+            
+            if not result.is_safe:
+                return {
+                    "error": "Blocked",
+                    "reason": result.reason
+                }, 403
+                
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route("/generate", methods=["POST"])
+@guard_route
+def generate():
+    return {"status": "ok"}
+```
+
+## Error Handling
+
+When a request is blocked, you can return a 403 Forbidden status or a custom error response JSON as shown above. The `result.details` object contains specific information about *why* it was blocked (e.g., "Prompt Injection Detected", "PII Found").

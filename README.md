@@ -1,101 +1,76 @@
-# KoreShield Web Properties
+# KoreShield Web
 
-Unified web properties for KoreShield, serving all user-facing content from koreshield.ai
+Unified frontend for `koreshield.ai` — one Cloudflare Pages project, four concerns.
 
-## 📁 Structure
+## URL Layout
+
+| URL | What serves it | Source |
+|-----|---------------|--------|
+| `koreshield.ai/` | TanStack Start (marketing landing) | `web/app/` |
+| `koreshield.ai/docs/*` | TanStack Start (Fumadocs) | `web/app/content/docs/` |
+| `koreshield.ai/app/:org/*` | TanStack Start (customer dashboard) | `web/app/src/routes/app/` |
+| `koreshield.ai/blog/*` | Astro static | `web/blog/` |
+| `koreshield.ai/studio/*` | Sanity Studio static | `web/studio/` |
+| `api.koreshield.com` | FastAPI backend (separate VPS) | `koreshield/` |
+
+## Folder Structure
 
 ```
 web/
-├── koreshield-web/        # Marketing site (root, Vite/React)
-├── koreshield-blog/       # Blog content (/blog, Astro)
-├── koreshield-docs/       # Documentation (/docs, Docusaurus)
-├── package.json           # Unified build orchestration
-├── scripts/               # Build utilities
-├── wrangler.toml          # Cloudflare Pages config
-└── README.md              # This file
+├── app/        TanStack Start — marketing, /docs/*, /app/:org/*
+├── blog/       Astro — /blog/* (static, base: '/blog')
+├── studio/     Sanity Studio — /studio/* (static, basePath: '/studio')
+├── dist/       Build output (git-ignored) — deployed as one Cloudflare Pages project
+├── wrangler.toml
+└── package.json
 ```
 
-## 🚀 Deployment
+## How Cloudflare Pages Serves This
 
-### Routes
-- `koreshield.ai/` → Marketing site (koreshield-web)
-- `koreshield.ai/blog/` → Blog (koreshield-blog)
-- `koreshield.ai/docs/` → Documentation (koreshield-docs)
-- `koreshield.ai/app/` → Dashboard (if needed)
+Cloudflare Pages checks for a static file first. If one exists it serves it
+directly. If not it invokes the TanStack Start Worker. So:
 
-### Build Output
-```
-dist/
-├── index.html             # Marketing site root
-├── blog/                  # Blog subdirectory
-├── docs/                  # Docs subdirectory
-└── _redirects             # Cloudflare routing rules
-```
+- `/blog/...` → `dist/blog/index.html` (Astro, served statically — Worker never invoked)
+- `/studio/...` → `dist/studio/index.html` (Sanity, served statically)
+- Everything else → TanStack Worker (`dist/_worker.js`)
 
-## 📦 Development
+`app/public/_routes.json` declares this explicitly so Cloudflare skips the
+Worker invocation for `/blog/*` and `/studio/*` entirely.
 
-Each property can be developed independently:
+## Local Development
 
 ```bash
-# Marketing site (Vite/React)
-cd koreshield-web && pnpm dev
-
-# Blog (Astro)
-cd koreshield-blog && pnpm dev
-
-# Docs (Docusaurus)
-cd koreshield-docs && pnpm start
+cd app && npm run dev      # → http://localhost:3000  (marketing + docs + dashboard)
+cd blog && pnpm dev        # → http://localhost:4321/blog
+cd studio && pnpm dev      # → http://localhost:3333
 ```
 
-## 🔨 Building
-
-Build everything for production:
+## Production Build
 
 ```bash
-pnpm build
+# From web/
+npm run build
+# Output: web/dist/
 ```
 
-This runs:
-1. Cleans previous build output
-2. Builds marketing site → `dist/`
-3. Builds blog → `dist/blog/`
-4. Builds docs → `dist/docs/`
-5. Post-processes for Cloudflare Pages
-
-### Individual Builds
+## Deploy Manually
 
 ```bash
-cd koreshield-web && pnpm build   # Marketing site
-cd koreshield-blog && pnpm build  # Blog
-cd koreshield-docs && pnpm build  # Docs
+cd web && npm run build
+npx wrangler pages deploy dist --project-name=koreshield-web
 ```
 
-## 🔄 Monorepo Sync
+CI runs automatically via `.github/workflows/web-deploy.yml` on every push to
+`main` that touches `web/**`.
 
-Changes to `web/` folder automatically sync to separate GitHub repo: https://github.com/koreshield/web
+## Required Secrets (GitHub → Settings → Secrets)
 
-This is handled by `.github/workflows/sync-to-opensource.yml`
-
-## 📝 Configuration Files
-
-- `astro.config.mjs` (blog) - Updated with `base: '/blog'`
-- `docusaurus.config.ts` (docs) - Updated with `baseUrl: '/docs'`
-- `wrangler.toml` - Cloudflare Pages configuration
-- `scripts/post-build.mjs` - Post-build optimization
-
-## 🚢 Deployment to Cloudflare Pages
-
-Connected to: https://github.com/koreshield/web
-
-Build settings:
-- **Build command:** `pnpm build`
-- **Build output directory:** `dist`
-- **Root directory:** `/`
-
-Environment variables (set in Cloudflare Pages):
-- `PUBLIC_SANITY_PROJECT_ID`
-- `PUBLIC_SANITY_DATASET`
-- `SANITY_STUDIO_PROJECT_ID`
-- `SANITY_STUDIO_DATASET`
-- `RESEND_API_KEY`
-- `RESEND_AUDIENCE_ID`
+| Secret | Used by |
+|--------|---------|
+| `CLOUDFLARE_API_TOKEN` | Wrangler deploy |
+| `CLOUDFLARE_ACCOUNT_ID` | Wrangler deploy |
+| `BETTER_AUTH_SECRET` | TanStack Start auth |
+| `WEB_DATABASE_URL` | App database (Cloudflare D1 or Postgres) |
+| `POLAR_ACCESS_TOKEN` | Billing |
+| `SANITY_PROJECT_ID` | Blog + Studio |
+| `SANITY_DATASET` | Blog + Studio |

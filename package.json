@@ -2,21 +2,22 @@
   "name": "koreshield-web",
   "type": "module",
   "version": "0.0.1",
-  "description": "Unified web properties: marketing site, blog, docs, and dashboard",
+  "description": "Unified web properties for koreshield.ai — marketing, blog, docs, and dashboard",
   "scripts": {
-    "dev:web": "cd koreshield-web && pnpm dev",
-    "dev:blog": "cd koreshield-blog && pnpm dev",
-    "dev:docs": "cd koreshield-docs && pnpm start",
-    "install:all": "pnpm install && cd koreshield-web && pnpm install && cd ../koreshield-blog && pnpm install && cd ../koreshield-docs && pnpm install && cd ..",
-    "build": "pnpm run build:clean && pnpm run build:web && pnpm run build:blog && pnpm run build:docs && pnpm run build:merge",
-    "build:clean": "rm -rf dist && mkdir -p dist/blog dist/docs",
-    "build:web": "cd koreshield-web && pnpm install && pnpm build && cp -r dist/* ../dist/",
-    "build:blog": "cd koreshield-blog && pnpm install && pnpm build && cp -r dist/* ../dist/blog/",
-    "build:docs": "cd koreshield-docs && pnpm install && pnpm build && cp -r build/* ../dist/docs/",
-    "build:merge": "node scripts/post-build.mjs",
-    "preview": "pnpm run build && npx http-server dist -p 3000"
+    "dev": "cd app && npm run dev",
+    "dev:blog": "cd blog && pnpm dev",
+    "dev:studio": "cd studio && pnpm dev",
+
+    "build": "npm run build:clean && npm run build:app && npm run build:blog && npm run build:studio",
+    "build:clean": "rm -rf dist && mkdir -p dist/blog dist/studio",
+
+    "build:app": "cd app && npm install && npm run build && cp -r .output/public/* ../dist/",
+    "build:blog": "cd blog && pnpm install && pnpm build && cp -r dist/* ../dist/blog/",
+    "build:studio": "cd studio && npm install && npm run build && cp -r dist/* ../dist/studio/",
+
+    "preview": "npm run build && npx wrangler pages dev dist --compatibility-date=2024-09-23"
   },
   "devDependencies": {
-    "http-server": "^14.1.1"
+    "wrangler": "^3.0.0"
   }
 }
