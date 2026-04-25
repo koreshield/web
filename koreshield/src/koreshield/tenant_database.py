@@ -19,6 +19,7 @@ from .tenant_models import TenantContext, generate_tenant_schema_name
 from .tenant_utils import get_current_tenant
 from .logger import FirewallLogger
 
+
 class TenantDatabaseManager:
     """
     Manages database connections and tenant isolation.
@@ -161,7 +162,7 @@ class TenantDatabaseManager:
         try:
             session_maker = await self.get_tenant_session(tenant_context)
 
-            async with session_maker() as session:
+            async with session_maker():
                 # Get table sizes, index usage, etc.
                 # This is a simplified version
                 stats = {
@@ -181,8 +182,10 @@ class TenantDatabaseManager:
             )
             return {}
 
+
 # Global database manager instance
 _db_manager: Optional[TenantDatabaseManager] = None
+
 
 def get_tenant_db_manager() -> TenantDatabaseManager:
     """Get the global tenant database manager."""
@@ -191,6 +194,7 @@ def get_tenant_db_manager() -> TenantDatabaseManager:
         database_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://localhost/koreshield")
         _db_manager = TenantDatabaseManager(database_url)
     return _db_manager
+
 
 @asynccontextmanager
 async def get_tenant_db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -212,6 +216,7 @@ async def get_tenant_db_session() -> AsyncGenerator[AsyncSession, None]:
             yield session
         finally:
             await session.close()
+
 
 class TenantConfigurationManager:
     """
@@ -429,8 +434,10 @@ class TenantConfigurationManager:
             )
             return False
 
+
 # Global configuration manager instance
 _config_manager: Optional[TenantConfigurationManager] = None
+
 
 def get_tenant_config_manager() -> TenantConfigurationManager:
     """Get the global tenant configuration manager."""

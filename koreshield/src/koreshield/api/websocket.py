@@ -33,11 +33,11 @@ redis_client: aioredis.Redis | None = None
 
 class ConnectionManager:
     """Manages WebSocket connections and message broadcasting."""
-    
+
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
         self.user_subscriptions: Dict[str, set[str]] = {}  # user_id -> set of event types
-    
+
     async def connect(
         self,
         websocket: WebSocket,
@@ -49,7 +49,7 @@ class ConnectionManager:
         self.active_connections[client_id] = websocket
         self.user_subscriptions.setdefault(user_id, set())
         logger.info("websocket_connected", user_id=user_id, client_id=client_id)
-    
+
     def disconnect(self, client_id: str, user_id: str):
         """Remove a WebSocket connection."""
         if client_id in self.active_connections:
@@ -60,7 +60,7 @@ class ConnectionManager:
             # Remove user subscriptions if no more connections
             del self.user_subscriptions[user_id]
         logger.info("websocket_disconnected", user_id=user_id, client_id=client_id)
-    
+
     async def send_personal_message(self, message: Dict[str, Any], client_id: str):
         """Send a message to a specific client."""
         if client_id in self.active_connections:
@@ -69,11 +69,11 @@ class ConnectionManager:
                 await websocket.send_json(message)
             except Exception as e:
                 logger.error("websocket_send_error", client_id=client_id, error=str(e))
-    
+
     async def broadcast(self, message: Dict[str, Any], event_type: str | None = None):
         """Broadcast a message to all connected clients."""
         disconnected_clients = []
-        
+
         for client_id, websocket in self.active_connections.items():
             try:
                 # If event type is specified, only send to subscribed users
@@ -87,12 +87,12 @@ class ConnectionManager:
             except Exception as e:
                 logger.error("websocket_broadcast_error", client_id=client_id, error=str(e))
                 disconnected_clients.append(client_id)
-        
+
         # Clean up disconnected clients
         for client_id in disconnected_clients:
             user_id = client_id.split("_")[0]
             self.disconnect(client_id, user_id)
-    
+
     def subscribe(self, user_id: str, event_types: list[str]):
         """Subscribe a user to specific event types."""
         if user_id not in self.user_subscriptions:
@@ -138,16 +138,16 @@ async def websocket_events(
 ):
     """
     WebSocket endpoint for real-time event streaming.
-    
+
     Authentication:
         - Requires valid JWT token in Authorization header or auth cookie
-        
+
     Event Types:
         - threat_detected: New threat detection event
         - provider_health_change: Provider health status update
         - cost_threshold_alert: Cost threshold exceeded
         - system_status: System component status change
-    
+
     Message Format:
         {
             "type": "threat_detected",
@@ -162,7 +162,7 @@ async def websocket_events(
     """
     client_id = None
     user_id = None
-    
+
     try:
         token = _extract_ws_token(websocket)
         if not token:
@@ -178,10 +178,10 @@ async def websocket_events(
 
         user_id = str(user.get("id") or user.get("sub") or user.get("user_id") or "unknown")
         client_id = f"{user_id}_{id(websocket)}"
-        
+
         # Accept connection
         await manager.connect(websocket, user_id, client_id)
-        
+
         # Send welcome message
         await websocket.send_json({
             "type": "connection_established",
@@ -191,17 +191,17 @@ async def websocket_events(
                 "message": "Connected to KoreShield real-time event stream"
             }
         })
-        
+
         # Start Redis pub/sub listener in background
         if redis_client:
             asyncio.create_task(redis_pubsub_listener(client_id, user_id))
-        
+
         # Keep connection alive and handle incoming messages
         while True:
             try:
                 # Receive messages from client (for subscription management)
                 data = await websocket.receive_json()
-                
+
                 if data.get("action") == "subscribe":
                     # Allow clients to subscribe to specific event types
                     event_types = data.get("event_types", [])
@@ -211,11 +211,11 @@ async def websocket_events(
                         "data": {"subscribed_to": event_types}
                     })
                     logger.info("websocket_subscription_updated", user_id=user_id, event_types=event_types)
-                
+
                 elif data.get("action") == "ping":
                     # Heartbeat
                     await websocket.send_json({"type": "pong"})
-                    
+
             except WebSocketDisconnect:
                 break
             except json.JSONDecodeError:
@@ -230,7 +230,7 @@ async def websocket_events(
         with contextlib.suppress(RuntimeError, WebSocketDisconnect):
             if websocket.client_state.value == 1:  # CONNECTED
                 await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-    
+
     finally:
         if client_id and user_id:
             manager.disconnect(client_id, user_id)
@@ -243,13 +243,13 @@ async def redis_pubsub_listener(client_id: str, user_id: str):
     if not redis_client:
         logger.warning("redis_client_not_initialized")
         return
-    
+
     try:
         pubsub = redis_client.pubsub()
         await pubsub.subscribe("koreshield:events")
-        
+
         logger.info("redis_pubsub_started", user_id=user_id, client_id=client_id)
-        
+
         async for message in pubsub.listen():
             if message["type"] == "message":
                 try:
@@ -259,10 +259,10 @@ async def redis_pubsub_listener(client_id: str, user_id: str):
                     logger.error("redis_message_decode_error", message=message)
                 except Exception as e:
                     logger.error("redis_message_forward_error", error=str(e))
-    
+
     except Exception as e:
         logger.error("redis_pubsub_error", user_id=user_id, error=str(e))
-    
+
     finally:
         await pubsub.unsubscribe("koreshield:events")
         await pubsub.close()
@@ -271,7 +271,7 @@ async def redis_pubsub_listener(client_id: str, user_id: str):
 async def publish_event(event_type: str, data: Dict[str, Any]):
     """
     Publish an event to all connected WebSocket clients via Redis pub/sub.
-    
+
     Args:
         event_type: Type of event (threat_detected, provider_health_change, etc.)
         data: Event data payload
@@ -279,13 +279,13 @@ async def publish_event(event_type: str, data: Dict[str, Any]):
     if not redis_client:
         logger.warning("redis_client_not_initialized_cannot_publish")
         return
-    
+
     event = {
         "type": event_type,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "data": data
     }
-    
+
     try:
         await redis_client.publish("koreshield:events", json.dumps(event))
         logger.info("event_published", event_type=event_type)
@@ -294,7 +294,8 @@ async def publish_event(event_type: str, data: Dict[str, Any]):
 
 
 # Health check endpoint for WebSocket service
-@router.get("/health", summary="WebSocket Health", description="Check that the WebSocket event stream service is running and accepting connections.")
+@router.get("/health", summary="WebSocket Health",
+            description="Check that the WebSocket event stream service is running and accepting connections.")
 async def websocket_health():
     """Check WebSocket service health."""
     return JSONResponse({

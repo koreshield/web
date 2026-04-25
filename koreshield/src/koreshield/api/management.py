@@ -1,3 +1,5 @@
+import csv
+import io as _io
 import json
 import os
 import re
@@ -73,10 +75,12 @@ def _redact_sensitive(value):
         return [_redact_sensitive(item) for item in value]
     return value
 
+
 class SignupRequest(BaseModel):
     email: EmailStr
     password: str
     name: str | None = None
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -99,6 +103,7 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+
 
 class SecurityConfigUpdate(BaseModel):
     sensitivity: str | None = None
@@ -557,6 +562,7 @@ async def signup(
             detail="Signup failed. Please try again later."
         )
 
+
 @router.post(
     "/login",
     summary="User Login",
@@ -853,14 +859,18 @@ async def reset_password(
             detail="Password reset failed. Please try again later.",
         )
 
-@router.post("/logout", summary="Logout", description="Invalidate the current session cookie and log out the authenticated user.", tags=["Authentication"])
+
+@router.post("/logout", summary="Logout",
+             description="Invalidate the current session cookie and log out the authenticated user.", tags=["Authentication"])
 async def admin_logout(response: Response, current_user: dict = Depends(get_current_user)):
     """Logout endpoint for any authenticated user."""
     _delete_auth_cookie(response)
     logger.info("user_logout", user_id=current_user.get("id"), email=current_user.get("email"))
     return {"status": "logged_out"}
 
-@router.get("/stats/live", summary="Live Platform Statistics", description="Return raw in-memory runtime statistics for operator diagnostics.")
+
+@router.get("/stats/live", summary="Live Platform Statistics",
+            description="Return raw in-memory runtime statistics for operator diagnostics.")
 async def get_live_stats(request: Request, current_user: dict = Depends(get_current_admin)):
     """Get unscoped in-memory proxy statistics for admin diagnostics."""
     # Access the proxy instance from the app state or request
@@ -868,7 +878,9 @@ async def get_live_stats(request: Request, current_user: dict = Depends(get_curr
         return request.app.state.stats
     return {"error": "Stats not available"}
 
-@router.get("/config", summary="Get Configuration", description="Return the current platform configuration (development environments only). Sensitive values are redacted.")
+
+@router.get("/config", summary="Get Configuration",
+            description="Return the current platform configuration (development environments only). Sensitive values are redacted.")
 async def get_config(request: Request, current_user: dict = Depends(get_current_admin)):
     """Get current configuration."""
     if hasattr(request.app.state, "config"):
@@ -881,7 +893,9 @@ async def get_config(request: Request, current_user: dict = Depends(get_current_
         return _redact_sensitive(current_config)
     return {"error": "Config not available"}
 
-@router.patch("/config/security", summary="Update Security Config", description="Update runtime security settings including sensitivity level and default action policy.")
+
+@router.patch("/config/security", summary="Update Security Config",
+              description="Update runtime security settings including sensitivity level and default action policy.")
 async def update_security_config(
     request: Request,
     config_update: SecurityConfigUpdate,
@@ -908,12 +922,10 @@ async def update_security_config(
         security_config["default_action"] = config_update.default_action
         updates_made = True
 
-
     if updates_made:
         # Update the main config object
         current_config["security"] = security_config
         logger.info("security_config_updated", updates=config_update.dict(exclude_unset=True))
-
 
     if updates_made:
         # Update the main config object
@@ -1334,12 +1346,14 @@ async def add_breach_update(
     logger.info("breach_record_updated", actor=current_user.get("email"), breach_id=breach_id, status=payload.status)
     return record
 
+
 class Policy(BaseModel):
     id: str
     name: str
     description: str
     severity: str
     roles: list[str] = ["admin", "moderator", "user"]
+
 
 @router.get("/policies", summary="List Policies", description="List all active security policies configured in the policy engine.")
 async def list_policies(request: Request, current_user: dict = Depends(get_current_user)):
@@ -1349,7 +1363,9 @@ async def list_policies(request: Request, current_user: dict = Depends(get_curre
         return request.app.state.policy_engine.list_policies()
     return []
 
-@router.post("/policies", summary="Create Policy", description="Add a new security policy to the policy engine. Policy IDs must be unique.")
+
+@router.post("/policies", summary="Create Policy",
+             description="Add a new security policy to the policy engine. Policy IDs must be unique.")
 async def create_policy(request: Request, policy: Policy, current_user: dict = Depends(get_current_admin)):
     """Create or update a policy."""
     if not hasattr(request.app.state, "policy_engine"):
@@ -1367,7 +1383,9 @@ async def create_policy(request: Request, policy: Policy, current_user: dict = D
 
     return {"status": "created", "policy": policy}
 
-@router.delete("/policies/{policy_id}", summary="Delete Policy", description="Remove a security policy by ID from the policy engine.")
+
+@router.delete("/policies/{policy_id}", summary="Delete Policy",
+               description="Remove a security policy by ID from the policy engine.")
 async def delete_policy(request: Request, policy_id: str, current_user: dict = Depends(get_current_admin)):
     """Delete a policy."""
     if not hasattr(request.app.state, "policy_engine"):
@@ -1396,6 +1414,7 @@ class CreateAPIKeyRequest(BaseModel):
     expires_in_days: int | None = None  # Optional expiration in days
     expires_at: datetime | None = None  # Optional specific expiration date
 
+
 class APIKeyResponse(BaseModel):
     id: str
     name: str
@@ -1405,6 +1424,7 @@ class APIKeyResponse(BaseModel):
     expires_at: str | None
     is_revoked: bool
     created_at: str
+
 
 class CreateAPIKeyResponse(APIKeyResponse):
     api_key: str  # Full key - only shown once!
@@ -1419,6 +1439,7 @@ def _current_user_uuid(current_user: dict) -> UUID:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid user identity",
         ) from exc
+
 
 @router.post(
     "/api-keys",
@@ -1450,17 +1471,17 @@ async def generate_api_key(
         expires_at = None
 
         if request.expires_at is not None:
-             # Normalize to naive UTC for storage
-             if request.expires_at.tzinfo is not None:
-                 expires_at = request.expires_at.astimezone(timezone.utc).replace(tzinfo=None)
-             else:
-                 expires_at = request.expires_at
+            # Normalize to naive UTC for storage
+            if request.expires_at.tzinfo is not None:
+                expires_at = request.expires_at.astimezone(timezone.utc).replace(tzinfo=None)
+            else:
+                expires_at = request.expires_at
 
-             if expires_at <= now:
-                 raise HTTPException(
-                     status_code=status.HTTP_400_BAD_REQUEST,
-                     detail="expires_at must be in the future",
-                 )
+            if expires_at <= now:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="expires_at must be in the future",
+                )
         elif request.expires_in_days is not None:
             if request.expires_in_days <= 0:
                 raise HTTPException(
@@ -1505,6 +1526,7 @@ async def generate_api_key(
             detail="Failed to generate API key"
         )
 
+
 @router.get(
     "/api-keys",
     summary="List API Keys",
@@ -1538,6 +1560,7 @@ async def list_api_keys(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to list API keys"
         )
+
 
 @router.delete(
     "/api-keys/{key_id}",
@@ -1591,6 +1614,7 @@ async def revoke_api_key(
             detail="Failed to revoke API key"
         )
 
+
 @router.get(
     "/api-keys/{key_id}",
     summary="Get API Key Details",
@@ -1638,8 +1662,6 @@ async def get_api_key(
 # Threat & Block Log Export
 # ============================================================================
 
-import csv
-import io as _io
 
 @router.get(
     "/export/threats",
@@ -1667,7 +1689,7 @@ async def export_threat_logs(
         query = select(RequestLog).order_by(desc(RequestLog.timestamp)).limit(limit)
         if not include_safe:
             query = query.where(
-                or_(RequestLog.attack_detected == True, RequestLog.is_blocked == True)
+                or_(RequestLog.attack_detected.is_(True), RequestLog.is_blocked.is_(True))
             )
         result = await db.execute(query)
         logs = result.scalars().all()

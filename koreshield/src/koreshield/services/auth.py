@@ -14,6 +14,7 @@ from ..api.auth import get_request_token, verify_jwt_token
 
 logger = structlog.get_logger(__name__)
 
+
 class AuthService:
     def __init__(self, db_session_factory=None):
         self.db_session_factory = db_session_factory
@@ -25,7 +26,7 @@ class AuthService:
         """
         auth_header = request.headers.get("Authorization", "")
         token = get_request_token(request)
-        
+
         if token:
             payload = verify_jwt_token(token)
             if payload:
@@ -58,7 +59,7 @@ class AuthService:
                 )
             key_hash = APIKey.hash_key(api_key_value)
             now = datetime.now(timezone.utc).replace(tzinfo=None)
-            
+
             async with self.db_session_factory() as session:
                 result = await session.execute(
                     select(APIKey).where(

@@ -15,7 +15,7 @@ class RequestLog(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     request_id = Column(String(255), unique=True, index=True, nullable=False)
     timestamp = Column(DateTime, default=utcnow_naive, index=True, nullable=False)
-    
+
     # Request details
     provider = Column(String(50), nullable=False, index=True)
     model = Column(String(100), nullable=False)
@@ -23,28 +23,28 @@ class RequestLog(Base):
     path = Column(String(255), nullable=False)
     status_code = Column(Integer, nullable=False)
     latency_ms = Column(Float, nullable=False)
-    
+
     # Cost & Usage
     tokens_prompt = Column(Integer, default=0)
     tokens_completion = Column(Integer, default=0)
     tokens_total = Column(Integer, default=0)
     cost = Column(Float, default=0.0)
-    
+
     # Security context
     is_blocked = Column(Boolean, default=False, index=True)
     block_reason = Column(String(255))
     attack_detected = Column(Boolean, default=False, index=True)
     attack_type = Column(String(50))
     attack_details = Column(JSON, default={})
-    
+
     # Client Metadata
     ip_address = Column(String(50))
     user_agent = Column(String(255))
-    
+
     # Associations
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=True, index=True)
     api_key_id = Column(UUID(as_uuid=True), ForeignKey('api_keys.id'), nullable=True, index=True)
-    
+
     # Relationships
     user = relationship("User")
     api_key = relationship("APIKey")

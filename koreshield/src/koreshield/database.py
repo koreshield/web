@@ -9,6 +9,7 @@ if DATABASE_URL.startswith("postgresql://"):
 engine = create_async_engine(DATABASE_URL, echo=False) if DATABASE_URL else None
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False) if engine else None
 
+
 async def get_db():
     """Database session dependency."""
     if not AsyncSessionLocal:

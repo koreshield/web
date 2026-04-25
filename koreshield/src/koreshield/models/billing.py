@@ -49,7 +49,14 @@ class BillingWebhookEvent(Base):
     __tablename__ = "billing_webhook_events"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    billing_account_id = Column(UUID(as_uuid=True), ForeignKey("billing_accounts.id", ondelete="SET NULL"), nullable=True, index=True)
+    billing_account_id = Column(
+    UUID(
+        as_uuid=True),
+        ForeignKey(
+            "billing_accounts.id",
+            ondelete="SET NULL"),
+            nullable=True,
+             index=True)
     provider = Column(String(50), nullable=False, default="polar")
     event_type = Column(String(100), nullable=False, index=True)
     event_id = Column(String(255), unique=True, index=True)

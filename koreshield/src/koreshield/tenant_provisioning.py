@@ -27,6 +27,7 @@ from .logger import FirewallLogger
 
 logger = FirewallLogger()
 
+
 @dataclass
 class ProvisioningResult:
     """Result of tenant provisioning operation."""
@@ -38,6 +39,7 @@ class ProvisioningResult:
     status: str
     message: str
     provisioned_at: datetime
+
 
 @dataclass
 class ProvisioningConfig:
@@ -55,6 +57,7 @@ class ProvisioningConfig:
             self.default_api_key_permissions = ["read", "write"]
         if self.default_api_key_endpoints is None:
             self.default_api_key_endpoints = ["*"]
+
 
 class TenantProvisioner:
     """Handles automated tenant provisioning."""
@@ -423,6 +426,7 @@ class TenantProvisioner:
                 error=str(e)
             )
 
+
 class TenantDeprovisioner:
     """Handles tenant deprovisioning and cleanup."""
 
@@ -586,9 +590,11 @@ class TenantDeprovisioner:
         finally:
             await session.close()
 
+
 # Global instances for dependency injection
 _provisioner_instance = None
 _deprovisioner_instance = None
+
 
 def get_tenant_provisioner() -> TenantProvisioner:
     """Get the global tenant provisioner instance."""
@@ -605,6 +611,7 @@ def get_tenant_provisioner() -> TenantProvisioner:
             audit_logger=get_tenant_audit_logger()
         )
     return _provisioner_instance
+
 
 def get_tenant_deprovisioner() -> TenantDeprovisioner:
     """Get the global tenant deprovisioner instance."""
