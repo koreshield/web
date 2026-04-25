@@ -28,7 +28,8 @@ import sanity from '@sanity/astro';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://blog.koreshield.com',
+	site: 'https://koreshield.ai',
+	base: '/blog',
 	output: 'static',
 
 	integrations: [
