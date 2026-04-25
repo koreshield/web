@@ -7,7 +7,6 @@ on:
       - 'docker-compose.prod.yml'
       - 'Caddyfile'
       - 'koreshield/**'
-      - 'koreshield-web/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
@@ -32,9 +31,8 @@ jobs:
         cp docker-compose.prod.yml /opt/koreshield/docker-compose.prod.yml
         cp Caddyfile /opt/koreshield/Caddyfile
 
-        # Sync backend and frontend source
+        # Sync backend source
         rsync -av --delete $GITHUB_WORKSPACE/koreshield/  /opt/koreshield/koreshield/
-        rsync -av --delete $GITHUB_WORKSPACE/koreshield-web/ /opt/koreshield/koreshield-web/
 
         # Keep .env symlink alive
         ln -sf /opt/koreshield/.env /opt/koreshield/koreshield/.env 2>/dev/null || true
@@ -82,28 +80,12 @@ jobs:
 
         # Remove old containers
         docker ps -aq --filter "name=koreshield-api" | xargs -r docker rm -f || true
-        docker ps -aq --filter "name=koreshield-web"  | xargs -r docker rm -f || true
 
         # Rebuild app containers
-        docker compose -f docker-compose.prod.yml up -d --build --no-deps api web
+        docker compose -f docker-compose.prod.yml up -d --build --no-deps api
 
         echo "Waiting for API to be healthy..."
         timeout 120s bash -c 'until curl -sf http://localhost:8000/health; do sleep 5; done'
-
-        # Smoke-test web routes
-        wait_for_url() {
-          local url="$1" label="$2" attempt=1 max=20
-          while [ "$attempt" -le "$max" ]; do
-            curl -fsSI "$url" > /dev/null 2>&1 && echo "  healthy: $label" && return 0
-            echo "  waiting ($attempt/$max): $label"
-            sleep 3
-            attempt=$((attempt+1))
-          done
-          echo "Timeout: $url" >&2; return 1
-        }
-
-        wait_for_url "http://127.0.0.1:3000/auth/google-callback" "google oauth callback"
-        wait_for_url "http://127.0.0.1:3000/billing"             "billing route"
 
         docker image prune -f
         echo "Deploy complete."

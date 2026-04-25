@@ -1,7 +1,3 @@
 api.koreshield.com {
     reverse_proxy api:8000
 }
-
-koreshield.com, www.koreshield.com {
-    reverse_proxy web:80
-}
