@@ -217,6 +217,7 @@ const buildLocalScanResult = async (inputPrompt: string): Promise<ScanResult> =>
 		details: analysis.explanation,
 		timestamp: new Date(),
 		prompt: inputPrompt,
+		isLive: false,
 	};
 };
 
