@@ -4,27 +4,27 @@ import { CheckCircle, FileCheck, Lock, ShieldCheck } from 'lucide-react';
 const badges = [
 	{
 		icon: ShieldCheck,
-		title: 'SOC 2 Type II',
-		description: 'Audit-ready',
-		detail: 'Full access controls, logging, and incident response policies in place.',
+		title: 'SOC 2 Oriented',
+		description: 'Controls in place',
+		detail: 'Access controls, structured audit logging, and incident response policies designed for SOC 2 readiness.',
 	},
 	{
 		icon: Lock,
 		title: 'GDPR / CCPA',
-		description: 'Compliant',
-		detail: 'Zero prompt data stored. No third-party data sharing. Right-to-deletion supported.',
+		description: 'Privacy-first design',
+		detail: 'Prompts are not stored by default. No third-party data sharing. Configurable data retention policies.',
 	},
 	{
 		icon: FileCheck,
 		title: 'ISO 27001',
-		description: 'Aligned',
-		detail: 'Information security management controls aligned to the standard.',
+		description: 'Aligned practices',
+		detail: 'Information security management controls designed to align with ISO 27001 principles.',
 	},
 	{
 		icon: CheckCircle,
 		title: 'Zero Retention',
 		description: 'Privacy first',
-		detail: '0 bytes of prompt or response content written to persistent storage.',
+		detail: 'Prompt and response content is not written to persistent storage in the default configuration.',
 	},
 ];
 
