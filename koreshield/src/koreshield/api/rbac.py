@@ -244,7 +244,8 @@ _initialize_defaults()
 
 # Endpoints
 
-@router.get("/users", response_model=List[User], summary="List Users", description="List all users. Optionally filter by name/email search query or role.")
+@router.get("/users", response_model=List[User], summary="List Users",
+            description="List all users. Optionally filter by name/email search query or role.")
 async def get_users(
     search: Optional[str] = Query(None, description="Search by name or email"),
     role: Optional[str] = Query(None, description="Filter by role"),
@@ -267,7 +268,8 @@ async def get_users(
     return users
 
 
-@router.get("/users/{user_id}", response_model=User, summary="Get User", description="Get the profile, role, permissions, and status of a specific user by ID.")
+@router.get("/users/{user_id}", response_model=User, summary="Get User",
+            description="Get the profile, role, permissions, and status of a specific user by ID.")
 async def get_user(
     user_id: str,
     current_user: dict = Depends(get_current_admin)
@@ -281,7 +283,8 @@ async def get_user(
     return _users_store[user_id]
 
 
-@router.post("/users", response_model=User, status_code=status.HTTP_201_CREATED, summary="Create User", description="Create a new user account and assign a role. Optionally send an invite email.")
+@router.post("/users", response_model=User, status_code=status.HTTP_201_CREATED, summary="Create User",
+             description="Create a new user account and assign a role. Optionally send an invite email.")
 async def create_user(
     user_data: UserCreate,
     current_user: dict = Depends(get_current_admin)
@@ -322,7 +325,8 @@ async def create_user(
     return new_user
 
 
-@router.put("/users/{user_id}", response_model=User, summary="Update User", description="Update a user's name, role, or status.")
+@router.put("/users/{user_id}", response_model=User, summary="Update User",
+            description="Update a user's name, role, or status.")
 async def update_user(
     user_id: str,
     user_update: UserUpdate,
@@ -364,7 +368,8 @@ async def update_user(
     return user
 
 
-@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete User", description="Permanently delete a user account. Built-in system users cannot be deleted.")
+@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete User",
+               description="Permanently delete a user account. Built-in system users cannot be deleted.")
 async def delete_user(
     user_id: str,
     current_user: dict = Depends(get_current_admin)
@@ -386,7 +391,8 @@ async def delete_user(
     return None
 
 
-@router.get("/roles", response_model=List[Role], summary="List Roles", description="List all defined roles with their permission sets and current user counts.")
+@router.get("/roles", response_model=List[Role], summary="List Roles",
+            description="List all defined roles with their permission sets and current user counts.")
 async def get_roles(
     current_user: dict = Depends(get_current_admin)
 ):
@@ -395,7 +401,8 @@ async def get_roles(
     return list(_roles_store.values())
 
 
-@router.get("/roles/{role_id}", response_model=Role, summary="Get Role", description="Get the full details and permission set for a specific role.")
+@router.get("/roles/{role_id}", response_model=Role, summary="Get Role",
+            description="Get the full details and permission set for a specific role.")
 async def get_role(
     role_id: str,
     current_user: dict = Depends(get_current_admin)
@@ -409,7 +416,8 @@ async def get_role(
     return _roles_store[role_id]
 
 
-@router.post("/roles", response_model=Role, status_code=status.HTTP_201_CREATED, summary="Create Role", description="Create a new custom role with a specified set of permissions.")
+@router.post("/roles", response_model=Role, status_code=status.HTTP_201_CREATED, summary="Create Role",
+             description="Create a new custom role with a specified set of permissions.")
 async def create_role(
     role_data: RoleCreate,
     current_user: dict = Depends(get_current_admin)
@@ -441,7 +449,8 @@ async def create_role(
     return new_role
 
 
-@router.put("/roles/{role_id}", response_model=Role, summary="Update Role", description="Update a role's description or permission set.")
+@router.put("/roles/{role_id}", response_model=Role, summary="Update Role",
+            description="Update a role's description or permission set.")
 async def update_role(
     role_id: str,
     role_update: RoleUpdate,
@@ -514,7 +523,8 @@ async def delete_role(
     return None
 
 
-@router.get("/permissions", response_model=List[Permission], summary="List Permissions", description="List all available permissions in the system. Optionally filter by category (Dashboard, Analytics, Reports, Alerts, Policies, Rules, Tenants, Users & Roles, API Keys).")
+@router.get("/permissions", response_model=List[Permission], summary="List Permissions",
+            description="List all available permissions in the system. Optionally filter by category (Dashboard, Analytics, Reports, Alerts, Policies, Rules, Tenants, Users & Roles, API Keys).")
 async def get_permissions(
     category: Optional[str] = Query(None, description="Filter by category"),
     current_user: dict = Depends(get_current_admin)

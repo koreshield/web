@@ -30,11 +30,14 @@ class TeamBase(BaseModel):
     name: str
     slug: str
 
+
 class TeamCreate(TeamBase):
     pass
 
+
 class TeamUpdate(BaseModel):
     name: Optional[str] = None
+
 
 class TeamSchema(TeamBase):
     id: UUID
@@ -43,6 +46,7 @@ class TeamSchema(TeamBase):
     my_role: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class TeamMemberSchema(BaseModel):
     id: UUID
@@ -55,12 +59,15 @@ class TeamMemberSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class AddMemberRequest(BaseModel):
     email: str
     role: str = "member"
 
+
 class UpdateRoleRequest(BaseModel):
     role: str
+
 
 class TeamInviteSchema(BaseModel):
     id: UUID
@@ -73,9 +80,11 @@ class TeamInviteSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class CreateInviteRequest(BaseModel):
     email: str
     role: str = "member"
+
 
 class SharedDashboardSchema(BaseModel):
     id: UUID
@@ -86,6 +95,7 @@ class SharedDashboardSchema(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class CreateDashboardRequest(BaseModel):
     name: str
@@ -124,7 +134,8 @@ async def get_team_member(
 # ──────────────────────────────────────────────
 
 @router.post("", response_model=TeamSchema, include_in_schema=False)
-@router.post("/", response_model=TeamSchema, summary="Create Team", description="Create a new team. The creator is automatically assigned the owner role.")
+@router.post("/", response_model=TeamSchema, summary="Create Team",
+             description="Create a new team. The creator is automatically assigned the owner role.")
 async def create_team(
     team_in: TeamCreate,
     current_user: dict = Depends(get_current_user),
@@ -152,7 +163,8 @@ async def create_team(
 
 
 @router.get("", response_model=List[TeamSchema], include_in_schema=False)
-@router.get("/", response_model=List[TeamSchema], summary="List My Teams", description="List all teams the authenticated user is a member of.")
+@router.get("/", response_model=List[TeamSchema], summary="List My Teams",
+            description="List all teams the authenticated user is a member of.")
 async def list_my_teams(
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -169,7 +181,8 @@ async def list_my_teams(
     return teams
 
 
-@router.get("/{team_id}", response_model=TeamSchema, summary="Get Team", description="Get details for a specific team. Requires membership.")
+@router.get("/{team_id}", response_model=TeamSchema, summary="Get Team",
+            description="Get details for a specific team. Requires membership.")
 async def get_team(
     team_id: UUID,
     member: TeamMember = Depends(get_team_member),
@@ -184,7 +197,8 @@ async def get_team(
     return response
 
 
-@router.put("/{team_id}", response_model=TeamSchema, summary="Update Team", description="Update team name. Only the owner or admin can update team details. The slug is immutable.")
+@router.put("/{team_id}", response_model=TeamSchema, summary="Update Team",
+            description="Update team name. Only the owner or admin can update team details. The slug is immutable.")
 async def update_team(
     team_id: UUID,
     team_update: TeamUpdate,
@@ -209,7 +223,8 @@ async def update_team(
     return response
 
 
-@router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Team", description="Permanently delete a team and all its members. Only the team owner can perform this action.")
+@router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Team",
+               description="Permanently delete a team and all its members. Only the team owner can perform this action.")
 async def delete_team(
     team_id: UUID,
     member: TeamMember = Depends(get_team_member),
@@ -232,7 +247,8 @@ async def delete_team(
 # Members
 # ──────────────────────────────────────────────
 
-@router.get("/{team_id}/members", response_model=List[TeamMemberSchema], summary="List Team Members", description="List all members of a team with their roles.")
+@router.get("/{team_id}/members", response_model=List[TeamMemberSchema],
+            summary="List Team Members", description="List all members of a team with their roles.")
 async def list_members(
     team_id: UUID,
     member: TeamMember = Depends(get_team_member),
@@ -252,7 +268,8 @@ async def list_members(
     return response
 
 
-@router.post("/{team_id}/members", response_model=TeamMemberSchema, summary="Add Team Member", description="Add an existing KoreShield user to the team by email address. For inviting users not yet registered, use the invites endpoint.")
+@router.post("/{team_id}/members", response_model=TeamMemberSchema, summary="Add Team Member",
+             description="Add an existing KoreShield user to the team by email address. For inviting users not yet registered, use the invites endpoint.")
 async def add_member(
     team_id: UUID,
     request: AddMemberRequest,
@@ -293,7 +310,8 @@ async def add_member(
     return schema
 
 
-@router.delete("/{team_id}/members/{user_id}", summary="Remove Team Member", description="Remove a member from the team. The team owner cannot be removed.")
+@router.delete("/{team_id}/members/{user_id}", summary="Remove Team Member",
+               description="Remove a member from the team. The team owner cannot be removed.")
 async def remove_member(
     team_id: UUID,
     user_id: UUID,
@@ -317,7 +335,8 @@ async def remove_member(
     return {"status": "success"}
 
 
-@router.post("/{team_id}/members/{user_id}/role", summary="Update Member Role", description="Update the role of a team member. Owner role cannot be changed through this endpoint.")
+@router.post("/{team_id}/members/{user_id}/role", summary="Update Member Role",
+             description="Update the role of a team member. Owner role cannot be changed through this endpoint.")
 async def update_member_role(
     team_id: UUID,
     user_id: UUID,
@@ -349,7 +368,8 @@ async def update_member_role(
 # Invites
 # ──────────────────────────────────────────────
 
-@router.get("/{team_id}/invites", response_model=List[TeamInviteSchema], summary="List Team Invites", description="List pending invitations for the team. Only owners and admins can view invites.")
+@router.get("/{team_id}/invites", response_model=List[TeamInviteSchema], summary="List Team Invites",
+            description="List pending invitations for the team. Only owners and admins can view invites.")
 async def list_invites(
     team_id: UUID,
     status_filter: Optional[str] = None,
@@ -372,7 +392,8 @@ async def list_invites(
     return invites
 
 
-@router.post("/{team_id}/invites", response_model=TeamInviteSchema, status_code=status.HTTP_201_CREATED, summary="Create Team Invite", description="Create a pending invitation for an email address. If the user is already registered, they are added directly. Otherwise an invite record is created for when they sign up.")
+@router.post("/{team_id}/invites", response_model=TeamInviteSchema, status_code=status.HTTP_201_CREATED, summary="Create Team Invite",
+             description="Create a pending invitation for an email address. If the user is already registered, they are added directly. Otherwise an invite record is created for when they sign up.")
 async def create_invite(
     team_id: UUID,
     request: CreateInviteRequest,
@@ -428,7 +449,8 @@ async def create_invite(
     return invite
 
 
-@router.delete("/{team_id}/invites/{invite_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Cancel Team Invite", description="Cancel a pending team invitation.")
+@router.delete("/{team_id}/invites/{invite_id}", status_code=status.HTTP_204_NO_CONTENT,
+               summary="Cancel Team Invite", description="Cancel a pending team invitation.")
 async def cancel_invite(
     team_id: UUID,
     invite_id: UUID,
@@ -455,7 +477,8 @@ async def cancel_invite(
 # Shared Dashboards
 # ──────────────────────────────────────────────
 
-@router.get("/{team_id}/dashboards", response_model=List[SharedDashboardSchema], summary="List Shared Dashboards", description="List shared dashboards for a team. Optionally filter by dashboard type (security, analytics, compliance).")
+@router.get("/{team_id}/dashboards", response_model=List[SharedDashboardSchema], summary="List Shared Dashboards",
+            description="List shared dashboards for a team. Optionally filter by dashboard type (security, analytics, compliance).")
 async def list_dashboards(
     team_id: UUID,
     dashboard_type: Optional[str] = None,
@@ -473,7 +496,8 @@ async def list_dashboards(
     return dashboards
 
 
-@router.post("/{team_id}/dashboards", response_model=SharedDashboardSchema, status_code=status.HTTP_201_CREATED, summary="Create Shared Dashboard", description="Create a new shared dashboard for the team. Only owners and admins can create dashboards.")
+@router.post("/{team_id}/dashboards", response_model=SharedDashboardSchema, status_code=status.HTTP_201_CREATED,
+             summary="Create Shared Dashboard", description="Create a new shared dashboard for the team. Only owners and admins can create dashboards.")
 async def create_dashboard(
     team_id: UUID,
     request: CreateDashboardRequest,
@@ -514,7 +538,8 @@ async def create_dashboard(
     return dashboard
 
 
-@router.delete("/{team_id}/dashboards/{dashboard_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Shared Dashboard", description="Delete a shared dashboard. Only owners and admins can delete dashboards.")
+@router.delete("/{team_id}/dashboards/{dashboard_id}", status_code=status.HTTP_204_NO_CONTENT,
+               summary="Delete Shared Dashboard", description="Delete a shared dashboard. Only owners and admins can delete dashboards.")
 async def delete_dashboard(
     team_id: UUID,
     dashboard_id: UUID,

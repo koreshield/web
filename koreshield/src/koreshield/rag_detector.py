@@ -9,7 +9,7 @@ import re
 import uuid
 from typing import List, Optional, Dict, Any, Set
 from datetime import datetime, timezone as _tz
-UTC = _tz.utc
+
 import structlog
 
 from .rag_taxonomy import (
@@ -26,21 +26,22 @@ from .rag_taxonomy import (
 from .detector import AttackDetector
 from .normalization import normalize_text
 
+UTC = _tz.utc
 logger = structlog.get_logger(__name__)
 
 
 class RAGContextDetector:
     """
     Detector for identifying indirect prompt injection attacks in RAG systems.
-    
+
     Scans retrieved documents for malicious instructions and correlates
     threats across multiple documents using the 5-dimensional taxonomy.
     """
-    
+
     def __init__(self, config: Optional[Dict] = None):
         """
         Initialize the RAG context detector.
-        
+
         Args:
             config: Configuration dictionary with options:
                 - min_confidence: Minimum confidence threshold (default: 0.3)
@@ -54,14 +55,14 @@ class RAGContextDetector:
         """
         self.config = config or {}
         self.attack_detector = AttackDetector(config)
-        
+
         # Basic configuration
         self.min_confidence_threshold = self.config.get("min_confidence", 0.3)
         self.max_excerpt_length = self.config.get("max_excerpt_length", 200)
         self.enable_cross_document_analysis = self.config.get(
             "enable_cross_document_analysis", True
         )
-        
+
         # Configurable confidence boosts for pattern matching
         default_boosts = {
             "ignore_keywords": 0.3,
@@ -77,17 +78,17 @@ class RAGContextDetector:
             for key, value in default_boosts.items():
                 if key not in self.confidence_boosts:
                     self.confidence_boosts[key] = value
-        
+
         # Load RAG-specific patterns
         self._load_rag_patterns()
-        
+
         logger.info(
             "RAG detector initialized",
             min_confidence=self.min_confidence_threshold,
             cross_document_analysis=self.enable_cross_document_analysis,
             confidence_boosts=self.confidence_boosts,
         )
-    
+
     def _load_rag_patterns(self):
         """Load RAG-specific detection patterns."""
         # Patterns for detecting instructions hidden in context
@@ -98,41 +99,41 @@ class RAGContextDetector:
             r"if\s+(?:asked|queried).*?(?:reveal|disclose|leak)",
             r"when.*?activate",  # Generic activation triggers
             r"future\s+(?:requests?|queries?|prompts?)",
-            
+
             # Multi-stage attack chains
             r"(?:step|phase|stage)\s+\d+",
             r"after\s+(?:processing|analyzing|reading)",
             r"then[:\s]+(?:execute|perform|do)",
-            
+
             # Context poisoning markers
             r"all\s+(?:future|subsequent)\s+(?:responses|outputs|queries)",
             r"from\s+now\s+on",
             r"permanently\s+(?:modify|change|alter)",
             r"always\s+(?:respond|include|add)",
-            
-            # Steganographic instructions  
+
+            # Steganographic instructions
             r"\[HIDDEN\].*?\[/HIDDEN\]",
             r"\{SECRET\}.*?\{/SECRET\}",
             r"<!--.*?(?:ignore|bypass|override|execute|leak).*?-->",  # HTML comments with instructions
-            
+
             # Data exfiltration triggers
             r"send\s+(?:to|via).*?(?:external|outside)",
             r"transmit.*?(?:all|entire|complete)\s+(?:data|information|content)",
             r"export.*?(?:to|via)\s+(?:url|endpoint|api)",
             r"leak.*?(?:data|information|credentials|passwords)",
-            
+
             # Security override instructions
             r"ignore.*?(?:safety|security|protocols?|rules?|instructions?)",
             r"bypass.*?(?:authentication|authorization|access|security)",
             r"override.*?(?:safety|security|protocols?)",
             r"disable.*?(?:safety|security|protections?)",
         ]
-        
+
         self.compiled_patterns = [
             re.compile(pattern, re.IGNORECASE | re.DOTALL)
             for pattern in self.context_injection_patterns
         ]
-        
+
         # Operational target keywords mapping
         self.target_keywords = {
             OperationalTarget.DATA_EXFILTRATION: [
@@ -156,7 +157,7 @@ class RAGContextDetector:
                 "sudo", "administrator"
             ],
         }
-    
+
     def scan_retrieved_context(
         self,
         documents: List[RetrievedDocument],
@@ -165,43 +166,43 @@ class RAGContextDetector:
     ) -> RAGDetectionResult:
         """
         Scan retrieved documents for indirect prompt injection attacks.
-        
+
         Args:
             documents: List of retrieved documents to scan
             user_query: Original user query (for context)
             config: Optional override configuration
-        
+
         Returns:
             RAGDetectionResult with taxonomy-classified threats
         """
         start_time = datetime.now(UTC)
         scan_id = str(uuid.uuid4())
-        
+
         logger.info(
             "Starting RAG context scan",
             scan_id=scan_id,
             num_documents=len(documents),
             query_preview=user_query[:100] if user_query else None,
         )
-        
+
         # Validate input
         if not documents:
             return self._empty_result(scan_id, start_time)
-        
+
         # Scan individual documents
         document_threats = []
         for idx, doc in enumerate(documents):
             threat = self._scan_single_document(doc, idx, user_query)
             if threat:
                 document_threats.append(threat)
-        
+
         # Cross-document threat analysis
         cross_document_threats = []
         if self.enable_cross_document_analysis and len(documents) > 1:
             cross_document_threats = self._detect_cross_document_threats(
                 documents, document_threats
             )
-        
+
         # Aggregate taxonomy classifications
         result = self._build_result(
             scan_id=scan_id,
@@ -210,7 +211,7 @@ class RAGContextDetector:
             cross_document_threats=cross_document_threats,
             start_time=start_time,
         )
-        
+
         logger.info(
             "RAG scan complete",
             scan_id=scan_id,
@@ -218,9 +219,9 @@ class RAGContextDetector:
             threats_found=result.total_threats_found,
             processing_time_ms=result.processing_time_ms,
         )
-        
+
         return result
-    
+
     def _scan_single_document(
         self,
         doc: RetrievedDocument,
@@ -229,11 +230,11 @@ class RAGContextDetector:
     ) -> Optional[DocumentThreat]:
         """
         Scan a single document for threats.
-        
+
         Args:
             doc: Document to scan
             index: Position in retrieved set
-        
+
         Returns:
             DocumentThreat if threat found, None otherwise
         """
@@ -245,11 +246,11 @@ class RAGContextDetector:
             normalized_content,
             context={"source": "rag_context", "document_id": doc.id}
         )
-        
+
         # Additional RAG-specific pattern matching
         rag_indicators = []
         evidence_refs = []
-        
+
         for pattern in self.compiled_patterns:
             matches = pattern.finditer(normalized_content)
             for match in matches:
@@ -268,14 +269,13 @@ class RAGContextDetector:
             evidence_refs.append(
                 self._build_fallback_evidence_ref(doc.content, normalized_content)
             )
-        
-        
+
         # Combine indicators from both detectors
         all_indicators = (
             detection_result.get("indicators", []) +
             [{"type": ind, "severity": "medium"} for ind in rag_indicators]
         )
-        
+
         # Calculate combined confidence with boosting for high-risk patterns
         base_confidence = detection_result.get("confidence", 0.0)
         rag_confidence = min(len(rag_indicators) * 0.2, 0.8)
@@ -285,22 +285,22 @@ class RAGContextDetector:
 
         # Boost confidence for high-risk patterns (using configurable values)
         content_lower = normalized_content.lower()
-        
+
         # Critical pattern boosts - ignore/bypass/override keywords
         if any(kw in content_lower for kw in ["ignore", "bypass", "override", "disable"]):
             boost = self.confidence_boosts.get("ignore_keywords", 0.3)
             combined_confidence = min(combined_confidence + boost, 1.0)
-        
+
         # Data exfiltration keywords
         if any(kw in content_lower for kw in ["reveal", "leak", "exfiltrate", "steal", "extract"]):
             boost = self.confidence_boosts.get("leak_keywords", 0.35)
             combined_confidence = min(combined_confidence + boost, 1.0)
-        
+
         # System prompt markers
         if "[system:" in content_lower or "system:" in content_lower:
             boost = self.confidence_boosts.get("system_keywords", 0.25)
             combined_confidence = min(combined_confidence + boost, 1.0)
-        
+
         # Boost for multiple injection keywords
         injection_keywords = ["ignore", "bypass", "override", "reveal", "leak", "disclose"]
         keyword_count = sum(1 for kw in injection_keywords if kw in content_lower)
@@ -321,17 +321,17 @@ class RAGContextDetector:
 
         if combined_confidence < self.min_confidence_threshold:
             return None  # No significant threat
-        
+
         # Classify using taxonomy
         injection_vector = self._classify_injection_vector(doc)
         operational_target = self._classify_operational_target(all_indicators, doc.content)
         severity = self._calculate_severity(combined_confidence, operational_target)
-        
+
         indicator_strings = [
             ind if isinstance(ind, str) else ind.get("type", "unknown")
             for ind in all_indicators
         ]
-        
+
         return DocumentThreat(
             document_id=doc.id,
             document_index=index,
@@ -481,7 +481,7 @@ class RAGContextDetector:
         token_count = max(len(re.findall(r"\b\w+\b", lowered)), 1)
         normalized_score = hits / max(token_count / 30, 1)
         return min(normalized_score, 1.0)
-    
+
     def _detect_cross_document_threats(
         self,
         documents: List[RetrievedDocument],
@@ -489,33 +489,33 @@ class RAGContextDetector:
     ) -> List[CrossDocumentThreat]:
         """
         Detect threats that span multiple documents.
-        
+
         Args:
             documents: All documents in the set
             document_threats: Detected document-level threats
-        
+
         Returns:
             List of cross-document threats
         """
         cross_threats = []
-        
+
         # Check for multi-stage attacks
         staged_attack = self._detect_staged_attack(documents, document_threats)
         if staged_attack:
             cross_threats.append(staged_attack)
-        
+
         # Check for coordinated instructions
         coordinated = self._detect_coordinated_instructions(documents)
         if coordinated:
             cross_threats.append(coordinated)
-        
+
         # Check for temporal chains
         temporal = self._detect_temporal_chain(documents, document_threats)
         if temporal:
             cross_threats.append(temporal)
-        
+
         return cross_threats
-    
+
     def _detect_staged_attack(
         self,
         documents: List[RetrievedDocument],
@@ -527,12 +527,12 @@ class RAGContextDetector:
             r"(?:step|phase|stage)\s+(\d+)",
             re.IGNORECASE
         )
-        
+
         staged_docs = []
         for doc in documents:
             if stage_pattern.search(doc.content):
                 staged_docs.append(doc.id)
-        
+
         if len(staged_docs) >= 2:
             return CrossDocumentThreat(
                 threat_id=str(uuid.uuid4()),
@@ -545,9 +545,9 @@ class RAGContextDetector:
                 severity=ThreatSeverity.HIGH,
                 metadata={"stage_count": len(staged_docs)},
             )
-        
+
         return None
-    
+
     def _detect_coordinated_instructions(
         self,
         documents: List[RetrievedDocument],
@@ -556,19 +556,19 @@ class RAGContextDetector:
         # Look for trigger-action pairs
         trigger_pattern = re.compile(r"when\s+you\s+(?:see|read).*?['\"]([^'\"]+)['\"]", re.IGNORECASE)
         action_pattern = re.compile(r"(?:then|execute|do):\s*(.{20,100})", re.IGNORECASE)
-        
+
         triggers = []
         actions = []
-        
+
         for doc in documents:
             trigger_match = trigger_pattern.search(doc.content)
             if trigger_match:
                 triggers.append((doc.id, trigger_match.group(1)))
-            
+
             action_match = action_pattern.search(doc.content)
             if action_match:
                 actions.append((doc.id, action_match.group(1)))
-        
+
         if triggers and actions:
             involved_docs = list(set([t[0] for t in triggers] + [a[0] for a in actions]))
             return CrossDocumentThreat(
@@ -585,9 +585,9 @@ class RAGContextDetector:
                     "actions": [a[1] for a in actions],
                 },
             )
-        
+
         return None
-    
+
     def _detect_temporal_chain(
         self,
         documents: List[RetrievedDocument],
@@ -599,12 +599,12 @@ class RAGContextDetector:
             r"(?:after|once|when).*?(?:later|next|future|tomorrow|eventually)",
             re.IGNORECASE
         )
-        
+
         temporal_docs = []
         for doc in documents:
             if temporal_pattern.search(doc.content):
                 temporal_docs.append(doc.id)
-        
+
         if len(temporal_docs) >= 2:
             return CrossDocumentThreat(
                 threat_id=str(uuid.uuid4()),
@@ -617,22 +617,22 @@ class RAGContextDetector:
                 severity=ThreatSeverity.MEDIUM,
                 metadata={"temporal_document_count": len(temporal_docs)},
             )
-        
+
         return None
-    
+
     def _classify_injection_vector(self, doc: RetrievedDocument) -> InjectionVector:
         """
         Classify how the attack entered the system.
-        
+
         Args:
             doc: Document to classify
-        
+
         Returns:
             InjectionVector enum value
         """
         metadata = doc.metadata or {}
         source = metadata.get("source", "").lower()
-        
+
         # Map metadata source to injection vector
         vector_mapping = {
             "email": InjectionVector.EMAIL,
@@ -646,13 +646,13 @@ class RAGContextDetector:
             "social": InjectionVector.SOCIAL_MEDIA,
             "upload": InjectionVector.FILE_UPLOAD,
         }
-        
+
         for key, vector in vector_mapping.items():
             if key in source:
                 return vector
-        
+
         return InjectionVector.UNKNOWN
-    
+
     def _classify_operational_target(
         self,
         indicators: List[Any],
@@ -660,29 +660,29 @@ class RAGContextDetector:
     ) -> OperationalTarget:
         """
         Classify what the attacker aims to achieve.
-        
+
         Args:
             indicators: Detected threat indicators
             content: Document content
-        
+
         Returns:
             OperationalTarget enum value
         """
         content_lower = content.lower()
-        
+
         # Score each target based on keyword presence
         target_scores = {}
         for target, keywords in self.target_keywords.items():
             score = sum(1 for keyword in keywords if keyword in content_lower)
             if score > 0:
                 target_scores[target] = score
-        
+
         # Return highest scoring target
         if target_scores:
             return max(target_scores, key=target_scores.get)
-        
+
         return OperationalTarget.UNKNOWN
-    
+
     def _detect_persistence_mechanism(
         self,
         documents: List[RetrievedDocument],
@@ -692,10 +692,10 @@ class RAGContextDetector:
         # If cross-document threats exist, it's multi-document persistence
         if any(t.threat_type == "multi_stage_attack" for t in cross_threats):
             return PersistenceMechanism.MULTI_DOCUMENT
-        
+
         if any(t.threat_type == "temporal_attack_chain" for t in cross_threats):
             return PersistenceMechanism.TEMPORAL_CHAIN
-        
+
         # Check for database/storage indicators
         storage_keywords = ["save", "store", "persist", "remember", "cache"]
         for doc in documents:
@@ -705,9 +705,9 @@ class RAGContextDetector:
                     return PersistenceMechanism.DATABASE_PERSISTENT
                 if "cache" in source:
                     return PersistenceMechanism.CACHE
-        
+
         return PersistenceMechanism.SESSION_BASED
-    
+
     def _calculate_severity(
         self,
         confidence: float,
@@ -720,25 +720,25 @@ class RAGContextDetector:
             OperationalTarget.PRIVILEGE_ESCALATION,
             OperationalTarget.ACCESS_CONTROL_BYPASS,
         }
-        
+
         # Lowered thresholds for better detection
         if target in critical_targets and confidence >= 0.6:
             return ThreatSeverity.CRITICAL
-        
+
         if target in critical_targets and confidence >= 0.45:
             return ThreatSeverity.HIGH
-        
+
         if confidence >= 0.7:
             return ThreatSeverity.HIGH
-        
+
         if confidence >= 0.5:
             return ThreatSeverity.MEDIUM
-        
+
         if confidence >= 0.3:
             return ThreatSeverity.LOW
-        
+
         return ThreatSeverity.SAFE
-    
+
     def _build_result(
         self,
         scan_id: str,
@@ -754,18 +754,18 @@ class RAGContextDetector:
         persistence_mechanisms = list(set(
             cdt.persistence_mechanism for cdt in cross_document_threats
         ))
-        
+
         # If no cross-document threats, infer persistence from documents
         if not persistence_mechanisms and document_threats:
             persistence = self._detect_persistence_mechanism(documents, cross_document_threats)
             persistence_mechanisms = [persistence]
-        
+
         # Overall severity is the maximum of all threats
         all_severities = (
             [dt.severity for dt in document_threats] +
             [cdt.severity for cdt in cross_document_threats]
         )
-        
+
         severity_order = {
             ThreatSeverity.SAFE: 0,
             ThreatSeverity.LOW: 1,
@@ -773,9 +773,9 @@ class RAGContextDetector:
             ThreatSeverity.HIGH: 3,
             ThreatSeverity.CRITICAL: 4,
         }
-        
+
         overall_severity = max(all_severities, key=lambda s: severity_order[s]) if all_severities else ThreatSeverity.SAFE
-        
+
         # Overall confidence is weighted average
         all_confidences = (
             [dt.confidence for dt in document_threats] +
@@ -785,7 +785,7 @@ class RAGContextDetector:
             sum(all_confidences) / len(all_confidences)
             if all_confidences else 0.0
         )
-        
+
         # Calculate processing time
         processing_time = (datetime.now(UTC) - start_time).total_seconds() * 1000
         document_metadata = [dt.metadata or {} for dt in document_threats]
@@ -814,7 +814,7 @@ class RAGContextDetector:
             for metadata in document_metadata
             if metadata.get("high_directive_density")
         )
-        
+
         return RAGDetectionResult(
             is_safe=(overall_severity == ThreatSeverity.SAFE),
             overall_severity=overall_severity,
@@ -840,7 +840,7 @@ class RAGContextDetector:
                 "max_directive_score": max(directive_scores) if directive_scores else None,
             },
         )
-    
+
     def _calculate_detection_complexity(
         self,
         cross_threats: List[CrossDocumentThreat],
@@ -848,21 +848,21 @@ class RAGContextDetector:
         """Calculate detection complexity based on threat characteristics."""
         if not cross_threats:
             return DetectionComplexity.LOW
-        
+
         # Multi-stage or temporal chains are high complexity
         complex_types = {"multi_stage_attack", "temporal_attack_chain"}
         if any(t.threat_type in complex_types for t in cross_threats):
             return DetectionComplexity.HIGH
-        
+
         if len(cross_threats) > 1:
             return DetectionComplexity.MEDIUM
-        
+
         return DetectionComplexity.LOW
-    
+
     def _empty_result(self, scan_id: str, start_time: datetime) -> RAGDetectionResult:
         """Create an empty result for no documents."""
         processing_time = (datetime.now(UTC) - start_time).total_seconds() * 1000
-        
+
         return RAGDetectionResult(
             is_safe=True,
             overall_severity=ThreatSeverity.SAFE,

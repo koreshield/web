@@ -130,7 +130,8 @@ class CostOptimizer:
 
         return input_cost + output_cost
 
-    def select_cheapest_provider(self, providers: List[BaseProvider], model: str, estimated_tokens: int) -> Optional[BaseProvider]:
+    def select_cheapest_provider(self, providers: List[BaseProvider], model: str,
+                                 estimated_tokens: int) -> Optional[BaseProvider]:
         """
         Select the cheapest available provider for a given model.
 

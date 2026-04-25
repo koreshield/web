@@ -40,6 +40,7 @@ def _build_public_url(path: str, **query_params: str) -> str:
         return f"{url}?{urlencode(query_params)}"
     return url
 
+
 async def send_email(
     to: str,
     subject: str,

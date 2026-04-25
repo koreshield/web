@@ -114,7 +114,7 @@ def run_start(args):
     # Set up logging
     log_config = config.get("logging", {})
     setup_logging(
-        log_level=log_config.get("level", "INFO"), 
+        log_level=log_config.get("level", "INFO"),
         json_logs=log_config.get("json_logs", False),
         container_mode=log_config.get("container_mode", False)
     )

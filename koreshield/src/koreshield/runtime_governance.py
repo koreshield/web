@@ -312,7 +312,8 @@ class RuntimeGovernanceManager:
             "review_count": session["review_count"],
             "blocked_count": session["blocked_count"],
             "pending_reviews": len(
-                [ticket_id for ticket_id in session.get("review_ticket_ids", []) if self.reviews.get(ticket_id, {}).get("status") == "pending"]
+                [ticket_id for ticket_id in session.get("review_ticket_ids", [])
+                                                        if self.reviews.get(ticket_id, {}).get("status") == "pending"]
             ),
             "recent_tools": [entry["tool_name"] for entry in session.get("history", [])[-5:]],
         }

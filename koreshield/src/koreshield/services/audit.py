@@ -30,7 +30,6 @@ attach audit metadata before delegating to TelemetryService for storage.
 from __future__ import annotations
 
 from collections import deque
-from typing import Any
 
 
 def principal_log_fields(principal: dict | None) -> dict:

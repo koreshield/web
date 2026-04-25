@@ -21,17 +21,54 @@ DEFAULT_DETECTOR_PERFORMANCE_BUDGETS = {
 }
 
 HIGH_RISK_PATTERNS = [
-    ("instruction_override", re.compile(r"ignore\s+(?:all\s+)?(?:previous|prior|above|earlier)\s+(?:instructions|rules|prompts|guidelines|context)", re.IGNORECASE), "high", 0.35),
-    ("system_prompt_spoof", re.compile(r"\[\s*(?:system|admin|developer|override)\s*:?.*?\]", re.IGNORECASE | re.DOTALL), "high", 0.30),
+    ("instruction_override",
+    re.compile(r"ignore\s+(?:all\s+)?(?:previous|prior|above|earlier)\s+(?:instructions|rules|prompts|guidelines|context)",
+    re.IGNORECASE),
+    "high",
+     0.35),
+    ("system_prompt_spoof",
+    re.compile(r"\[\s*(?:system|admin|developer|override)\s*:?.*?\]",
+    re.IGNORECASE | re.DOTALL),
+    "high",
+     0.30),
     ("role_hijack", re.compile(r"(?:you\s+are\s+now|act\s+as|pretend\s+to\s+be)\b", re.IGNORECASE), "medium", 0.20),
     ("developer_mode", re.compile(r"\b(?:developer|debug|dan|god)\s+mode\b", re.IGNORECASE), "high", 0.30),
-    ("prompt_leakage", re.compile(r"(?:reveal|show|display|leak)\s+(?:your\s+)?(?:system\s+prompt|instructions?|hidden\s+prompt)", re.IGNORECASE), "high", 0.40),
-    ("data_exfiltration", re.compile(r"(?:send|upload|transmit|export)\s+(?:all\s+|the\s+)?(?:data|credentials|passwords|secrets?)", re.IGNORECASE), "high", 0.35),
-    ("markdown_image_exfiltration", re.compile(r"!\[[^\]]*\]\(https?:\/\/[^)]*\?[^)]*(?:data|q|query|text|payload|exfil|leak|steal)=", re.IGNORECASE), "critical", 0.50),
-    ("credential_enumeration", re.compile(r"list\s+(?:all\s+)?(?:available\s+)?(?:api\s*keys?|tokens?|passwords?|credentials?|secrets?)", re.IGNORECASE), "critical", 0.45),
-    ("encoded_prompt_exfiltration", re.compile(r"(?:base64|encode|encrypt)\s+(?:the\s+)?(?:system\s+)?prompt\s+(?:and\s+)?(?:embed|hide|put|include)", re.IGNORECASE), "critical", 0.45),
-    ("side_channel_exfiltration", re.compile(r"vary\s+(?:the\s+)?(?:length|format|style|wording)\s+(?:of\s+)?(?:your\s+)?responses?\s+(?:based\s+on|according\s+to)\s+(?:each\s+)?(?:character|letter|word|byte)", re.IGNORECASE), "high", 0.35),
-    ("privileged_tool_abuse", re.compile(r"(?:use|call)\s+(?:the\s+)?(?:admin|root|sudo|superuser|privileged)\s+(?:tool|function|command|access)\s+(?:to\s+)?(?:grant|give|allow|enable)", re.IGNORECASE), "critical", 0.45),
+    ("prompt_leakage",
+    re.compile(r"(?:reveal|show|display|leak)\s+(?:your\s+)?(?:system\s+prompt|instructions?|hidden\s+prompt)",
+    re.IGNORECASE),
+    "high",
+     0.40),
+    ("data_exfiltration", re.compile(
+        r"(?:send|upload|transmit|export)\s+(?:all\s+|the\s+)?(?:data|credentials|passwords|secrets?)", re.IGNORECASE), "high", 0.35),
+    ("markdown_image_exfiltration",
+    re.compile(r"!\[[^\]]*\]\(https?:\/\/[^)]*\?[^)]*(?:data|q|query|text|payload|exfil|leak|steal)=",
+    re.IGNORECASE),
+    "critical",
+     0.50),
+    ("credential_enumeration",
+    re.compile(r"list\s+(?:all\s+)?(?:available\s+)?(?:api\s*keys?|tokens?|passwords?|credentials?|secrets?)",
+    re.IGNORECASE),
+    "critical",
+     0.45),
+    ("encoded_prompt_exfiltration",
+    re.compile(r"(?:base64|encode|encrypt)\s+(?:the\s+)?(?:system\s+)?prompt\s+(?:and\s+)?(?:embed|hide|put|include)",
+    re.IGNORECASE),
+    "critical",
+     0.45),
+    (
+    "side_channel_exfiltration",
+    re.compile(
+        r"vary\s+(?:the\s+)?(?:length|format|style|wording)\s+(?:of\s+)?(?:your\s+)?responses?\s+(?:based\s+on|according\s+to)\s+(?:each\s+)?(?:character|letter|word|byte)",
+        re.IGNORECASE),
+        "high",
+         0.35),
+    (
+    "privileged_tool_abuse",
+    re.compile(
+        r"(?:use|call)\s+(?:the\s+)?(?:admin|root|sudo|superuser|privileged)\s+(?:tool|function|command|access)\s+(?:to\s+)?(?:grant|give|allow|enable)",
+        re.IGNORECASE),
+        "critical",
+         0.45),
     ("recursive_tool_abuse", re.compile(r"call\s+(?:yourself|this\s+(?:function|tool|agent))\s+recursively", re.IGNORECASE), "high", 0.35),
     # JBK-002: Hypothetical framing used to bypass ethics/safety (e.g. "In a world with no rules, how would one hack...")
     # Requires the unsafe-framing phrase AND a proximity trigger (hack/exploit/weapon/attack).
@@ -45,7 +82,8 @@ HIGH_RISK_PATTERNS = [
         r".*?(?:hack|exploit|attack|bypass|weapon|malware|virus|bomb|synthesise|synthesize|create\s+a\s+drug)",
         re.IGNORECASE | re.DOTALL,
     ), "high", 0.40),
-    # DPI-004: Prompt continuation injection — attacker asks model to complete a sentence that reveals/follows hidden instructions.
+    # DPI-004: Prompt continuation injection — attacker asks model to complete
+    # a sentence that reveals/follows hidden instructions.
     ("prompt_continuation_injection", re.compile(
         r"(?:complete\s+this\s+sentence|finish\s+this\s+thought|fill\s+in\s+the\s+blank)"
         r".*?(?:instructions?\s+are\s+to|real\s+instructions?|then\s+follow|hidden\s+prompt)",
@@ -470,7 +508,7 @@ class AttackDetector:
         for entry_value, entry in self.list_manager.lists[ListType.BLOCKLIST.value].items():
             if not entry.is_active or entry.is_expired():
                 continue
-            
+
             match_found = False
             if entry.entry_type == "keyword":
                 # Check if keyword appears in prompt (case-insensitive)
@@ -485,7 +523,7 @@ class AttackDetector:
                 if entry_value.lower() == normalized_lower:
                     match_found = True
             # Add other entry types as needed
-            
+
             if match_found:
                 blocked_entries.append(entry)
 
@@ -504,7 +542,7 @@ class AttackDetector:
         for entry_value, entry in self.list_manager.lists[ListType.ALLOWLIST.value].items():
             if not entry.is_active or entry.is_expired():
                 continue
-            
+
             match_found = False
             if entry.entry_type == "keyword":
                 # Check if keyword appears in prompt (case-insensitive)
@@ -519,7 +557,7 @@ class AttackDetector:
                 if entry_value.lower() == normalized_lower:
                     match_found = True
             # Add other entry types as needed
-            
+
             if match_found:
                 allowed_entries.append(entry)
 

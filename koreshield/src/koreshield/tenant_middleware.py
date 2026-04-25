@@ -20,6 +20,7 @@ from .tenant_database import get_tenant_db_session
 from .tenant_utils import tenant_context, request_id_context
 from .api.auth import verify_jwt_token
 
+
 class TenantMiddleware(BaseHTTPMiddleware):
     """
     Middleware for tenant identification and context management.
@@ -201,11 +202,11 @@ class TenantMiddleware(BaseHTTPMiddleware):
                                 schema_name="public",
                                 tier=TenantTier.ENTERPRISE,
                                 is_active=True,
-                                resource_limits={} 
+                                resource_limits={}
                             )
                     except Exception:
                         pass
-                
+
                 return None
 
             if not tenant.is_active():

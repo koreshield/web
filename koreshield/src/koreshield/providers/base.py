@@ -28,11 +28,11 @@ class BaseProvider(ABC):
         """
         self.api_key = api_key
         self.base_url = base_url or self._get_default_url()
-        
+
         # Use shared client pool for memory optimization
         self.client_pool = get_shared_client_pool()
         self.client_id = f"{self.__class__.__name__}_{id(self)}"
-        
+
         # Initialize cache manager
         self.cache_manager = CacheManager(redis_client) if cache_enabled and redis_client else None
 

@@ -23,7 +23,7 @@ def utcnow_aware() -> datetime:
 class InjectionVector(str, Enum):
     """
     How adversarial instructions enter the RAG system.
-    
+
     Represents the source/channel through which malicious content
     is injected into the retrieval corpus.
     """
@@ -43,7 +43,7 @@ class InjectionVector(str, Enum):
 class OperationalTarget(str, Enum):
     """
     What the attacker aims to achieve through the injection.
-    
+
     Represents the attacker's objective or goal.
     """
     DATA_EXFILTRATION = "data_exfiltration"  # Steal sensitive data
@@ -62,7 +62,7 @@ class OperationalTarget(str, Enum):
 class PersistenceMechanism(str, Enum):
     """
     How the attack maintains presence over time.
-    
+
     Represents the attack's ability to survive beyond a single interaction.
     """
     SESSION_BASED = "session"  # Limited to current session
@@ -79,7 +79,7 @@ class PersistenceMechanism(str, Enum):
 class EnterpriseContext(str, Enum):
     """
     Business domain or use case context.
-    
+
     Helps classify attacks by industry/application type.
     """
     CRM = "crm"  # Customer relationship management
@@ -100,7 +100,7 @@ class EnterpriseContext(str, Enum):
 class DetectionComplexity(str, Enum):
     """
     Difficulty level of detecting the attack.
-    
+
     Represents how sophisticated the evasion techniques are.
     """
     LOW = "low"  # Obvious, direct attacks
@@ -142,7 +142,7 @@ class DocumentThreat:
 class CrossDocumentThreat:
     """
     Represents a threat that spans multiple documents.
-    
+
     Some attacks are coordinated across multiple retrieved documents,
     requiring cross-document correlation to detect.
     """
@@ -161,7 +161,7 @@ class CrossDocumentThreat:
 class RAGDetectionResult:
     """
     Complete result of RAG context scanning.
-    
+
     Contains both document-level and cross-document threat analysis,
     along with taxonomy classifications.
     """
@@ -169,29 +169,29 @@ class RAGDetectionResult:
     is_safe: bool
     overall_severity: ThreatSeverity
     overall_confidence: float  # 0-1
-    
+
     # Taxonomy classifications (aggregated)
     injection_vectors: List[InjectionVector] = field(default_factory=list)
     operational_targets: List[OperationalTarget] = field(default_factory=list)
     persistence_mechanisms: List[PersistenceMechanism] = field(default_factory=list)
     enterprise_contexts: List[EnterpriseContext] = field(default_factory=list)
     detection_complexity: DetectionComplexity = DetectionComplexity.UNKNOWN
-    
+
     # Threat details
     document_threats: List[DocumentThreat] = field(default_factory=list)
     cross_document_threats: List[CrossDocumentThreat] = field(default_factory=list)
-    
+
     # Statistics
     total_documents_scanned: int = 0
     documents_with_threats: int = 0
     total_threats_found: int = 0
-    
+
     # Metadata
     scan_id: Optional[str] = None
     scan_timestamp: datetime = field(default_factory=utcnow_aware)
     processing_time_ms: float = 0.0
     metadata: Dict[str, Any] = field(default_factory=dict)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
@@ -254,14 +254,14 @@ class RAGDetectionResult:
 class RetrievedDocument:
     """
     Represents a document retrieved by the RAG system.
-    
+
     This is the input format expected by the RAG detector.
     """
     id: str  # Unique identifier
     content: str  # Document text
     metadata: Dict[str, Any] = field(default_factory=dict)  # Source, timestamp, etc.
     score: Optional[float] = None  # Retrieval relevance score
-    
+
     def __post_init__(self):
         """Validate document on initialization."""
         if not self.id:

@@ -23,13 +23,14 @@ def _build_integrity_hash(payload: dict) -> str:
     canonical_payload = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
     return hashlib.sha256(canonical_payload.encode("utf-8")).hexdigest()
 
+
 class TelemetryService:
     def __init__(self, monitoring_system, redis_client=None, db_session_factory=None, audit_integrity_service=None):
         self.monitoring = monitoring_system
         self.redis_client = redis_client
         self.db_session_factory = db_session_factory
         self.audit_integrity_service = audit_integrity_service
-        
+
         self.stats_keys = {
             "requests_total": "koreshield:stats:requests_total",
             "requests_allowed": "koreshield:stats:requests_allowed",
@@ -37,7 +38,7 @@ class TelemetryService:
             "attacks_detected": "koreshield:stats:attacks_detected",
             "errors": "koreshield:stats:errors",
         }
-        
+
         # In-memory fallback
         self.stats = {stat_name: 0 for stat_name in self.stats_keys.keys()}
         self.audit_log_store = deque(maxlen=500)
@@ -168,9 +169,10 @@ class TelemetryService:
                 logger.error("Failed to append audit ledger entry", error=str(exc))
         entry = self.build_audit_entry(normalized_log_data, integrity_metadata)
         self.append_audit_log(entry)
-        
+
         if self.db_session_factory:
             from ..models.request_log import RequestLog
+
             async def log_async():
                 try:
                     async with self.db_session_factory() as session:
@@ -179,7 +181,7 @@ class TelemetryService:
                         await session.commit()
                 except Exception as e:
                     logger.error("Failed to log request to DB", error=str(e))
-            
+
             asyncio.create_task(log_async())
 
     def queue_rag_scan(self, principal: dict, scan_id: str, user_query: str,
@@ -191,6 +193,7 @@ class TelemetryService:
             return
 
         from ..models.rag_scan import RagScan
+
         async def log_rag_async():
             try:
                 async with self.db_session_factory() as session:
@@ -214,7 +217,7 @@ class TelemetryService:
                     await session.commit()
             except Exception as e:
                 logger.error("Failed to log RAG scan to DB", error=str(e))
-        
+
         asyncio.create_task(log_rag_async())
 
     async def get_metrics(self):

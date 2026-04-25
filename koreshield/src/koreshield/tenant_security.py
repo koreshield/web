@@ -13,6 +13,7 @@ from .tenant_models import TenantContext, TenantAuditLog
 from .tenant_utils import get_current_request_id
 from .logger import FirewallLogger
 
+
 class CrossTenantSecurityEnforcer:
     """
     Enforces security measures to prevent cross-tenant data leakage and attacks.
@@ -201,6 +202,7 @@ class CrossTenantSecurityEnforcer:
             source_ip=getattr(tenant_context, 'source_ip', None),
             user_id=getattr(tenant_context, 'user_id', None)
         )
+
 
 class TenantAuditLogger:
     """
@@ -506,7 +508,7 @@ class TenantAuditLogger:
                     session.query(TenantAuditLog).filter(
                         TenantAuditLog.tenant_id == tenant_context.tenant_uuid,
                         TenantAuditLog.timestamp < cutoff_date,
-                        TenantAuditLog.requires_retention == False
+                        TenantAuditLog.requires_retention.is_(False)
                     ).delete()
                 )
 
@@ -531,9 +533,11 @@ class TenantAuditLogger:
             )
             return 0
 
+
 # Global instances
 _security_enforcer: Optional[CrossTenantSecurityEnforcer] = None
 _audit_logger: Optional[TenantAuditLogger] = None
+
 
 def get_cross_tenant_security_enforcer() -> CrossTenantSecurityEnforcer:
     """Get the global cross-tenant security enforcer."""
@@ -541,6 +545,7 @@ def get_cross_tenant_security_enforcer() -> CrossTenantSecurityEnforcer:
     if _security_enforcer is None:
         _security_enforcer = CrossTenantSecurityEnforcer()
     return _security_enforcer
+
 
 def get_tenant_audit_logger() -> TenantAuditLogger:
     """Get the global tenant audit logger."""

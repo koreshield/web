@@ -13,8 +13,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-from .logger import setup_logging
-from .proxy import KoreShieldProxy
+from .logger import setup_logging  # noqa: E402
+from .proxy import KoreShieldProxy  # noqa: E402
 
 logger = structlog.get_logger(__name__)
 
@@ -33,7 +33,7 @@ def expand_env_vars(config: dict) -> dict:
         def replace_var(match):
             var_name = match.group(1) or match.group(2)
             return os.getenv(var_name, match.group(0))  # Return original if not found
-        
+
         # Pattern matches both ${VAR} and $VAR
         pattern = re.compile(r'\$\{([^}]+)\}|\$([A-Z_][A-Z0-9_]*)')
         return pattern.sub(replace_var, config)
@@ -65,7 +65,7 @@ def load_config(config_path: str = "config/config.yaml") -> dict:
 
     with open(config_file, "r") as f:
         config = yaml.safe_load(f) or {}
-    
+
     # Expand environment variables in the configuration
     return expand_env_vars(config)
 
@@ -100,11 +100,11 @@ try:
     # Set up logging early
     log_config = config.get("logging", {})
     setup_logging(
-        log_level=log_config.get("level", "INFO"), 
+        log_level=log_config.get("level", "INFO"),
         json_logs=log_config.get("json_logs", False),
         container_mode=log_config.get("container_mode", False)
     )
-    
+
     proxy = KoreShieldProxy(config)
     app = proxy.app
 except Exception as e:
@@ -112,6 +112,7 @@ except Exception as e:
     # Fallback/dummy app to prevent import error crashing uvicorn immediately if config fails
     # But usually we want it to fail specific to config
     raise e
+
 
 def main(config_path: str = "config/config.yaml"):
     """
@@ -122,6 +123,7 @@ def main(config_path: str = "config/config.yaml"):
     host = config.get("server", {}).get("host", "0.0.0.0")
     port = config.get("server", {}).get("port", 8000)
     uvicorn.run(app, host=host, port=port)
+
 
 if __name__ == "__main__":
     main()

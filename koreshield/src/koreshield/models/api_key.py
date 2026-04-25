@@ -12,7 +12,7 @@ from ..utils import utcnow_naive
 
 class APIKey(Base):
     __tablename__ = 'api_keys'
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     key_hash = Column(String(255), nullable=False, unique=True, index=True)
@@ -24,12 +24,12 @@ class APIKey(Base):
     is_revoked = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, nullable=False, default=utcnow_naive)
     updated_at = Column(DateTime, nullable=False, default=utcnow_naive, onupdate=utcnow_naive)
-    
+
     @staticmethod
     def generate_key() -> tuple[str, str, str]:
         """
         Generate a new API key.
-        
+
         Returns:
             tuple: (full_key, key_hash, key_prefix)
                 - full_key: The complete API key to show user (only once)
@@ -38,27 +38,27 @@ class APIKey(Base):
         """
         # Generate random secure token
         random_part = secrets.token_urlsafe(32)  # 43 chars base64url
-        
+
         # Create full key with prefix
         full_key = f"ks_live_{random_part}"
-        
+
         # Hash for storage
         key_hash = hashlib.sha256(full_key.encode()).hexdigest()
-        
+
         # Prefix for display
         key_prefix = full_key[:16]  # "ks_live_" + first 8 chars
-        
+
         return full_key, key_hash, key_prefix
-    
+
     @staticmethod
     def hash_key(key: str) -> str:
         """Hash an API key for comparison."""
         return hashlib.sha256(key.encode()).hexdigest()
-    
+
     def to_dict(self, include_full_key: bool = False) -> dict:
         """
         Convert API key to dictionary.
-        
+
         Args:
             include_full_key: If True, includes the full key (only for newly created keys)
         """
@@ -74,7 +74,7 @@ class APIKey(Base):
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
         return data
-    
+
     def is_valid(self) -> bool:
         """Check if API key is valid (not revoked and not expired)."""
         if self.is_revoked:
@@ -82,7 +82,7 @@ class APIKey(Base):
         if self.expires_at and self.expires_at < utcnow_naive():
             return False
         return True
-    
+
     def mark_used(self):
         """Update last_used_at timestamp."""
         self.last_used_at = utcnow_naive()

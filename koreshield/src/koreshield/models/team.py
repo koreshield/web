@@ -24,6 +24,7 @@ class Team(Base):
     owner = relationship("User", foreign_keys=[owner_id], backref="owned_teams")
     members = relationship("TeamMember", back_populates="team", cascade="all, delete-orphan")
 
+
 class TeamMember(Base):
     """Association between User and Team with Role."""
     __tablename__ = 'team_members'
@@ -31,7 +32,7 @@ class TeamMember(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     team_id = Column(UUID(as_uuid=True), ForeignKey('teams.id'), nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-    role = Column(String(50), nullable=False, default='member') # owner, admin, member, viewer
+    role = Column(String(50), nullable=False, default='member')  # owner, admin, member, viewer
 
     joined_at = Column(DateTime, default=utcnow_naive)
 
@@ -43,6 +44,7 @@ class TeamMember(Base):
     __table_args__ = (
         UniqueConstraint('team_id', 'user_id', name='uq_team_member'),
     )
+
 
 class TeamInvite(Base):
     """Pending invitation to join a team."""
@@ -64,6 +66,7 @@ class TeamInvite(Base):
     __table_args__ = (
         UniqueConstraint("team_id", "email", "status", name="uq_team_invites_team_email_status"),
     )
+
 
 class SharedDashboard(Base):
     """Shared dashboard configuration for a team."""

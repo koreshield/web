@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from .tenant_models import TenantContext, ResourceType
 from .logger import FirewallLogger
 
+
 class ResourceQuotaManager:
     """
     Manages resource quotas and enforcement for tenants.
@@ -293,6 +294,7 @@ class ResourceQuotaManager:
                     "last_reset": time.time()
                 }
 
+
 class TenantResourceQuotaEnforcer:
     """
     Enforces resource quotas with different strategies.
@@ -410,9 +412,11 @@ class TenantResourceQuotaEnforcer:
             "violation_rate_per_hour": last_hour if last_hour > 0 else 0
         }
 
+
 # Global instances
 _quota_manager: Optional[ResourceQuotaManager] = None
 _quota_enforcer: Optional[TenantResourceQuotaEnforcer] = None
+
 
 def get_resource_quota_manager() -> ResourceQuotaManager:
     """Get the global resource quota manager."""
@@ -420,6 +424,7 @@ def get_resource_quota_manager() -> ResourceQuotaManager:
     if _quota_manager is None:
         _quota_manager = ResourceQuotaManager()
     return _quota_manager
+
 
 def get_resource_quota_enforcer() -> TenantResourceQuotaEnforcer:
     """Get the global resource quota enforcer."""

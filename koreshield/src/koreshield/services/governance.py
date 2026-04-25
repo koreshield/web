@@ -12,6 +12,7 @@ from ..policy import PolicyEngine
 
 logger = structlog.get_logger(__name__)
 
+
 class GovernanceService:
     def __init__(self, config: dict, detector: Any):
         self.config = config
@@ -23,7 +24,7 @@ class GovernanceService:
         """Evaluate a tool call for security risks."""
         session_id = context.get("session_id") or context.get("sessionId")
         session_context = self.runtime_governance.get_session_context(session_id, principal)
-        
+
         if session_context:
             merged_context = dict(context)
             merged_context.update({
@@ -42,7 +43,8 @@ class GovernanceService:
         )
 
         should_block = tool_analysis.get("suggested_action") == "block" or policy_result.get("allowed") is False
-        action_taken = "blocked" if should_block else policy_result.get("action", tool_analysis.get("suggested_action", "allow"))
+        action_taken = "blocked" if should_block else policy_result.get(
+            "action", tool_analysis.get("suggested_action", "allow"))
 
         return {
             "analysis": tool_analysis,

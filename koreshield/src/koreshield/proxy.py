@@ -40,23 +40,25 @@ from .services.audit_integrity import AuditIntegrityService
 
 logger = structlog.get_logger(__name__)
 
-from fastapi.middleware.cors import CORSMiddleware
-from .api.management import router as management_router, provision_test_key as _provision_test_key
-from .api.analytics import router as analytics_router
-from .api.rbac import router as rbac_router
-from .api.reports import router as reports_router
-from .api.teams import router as teams_router
-from .api.rules import router as rules_router
-from .api.alerts import router as alerts_router
-from .api.billing import router as billing_router
-from .api import websocket as websocket_module
-from .api.websocket import router as websocket_router
+# These imports intentionally come after logger setup so the logger singleton
+# is available to any module-level code in the routers that runs at import time.
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from .api.management import router as management_router, provision_test_key as _provision_test_key  # noqa: E402
+from .api.analytics import router as analytics_router  # noqa: E402
+from .api.rbac import router as rbac_router  # noqa: E402
+from .api.reports import router as reports_router  # noqa: E402
+from .api.teams import router as teams_router  # noqa: E402
+from .api.rules import router as rules_router  # noqa: E402
+from .api.alerts import router as alerts_router  # noqa: E402
+from .api.billing import router as billing_router  # noqa: E402
+from .api import websocket as websocket_module  # noqa: E402
+from .api.websocket import router as websocket_router  # noqa: E402
 
+from slowapi import Limiter, _rate_limit_exceeded_handler  # noqa: E402
+from slowapi.util import get_remote_address  # noqa: E402
+from slowapi.errors import RateLimitExceeded  # noqa: E402
+from slowapi.middleware import SlowAPIMiddleware  # noqa: E402
 
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
 
 class KoreShieldProxy:
     """
@@ -157,7 +159,7 @@ class KoreShieldProxy:
             self.limiter = Limiter(key_func=get_remote_address, storage_uri=storage_uri)
         else:
             self.limiter = Limiter(key_func=get_remote_address)
-        
+
         self.app.state.limiter = self.limiter
         self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
         self.app.add_middleware(SlowAPIMiddleware)
@@ -222,7 +224,7 @@ class KoreShieldProxy:
             audit_integrity_service=self.audit_integrity,
         )
         self.auth = AuthService(db_session_factory=AsyncSessionLocal)
-        
+
         # Override provider enabled status from environment if ENABLED_PROVIDERS is set
         enabled_providers_env = os.getenv("ENABLED_PROVIDERS")
         if enabled_providers_env:
@@ -231,7 +233,8 @@ class KoreShieldProxy:
             for provider_name in providers_config:
                 providers_config[provider_name]["enabled"] = provider_name in enabled_list
                 # Log if we are overriding
-                self.logger.logger.info(f"Provider {provider_name} status overridden by ENABLED_PROVIDERS: {providers_config[provider_name]['enabled']}")
+                self.logger.logger.info(
+                    f"Provider {provider_name} status overridden by ENABLED_PROVIDERS: {providers_config[provider_name]['enabled']}")
 
         self.provider_service = ProviderService(config, redis_client=self.redis_client)
         self.security = SecurityService(config)
@@ -246,7 +249,7 @@ class KoreShieldProxy:
         self.app.state.audit_log_store = self.telemetry.audit_log_store
         self.app.state.audit_integrity = self.audit_integrity
         self.app.state.operational_status = self.operational_status
-        
+
         # Router-required state
         self.app.state.policy_engine = self.security.policy_engine
         self.app.state.security = self.security
@@ -292,30 +295,10 @@ class KoreShieldProxy:
 
         if self.redis_async_client:
             websocket_module.set_redis_client(self.redis_async_client)
-        
+
         self._setup_routes()
 
-        # Emit system status updates on lifecycle events
-        @self.app.on_event("startup")
-        async def _startup_event():
-            # Start background health monitoring
-            await self.start_monitoring()
-            asyncio.create_task(self._background_heartbeat())
-            await self._handle_event_broadcast("system_status", {"status": "online", "version": self.app.version})
-
-            # Load persisted custom rules into the in-memory detection engine
-            if AsyncSessionLocal:
-                try:
-                    from .api.rules import startup_load_rules
-                    async with AsyncSessionLocal() as db:
-                        await startup_load_rules(db)
-                except Exception as exc:
-                    logger.warning("Could not load custom rules from DB on startup", error=str(exc))
-
-        @self.app.on_event("shutdown")
-        async def _shutdown_event():
-            await self._handle_event_broadcast("system_status", {"status": "shutdown"})
-            await self.stop_monitoring()
+        # Lifecycle events are handled in _lifespan (see below)
 
     async def _handle_event_broadcast(self, event_type: str, data: dict) -> None:
         """Centralized and throttled event broadcast over WebSockets."""
@@ -331,20 +314,20 @@ class KoreShieldProxy:
             try:
                 # Refresh health snapshot
                 snapshot = await self.provider_service.get_health_snapshot()
-                
+
                 # Persist in Redis for reactive status page
                 if self.redis_client:
                     self.redis_client.set("koreshield:status:snapshot", json.dumps(snapshot))
-                
+
                 # Broadcast changes if health state transitions
                 if snapshot != last_snapshot:
                     await self._handle_event_broadcast("system_health_update", snapshot)
                     last_snapshot = snapshot
-                
+
             except Exception as e:
                 logger.error("Heartbeat monitoring error", error=str(e))
-                
-            await asyncio.sleep(60) # Refresh every minute
+
+            await asyncio.sleep(60)  # Refresh every minute
 
     async def _publish_event(self, event_type: str, data: dict) -> None:
         """Publish an event over the WebSocket pub/sub channel."""
@@ -362,7 +345,7 @@ class KoreShieldProxy:
         snapshot = await self.provider_service.get_health_snapshot()
         healthy_count = len([p for p in snapshot.values() if p.get("status") == "healthy"])
         enabled_count = len([p for p in snapshot.values() if p.get("enabled")])
-        
+
         return {
             "providers": snapshot,
             "total_providers": len(self.provider_service.providers),
@@ -375,7 +358,7 @@ class KoreShieldProxy:
         """Dashboard status endpoint."""
         stats = self.telemetry.get_stats()
         providers = await self.provider_service.get_health_snapshot()
-        
+
         # Only enabled providers should affect runtime routing health.
         # Disabled providers can legitimately report a non-healthy status
         # (for example "disabled") without meaning the live routing plane
@@ -386,7 +369,7 @@ class KoreShieldProxy:
             for p in providers.values()
         ):
             routing_status = "degraded"
-            
+
         snapshot = {
             "status": "healthy",
             "version": "0.1.0",
@@ -422,10 +405,28 @@ class KoreShieldProxy:
 
     @asynccontextmanager
     async def _lifespan(self, app: FastAPI):
+        # ── startup ────────────────────────────────────────────────────────────
+        # Start both monitoring subsystems
+        await self.start_monitoring()
         monitor_task = asyncio.create_task(self.provider_service.health_monitor.start_monitoring())
+        asyncio.create_task(self._background_heartbeat())
+        await self._handle_event_broadcast("system_status", {"status": "online", "version": app.version})
+
+        # Load persisted custom rules into the in-memory detection engine
+        if AsyncSessionLocal:
+            try:
+                from .api.rules import startup_load_rules
+                async with AsyncSessionLocal() as db:
+                    await startup_load_rules(db)
+            except Exception as exc:
+                logger.warning("Could not load custom rules from DB on startup", error=str(exc))
+
         try:
             yield
         finally:
+            # ── shutdown ───────────────────────────────────────────────────────
+            await self._handle_event_broadcast("system_status", {"status": "shutdown"})
+            await self.stop_monitoring()
             monitor_task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await monitor_task
@@ -485,12 +486,14 @@ class KoreShieldProxy:
             return await self._handle_chat_completion(request)
 
         # RAG context scanning endpoint
-        @self.app.post("/v1/rag/scan", tags=["Chat"], summary="Scan RAG Context", description="Scan retrieved documents for indirect prompt injection threats before passing to the LLM.")
+        @self.app.post("/v1/rag/scan", tags=["Chat"], summary="Scan RAG Context",
+                       description="Scan retrieved documents for indirect prompt injection threats before passing to the LLM.")
         @self.limiter.limit(rate_limit)
         async def rag_scan(request: Request):
             return await self._handle_rag_scan(request)
 
-        @self.app.get("/v1/rag/scans", tags=["Chat"], summary="List RAG Scans", description="Retrieve the history of RAG security scans with pagination.")
+        @self.app.get("/v1/rag/scans", tags=["Chat"], summary="List RAG Scans",
+                      description="Retrieve the history of RAG security scans with pagination.")
         @self.limiter.limit(rate_limit)
         async def list_rag_scans(request: Request, limit: int = 50, offset: int = 0):
             principal = await self._authenticate_request(request)
@@ -529,7 +532,8 @@ class KoreShieldProxy:
                 "offset": offset,
             }
 
-        @self.app.get("/v1/rag/scans/{scan_id}", tags=["Chat"], summary="Get RAG Scan", description="Get the full details of a specific RAG security scan by ID.")
+        @self.app.get("/v1/rag/scans/{scan_id}", tags=["Chat"], summary="Get RAG Scan",
+                      description="Get the full details of a specific RAG security scan by ID.")
         @self.limiter.limit(rate_limit)
         async def get_rag_scan(scan_id: str, request: Request):
             principal = await self._authenticate_request(request)
@@ -552,7 +556,8 @@ class KoreShieldProxy:
                 raise HTTPException(status_code=404, detail="RAG scan not found")
             return scan
 
-        @self.app.delete("/v1/rag/scans/{scan_id}", tags=["Chat"], summary="Delete RAG Scan", description="Delete a specific RAG security scan record by ID.")
+        @self.app.delete("/v1/rag/scans/{scan_id}", tags=["Chat"], summary="Delete RAG Scan",
+                         description="Delete a specific RAG security scan record by ID.")
         @self.limiter.limit(rate_limit)
         async def delete_rag_scan(scan_id: str, request: Request):
             principal = await self._authenticate_request(request)
@@ -577,7 +582,8 @@ class KoreShieldProxy:
                     raise HTTPException(status_code=404, detail="RAG scan not found")
                 return {"deleted": True}
 
-        @self.app.delete("/v1/rag/scans", tags=["Chat"], summary="Clear All RAG Scans", description="Delete all RAG scan records for the authenticated principal.")
+        @self.app.delete("/v1/rag/scans", tags=["Chat"], summary="Clear All RAG Scans",
+                         description="Delete all RAG scan records for the authenticated principal.")
         @self.limiter.limit(rate_limit)
         async def clear_rag_scans(request: Request):
             principal = await self._authenticate_request(request)
@@ -597,7 +603,8 @@ class KoreShieldProxy:
                 await session.commit()
                 return {"deleted": True}
 
-        @self.app.get("/v1/rag/scans/{scan_id}/pack", tags=["Chat"], summary="Download RAG Scan Pack", description="Download the full request, response, and document payloads for a RAG scan as a ZIP archive.")
+        @self.app.get("/v1/rag/scans/{scan_id}/pack", tags=["Chat"], summary="Download RAG Scan Pack",
+                      description="Download the full request, response, and document payloads for a RAG scan as a ZIP archive.")
         @self.limiter.limit(rate_limit)
         async def download_rag_scan_pack(scan_id: str, request: Request):
             principal = await self._authenticate_request(request)
@@ -664,52 +671,62 @@ class KoreShieldProxy:
         async def scan_prompt(request: Request):
             return await self._handle_scan(request)
 
-        @self.app.post("/v1/scan/batch", tags=["Scan"], summary="Batch Scan Prompts", description="Scan multiple prompts in a single request. Each item is evaluated independently and results are returned in the same order.")
+        @self.app.post("/v1/scan/batch", tags=["Scan"], summary="Batch Scan Prompts",
+                       description="Scan multiple prompts in a single request. Each item is evaluated independently and results are returned in the same order.")
         @self.limiter.limit(rate_limit)
         async def scan_prompt_batch(request: Request):
             return await self._handle_scan_batch(request)
 
-        @self.app.post("/v1/tools/scan", tags=["Scan"], summary="Scan Tool Call", description="Evaluate a tool call for security risks including confused-deputy attacks, excessive permissions, and unsafe argument patterns.")
+        @self.app.post("/v1/tools/scan", tags=["Scan"], summary="Scan Tool Call",
+                       description="Evaluate a tool call for security risks including confused-deputy attacks, excessive permissions, and unsafe argument patterns.")
         @self.limiter.limit(rate_limit)
         async def scan_tool_call(request: Request):
             return await self._handle_tool_scan(request)
 
-        @self.app.post("/v1/tools/sessions", tags=["Scan"], summary="Create Runtime Session", description="Start a governed runtime session to track a sequence of tool calls with policy-backed allow, warn, and block decisions.")
+        @self.app.post("/v1/tools/sessions", tags=["Scan"], summary="Create Runtime Session",
+                       description="Start a governed runtime session to track a sequence of tool calls with policy-backed allow, warn, and block decisions.")
         @self.limiter.limit(rate_limit)
         async def create_tool_runtime_session(request: Request):
             return await self._handle_create_tool_session(request)
 
-        @self.app.get("/v1/tools/sessions", tags=["Scan"], summary="List Runtime Sessions", description="List active and recent governed runtime sessions. Filter by status (active, completed, blocked).")
+        @self.app.get("/v1/tools/sessions", tags=["Scan"], summary="List Runtime Sessions",
+                      description="List active and recent governed runtime sessions. Filter by status (active, completed, blocked).")
         @self.limiter.limit(rate_limit)
         async def list_tool_runtime_sessions(request: Request, limit: int = 50, status: str | None = None):
             return await self._handle_list_tool_sessions(request, limit=limit, status=status)
 
-        @self.app.get("/v1/tools/sessions/{session_id}", tags=["Scan"], summary="Get Runtime Session", description="Get the full state and event history of a specific governed runtime session.")
+        @self.app.get("/v1/tools/sessions/{session_id}", tags=["Scan"], summary="Get Runtime Session",
+                      description="Get the full state and event history of a specific governed runtime session.")
         @self.limiter.limit(rate_limit)
         async def get_tool_runtime_session(session_id: str, request: Request):
             return await self._handle_get_tool_session(request, session_id)
 
-        @self.app.post("/v1/tools/sessions/{session_id}/state", tags=["Scan"], summary="Update Session State", description="Update the state of a governed runtime session, e.g. marking it completed or attaching additional context.")
+        @self.app.post("/v1/tools/sessions/{session_id}/state", tags=["Scan"], summary="Update Session State",
+                       description="Update the state of a governed runtime session, e.g. marking it completed or attaching additional context.")
         @self.limiter.limit(rate_limit)
         async def update_tool_runtime_session(session_id: str, request: Request):
             return await self._handle_update_tool_session_state(request, session_id)
 
-        @self.app.get("/v1/tools/reviews", tags=["Scan"], summary="List Tool Reviews", description="List pending and resolved human-review tickets raised by the runtime tool governance engine.")
+        @self.app.get("/v1/tools/reviews", tags=["Scan"], summary="List Tool Reviews",
+                      description="List pending and resolved human-review tickets raised by the runtime tool governance engine.")
         @self.limiter.limit(rate_limit)
         async def list_tool_runtime_reviews(request: Request, limit: int = 50, status: str | None = None):
             return await self._handle_list_tool_reviews(request, limit=limit, status=status)
 
-        @self.app.get("/v1/tools/reviews/{ticket_id}", tags=["Scan"], summary="Get Tool Review", description="Get the full details of a specific tool review ticket including the flagged tool call and its risk assessment.")
+        @self.app.get("/v1/tools/reviews/{ticket_id}", tags=["Scan"], summary="Get Tool Review",
+                      description="Get the full details of a specific tool review ticket including the flagged tool call and its risk assessment.")
         @self.limiter.limit(rate_limit)
         async def get_tool_runtime_review(ticket_id: str, request: Request):
             return await self._handle_get_tool_review(request, ticket_id)
 
-        @self.app.post("/v1/tools/reviews/{ticket_id}/decision", tags=["Scan"], summary="Submit Review Decision", description="Approve or reject a pending tool review ticket. Approvals allow the tool call to proceed; rejections block it and log the decision.")
+        @self.app.post("/v1/tools/reviews/{ticket_id}/decision", tags=["Scan"], summary="Submit Review Decision",
+                       description="Approve or reject a pending tool review ticket. Approvals allow the tool call to proceed; rejections block it and log the decision.")
         @self.limiter.limit(rate_limit)
         async def decide_tool_runtime_review(ticket_id: str, request: Request):
             return await self._handle_review_decision(request, ticket_id)
 
-        @self.app.get("/v1/scans", tags=["Scan"], summary="List Scans", description="List recent prompt scan results with pagination.")
+        @self.app.get("/v1/scans", tags=["Scan"], summary="List Scans",
+                      description="List recent prompt scan results with pagination.")
         @self.limiter.limit(rate_limit)
         async def list_scans(request: Request, limit: int = 100, offset: int = 0):
             await self._authenticate_request(request)
@@ -722,7 +739,8 @@ class KoreShieldProxy:
                 "offset": offset,
             }
 
-        @self.app.get("/v1/scans/{scan_id}", tags=["Scan"], summary="Get Scan", description="Get the full details of a prompt scan result.")
+        @self.app.get("/v1/scans/{scan_id}", tags=["Scan"], summary="Get Scan",
+                      description="Get the full details of a prompt scan result.")
         @self.limiter.limit(rate_limit)
         async def get_scan(scan_id: str, request: Request):
             await self._authenticate_request(request)
@@ -733,7 +751,6 @@ class KoreShieldProxy:
 
         # Note: Removed catch-all route to prevent interference with specific routes
         # If needed, implement specific proxy endpoints instead
-
 
     # ── Audit helpers (thin wrappers — implementation lives in services/audit.py) ──
 
@@ -1139,22 +1156,21 @@ class KoreShieldProxy:
             raise HTTPException(status_code=404, detail="Runtime review not found")
         return JSONResponse(status_code=200, content=review)
 
-
     async def _handle_rag_scan(self, request: Request) -> Response:
         """Forward to SecurityService."""
         request_id = str(uuid.uuid4())
         principal = await self._authenticate_request(request)
-        
+
         # Parse and validate JSON body
         try:
             body = await request.json()
         except Exception as e:
             logger.error("Failed to parse JSON", request_id=request_id, error=str(e))
             raise HTTPException(status_code=400, detail="Invalid JSON in request body")
-            
+
         user_query = body.get("user_query", "")
         documents_data = body.get("documents", [])
-        
+
         # Convert documents with validation
         try:
             documents = []
@@ -1175,7 +1191,7 @@ class KoreShieldProxy:
 
         import time
         start_scan_time = time.time()
-        
+
         rag_scan_result = self.security.scan_rag(
             user_query=user_query,
             documents=documents,
@@ -1195,7 +1211,7 @@ class KoreShieldProxy:
         response_data = {
             "scan_id": rag_scan_result.scan_id or request_id,
             "is_safe": is_safe,
-            "blocked": not is_safe, # Restore explicitly for tests
+            "blocked": not is_safe,  # Restore explicitly for tests
             "overall_severity": rag_scan_result.overall_severity.value,
             "overall_confidence": rag_scan_result.overall_confidence,
             "context_analysis": rag_scan_result.to_dict(),
@@ -1366,10 +1382,10 @@ class KoreShieldProxy:
         principal = await self._authenticate_request(request)
         start_time = time.time()
         body = await request.json()
-        
+
         requests_payload = body.get("requests", [])
         results = []
-        
+
         for item in requests_payload:
             scan = self.security.scan_prompt(
                 item.get("prompt"),
@@ -1380,7 +1396,7 @@ class KoreShieldProxy:
                 "request_id": str(uuid.uuid4()),
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             })
-            
+
             self.telemetry.increment_stat("requests_total")
             if scan["blocked"]:
                 self.telemetry.increment_stat("requests_blocked")
