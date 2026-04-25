@@ -2,9 +2,6 @@
 OpenAI API provider integration.
 """
 
-import json
-import time
-import uuid
 from typing import Any, AsyncIterator, Dict
 
 import httpx

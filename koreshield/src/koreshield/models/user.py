@@ -10,7 +10,7 @@ from ..utils import utcnow_naive
 
 class User(Base):
     __tablename__ = 'users'
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), nullable=False, unique=True, index=True)
     password_hash = Column(String(255), nullable=False)
@@ -26,7 +26,7 @@ class User(Base):
     created_at = Column(DateTime, nullable=False, default=utcnow_naive)
     updated_at = Column(DateTime, nullable=False, default=utcnow_naive, onupdate=utcnow_naive)
     user_metadata = Column(JSON, default={})
-    
+
     # OAuth provider fields
     github_id = Column(String(255), nullable=True, unique=True, index=True)
     google_id = Column(String(255), nullable=True, unique=True, index=True)
@@ -34,7 +34,7 @@ class User(Base):
 
     # Relationships
     # Note: `owned_teams` and `team_memberships` are defined in Team and TeamMember using backref/back_populates
-    
+
     def to_dict(self):
         """Convert user to dictionary (excluding password)."""
         metadata = self.user_metadata or {}

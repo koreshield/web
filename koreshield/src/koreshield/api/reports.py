@@ -32,6 +32,7 @@ router = APIRouter(prefix="/reports", tags=["Reports"])
 # Pydantic Models for Request/Response
 # Note: DB models have same names, so using aliases or separate classes
 
+
 class DateRange(str, Enum):
     TODAY = "today"
     LAST_7_DAYS = "7d"
@@ -39,12 +40,14 @@ class DateRange(str, Enum):
     LAST_90_DAYS = "90d"
     CUSTOM = "custom"
 
+
 class ReportCategory(str, Enum):
     SECURITY = "Security"
     FINANCIAL = "Financial"
     COMPLIANCE = "Compliance"
     OPERATIONS = "Operations"
     ANALYTICS = "Analytics"
+
 
 class ReportFilters(BaseModel):
     date_range: DateRange = DateRange.LAST_30_DAYS
@@ -54,20 +57,22 @@ class ReportFilters(BaseModel):
     tenants: List[str] = Field(default_factory=list)
     metrics: List[str] = Field(default_factory=list)
 
+
 class ReportSchema(BaseModel):
     id: str
     name: str
     description: Optional[str]
-    template: str # Name of template
+    template: str  # Name of template
     schedule: str
     format: str
     created_at: datetime
-    last_run: str = "Never" # Computed
+    last_run: str = "Never"  # Computed
     status: str
     filters: dict
     file_url: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class ReportCreate(BaseModel):
     name: str
@@ -77,12 +82,14 @@ class ReportCreate(BaseModel):
     format: str = "pdf"
     filters: ReportFilters
 
+
 class ReportUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     schedule: Optional[str] = None
     format: Optional[str] = None
     filters: Optional[ReportFilters] = None
+
 
 class ReportTemplateSchema(BaseModel):
     id: str
@@ -157,6 +164,8 @@ def _build_simple_pdf(lines: List[str]) -> bytes:
     return bytes(pdf)
 
 # Helper to seed templates
+
+
 async def _seed_templates(session: AsyncSession):
     stmt = select(ReportTemplate)
     result = await session.execute(stmt)
@@ -193,20 +202,24 @@ async def _seed_templates(session: AsyncSession):
 
     await session.commit()
 
-@router.get("/templates", response_model=List[ReportTemplateSchema], summary="List Report Templates", description="List all available report templates including security summaries, compliance audits, and threat analysis reports.")
+
+@router.get("/templates", response_model=List[ReportTemplateSchema], summary="List Report Templates",
+            description="List all available report templates including security summaries, compliance audits, and threat analysis reports.")
 async def get_templates(
     current_user: dict = Depends(get_current_admin),
     session: AsyncSession = Depends(get_db)
 ):
     """Get all report templates."""
-    await _seed_templates(session) # Ensure seeded
+    await _seed_templates(session)  # Ensure seeded
 
     stmt = select(ReportTemplate)
     result = await session.execute(stmt)
     templates = result.scalars().all()
     return templates
 
-@router.get("", response_model=List[ReportSchema], summary="List Reports", description="List all reports created by the authenticated user. Filter by status, schedule, or format.")
+
+@router.get("", response_model=List[ReportSchema], summary="List Reports",
+            description="List all reports created by the authenticated user. Filter by status, schedule, or format.")
 async def get_reports(
     status: Optional[str] = None,
     schedule: Optional[str] = None,
@@ -244,7 +257,9 @@ async def get_reports(
 
     return reports
 
-@router.post("", response_model=ReportSchema, summary="Create Report", description="Create a new report from a template. Optionally configure scheduling, output format, and filters.")
+
+@router.post("", response_model=ReportSchema, summary="Create Report",
+             description="Create a new report from a template. Optionally configure scheduling, output format, and filters.")
 async def create_report(
     report_data: ReportCreate,
     request: Request,
@@ -309,6 +324,7 @@ async def create_report(
         "filters": new_report.filters,
         "file_url": new_report.file_url
     }
+
 
 async def _generate_report_task(report_id: str, user_id: str, monitoring=None):
     """Background task to generate report."""
@@ -380,7 +396,9 @@ async def _generate_report_task(report_id: str, user_id: str, monitoring=None):
                 )
             raise
 
-@router.post("/{report_id}/generate", summary="Generate Report", description="Trigger immediate generation of a report. The report status will update to generating and then completed or failed.")
+
+@router.post("/{report_id}/generate", summary="Generate Report",
+             description="Trigger immediate generation of a report. The report status will update to generating and then completed or failed.")
 async def generate_report(
     report_id: str,
     request: Request,
@@ -426,7 +444,9 @@ async def generate_report(
 
     return {"status": "queued", "message": "Report generation started"}
 
-@router.put("/{report_id}", response_model=ReportSchema, summary="Update Report", description="Update report configuration such as name, description, schedule, or format.")
+
+@router.put("/{report_id}", response_model=ReportSchema, summary="Update Report",
+            description="Update report configuration such as name, description, schedule, or format.")
 async def update_report(
     report_id: str,
     report_update: ReportUpdate,
@@ -439,7 +459,12 @@ async def update_report(
     except ValueError:
         raise HTTPException(status_code=422, detail="Invalid report ID format")
 
-    stmt = select(Report, ReportTemplate).join(ReportTemplate, Report.template_id == ReportTemplate.id).where(Report.id == report_uuid)
+    stmt = select(
+    Report,
+    ReportTemplate).join(
+        ReportTemplate,
+        Report.template_id == ReportTemplate.id).where(
+            Report.id == report_uuid)
     result = await session.execute(stmt)
     row = result.one_or_none()
     if not row:
@@ -476,7 +501,8 @@ async def update_report(
     }
 
 
-@router.delete("/{report_id}", status_code=204, summary="Delete Report", description="Permanently delete a report and all its data.")
+@router.delete("/{report_id}", status_code=204, summary="Delete Report",
+               description="Permanently delete a report and all its data.")
 async def delete_report(
     report_id: str,
     current_user: dict = Depends(get_current_admin),
@@ -499,7 +525,8 @@ async def delete_report(
     await session.commit()
 
 
-@router.get("/{report_id}/download", summary="Download Report", description="Download the generated output of a completed report. Returns CSV or JSON data based on the report format.")
+@router.get("/{report_id}/download", summary="Download Report",
+            description="Download the generated output of a completed report. Returns CSV or JSON data based on the report format.")
 async def download_report(
     report_id: str,
     current_user: dict = Depends(get_current_admin),
@@ -512,7 +539,12 @@ async def download_report(
     except ValueError:
         raise HTTPException(status_code=422, detail="Invalid report ID format")
 
-    stmt = select(Report, ReportTemplate).join(ReportTemplate, Report.template_id == ReportTemplate.id).where(Report.id == report_uuid)
+    stmt = select(
+    Report,
+    ReportTemplate).join(
+        ReportTemplate,
+        Report.template_id == ReportTemplate.id).where(
+            Report.id == report_uuid)
     result = await session.execute(stmt)
     row = result.one_or_none()
 
@@ -566,7 +598,9 @@ async def download_report(
             headers={"Content-Disposition": f'attachment; filename="{report.name.replace(" ", "_")}.csv"'},
         )
 
-@router.get("/logs", response_model=List[dict], summary="Report Logs", description="Get a log of all report generation events including timestamps, statuses, and error messages.")
+
+@router.get("/logs", response_model=List[dict], summary="Report Logs",
+            description="Get a log of all report generation events including timestamps, statuses, and error messages.")
 async def get_logs(
     limit: int = 50,
     offset: int = 0,

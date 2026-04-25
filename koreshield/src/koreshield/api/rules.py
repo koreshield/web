@@ -16,7 +16,6 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import structlog
-from datetime import datetime
 import uuid
 
 from sqlalchemy import select
