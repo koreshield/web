@@ -149,7 +149,19 @@ export function AnalyticsPage() {
                     </div>
                 )}
 
-                {!accessDenied && !analyticsError && (
+                {!accessDenied && !analyticsError && !isLoading && analytics.length === 0 && (
+                    <div className="bg-card border border-border rounded-lg p-8 text-center mb-8">
+                        <BarChart3 className="w-10 h-10 mx-auto mb-4 text-muted-foreground" />
+                        <h2 className="text-xl font-semibold mb-2">No analytics data yet</h2>
+                        <p className="text-muted-foreground max-w-lg mx-auto text-sm">
+                            Usage analytics appear here once requests are flowing through the KoreShield proxy.
+                            Send your first request via <code className="bg-muted px-1 rounded text-xs">POST /v1/scan</code> or{' '}
+                            <code className="bg-muted px-1 rounded text-xs">POST /v1/chat/completions</code> using your API key to get started.
+                        </p>
+                    </div>
+                )}
+
+                {!accessDenied && !analyticsError && (analytics.length > 0 || isLoading) && (
                 <>
                 {/* Global Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
