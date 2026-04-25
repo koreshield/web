@@ -1,8 +1,0 @@
----
-const { type = "note", title } = Astro.props;
----
-
-<blockquote class={`admonition bdm-${type}`}>
-    <span class="bdm-title">{title || type.toUpperCase()}</span>
-    <slot />
-</blockquote>
