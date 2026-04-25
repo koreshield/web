@@ -1,3 +1,0 @@
-api.koreshield.com {
-    reverse_proxy api:8000
-}

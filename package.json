@@ -1,0 +1,21 @@
+{
+  "name": "koreshield-web",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Unified web properties: marketing site, blog, docs, and dashboard",
+  "scripts": {
+    "dev:web": "cd koreshield-web && pnpm dev",
+    "dev:blog": "cd koreshield-blog && pnpm dev",
+    "dev:docs": "cd koreshield-docs && pnpm start",
+    "build": "pnpm run build:clean && pnpm run build:web && pnpm run build:blog && pnpm run build:docs && pnpm run build:merge",
+    "build:clean": "rm -rf dist && mkdir -p dist/blog dist/docs",
+    "build:web": "cd koreshield-web && pnpm build && cp -r dist/* ../dist/",
+    "build:blog": "cd koreshield-blog && pnpm build && cp -r dist/* ../dist/blog/",
+    "build:docs": "cd koreshield-docs && pnpm build && cp -r build/* ../dist/docs/",
+    "build:merge": "node scripts/post-build.mjs",
+    "preview": "pnpm run build && npx http-server dist -p 3000"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

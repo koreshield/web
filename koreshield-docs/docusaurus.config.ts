@@ -13,8 +13,8 @@ const config: Config = {
 	},
 
 	// === DEPLOYMENT ===
-	url: 'https://docs.koreshield.com',
-	baseUrl: '/',
+	url: 'https://koreshield.ai',
+	baseUrl: '/docs',
 	organizationName: 'Koreshield',
 	projectName: 'Koreshield',
 
