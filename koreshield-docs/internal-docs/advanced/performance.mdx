@@ -1,0 +1,56 @@
+---
+title: Performance Tuning
+description: Practical performance guidance for self-hosted KoreShield.
+published: true
+---
+
+# Performance Tuning
+
+This guide is scoped to the current self-hosted server in this repository.
+
+## Hot Paths
+
+Primary request paths to monitor:
+
+- `POST /v1/chat/completions`
+- `POST /v1/rag/scan`
+
+Related health/ops paths:
+
+- `GET /health`
+- `GET /status`
+- `GET /metrics`
+
+## Deployment Baseline
+
+Use Docker Compose baseline from `koreshield/docker-compose.yml` with:
+
+- Redis enabled
+- Postgres enabled
+- App health checks configured
+
+## Practical Tuning Checklist
+
+1. Set Redis to a low-latency instance near app nodes.
+2. Keep Postgres connection capacity sized for peak write volume.
+3. Use provider timeouts and retries conservatively to avoid queue buildup.
+4. Keep `security.sensitivity` aligned with your threat model and latency target.
+5. Track p95/p99 latency from `/metrics` and tune before scaling out.
+
+## Rate Limiting
+
+Rate limiting is configured from server security settings (`rate_limit`), applied on chat and rag routes.
+
+Use stricter limits for untrusted/high-volume clients.
+
+## Observability
+
+- Scrape Prometheus metrics at `/metrics`.
+- Alert on latency spikes, error rate growth, and provider health deterioration.
+- Use `/health/providers` to detect provider-side instability quickly.
+
+## Scale Strategy
+
+1. Vertical: increase CPU/memory for detector/policy workloads.
+2. Horizontal: multiple app replicas behind a load balancer.
+3. Shared state: keep Redis/Postgres externalized for multi-replica deployments.

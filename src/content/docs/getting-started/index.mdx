@@ -1,0 +1,35 @@
+---
+title: Getting Started
+description: Get up and running with KoreShield in minutes.
+sidebar_position: 1
+last_update:
+  date: 2026-04-26
+---
+
+Welcome to KoreShield. This section walks you through everything you need to go from zero to a running, protected LLM gateway.
+
+## In This Section
+
+- **[Quick Start](/docs/getting-started/quick-start)** — Start the server and send your first protected request in under 5 minutes.
+- **[Installation](/docs/getting-started/installation)** — Detailed install options including Docker, Railway, and bare-metal.
+
+## Prerequisites
+
+- Docker (recommended) or Python 3.11+
+- An API key for at least one supported provider (OpenAI, Anthropic, Gemini, Azure OpenAI, or DeepSeek)
+- A KoreShield API key (generated after signup)
+
+## How It Works
+
+KoreShield is a transparent proxy. Your app sends requests to KoreShield instead of directly to the LLM provider. KoreShield:
+
+1. Scans the prompt (and RAG context if present) for injection attempts and policy violations
+2. Applies your configured rules and thresholds
+3. Forwards clean requests to the provider
+4. Returns the provider response — or a blocked response if the request violated policy
+
+The proxy is fully stateless per request. No prompt data is stored unless you explicitly enable audit logging.
+
+## Next Steps
+
+Start with the [Quick Start guide](/docs/getting-started/quick-start) to get a working instance running locally, then move to [Installation](/docs/getting-started/installation) for production deployment options.

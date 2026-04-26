@@ -1,0 +1,59 @@
+.toc-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  padding: 0;
+  margin: 2rem 0;
+}
+
+.toc-list-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.toc-list-head {
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  padding: 0 0 1rem 0;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--ifm-color-primary);
+  margin-bottom: 1rem;
+}
+
+.toc-list-content {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  
+  li {
+    margin-bottom: 0.5rem;
+    
+    a {
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      font-size: 0.9rem;
+      
+      &:hover {
+        color: var(--ifm-color-primary);
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+@media (max-width: 1300px) {
+  .toc-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .toc-list {
+    grid-template-columns: 1fr;
+  }
+}
