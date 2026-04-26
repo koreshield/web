@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MarkdownRenderer } from './MarkdownRenderer';
-import { parseFrontMatter } from '../lib/documentationLoader';
+import { parseFrontMatter, getDocContent, docExists } from '../lib/documentationLoader';
 import type { DocFrontMatter } from '../lib/documentationLoader';
 import { ArrowLeft, Calendar } from 'lucide-react';
 
@@ -17,14 +17,19 @@ export function DocPage({ docPath }: DocPageProps) {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		const loadDoc = async () => {
+		const loadDoc = () => {
 			try {
 				setLoading(true);
 				setError(null);
 
-				// Dynamically import the markdown file
-				const module = await import(`../content/docs/${docPath}.mdx?raw`);
-				const rawContent = module.default;
+				if (!docExists(docPath)) {
+					throw new Error(`Doc not found: ${docPath}`);
+				}
+
+				const rawContent = getDocContent(docPath);
+				if (!rawContent) {
+					throw new Error(`Could not load content for: ${docPath}`);
+				}
 
 				const { frontMatter: fm, body } = parseFrontMatter(rawContent);
 				setFrontMatter(fm);

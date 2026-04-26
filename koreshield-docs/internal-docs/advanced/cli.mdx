@@ -1,0 +1,50 @@
+---
+title: CLI Reference
+description: Command-line interface for KoreShield server.
+slug: /api/cli
+last_update:
+  date: 2026-03-10
+---
+
+# CLI Reference
+
+The `koreshield` CLI is provided by the Python server package (`koreshield-server`).
+
+:::note
+This CLI is intended for **self-hosted** deployments. Hosted customers do not need to run the server CLI.
+:::
+
+## Commands
+
+### `koreshield start`
+
+Starts the API server.
+
+```bash
+koreshield start --config config/config.yaml
+```
+
+Options:
+
+- `--host`: bind host (default from config)
+- `--port`: bind port (default from config)
+- `--config`: config file path (default `config/config.yaml`)
+- `--log-level`: `DEBUG|INFO|WARNING|ERROR|CRITICAL`
+- `--json-logs`: force JSON log output
+- `--container-mode`: stdout/container logging mode
+
+### `koreshield check-config`
+
+Validates configuration and reports issues.
+
+```bash
+koreshield check-config --config config/config.yaml
+```
+
+### `koreshield version`
+
+Prints CLI/server version.
+
+```bash
+koreshield version
+```

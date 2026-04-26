@@ -115,14 +115,9 @@ export function buildDocsNavigation(): DocsNavItem[] {
 			description: 'How to integrate KoreShield into your application',
 			children: [
 				{
-					title: 'Quick Start',
-					path: '/docs/client-integration/quick-start',
-					slug: 'client-integration-quick-start',
-				},
-				{
-					title: 'Installation',
-					path: '/docs/client-integration/installation',
-					slug: 'client-integration-installation',
+					title: 'Integration Guide',
+					path: '/docs/client-integration/guide',
+					slug: 'client-integration-guide',
 				},
 			],
 		},
@@ -240,6 +235,18 @@ export function buildDocsNavigation(): DocsNavItem[] {
 			path: '/docs/best-practices',
 			slug: 'best-practices',
 			description: 'Tips and best practices',
+			children: [
+				{
+					title: 'Caching',
+					path: '/docs/best-practices/caching',
+					slug: 'best-practices-caching',
+				},
+				{
+					title: 'Error Handling',
+					path: '/docs/best-practices/error-handling',
+					slug: 'best-practices-error-handling',
+				},
+			],
 		},
 		{
 			title: 'Compliance',
@@ -269,6 +276,167 @@ export function buildDocsNavigation(): DocsNavItem[] {
 			path: '/docs/case-studies',
 			slug: 'case-studies',
 			description: 'Real-world implementations',
+			children: [
+				{
+					title: 'AI Agents',
+					path: '/docs/case-studies/ai-agents',
+					slug: 'case-studies-ai-agents',
+				},
+				{
+					title: 'Customer Service',
+					path: '/docs/case-studies/customer-service',
+					slug: 'case-studies-customer-service',
+				},
+				{
+					title: 'Financial Services',
+					path: '/docs/case-studies/financial-services',
+					slug: 'case-studies-financial-services',
+				},
+				{
+					title: 'Healthcare',
+					path: '/docs/case-studies/healthcare',
+					slug: 'case-studies-healthcare',
+				},
+			],
 		},
 	];
+}
+
+/**
+ * Re-export content loader functions
+ * Direct imports for better performance and reliability
+ */
+
+import overviewContent from 'virtual:doc:overview';
+import apiReferenceContent from 'virtual:doc:api-reference';
+
+// Client Integration
+import clientIntegrationContent from 'virtual:doc:client-integration/index';
+import clientIntegrationGuideContent from 'virtual:doc:client-integration/guide';
+
+// Getting Started
+import gettingStartedQuickStartContent from 'virtual:doc:getting-started/quick-start';
+import gettingStartedInstallationContent from 'virtual:doc:getting-started/installation';
+
+// Configuration
+import configurationIndexContent from 'virtual:doc:configuration/index';
+import configurationSettingsContent from 'virtual:doc:configuration/settings';
+import configurationPoliciesContent from 'virtual:doc:configuration/policies';
+import configurationRateLimitingContent from 'virtual:doc:configuration/rate-limiting';
+import configurationProductionChecklistContent from 'virtual:doc:configuration/production-checklist';
+
+// API
+import apiIndexContent from 'virtual:doc:api/index';
+import apiRestContent from 'virtual:doc:api/rest-api';
+import apiWebsocketContent from 'virtual:doc:api/websocket';
+
+// Features
+import featuresIndexContent from 'virtual:doc:features/index';
+import featuresAttackDetectionContent from 'virtual:doc:features/attack-detection';
+import featuresMonitoringContent from 'virtual:doc:features/monitoring';
+import featuresRagDefenseContent from 'virtual:doc:features/rag-defense';
+import featuresSecurityContent from 'virtual:doc:features/security';
+import featuresRbacContent from 'virtual:doc:features/rbac';
+
+// Integrations
+import integrationsIndexContent from 'virtual:doc:integrations/index';
+
+// Best Practices
+import bestPracticesIndexContent from 'virtual:doc:best-practices/index';
+import bestPracticesCachingContent from 'virtual:doc:best-practices/caching';
+import bestPracticesErrorHandlingContent from 'virtual:doc:best-practices/error-handling';
+
+// Compliance
+import complianceIndexContent from 'virtual:doc:compliance/index';
+import complianceGdprContent from 'virtual:doc:compliance/gdpr';
+import complianceHipaaContent from 'virtual:doc:compliance/hipaa';
+import complianceDpaContent from 'virtual:doc:compliance/dpa';
+
+// Case Studies
+import caseStudiesIndexContent from 'virtual:doc:case-studies/index';
+import caseStudiesAiAgentsContent from 'virtual:doc:case-studies/ai-agents';
+import caseStudiesCodeGenerationContent from 'virtual:doc:case-studies/code-generation';
+import caseStudiesCustomerServiceContent from 'virtual:doc:case-studies/customer-service';
+import caseStudiesEcommerceContent from 'virtual:doc:case-studies/ecommerce';
+import caseStudiesFinancialServicesContent from 'virtual:doc:case-studies/financial-services';
+import caseStudiesHealthcareContent from 'virtual:doc:case-studies/healthcare';
+import caseStudiesLegalTechContent from 'virtual:doc:case-studies/legal-tech';
+
+// Create a map of all documentation content
+const docContentMap: Record<string, string> = {
+  // Top-level
+  'overview': overviewContent,
+  'api-reference': apiReferenceContent,
+
+  // Client Integration
+  'client-integration': clientIntegrationContent,
+  'client-integration/guide': clientIntegrationGuideContent,
+
+  // Getting Started
+  'getting-started/quick-start': gettingStartedQuickStartContent,
+  'getting-started/installation': gettingStartedInstallationContent,
+
+  // Configuration
+  'configuration': configurationIndexContent,
+  'configuration/index': configurationIndexContent,
+  'configuration/settings': configurationSettingsContent,
+  'configuration/policies': configurationPoliciesContent,
+  'configuration/rate-limiting': configurationRateLimitingContent,
+  'configuration/production-checklist': configurationProductionChecklistContent,
+
+  // API
+  'api': apiIndexContent,
+  'api/index': apiIndexContent,
+  'api/rest-api': apiRestContent,
+  'api/websocket': apiWebsocketContent,
+
+  // Features
+  'features': featuresIndexContent,
+  'features/index': featuresIndexContent,
+  'features/attack-detection': featuresAttackDetectionContent,
+  'features/monitoring': featuresMonitoringContent,
+  'features/rag-defense': featuresRagDefenseContent,
+  'features/security': featuresSecurityContent,
+  'features/rbac': featuresRbacContent,
+
+  // Integrations
+  'integrations': integrationsIndexContent,
+
+  // Best Practices
+  'best-practices': bestPracticesIndexContent,
+  'best-practices/index': bestPracticesIndexContent,
+  'best-practices/caching': bestPracticesCachingContent,
+  'best-practices/error-handling': bestPracticesErrorHandlingContent,
+
+  // Compliance
+  'compliance': complianceIndexContent,
+  'compliance/index': complianceIndexContent,
+  'compliance/gdpr': complianceGdprContent,
+  'compliance/hipaa': complianceHipaaContent,
+  'compliance/dpa': complianceDpaContent,
+
+  // Case Studies
+  'case-studies': caseStudiesIndexContent,
+  'case-studies/index': caseStudiesIndexContent,
+  'case-studies/ai-agents': caseStudiesAiAgentsContent,
+  'case-studies/code-generation': caseStudiesCodeGenerationContent,
+  'case-studies/customer-service': caseStudiesCustomerServiceContent,
+  'case-studies/ecommerce': caseStudiesEcommerceContent,
+  'case-studies/financial-services': caseStudiesFinancialServicesContent,
+  'case-studies/healthcare': caseStudiesHealthcareContent,
+  'case-studies/legal-tech': caseStudiesLegalTechContent,
+};
+
+/**
+ * Get documentation content by path
+ */
+export function getDocContent(docPath: string): string | undefined {
+  return docContentMap[docPath];
+}
+
+/**
+ * Check if a documentation path exists
+ */
+export function docExists(docPath: string): boolean {
+  return docPath in docContentMap;
 }

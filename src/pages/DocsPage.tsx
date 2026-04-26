@@ -19,50 +19,43 @@ export default function DocsPage() {
 	// Normalize path for doc loading
 	const docPath = pathParts.length > 0 ? pathParts.join('/') : null;
 
-	// Map documentation paths to actual file paths
+	// Categories that have an index.mdx inside them
+	const CATEGORIES_WITH_INDEX = new Set([
+		'getting-started',
+		'client-integration',
+		'configuration',
+		'api',
+		'features',
+		'integrations',
+		'compliance',
+		'case-studies',
+		'best-practices',
+	]);
+
+	// Top-level standalone files (no subdirectory)
+	const STANDALONE_DOCS = new Set(['overview', 'api-reference']);
+
+	// Map documentation URL paths to content file paths
 	const getDocFilePath = (path: string | null): string | null => {
 		if (!path) return null;
 
-		// Handle overview path
-		if (path === 'overview') return 'overview';
+		// Standalone top-level files
+		if (STANDALONE_DOCS.has(path)) return path;
 
-		// Handle nested paths like "getting-started/quick-start"
 		const parts = path.split('/');
 
-		// Map category shortcuts to actual paths
-		const categoryMap: Record<string, string> = {
-			'getting-started': 'getting-started',
-			'client-integration': 'client-integration',
-			'quick-start': 'getting-started/quick-start',
-			'installation': 'getting-started/installation',
-			'configuration': 'configuration',
-			'api': 'api',
-			'features': 'features',
-			'integrations': 'integrations',
-			'compliance': 'compliance',
-			'case-studies': 'case-studies',
-			'best-practices': 'best-practices',
-		};
-
-		// Check if it's a direct category with a sub-page
-		if (parts.length === 2) {
-			const category = parts[0];
-			const page = parts[1];
-			const categoryPath = categoryMap[category] || category;
-			return `${categoryPath}/${page}`;
+		// Multi-segment path: category/page (e.g. "getting-started/quick-start")
+		if (parts.length >= 2) {
+			// Pass through as-is — the file must exist at this exact path
+			return path;
 		}
 
-		// Check direct mapping
-		if (categoryMap[path]) {
-			return categoryMap[path];
+		// Single segment — it's a category root; resolve to its index file
+		if (CATEGORIES_WITH_INDEX.has(path)) {
+			return `${path}/index`;
 		}
 
-		// Return as-is (might be an index file for a category)
-		if (categoryMap[parts[0]]) {
-			return `${categoryMap[parts[0]]}/index`;
-		}
-
-		// Last resort - treat the path as a file path within docs
+		// Fallback: try as-is
 		return path;
 	};
 

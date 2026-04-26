@@ -1,0 +1,53 @@
+---
+title: Resources
+description: Canonical project resources and repository map.
+icon: BookOpen
+---
+
+# Resources
+
+This page lists the canonical KoreShield project artifacts in this monorepo.
+
+## Core Repositories (In This Workspace)
+
+- Server/API: `koreshield/`
+- Documentation site: `koreshield-docs/`
+- JavaScript SDK: `koreshield-js-sdk/`
+- Python SDK: `koreshield-python-sdk/`
+- Web frontend: `koreshield-web/`
+
+## Server API Source of Truth
+
+Runtime routes and auth behavior are defined in:
+
+- `koreshield/src/koreshield/proxy.py`
+- `koreshield/src/koreshield/api/management.py`
+- `koreshield/src/koreshield/api/auth.py`
+- `koreshield/src/koreshield/api/websocket.py`
+
+Primary protected endpoints:
+
+- `POST /v1/chat/completions`
+- `POST /v1/rag/scan`
+
+Primary auth options:
+
+1. `Authorization: Bearer <jwt>`
+2. `X-API-Key: ks_...`
+3. `ks_access_token` httpOnly cookie
+
+## Configuration Source of Truth
+
+- Example config: `koreshield/config/config.example.yaml`
+- Runtime config: `koreshield/config/config.yaml`
+
+JWT requirements (enforced at startup):
+
+- `JWT_ISSUER` and `JWT_AUDIENCE` are required.
+- Use either HS256 (`JWT_SECRET`, min 32 chars) or RS256 (`JWT_PUBLIC_KEY` + `JWT_PRIVATE_KEY`) mode.
+
+## Useful Entry Points
+
+- Install & run: [/docs/getting-started/installation](/docs/getting-started/installation)
+- API reference: [/docs/api/rest-api](/docs/api/rest-api)
+- Runtime settings: [/docs/configuration/settings](/docs/configuration/settings)

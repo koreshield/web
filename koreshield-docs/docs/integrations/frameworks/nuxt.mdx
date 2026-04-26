@@ -1,0 +1,62 @@
+---
+title: Nuxt.js
+description: Integrate Nuxt server routes with KoreShield proxy APIs.
+sidebar_position: 11
+icon: Box
+last_update:
+  date: 2026-03-10
+---
+
+# Nuxt.js Integration
+
+Use server routes (`server/api/*`) to call KoreShield safely.
+
+## Environment
+
+```bash
+KORESHIELD_BASE_URL=http://localhost:8000
+KORESHIELD_JWT=<jwt-token>
+```
+
+## Server Route Example
+
+```ts
+// server/api/chat.post.ts
+export default defineEventHandler(async (event) => {
+  const body = await readBody(event)
+
+  const response = await fetch(`${process.env.KORESHIELD_BASE_URL}/v1/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.KORESHIELD_JWT}`,
+    },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: body.messages,
+    }),
+  })
+
+  return await response.json()
+})
+```
+
+## RAG Scan Route
+
+```ts
+// server/api/rag-scan.post.ts
+export default defineEventHandler(async (event) => {
+  const body = await readBody(event)
+
+  const response = await fetch(`${process.env.KORESHIELD_BASE_URL}/v1/rag/scan`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.KORESHIELD_JWT}`,
+    },
+    body: JSON.stringify(body),
+  })
+
+  return await response.json()
+})
+```

@@ -1,0 +1,8 @@
+{
+  "label": "CRM",
+  "position": 7,
+  "link": {
+    "type": "doc",
+    "id": "integrations/crm/index"
+  }
+}

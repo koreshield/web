@@ -1,0 +1,55 @@
+---
+title: Kubernetes Deployment
+description: Deploy self-hosted KoreShield server on Kubernetes.
+published: true
+last_update:
+  date: 2026-03-10
+---
+
+# Kubernetes Deployment
+
+KoreShield does not ship an official Helm chart today. Use standard Kubernetes manifests with the KoreShield-provided image.
+
+## 1. Publish Image
+
+Push the KoreShield image provided for your account to your registry.
+
+## 2. Create Secret
+
+```bash
+kubectl create secret generic koreshield-secrets \
+  --from-literal=JWT_SECRET='replace-with-32+char-secret' \
+  --from-literal=JWT_ISSUER='koreshield-auth' \
+  --from-literal=JWT_AUDIENCE='koreshield-api' \
+  --from-literal=DEEPSEEK_API_KEY='...'
+```
+
+## 3. Deploy App + Redis + Postgres
+
+Use your preferred charts/manifests for Redis and Postgres, then deploy KoreShield with env wiring to those services.
+
+Core env for app pod:
+
+- `JWT_SECRET` (or RSA key mode)
+- `JWT_ISSUER`
+- `JWT_AUDIENCE`
+- `DEEPSEEK_API_KEY` (or other enabled provider key)
+- `REDIS_URL`
+- `DATABASE_URL`
+
+## 4. Health and Readiness
+
+Use:
+
+- liveness/readiness: `GET /health`
+- optional provider check endpoint: `GET /health/providers`
+
+## 5. Ingress
+
+Route traffic to service port 8000 and enforce TLS at ingress.
+
+## Operational Guidance
+
+- Run multiple app replicas behind a load balancer.
+- Keep Redis/Postgres as managed/stateful services.
+- Monitor `/metrics` with Prometheus and alert on latency/error anomalies.
