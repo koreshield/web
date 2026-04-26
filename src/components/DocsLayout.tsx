@@ -1,15 +1,8 @@
 import { useState } from 'react';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { buildDocsNavigation } from '../docs/loader';
+import { buildDocsNavigation, type NavItem as DocsNavItem } from '../docs/loader';
 import { DocSearch } from './DocSearch';
-
-interface NavItem {
-	title: string;
-	path: string;
-	children?: NavItem[];
-	description?: string;
-}
 
 interface DocsLayoutProps {
 	children: React.ReactNode;
@@ -65,10 +58,10 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 				>
 					<nav className="space-y-0.5 px-3 py-6">
 						{navigation.map((item) => (
-							<NavItem
+							<SidebarNavItem
 								key={item.path}
 								item={item}
-								isActive={location.pathname === item.path}
+								currentPath={location.pathname}
 								onNavigate={() => setSidebarOpen(false)}
 							/>
 						))}
@@ -95,13 +88,22 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 }
 
 interface NavItemProps {
-	item: NavItem;
-	isActive: boolean;
+	item: DocsNavItem;
+	currentPath: string;
 	onNavigate: () => void;
 }
 
-function NavItem({ item, isActive, onNavigate }: NavItemProps) {
-	const [expanded, setExpanded] = useState(isActive || item.children?.some(c => c.path === window.location.pathname));
+function hasActiveDescendant(item: DocsNavItem, currentPath: string): boolean {
+	if (item.path === currentPath) {
+		return true;
+	}
+	return item.children?.some((child) => hasActiveDescendant(child, currentPath)) ?? false;
+}
+
+function SidebarNavItem({ item, currentPath, onNavigate }: NavItemProps) {
+	const isActive = item.path === currentPath;
+	const isBranchActive = hasActiveDescendant(item, currentPath);
+	const [expanded, setExpanded] = useState(isBranchActive);
 
 	const hasChildren = item.children && item.children.length > 0;
 
@@ -142,18 +144,27 @@ function NavItem({ item, isActive, onNavigate }: NavItemProps) {
 			{hasChildren && expanded && item.children && (
 				<div className="ml-0 mt-1 space-y-0.5 border-l border-gray-300 dark:border-gray-700 pl-0">
 					{item.children.map((child) => (
+						child.children && child.children.length > 0 ? (
+							<SidebarNavItem
+								key={child.path}
+								item={child}
+								currentPath={currentPath}
+								onNavigate={onNavigate}
+							/>
+						) : (
 						<Link
 							key={child.path}
 							to={child.path}
 							onClick={onNavigate}
 							className={`block px-3 py-2 rounded-lg text-sm transition-all ml-2 ${
-								window.location.pathname === child.path
+								currentPath === child.path
 									? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-medium'
 									: 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
 							}`}
 						>
 							{child.title}
 						</Link>
+						)
 					))}
 				</div>
 			)}
