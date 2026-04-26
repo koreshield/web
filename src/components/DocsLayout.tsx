@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { buildDocsNavigation } from '../docs/loader';
+import { DocSearch } from './DocSearch';
 
 interface NavItem {
 	title: string;
@@ -20,30 +21,57 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 	const navigation = buildDocsNavigation();
 
 	return (
-		<div className="min-h-screen bg-background">
-			{/* Mobile menu button */}
-			<div className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-sm lg:hidden">
-				<div className="flex items-center justify-between px-4 py-3">
-					<h1 className="text-lg font-semibold text-foreground">Documentation</h1>
-					<button
-						onClick={() => setSidebarOpen(!sidebarOpen)}
-						className="p-2 hover:bg-card rounded-md transition-colors"
+		<div className="min-h-screen bg-white dark:bg-gray-950">
+			{/* Header */}
+			<header className="sticky top-0 z-40 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950/80 backdrop-blur-sm">
+				<div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+					{/* Logo/Title */}
+					<Link
+						to="/docs"
+						className="flex items-center gap-2 font-bold text-lg text-gray-900 dark:text-gray-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
 					>
-						{sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-					</button>
+						<span>📚</span>
+						<span>Documentation</span>
+					</Link>
+
+					{/* Desktop Search */}
+					<div className="flex-1 max-w-xs mx-8 hidden lg:block">
+						<DocSearch />
+					</div>
+
+					{/* Right side */}
+					<div className="flex items-center gap-2">
+						{/* Mobile Search */}
+						<div className="lg:hidden">
+							<DocSearch />
+						</div>
+
+						{/* Mobile Menu Button */}
+						<button
+							onClick={() => setSidebarOpen(!sidebarOpen)}
+							className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+						>
+							{sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+						</button>
+					</div>
 				</div>
-			</div>
+			</header>
 
 			<div className="flex">
 				{/* Sidebar */}
 				<aside
 					className={`${
 						sidebarOpen ? 'block' : 'hidden'
-					} lg:block fixed lg:sticky top-14 lg:top-0 left-0 w-64 h-[calc(100vh-3.5rem)] lg:h-screen bg-card/50 border-r border-border/50 overflow-y-auto z-30`}
+					} lg:block fixed lg:sticky top-20 lg:top-0 left-0 w-64 h-[calc(100vh-5rem)] lg:h-screen bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 overflow-y-auto z-30 transition-all`}
 				>
-					<nav className="space-y-1 px-3 py-4">
+					<nav className="space-y-0.5 px-3 py-6">
 						{navigation.map((item) => (
-							<NavItem key={item.path} item={item} isActive={location.pathname === item.path} onNavigate={() => setSidebarOpen(false)} />
+							<NavItem
+								key={item.path}
+								item={item}
+								isActive={location.pathname === item.path}
+								onNavigate={() => setSidebarOpen(false)}
+							/>
 						))}
 					</nav>
 				</aside>
@@ -57,8 +85,8 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 				)}
 
 				{/* Main content */}
-				<main className="flex-1 min-h-screen">
-					<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+				<main className="flex-1 min-h-[calc(100vh-5rem)]">
+					<div className="px-4 sm:px-6 lg:px-8 py-8 lg:py-12 max-w-7xl mx-auto">
 						{children}
 					</div>
 				</main>
@@ -80,30 +108,30 @@ function NavItem({ item, isActive, onNavigate }: NavItemProps) {
 
 	return (
 		<div key={item.path}>
-			<div className="flex items-center gap-2">
+			<div className="flex items-center gap-1">
 				{hasChildren ? (
 					<button
 						onClick={() => setExpanded(!expanded)}
-						className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+						className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
 							isActive
-								? 'bg-primary/10 text-primary border border-primary/20'
-								: 'text-foreground/70 hover:text-foreground hover:bg-card/80'
+								? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-l-2 border-emerald-600 dark:border-emerald-400'
+								: 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
 						}`}
 					>
 						<span className="flex-1 text-left">{item.title}</span>
 						<ChevronDown
 							size={16}
-							className={`transition-transform ${expanded ? 'rotate-180' : ''}`}
+							className={`flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`}
 						/>
 					</button>
 				) : (
 					<Link
 						to={item.path}
 						onClick={onNavigate}
-						className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+						className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
 							isActive
-								? 'bg-primary/10 text-primary border border-primary/20'
-								: 'text-foreground/70 hover:text-foreground hover:bg-card/80'
+								? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-l-2 border-emerald-600 dark:border-emerald-400'
+								: 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
 						}`}
 					>
 						{item.title}
@@ -113,16 +141,16 @@ function NavItem({ item, isActive, onNavigate }: NavItemProps) {
 
 			{/* Children */}
 			{hasChildren && expanded && item.children && (
-				<div className="ml-4 mt-1 space-y-1 border-l border-border/30 pl-3">
+				<div className="ml-0 mt-1 space-y-0.5 border-l border-gray-300 dark:border-gray-700 pl-0">
 					{item.children.map((child) => (
 						<Link
 							key={child.path}
 							to={child.path}
 							onClick={onNavigate}
-							className={`block px-3 py-2 rounded text-sm transition-colors ${
+							className={`block px-3 py-2 rounded-lg text-sm transition-all ml-2 ${
 								window.location.pathname === child.path
-									? 'bg-primary/10 text-primary font-medium'
-									: 'text-foreground/60 hover:text-foreground hover:bg-card/50'
+									? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-medium'
+									: 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
 							}`}
 						>
 							{child.title}

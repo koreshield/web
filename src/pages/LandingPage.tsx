@@ -2,7 +2,6 @@ import Architecture from '../components/Architecture';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import Features from '../components/Features';
 import Hero from '../components/Hero';
-import IntegrationCode from '../components/IntegrationCode';
 import { IntegrationTicker } from '../components/IntegrationTicker';
 import { InteractiveDemo } from '../components/InteractiveDemo';
 import { RAGShowcase } from '../components/RAGShowcase';
@@ -66,10 +65,6 @@ function LandingPage() {
 
             <Architecture />
             <Features />
-
-            <ErrorBoundary fallback={null}>
-                <IntegrationCode />
-            </ErrorBoundary>
 
             <TrustBadges />
             <UseCases />
