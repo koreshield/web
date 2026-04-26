@@ -11,8 +11,10 @@ export function TableOfContents({ content }: { content: string }) {
 	const [activeId, setActiveId] = useState('');
 
 	useEffect(() => {
-		// Extract headings from content
-		const headingLines = content.split('\n').filter(line => line.startsWith('#'));
+		const headingLines = content
+			.split('\n')
+			.filter((line) => /^#{1,3}\s+/.test(line.trim()));
+
 		const extracted: TableOfContentsItem[] = headingLines.map((line, idx) => {
 			const level = line.match(/^#+/)?.[0].length ?? 2;
 			const title = line.replace(/^#+\s+/, '').trim();
