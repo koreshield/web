@@ -1,121 +1,122 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MarkdownRenderer } from './MarkdownRenderer';
-import { parseFrontMatter, getDocContent, docExists } from '../lib/documentationLoader';
-import type { DocFrontMatter } from '../lib/documentationLoader';
-import { ArrowLeft, Calendar } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { getDocByPath } from '../docs/loader';
 
-interface DocPageProps {
-	docPath: string;
-}
-
-export function DocPage({ docPath }: DocPageProps) {
-	const [frontMatter, setFrontMatter] = useState<DocFrontMatter | null>(null);
-	const [content, setContent] = useState<string>('');
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+export function DocPage() {
+	const location = useLocation();
 	const navigate = useNavigate();
 
-	useEffect(() => {
-		const loadDoc = () => {
-			try {
-				setLoading(true);
-				setError(null);
+	// Extract section and doc from URL path
+	const pathParts = location.pathname
+		.replace(/^\/docs\/?/, '')
+		.split('/')
+		.filter(Boolean);
 
-				if (!docExists(docPath)) {
-					throw new Error(`Doc not found: ${docPath}`);
-				}
+	const section = pathParts[0] || '';
+	const doc = pathParts[1] || '';
 
-				const rawContent = getDocContent(docPath);
-				if (!rawContent) {
-					throw new Error(`Could not load content for: ${docPath}`);
-				}
+	const docContent = getDocByPath(section, doc);
 
-				const { frontMatter: fm, body } = parseFrontMatter(rawContent);
-				setFrontMatter(fm);
-				setContent(body);
-			} catch (err) {
-				console.error('Error loading doc:', err);
-				setError('Documentation page not found.');
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		loadDoc();
-	}, [docPath]);
-
-	if (loading) {
+	if (!docContent) {
 		return (
-			<div className="flex items-center justify-center min-h-screen">
-				<div className="text-center">
-					<div className="inline-block animate-spin">
-						<div className="h-8 w-8 border-4 border-primary border-transparent border-t-primary rounded-full" />
-					</div>
-					<p className="mt-4 text-foreground/60">Loading documentation...</p>
-				</div>
-			</div>
-		);
-	}
-
-	if (error || !frontMatter) {
-		return (
-			<div className="min-h-screen flex flex-col items-center justify-center">
-				<div className="text-center">
-					<h1 className="text-3xl font-bold text-foreground mb-2">Page Not Found</h1>
-					<p className="text-foreground/60 mb-6">{error || 'The documentation page could not be found.'}</p>
+			<div className="prose prose-invert max-w-none">
+				<div className="mb-8">
 					<button
-						onClick={() => navigate('/docs')}
-						className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+						onClick={() => navigate(-1)}
+						className="flex items-center gap-2 text-gray-400 hover:text-gray-200 transition-colors"
 					>
-						<ArrowLeft size={16} />
+						<ArrowLeft className="w-4 h-4" />
 						Back to Documentation
 					</button>
+				</div>
+				<div className="text-center py-12">
+					<h1 className="text-4xl font-bold text-red-500 mb-4">Page Not Found</h1>
+					<p className="text-gray-400">Documentation page not found.</p>
 				</div>
 			</div>
 		);
 	}
 
 	return (
-		<article className="prose prose-invert max-w-none">
-			{/* Breadcrumb */}
-			<button
-				onClick={() => navigate('/docs')}
-				className="inline-flex items-center gap-2 text-sm text-foreground/60 hover:text-foreground transition-colors mb-6"
-			>
-				<ArrowLeft size={16} />
-				Back to Documentation
-			</button>
-
-			{/* Header */}
-			<header className="mb-8 border-b border-border/30 pb-8">
-				<h1 className="text-4xl font-bold text-foreground mb-3">{frontMatter.title}</h1>
-				{frontMatter.description && (
-					<p className="text-lg text-foreground/70">{frontMatter.description}</p>
-				)}
-				{frontMatter.last_update?.date && (
-					<div className="flex items-center gap-2 mt-4 text-sm text-foreground/50">
-						<Calendar size={16} />
-						<span>Last updated: {frontMatter.last_update.date}</span>
-					</div>
-				)}
-			</header>
-
-			{/* Content */}
-			<div className="space-y-6">
-				<MarkdownRenderer content={content} />
-			</div>
-
-			{/* Footer Navigation */}
-			<footer className="mt-12 pt-8 border-t border-border/30">
+		<div className="prose prose-invert max-w-none">
+			<div className="mb-8">
 				<button
-					onClick={() => navigate('/docs')}
-					className="inline-flex items-center gap-2 px-4 py-2 bg-card hover:bg-card/80 border border-border/50 rounded-lg transition-colors text-foreground/70 hover:text-foreground"
+					onClick={() => navigate(-1)}
+					className="flex items-center gap-2 text-gray-400 hover:text-gray-200 transition-colors"
 				>
-					<ArrowLeft size={16} />
+					<ArrowLeft className="w-4 h-4" />
 					Back to Documentation
 				</button>
-			</footer>
-		</article>
+			</div>
+
+			{/* Render markdown-like content */}
+			<article className="space-y-6">
+				<div>
+					<h1 className="text-4xl font-bold mb-4">{docContent.title}</h1>
+					<p className="text-xl text-gray-400">{docContent.description}</p>
+				</div>
+
+				{/* Simple markdown renderer */}
+				<div className="space-y-4 text-gray-300">
+					{docContent.content.split('\n\n').map((paragraph, idx) => {
+						if (paragraph.startsWith('# ')) {
+							return (
+								<h1 key={idx} className="text-3xl font-bold mt-8 mb-4">
+									{paragraph.slice(2).trim()}
+								</h1>
+							);
+						}
+						if (paragraph.startsWith('## ')) {
+							return (
+								<h2 key={idx} className="text-2xl font-bold mt-6 mb-3">
+									{paragraph.slice(3).trim()}
+								</h2>
+							);
+						}
+						if (paragraph.startsWith('### ')) {
+							return (
+								<h3 key={idx} className="text-xl font-bold mt-4 mb-2">
+									{paragraph.slice(4).trim()}
+								</h3>
+							);
+						}
+						if (paragraph.startsWith('```')) {
+							const lines = paragraph.split('\n');
+							const lang = lines[0].slice(3);
+							const code = lines.slice(1, -1).join('\n');
+							return (
+								<pre key={idx} className="bg-gray-900 p-4 rounded overflow-x-auto">
+									<code className={`language-${lang || 'bash'} text-sm`}>{code}</code>
+								</pre>
+							);
+						}
+						if (paragraph.startsWith('- ')) {
+							return (
+								<ul key={idx} className="list-disc list-inside space-y-1">
+									{paragraph.split('\n').map((item, i) => (
+										<li key={i}>{item.slice(2).trim()}</li>
+									))}
+								</ul>
+							);
+						}
+						return (
+							<p key={idx} className="leading-relaxed">
+								{paragraph}
+							</p>
+						);
+					})}
+				</div>
+			</article>
+
+			<div className="mt-12">
+				<button
+					onClick={() => navigate(-1)}
+					className="flex items-center gap-2 text-gray-400 hover:text-gray-200 transition-colors"
+				>
+					<ArrowLeft className="w-4 h-4" />
+					Back to Documentation
+				</button>
+			</div>
+		</div>
 	);
 }
