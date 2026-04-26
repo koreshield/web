@@ -1,8 +1,14 @@
 import { useState } from 'react';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { buildDocsNavigation } from '../lib/documentationLoader';
-import type { DocsNavItem } from '../lib/documentationLoader';
+import { buildDocsNavigation } from '../docs/loader';
+
+interface NavItem {
+	title: string;
+	path: string;
+	children?: NavItem[];
+	description?: string;
+}
 
 interface DocsLayoutProps {
 	children: React.ReactNode;
@@ -37,7 +43,7 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 				>
 					<nav className="space-y-1 px-3 py-4">
 						{navigation.map((item) => (
-							<NavItem key={item.slug} item={item} isActive={location.pathname === item.path} onNavigate={() => setSidebarOpen(false)} />
+							<NavItem key={item.path} item={item} isActive={location.pathname === item.path} onNavigate={() => setSidebarOpen(false)} />
 						))}
 					</nav>
 				</aside>
@@ -62,7 +68,7 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 }
 
 interface NavItemProps {
-	item: DocsNavItem;
+	item: NavItem;
 	isActive: boolean;
 	onNavigate: () => void;
 }
@@ -73,7 +79,7 @@ function NavItem({ item, isActive, onNavigate }: NavItemProps) {
 	const hasChildren = item.children && item.children.length > 0;
 
 	return (
-		<div key={item.slug}>
+		<div key={item.path}>
 			<div className="flex items-center gap-2">
 				{hasChildren ? (
 					<button
@@ -110,7 +116,7 @@ function NavItem({ item, isActive, onNavigate }: NavItemProps) {
 				<div className="ml-4 mt-1 space-y-1 border-l border-border/30 pl-3">
 					{item.children.map((child) => (
 						<Link
-							key={child.slug}
+							key={child.path}
 							to={child.path}
 							onClick={onNavigate}
 							className={`block px-3 py-2 rounded text-sm transition-colors ${
