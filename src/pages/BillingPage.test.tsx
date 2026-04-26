@@ -1,0 +1,171 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import BillingPage from './BillingPage';
+
+const { getBillingAccount } = vi.hoisted(() => ({
+	getBillingAccount: vi.fn(),
+}));
+
+vi.mock('../lib/api-client', () => ({
+	api: {
+		getBillingAccount,
+		createBillingCheckout: vi.fn(),
+		createBillingPortal: vi.fn(),
+		syncBillingAccount: vi.fn(),
+	},
+}));
+
+describe('BillingPage', () => {
+	beforeEach(() => {
+		getBillingAccount.mockReset();
+	});
+
+	it('shows a clear hosted-billing warning when Polar is not configured', async () => {
+		getBillingAccount.mockRejectedValue(new Error('POLAR_ACCESS_TOKEN is not configured'));
+
+		render(
+			<MemoryRouter initialEntries={['/billing']}>
+				<Routes>
+					<Route path="/billing" element={<BillingPage />} />
+				</Routes>
+			</MemoryRouter>,
+		);
+
+		await waitFor(() => {
+			expect(screen.getByText(/Hosted billing is not fully configured in this environment yet/i)).toBeInTheDocument();
+		});
+	});
+
+	it('maps hosted billing slugs to the public Growth and Scale plan names', async () => {
+		getBillingAccount.mockResolvedValue({
+			id: 'acct_1',
+			status: 'active',
+			plan_slug: 'startup',
+			subscription_status: 'active',
+			current_period_end: null,
+			billing_email: 'ops@koreshield.com',
+			external_customer_id: 'cus_123',
+			polar_customer_id: 'polcus_123',
+			metadata: {
+				recurring_interval: 'month',
+				active_meter_count: 1,
+				granted_benefits: [],
+			},
+		});
+
+		render(
+			<MemoryRouter initialEntries={['/billing']}>
+				<Routes>
+					<Route path="/billing" element={<BillingPage />} />
+				</Routes>
+			</MemoryRouter>,
+		);
+
+		await waitFor(() => {
+			expect(screen.getByText(/^Growth$/i)).toBeInTheDocument();
+		});
+
+		expect(screen.getByText(/Hosted plans are sold as Growth and Scale/i)).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /choose growth/i })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /choose scale/i })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /open customer portal/i })).toBeInTheDocument();
+	});
+
+	it('shows internal unlimited enterprise accounts as provisioned and disables upgrades', async () => {
+		getBillingAccount.mockResolvedValue({
+			id: 'acct_internal',
+			status: 'active',
+			plan_slug: 'enterprise',
+			plan_name: 'Enterprise',
+			subscription_status: 'active',
+			current_period_end: null,
+			billing_email: 'internal-owner@example.com',
+			external_customer_id: 'team:internal',
+			metadata: {
+				internal_unlimited: true,
+				protected_requests: 'unlimited',
+				support: 'priority',
+				active_meter_count: 0,
+				granted_benefits: [],
+			},
+		});
+
+		render(
+			<MemoryRouter initialEntries={['/billing']}>
+				<Routes>
+					<Route path="/billing" element={<BillingPage />} />
+				</Routes>
+			</MemoryRouter>,
+		);
+
+		await waitFor(() => {
+			expect(screen.getAllByText(/unlimited enterprise access/i).length).toBeGreaterThan(0);
+		});
+
+		expect(screen.getByText(/^Enterprise$/i)).toBeInTheDocument();
+		expect(screen.getByText(/^unlimited$/i)).toBeInTheDocument();
+		expect(screen.getAllByRole('button', { name: /included with internal enterprise access/i })).toHaveLength(2);
+		screen.getAllByRole('button', { name: /included with internal enterprise access/i }).forEach((button) => {
+			expect(button).toBeDisabled();
+		});
+	});
+
+	it('does not crash when billing metadata is malformed', async () => {
+		getBillingAccount.mockResolvedValue({
+			id: 'acct_weird',
+			status: 'active',
+			plan_slug: 'scale',
+			subscription_status: 'active',
+			external_customer_id: null,
+			metadata: 'broken-payload',
+		});
+
+		render(
+			<MemoryRouter initialEntries={['/billing']}>
+				<Routes>
+					<Route path="/billing" element={<BillingPage />} />
+				</Routes>
+			</MemoryRouter>,
+		);
+
+		await waitFor(() => {
+			expect(screen.getByText(/^Scale$/i)).toBeInTheDocument();
+		});
+
+		expect(screen.getAllByText(/^0$/i).length).toBeGreaterThan(0);
+	});
+
+	it('shows a checkout-first hint instead of a broken portal action when no Polar customer exists yet', async () => {
+		getBillingAccount.mockResolvedValue({
+			id: 'acct_new',
+			status: 'inactive',
+			plan_slug: 'free',
+			subscription_status: 'inactive',
+			current_period_end: null,
+			billing_email: 'hello@koreshield.com',
+			external_customer_id: 'user:test',
+			polar_customer_id: null,
+			metadata: {
+				recurring_interval: null,
+				active_meter_count: 0,
+				granted_benefits: [],
+			},
+		});
+
+		render(
+			<MemoryRouter initialEntries={['/billing']}>
+				<Routes>
+					<Route path="/billing" element={<BillingPage />} />
+				</Routes>
+			</MemoryRouter>,
+		);
+
+		await waitFor(() => {
+			expect(screen.getByText(/Customer portal access becomes available after your first completed checkout/i)).toBeInTheDocument();
+		});
+
+		expect(screen.queryByRole('button', { name: /open customer portal/i })).not.toBeInTheDocument();
+		expect(screen.queryByText(/Hosted billing is not fully configured in this environment yet/i)).not.toBeInTheDocument();
+	});
+});
