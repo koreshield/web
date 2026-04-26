@@ -1,0 +1,61 @@
+---
+title: Express.js
+description: Secure Express LLM routes with KoreShield proxy.
+sidebar_position: 5
+icon: Box
+last_update:
+  date: 2026-03-10
+---
+
+# Express.js Integration
+
+## Install
+
+```bash
+npm install koreshield express
+```
+
+## Proxy Through KoreShield
+
+```ts
+import express from 'express';
+
+const app = express();
+app.use(express.json());
+
+app.post('/chat', async (req, res) => {
+  const response = await fetch('http://localhost:8000/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.KORESHIELD_JWT}`,
+    },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: req.body.messages,
+    }),
+  });
+
+  const data = await response.json();
+  res.status(response.status).json(data);
+});
+
+app.listen(3000);
+```
+
+## Optional RAG Pre-Scan Route
+
+```ts
+app.post('/rag-scan', async (req, res) => {
+  const response = await fetch('http://localhost:8000/v1/rag/scan', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.KORESHIELD_JWT}`,
+    },
+    body: JSON.stringify(req.body),
+  });
+
+  res.status(response.status).json(await response.json());
+});
+```

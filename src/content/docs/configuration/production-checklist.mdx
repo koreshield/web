@@ -1,0 +1,19 @@
+---
+title: Production Checklist
+description: Client-facing checklist for launching KoreShield in production.
+slug: /configuration/production-checklist
+last_update:
+  date: 2026-03-10
+---
+
+# Production Checklist
+
+Before enabling blocking in production:
+
+- Confirm JWT/API key auth is enforced for all protected endpoints.
+- Validate provider routing and API key scopes.
+- Review policy sensitivity and default action.
+- Configure rate limits and alerting thresholds.
+- Run a staging traffic replay to measure false positives.
+
+If you need help validating the rollout, contact support at hello@koreshield.com.
