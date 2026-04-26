@@ -1,0 +1,19 @@
+---
+title: AI Agents
+description: Securing autonomous agent interactions with KoreShield.
+last_update:
+  date: 2026-03-10
+---
+
+# AI Agents
+
+Agent orchestration should place KoreShield at the model boundary:
+
+- Agent planner/tool prompts -> `/v1/chat/completions`
+- Retrieved tool context/docs -> `/v1/rag/scan` before model call
+
+Recommended controls:
+
+- Require JWT or API key for all agent calls
+- Log blocked interactions for incident response
+- Keep policy defaults conservative (`default_action: block`) for high-risk tools

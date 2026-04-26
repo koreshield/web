@@ -1,0 +1,44 @@
+---
+title: Docker Deployment
+description: Deploy KoreShield using the provided Docker image and Compose stack.
+published: true
+last_update:
+  date: 2026-03-10
+---
+
+# Docker Deployment
+
+This page describes Docker deployment for **self-hosted** customers using the KoreShield-provided image or bundle.
+
+## Quick Start
+
+Use the Docker Compose file and image provided by the KoreShield team.
+
+Services started:
+
+- `koreshield` on `:8000`
+- `redis` on `:6379`
+- `postgres` on `:5432`
+
+## Required Environment
+
+At minimum:
+
+```bash
+export JWT_SECRET='replace-with-32+char-secret'
+export JWT_ISSUER='koreshield-auth'
+export JWT_AUDIENCE='koreshield-api'
+export DEEPSEEK_API_KEY='...'
+```
+
+## Health Verification
+
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/status
+```
+
+## Notes
+
+- Compose file includes container health checks.
+- Set explicit production secrets in real deployments.
