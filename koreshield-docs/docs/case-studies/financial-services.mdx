@@ -1,0 +1,21 @@
+---
+title: Financial Services
+description: Hardening financial AI workflows with KoreShield controls.
+last_update:
+  date: 2026-03-10
+---
+
+# Financial Services
+
+Use KoreShield as a strict policy gateway for finance-oriented LLM traffic.
+
+## Suggested Flow
+
+1. Authenticate every request (JWT/API key).
+2. Route prompts through `/v1/chat/completions`.
+3. Pre-scan retrieved records with `/v1/rag/scan`.
+4. Review blocked events and reports for audit evidence.
+
+## Compliance Note
+
+KoreShield provides technical controls and logs; formal certifications/audit outcomes depend on your organization’s full control environment.

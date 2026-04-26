@@ -5,8 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "npm run build:docs && tsc -b && vite build && cp dist/index.html dist/404.html",
-		"build:docs": "cd koreshield-docs && npm run build && cd .. && rm -rf public/docs && cp -r koreshield-docs/build public/docs",
+		"build": "tsc -b && vite build && cp dist/index.html dist/404.html",
 		"lint": "eslint .",
 		"test": "vitest run",
 		"preview": "vite preview"

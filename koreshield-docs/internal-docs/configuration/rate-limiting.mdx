@@ -1,0 +1,76 @@
+---
+title: Rate Limiting
+description: Rate limiting configuration with SlowAPI and Redis.
+slug: /configuration/rate-limiting
+---
+
+# Rate Limiting
+
+KoreShield uses [SlowAPI](https://github.com/laurentS/slowapi) for rate limiting, backed by Redis for distributed enforcement across multiple proxy instances.
+
+## Configuration
+
+Set the rate limit in your `config.yaml`:
+
+```yaml
+security:
+  rate_limit: "60/minute"
+```
+
+This limit applies to the protected proxy endpoints:
+
+- `POST /v1/chat/completions`
+- `POST /v1/rag/scan`
+
+## Enable Redis
+
+Redis is required for distributed rate limiting. When Redis is enabled, all proxy instances share the same rate limit counters.
+
+```yaml
+redis:
+  enabled: true
+  url: "redis://localhost:6379/0"
+```
+
+Without Redis, each proxy instance maintains its own in-memory counter, which does not scale across replicas.
+
+## Rate Limit Formats
+
+SlowAPI supports several rate expressions:
+
+| Format | Example |
+|---|---|
+| Per minute | `"60/minute"` |
+| Per second | `"5/second"` |
+| Per hour | `"1000/hour"` |
+| Per day | `"10000/day"` |
+
+## Response on Rate Limit Exceeded
+
+When a client exceeds the rate limit, KoreShield returns:
+
+```json
+{
+  "error": "Rate limit exceeded",
+  "detail": "60 per 1 minute"
+}
+```
+
+HTTP status: `429 Too Many Requests`
+
+## Production Guidance
+
+- Use a managed Redis service with TLS enabled
+- Ensure all proxy instances point to the same Redis
+- Monitor Redis memory and set appropriate eviction policies
+- Start with `"60/minute"` and adjust based on traffic patterns
+
+## Validation
+
+- Confirm Redis connectivity in logs at startup
+- Load test to verify requests are throttled consistently across instances
+
+## Related Docs
+
+- Redis setup in [/integrations/databases/redis](/docs/integrations/databases/redis)
+- Global settings in [/configuration/settings](/docs/configuration/settings)

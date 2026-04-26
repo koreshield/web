@@ -1,0 +1,72 @@
+---
+title: Troubleshooting
+description: Diagnose common runtime and auth issues in KoreShield server.
+published: true
+---
+
+# Troubleshooting
+
+## Server Won't Start
+
+Check logs for JWT startup validation errors.
+
+Common causes:
+
+- Missing `JWT_ISSUER` or `JWT_AUDIENCE`
+- `JWT_SECRET` shorter than 32 chars in HS256 mode
+- Mixing `JWT_SECRET` with RSA key env vars
+
+Fix by setting one valid key mode plus issuer/audience.
+
+## 401 On Protected Endpoints
+
+Impacted routes:
+
+- `POST /v1/chat/completions`
+- `POST /v1/rag/scan`
+
+Verify one auth method is present:
+
+1. `Authorization: Bearer <jwt>`
+2. `X-API-Key: ks_...`
+3. `ks_access_token` cookie
+
+Also verify JWT `iss`/`aud` match server configuration.
+
+## `/v1/management/config` Returns 404
+
+Expected outside development-like environments.
+
+The endpoint is intentionally disabled unless environment is recognized as dev/local/test.
+
+## WebSocket Auth Fails
+
+`/ws/events` expects JWT from:
+
+- `Authorization` header, or
+- `ks_access_token` cookie
+
+Query-param token auth is intentionally not supported.
+
+## Healthcheck Timeouts In CI/Compose
+
+- Ensure `JWT_SECRET`, `JWT_ISSUER`, `JWT_AUDIENCE` are set.
+- Verify Redis/Postgres are healthy before app startup.
+- Confirm app health endpoint: `GET /health`.
+
+## Quick Diagnostics
+
+```bash
+curl -i http://localhost:8000/health
+curl -i http://localhost:8000/status
+curl -i http://localhost:8000/openapi.json
+```
+
+With auth:
+
+```bash
+curl -i -X POST http://localhost:8000/v1/chat/completions \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"deepseek-chat","messages":[{"role":"user","content":"ping"}]}'
+```

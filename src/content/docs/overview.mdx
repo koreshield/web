@@ -1,0 +1,49 @@
+---
+title: Documentation
+description: Welcome to the KoreShield documentation
+icon: House
+last_update:
+  date: 2026-03-10
+---
+
+KoreShield is an LLM security gateway that sits between your app and model providers. It scans prompts and RAG context, applies policy decisions, and blocks unsafe requests before they reach providers.
+
+## What It Protects
+
+- direct prompt injection attempts
+- indirect/RAG injection hidden in retrieved documents
+- policy and compliance violations based on configured rules
+
+## Current Provider Support
+
+- DeepSeek
+- OpenAI
+- Anthropic
+- Gemini
+- Azure OpenAI
+
+## Core Runtime Endpoints
+
+- `POST /v1/chat/completions` (protected)
+- `POST /v1/rag/scan` (protected)
+- `POST /v1/scan` and `POST /v1/scan/batch` (protected)
+- `GET /v1/scans` (protected)
+- `GET /health`, `GET /status`, `GET /metrics`
+
+## Authentication
+
+Protected endpoints accept:
+
+1. `Authorization: Bearer <jwt>`
+2. `X-API-Key: ks_...`
+3. `ks_access_token` httpOnly cookie
+
+JWT validation enforces `iss`, `aud`, signature, and expiration checks.
+
+## Start Here
+
+- [Client Integration Guide](/docs/client-integration)
+- [Quick Start](/docs/getting-started/quick-start)
+- [Installation](/docs/getting-started/installation)
+- [API Reference](/docs/api)
+- [Integrations](/docs/integrations)

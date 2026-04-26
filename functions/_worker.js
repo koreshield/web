@@ -12,16 +12,15 @@ export async function onRequest(context) {
       const url = new URL(context.request.url);
       const pathname = url.pathname;
       
-      // Don't redirect API calls, static assets, docs, or known non-page routes
+      // Don't redirect API calls, static assets, or actual files
       if (
         !pathname.startsWith('/api/') &&
         !pathname.startsWith('/assets/') &&
         !pathname.startsWith('/static/') &&
-        !pathname.startsWith('/docs/') &&
         !pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|json|xml|webp|woff|woff2|ttf|eot)$/i) &&
         !pathname.includes('.')
       ) {
-        // Serve index.html for SPA routes
+        // Serve index.html for SPA routes (including /docs/*)
         return new Response(await context.env.ASSETS.get('index.html'), {
           status: 200,
           headers: {
