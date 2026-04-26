@@ -191,16 +191,6 @@ function AppContent() {
 						}
 					/>
 					<Route
-						path="/docs/*"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<DocsPage />
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
 						path="/integrations"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
@@ -461,6 +451,18 @@ function AppContent() {
 						}
 					/>
 				</Route>
+
+				{/* Documentation Layout - Separate from Marketing */}
+				<Route
+					path="/docs/*"
+					element={
+						<Suspense fallback={<SuspenseFallback />}>
+							<RouteErrorBoundary>
+								<DocsPage />
+							</RouteErrorBoundary>
+						</Suspense>
+					}
+				/>
 
 				{/* App Layout - Authenticated Routes */}
 				<Route element={<AppLayout />}>
