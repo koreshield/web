@@ -1,9 +1,0 @@
-{
-  "label": "Features",
-  "position": 3,
-  "collapsed": false,
-  "link": {
-    "type": "generated-index",
-    "description": "Explore Koreshield's powerful features for detecting and preventing prompt injection attacks in RAG systems."
-  }
-}
