@@ -30,7 +30,6 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 						to="/docs"
 						className="flex items-center gap-2 font-bold text-lg text-gray-900 dark:text-gray-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
 					>
-						<span>📚</span>
 						<span>Documentation</span>
 					</Link>
 
