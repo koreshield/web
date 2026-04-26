@@ -40,10 +40,10 @@ function SkeletonLoader() {
           <div className="h-6 w-6 bg-white/10 rounded" />
         </div>
         <div className="p-4 space-y-2">
-          {[...Array(6)].map((_, i) => (
+          {([80, 65, 90, 72, 85, 68] as const).map((w, i) => (
             <div key={i} className="flex gap-2">
               <div className="h-3 w-24 bg-white/10 rounded" />
-              <div className="h-3 flex-1 bg-white/10 rounded" style={{ maxWidth: `${60 + Math.random() * 40}%` }} />
+              <div className="h-3 flex-1 bg-white/10 rounded" style={{ maxWidth: `${w}%` }} />
             </div>
           ))}
         </div>
@@ -56,8 +56,8 @@ function SkeletonLoader() {
           <div className="h-6 w-6 bg-white/10 rounded" />
         </div>
         <div className="p-4 space-y-2">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-3 bg-white/10 rounded" style={{ width: `${70 + Math.random() * 30}%` }} />
+          {([75, 92, 83, 70] as const).map((w, i) => (
+            <div key={i} className="h-3 bg-white/10 rounded" style={{ width: `${w}%` }} />
           ))}
         </div>
       </div>

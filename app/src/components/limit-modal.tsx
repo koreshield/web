@@ -92,7 +92,7 @@ export function LimitModal({
                     </button>
                     <Link
                       to="/app/$orgSlug/billing"
-                      params={{ orgSlug: selectedOrganization?.slug! }}
+                      params={{ orgSlug: selectedOrganization?.slug ?? "" }}
                       className="flex-1 px-4 py-2.5 rounded-xl bg-white text-black text-sm font-medium hover:bg-gray-100 transition-colors text-center"
                     >
                       Upgrade Plan

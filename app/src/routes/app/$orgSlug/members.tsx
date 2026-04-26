@@ -432,7 +432,7 @@ function MembersView() {
                   <Link
                     to="/app/$orgSlug/billing"
                     className="text-yellow-500 hover:underline"
-                    params={{ orgSlug: selectedOrganization?.slug! }}
+                    params={{ orgSlug: selectedOrganization?.slug ?? "" }}
                   >
                     Billing
                   </Link>{" "}
