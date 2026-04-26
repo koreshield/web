@@ -1,11 +1,11 @@
+import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Copy, Check } from 'lucide-react';
-import { getDocByPath } from '../docs/loader';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { ArrowLeft, Check, Copy } from 'lucide-react';
 import { DocBreadcrumb } from './DocBreadcrumb';
 import { TableOfContents } from './TableOfContents';
-import { useState } from 'react';
-
-// Simple code display (no special highlighting needed)
+import { getDocPageByRoute, type DocLink } from '../docs/loader';
 
 interface CodeBlockProps {
 	language: string;
@@ -16,13 +16,13 @@ function CodeBlock({ language, code }: CodeBlockProps) {
 	const [copied, setCopied] = useState(false);
 
 	const handleCopy = () => {
-		navigator.clipboard.writeText(code);
+		void navigator.clipboard.writeText(code);
 		setCopied(true);
 		setTimeout(() => setCopied(false), 2000);
 	};
 
 	return (
-		<div className="relative group">
+		<div className="relative group my-6">
 			<pre className="bg-gray-900 dark:bg-gray-950 text-gray-50 p-4 rounded-lg overflow-x-auto text-sm leading-relaxed border border-gray-800 dark:border-gray-700">
 				<code className={`language-${language}`}>{code}</code>
 			</pre>
@@ -41,29 +41,85 @@ function CodeBlock({ language, code }: CodeBlockProps) {
 	);
 }
 
+function normalizeRelativeDocLink(currentPath: string, href: string) {
+	if (!href || href.startsWith('http://') || href.startsWith('https://') || href.startsWith('#')) {
+		return href;
+	}
+
+	if (href.startsWith('/')) {
+		if (href.startsWith('/docs')) {
+			return href.replace(/\.mdx?$/i, '');
+		}
+		return href;
+	}
+
+	const cleaned = href.replace(/\.mdx?$/i, '');
+	const baseSegments = currentPath.replace(/^\/docs\/?/, '').split('/').filter(Boolean);
+	baseSegments.pop();
+
+	for (const segment of cleaned.split('/')) {
+		if (!segment || segment === '.') continue;
+		if (segment === '..') {
+			baseSegments.pop();
+			continue;
+		}
+		baseSegments.push(segment);
+	}
+
+	return `/docs/${baseSegments.join('/')}`.replace(/\/+/g, '/');
+}
+
+function transformDocContent(content: string) {
+	return content
+		.replace(/^import\s+.*$/gm, '')
+		.replace(/<DocCardList\s*\/>/g, '')
+		.replace(/^::::(note|info|tip|warning|danger)\s*$/gm, '> **$1**')
+		.replace(/^::::\s*$/gm, '')
+		.replace(/https:\/\/docs\.koreshield\.com\/docs\/?/g, '/docs/')
+		.replace(/https:\/\/docs\.koreshield\.com/g, '/docs');
+}
+
+function ChildLinks({ links }: { links: DocLink[] }) {
+	if (links.length === 0) {
+		return null;
+	}
+
+	return (
+		<div className="mt-10 grid gap-4 sm:grid-cols-2">
+			{links.map((link) => (
+				<a
+					key={link.path}
+					href={link.path}
+					className="block rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-900/60 p-5 no-underline hover:border-emerald-400/50 hover:bg-white dark:hover:bg-gray-900 transition-colors"
+				>
+					<div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{link.title}</div>
+					{link.description && (
+						<div className="mt-2 text-sm text-gray-600 dark:text-gray-400">{link.description}</div>
+					)}
+				</a>
+			))}
+		</div>
+	);
+}
+
 export function DocPage() {
 	const location = useLocation();
 	const navigate = useNavigate();
+	const page = getDocPageByRoute(location.pathname);
 
-	// Extract section and doc from URL path
-	const pathParts = location.pathname
-		.replace(/^\/docs\/?/, '')
-		.split('/')
-		.filter(Boolean);
+	const renderedContent = useMemo(
+		() => (page ? transformDocContent(page.content) : ''),
+		[page]
+	);
 
-	const section = pathParts[0] || '';
-	const doc = pathParts[1] || '';
-
-	const docContent = getDocByPath(section, doc);
-
-	if (!docContent) {
+	if (!page) {
 		return (
 			<div className="max-w-4xl mx-auto">
 				<DocBreadcrumb />
 				<div className="text-center py-12">
 					<h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">Page Not Found</h1>
 					<p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-						The documentation page you're looking for doesn't exist.
+						The documentation page you&apos;re looking for doesn&apos;t exist.
 					</p>
 					<button
 						onClick={() => navigate('/docs')}
@@ -77,127 +133,89 @@ export function DocPage() {
 		);
 	}
 
+	let headingIndex = -1;
+
 	return (
 		<div className="flex gap-8">
-			{/* Main content */}
 			<div className="flex-1 min-w-0">
 				<DocBreadcrumb />
 
-				{/* Article header */}
 				<header className="mb-12 pb-8 border-b border-gray-200 dark:border-gray-800">
 					<h1 className="text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4 leading-tight">
-						{docContent.title}
+						{page.title}
 					</h1>
-					<p className="text-xl text-gray-600 dark:text-gray-400">
-						{docContent.description}
-					</p>
+					{page.description && (
+						<p className="text-xl text-gray-600 dark:text-gray-400">
+							{page.description}
+						</p>
+					)}
+					{page.lastUpdated && (
+						<p className="mt-4 text-sm text-gray-500 dark:text-gray-500">
+							Last updated {page.lastUpdated}
+						</p>
+					)}
 				</header>
 
-				{/* Content */}
-				<article className="prose dark:prose-invert max-w-none">
-					<div className="space-y-6">
-						{docContent.content.split('\n\n').map((paragraph, idx) => {
-							// Handle headings
-							if (paragraph.startsWith('# ')) {
+				<article className="prose prose-invert max-w-none prose-pre:bg-transparent prose-code:before:content-none prose-code:after:content-none">
+					<ReactMarkdown
+						remarkPlugins={[remarkGfm]}
+						components={{
+							h1: ({ children }) => {
+								headingIndex += 1;
 								return (
-									<h1
-										key={idx}
-										data-heading-id={`heading-${idx}`}
-										className="text-4xl font-bold text-gray-900 dark:text-gray-100 mt-12 mb-6 scroll-mt-20"
-									>
-										{paragraph.slice(2).trim()}
+									<h1 data-heading-id={`heading-${headingIndex}`} className="scroll-mt-24">
+										{children}
 									</h1>
 								);
-							}
-
-							if (paragraph.startsWith('## ')) {
+							},
+							h2: ({ children }) => {
+								headingIndex += 1;
 								return (
-									<h2
-										key={idx}
-										data-heading-id={`heading-${idx}`}
-										className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-10 mb-4 scroll-mt-20"
-									>
-										{paragraph.slice(3).trim()}
+									<h2 data-heading-id={`heading-${headingIndex}`} className="scroll-mt-24">
+										{children}
 									</h2>
 								);
-							}
-
-							if (paragraph.startsWith('### ')) {
+							},
+							h3: ({ children }) => {
+								headingIndex += 1;
 								return (
-									<h3
-										key={idx}
-										data-heading-id={`heading-${idx}`}
-										className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-8 mb-3 scroll-mt-20"
-									>
-										{paragraph.slice(4).trim()}
+									<h3 data-heading-id={`heading-${headingIndex}`} className="scroll-mt-24">
+										{children}
 									</h3>
 								);
-							}
-
-							// Handle code blocks
-							if (paragraph.startsWith('```')) {
-								const lines = paragraph.split('\n');
-								const lang = lines[0].slice(3) || 'bash';
-								const code = lines.slice(1, -1).join('\n');
-
+							},
+							a: ({ href = '', children }) => {
+								const normalized = normalizeRelativeDocLink(page.path, href);
+								const external = normalized.startsWith('http://') || normalized.startsWith('https://');
 								return (
-									<div key={idx} className="my-6">
-										<CodeBlock language={lang} code={code} />
-									</div>
+									<a href={normalized} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
+										{children}
+									</a>
 								);
-							}
-
-							// Handle lists
-							if (paragraph.startsWith('- ')) {
+							},
+							code: ({ className, children, ...props }) => {
+								const match = /language-(\w+)/.exec(className || '');
+								const code = String(children).replace(/\n$/, '');
+								if (match) {
+									return <CodeBlock language={match[1]} code={code} />;
+								}
 								return (
-									<ul key={idx} className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
-										{paragraph.split('\n').map((item, i) => {
-											const text = item.slice(2).trim();
-											// Handle bold text
-											const parts = text.split(/\*\*(.*?)\*\*/g);
-											return (
-												<li key={i}>
-													{parts.map((part, j) =>
-														j % 2 === 1 ? (
-															<strong key={j}>{part}</strong>
-														) : (
-															<span key={j}>{part}</span>
-														)
-													)}
-												</li>
-											);
-										})}
-									</ul>
+									<code
+										{...props}
+										className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono text-emerald-600 dark:text-emerald-400"
+									>
+										{children}
+									</code>
 								);
-							}
-
-							// Handle regular paragraphs with formatting
-							const parts = paragraph.split(/(\*\*.*?\*\*|`.*?`)/g);
-							return (
-								<p key={idx} className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-									{parts.map((part, i) => {
-										if (part.startsWith('**') && part.endsWith('**')) {
-											return <strong key={i}>{part.slice(2, -2)}</strong>;
-										}
-										if (part.startsWith('`') && part.endsWith('`')) {
-											return (
-												<code
-													key={i}
-													className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono text-emerald-600 dark:text-emerald-400"
-												>
-													{part.slice(1, -1)}
-												</code>
-											);
-										}
-										return part;
-									})}
-								</p>
-							);
-						})}
-					</div>
+							},
+						}}
+					>
+						{renderedContent}
+					</ReactMarkdown>
 				</article>
 
-				{/* Navigation */}
+				<ChildLinks links={page.childLinks} />
+
 				<div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
 					<button
 						onClick={() => navigate(-1)}
@@ -209,8 +227,7 @@ export function DocPage() {
 				</div>
 			</div>
 
-			{/* Table of Contents */}
-			<TableOfContents content={docContent.content} />
+			<TableOfContents content={renderedContent} />
 		</div>
 	);
 }
