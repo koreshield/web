@@ -12,11 +12,12 @@ export async function onRequest(context) {
       const url = new URL(context.request.url);
       const pathname = url.pathname;
       
-      // Don't redirect API calls, static assets, or known non-page routes
+      // Don't redirect API calls, static assets, docs, or known non-page routes
       if (
         !pathname.startsWith('/api/') &&
         !pathname.startsWith('/assets/') &&
         !pathname.startsWith('/static/') &&
+        !pathname.startsWith('/docs/') &&
         !pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|json|xml|webp|woff|woff2|ttf|eot)$/i) &&
         !pathname.includes('.')
       ) {
