@@ -6,28 +6,43 @@ import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import rehypeHighlight from 'rehype-highlight'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
+import { globSync } from 'glob'
+
+// Pre-load all MDX files at build time
+const mdxFiles: Record<string, string> = {}
+const srcDir = resolve(__dirname, 'src')
+const contentDir = resolve(srcDir, 'content/docs')
+
+// Scan for all .mdx files
+const files = globSync('**/*.mdx', { cwd: contentDir })
+files.forEach((file: string) => {
+  const key = `virtual:doc:${file.replace(/\.mdx$/, '')}`
+  const fullPath = resolve(contentDir, file)
+  try {
+    mdxFiles[key] = readFileSync(fullPath, 'utf-8')
+  } catch (err) {
+    console.warn(`Failed to read: ${file}`)
+  }
+})
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    // Custom plugin for handling ?raw MDX imports
+    // Virtual module loader for documentation files
     {
-      name: 'raw-mdx-loader',
+      name: 'virtual-docs',
       resolveId(id) {
-        if (id.includes('.mdx?raw')) {
+        if (id.startsWith('virtual:doc:')) {
           return id
         }
       },
       load(id) {
-        if (id.includes('.mdx?raw')) {
-          const path = id.replace('?raw', '')
-          try {
-            const content = readFileSync(resolve(__dirname, path), 'utf-8')
+        if (id.startsWith('virtual:doc:')) {
+          const content = mdxFiles[id]
+          if (content) {
             return `export default ${JSON.stringify(content)}`
-          } catch (err) {
-            console.warn(`Failed to load raw MDX: ${path}`, err)
-            return 'export default ""'
           }
+          return 'export default ""'
         }
       }
     },

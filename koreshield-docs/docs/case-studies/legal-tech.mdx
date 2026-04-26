@@ -1,0 +1,17 @@
+---
+title: Legal Tech
+description: Applying KoreShield to legal document and advisory AI use cases.
+last_update:
+  date: 2026-03-10
+---
+
+# Legal Tech
+
+Legal AI systems benefit from explicit context validation before model execution.
+
+Recommended pipeline:
+
+1. Retrieve clauses/case excerpts.
+2. Scan retrieved context via `/v1/rag/scan`.
+3. Pass only safe context to `/v1/chat/completions`.
+4. Keep logs/reports for review and defensibility.
