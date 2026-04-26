@@ -16,58 +16,19 @@ export default function DocsPage() {
 		.split('/')
 		.filter(Boolean);
 
-	// Normalize path for doc loading
-	const docPath = pathParts.length > 0 ? pathParts.join('/') : null;
+	// If no path, show the index page
+	if (pathParts.length === 0) {
+		return (
+			<DocsLayout>
+				<DocsIndexPage />
+			</DocsLayout>
+		);
+	}
 
-	// Categories that have an index.mdx inside them
-	const CATEGORIES_WITH_INDEX = new Set([
-		'getting-started',
-		'client-integration',
-		'configuration',
-		'api',
-		'features',
-		'integrations',
-		'compliance',
-		'case-studies',
-		'best-practices',
-	]);
-
-	// Top-level standalone files (no subdirectory)
-	const STANDALONE_DOCS = new Set(['overview', 'api-reference']);
-
-	// Map documentation URL paths to content file paths
-	const getDocFilePath = (path: string | null): string | null => {
-		if (!path) return null;
-
-		// Standalone top-level files
-		if (STANDALONE_DOCS.has(path)) return path;
-
-		const parts = path.split('/');
-
-		// Multi-segment path: category/page (e.g. "getting-started/quick-start")
-		if (parts.length >= 2) {
-			// Pass through as-is — the file must exist at this exact path
-			return path;
-		}
-
-		// Single segment — it's a category root; resolve to its index file
-		if (CATEGORIES_WITH_INDEX.has(path)) {
-			return `${path}/index`;
-		}
-
-		// Fallback: try as-is
-		return path;
-	};
-
-	const docFilePath = getDocFilePath(docPath);
-
+	// Otherwise show the specific doc page
 	return (
 		<DocsLayout>
-			{docFilePath ? (
-				<DocPage docPath={docFilePath} />
-			) : (
-				<DocsIndexPage />
-			)}
+			<DocPage />
 		</DocsLayout>
 	);
 }
