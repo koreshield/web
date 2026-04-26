@@ -94,7 +94,7 @@ export function canUseFeature(
   currentUsage?: number,
 ): boolean {
   const planFeatures = SUBSCRIPTION_PLANS[plan].features;
-  // @ts-ignore
+  // @ts-expect-error — feature key is valid but TS can't narrow the union type here
   const limit = planFeatures[feature];
 
   if (limit === -1) return true; // Unlimited

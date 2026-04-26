@@ -106,7 +106,7 @@ export const firewallConfigsRelations = relations(firewallConfigs, ({ many }) =>
   securityEvents: many(securityEvents),
 }));
 
-export const apiProvidersRelations = relations(apiProviders, ({}) => ({
+export const apiProvidersRelations = relations(apiProviders, (_helpers) => ({
   // Add relations if needed
 }));
 
@@ -117,7 +117,7 @@ export const securityEventsRelations = relations(securityEvents, ({ one }) => ({
   }),
 }));
 
-export const firewallMetricsRelations = relations(firewallMetrics, ({}) => ({
+export const firewallMetricsRelations = relations(firewallMetrics, (_helpers) => ({
   // Add relations if needed
 }));
 
