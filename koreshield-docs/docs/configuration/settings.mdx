@@ -1,0 +1,25 @@
+---
+title: Runtime Settings
+description: Configure KoreShield runtime behavior for hosted or self-hosted deployments.
+slug: /configuration/settings
+last_update:
+  date: 2026-03-10
+---
+
+# Runtime Settings
+
+Hosted customers configure runtime settings in the KoreShield Dashboard. Self-hosted customers can apply the same settings in their deployment configuration.
+
+## Common Settings
+
+- **Security sensitivity:** Low/Medium/High detection posture
+- **Default action:** Allow, warn, or block
+- **Authentication:** JWT or API key requirements
+- **Provider routing:** Enable or disable providers per environment
+
+## Hosted vs. Self-hosted
+
+- **Hosted:** Set values in the Dashboard and deploy instantly.
+- **Self-hosted:** Apply environment variables and the managed config bundle provided by KoreShield.
+
+For changes that affect production enforcement (for example, stricter blocking), validate changes in a staging environment first.

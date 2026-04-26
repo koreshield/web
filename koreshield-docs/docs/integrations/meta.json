@@ -1,0 +1,17 @@
+{
+  "pages": [
+    "index",
+    "---SDKs---",
+    "sdk-python",
+    "sdk-javascript",
+    "---CRM---",
+    "salesforce",
+    "hubspot",
+    "---Frameworks---",
+    "langchain",
+    "llamaindex",
+    "openai",
+    "anthropic",
+    "deepseek"
+  ]
+}
