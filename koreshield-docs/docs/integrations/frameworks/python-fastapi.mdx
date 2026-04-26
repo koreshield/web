@@ -1,0 +1,44 @@
+---
+title: FastAPI
+description: Integrate FastAPI services with KoreShield proxy.
+sidebar_position: 3
+icon: Box
+last_update:
+  date: 2026-03-10
+---
+
+# FastAPI Integration
+
+Run your application and KoreShield as separate services. Your FastAPI routes call KoreShield endpoints.
+
+## Example
+
+```python
+from fastapi import FastAPI
+import httpx
+import os
+
+app = FastAPI()
+
+@app.post('/chat')
+async def chat(payload: dict):
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(
+            'http://localhost:8000/v1/chat/completions',
+            headers={
+                'Authorization': f"Bearer {os.environ['KORESHIELD_JWT']}",
+                'Content-Type': 'application/json',
+            },
+            json={
+                'model': 'deepseek-chat',
+                'messages': payload.get('messages', []),
+            },
+        )
+        return resp.json()
+```
+
+## Auth Options
+
+- Bearer JWT
+- `X-API-Key`
+- `ks_access_token` cookie

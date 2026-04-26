@@ -1,0 +1,46 @@
+---
+title: Security
+description: Koreshield security capabilities and guidance.
+last_update:
+  date: 2026-03-10
+---
+
+# Security
+
+KoreShield secures LLM traffic by combining sanitization, detection, and policy enforcement in a single proxy layer. This keeps provider API keys server-side and applies the same safeguards to every request.
+
+## Core Capabilities
+
+- Input sanitization to remove unsafe content patterns
+- Prompt injection detection with multi-layered rules
+- Policy enforcement that blocks or warns on detected threats
+- Audit-friendly logging and metrics for monitoring
+
+## How It Works
+
+1. Requests enter the KoreShield proxy
+2. Content is sanitized and scanned for threats
+3. Policies decide whether to allow, warn, or block
+4. Allowed traffic is forwarded to the configured provider
+5. Results are logged for monitoring and audit
+
+## Configure Security Defaults
+
+Set defaults in the KoreShield Dashboard (hosted) or your deployment settings (self-hosted). Typical settings include sensitivity and default action.
+
+## Sensitivity Guidance
+
+- `high`: strict enforcement, best for regulated workloads
+- `medium`: balanced defaults for most production use
+- `low`: lenient mode for experimentation
+
+## Operational Tips
+
+- Use structured logging and alerts to monitor blocks and threats
+- Apply rate limits to protect upstream providers
+- Protect proxy endpoints with JWT or `X-API-Key` auth
+
+## Related Docs
+
+- Detection details in [Attack Detection](/docs/features/attack-detection)
+- Configuration settings in [/configuration/settings](/docs/configuration/settings)

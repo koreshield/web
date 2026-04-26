@@ -1,0 +1,9 @@
+{
+  "label": "Advanced",
+  "position": 6,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "description": "Advanced topics for power users and custom integrations."
+  }
+}

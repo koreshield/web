@@ -191,7 +191,7 @@ function AppContent() {
 						}
 					/>
 					<Route
-						path="/docs"
+						path="/docs/*"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>

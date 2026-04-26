@@ -1,0 +1,98 @@
+---
+title: WebSocket Events
+description: Real-time event streaming via WebSocket.
+slug: /api/websocket
+last_update:
+  date: 2026-03-10
+---
+
+# WebSocket Events
+
+KoreShield provides a WebSocket endpoint for real-time event streaming to dashboards, monitoring tools, and automation pipelines.
+
+## Endpoint
+
+```
+ws://localhost:8000/ws/events
+```
+
+## Authentication
+
+WebSocket connections require a valid JWT:
+
+- **Header**: `Authorization: Bearer <jwt>`
+- **Cookie**: `ks_access_token`
+
+Unauthenticated connections are rejected with a `4003` close code.
+
+## Event Types
+
+| Event Type | Description |
+|---|---|
+| `threat_detected` | A new threat was detected during request scanning |
+| `provider_health_change` | A provider's health status changed |
+| `cost_threshold_alert` | A cost threshold was exceeded |
+| `system_status` | System status update (startup, shutdown, config change) |
+
+## Message Format
+
+All messages are JSON with this structure:
+
+```json
+{
+  "type": "threat_detected",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "data": {
+    "threat_id": "thr_abc123",
+    "severity": "high",
+    "attack_type": "prompt_injection",
+    "confidence": 0.92,
+    "action_taken": "blocked"
+  }
+}
+```
+
+## Subscribing to Event Types
+
+After connecting, send a subscription message to filter events:
+
+```json
+{
+  "action": "subscribe",
+  "event_types": ["threat_detected", "provider_health_change"]
+}
+```
+
+If no subscription is sent, all events are delivered.
+
+## Client Example (JavaScript)
+
+```javascript
+const ws = new WebSocket("ws://localhost:8000/ws/events", [], {
+  headers: { Authorization: `Bearer ${token}` }
+});
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log(`[${data.type}]`, data.data);
+};
+
+ws.onerror = (err) => console.error("WebSocket error:", err);
+ws.onclose = (e) => console.log("Closed:", e.code, e.reason);
+```
+
+## Infrastructure
+
+- The WebSocket system uses **Redis pub/sub** to broadcast events across multiple proxy instances
+- The Redis client is initialized from the main app and shared with the WebSocket module
+- A health check endpoint is available at `GET /ws/health`
+
+## Notes
+
+- WebSocket endpoints are **not** part of the OpenAPI document (FastAPI/OpenAPI does not describe WebSocket handlers)
+- Connection limits and timeouts follow your reverse proxy configuration
+
+## Related Docs
+
+- [REST API](/docs/api/rest-api) for HTTP endpoints
+- [Monitoring](/docs/features/monitoring) for Prometheus metrics and alerting

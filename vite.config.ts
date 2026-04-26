@@ -4,10 +4,33 @@ import mdx from '@mdx-js/rollup'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import rehypeHighlight from 'rehype-highlight'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    // Custom plugin for handling ?raw MDX imports
+    {
+      name: 'raw-mdx-loader',
+      resolveId(id) {
+        if (id.includes('.mdx?raw')) {
+          return id
+        }
+      },
+      load(id) {
+        if (id.includes('.mdx?raw')) {
+          const path = id.replace('?raw', '')
+          try {
+            const content = readFileSync(resolve(__dirname, path), 'utf-8')
+            return `export default ${JSON.stringify(content)}`
+          } catch (err) {
+            console.warn(`Failed to load raw MDX: ${path}`, err)
+            return 'export default ""'
+          }
+        }
+      }
+    },
     {
       enforce: 'pre',
       ...mdx({
@@ -36,3 +59,4 @@ export default defineConfig({
     globals: true,
   }
 })
+

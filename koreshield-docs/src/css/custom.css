@@ -1,0 +1,121 @@
+/**
+ * Custom CSS for KoreShield Docs
+ * Infima (Docusaurus's CSS framework) already handles most mobile responsiveness.
+ * These overrides enhance the mobile experience further.
+ */
+
+:root {
+  --ifm-color-primary: #3b82f6;
+  --ifm-color-primary-dark: #2563eb;
+  --ifm-color-primary-darker: #1d4ed8;
+  --ifm-color-primary-darkest: #1e40af;
+  --ifm-color-primary-light: #60a5fa;
+  --ifm-color-primary-lighter: #93c5fd;
+  --ifm-color-primary-lightest: #bfdbfe;
+  --ifm-code-font-size: 92%;
+  --ifm-font-family-base: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-navbar-height: 60px;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #60a5fa;
+  --ifm-color-primary-dark: #3b82f6;
+  --ifm-color-primary-darker: #2563eb;
+  --ifm-color-primary-darkest: #1d4ed8;
+  --ifm-color-primary-light: #93c5fd;
+  --ifm-color-primary-lighter: #bfdbfe;
+  --ifm-color-primary-lightest: #dbeafe;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-background-color: #050a14;
+  --ifm-background-surface-color: #0f1623;
+  --ifm-navbar-background-color: rgba(5, 10, 20, 0.85);
+  --ifm-sidebar-background: #0d1526;
+}
+
+/* Navbar */
+.navbar {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Mobile: collapse sidebar padding */
+@media (max-width: 996px) {
+  .navbar__inner {
+    padding: 0 1rem;
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+
+  /* Good padding for article content on small screens */
+  .markdown {
+    padding: 0 0.25rem;
+  }
+
+  /* Make code blocks horizontally scrollable rather than overflowing */
+  pre {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 13px;
+  }
+
+  /* Table of contents  -  hide on mobile, only show in sidebar */
+  .tableOfContents {
+    display: none;
+  }
+
+  /* Better button sizes for touch targets */
+  .button {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  /* Hero section text scaling */
+  .hero__title {
+    font-size: 2.2rem;
+  }
+
+  .hero__subtitle {
+    font-size: 1.1rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .hero__title {
+    font-size: 1.8rem;
+    line-height: 1.2;
+  }
+
+  .hero__subtitle {
+    font-size: 1rem;
+  }
+
+  /* Prevent horizontal overflow from long code strings */
+  code {
+    word-break: break-all;
+  }
+}
+
+/* Improve sidebar on mobile */
+.sidebar_node_modules\@docusaurus\8theme-classic\src\theme\DocSidebar\Desktop\index\.module\.css {
+  top: var(--ifm-navbar-height);
+}
+
+/* Better table responsiveness */
+.markdown table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+}
+
+@media (min-width: 997px) {
+  .markdown table {
+    display: table;
+    white-space: normal;
+  }
+}
