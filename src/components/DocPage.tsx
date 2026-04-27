@@ -75,6 +75,11 @@ function normalizeRelativeDocLink(currentPath: string, href: string) {
 
 function transformDocContent(content: string) {
 	return content
+		// Strip leading h1 — the page title is already rendered in the <header>
+		// above the article, so the "# Title" at the top of each MDX file would
+		// create a duplicate. Remove the very first h1 line (and the blank line
+		// that typically follows it) if it appears before any real content.
+		.replace(/^\s*#\s+[^\n]+\n+/, '')
 		.replace(/^import\s+.*$/gm, '')
 		.replace(/<DocCardList\s*\/>/g, '')
 		.replace(/^::::(note|info|tip|warning|danger)\s*$/gm, '> **$1**')
