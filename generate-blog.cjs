@@ -46,10 +46,26 @@ function parseFrontmatter(content) {
 		const keyLower = key.trim().toLowerCase();
 		switch (keyLower) {
 			case 'categories':
-				metadata.categories = Array.isArray(value) ? value : [value];
+				// Split comma-separated values into array
+				if (Array.isArray(value)) {
+					metadata.categories = value;
+				} else {
+					metadata.categories = value
+						.split(',')
+						.map(v => v.trim())
+						.filter(Boolean);
+				}
 				break;
 			case 'tags':
-				metadata.tags = Array.isArray(value) ? value : [value];
+				// Split comma-separated values into array
+				if (Array.isArray(value)) {
+					metadata.tags = value;
+				} else {
+					metadata.tags = value
+						.split(',')
+						.map(v => v.trim())
+						.filter(Boolean);
+				}
 				break;
 			default:
 				metadata[keyLower] = value;

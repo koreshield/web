@@ -5,6 +5,8 @@
 import { useParams } from 'react-router-dom';
 import { BlogListPage } from '../components/BlogListPage';
 import { BlogPostPage } from '../components/BlogPostPage';
+// Import content to trigger blog initialization
+import '../blog/content';
 
 export function BlogPage() {
 	const { slug } = useParams<{ slug?: string }>();
