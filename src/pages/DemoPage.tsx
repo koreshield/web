@@ -1,25 +1,12 @@
-import emailjs from '@emailjs/browser';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, Clock, Shield, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 import { useToast } from '../components/ToastNotification';
+import { resolveApiBaseUrl } from '../lib/api-base';
 
-const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string;
-const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string;
-const TEMPLATE_ID =
-	(import.meta.env.VITE_EMAILJS_TEMPLATE_ID_CONTACT as string | undefined) ||
-	(import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string | undefined) ||
-	'';
-const emailConfigAvailable =
-	Boolean(EMAILJS_SERVICE_ID) && Boolean(EMAILJS_PUBLIC_KEY) && Boolean(TEMPLATE_ID);
-
-// Google Apps Script deployment URL for Google Sheets
-const GOOGLE_SHEETS_WEBHOOK = import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK as string | undefined;
-
-// Backend API endpoint for database storage
-const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL as string | undefined;
+const API_BASE_URL = resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
 const whatYoullSee = [
 	{
@@ -135,79 +122,39 @@ export default function DemoPage() {
 
 		setSubmitting(true);
 		try {
-			const formData = {
-				firstName: form.firstName,
-				lastName: form.lastName,
-				workEmail: form.workEmail,
-				company: form.company,
-				jobTitle: form.jobTitle,
-				useCase: form.useCase,
-				source: form.source || 'Not specified',
-			};
+			const backendResponse = await fetch(`${API_BASE_URL}/v1/management/demo-submission`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					first_name: form.firstName,
+					last_name: form.lastName,
+					work_email: form.workEmail,
+					company: form.company,
+					job_title: form.jobTitle,
+					use_case: form.useCase,
+					source: form.source || null,
+				}),
+			});
 
-			// Send to Google Sheets (non-blocking)
-			if (GOOGLE_SHEETS_WEBHOOK) {
-				fetch(GOOGLE_SHEETS_WEBHOOK, {
-					method: 'POST',
-					body: JSON.stringify(formData),
-				}).catch((err) => {
-					console.error('Google Sheets submission failed:', err);
-					// Don't fail the main submission if Sheets fails
-				});
-			}
-
-			// Send to backend database
-			if (BACKEND_API_URL) {
-				const backendResponse = await fetch(`${BACKEND_API_URL}/api/demo-submission`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						first_name: form.firstName,
-						last_name: form.lastName,
-						work_email: form.workEmail,
-						company: form.company,
-						job_title: form.jobTitle,
-						use_case: form.useCase,
-						source: form.source || null,
-					}),
-				});
-
-				if (!backendResponse.ok) {
-					console.error('Backend submission failed:', backendResponse.statusText);
-				}
-			}
-
-			// Send notification email via EmailJS
-			if (emailConfigAvailable) {
-				await emailjs.send(
-					EMAILJS_SERVICE_ID,
-					TEMPLATE_ID,
-					{
-						name: `${form.firstName} ${form.lastName}`.trim(),
-						from_name: `${form.firstName} ${form.lastName}`.trim(),
-						email: form.workEmail,
-						from_email: form.workEmail,
-						company: form.company,
-						tier: form.jobTitle,
-						subject: 'Demo request',
-						subject_line: `Demo request from ${form.company}`,
-						form_type: 'Book a Demo',
-						icon: '🎯',
-						message: `Job title: ${form.jobTitle}\n\nWhat they are building:\n${form.useCase}\n\nHow they heard about us: ${form.source || 'Not specified'}`,
-						details: form.useCase,
-					},
-					EMAILJS_PUBLIC_KEY,
+			if (!backendResponse.ok) {
+				const error = await backendResponse.json().catch(() => ({}));
+				throw new Error(
+					(typeof error.detail === 'string' && error.detail) ||
+						'We could not submit your demo request right now.',
 				);
 			}
 
 			setSubmitted(true);
 			setForm(initialForm);
 			setErrors({});
-		} catch {
+		} catch (error) {
 			addToast({
-				message: 'Something went wrong. Please try emailing us directly at hello@koreshield.com.',
+				message:
+					error instanceof Error
+						? error.message
+						: 'Something went wrong. Please try emailing us directly at hello@koreshield.com.',
 				type: 'error',
 			});
 		} finally {
