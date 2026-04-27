@@ -12,6 +12,7 @@ import UseCases from '../components/UseCases';
 
 import { motion } from 'framer-motion';
 import { ArrowDown, ArrowRight, CheckCircle2, Rocket, Settings, Terminal } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
 function CTAFlowArrow() {
@@ -201,17 +202,15 @@ function LandingPage() {
                                     </div>
                                 ))}
                             </div>
-                            <a
-                                href="https://docs.koreshield.com"
-                                target="_blank"
-                                rel="noreferrer"
+                            <Link
+                                to="/docs"
                                 className="group relative w-full inline-flex items-center justify-center gap-2 bg-electric-green hover:bg-emerald-bright text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 shadow-lg shadow-emerald-500/20 overflow-hidden"
                             >
                                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-0 animate-shimmer" />
                                 <Rocket className="w-4 h-4 relative z-10" />
                                 <span className="relative z-10">Start Building</span>
                                 <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
-                            </a>
+                            </Link>
                         </motion.div>
                     </div>
                 </div>

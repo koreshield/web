@@ -91,7 +91,7 @@ const supportOptions = [
 		title: 'Documentation',
 		description: 'Comprehensive guides, API references, and tutorials. Most questions are answered here first.',
 		cta: 'Browse Docs',
-		link: 'https://docs.koreshield.com',
+		link: '/docs',
 		external: true,
 	},
 	{

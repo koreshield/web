@@ -342,11 +342,11 @@ export function ProfilePage() {
 							<div className="font-medium">Server API keys</div>
 							<p className="text-sm text-muted-foreground mt-2">Create the credentials your backend or gateway will use.</p>
 						</Link>
-						<a href="https://docs.koreshield.com/docs/getting-started/quick-start/" target="_blank" rel="noreferrer" className="rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
+						<Link to="/docs/getting-started/quick-start" className="rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
 							<BookOpen className="w-5 h-5 text-primary mb-3" />
 							<div className="font-medium">Public docs</div>
 							<p className="text-sm text-muted-foreground mt-2">Open the published docs if you want the broader setup guide.</p>
-						</a>
+						</Link>
 					</div>
 				</div>
 

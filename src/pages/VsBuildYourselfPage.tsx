@@ -348,15 +348,13 @@ export default function VsBuildYourselfPage() {
 							<DollarSign className="w-5 h-5" />
 							View Pricing
 						</Link>
-						<a
-							href="https://docs.koreshield.com/docs/getting-started/installation/"
-							target="_blank"
-							rel="noreferrer noopener"
+						<Link
+							to="/docs/getting-started/installation"
 							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"
 						>
 							<Code className="w-5 h-5" />
 							Start building
-						</a>
+						</Link>
 					</div>
 				</motion.div>
 			</div>

@@ -1,60 +1,35 @@
 import { Search, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { buildDocsNavigation } from '../docs/loader';
-
-interface SearchResult {
-	title: string;
-	path: string;
-	description?: string;
-}
+import { buildDocsSearchIndex, type SearchItem } from '../docs/loader';
 
 export function DocSearch() {
 	const [open, setOpen] = useState(false);
 	const [query, setQuery] = useState('');
-	const [results, setResults] = useState<SearchResult[]>([]);
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const navigate = useNavigate();
-
-	useEffect(() => {
+	const searchIndex = useMemo<SearchItem[]>(() => buildDocsSearchIndex(), []);
+	const results = useMemo(() => {
 		if (!query.trim()) {
-			setResults([]);
-			return;
+			return [];
 		}
 
-		const navigation = buildDocsNavigation();
-		const searchResults: SearchResult[] = [];
+		const normalizedQuery = query.toLowerCase();
+		return searchIndex
+			.filter((item) => (
+				item.title.toLowerCase().includes(normalizedQuery) ||
+				item.description?.toLowerCase().includes(normalizedQuery) ||
+				item.content.toLowerCase().includes(normalizedQuery) ||
+				item.tags?.some((tag) => tag.toLowerCase().includes(normalizedQuery))
+			))
+			.slice(0, 8);
+	}, [query, searchIndex]);
 
-		navigation.forEach(section => {
-			// Search in section title
-			if (section.title.toLowerCase().includes(query.toLowerCase())) {
-				searchResults.push({
-					title: section.title,
-					path: section.path,
-					description: section.description,
-				});
-			}
-
-			// Search in children
-			section.children?.forEach(child => {
-				if (child.title.toLowerCase().includes(query.toLowerCase())) {
-					searchResults.push({
-						title: child.title,
-						path: child.path,
-					});
-				}
-			});
-		});
-
-		setResults(searchResults.slice(0, 8));
-		setSelectedIndex(0);
-	}, [query]);
-
-	const handleNavigate = (path: string) => {
+	const handleNavigate = useCallback((path: string) => {
 		navigate(path);
 		setOpen(false);
 		setQuery('');
-	};
+	}, [navigate]);
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -63,10 +38,10 @@ export function DocSearch() {
 				setOpen(true);
 			} else if (e.key === 'Escape') {
 				setOpen(false);
-			} else if (e.key === 'ArrowDown') {
+			} else if (e.key === 'ArrowDown' && results.length > 0) {
 				e.preventDefault();
 				setSelectedIndex(prev => (prev + 1) % results.length);
-			} else if (e.key === 'ArrowUp') {
+			} else if (e.key === 'ArrowUp' && results.length > 0) {
 				e.preventDefault();
 				setSelectedIndex(prev => (prev - 1 + results.length) % results.length);
 			} else if (e.key === 'Enter') {
@@ -79,7 +54,7 @@ export function DocSearch() {
 
 		window.addEventListener('keydown', handleKeyDown);
 		return () => window.removeEventListener('keydown', handleKeyDown);
-	}, [results, selectedIndex]);
+	}, [handleNavigate, results, selectedIndex]);
 
 	return (
 		<>
@@ -107,15 +82,18 @@ export function DocSearch() {
 					<div className="w-full max-w-2xl mx-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
 						{/* Search input */}
 						<div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-							<Search size={18} className="text-gray-400" />
-							<input
-								autoFocus
-								type="text"
-								placeholder="Search documentation..."
-								value={query}
-								onChange={e => setQuery(e.target.value)}
-								className="flex-1 bg-transparent outline-none text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-							/>
+								<Search size={18} className="text-gray-400" />
+								<input
+									autoFocus
+									type="text"
+									placeholder="Search documentation..."
+									value={query}
+									onChange={(e) => {
+										setQuery(e.target.value);
+										setSelectedIndex(0);
+									}}
+									className="flex-1 bg-transparent outline-none text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+								/>
 							<button
 								onClick={() => setOpen(false)}
 								className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"

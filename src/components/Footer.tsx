@@ -72,7 +72,7 @@ function Footer() {
 					<div>
 						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Product</h4>
 						<ul className="space-y-3">
-							<li><a href="https://docs.koreshield.com/docs/features/" target="_blank" rel="noreferrer noopener" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Features</a></li>
+							<li><Link to="/docs/features" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Features</Link></li>
 							<li><Link to="/integrations" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Integrations</Link></li>
 							<li><Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Pricing</Link></li>
 							<li><Link to="/demo" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Live Demo</Link></li>
@@ -85,7 +85,7 @@ function Footer() {
 					<div>
 						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Resources</h4>
 						<ul className="space-y-3">
-							<li><a href="https://docs.koreshield.com" target="_blank" rel="noreferrer noopener" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Documentation</a></li>
+							<li><Link to="/docs" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Documentation</Link></li>
 							<li><a href="https://blog.koreshield.com" target="_blank" rel="noreferrer noopener" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Blog</a></li>
 							<li><Link to="/research" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Research</Link></li>
 							<li><Link to="/status" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Status</Link></li>
