@@ -14,6 +14,7 @@ import { ApiKeysPage } from './pages/ApiKeysPage';
 
 // Lazy load pages for code splitting
 const LandingPage = lazy(() => import('./pages/LandingPage'));
+const BlogPage = lazy(() => import('./pages/BlogPageWrapper'));
 const DocsPage = lazy(() => import('./pages/DocsPage'));
 const StatusPage = lazy(() => import('./pages/StatusPage'));
 const PlaygroundPage = lazy(() => import('./pages/PlaygroundPage'));
@@ -451,6 +452,28 @@ function AppContent() {
 						}
 					/>
 				</Route>
+
+				{/* Blog Layout */}
+				<Route
+					path="/blog"
+					element={
+						<Suspense fallback={<SuspenseFallback />}>
+							<RouteErrorBoundary>
+								<BlogPage />
+							</RouteErrorBoundary>
+						</Suspense>
+					}
+				/>
+				<Route
+					path="/blog/*"
+					element={
+						<Suspense fallback={<SuspenseFallback />}>
+							<RouteErrorBoundary>
+								<BlogPage />
+							</RouteErrorBoundary>
+						</Suspense>
+					}
+				/>
 
 				{/* Documentation Layout - Separate from Marketing */}
 				<Route
