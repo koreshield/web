@@ -14,49 +14,32 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 	const navigation = buildDocsNavigation();
 
 	return (
-		<div className="min-h-screen bg-white dark:bg-gray-950">
-			{/* Header */}
-			<header className="sticky top-0 z-40 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950/80 backdrop-blur-sm">
-				<div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
-					{/* Logo/Title */}
-					<Link
-						to="/docs"
-						className="flex items-center gap-2 font-bold text-lg text-gray-900 dark:text-gray-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-					>
-						<span>Documentation</span>
-					</Link>
-
-					{/* Desktop Search */}
-					<div className="flex-1 max-w-xs mx-8 hidden lg:block">
-						<DocSearch />
-					</div>
-
-					{/* Right side */}
-					<div className="flex items-center gap-2">
-						{/* Mobile Search */}
-						<div className="lg:hidden">
-							<DocSearch />
-						</div>
-
-						{/* Mobile Menu Button */}
-						<button
-							onClick={() => setSidebarOpen(!sidebarOpen)}
-							className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-						>
-							{sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-						</button>
-					</div>
-				</div>
-			</header>
+		<>
+			{/* Mobile docs toolbar — visible only on small screens, sticks below the site header */}
+			<div className="sticky top-16 z-30 flex items-center justify-between border-b border-border bg-background/90 px-4 py-2 backdrop-blur-sm lg:hidden">
+				<button
+					onClick={() => setSidebarOpen(!sidebarOpen)}
+					className="flex items-center gap-2 rounded-lg p-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+				>
+					{sidebarOpen ? <X size={18} /> : <Menu size={18} />}
+					<span>Docs menu</span>
+				</button>
+				<DocSearch />
+			</div>
 
 			<div className="flex">
 				{/* Sidebar */}
 				<aside
 					className={`${
 						sidebarOpen ? 'block' : 'hidden'
-					} lg:block fixed lg:sticky top-20 lg:top-0 left-0 w-64 h-[calc(100vh-5rem)] lg:h-screen bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 overflow-y-auto z-30 transition-all`}
+					} lg:block fixed lg:sticky top-[6.75rem] lg:top-16 left-0 w-64 h-[calc(100vh-6.75rem)] lg:h-[calc(100vh-4rem)] border-r border-border bg-card/30 overflow-y-auto z-30`}
 				>
-					<nav className="space-y-0.5 px-3 py-6">
+					{/* Search — desktop only; mobile has it in the toolbar above */}
+					<div className="hidden px-3 pt-4 pb-2 lg:block">
+						<DocSearch />
+					</div>
+
+					<nav className="space-y-0.5 px-3 py-4">
 						{navigation.map((item) => (
 							<SidebarNavItem
 								key={item.path}
@@ -71,19 +54,19 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 				{/* Overlay for mobile */}
 				{sidebarOpen && (
 					<div
-						className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+						className="fixed inset-0 z-20 bg-black/50 lg:hidden"
 						onClick={() => setSidebarOpen(false)}
 					/>
 				)}
 
 				{/* Main content */}
-				<main className="flex-1 min-h-[calc(100vh-5rem)]">
+				<div className="flex-1 min-w-0">
 					<div className="px-4 sm:px-6 lg:px-8 py-8 lg:py-12 max-w-7xl mx-auto">
 						{children}
 					</div>
-				</main>
+				</div>
 			</div>
-		</div>
+		</>
 	);
 }
 
@@ -115,8 +98,8 @@ function SidebarNavItem({ item, currentPath, onNavigate }: NavItemProps) {
 						onClick={() => setExpanded(!expanded)}
 						className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
 							isActive
-								? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-l-2 border-emerald-600 dark:border-emerald-400'
-								: 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+								? 'bg-primary/10 text-primary border-l-2 border-primary'
+								: 'text-foreground hover:text-foreground hover:bg-accent'
 						}`}
 					>
 						<span className="flex-1 text-left">{item.title}</span>
@@ -131,8 +114,8 @@ function SidebarNavItem({ item, currentPath, onNavigate }: NavItemProps) {
 						onClick={onNavigate}
 						className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
 							isActive
-								? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-l-2 border-emerald-600 dark:border-emerald-400'
-								: 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+								? 'bg-primary/10 text-primary border-l-2 border-primary'
+								: 'text-foreground hover:text-foreground hover:bg-accent'
 						}`}
 					>
 						{item.title}
@@ -142,7 +125,7 @@ function SidebarNavItem({ item, currentPath, onNavigate }: NavItemProps) {
 
 			{/* Children */}
 			{hasChildren && expanded && item.children && (
-				<div className="ml-0 mt-1 space-y-0.5 border-l border-gray-300 dark:border-gray-700 pl-0">
+				<div className="mt-1 space-y-0.5 border-l border-border pl-0 ml-0">
 					{item.children.map((child) => (
 						child.children && child.children.length > 0 ? (
 							<SidebarNavItem
@@ -152,18 +135,18 @@ function SidebarNavItem({ item, currentPath, onNavigate }: NavItemProps) {
 								onNavigate={onNavigate}
 							/>
 						) : (
-						<Link
-							key={child.path}
-							to={child.path}
-							onClick={onNavigate}
-							className={`block px-3 py-2 rounded-lg text-sm transition-all ml-2 ${
-								currentPath === child.path
-									? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-medium'
-									: 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
-							}`}
-						>
-							{child.title}
-						</Link>
+							<Link
+								key={child.path}
+								to={child.path}
+								onClick={onNavigate}
+								className={`block px-3 py-2 rounded-lg text-sm transition-all ml-2 ${
+									currentPath === child.path
+										? 'bg-primary/10 text-primary font-medium'
+										: 'text-muted-foreground hover:text-foreground hover:bg-accent'
+								}`}
+							>
+								{child.title}
+							</Link>
 						)
 					))}
 				</div>

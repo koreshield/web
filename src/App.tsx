@@ -443,6 +443,50 @@ function AppContent() {
 							</Suspense>
 						}
 					/>
+					{/* Blog */}
+					<Route
+						path="/blog"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<BlogPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/blog/*"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<BlogPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+
+					{/* Documentation */}
+					<Route
+						path="/docs"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<DocsPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/docs/*"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<DocsPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+
 					<Route
 						path="*"
 						element={
@@ -452,40 +496,6 @@ function AppContent() {
 						}
 					/>
 				</Route>
-
-				{/* Blog Layout */}
-				<Route
-					path="/blog"
-					element={
-						<Suspense fallback={<SuspenseFallback />}>
-							<RouteErrorBoundary>
-								<BlogPage />
-							</RouteErrorBoundary>
-						</Suspense>
-					}
-				/>
-				<Route
-					path="/blog/*"
-					element={
-						<Suspense fallback={<SuspenseFallback />}>
-							<RouteErrorBoundary>
-								<BlogPage />
-							</RouteErrorBoundary>
-						</Suspense>
-					}
-				/>
-
-				{/* Documentation Layout - Separate from Marketing */}
-				<Route
-					path="/docs/*"
-					element={
-						<Suspense fallback={<SuspenseFallback />}>
-							<RouteErrorBoundary>
-								<DocsPage />
-							</RouteErrorBoundary>
-						</Suspense>
-					}
-				/>
 
 				{/* App Layout - Authenticated Routes */}
 				<Route element={<AppLayout />}>
