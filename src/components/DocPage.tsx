@@ -1,47 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import type { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ArrowLeft, Check, Copy } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { DocBreadcrumb } from './DocBreadcrumb';
 import { TableOfContents } from './TableOfContents';
+import { CodeBlock } from './CodeBlock';
 import { extractNodeText, slugifyHeading } from './tableOfContentsUtils';
 import { getDocPageByRoute, isSectionIndexRoute, type DocLink } from '../docs/loader';
-
-interface CodeBlockProps {
-	language: string;
-	code: string;
-}
-
-function CodeBlock({ language, code }: CodeBlockProps) {
-	const [copied, setCopied] = useState(false);
-
-	const handleCopy = () => {
-		void navigator.clipboard.writeText(code);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
-	};
-
-	return (
-		<div className="relative group my-6">
-			<pre className="bg-gray-950 text-gray-50 p-4 rounded-xl overflow-x-auto text-sm leading-relaxed border border-white/[0.08]">
-				<code className={`language-${language}`}>{code}</code>
-			</pre>
-			<button
-				onClick={handleCopy}
-				className="absolute top-3 right-3 p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-				title="Copy code"
-			>
-				{copied ? (
-					<Check size={16} className="text-primary" />
-				) : (
-					<Copy size={16} className="text-gray-400" />
-				)}
-			</button>
-		</div>
-	);
-}
 
 function normalizeRelativeDocLink(currentPath: string, href: string) {
 	if (!href || href.startsWith('http://') || href.startsWith('https://') || href.startsWith('#')) {

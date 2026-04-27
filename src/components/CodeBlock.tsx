@@ -1,106 +1,66 @@
-import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Check, Copy } from 'lucide-react';
 
 interface CodeBlockProps {
-  children: string;
-  language?: string;
-  filename?: string;
-  showLineNumbers?: boolean;
-  highlightLines?: number[];
+	language: string;
+	code: string;
 }
 
-export function CodeBlock({
-  children,
-  language = 'typescript',
-  filename,
-  showLineNumbers = false,
-  highlightLines = [],
-}: CodeBlockProps) {
-  const [copied, setCopied] = useState(false);
+export function CodeBlock({ language, code }: CodeBlockProps) {
+	const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(children);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+	const handleCopy = () => {
+		void navigator.clipboard.writeText(code);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 2000);
+	};
 
-  const lines = children.split('\n');
+	const lang = language || 'text';
 
-  return (
-    <div className="my-6 rounded-lg overflow-hidden border border-border bg-muted/30">
-      {(filename || language) && (
-        <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/50">
-          <div className="flex items-center gap-2">
-            {filename && (
-              <span className="text-sm font-mono text-foreground">{filename}</span>
-            )}
-            {language && !filename && (
-              <span className="text-xs font-mono text-muted-foreground uppercase">
-                {language}
-              </span>
-            )}
-          </div>
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1.5 px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted cursor-pointer"
-            title="Copy code"
-          >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                Copied
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5" />
-                Copy
-              </>
-            )}
-          </button>
-        </div>
-      )}
-      <div className="relative">
-        <pre className="p-4 overflow-x-auto">
-          <code className={`language-${language} text-sm`}>
-            {showLineNumbers ? (
-              <table className="w-full border-collapse">
-                <tbody>
-                  {lines.map((line, index) => (
-                    <tr
-                      key={index}
-                      className={
-                        highlightLines.includes(index + 1)
-                          ? 'bg-yellow-500/10'
-                          : ''
-                      }
-                    >
-                      <td className="pr-4 text-right text-muted-foreground select-none w-8">
-                        {index + 1}
-                      </td>
-                      <td>{line}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              children
-            )}
-          </code>
-        </pre>
-        {!filename && !language && (
-          <button
-            onClick={handleCopy}
-            className="absolute top-2 right-2 p-2 text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted/50 cursor-pointer"
-            title="Copy code"
-          >
-            {copied ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Copy className="w-4 h-4" />
-            )}
-          </button>
-        )}
-      </div>
-    </div>
-  );
+	return (
+		<div className="relative group my-6">
+			<div className="rounded-xl overflow-hidden border border-white/[0.08]">
+				{/* Language badge */}
+				<div className="flex items-center justify-between bg-[#1a1a1a] px-4 py-2 border-b border-white/[0.08]">
+					<span className="text-xs font-mono text-gray-500 uppercase tracking-widest select-none">
+						{lang === 'text' ? 'code' : lang}
+					</span>
+					<button
+						onClick={handleCopy}
+						className="flex items-center gap-1.5 px-2 py-1 text-xs text-gray-500 hover:text-gray-200 transition-colors rounded hover:bg-white/10"
+						title="Copy code"
+					>
+						{copied ? (
+							<><Check size={12} className="text-green-400" /><span className="text-green-400">Copied</span></>
+						) : (
+							<><Copy size={12} /><span>Copy</span></>
+						)}
+					</button>
+				</div>
+
+				<SyntaxHighlighter
+					language={lang}
+					style={vscDarkPlus}
+					customStyle={{
+						margin: 0,
+						padding: '1.25rem 1rem',
+						background: '#1e1e1e',
+						fontSize: '0.875rem',
+						lineHeight: '1.65',
+						borderRadius: 0,
+					}}
+					codeTagProps={{
+						style: {
+							fontFamily: '"GeistMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+						},
+					}}
+					wrapLongLines={false}
+				>
+					{code}
+				</SyntaxHighlighter>
+			</div>
+		</div>
+	);
 }
