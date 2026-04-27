@@ -5,10 +5,12 @@
 import { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, Calendar, Clock, User, Tag, Folder, Twitter, Linkedin } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { getBlogPost, getRelatedBlogPosts, toSlug } from '../blog/loader';
 import type { BlogPost } from '../blog/loader';
 import { Helmet } from 'react-helmet-async';
-import { parseMarkdown } from '../utils/markdownParser';
+import { CodeBlock } from './CodeBlock';
 
 interface BlogPostPageProps {
 	slug?: string;
@@ -25,7 +27,8 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 
 		return getRelatedBlogPosts(slug, 3);
 	}, [post, slug]);
-	const parsedContent = useMemo(() => (post ? parseMarkdown(post.content) : ''), [post]);
+	// Strip leading h1 — BlogPostPage renders the title in <header> already
+	const strippedContent = useMemo(() => (post ? post.content.replace(/^\s*#\s+[^\n]+\n+/, '') : ''), [post]);
 
 	if (!post) {
 		return (
@@ -140,9 +143,40 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 				</header>
 
 				{/* Main Content */}
-				<div className="prose prose-lg dark:prose-invert max-w-none mb-12">
-					<div dangerouslySetInnerHTML={{ __html: parsedContent }} />
-				</div>
+				<article className="prose dark:prose-invert max-w-none prose-pre:bg-transparent prose-code:before:content-none prose-code:after:content-none mb-12">
+					<ReactMarkdown
+						remarkPlugins={[remarkGfm]}
+						components={{
+							pre: ({ children }) => <>{children}</>,
+							code: ({ className, children }) => {
+								const match = /language-(\w+)/.exec(className || '');
+								const code = String(children).replace(/\n$/, '');
+								if (match) {
+									return <CodeBlock language={match[1]} code={code} />;
+								}
+								return (
+									<code className="bg-[hsl(var(--accent))] text-[hsl(var(--primary))] px-2 py-0.5 rounded text-sm font-mono">
+										{children}
+									</code>
+								);
+							},
+							a: ({ href = '', children }) => {
+								const external = href.startsWith('http://') || href.startsWith('https://');
+								return (
+									<a
+										href={href}
+										target={external ? '_blank' : undefined}
+										rel={external ? 'noreferrer' : undefined}
+									>
+										{children}
+									</a>
+								);
+							},
+						}}
+					>
+						{strippedContent}
+					</ReactMarkdown>
+				</article>
 
 				{/* Tags */}
 				{post.tags.length > 0 && (
