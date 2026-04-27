@@ -12,7 +12,7 @@ const steps = [
 	{
 		title: 'Point your app at KoreShield',
 		description: 'Send chat traffic to /v1/chat/completions and document scans to /v1/rag/scan or /v1/scan.',
-		href: 'https://docs.koreshield.com/docs/getting-started/quick-start/',
+		href: '/docs/getting-started/quick-start',
 		icon: Shield,
 		linkLabel: 'Read integration docs',
 		external: true,
@@ -160,7 +160,7 @@ const response = await client.chat.completions.create({
 						</div>
 						<div className="mt-4 sm:mt-6 flex items-start sm:items-center gap-2 text-xs sm:text-sm text-muted-foreground">
 							<BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5 sm:mt-0" />
-							Need the public docs too? <a href="https://docs.koreshield.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">Open docs.koreshield.com</a>
+							Need the public docs too? <Link to="/docs" className="text-primary hover:underline">Open the docs</Link>
 						</div>
 						<p className="mt-4 text-[10px] sm:text-xs text-muted-foreground">
 							Reports and tenant-level analytics may be limited to admin users. They are follow-up operator tools, not blockers for the first customer integration.

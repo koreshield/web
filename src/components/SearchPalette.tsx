@@ -3,6 +3,7 @@ import { Command } from 'cmdk';
 import { Search, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Fuse from 'fuse.js';
+import { buildDocsSearchIndex } from '../docs/loader';
 
 interface SearchItem {
   title: string;
@@ -12,39 +13,15 @@ interface SearchItem {
   tags?: string[];
 }
 
-// Comprehensive search index
-const searchIndex: SearchItem[] = [
+const staticPages: SearchItem[] = [
   { title: 'Home', path: '/', content: 'KoreShield LLM security platform', category: 'Pages' },
   { title: 'Pricing', path: '/pricing', content: 'Plans and pricing', category: 'Pages' },
   { title: 'Status', path: '/status', content: 'System status', category: 'Pages' },
   { title: 'Playground', path: '/playground', content: 'Test KoreShield', category: 'Pages' },
   { title: 'Why KoreShield', path: '/why-koreshield', content: 'Benefits', category: 'Pages' },
-  { title: 'Quick Start', path: '/docs', content: 'Get started', category: 'Getting Started', tags: ['setup'] },
-  { title: 'JavaScript SDK', path: '/docs/getting-started/javascript', content: 'JS SDK', category: 'Getting Started' },
-  { title: 'Python SDK', path: '/docs/getting-started/python', content: 'Python SDK', category: 'Getting Started' },
-  { title: 'Attack Detection', path: '/docs/attack-detection', content: 'Prompt injection threats', category: 'Platform Features', tags: ['security'] },
-  { title: 'Policy Engine', path: '/docs/policy-engine', content: 'RBAC policies', category: 'Platform Features', tags: ['policies'] },
-  { title: 'Monitoring', path: '/docs/monitoring-alerting', content: 'Prometheus Grafana', category: 'Platform Features', tags: ['monitoring'] },
-  { title: 'Custom Rules', path: '/docs/custom-rules', content: 'Security rules DSL', category: 'Platform Features', tags: ['rules'] },
-  { title: 'React/Next.js', path: '/docs/integrations/react-nextjs', content: 'React Next.js', category: 'Integrations', tags: ['react', 'nextjs'] },
-  { title: 'Express.js', path: '/docs/integrations/express', content: 'Express middleware', category: 'Integrations', tags: ['express', 'nodejs'] },
-  { title: 'Nuxt.js', path: '/docs/integrations/nuxt', content: 'Nuxt Vue', category: 'Integrations', tags: ['nuxt', 'vue'] },
-  { title: 'LangChain', path: '/docs/integrations/langchain', content: 'LangChain chains agents', category: 'Integrations', tags: ['langchain', 'python'] },
-  { title: 'OpenAI', path: '/docs/integrations/openai', content: 'OpenAI GPT-4', category: 'Integrations', tags: ['openai', 'gpt4'] },
-  { title: 'Anthropic Claude', path: '/docs/integrations/anthropic', content: 'Claude API', category: 'Integrations', tags: ['anthropic', 'claude'] },
-  { title: 'DeepSeek', path: '/docs/integrations/deepseek', content: 'DeepSeek models', category: 'Integrations', tags: ['deepseek'] },
-  { title: 'Docker', path: '/docs/integrations/docker', content: 'Docker deployment', category: 'Integrations', tags: ['docker'] },
-  { title: 'Kubernetes', path: '/docs/integrations/kubernetes', content: 'K8s helm', category: 'Integrations', tags: ['kubernetes', 'k8s'] },
-  { title: 'RAG Security', path: '/docs/advanced/rag-security', content: 'RAG protection', category: 'Advanced', tags: ['rag', 'security'] },
-  { title: 'Performance', path: '/docs/advanced/performance', content: 'Optimization', category: 'Advanced', tags: ['performance'] },
-  { title: 'Troubleshooting', path: '/docs/advanced/troubleshooting', content: 'Debug FAQ', category: 'Advanced', tags: ['troubleshooting'] },
-  { title: 'Compliance', path: '/docs/advanced/compliance', content: 'SOC2 HIPAA GDPR', category: 'Advanced', tags: ['compliance', 'soc2', 'hipaa'] },
-  { title: 'Financial Services', path: '/docs/case-studies/financial-services', content: 'Finance banking security', category: 'Case Studies', tags: ['finance'] },
-  { title: 'Healthcare', path: '/docs/case-studies/healthcare', content: 'Medical PHI HIPAA', category: 'Case Studies', tags: ['healthcare'] },
-  { title: 'E-commerce', path: '/docs/case-studies/ecommerce', content: 'Shopping assistant protection', category: 'Case Studies', tags: ['ecommerce'] },
-  { title: 'AI Agents', path: '/docs/case-studies/ai-agents', content: 'Agent workflows', category: 'Case Studies', tags: ['agents'] },
-  { title: 'Code Generation', path: '/docs/case-studies/code-generation', content: 'Code assistant security', category: 'Case Studies', tags: ['code'] },
 ];
+
+const searchIndex: SearchItem[] = [...staticPages, ...buildDocsSearchIndex()];
 
 interface SearchPaletteProps {
   mobile?: boolean;
