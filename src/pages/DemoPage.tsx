@@ -51,6 +51,8 @@ type FormState = {
 	source: string;
 };
 
+type FormErrors = Partial<Record<keyof FormState, string>>;
+
 const initialForm: FormState = {
 	firstName: '',
 	lastName: '',
@@ -61,21 +63,69 @@ const initialForm: FormState = {
 	source: '',
 };
 
+const validateForm = (form: FormState): FormErrors => {
+	const errors: FormErrors = {};
+
+	if (!form.firstName.trim()) {
+		errors.firstName = 'First name is required';
+	}
+	if (!form.lastName.trim()) {
+		errors.lastName = 'Last name is required';
+	}
+	if (!form.workEmail.trim()) {
+		errors.workEmail = 'Work email is required';
+	} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.workEmail)) {
+		errors.workEmail = 'Please enter a valid email address';
+	}
+	if (!form.company.trim()) {
+		errors.company = 'Company is required';
+	}
+	if (!form.jobTitle.trim()) {
+		errors.jobTitle = 'Job title is required';
+	}
+	if (!form.useCase.trim()) {
+		errors.useCase = 'Please describe what you are building';
+	}
+
+	return errors;
+};
+
 export default function DemoPage() {
 	const { addToast } = useToast();
 	const [form, setForm] = useState<FormState>(initialForm);
+	const [errors, setErrors] = useState<FormErrors>({});
 	const [submitting, setSubmitting] = useState(false);
 	const [submitted, setSubmitted] = useState(false);
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
 	) => {
-		setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+		const { name } = e.target;
+		setForm((prev) => ({ ...prev, [name]: e.target.value }));
+		// Clear error for this field when user starts typing
+		if (errors[name as keyof FormState]) {
+			setErrors((prev) => {
+				const newErrors = { ...prev };
+				delete newErrors[name as keyof FormState];
+				return newErrors;
+			});
+		}
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (submitting) return;
+
+		// Validate form
+		const formErrors = validateForm(form);
+		if (Object.keys(formErrors).length > 0) {
+			setErrors(formErrors);
+			addToast({
+				message: 'Please fill in all required fields correctly',
+				type: 'error',
+			});
+			return;
+		}
 
 		setSubmitting(true);
 		try {
@@ -102,6 +152,7 @@ export default function DemoPage() {
 			}
 			setSubmitted(true);
 			setForm(initialForm);
+			setErrors({});
 		} catch {
 			addToast({
 				message: 'Something went wrong. Please try emailing us directly at hello@koreshield.com.',
@@ -226,13 +277,19 @@ export default function DemoPage() {
 													id="firstName"
 													name="firstName"
 													type="text"
-													required
 													autoComplete="given-name"
 													value={form.firstName}
 													onChange={handleChange}
 													placeholder="Jane"
-													className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-electric-green/40"
+													className={`w-full rounded-xl border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 transition-colors ${
+														errors.firstName
+															? 'border-red-500 focus:ring-red-500/40'
+															: 'border-border focus:ring-electric-green/40'
+													}`}
 												/>
+												{errors.firstName && (
+													<p className="mt-1 text-xs text-red-500">{errors.firstName}</p>
+												)}
 											</div>
 											<div>
 												<label htmlFor="lastName" className="block text-sm font-medium mb-1.5">
@@ -242,13 +299,19 @@ export default function DemoPage() {
 													id="lastName"
 													name="lastName"
 													type="text"
-													required
 													autoComplete="family-name"
 													value={form.lastName}
 													onChange={handleChange}
 													placeholder="Smith"
-													className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-electric-green/40"
+													className={`w-full rounded-xl border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 transition-colors ${
+														errors.lastName
+															? 'border-red-500 focus:ring-red-500/40'
+															: 'border-border focus:ring-electric-green/40'
+													}`}
 												/>
+												{errors.lastName && (
+													<p className="mt-1 text-xs text-red-500">{errors.lastName}</p>
+												)}
 											</div>
 										</div>
 
@@ -260,13 +323,19 @@ export default function DemoPage() {
 												id="workEmail"
 												name="workEmail"
 												type="email"
-												required
 												autoComplete="email"
 												value={form.workEmail}
 												onChange={handleChange}
 												placeholder="jane@yourcompany.com"
-												className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-electric-green/40"
+												className={`w-full rounded-xl border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 transition-colors ${
+													errors.workEmail
+														? 'border-red-500 focus:ring-red-500/40'
+														: 'border-border focus:ring-electric-green/40'
+												}`}
 											/>
+											{errors.workEmail && (
+												<p className="mt-1 text-xs text-red-500">{errors.workEmail}</p>
+											)}
 										</div>
 
 										<div className="grid gap-4 sm:grid-cols-2">
@@ -278,13 +347,19 @@ export default function DemoPage() {
 													id="company"
 													name="company"
 													type="text"
-													required
 													autoComplete="organization"
 													value={form.company}
 													onChange={handleChange}
 													placeholder="Acme Corp"
-													className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-electric-green/40"
+													className={`w-full rounded-xl border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 transition-colors ${
+														errors.company
+															? 'border-red-500 focus:ring-red-500/40'
+															: 'border-border focus:ring-electric-green/40'
+													}`}
 												/>
+												{errors.company && (
+													<p className="mt-1 text-xs text-red-500">{errors.company}</p>
+												)}
 											</div>
 											<div>
 												<label htmlFor="jobTitle" className="block text-sm font-medium mb-1.5">
@@ -294,13 +369,19 @@ export default function DemoPage() {
 													id="jobTitle"
 													name="jobTitle"
 													type="text"
-													required
 													autoComplete="organization-title"
 													value={form.jobTitle}
 													onChange={handleChange}
 													placeholder="CTO, Security Engineer..."
-													className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-electric-green/40"
+													className={`w-full rounded-xl border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 transition-colors ${
+														errors.jobTitle
+															? 'border-red-500 focus:ring-red-500/40'
+															: 'border-border focus:ring-electric-green/40'
+													}`}
 												/>
+												{errors.jobTitle && (
+													<p className="mt-1 text-xs text-red-500">{errors.jobTitle}</p>
+												)}
 											</div>
 										</div>
 
@@ -311,13 +392,19 @@ export default function DemoPage() {
 											<textarea
 												id="useCase"
 												name="useCase"
-												required
 												rows={4}
 												value={form.useCase}
 												onChange={handleChange}
 												placeholder="Briefly describe your LLM use case, the model(s) you are using, and your main security concern."
-												className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-electric-green/40 resize-none"
+												className={`w-full rounded-xl border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 resize-none transition-colors ${
+													errors.useCase
+														? 'border-red-500 focus:ring-red-500/40'
+														: 'border-border focus:ring-electric-green/40'
+												}`}
 											/>
+											{errors.useCase && (
+												<p className="mt-1 text-xs text-red-500">{errors.useCase}</p>
+											)}
 										</div>
 
 										<div>
