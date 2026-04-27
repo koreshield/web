@@ -10,12 +10,10 @@ import '../blog/content';
 
 export function BlogPage() {
 	const { slug } = useParams<{ slug?: string }>();
-	const paths = slug?.split('/').filter(Boolean);
-	const postSlug = paths?.[0];
 
 	// If there's a slug, show the post page
-	if (postSlug && postSlug !== '') {
-		return <BlogPostPage slug={postSlug} />;
+	if (slug && slug !== '') {
+		return <BlogPostPage slug={slug} />;
 	}
 
 	// Otherwise, show the blog list page
