@@ -136,9 +136,9 @@ export default function SolutionApplicationProtectionPage() {
 						<Link to="/signup?plan=free" className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500">
 							Start for free <ArrowRight className="h-4 w-4" />
 						</Link>
-						<a href="https://docs.koreshield.com" target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-2 rounded-xl border border-border px-7 py-3 font-semibold transition-colors hover:bg-muted">
+						<Link to="/docs" className="inline-flex items-center gap-2 rounded-xl border border-border px-7 py-3 font-semibold transition-colors hover:bg-muted">
 							Read the docs
-						</a>
+						</Link>
 					</div>
 				</div>
 			</section>

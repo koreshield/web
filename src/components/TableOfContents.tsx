@@ -1,30 +1,11 @@
-import { useEffect, useState } from 'react';
-
-export interface TableOfContentsItem {
-	id: string;
-	title: string;
-	level: number;
-}
+import { useEffect, useMemo, useState } from 'react';
+import { extractTableOfContents } from './tableOfContentsUtils';
 
 export function TableOfContents({ content }: { content: string }) {
-	const [headings, setHeadings] = useState<TableOfContentsItem[]>([]);
 	const [activeId, setActiveId] = useState('');
+	const headings = useMemo(() => extractTableOfContents(content), [content]);
 
 	useEffect(() => {
-		const headingLines = content
-			.split('\n')
-			.filter((line) => /^#{1,3}\s+/.test(line.trim()));
-
-		const extracted: TableOfContentsItem[] = headingLines.map((line, idx) => {
-			const level = line.match(/^#+/)?.[0].length ?? 2;
-			const title = line.replace(/^#+\s+/, '').trim();
-			const id = `heading-${idx}`;
-			return { id, title, level };
-		});
-
-		setHeadings(extracted);
-
-		// Set up intersection observer to track active section
 		const handleScroll = () => {
 			const headingElements = document.querySelectorAll('[data-heading-id]');
 			let currentId = '';
@@ -40,6 +21,7 @@ export function TableOfContents({ content }: { content: string }) {
 		};
 
 		window.addEventListener('scroll', handleScroll);
+		handleScroll();
 		return () => window.removeEventListener('scroll', handleScroll);
 	}, [content]);
 

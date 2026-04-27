@@ -1,5 +1,6 @@
 import { Box, Cloud, Code2, Cpu, Database, Layers, Search, type LucideIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
 interface Integration {
@@ -21,7 +22,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'CRM',
 		description: 'Secure Einstein Bots and Email RAG pipelines.',
 		icon: Cloud,
-		link: 'https://docs.koreshield.com/docs/integrations/crm/salesforce/',
+		link: '/docs/integrations/crm/salesforce',
 		featured: true,
 		statusNote: 'Guide available'
 	},
@@ -31,7 +32,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'CRM',
 		description: 'Protect Chatflows and ticketing workflows.',
 		icon: Database,
-		link: 'https://docs.koreshield.com/docs/integrations/crm/hubspot/',
+		link: '/docs/integrations/crm/hubspot',
 		featured: true,
 		statusNote: 'Guide available'
 	},
@@ -43,7 +44,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'LLM',
 		description: 'Proxy support for GPT-5, GPT-4o, and embeddings.',
 		icon: Cpu,
-		link: 'https://docs.koreshield.com/docs/integrations/models/openai/',
+		link: '/docs/integrations/models/openai',
 		featured: true,
 		statusNote: 'Provider supported'
 	},
@@ -53,7 +54,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'LLM',
 		description: 'Secure Claude 4.5 Sonnet, Claude 4.5 Opus, and Claude 4.6 deployments.',
 		icon: Box,
-		link: 'https://docs.koreshield.com/docs/integrations/models/anthropic/',
+		link: '/docs/integrations/models/anthropic',
 		featured: true,
 		statusNote: 'Provider supported'
 	},
@@ -63,7 +64,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'LLM',
 		description: 'Full support for Gemini Pro and Ultra models.',
 		icon: Cpu,
-		link: 'https://docs.koreshield.com/docs/integrations/models/gemini/',
+		link: '/docs/integrations/models/gemini',
 		featured: true,
 		statusNote: 'Provider supported'
 	},
@@ -73,7 +74,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'LLM',
 		description: 'Enterprise Azure OpenAI Service integration.',
 		icon: Cloud,
-		link: 'https://docs.koreshield.com/docs/integrations/models/azure-openai/',
+		link: '/docs/integrations/models/azure-openai',
 		statusNote: 'Guide available'
 	},
 
@@ -84,7 +85,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'Framework',
 		description: 'Drop-in callbacks for chains and agents.',
 		icon: Layers,
-		link: 'https://docs.koreshield.com/docs/integrations/frameworks/langchain/',
+		link: '/docs/integrations/frameworks/langchain',
 		featured: true,
 		statusNote: 'Guide available'
 	},
@@ -94,7 +95,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'Framework',
 		description: 'Secure RAG query engines and retrievers.',
 		icon: Database,
-		link: 'https://docs.koreshield.com/docs/integrations/frameworks/llamaindex/',
+		link: '/docs/integrations/frameworks/llamaindex',
 		statusNote: 'Guide available'
 	},
 	{
@@ -123,7 +124,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'Deployment',
 		description: 'Official Docker images for quick self-hosted deployment.',
 		icon: Box,
-		link: 'https://docs.koreshield.com/docs/integrations/deployment/docker/',
+		link: '/docs/integrations/deployment/docker',
 		statusNote: 'Deployment guide'
 	},
 	{
@@ -132,12 +133,16 @@ const INTEGRATIONS: Integration[] = [
 		category: 'Deployment',
 		description: 'Deploy on ECS, EKS, or Lambda with one-click templates.',
 		icon: Cloud,
-		link: 'https://docs.koreshield.com/docs/integrations/deployment/aws/',
+		link: '/docs/integrations/deployment/aws',
 		statusNote: 'Deployment guide'
 	},
 ];
 
 const CATEGORIES = ['All', 'CRM', 'LLM', 'Framework', 'Deployment'];
+
+function isExternalLink(link: string) {
+	return /^https?:\/\//.test(link);
+}
 
 function IntegrationsPage() {
 	const [search, setSearch] = useState('');
@@ -206,34 +211,54 @@ function IntegrationsPage() {
 
 				{/* Grid */}
 				<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{filteredIntegrations.map((item) => (
-						<a
-							key={item.id}
-							href={item.link}
-							target="_blank"
-							rel="noreferrer noopener"
-							className="bg-card border border-border rounded-xl p-6 hover:border-electric-green/50 hover:shadow-lg hover:shadow-electric-green/5 transition-all duration-300 group no-underline"
-						>
-							<div className="flex items-start justify-between mb-4">
-								<div className="p-3 bg-background rounded-lg border border-border group-hover:bg-electric-green/10 group-hover:border-electric-green/20 transition-colors">
-									<item.icon className="w-6 h-6 text-muted-foreground group-hover:text-electric-green transition-colors" />
+					{filteredIntegrations.map((item) => {
+						const cardContent = (
+							<>
+								<div className="flex items-start justify-between mb-4">
+									<div className="p-3 bg-background rounded-lg border border-border group-hover:bg-electric-green/10 group-hover:border-electric-green/20 transition-colors">
+										<item.icon className="w-6 h-6 text-muted-foreground group-hover:text-electric-green transition-colors" />
+									</div>
+									{item.featured && (
+										<span className="text-[10px] font-bold uppercase tracking-wider bg-electric-green/10 text-electric-green px-2 py-1 rounded-full">
+											Popular
+										</span>
+									)}
 								</div>
-								{item.featured && (
-									<span className="text-[10px] font-bold uppercase tracking-wider bg-electric-green/10 text-electric-green px-2 py-1 rounded-full">
-										Popular
-									</span>
-								)}
-							</div>
-							<h3 className="text-lg font-bold mb-2 text-foreground">{item.name}</h3>
-							<p className="text-muted-foreground text-sm mb-4 line-clamp-2">{item.description}</p>
-							<div className="flex items-center justify-between gap-3">
-								<div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground/60 uppercase tracking-widest">
-								{item.category}
+								<h3 className="text-lg font-bold mb-2 text-foreground">{item.name}</h3>
+								<p className="text-muted-foreground text-sm mb-4 line-clamp-2">{item.description}</p>
+								<div className="flex items-center justify-between gap-3">
+									<div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground/60 uppercase tracking-widest">
+										{item.category}
+									</div>
+									<span className="text-[11px] font-medium text-electric-green">{item.statusNote}</span>
 								</div>
-								<span className="text-[11px] font-medium text-electric-green">{item.statusNote}</span>
-							</div>
-						</a>
-					))}
+							</>
+						);
+
+						if (isExternalLink(item.link)) {
+							return (
+								<a
+									key={item.id}
+									href={item.link}
+									target="_blank"
+									rel="noreferrer noopener"
+									className="bg-card border border-border rounded-xl p-6 hover:border-electric-green/50 hover:shadow-lg hover:shadow-electric-green/5 transition-all duration-300 group no-underline"
+								>
+									{cardContent}
+								</a>
+							);
+						}
+
+						return (
+							<Link
+								key={item.id}
+								to={item.link}
+								className="bg-card border border-border rounded-xl p-6 hover:border-electric-green/50 hover:shadow-lg hover:shadow-electric-green/5 transition-all duration-300 group no-underline"
+							>
+								{cardContent}
+							</Link>
+						);
+					})}
 				</div>
 
 				{filteredIntegrations.length === 0 && (
@@ -254,14 +279,9 @@ function IntegrationsPage() {
 				<div className="text-center mt-12 py-8 border-t border-border">
 					<p className="text-muted-foreground text-sm">
 						This catalog is checked against the current docs and SDK repos. View the broader integration library in our{' '}
-						<a
-							href="https://docs.koreshield.com/docs/integrations/"
-							target="_blank"
-							rel="noreferrer noopener"
-							className="text-electric-green hover:underline"
-						>
+						<Link to="/docs/integrations" className="text-electric-green hover:underline">
 							documentation
-						</a>.
+						</Link>.
 					</p>
 				</div>
 			</div>

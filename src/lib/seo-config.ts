@@ -10,7 +10,7 @@ export const SEOConfig = {
 			url: 'https://koreshield.com',
 			potentialAction: {
 				'@type': 'SearchAction',
-				target: 'https://docs.koreshield.com?q={search_term_string}',
+				target: '/docs?q={search_term_string}',
 				'query-input': 'required name=search_term_string',
 			},
 		},

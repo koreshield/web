@@ -62,15 +62,13 @@ function Hero() {
 							<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10 shrink-0" />
 						</Link>
 
-						<a
-							href="https://docs.koreshield.com"
-							target="_blank"
-							rel="noreferrer noopener"
+						<Link
+							to="/docs"
 							className="group relative border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 text-foreground font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto backdrop-blur-sm"
 						>
 							<span className="relative z-10">Read the Docs</span>
 							<ArrowRight className="w-4 h-4 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform shrink-0" />
-						</a>
+						</Link>
 					</motion.div>
 				</motion.div>
 

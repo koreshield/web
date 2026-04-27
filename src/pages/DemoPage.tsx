@@ -201,14 +201,12 @@ export default function DemoPage() {
 											Start for free in the meantime
 											<ArrowRight className="h-4 w-4" />
 										</Link>
-										<a
-											href="https://docs.koreshield.com"
-											target="_blank"
-											rel="noreferrer noopener"
+										<Link
+											to="/docs"
 											className="inline-flex items-center gap-2 rounded-xl border border-border px-6 py-3 font-semibold transition-colors hover:bg-muted"
 										>
 											Read the docs
-										</a>
+										</Link>
 									</div>
 								</div>
 							) : (
