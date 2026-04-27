@@ -72,7 +72,8 @@ function NavDropdown({
 	const ref = useRef<HTMLDivElement>(null);
 	const location = useLocation();
 
-	// Close on route change
+	// Close menu when route changes
+	// eslint-disable-next-line react-hooks/set-state-in-effect
 	useEffect(() => {
 		setOpen(false);
 	}, [location.pathname]);
