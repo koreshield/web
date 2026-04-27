@@ -12,7 +12,8 @@
  * - Author attribution
  */
 
-import { BlogPost, addBlogPost } from './loader';
+import type { BlogPost } from './loader';
+import { addBlogPost } from './loader';
 
 /**
  * Blog posts collection
