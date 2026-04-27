@@ -2,7 +2,7 @@
  * BlogPostPage - Renders individual blog posts with metadata, related posts, and navigation
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, Calendar, Clock, User, Tag, Folder, Share2 } from 'lucide-react';
 import { getBlogPost, getRelatedBlogPosts, toSlug } from '../blog/loader';
@@ -17,18 +17,15 @@ interface BlogPostPageProps {
 export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 	const { slug: paramSlug } = useParams<{ slug: string }>();
 	const slug = propSlug || paramSlug;
-	const [post, setPost] = useState<BlogPost | null>(null);
-	const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
-
-	useEffect(() => {
-		if (slug) {
-			const foundPost = getBlogPost(slug);
-			setPost(foundPost);
-			if (foundPost) {
-				setRelatedPosts(getRelatedBlogPosts(slug, 3));
-			}
+	const post = useMemo<BlogPost | null>(() => (slug ? getBlogPost(slug) : null), [slug]);
+	const relatedPosts = useMemo(() => {
+		if (!slug || !post) {
+			return [];
 		}
-	}, [slug]);
+
+		return getRelatedBlogPosts(slug, 3);
+	}, [post, slug]);
+	const parsedContent = useMemo(() => (post ? parseMarkdown(post.content) : ''), [post]);
 
 	if (!post) {
 		return (
@@ -50,7 +47,6 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 		);
 	}
 
-	const parsedContent = useMemo(() => parseMarkdown(post.content), [post.content]);
 	const readTime = post.readingTime || 5;
 	const publishDate = new Date(post.date);
 	const formattedDate = publishDate.toLocaleDateString('en-US', {
