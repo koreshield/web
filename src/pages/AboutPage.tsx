@@ -250,15 +250,13 @@ export default function AboutPage() {
 						Whether you're a developer, researcher, or enterprise customer, we'd love to hear from you.
 					</p>
 					<div className="flex flex-wrap gap-4 justify-center">
-						<a
-							href="https://docs.koreshield.com/"
-							target="_blank"
-							rel="noreferrer noopener"
+						<Link
+							to="/docs"
 							className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-colors"
 						>
 							Get Started
 							<ArrowRight className="w-4 h-4" />
-						</a>
+						</Link>
 						<Link
 							to="/contact"
 							className="inline-flex items-center gap-2 px-6 py-3 bg-card border border-border hover:border-primary/50 text-foreground font-semibold rounded-lg transition-colors"

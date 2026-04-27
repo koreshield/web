@@ -4,19 +4,19 @@ import { Link } from 'react-router-dom';
 
 const suggestedLinks = [
 	{
-		href: 'https://docs.koreshield.com/docs/getting-started/quick-start/',
+		href: '/docs/getting-started/quick-start',
 		label: 'Quickstart Tutorial',
 		desc: 'Get up and running in under 15 minutes',
 		external: true,
 	},
 	{
-		href: 'https://docs.koreshield.com/docs/getting-started/installation/',
+		href: '/docs/getting-started/installation',
 		label: 'Installation Guide',
 		desc: 'Docker, Python, NPM, Kubernetes',
 		external: true,
 	},
 	{
-		href: 'https://docs.koreshield.com/docs/api-reference/',
+		href: '/docs/api',
 		label: 'API Reference',
 		desc: 'Full endpoint documentation',
 		external: true,
@@ -63,15 +63,13 @@ export default function NotFoundPage() {
 							<Home className="w-4 h-4" />
 							Back to Home
 						</Link>
-						<a
-							href="https://docs.koreshield.com"
-							target="_blank"
-							rel="noreferrer noopener"
+						<Link
+							to="/docs"
 							className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-card border border-border hover:border-primary/40 text-foreground font-semibold rounded-lg transition-colors"
 						>
 							<BookOpen className="w-4 h-4" />
 							Documentation
-						</a>
+						</Link>
 					</div>
 
 					{/* Suggested links */}

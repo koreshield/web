@@ -17,6 +17,7 @@ import {
     XCircle
 } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../lib/api-client';
 import { useAuthState } from '../hooks/useAuthState';
 import { SEOMeta } from '../components/SEOMeta';
@@ -656,21 +657,19 @@ export default function PlaygroundPage() {
 										Ready to protect your application? Get started with KoreShield in just 5 minutes with our Python or JavaScript SDK.
 									</p>
 									<div className="flex flex-wrap gap-3">
-										<a
-										href="https://docs.koreshield.com/docs/getting-started/quick-start/"
-										target="_blank"
-										rel="noreferrer noopener"
+										<Link
+										to="/docs/getting-started/quick-start"
 											className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
 										>
 											Quick Start Guide
 											<ExternalLink className="w-4 h-4" />
-										</a>
-										<a
-											href="https://docs.koreshield.com"
+										</Link>
+										<Link
+											to="/docs"
 											className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border text-foreground hover:bg-muted rounded-lg transition-colors"
 										>
 											View Documentation
-										</a>
+										</Link>
 									</div>
 								</div>
 							</div>
