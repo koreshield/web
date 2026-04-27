@@ -288,14 +288,12 @@ export default function ResearchPage() {
 								New papers, reports, and research notes are announced through the blog and the public GitHub organization.
 							</p>
 							<div className="mt-6 flex flex-col gap-3">
-								<a
-									href="https://blog.koreshield.com"
-									target="_blank"
-									rel="noreferrer noopener"
+								<Link
+									to="/blog"
 									className="inline-flex items-center gap-2 rounded-xl border border-border px-5 py-3 text-sm font-semibold transition-colors hover:bg-muted"
 								>
 									<BookOpen className="h-4 w-4" /> Read the blog
-								</a>
+								</Link>
 								<a
 									href="https://github.com/koreshield/"
 									target="_blank"
