@@ -35,6 +35,7 @@ export function BlogListPage() {
 			const results = searchBlogPosts(searchQuery);
 			setPosts(results);
 		} else {
+			setIsSearching(false);
 			const filters: Record<string, unknown> = {};
 			if (category) filters.category = category;
 			if (tag) filters.tag = tag;
@@ -178,7 +179,7 @@ export function BlogListPage() {
 						<div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
 							<span className="text-sm text-foreground">
 								{posts.length} post{posts.length !== 1 ? 's' : ''} found
-								{searchQuery && ` matching &ldquo;${searchQuery}&rdquo;`}
+								{searchQuery && ` matching \u201c${searchQuery}\u201d`}
 							</span>
 							<button
 								onClick={clearFilters}
