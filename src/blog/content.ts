@@ -27,8 +27,8 @@ const BLOG_POSTS: BlogPost[] = [
 		excerpt: 'A comprehensive guide to integrating KoreShield into your application for AI security.',
 		date: '2026-04-27',
 		author: 'KoreShield Team',
-		categories: ['Getting Started, Tutorials'],
-		tags: ['integration, beginner, setup'],
+		categories: ['Getting Started', 'Tutorials'],
+		tags: ['integration', 'beginner', 'setup'],
 		status: 'published',
 		
 		coverImage: '/images/blog/getting-started.png',
@@ -76,8 +76,8 @@ For more information, visit our [documentation portal](/docs).`,
 		excerpt: 'Latest security patches, threat intelligence, and feature updates for this week.',
 		date: '2026-04-27',
 		author: 'KoreShield Team',
-		categories: ['Updates, Security'],
-		tags: ['updates, security, weekly'],
+		categories: ['Updates', 'Security'],
+		tags: ['updates', 'security', 'weekly'],
 		status: 'published',
 		
 		coverImage: '/images/blog/updates.png',
@@ -122,8 +122,8 @@ Remember to keep your KoreShield SDK updated and enable all security features in
 		excerpt: 'Learn how to secure your Retrieval-Augmented Generation (RAG) systems from prompt injection and data extraction attacks.',
 		date: '2026-04-26',
 		author: 'Security Research Team',
-		categories: ['Security, Best Practices'],
-		tags: ['rag, prompts, injection, ai'],
+		categories: ['Security', 'Best Practices'],
+		tags: ['rag', 'prompts', 'injection', 'ai'],
 		status: 'published',
 		
 		coverImage: '/images/blog/rag-security.png',
@@ -368,8 +368,8 @@ RAG systems are powerful but require careful security consideration:
 		excerpt: 'Explore the landscape of threats targeting AI systems and how to mitigate them.',
 		date: '2026-04-20',
 		author: 'Security Research Team',
-		categories: ['Security, Research'],
-		tags: ['threats, ai, security, research'],
+		categories: ['Security', 'Research'],
+		tags: ['threats', 'ai', 'security', 'research'],
 		status: 'published',
 		
 		coverImage: '/images/blog/ai-threats.png',
@@ -423,8 +423,8 @@ KoreShield provides comprehensive protection against these threats through:
 		excerpt: 'Learn how KoreShield\'s detection engine works through three layers of protection - text normalization, rule-based detection, and semantic scoring - to catch prompt injection attacks in production systems.',
 		date: '2026-04-14',
 		author: 'Isaac Emmanuel',
-		categories: ['Security, Research'],
-		tags: ['prompt injection, llm security, ai security, detection, firewall, architecture'],
+		categories: ['Security', 'Research'],
+		tags: ['prompt injection', 'llm security', 'ai security', 'detection', 'firewall', 'architecture'],
 		status: 'published',
 		
 		coverImage: 'https://cdn.sanity.io/images/rdas6fhs/production/30174d8152a337af92c80a4f86d4ac0938d0b19e-1469x798.jpg',
@@ -531,8 +531,8 @@ KoreShield's detection engine involving text normalisation, weighted rule matchi
 		excerpt: 'Three of six recent security incidents were LLM-layer attacks. Most engineering teams have no runtime protection between their applications and models. Here\'s why that matters.',
 		date: '2026-03-31',
 		author: 'Teslim O. Kazeem',
-		categories: ['Security, Updates'],
-		tags: ['ai security, llm security, prompt injection, devsecops, koreshield, incidents'],
+		categories: ['Security', 'Updates'],
+		tags: ['ai security', 'llm security', 'prompt injection', 'devsecops', 'koreshield', 'incidents'],
 		status: 'published',
 		
 		
@@ -586,8 +586,8 @@ If you are building with LLMs in production, or you know someone who is, this is
 		excerpt: 'Your AI Agent is one CRM note away from a data breach. KoreShield is a security proxy that sits between your data sources and models, evaluating every input before it reaches your LLM.',
 		date: '2026-03-04',
 		author: 'Teslim O. Kazeem',
-		categories: ['Product, Security'],
-		tags: ['crm, fintech, healthcare, prompt injection, llm security, ai security, salesforce, enterprise saas'],
+		categories: ['Product', 'Security'],
+		tags: ['crm', 'fintech', 'healthcare', 'prompt injection', 'llm security', 'ai security', 'salesforce', 'enterprise saas'],
 		status: 'published',
 		
 		coverImage: 'https://cdn.sanity.io/images/rdas6fhs/production/30174d8152a337af92c80a4f86d4ac0938d0b19e-1469x798.jpg',
@@ -661,8 +661,8 @@ We're pre-launch and working with a small group of early customers. If this is a
 		excerpt: 'For the last two decades, enterprise security was structurally straightforward. But LLMs changed everything. A valid English sentence can now drop tables or exfiltrate PII. Traditional security tools are blind to semantic manipulation.',
 		date: '2026-03-02',
 		author: 'Isaac Emmanuel',
-		categories: ['Engineering, Updates'],
-		tags: ['engineering, data privacy, prompt injection, llm, ai security'],
+		categories: ['Engineering', 'Updates'],
+		tags: ['engineering', 'data privacy', 'prompt injection', 'llm', 'ai security'],
 		status: 'published',
 		
 		

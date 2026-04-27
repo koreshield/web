@@ -1,8 +1,8 @@
 ---
 title: RAG Security Best Practices
 excerpt: Learn how to secure your Retrieval-Augmented Generation (RAG) systems from prompt injection and data extraction attacks.
-date: 2026-04-26
-author: Security Research Team
+date: 2026-02-26
+author: Koreshield Labs
 categories: Security, Best Practices
 tags: rag, prompts, injection, ai
 status: published
