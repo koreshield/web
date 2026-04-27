@@ -25,16 +25,16 @@ function CodeBlock({ language, code }: CodeBlockProps) {
 
 	return (
 		<div className="relative group my-6">
-			<pre className="bg-gray-900 dark:bg-gray-950 text-gray-50 p-4 rounded-lg overflow-x-auto text-sm leading-relaxed border border-gray-800 dark:border-gray-700">
+			<pre className="bg-gray-950 text-gray-50 p-4 rounded-xl overflow-x-auto text-sm leading-relaxed border border-white/[0.08]">
 				<code className={`language-${language}`}>{code}</code>
 			</pre>
 			<button
 				onClick={handleCopy}
-				className="absolute top-3 right-3 p-2 bg-gray-800 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 rounded transition-colors opacity-0 group-hover:opacity-100"
+				className="absolute top-3 right-3 p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
 				title="Copy code"
 			>
 				{copied ? (
-					<Check size={16} className="text-green-400" />
+					<Check size={16} className="text-primary" />
 				) : (
 					<Copy size={16} className="text-gray-400" />
 				)}
@@ -94,11 +94,11 @@ function ChildLinks({ links }: { links: DocLink[] }) {
 				<Link
 					key={link.path}
 					to={link.path}
-					className="block rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-900/60 p-5 no-underline hover:border-emerald-400/50 hover:bg-white dark:hover:bg-gray-900 transition-colors"
+					className="block rounded-xl border border-border bg-card/60 p-5 no-underline hover:border-primary/40 hover:bg-card transition-colors"
 				>
-					<div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{link.title}</div>
+					<div className="text-lg font-semibold text-foreground">{link.title}</div>
 					{link.description && (
-						<div className="mt-2 text-sm text-gray-600 dark:text-gray-400">{link.description}</div>
+						<div className="mt-2 text-sm text-muted-foreground">{link.description}</div>
 					)}
 				</Link>
 			))}
@@ -133,25 +133,25 @@ const markdownComponents: Components = {
 		);
 	},
 	table: ({ children }) => (
-		<div className="my-6 overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
+		<div className="my-6 overflow-x-auto rounded-xl border border-border">
 			<table className="min-w-full border-collapse text-sm">{children}</table>
 		</div>
 	),
 	thead: ({ children }) => (
-		<thead className="bg-gray-100 dark:bg-gray-900">{children}</thead>
+		<thead className="bg-accent/60">{children}</thead>
 	),
 	th: ({ children }) => (
-		<th className="border-b border-gray-200 px-4 py-3 text-left font-semibold text-gray-900 dark:border-gray-800 dark:text-gray-100">
+		<th className="border-b border-border px-4 py-3 text-left font-semibold text-foreground">
 			{children}
 		</th>
 	),
 	td: ({ children }) => (
-		<td className="border-b border-gray-200 px-4 py-3 align-top text-gray-700 dark:border-gray-800 dark:text-gray-300">
+		<td className="border-b border-border px-4 py-3 align-top text-muted-foreground">
 			{children}
 		</td>
 	),
 	blockquote: ({ children }) => (
-		<blockquote className="my-6 border-l-4 border-emerald-500 bg-emerald-50/60 px-4 py-3 text-gray-800 dark:bg-emerald-950/20 dark:text-gray-200">
+		<blockquote className="my-6 border-l-4 border-primary bg-primary/5 px-4 py-3 text-foreground">
 			{children}
 		</blockquote>
 	),
@@ -164,7 +164,7 @@ const markdownComponents: Components = {
 		return (
 			<code
 				{...props}
-				className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono text-emerald-600 dark:text-emerald-400"
+				className="bg-accent px-2 py-0.5 rounded text-sm font-mono text-primary"
 			>
 				{children}
 			</code>
@@ -187,13 +187,13 @@ export function DocPage() {
 			<div className="max-w-4xl mx-auto">
 				<DocBreadcrumb />
 				<div className="text-center py-12">
-					<h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">Page Not Found</h1>
-					<p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+					<h1 className="text-4xl font-bold text-foreground mb-4">Page Not Found</h1>
+					<p className="text-lg text-muted-foreground mb-6">
 						The documentation page you&apos;re looking for doesn&apos;t exist.
 					</p>
 					<button
 						onClick={() => navigate('/docs')}
-						className="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
+						className="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
 					>
 						<ArrowLeft className="w-4 h-4" />
 						Back to Documentation
@@ -208,23 +208,23 @@ export function DocPage() {
 			<div className="flex-1 min-w-0">
 				<DocBreadcrumb />
 
-				<header className="mb-12 pb-8 border-b border-gray-200 dark:border-gray-800">
-					<h1 className="text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4 leading-tight">
+				<header className="mb-12 pb-8 border-b border-border">
+					<h1 className="text-5xl font-bold text-foreground mb-4 leading-tight">
 						{page.title}
 					</h1>
 					{page.description && (
-						<p className="text-xl text-gray-600 dark:text-gray-400">
+						<p className="text-xl text-muted-foreground">
 							{page.description}
 						</p>
 					)}
 					{page.lastUpdated && (
-						<p className="mt-4 text-sm text-gray-500 dark:text-gray-500">
+						<p className="mt-4 text-sm text-muted-foreground/60">
 							Last updated {page.lastUpdated}
 						</p>
 					)}
 				</header>
 
-				<article className="prose prose-invert max-w-none prose-pre:bg-transparent prose-code:before:content-none prose-code:after:content-none">
+				<article className="prose dark:prose-invert max-w-none prose-pre:bg-transparent prose-code:before:content-none prose-code:after:content-none">
 					<ReactMarkdown
 						remarkPlugins={[remarkGfm]}
 						components={{
@@ -246,10 +246,10 @@ export function DocPage() {
 
 				<ChildLinks links={page.childLinks} />
 
-				<div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
+				<div className="mt-12 pt-8 border-t border-border">
 					<button
 						onClick={() => navigate(-1)}
-						className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+						className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
 					>
 						<ArrowLeft size={18} />
 						Back

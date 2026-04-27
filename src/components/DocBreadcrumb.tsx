@@ -21,23 +21,23 @@ export function DocBreadcrumb() {
 						{isRoot ? (
 							<Link
 								to={crumb.path}
-								className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+								className="flex items-center gap-1 text-primary hover:text-primary/80 transition-colors"
 							>
 								<Home size={16} />
 								<span>{crumb.title}</span>
 							</Link>
 						) : isLast ? (
-							<span className="text-gray-600 dark:text-gray-400">{crumb.title}</span>
+							<span className="text-muted-foreground">{crumb.title}</span>
 						) : (
 							<Link
 								to={crumb.path}
-								className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+								className="text-primary hover:text-primary/80 transition-colors"
 							>
 								{crumb.title}
 							</Link>
 						)}
 						{!isLast && (
-							<ChevronRight size={16} className="text-gray-400 dark:text-gray-600" />
+							<ChevronRight size={16} className="text-muted-foreground/40" />
 						)}
 					</div>
 				);
