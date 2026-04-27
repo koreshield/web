@@ -192,7 +192,8 @@ coverImage: /images/my-image.png
  * - Author attribution
  */
 
-import { BlogPost, addBlogPost } from './loader';
+import type { BlogPost } from './loader';
+import { addBlogPost } from './loader';
 
 /**
  * Blog posts collection
