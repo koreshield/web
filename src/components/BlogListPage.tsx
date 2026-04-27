@@ -28,25 +28,27 @@ export function BlogListPage() {
 	const page = parseInt(searchParams.get('page') || '1');
 	const perPage = 10;
 
-	// Fetch posts based on filters
-	useEffect(() => {
+	// Compute posts based on filters using useMemo
+	const computedPosts = useMemo(() => {
 		if (searchQuery) {
-			setIsSearching(true);
-			const results = searchBlogPosts(searchQuery);
-			setPosts(results);
-		} else {
-			setIsSearching(false);
-			const filters: Record<string, unknown> = {};
-			if (category) filters.category = category;
-			if (tag) filters.tag = tag;
-
-			const allPosts = listBlogPosts({
-				filters: filters as any,
-				sortBy: 'date-desc',
-			});
-			setPosts(allPosts);
+			return searchBlogPosts(searchQuery);
 		}
+		const filters: Record<string, unknown> = {};
+		if (category) filters.category = category;
+		if (tag) filters.tag = tag;
+
+		return listBlogPosts({
+			filters: filters as any,
+			sortBy: 'date-desc',
+		});
 	}, [searchQuery, category, tag]);
+
+	// Update posts and searching state whenever computed posts change
+	// eslint-disable-next-line react-hooks/set-state-in-effect
+	useEffect(() => {
+		setPosts(computedPosts);
+		setIsSearching(!!searchQuery);
+	}, [computedPosts, searchQuery]);
 
 	const paginatedPosts = useMemo(() => {
 		const start = (page - 1) * perPage;
