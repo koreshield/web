@@ -4,7 +4,7 @@
 
 import { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, Calendar, Clock, User, Tag, Folder, Share2 } from 'lucide-react';
+import { ChevronLeft, Calendar, Clock, User, Tag, Folder, Twitter, Linkedin } from 'lucide-react';
 import { getBlogPost, getRelatedBlogPosts, toSlug } from '../blog/loader';
 import type { BlogPost } from '../blog/loader';
 import { Helmet } from 'react-helmet-async';
@@ -185,9 +185,9 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 						target="_blank"
 						rel="noopener noreferrer"
 						className="p-2 text-muted-foreground hover:text-primary transition-colors"
-						title="Share on Twitter"
+						title="Share on X / Twitter"
 					>
-						<Share2 size={20} />
+						<Twitter size={20} />
 					</a>
 					<a
 						href={`https://linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://koreshield.ai${post.path}`)}`}
@@ -196,7 +196,7 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 						className="p-2 text-muted-foreground hover:text-primary transition-colors"
 						title="Share on LinkedIn"
 					>
-						<Share2 size={20} />
+						<Linkedin size={20} />
 					</a>
 				</div>
 

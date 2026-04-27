@@ -18,7 +18,7 @@ export function parseMarkdown(markdown: string): string {
 			.replace(/>/g, '&gt;')
 			.replace(/"/g, '&quot;')
 			.replace(/'/g, '&#39;');
-		const highlighted = `<pre><code class="language-${lang || 'text'}">${escaped}</code></pre>`;
+		const highlighted = `<pre class="bg-gray-950 text-gray-50 p-4 rounded-xl overflow-x-auto text-sm leading-relaxed border border-white/[0.08] my-6"><code class="language-${lang || 'text'}">${escaped}</code></pre>`;
 		codeBlocks.push(highlighted);
 		return `__CODE_BLOCK_${codeBlocks.length - 1}__`;
 	});
@@ -35,10 +35,11 @@ export function parseMarkdown(markdown: string): string {
 		return codeBlocks[index];
 	});
 
-	// Headings
-	html = html.replace(/^### (.*?)$/gm, '<h3 className="text-2xl font-bold mt-6 mb-3">$1</h3>');
-	html = html.replace(/^## (.*?)$/gm, '<h2 className="text-3xl font-bold mt-8 mb-4">$1</h2>');
-	html = html.replace(/^# (.*?)$/gm, '<h1 className="text-4xl font-bold mb-4">$1</h1>');
+	// Headings — strip leading h1 to avoid duplicate (BlogPostPage already renders title in header)
+	html = html.replace(/^\s*# [^\n]+\n+/, '');
+	html = html.replace(/^### (.*?)$/gm, '<h3 class="text-xl font-bold mt-6 mb-3 text-[hsl(var(--foreground))] scroll-mt-24">$1</h3>');
+	html = html.replace(/^## (.*?)$/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-[hsl(var(--foreground))] border-b border-[hsl(var(--border))] pb-2 scroll-mt-24">$1</h2>');
+	html = html.replace(/^# (.*?)$/gm, '<h1 class="text-3xl font-bold mb-4 text-[hsl(var(--foreground))] scroll-mt-24">$1</h1>');
 
 	// Bold and italic
 	html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
@@ -48,35 +49,37 @@ export function parseMarkdown(markdown: string): string {
 	html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
 	html = html.replace(/_(.*?)_/g, '<em>$1</em>');
 
-	// Inline code (backticks - not in code blocks)
-	html = html.replace(/`([^`]+)`/g, '<code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono">$1</code>');
+	// Inline code
+	html = html.replace(/`([^`]+)`/g, '<code class="bg-[hsl(var(--accent))] text-[hsl(var(--primary))] px-2 py-0.5 rounded text-sm font-mono">$1</code>');
 
 	// Links
-	html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" className="text-emerald-600 dark:text-emerald-400 hover:underline">$1</a>');
+	html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-[hsl(var(--primary))] underline hover:opacity-80 transition-opacity">$1</a>');
 
-	// Unordered lists
+	// Unordered lists — collect consecutive <li> items into a single <ul>
 	html = html.replace(/^\* (.*?)$/gm, '<li>$1</li>');
 	html = html.replace(/^\- (.*?)$/gm, '<li>$1</li>');
-	html = html.replace(/(<li>.*?<\/li>)/s, (match) => {
-		return `<ul className="list-disc list-inside ml-4 mb-4">\n${match}\n</ul>`;
+	html = html.replace(/(<li>[\s\S]*?<\/li>)(\n<li>[\s\S]*?<\/li>)*/g, (match) => {
+		return `<ul class="list-disc list-outside ml-6 mb-4 space-y-1">${match}</ul>`;
 	});
 
 	// Ordered lists
-	html = html.replace(/^\d+\. (.*?)$/gm, '<li>$1</li>');
+	html = html.replace(/((?:^\d+\. .*$\n?)+)/gm, (block) => {
+		const items = block.trim().replace(/^\d+\. (.*?)$/gm, '<li>$1</li>');
+		return `<ol class="list-decimal list-outside ml-6 mb-4 space-y-1">${items}</ol>`;
+	});
 
 	// Blockquotes
-	html = html.replace(/^> (.*?)$/gm, '<blockquote className="border-l-4 border-emerald-500 pl-4 italic text-gray-600 dark:text-gray-400">$1</blockquote>');
+	html = html.replace(/^> (.*?)$/gm, '<blockquote class="border-l-4 border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.05)] pl-4 py-2 my-4 italic text-[hsl(var(--muted-foreground))]">$1</blockquote>');
 
-	// Line breaks - convert multiple newlines to paragraphs
-	html = html.replace(/\n\n+/g, '</p><p className="mb-4">');
-	html = `<p className="mb-4">${html}</p>`;
+	// Horizontal rules
+	html = html.replace(/^---$/gm, '<hr class="border-[hsl(var(--border))] my-6" />');
+
+	// Line breaks — convert multiple newlines to paragraph breaks
+	html = html.replace(/\n\n+/g, '</p><p class="mb-4 leading-relaxed text-[hsl(var(--foreground))]">');
+	html = `<p class="mb-4 leading-relaxed text-[hsl(var(--foreground))]">${html}</p>`;
 
 	// Clean up empty paragraphs
-	html = html.replace(/<p[^>]*><\/p>/g, '');
-
-	// Remove extra className attributes for proper JSX rendering
-	// Actually, we need to convert these to proper HTML attributes
-	html = html.replace(/className="/g, 'class="');
+	html = html.replace(/<p[^>]*>\s*<\/p>/g, '');
 
 	return html;
 }
