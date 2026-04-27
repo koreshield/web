@@ -37,15 +37,15 @@ export function TableOfContents({ content }: { content: string }) {
 	};
 
 	return (
-		<div className="hidden lg:block sticky top-20 h-fit">
+		<div className="hidden lg:block sticky top-24 h-fit w-56 flex-shrink-0">
 			<div className="text-sm">
-				<div className="font-semibold text-gray-900 dark:text-gray-100 mb-3">On this page</div>
-				<nav className="space-y-2">
+				<div className="font-semibold text-foreground mb-3">On this page</div>
+				<nav className="space-y-1">
 					{headings.map(heading => (
 						<button
 							key={heading.id}
 							onClick={() => handleClick(heading.id)}
-							className={`block w-full text-left px-2 py-1 rounded transition-colors ${
+							className={`block w-full text-left px-2 py-1.5 rounded-lg transition-colors ${
 								heading.level === 1
 									? 'font-medium'
 									: heading.level === 2
@@ -53,8 +53,8 @@ export function TableOfContents({ content }: { content: string }) {
 										: 'pl-4 text-xs'
 							} ${
 								activeId === heading.id
-									? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30'
-									: 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+									? 'text-primary bg-primary/10'
+									: 'text-muted-foreground hover:text-foreground hover:bg-accent'
 							}`}
 						>
 							{heading.title}
