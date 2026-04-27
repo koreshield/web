@@ -15,6 +15,12 @@ const TEMPLATE_ID =
 const emailConfigAvailable =
 	Boolean(EMAILJS_SERVICE_ID) && Boolean(EMAILJS_PUBLIC_KEY) && Boolean(TEMPLATE_ID);
 
+// Google Apps Script deployment URL for Google Sheets
+const GOOGLE_SHEETS_WEBHOOK = import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK as string | undefined;
+
+// Backend API endpoint for database storage
+const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL as string | undefined;
+
 const whatYoullSee = [
 	{
 		icon: <Shield className="h-5 w-5 text-electric-green" />,
@@ -129,6 +135,51 @@ export default function DemoPage() {
 
 		setSubmitting(true);
 		try {
+			const formData = {
+				firstName: form.firstName,
+				lastName: form.lastName,
+				workEmail: form.workEmail,
+				company: form.company,
+				jobTitle: form.jobTitle,
+				useCase: form.useCase,
+				source: form.source || 'Not specified',
+			};
+
+			// Send to Google Sheets (non-blocking)
+			if (GOOGLE_SHEETS_WEBHOOK) {
+				fetch(GOOGLE_SHEETS_WEBHOOK, {
+					method: 'POST',
+					body: JSON.stringify(formData),
+				}).catch((err) => {
+					console.error('Google Sheets submission failed:', err);
+					// Don't fail the main submission if Sheets fails
+				});
+			}
+
+			// Send to backend database
+			if (BACKEND_API_URL) {
+				const backendResponse = await fetch(`${BACKEND_API_URL}/api/demo-submission`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						first_name: form.firstName,
+						last_name: form.lastName,
+						work_email: form.workEmail,
+						company: form.company,
+						job_title: form.jobTitle,
+						use_case: form.useCase,
+						source: form.source || null,
+					}),
+				});
+
+				if (!backendResponse.ok) {
+					console.error('Backend submission failed:', backendResponse.statusText);
+				}
+			}
+
+			// Send notification email via EmailJS
 			if (emailConfigAvailable) {
 				await emailjs.send(
 					EMAILJS_SERVICE_ID,
@@ -150,6 +201,7 @@ export default function DemoPage() {
 					EMAILJS_PUBLIC_KEY,
 				);
 			}
+
 			setSubmitted(true);
 			setForm(initialForm);
 			setErrors({});
