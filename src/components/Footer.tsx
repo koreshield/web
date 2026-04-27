@@ -86,7 +86,7 @@ function Footer() {
 						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Resources</h4>
 						<ul className="space-y-3">
 							<li><Link to="/docs" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Documentation</Link></li>
-							<li><a href="https://blog.koreshield.com" target="_blank" rel="noreferrer noopener" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Blog</a></li>
+							<li><Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Blog</Link></li>
 							<li><Link to="/research" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Research</Link></li>
 							<li><Link to="/status" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Status</Link></li>
 							<li><Link to="/why-koreshield" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Why KoreShield</Link></li>
