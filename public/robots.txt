@@ -1,25 +1,47 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+Disallow: /.well-known/
 
-# Sitemap location
-Sitemap: https://koreshield.com/sitemap.xml
-
-# Crawl delay
-Crawl-delay: 1
-
-# Allow all major search engines
+# Specific bot rules
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Slurp
 Allow: /
+Crawl-delay: 2
 
 User-agent: DuckDuckBot
 Allow: /
 
 User-agent: Baiduspider
 Allow: /
+
+User-agent: Yandexbot
+Allow: /
+
+User-agent: MJ12bot
+Allow: /
+
+# Block bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+# Sitemap
+Sitemap: https://koreshield.com/sitemap.xml
+Sitemap: https://koreshield.com/sitemap-blog.xml
+Sitemap: https://koreshield.com/sitemap-docs.xml
