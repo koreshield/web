@@ -11,8 +11,37 @@ export class DocumentReadError extends Error {
 interface PdfTextItem {
 	str?: string;
 }
+
+type PromiseWithResolversShape<T> = {
+	promise: Promise<T>;
+	resolve: (value: T | PromiseLike<T>) => void;
+	reject: (reason?: unknown) => void;
+};
+
+type PromiseWithResolversConstructor = PromiseConstructor & {
+	withResolvers?: <T>() => PromiseWithResolversShape<T>;
+};
+
+function ensurePromiseWithResolvers() {
+	const PromiseWithResolvers = Promise as PromiseWithResolversConstructor;
+	if (typeof PromiseWithResolvers.withResolvers === 'function') {
+		return;
+	}
+
+	PromiseWithResolvers.withResolvers = function withResolvers<T>() {
+		let resolve!: (value: T | PromiseLike<T>) => void;
+		let reject!: (reason?: unknown) => void;
+		const promise = new Promise<T>((res, rej) => {
+			resolve = res;
+			reject = rej;
+		});
+		return { promise, resolve, reject };
+	};
+}
+
 const extractPdfText = async (file: File): Promise<string> => {
-	const { getDocument } = await import('pdfjs-dist');
+	ensurePromiseWithResolvers();
+	const { getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs');
 	const data = new Uint8Array(await file.arrayBuffer());
 	const loadingTask = getDocument({
 		data,
