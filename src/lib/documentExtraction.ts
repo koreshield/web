@@ -41,40 +41,68 @@ function ensurePromiseWithResolvers() {
 
 const extractPdfText = async (file: File): Promise<string> => {
 	ensurePromiseWithResolvers();
-	const { getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs');
-	const data = new Uint8Array(await file.arrayBuffer());
-	const loadingTask = getDocument({
-		data,
-		disableWorker: true,
-		useSystemFonts: true,
-		isEvalSupported: false,
-	} as Parameters<typeof getDocument>[0]);
-
 	try {
-		const pdf = await loadingTask.promise;
-		const pageTexts: string[] = [];
+		const { getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs');
+		const data = new Uint8Array(await file.arrayBuffer());
+		const loadingTask = getDocument({
+			data,
+			disableWorker: true,
+			useSystemFonts: true,
+			isEvalSupported: false,
+		} as Parameters<typeof getDocument>[0]);
 
-		for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex += 1) {
-			const page = await pdf.getPage(pageIndex);
-			const content = await page.getTextContent();
-			const pageText = (content.items as PdfTextItem[])
-				.map((item) => (typeof item?.str === 'string' ? item.str : ''))
-				.filter(Boolean)
-				.join(' ');
+		try {
+			const pdf = await loadingTask.promise;
+			const pageTexts: string[] = [];
 
-			if (pageText.trim()) {
-				pageTexts.push(pageText.trim());
+			for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex += 1) {
+				const page = await pdf.getPage(pageIndex);
+				const content = await page.getTextContent();
+				const pageText = (content.items as PdfTextItem[])
+					.map((item) => (typeof item?.str === 'string' ? item.str : ''))
+					.filter(Boolean)
+					.join(' ');
+
+				if (pageText.trim()) {
+					pageTexts.push(pageText.trim());
+				}
 			}
-		}
 
-		return pageTexts.join('\n').trim();
-	} catch {
+			if (pageTexts.length === 0) {
+				throw new DocumentReadError(
+					`No text found in PDF: ${file.name}. This may be a scanned image or password-protected PDF. Try exporting as TXT or DOCX instead.`,
+					file.name,
+				);
+			}
+
+			return pageTexts.join('\n').trim();
+		} catch (innerError) {
+			if (innerError instanceof DocumentReadError) {
+				throw innerError;
+			}
+			// Check for specific PDF errors
+			const errorMessage = innerError instanceof Error ? innerError.message : String(innerError);
+			if (errorMessage.includes('password') || errorMessage.includes('encrypted')) {
+				throw new DocumentReadError(
+					`Cannot read password-protected PDF: ${file.name}. Please provide an unprotected PDF or export as TXT/DOCX.`,
+					file.name,
+				);
+			}
+			throw new DocumentReadError(
+				`Failed to extract text from PDF: ${file.name}. Try a text-based PDF or export as TXT/DOCX.`,
+				file.name,
+			);
+		} finally {
+			await loadingTask.destroy();
+		}
+	} catch (error) {
+		if (error instanceof DocumentReadError) {
+			throw error;
+		}
 		throw new DocumentReadError(
 			`We couldn't extract text from ${file.name}. Try a text-based PDF or export it as TXT/DOCX.`,
 			file.name,
 		);
-	} finally {
-		await loadingTask.destroy();
 	}
 };
 
