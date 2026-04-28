@@ -38,7 +38,7 @@ export const SEOConfig = {
 	},
 	pricing: {
 		title: 'Pricing Plans',
-		description: 'KoreShield pricing plans for teams of all sizes. Start free with 1M protected requests/month, then pay-as-you-grow. Enterprise plans available.',
+		description: 'KoreShield pricing plans for teams of all sizes. Start free with 10,000 protected requests/month, then pay-as-you-grow. Enterprise plans available.',
 		keywords: 'LLM security pricing, protected requests pricing, AI security cost, enterprise LLM security pricing, pricing plans',
 		ogImage: 'https://koreshield.ai/og-pricing.png',
 		ogType: 'website' as const,
@@ -63,7 +63,7 @@ export const SEOConfig = {
 					name: 'Can I start for free?',
 					acceptedAnswer: {
 						'@type': 'Answer',
-						text: 'Yes! The free tier includes 1 million protected requests per month, perfect for testing and development.',
+						text: 'Yes! The free tier includes 10,000 protected requests per month, which is ideal for evaluation and early prototypes.',
 					},
 				},
 			],
