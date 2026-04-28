@@ -293,7 +293,7 @@ export default function PricingPage() {
 										<ArrowRight className="h-4 w-4" />
 									</Link>
 									<a
-										href="mailto:hello@koreshield.com?subject=Enterprise%20plan%20enquiry"
+										href="mailto:hello@koreshield.ai?subject=Enterprise%20plan%20enquiry"
 										className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
 									>
 										<Mail className="h-3.5 w-3.5" />

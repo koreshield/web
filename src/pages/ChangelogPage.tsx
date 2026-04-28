@@ -401,7 +401,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 					'KoreShield has a stable, self-hosted production foundation with HTTPS and proper service isolation from day one.',
 				items: [
 					'Set up Docker Compose production stack with API, web, database, and cache services.',
-					'Configured Caddy for automatic TLS with HTTPS routing for koreshield.com and api.koreshield.com.',
+					'Configured Caddy for automatic TLS with HTTPS routing for koreshield.ai and api.koreshield.ai.',
 					'Provisioned PostgreSQL with persistent volumes and Redis for session and rate-limit storage.',
 				],
 			},

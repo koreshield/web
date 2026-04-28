@@ -276,10 +276,10 @@ export default function ResearchPage() {
 								We follow coordinated disclosure for vulnerabilities discovered in third-party systems during research. If you have identified an issue related to LLM infrastructure or retrieval security, we are open to working through a responsible remediation path.
 							</p>
 							<a
-								href="mailto:hello@koreshield.com"
+								href="mailto:hello@koreshield.ai"
 								className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-electric-green hover:underline"
 							>
-								Contact hello@koreshield.com <ArrowRight className="h-4 w-4" />
+								Contact hello@koreshield.ai <ArrowRight className="h-4 w-4" />
 							</a>
 						</div>
 						<div className="rounded-2xl border border-border bg-card p-8">

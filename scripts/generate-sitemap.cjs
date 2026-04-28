@@ -9,7 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SITE_URL = 'https://koreshield.com';
+const SITE_URL = 'https://koreshield.ai';
 const CURRENT_DATE = new Date().toISOString().split('T')[0];
 
 // Define all public routes with metadata
@@ -126,9 +126,9 @@ User-agent: SemrushBot
 Crawl-delay: 10
 
 # Sitemap
-Sitemap: https://koreshield.com/sitemap.xml
-Sitemap: https://koreshield.com/sitemap-blog.xml
-Sitemap: https://koreshield.com/sitemap-docs.xml
+Sitemap: https://koreshield.ai/sitemap.xml
+Sitemap: https://koreshield.ai/sitemap-blog.xml
+Sitemap: https://koreshield.ai/sitemap-docs.xml
 `;
 
 	return robotsTxt;
@@ -154,15 +154,15 @@ function writeSitemaps() {
 	const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<sitemap>
-		<loc>https://koreshield.com/sitemap.xml</loc>
+		<loc>https://koreshield.ai/sitemap.xml</loc>
 		<lastmod>${CURRENT_DATE}</lastmod>
 	</sitemap>
 	<sitemap>
-		<loc>https://koreshield.com/sitemap-blog.xml</loc>
+		<loc>https://koreshield.ai/sitemap-blog.xml</loc>
 		<lastmod>${CURRENT_DATE}</lastmod>
 	</sitemap>
 	<sitemap>
-		<loc>https://koreshield.com/sitemap-docs.xml</loc>
+		<loc>https://koreshield.ai/sitemap-docs.xml</loc>
 		<lastmod>${CURRENT_DATE}</lastmod>
 	</sitemap>
 </sitemapindex>`;
