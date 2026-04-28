@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import type { JSX } from 'react';
 
 export interface SEOMetadata {
 	title: string;
@@ -28,7 +29,7 @@ export interface SEOMetadata {
  * 
  * @param metadata - SEO metadata object
  */
-export function useSEO(metadata: SEOMetadata) {
+export function useSEO(metadata: SEOMetadata): JSX.Element {
 	const baseUrl = 'https://koreshield.ai';
 	const defaultOgImage = '/logo.png';
 
