@@ -42,6 +42,6 @@ User-agent: SemrushBot
 Crawl-delay: 10
 
 # Sitemap
-Sitemap: https://koreshield.com/sitemap.xml
-Sitemap: https://koreshield.com/sitemap-blog.xml
-Sitemap: https://koreshield.com/sitemap-docs.xml
+Sitemap: https://koreshield.ai/sitemap.xml
+Sitemap: https://koreshield.ai/sitemap-blog.xml
+Sitemap: https://koreshield.ai/sitemap-docs.xml

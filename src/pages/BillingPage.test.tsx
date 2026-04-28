@@ -44,7 +44,7 @@ describe('BillingPage', () => {
 			plan_slug: 'startup',
 			subscription_status: 'active',
 			current_period_end: null,
-			billing_email: 'ops@koreshield.com',
+			billing_email: 'ops@koreshield.ai',
 			external_customer_id: 'cus_123',
 			polar_customer_id: 'polcus_123',
 			metadata: {
@@ -143,7 +143,7 @@ describe('BillingPage', () => {
 			plan_slug: 'free',
 			subscription_status: 'inactive',
 			current_period_end: null,
-			billing_email: 'hello@koreshield.com',
+			billing_email: 'hello@koreshield.ai',
 			external_customer_id: 'user:test',
 			polar_customer_id: null,
 			metadata: {
