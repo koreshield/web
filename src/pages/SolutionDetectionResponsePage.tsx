@@ -137,7 +137,7 @@ export default function SolutionDetectionResponsePage() {
 			<section className="px-6 py-20 border-t border-border text-center">
 				<div className="mx-auto max-w-2xl">
 					<h2 className="text-3xl font-bold">Ready to intercept your first attack?</h2>
-					<p className="mt-4 text-muted-foreground">Start on the Dev plan for free. Integration takes under 30 minutes.</p>
+					<p className="mt-4 text-muted-foreground">Start on the Free plan. Integration takes under 30 minutes.</p>
 					<div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
 						<Link to="/signup?plan=free" className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500">
 							Start for free <ArrowRight className="h-4 w-4" />
