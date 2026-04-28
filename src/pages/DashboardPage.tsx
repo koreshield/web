@@ -1,14 +1,37 @@
 import { useMemo, useState } from 'react';
-import { Activity, Shield, AlertTriangle, CheckCircle, Rocket, Code, BookOpen, ArrowRight, Key, Users, ScanSearch } from 'lucide-react';
+import { Activity, Shield, AlertTriangle, CheckCircle, Rocket, Code, BookOpen, ArrowRight, Key, Users, ScanSearch, Plus, Copy, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStats, useRecentAttacks } from '../hooks/useApi';
 import { useAuthState } from '../hooks/useAuthState';
 import { AttackDetailModal } from '../components/AttackDetailModal';
 import { ThreatTypeBreakdown, ThreatTimeline, ThreatSummary } from '../components/ThreatAnalytics';
+import { api } from '../lib/api-client';
 export function DashboardPage() {
 	const { user } = useAuthState();
 	const [selectedAttack, setSelectedAttack] = useState<any>(null);
 	const isAdmin = user?.role === 'owner' || user?.role === 'admin';
+
+	// Inline API key generation state
+	const [showKeyForm, setShowKeyForm] = useState(false);
+	const [keyName, setKeyName] = useState('');
+	const [generatedKey, setGeneratedKey] = useState<string | null>(null);
+	const [copiedKey, setCopiedKey] = useState(false);
+	const queryClient = useQueryClient();
+	const generateKeyMutation = useMutation({
+		mutationFn: (name: string) => api.generateApiKey({ name }) as Promise<{ api_key: string }>,
+		onSuccess: (data) => {
+			setGeneratedKey(data.api_key);
+			setKeyName('');
+			void queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+		},
+	});
+	const handleCopyKey = () => {
+		if (!generatedKey) return;
+		void navigator.clipboard.writeText(generatedKey);
+		setCopiedKey(true);
+		setTimeout(() => setCopiedKey(false), 2000);
+	};
 	const integrationSnippet = useMemo(
 		() => `import OpenAI from 'openai';
 
@@ -24,14 +47,42 @@ const client = new OpenAI({
 	const { data: attacksData, isLoading: attacksLoading } = useRecentAttacks(10);
 
 	const loading = statsLoading || attacksLoading;
-	const recentAttacks = (((attacksData as any)?.logs) || []).filter((entry: any) =>
+
+	// Prefer recent_threats from stats endpoint (all-time, grouped query);
+	// fall back to the audit-log endpoint for backwards compatibility.
+	const statsAny = stats as any;
+	const recentThreatsFromStats: any[] = (statsAny?.recent_threats ?? []).map((t: any) => {
+		const details = (t.attack_details ?? {}) as Record<string, any>;
+		return {
+			...t,
+			// Normalise field names so the existing render logic works unchanged
+			threat_type: t.threat_type ?? details.threat_type ?? t.attack_type ?? 'Unknown',
+			action_taken: t.action_taken ?? details.action ?? (t.is_blocked ? 'blocked' : 'flagged'),
+			confidence: t.confidence ?? details.confidence ?? details.score ?? null,
+			content_preview:
+				t.content_preview ??
+				details.content_preview ??
+				details.input_preview ??
+				(typeof details.input === 'string' ? (details.input as string).slice(0, 120) : null),
+		};
+	});
+	const recentThreatsFromAudit = (((attacksData as any)?.logs) || []).filter((entry: any) =>
 		Boolean(entry?.attack_detected || entry?.is_blocked || entry?.status === 'failure')
 	);
-	const attackTypeCounts = recentAttacks.reduce((acc: Record<string, number>, attack: any) => {
-		const type = attack.threat_type || attack.attack_type || attack.type || 'Unknown';
-		acc[type] = (acc[type] || 0) + 1;
-		return acc;
-	}, {});
+	const recentAttacks = recentThreatsFromStats.length > 0
+		? recentThreatsFromStats
+		: recentThreatsFromAudit;
+
+	// Prefer attack_type_distribution from stats (all-time aggregate);
+	// fall back to computing counts from the local recent-attacks list.
+	const attackTypeDistribution: Array<{ type: string; count: number }> = statsAny?.attack_type_distribution ?? [];
+	const attackTypeCounts: Record<string, number> = attackTypeDistribution.length > 0
+		? Object.fromEntries(attackTypeDistribution.map((d: any) => [d.type ?? 'Unknown', d.count ?? 0]))
+		: recentAttacks.reduce((acc: Record<string, number>, attack: any) => {
+			const type = attack.threat_type || attack.attack_type || attack.type || 'Unknown';
+			acc[type] = (acc[type] || 0) + 1;
+			return acc;
+		}, {});
 
 	const isNewUser = !loading && (((stats as any)?.statistics?.requests_total ?? 0) === 0);
 
@@ -130,17 +181,65 @@ const client = new OpenAI({
 							</p>
 
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+								{/* Step 1 — inline key creator */}
 								<div className="bg-background border border-border rounded-lg p-4">
 									<div className="flex items-center gap-2 mb-2">
 										<div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0">1</div>
 										<h3 className="font-semibold text-sm">Get Your Token</h3>
 									</div>
-									<p className="text-xs text-muted-foreground mb-3">
-										Create the key your application will use to send protected traffic through KoreShield.
-									</p>
-									<Link to="/settings/api-keys" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-										Manage API Keys <ArrowRight className="w-3 h-3" />
-									</Link>
+									{generatedKey ? (
+										<div>
+											<p className="text-xs text-green-600 font-medium mb-2">Key generated! Copy it now — it won't be shown again.</p>
+											<div className="flex items-center gap-1 bg-muted rounded p-2 mb-2">
+												<code className="text-[10px] font-mono flex-1 break-all">{generatedKey}</code>
+												<button onClick={handleCopyKey} className="shrink-0 p-1 rounded hover:bg-primary/10 text-primary" title="Copy key">
+													{copiedKey ? <CheckCircle className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+												</button>
+											</div>
+											<button onClick={() => { setGeneratedKey(null); setShowKeyForm(false); }} className="text-[10px] text-muted-foreground hover:text-foreground">
+												I've saved it securely ✓
+											</button>
+										</div>
+									) : showKeyForm ? (
+										<div>
+											<div className="flex gap-1 mb-2">
+												<input
+													type="text"
+													placeholder="Key name (e.g. production)"
+													value={keyName}
+													onChange={(e) => setKeyName(e.target.value)}
+													onKeyDown={(e) => e.key === 'Enter' && keyName.trim() && generateKeyMutation.mutate(keyName.trim())}
+													className="flex-1 px-2 py-1.5 text-xs bg-background border border-border rounded focus:outline-none focus:ring-1 focus:ring-primary"
+													autoFocus
+												/>
+												<button onClick={() => setShowKeyForm(false)} className="p-1.5 rounded hover:bg-muted text-muted-foreground">
+													<X className="w-3.5 h-3.5" />
+												</button>
+											</div>
+											<button
+												onClick={() => keyName.trim() && generateKeyMutation.mutate(keyName.trim())}
+												disabled={!keyName.trim() || generateKeyMutation.isPending}
+												className="w-full py-1.5 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+											>
+												{generateKeyMutation.isPending ? 'Generating…' : 'Generate key'}
+											</button>
+											{generateKeyMutation.isError && (
+												<p className="mt-1 text-[10px] text-red-500">Failed to generate key. Try again.</p>
+											)}
+										</div>
+									) : (
+										<div>
+											<p className="text-xs text-muted-foreground mb-3">
+												Create the key your application will use to send protected traffic through KoreShield.
+											</p>
+											<button
+												onClick={() => setShowKeyForm(true)}
+												className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+											>
+												<Plus className="w-3 h-3" /> Generate API key
+											</button>
+										</div>
+									)}
 								</div>
 
 								<div className="bg-background border border-border rounded-lg p-4">
@@ -184,12 +283,12 @@ const client = new OpenAI({
 									{integrationSnippet}
 								</pre>
 								<div className="mt-3 flex flex-col sm:flex-row gap-2">
-									<Link
-										to="/settings/api-keys"
+									<button
+										onClick={() => { setShowKeyForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
 										className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
 									>
-										Generate API key
-									</Link>
+										<Plus className="w-3.5 h-3.5" /> Generate API key
+									</button>
 									<Link
 										to="/docs/getting-started/quick-start"
 										className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted"
