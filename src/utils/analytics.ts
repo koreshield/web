@@ -1,10 +1,10 @@
 import Plausible from 'plausible-tracker';
 
 // Initialize Plausible
-// Set your Plausible domain here (e.g., 'koreshield.com')
+// Set your Plausible domain here (e.g., 'koreshield.ai')
 // You can also use a custom API host if self-hosting Plausible
 const plausible = Plausible({
-	domain: 'koreshield.com',
+	domain: 'koreshield.ai',
 	// apiHost: 'https://plausible.io', // Optional: self-hosted instance
 	trackLocalhost: false, // Don't track localhost
 });
