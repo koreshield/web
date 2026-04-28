@@ -154,7 +154,7 @@ export default function DemoPage() {
 				message:
 					error instanceof Error
 						? error.message
-						: 'Something went wrong. Please try emailing us directly at hello@koreshield.ai.',
+						: 'Something went wrong. Please try emailing us directly at hello@koreshield.com.',
 				type: 'error',
 			});
 		} finally {

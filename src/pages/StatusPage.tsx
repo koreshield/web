@@ -593,7 +593,7 @@ export default function StatusPage() {
             </div>
             <div className="flex gap-3 flex-wrap">
               <a
-                href="mailto:hello@koreshield.ai?subject=Subscribe%20to%20KoreShield%20status%20alerts"
+                href="mailto:hello@koreshield.com?subject=Subscribe%20to%20KoreShield%20status%20alerts"
                 className="flex items-center gap-2 px-4 py-2 bg-card text-foreground border border-border rounded-lg font-medium hover:bg-muted transition-colors"
               >
                 <Bell className="w-4 h-4" />
