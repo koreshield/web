@@ -179,8 +179,8 @@ export function generateOrganizationSchema() {
 		'@context': 'https://schema.org',
 		'@type': 'Organization',
 		name: 'KoreShield',
-		url: 'https://koreshield.com',
-		logo: 'https://koreshield.com/logo.png',
+		url: 'https://koreshield.ai',
+		logo: 'https://koreshield.ai/logo.png',
 		description: 'Enterprise-grade LLM security firewall. Secure your AI infrastructure.',
 		sameAs: [
 			'https://github.com/koreshield',

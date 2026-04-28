@@ -386,7 +386,7 @@ export function ApiKeysPage() {
 							</p>
 							<pre className="bg-muted p-4 rounded-lg overflow-x-auto">
 								<code className="text-xs">
-									{`curl https://api.koreshield.ai/v1/chat/completions \\
+									{`curl https://api.koreshield.com/v1/chat/completions \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{

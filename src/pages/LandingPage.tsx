@@ -167,7 +167,7 @@ function LandingPage() {
                                         <div><span className="text-purple-400">from</span> koreshield <span className="text-purple-400">import</span> KoreShieldClient</div>
                                         <div className="mt-1.5">client = KoreShieldClient(</div>
                                         <div className="ml-4">api_key=<span className="text-electric-green">"your-key"</span>,</div>
-                                        <div className="ml-4">base_url=<span className="text-electric-green">"https://api.koreshield.ai"</span></div>
+                                        <div className="ml-4">base_url=<span className="text-electric-green">"https://api.koreshield.com"</span></div>
                                         <div>)</div>
                                         <div className="mt-1.5 text-muted-foreground/50"># Scan before sending to LLM</div>
                                         <div>result = client.scan_prompt(<span className="text-electric-green">"Summarize emails"</span>)</div>

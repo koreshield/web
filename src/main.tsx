@@ -9,6 +9,16 @@ import '@fontsource/geist-sans/700.css';
 import './index.css'
 import App from './App.tsx'
 
+const SPA_REDIRECT_KEY = 'koreshield-spa-redirect';
+
+const pendingRedirect = window.sessionStorage.getItem(SPA_REDIRECT_KEY);
+if (pendingRedirect) {
+  window.sessionStorage.removeItem(SPA_REDIRECT_KEY);
+  if (window.location.pathname === '/' && pendingRedirect.startsWith('/')) {
+    window.history.replaceState(null, '', pendingRedirect);
+  }
+}
+
 if (import.meta.env.PROD) {
   const originalWarn = console.warn;
   const originalError = console.error;
