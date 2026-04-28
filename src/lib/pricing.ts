@@ -66,14 +66,14 @@ export const PRICING_FAQS = [
 	{
 		question: 'Is annual pricing available?',
 		answer:
-			'Yes. Annual plans apply a flat 20% discount across Free, Growth, and Scale tiers. Enterprise contracts are scoped individually.',
+			'Yes. Annual plans apply a flat 20% discount across Dev, Growth, and Scale tiers. Enterprise contracts are scoped individually.',
 	},
 ];
 
 export const PRICING_PLANS: PricingPlan[] = [
 	{
 		id: 'free',
-		name: 'Free',
+		name: 'Dev',
 		description: 'For internal evaluation and prototyping.',
 		monthlyPriceLabel: '£0',
 		monthlyPriceValue: 0,
