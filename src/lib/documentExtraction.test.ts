@@ -7,6 +7,8 @@ const { getDocument, extractRawText } = vi.hoisted(() => ({
 
 vi.mock('pdfjs-dist/legacy/build/pdf.mjs', () => ({
 	getDocument,
+	// Expose a mutable workerSrc so the extraction code can set it without throwing
+	GlobalWorkerOptions: { workerSrc: '' },
 }));
 
 vi.mock('mammoth/mammoth.browser', () => ({
@@ -38,13 +40,16 @@ describe('documentExtraction', () => {
 		const file = new File([new Uint8Array([1, 2, 3])], 'sample.pdf', { type: 'application/pdf' });
 
 		await expect(readUploadedDocument(file)).resolves.toBe('Hello world');
+		// disableWorker is no longer passed — workerSrc is set via GlobalWorkerOptions instead
 		expect(getDocument).toHaveBeenCalledWith(
 			expect.objectContaining({
-				disableWorker: true,
 				useSystemFonts: true,
 				isEvalSupported: false,
 				data: expect.any(Uint8Array),
 			}),
+		);
+		expect(getDocument).toHaveBeenCalledWith(
+			expect.not.objectContaining({ disableWorker: expect.anything() }),
 		);
 		expect(destroy).toHaveBeenCalled();
 	});

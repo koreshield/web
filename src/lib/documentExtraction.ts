@@ -42,11 +42,22 @@ function ensurePromiseWithResolvers() {
 const extractPdfText = async (file: File): Promise<string> => {
 	ensurePromiseWithResolvers();
 	try {
-		const { getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs');
+		const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+		const { getDocument, GlobalWorkerOptions } = pdfjs;
+
+		// pdfjs-dist v4+ requires workerSrc to be set explicitly.
+		// `disableWorker` is no longer a supported getDocument option.
+		// We point to the co-bundled worker file so Vite copies it as an asset.
+		if (!GlobalWorkerOptions.workerSrc) {
+			GlobalWorkerOptions.workerSrc = new URL(
+				'pdfjs-dist/legacy/build/pdf.worker.mjs',
+				import.meta.url,
+			).href;
+		}
+
 		const data = new Uint8Array(await file.arrayBuffer());
 		const loadingTask = getDocument({
 			data,
-			disableWorker: true,
 			useSystemFonts: true,
 			isEvalSupported: false,
 		} as Parameters<typeof getDocument>[0]);

@@ -267,16 +267,43 @@ export function LoginPage() {
 							</div>
 						)}
 
-						{error && (
-							<div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-								{error}
-								{error.includes('Privileged sign-in requires an email verification code') ? (
-									<p className="mt-2 text-xs text-destructive/80">
-										This account is using admin MFA. The backend could not send the code email.
-									</p>
-								) : null}
-							</div>
-						)}
+						{error && (() => {
+							const isGoogleOAuth = error.toLowerCase().includes('google');
+							const isGitHubOAuth = error.toLowerCase().includes('github');
+							const isOAuthError = isGoogleOAuth || isGitHubOAuth;
+							return (
+								<div className={`p-3 rounded-lg text-sm border ${isOAuthError ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>
+									<p>{error}</p>
+									{isGoogleOAuth && (
+										<button
+											type="button"
+											onClick={handleGoogleLogin}
+											disabled={anyLoading}
+											className="mt-2 flex items-center gap-2 w-full justify-center py-2 px-3 bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.12] rounded-md text-foreground text-xs font-medium transition-colors disabled:opacity-50"
+										>
+											<GoogleIcon />
+											Continue with Google
+										</button>
+									)}
+									{isGitHubOAuth && (
+										<button
+											type="button"
+											onClick={handleGitHubLogin}
+											disabled={anyLoading}
+											className="mt-2 flex items-center gap-2 w-full justify-center py-2 px-3 bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.12] rounded-md text-foreground text-xs font-medium transition-colors disabled:opacity-50"
+										>
+											<Github className="w-4 h-4" />
+											Continue with GitHub
+										</button>
+									)}
+									{!isOAuthError && error.includes('Privileged sign-in requires an email verification code') && (
+										<p className="mt-2 text-xs text-destructive/80">
+											This account is using admin MFA. The backend could not send the code email.
+										</p>
+									)}
+								</div>
+							);
+						})()}
 
 						<button
 							type="submit"
