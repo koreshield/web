@@ -262,6 +262,13 @@ class ApiClient {
 		});
 	}
 
+	async updatePolicy(policyId: string, policy: JsonRecord) {
+		return this.fetch(`/v1/management/policies/${policyId}`, {
+			method: 'PUT',
+			body: JSON.stringify(policy),
+		});
+	}
+
 	async updateMe(data: { name?: string; company?: string; job_title?: string }) {
 		return this.fetch('/v1/management/me', {
 			method: 'PATCH',

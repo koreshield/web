@@ -39,14 +39,14 @@ describe('SignupPage', () => {
 		vi.unstubAllGlobals();
 	});
 
-	it('creates a session and redirects new users to getting started', async () => {
+	it('creates a session and redirects new users to the dashboard', async () => {
 		const user = userEvent.setup();
 
 		render(
 			<MemoryRouter initialEntries={['/signup']}>
 				<Routes>
 					<Route path="/signup" element={<SignupPage />} />
-					<Route path="/getting-started" element={<div>Onboarding destination</div>} />
+					<Route path="/dashboard" element={<div>Dashboard destination</div>} />
 				</Routes>
 			</MemoryRouter>,
 		);
@@ -62,6 +62,6 @@ describe('SignupPage', () => {
 				'jwt-token',
 			);
 		});
-		expect(screen.getByText('Onboarding destination')).toBeInTheDocument();
+		expect(screen.getByText('Dashboard destination')).toBeInTheDocument();
 	});
 });

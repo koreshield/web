@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Shield, Plus, Edit, Trash2, X, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
+import { useAuthState } from '../hooks/useAuthState';
 
 interface Policy {
     id: string;
@@ -46,12 +47,14 @@ function slugifyPolicyId(value: string) {
 }
 
 export function PoliciesPage() {
-    const [, setEditingPolicy] = useState<Policy | null>(null);
+    const { user } = useAuthState();
+    const [editingPolicy, setEditingPolicy] = useState<Policy | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [formData, setFormData] = useState<CreatePolicyForm>(DEFAULT_POLICY_FORM);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const queryClient = useQueryClient();
     const { addToast } = useToast();
+    const isAdmin = user?.role === 'owner' || user?.role === 'admin';
 
     // Fetch policies from real API
     const { data: policies = [], isLoading, error } = useQuery({
@@ -82,6 +85,28 @@ export function PoliciesPage() {
         },
         onError: (mutationError: unknown) => {
             const message = mutationError instanceof Error ? mutationError.message : 'Failed to create policy';
+            addToast({ type: 'error', message });
+        },
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: ({ policyId, policy }: { policyId: string; policy: CreatePolicyForm }) =>
+            api.updatePolicy(policyId, {
+                id: policy.id,
+                name: policy.name,
+                description: policy.description,
+                severity: policy.severity,
+                roles: policy.roles,
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['policies'] });
+            addToast({ type: 'success', message: 'Policy updated successfully' });
+            setShowCreateModal(false);
+            setEditingPolicy(null);
+            setFormData(DEFAULT_POLICY_FORM);
+        },
+        onError: (mutationError: unknown) => {
+            const message = mutationError instanceof Error ? mutationError.message : 'Failed to update policy';
             addToast({ type: 'error', message });
         },
     });
@@ -139,8 +164,43 @@ export function PoliciesPage() {
             });
             return;
         }
+        if (editingPolicy) {
+            updateMutation.mutate({ policyId: editingPolicy.id, policy: formData });
+            return;
+        }
         createMutation.mutate(formData);
     };
+
+    const openCreateModal = () => {
+        setEditingPolicy(null);
+        setFormData(DEFAULT_POLICY_FORM);
+        setShowCreateModal(true);
+    };
+
+    const openEditModal = (policy: Policy) => {
+        setEditingPolicy(policy);
+        setFormData({
+            id: policy.id,
+            name: policy.name,
+            description: policy.description,
+            severity: policy.severity,
+            roles: (policy.roles ?? ['admin', 'moderator', 'user']) as PolicyRole[],
+        });
+        setShowCreateModal(true);
+    };
+
+    const isSaving = createMutation.isPending || updateMutation.isPending;
+    const modalTitle = editingPolicy ? 'Edit Security Policy' : 'Create Security Policy';
+    const modalDescription = editingPolicy
+        ? 'Update how this policy behaves in your workspace.'
+        : 'Add a policy that can be referenced and managed from the KoreShield dashboard.';
+    const submitLabel = editingPolicy ? 'Save changes' : 'Create policy';
+    const permissionBanner = useMemo(() => {
+        if (isAdmin) {
+            return null;
+        }
+        return 'You can review workspace policies here, but only owners and admins can create, edit, or delete them.';
+    }, [isAdmin]);
 
     return (
         <div>
@@ -160,8 +220,9 @@ export function PoliciesPage() {
                             </div>
                         </div>
                         <button
-                            onClick={() => setShowCreateModal(true)}
-                            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm w-full sm:w-auto justify-center"
+                            onClick={openCreateModal}
+                            disabled={!isAdmin}
+                            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm w-full sm:w-auto justify-center disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             <Plus className="w-4 h-4" />
                             <span className="hidden sm:inline">Create Policy</span>
@@ -201,10 +262,11 @@ export function PoliciesPage() {
 
                 {/* Policies Grid */}
                 <div className="grid grid-cols-1 gap-6">
-                    {hasPermissionError && (
+                    {(hasPermissionError || permissionBanner) && (
                         <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
-                            Policy management is only available to workspace owners and admins. If this is your first KoreShield workspace,
-                            sign out and sign back in once so your account can refresh its role before trying again.
+                            {hasPermissionError
+                                ? 'Policy management is only available to workspace owners and admins. If this is your first KoreShield workspace, sign out and sign back in once so your account can refresh its role before trying again.'
+                                : permissionBanner}
                         </div>
                     )}
                     {isLoading ? (
@@ -225,8 +287,9 @@ export function PoliciesPage() {
                                 Create your first security policy to start protecting your LLM applications
                             </p>
                             <button
-                                onClick={() => setShowCreateModal(true)}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+                                onClick={openCreateModal}
+                                disabled={!isAdmin}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 <Plus className="w-4 h-4" />
                                 Create Your First Policy
@@ -288,15 +351,17 @@ export function PoliciesPage() {
                                     
                                     <div className="flex items-center gap-2 mt-4 sm:mt-0 sm:ml-4">
                                         <button
-                                            onClick={() => setEditingPolicy(policy)}
-                                            className="p-2 hover:bg-muted rounded-lg transition-colors"
+                                            onClick={() => openEditModal(policy)}
+                                            disabled={!isAdmin}
+                                            className="p-2 hover:bg-muted rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                             title="Edit"
                                         >
                                             <Edit className="w-4 h-4" />
                                         </button>
                                         <button
                                             onClick={() => setDeleteConfirm(policy.id)}
-                                            className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-colors"
+                                            disabled={!isAdmin}
+                                            className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                             title="Delete"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -338,14 +403,13 @@ export function PoliciesPage() {
                     <div className="w-full max-w-2xl mx-4 sm:mx-auto rounded-xl border border-border bg-card p-6 shadow-xl max-h-[90dvh] overflow-y-auto">
                         <div className="mb-6 flex items-start justify-between gap-4">
                             <div>
-                                <h2 className="text-xl font-semibold">Create Security Policy</h2>
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    Add a policy that can be referenced and managed from the KoreShield dashboard.
-                                </p>
+                                <h2 className="text-xl font-semibold">{modalTitle}</h2>
+                                <p className="mt-1 text-sm text-muted-foreground">{modalDescription}</p>
                             </div>
                             <button
                                 onClick={() => {
                                     setShowCreateModal(false);
+                                    setEditingPolicy(null);
                                     setFormData(DEFAULT_POLICY_FORM);
                                 }}
                                 className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -443,10 +507,11 @@ export function PoliciesPage() {
                                 type="button"
                                 onClick={() => {
                                     setShowCreateModal(false);
+                                    setEditingPolicy(null);
                                     setFormData(DEFAULT_POLICY_FORM);
                                 }}
                                 className="flex-1 rounded-lg bg-muted px-4 py-2 hover:bg-muted/80 w-full"
-                                disabled={createMutation.isPending}
+                                disabled={isSaving}
                             >
                                 Cancel
                             </button>
@@ -454,9 +519,9 @@ export function PoliciesPage() {
                                 type="button"
                                 onClick={handleCreatePolicy}
                                 className="flex-1 rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-60 w-full"
-                                disabled={createMutation.isPending}
+                                disabled={!isAdmin || isSaving}
                             >
-                                {createMutation.isPending ? 'Creating...' : 'Create policy'}
+                                {isSaving ? (editingPolicy ? 'Saving...' : 'Creating...') : submitLabel}
                             </button>
                         </div>
                     </div>

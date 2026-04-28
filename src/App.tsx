@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
 import { AppLayout } from './components/AppLayout';
 import { MarketingLayout } from './components/MarketingLayout';
@@ -9,7 +9,6 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { ToastProvider, setGlobalToast, useToast } from './components/ToastNotification';
 import { ThemeProvider } from './context/ThemeContext';
 import { DashboardPage } from './pages/DashboardPage';
-import GettingStartedPage from './pages/GettingStartedPage';
 import { ApiKeysPage } from './pages/ApiKeysPage';
 
 // Lazy load pages for code splitting
@@ -517,7 +516,7 @@ function AppContent() {
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<ProtectedRoute>
-										<GettingStartedPage />
+										<Navigate to="/dashboard" replace />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
 							</Suspense>
@@ -564,7 +563,7 @@ function AppContent() {
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
-									<ProtectedRoute requiredRole="admin">
+									<ProtectedRoute>
 										<PoliciesPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
@@ -684,7 +683,7 @@ function AppContent() {
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
-									<ProtectedRoute requiredRole="admin">
+									<ProtectedRoute>
 										<ApiKeyManagementPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>

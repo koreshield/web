@@ -13,7 +13,6 @@ import {
 	Lock,
 	LogOut,
 	Menu,
-	Rocket,
 	ScanSearch,
 	Shield,
 	ShieldAlert,
@@ -54,7 +53,6 @@ const NAV_GROUPS: NavGroup[] = [
 		label: 'Overview',
 		items: [
 			{ label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-			{ label: 'Getting Started', to: '/getting-started', icon: Rocket },
 		],
 	},
 	{
@@ -71,7 +69,7 @@ const NAV_GROUPS: NavGroup[] = [
 	{
 		label: 'Config',
 		items: [
-			{ label: 'API Keys', to: '/api-key-management', icon: Key },
+			{ label: 'API Keys', to: '/settings/api-keys', icon: Key },
 			{ label: 'Billing', to: '/billing', icon: DollarSign },
 			{ label: 'Rules', to: '/rules', icon: ListFilter },
 			{ label: 'Policies', to: '/policies', icon: Shield, adminOnly: true },

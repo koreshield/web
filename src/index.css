@@ -114,6 +114,32 @@ body {
   box-sizing: border-box;
 }
 
+button,
+a[href],
+[role="button"],
+summary,
+label[for],
+select,
+input[type="checkbox"],
+input[type="radio"],
+input[type="file"],
+input[type="submit"],
+input[type="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]),
+textarea {
+  cursor: text;
+}
+
 /* ═══ Terminal  -  frosted glass dark card ═══ */
 .terminal {
   font-family: var(--font-mono);
