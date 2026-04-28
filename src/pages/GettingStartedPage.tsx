@@ -128,7 +128,7 @@ export default function GettingStartedPage() {
 {`import OpenAI from 'openai';
 
 const client = new OpenAI({
-  baseURL: 'https://api.koreshield.ai/v1',
+  baseURL: 'https://api.koreshield.com/v1',
   apiKey: process.env.KORESHIELD_API_KEY,
 });
 
