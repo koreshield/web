@@ -344,7 +344,7 @@ export default function PricingPage() {
 							<thead>
 								<tr className="border-b border-border">
 									<th className="p-4 text-left font-semibold">Capability</th>
-									<th className="p-4 text-center font-semibold">Dev</th>
+									<th className="p-4 text-center font-semibold">Free</th>
 									<th className="p-4 text-center font-semibold">Growth</th>
 									<th className="p-4 text-center font-semibold">Scale</th>
 									<th className="p-4 text-center font-semibold">Enterprise</th>

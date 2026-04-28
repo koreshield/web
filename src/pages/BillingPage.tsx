@@ -287,7 +287,7 @@ export default function BillingPage() {
 							<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
 								<div className="rounded-xl bg-muted p-4">
 									<div className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">Plan</div>
-									<div className="text-xl font-semibold">{displayPlan?.name || account?.plan_name || account?.plan_slug || 'Dev'}</div>
+									<div className="text-xl font-semibold">{displayPlan?.name || account?.plan_name || account?.plan_slug || 'Free'}</div>
 								</div>
 								<div className="rounded-xl bg-muted p-4">
 									<div className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">Status</div>
