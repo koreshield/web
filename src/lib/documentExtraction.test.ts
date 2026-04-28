@@ -5,7 +5,7 @@ const { getDocument, extractRawText } = vi.hoisted(() => ({
 	extractRawText: vi.fn(),
 }));
 
-vi.mock('pdfjs-dist', () => ({
+vi.mock('pdfjs-dist/legacy/build/pdf.mjs', () => ({
 	getDocument,
 }));
 

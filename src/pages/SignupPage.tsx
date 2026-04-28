@@ -84,7 +84,7 @@ export function SignupPage() {
                 return;
             }
 
-            navigate('/getting-started');
+            navigate('/dashboard');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Signup failed');
         } finally {
