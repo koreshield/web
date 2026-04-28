@@ -119,7 +119,7 @@ export default function SolutionApplicationProtectionPage() {
 							</code>
 							<div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">After Koreshield</div>
 							<code className="block text-sm text-electric-green bg-electric-green/5 border border-electric-green/20 rounded-lg p-3">
-								client = OpenAI(base_url="https://api.koreshield.ai/v1")
+								client = OpenAI(base_url="https://api.koreshield.com/v1")
 							</code>
 							<p className="text-xs text-muted-foreground">That is the entire integration. Your existing code, your existing model, protected.</p>
 						</div>
