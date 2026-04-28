@@ -37,11 +37,11 @@ describe('BillingPage', () => {
 		});
 	});
 
-	it('maps hosted billing slugs to the public Growth and Scale plan names', async () => {
+	it('maps current and legacy hosted billing slugs to the public plan names', async () => {
 		getBillingAccount.mockResolvedValue({
 			id: 'acct_1',
 			status: 'active',
-			plan_slug: 'startup',
+			plan_slug: 'growth',
 			subscription_status: 'active',
 			current_period_end: null,
 			billing_email: 'ops@koreshield.ai',
@@ -66,10 +66,36 @@ describe('BillingPage', () => {
 			expect(screen.getByText(/^Growth$/i)).toBeInTheDocument();
 		});
 
-		expect(screen.getByText(/Hosted plans are sold as Growth and Scale/i)).toBeInTheDocument();
+		expect(screen.getByText(/Choose a plan that fits your protected-request volume/i)).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /choose growth/i })).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /choose scale/i })).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /open customer portal/i })).toBeInTheDocument();
+	});
+
+	it('keeps legacy startup slugs mapped to Growth', async () => {
+		getBillingAccount.mockResolvedValue({
+			id: 'acct_legacy',
+			status: 'active',
+			plan_slug: 'startup',
+			subscription_status: 'active',
+			current_period_end: null,
+			billing_email: 'ops@koreshield.ai',
+			external_customer_id: 'cus_legacy',
+			polar_customer_id: 'polcus_legacy',
+			metadata: {},
+		});
+
+		render(
+			<MemoryRouter initialEntries={['/billing']}>
+				<Routes>
+					<Route path="/billing" element={<BillingPage />} />
+				</Routes>
+			</MemoryRouter>,
+		);
+
+		await waitFor(() => {
+			expect(screen.getByText(/^Growth$/i)).toBeInTheDocument();
+		});
 	});
 
 	it('shows internal unlimited enterprise accounts as provisioned and disables upgrades', async () => {
