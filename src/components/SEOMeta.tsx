@@ -22,8 +22,8 @@ interface SEOMetaProps {
 const DEFAULT_TITLE = 'KoreShield - Enterprise-Grade LLM Security Firewall';
 const DEFAULT_DESCRIPTION = 'Enterprise-grade LLM security firewall protecting AI applications from prompt injection, jailbreaks, and data exfiltration with 95%+ detection accuracy.';
 const DEFAULT_KEYWORDS = 'LLM security, AI security, prompt injection, jailbreak detection, GPT security, OpenAI security, LLM firewall, AI safety, AI infrastructure protection, threat detection';
-const DEFAULT_OG_IMAGE = 'https://koreshield.ai/og-image.png';
-const SITE_URL = 'https://koreshield.ai';
+const DEFAULT_OG_IMAGE = 'https://koreshield.com/og-image.png';
+const SITE_URL = 'https://koreshield.com';
 
 export function SEOMeta({
 	title,
@@ -80,7 +80,7 @@ export function SEOMeta({
 			url: SITE_URL,
 			logo: {
 				'@type': 'ImageObject',
-				'url': 'https://koreshield.ai/logo/light/1x/White.png',
+				url: 'https://koreshield.com/logo/light/1x/White.png',
 			},
 			sameAs: [
 				'https://github.com/koreshield/',
