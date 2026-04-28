@@ -9,6 +9,6 @@ describe('resolveApiBaseUrl', () => {
 	});
 
 	it('removes a trailing slash from explicit API hosts', () => {
-		expect(resolveApiBaseUrl('https://api.koreshield.com/')).toBe('https://api.koreshield.com');
+		expect(resolveApiBaseUrl('https://api.koreshield.ai/')).toBe('https://api.koreshield.ai');
 	});
 });

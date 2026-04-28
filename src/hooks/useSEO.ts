@@ -29,7 +29,7 @@ export interface SEOMetadata {
  * @param metadata - SEO metadata object
  */
 export function useSEO(metadata: SEOMetadata) {
-	const baseUrl = 'https://koreshield.com';
+	const baseUrl = 'https://koreshield.ai';
 	const defaultOgImage = '/logo.png';
 
 	useEffect(() => {
