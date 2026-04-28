@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Key, Plus, Copy, Trash2, CheckCircle, AlertTriangle, Calendar, Clock } from 'lucide-react';
+import { Key, Plus, Copy, Trash2, CheckCircle, AlertTriangle, Calendar, Clock, Globe, Zap } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
@@ -13,11 +13,25 @@ interface APIKey {
 	expires_at: string | null;
 	is_revoked: boolean;
 	created_at: string;
+	rate_limit_rpm: number | null;
+	allowed_origins: string[] | null;
+	environment: 'dev' | 'staging' | 'prod' | null;
+	monthly_ceiling: number | null;
 }
 
 interface NewAPIKey extends APIKey {
 	api_key: string; // Full key - only shown once
 }
+
+type CreateAPIKeyPayload = {
+	name: string;
+	description?: string;
+	expires_at?: string;
+	rate_limit_rpm?: number;
+	allowed_origins?: string[];
+	environment?: string;
+	monthly_ceiling?: number;
+};
 
 export function ApiKeysPage() {
 	const [showCreateModal, setShowCreateModal] = useState(false);
@@ -26,10 +40,18 @@ export function ApiKeysPage() {
 		name: string;
 		description: string;
 		expires_at: string;
+		environment: string;
+		rate_limit_rpm: string;
+		monthly_ceiling: string;
+		allowed_origins: string;
 	}>({
 		name: '',
 		description: '',
 		expires_at: '',
+		environment: '',
+		rate_limit_rpm: '',
+		monthly_ceiling: '',
+		allowed_origins: '',
 	});
 	const [copiedKey, setCopiedKey] = useState<string | null>(null);
 	const { success, error } = useToast();
@@ -43,14 +65,14 @@ export function ApiKeysPage() {
 	});
 
 	// Generate API key mutation
-	const generateKeyMutation = useMutation<NewAPIKey, Error, { name: string; description?: string; expires_in_days?: number; expires_at?: string }>({
-		mutationFn: (data: { name: string; description?: string; expires_in_days?: number; expires_at?: string }) =>
+	const generateKeyMutation = useMutation<NewAPIKey, Error, CreateAPIKeyPayload>({
+		mutationFn: (data: CreateAPIKeyPayload) =>
 			api.generateApiKey(data) as Promise<NewAPIKey>,
 		onSuccess: (data: NewAPIKey) => {
 			queryClient.invalidateQueries({ queryKey: ['api-keys'] });
 			setNewKeyData(data);
 			setShowCreateModal(false);
-			setFormData({ name: '', description: '', expires_at: '' });
+			setFormData({ name: '', description: '', expires_at: '', environment: '', rate_limit_rpm: '', monthly_ceiling: '', allowed_origins: '' });
 			success('API key generated successfully!');
 		},
 		onError: (err) => {
@@ -82,9 +104,36 @@ export function ApiKeysPage() {
 			error('Name is required', 'Provide a name for the API key before generating.');
 			return;
 		}
-		const data: { name: string; description?: string; expires_at?: string } = {
+
+		let rate_limit_rpm: number | undefined;
+		if (formData.rate_limit_rpm) {
+			rate_limit_rpm = parseInt(formData.rate_limit_rpm, 10);
+			if (isNaN(rate_limit_rpm) || rate_limit_rpm <= 0) {
+				error('Invalid rate limit', 'Rate limit must be a positive integer.');
+				return;
+			}
+		}
+
+		let monthly_ceiling: number | undefined;
+		if (formData.monthly_ceiling) {
+			monthly_ceiling = parseInt(formData.monthly_ceiling, 10);
+			if (isNaN(monthly_ceiling) || monthly_ceiling <= 0) {
+				error('Invalid monthly ceiling', 'Monthly ceiling must be a positive integer.');
+				return;
+			}
+		}
+
+		const allowed_origins: string[] | undefined = formData.allowed_origins
+			? formData.allowed_origins.split(',').map((s) => s.trim()).filter(Boolean)
+			: undefined;
+
+		const data: CreateAPIKeyPayload = {
 			name: formData.name.trim(),
 			description: formData.description || undefined,
+			environment: formData.environment || undefined,
+			rate_limit_rpm,
+			monthly_ceiling,
+			allowed_origins,
 		};
 
 		if (formData.expires_at) {
@@ -245,7 +294,31 @@ export function ApiKeysPage() {
 												>
 													{status}
 												</span>
+											{key.environment && (
+												<span className="px-2 py-1 rounded text-xs font-medium bg-blue-500/10 text-blue-600">
+													{key.environment}
+												</span>
+											)}
+										</div>
+										{(key.rate_limit_rpm || key.monthly_ceiling || key.allowed_origins?.length) ? (
+											<div className="flex flex-wrap gap-2 mb-2">
+												{key.rate_limit_rpm && (
+													<span className="flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-purple-500/10 text-purple-600">
+														<Zap className="w-3 h-3" />{key.rate_limit_rpm} RPM
+													</span>
+												)}
+												{key.monthly_ceiling && (
+													<span className="flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-orange-500/10 text-orange-600">
+														<Clock className="w-3 h-3" />{key.monthly_ceiling.toLocaleString()} / mo
+													</span>
+												)}
+												{key.allowed_origins?.length ? (
+													<span className="flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-teal-500/10 text-teal-600">
+														<Globe className="w-3 h-3" />{key.allowed_origins.length} origin{key.allowed_origins.length !== 1 ? 's' : ''}
+													</span>
+												) : null}
 											</div>
+										) : null}
 											{key.description && (
 												<p className="text-sm text-muted-foreground mb-4">
 													{key.description}
@@ -387,11 +460,59 @@ export function ApiKeysPage() {
 									Optional. Key will never expire if left empty.
 								</p>
 							</div>
+							<div>
+								<label className="block text-sm font-medium mb-2">Environment</label>
+								<select
+									value={formData.environment}
+									onChange={(e) => setFormData({ ...formData, environment: e.target.value })}
+									className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+								>
+									<option value="">None</option>
+									<option value="dev">dev</option>
+									<option value="staging">staging</option>
+									<option value="prod">prod</option>
+								</select>
+							</div>
+							<div>
+								<label className="block text-sm font-medium mb-2">Rate Limit (requests/min)</label>
+								<input
+									type="number"
+									min="1"
+									placeholder="e.g. 60"
+									value={formData.rate_limit_rpm}
+									onChange={(e) => setFormData({ ...formData, rate_limit_rpm: e.target.value })}
+									className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+								/>
+								<p className="text-xs text-muted-foreground mt-1">Optional per-key RPM cap (overrides plan limit if lower).</p>
+							</div>
+							<div>
+								<label className="block text-sm font-medium mb-2">Monthly Ceiling</label>
+								<input
+									type="number"
+									min="1"
+									placeholder="e.g. 10000"
+									value={formData.monthly_ceiling}
+									onChange={(e) => setFormData({ ...formData, monthly_ceiling: e.target.value })}
+									className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+								/>
+								<p className="text-xs text-muted-foreground mt-1">Optional monthly request ceiling for this key.</p>
+							</div>
+							<div>
+								<label className="block text-sm font-medium mb-2">Allowed Origins</label>
+								<textarea
+									placeholder="https://app.example.com, https://staging.example.com"
+									value={formData.allowed_origins}
+									onChange={(e) => setFormData({ ...formData, allowed_origins: e.target.value })}
+									rows={2}
+									className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+								/>
+								<p className="text-xs text-muted-foreground mt-1">Optional. Comma-separated list of allowed request origins.</p>
+							</div>
 							<div className="flex gap-3 mt-6">
 								<button
 									onClick={() => {
 										setShowCreateModal(false);
-										setFormData({ name: '', description: '', expires_at: '' });
+										setFormData({ name: '', description: '', expires_at: '', environment: '', rate_limit_rpm: '', monthly_ceiling: '', allowed_origins: '' });
 									}}
 									className="flex-1 px-4 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
 									disabled={generateKeyMutation.isPending}
