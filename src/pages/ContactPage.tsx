@@ -83,7 +83,7 @@ const supportOptions = [
 		title: 'Email Support',
 		description: 'For technical issues, bug reports, or feature requests. Our engineering team reviews every ticket.',
 		cta: 'Email Us',
-		link: 'mailto:hello@koreshield.ai',
+		link: 'mailto:hello@koreshield.com',
 		external: true,
 	},
 	{
@@ -233,14 +233,14 @@ function GeneralContactForm({ initialSubject }: { initialSubject: string }) {
 		try {
 			if (!emailConfigAvailable) {
 				openMailClient({
-					to: 'hello@koreshield.ai',
+					to: 'hello@koreshield.com',
 					subject: formData.subject || 'General enquiry',
 					body:
 						`Name: ${formData.name}\n` +
 						`Email: ${formData.email}\n\n` +
 						`${formData.message}`,
 				});
-				toast.info('Opening your email app', 'We routed this enquiry to hello@koreshield.ai because browser email sending is not configured here.');
+				toast.info('Opening your email app', 'We routed this enquiry to hello@koreshield.com because browser email sending is not configured here.');
 				setFormData({ name: '', email: '', subject: '', message: '' });
 				return;
 			}
@@ -268,7 +268,7 @@ function GeneralContactForm({ initialSubject }: { initialSubject: string }) {
 					? (err as { text?: string; message?: string }).text ||
 					  (err as { text?: string; message?: string }).message
 					: undefined;
-			toast.error('Failed to send', details || 'Please try again or email hello@koreshield.ai directly.');
+			toast.error('Failed to send', details || 'Please try again or email hello@koreshield.com directly.');
 		} finally {
 			setLoading(false);
 		}
@@ -321,7 +321,7 @@ function TechnicalSupportForm() {
 		try {
 			if (!emailConfigAvailable) {
 				openMailClient({
-					to: 'hello@koreshield.ai',
+					to: 'hello@koreshield.com',
 					subject: formData.subject || 'Technical support request',
 					body:
 						`Name: ${formData.name}\n` +
@@ -332,7 +332,7 @@ function TechnicalSupportForm() {
 						`Description:\n${formData.description}\n\n` +
 						`Environment:\n${formData.environment || 'Not provided'}`,
 				});
-				toast.info('Opening your email app', 'We routed this support request to hello@koreshield.ai because browser email sending is not configured here.');
+				toast.info('Opening your email app', 'We routed this support request to hello@koreshield.com because browser email sending is not configured here.');
 				setFormData({
 					name: '',
 					email: '',
@@ -383,7 +383,7 @@ function TechnicalSupportForm() {
 					? (err as { text?: string; message?: string }).text ||
 					  (err as { text?: string; message?: string }).message
 					: undefined;
-			toast.error('Failed to send', details || 'Please try again or email hello@koreshield.ai directly.');
+			toast.error('Failed to send', details || 'Please try again or email hello@koreshield.com directly.');
 		} finally {
 			setLoading(false);
 		}

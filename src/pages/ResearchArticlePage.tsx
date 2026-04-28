@@ -131,10 +131,10 @@ export default function ResearchArticlePage() {
 									Browse all research
 								</Link>
 								<a
-									href="mailto:hello@koreshield.ai"
+									href="mailto:hello@koreshield.com"
 									className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-semibold transition-colors hover:bg-muted"
 								>
-									Contact hello@koreshield.ai
+									Contact hello@koreshield.com
 									<ExternalLink className="h-4 w-4" />
 								</a>
 							</div>
