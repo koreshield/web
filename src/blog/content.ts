@@ -227,7 +227,7 @@ Prompt injection is the primary attack surface of every LLM application, and it 
 
 KoreShield's detection engine involving text normalisation, weighted rule matching, and semantic scoring all handles the majority of traffic with sub-5ms overhead and catches attack patterns across their real-world realisations.
 
-[Get started with KoreShield →](https://koreshield.com/)`,
+[Get started with KoreShield →](https://koreshield.ai/)`,
 	},
 
 	{
@@ -282,7 +282,7 @@ It's the firewall every LLM deployment is missing.
 
 If you are building with LLMs in production, or you know someone who is, this is the conversation that needs to happen now.
 
-[Get started with koreshield.com today.](https://koreshield.com/)`,
+[Get started with koreshield.ai today.](https://koreshield.ai/)`,
 	},
 
 	{
