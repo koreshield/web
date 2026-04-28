@@ -4,9 +4,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ToastProvider } from '../components/ToastNotification';
 import { PoliciesPage } from './PoliciesPage';
 
-const { getPolicies, createPolicy, deletePolicy } = vi.hoisted(() => ({
+const { getPolicies, createPolicy, updatePolicy, deletePolicy } = vi.hoisted(() => ({
 	getPolicies: vi.fn(),
 	createPolicy: vi.fn(),
+	updatePolicy: vi.fn(),
 	deletePolicy: vi.fn(),
 }));
 
@@ -14,8 +15,17 @@ vi.mock('../lib/api-client', () => ({
 	api: {
 		getPolicies,
 		createPolicy,
+		updatePolicy,
 		deletePolicy,
 	},
+}));
+
+vi.mock('../hooks/useAuthState', () => ({
+	useAuthState: () => ({
+		user: {
+			role: 'owner',
+		},
+	}),
 }));
 
 function renderPage() {
@@ -39,10 +49,14 @@ describe('PoliciesPage', () => {
 	beforeEach(() => {
 		getPolicies.mockReset();
 		createPolicy.mockReset();
+		updatePolicy.mockReset();
 		deletePolicy.mockReset();
 		getPolicies.mockResolvedValue([]);
 		createPolicy.mockResolvedValue({
 			status: 'created',
+		});
+		updatePolicy.mockResolvedValue({
+			status: 'updated',
 		});
 	});
 
@@ -72,6 +86,40 @@ describe('PoliciesPage', () => {
 				description: 'Block prompt leakage attempts for protected traffic.',
 				severity: 'high',
 				roles: ['admin', 'moderator', 'user'],
+			});
+		});
+	});
+
+	it('edits an existing policy from the modal form', async () => {
+		getPolicies.mockResolvedValue([
+			{
+				id: 'protect-prompt-leakage',
+				name: 'Protect Prompt Leakage',
+				description: 'Block prompt leakage attempts for protected traffic.',
+				severity: 'high',
+				roles: ['admin', 'moderator'],
+				enabled: true,
+			},
+		]);
+
+		renderPage();
+
+		await screen.findByText(/Protect Prompt Leakage/i);
+		fireEvent.click(screen.getByTitle(/Edit/i));
+
+		fireEvent.change(screen.getByLabelText(/Description/i), {
+			target: { value: 'Updated policy description for protected traffic.' },
+		});
+
+		fireEvent.click(screen.getByRole('button', { name: /Save changes/i }));
+
+		await waitFor(() => {
+			expect(updatePolicy).toHaveBeenCalledWith('protect-prompt-leakage', {
+				id: 'protect-prompt-leakage',
+				name: 'Protect Prompt Leakage',
+				description: 'Updated policy description for protected traffic.',
+				severity: 'high',
+				roles: ['admin', 'moderator'],
 			});
 		});
 	});

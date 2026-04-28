@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Activity, Shield, AlertTriangle, CheckCircle, Rocket, Code, BookOpen, ArrowRight, Key, Users, ScanSearch } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useStats, useRecentAttacks } from '../hooks/useApi';
@@ -8,6 +8,16 @@ import { ThreatTypeBreakdown, ThreatTimeline, ThreatSummary } from '../component
 export function DashboardPage() {
 	const { user } = useAuthState();
 	const [selectedAttack, setSelectedAttack] = useState<any>(null);
+	const isAdmin = user?.role === 'owner' || user?.role === 'admin';
+	const integrationSnippet = useMemo(
+		() => `import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'https://api.koreshield.ai/v1',
+  apiKey: process.env.KORESHIELD_API_KEY
+});`,
+		[],
+	);
 
 	// Data fetching
 	const { data: stats, isLoading: statsLoading, error: statsError } = useStats();
@@ -68,7 +78,7 @@ export function DashboardPage() {
 
 			{/* Quick Actions */}
 			<div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-8">
-				<Link to="/api-key-management" className="bg-card border border-border rounded-lg p-4 hover:border-primary/40 transition-colors group">
+				<Link to="/settings/api-keys" className="bg-card border border-border rounded-lg p-4 hover:border-primary/40 transition-colors group">
 					<div className="flex items-center gap-3">
 						<Key className="w-5 h-5 text-primary" />
 						<div>
@@ -116,7 +126,7 @@ export function DashboardPage() {
 						<div className="flex-1 min-w-0">
 							<h2 className="text-lg font-bold mb-1">Welcome to KoreShield</h2>
 							<p className="text-sm text-muted-foreground mb-5">
-								Get started by integrating KoreShield into your application.
+								Everything you need to protect your first integration is right here. Generate a key, review your protection rules, and copy the integration snippet without bouncing between pages.
 							</p>
 
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -126,9 +136,9 @@ export function DashboardPage() {
 										<h3 className="font-semibold text-sm">Get Your Token</h3>
 									</div>
 									<p className="text-xs text-muted-foreground mb-3">
-										Use API keys for server-to-server integrations.
+										Create the key your application will use to send protected traffic through KoreShield.
 									</p>
-									<Link to="/api-key-management" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+									<Link to="/settings/api-keys" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
 										Manage API Keys <ArrowRight className="w-3 h-3" />
 									</Link>
 								</div>
@@ -139,10 +149,15 @@ export function DashboardPage() {
 										<h3 className="font-semibold text-sm">Configure Policies</h3>
 									</div>
 									<p className="text-xs text-muted-foreground mb-3">
-										Set up security policies to define what threats to block.
+										{isAdmin
+											? 'Review the default protections and tailor policy behavior for your workspace.'
+											: 'Review the active protections in your workspace and coordinate any changes with an admin.'}
 									</p>
-									<Link to="/policies" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-										Go to Policies <ArrowRight className="w-3 h-3" />
+									<Link
+										to={isAdmin ? '/policies' : '/rules'}
+										className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+									>
+										{isAdmin ? 'Go to Policies' : 'Review Rules'} <ArrowRight className="w-3 h-3" />
 									</Link>
 								</div>
 
@@ -152,10 +167,10 @@ export function DashboardPage() {
 										<h3 className="font-semibold text-sm">Send Requests</h3>
 									</div>
 									<p className="text-xs text-muted-foreground mb-3">
-										Route your LLM requests through KoreShield's proxy.
+										Copy the exact request shape your backend needs, then validate it against the quick-start docs.
 									</p>
-									<Link to="/getting-started" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-										Open guide <BookOpen className="w-3 h-3" />
+									<Link to="/docs/getting-started/quick-start" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+										Open integration guide <BookOpen className="w-3 h-3" />
 									</Link>
 								</div>
 							</div>
@@ -166,13 +181,22 @@ export function DashboardPage() {
 									<h3 className="font-semibold text-xs">Quick Integration</h3>
 								</div>
 								<pre className="bg-muted p-3 rounded text-[11px] overflow-x-auto text-muted-foreground">
-									{`import OpenAI from 'openai';
-
-const client = new OpenAI({
-  baseURL: '${window.location.origin}/v1',
-  apiKey: process.env.KORESHIELD_API_KEY
-});`}
+									{integrationSnippet}
 								</pre>
+								<div className="mt-3 flex flex-col sm:flex-row gap-2">
+									<Link
+										to="/settings/api-keys"
+										className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+									>
+										Generate API key
+									</Link>
+									<Link
+										to="/docs/getting-started/quick-start"
+										className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted"
+									>
+										View integration guide
+									</Link>
+								</div>
 							</div>
 						</div>
 					</div>
