@@ -96,7 +96,7 @@ export default function NotFoundPage() {
 
 					<p className="text-xs text-muted-foreground mt-6">
 						Still stuck?{' '}
-						<a href="mailto:hello@koreshield.ai" className="text-primary hover:underline">
+						<a href="mailto:hello@koreshield.com" className="text-primary hover:underline">
 							Email support
 						</a>
 						{' '}or join our{' '}
