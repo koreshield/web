@@ -761,6 +761,12 @@ class ApiClient {
 		}
 		return response.blob();
 	}
+
+	async resendVerificationEmail() {
+		return this.fetch('/v1/management/auth/resend-verification-email', {
+			method: 'POST',
+		});
+	}
 }
 
 export const api = new ApiClient();
