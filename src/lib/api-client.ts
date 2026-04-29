@@ -763,7 +763,7 @@ class ApiClient {
 	}
 
 	async resendVerificationEmail() {
-		return this.fetch('/v1/management/auth/resend-verification-email', {
+		return this.fetch('/v1/management/resend-verification-email', {
 			method: 'POST',
 		});
 	}
