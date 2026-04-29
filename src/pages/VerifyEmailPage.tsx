@@ -19,7 +19,7 @@ export function VerifyEmailPage() {
 
         const verify = async () => {
             try {
-                const response = await fetch('/v1/management/auth/verify-email?token=' + encodeURIComponent(token), {
+                const response = await fetch('/v1/management/verify-email?token=' + encodeURIComponent(token), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
