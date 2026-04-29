@@ -13,6 +13,7 @@ export interface AuthUser {
 	status?: string;
 	company?: string | null;
 	job_title?: string | null;
+	email_verified?: boolean;
 }
 
 export interface LoginResponse {

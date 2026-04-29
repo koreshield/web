@@ -35,6 +35,25 @@ export function ProfilePage() {
 	const [deleteConfirmText, setDeleteConfirmText] = useState('');
 	const [deleting, setDeleting] = useState(false);
 
+	// Email verification state
+	const [resendingEmail, setResendingEmail] = useState(false);
+	const [resendSuccess, setResendSuccess] = useState(false);
+
+	const handleResendVerificationEmail = async () => {
+		try {
+			setResendingEmail(true);
+			await api.resendVerificationEmail();
+			setResendSuccess(true);
+			toast.show('Verification email sent successfully', 'success');
+			setTimeout(() => setResendSuccess(false), 3000);
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'Failed to resend verification email';
+			toast.show(message, 'error');
+		} finally {
+			setResendingEmail(false);
+		}
+	};
+
 	useEffect(() => {
 		if (!user) return;
 		let active = true;
@@ -234,14 +253,35 @@ export function ProfilePage() {
 								<div className="p-3 bg-muted rounded-md text-foreground font-medium">
 									{user.email}
 								</div>
-								<p className="text-xs text-muted-foreground">Email address cannot be changed here.</p>
+							
+							{/* Email verification status */}
+							<div className="pt-2 border-t border-border">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+										{user.email_verified ? (
+											<>
+												<CheckCircle2 className="w-4 h-4 text-green-500" />
+												<span className="text-xs font-medium text-green-600">Email verified</span>
+											</>
+										) : (
+											<>
+												<AlertTriangle className="w-4 h-4 text-amber-500" />
+												<span className="text-xs font-medium text-amber-600">Unverified</span>
+											</>
+										)}
+									</div>
+									{!user.email_verified && (
+										<button
+											onClick={handleResendVerificationEmail}
+											disabled={resendingEmail || resendSuccess}
+											className="text-xs px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+										>
+											{resendSuccess ? '✓ Sent' : resendingEmail ? 'Sending...' : 'Resend'}
+										</button>
+									)}
+								</div>
 							</div>
-
-							{/* Role — read-only */}
-							<div className="space-y-2">
-								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-									<Shield className="w-4 h-4" /> Role
-								</label>
+							
 								<div className="p-3 bg-muted rounded-md text-foreground font-medium capitalize">
 									{user.role}
 								</div>
