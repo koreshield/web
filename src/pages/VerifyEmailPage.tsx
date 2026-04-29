@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+import { resolveApiBaseUrl } from '../lib/api-base';
+import { authService } from '../lib/auth';
 
 export function VerifyEmailPage() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const token = searchParams.get('token') ?? '';
+    const apiBaseUrl = resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
     const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading');
     const [errorMsg, setErrorMsg] = useState('');
@@ -19,20 +22,24 @@ export function VerifyEmailPage() {
 
         const verify = async () => {
             try {
-                const response = await fetch('/v1/management/verify-email?token=' + encodeURIComponent(token), {
+                const response = await fetch(`${apiBaseUrl}/v1/management/verify-email?token=${encodeURIComponent(token)}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include',
                 });
 
                 if (!response.ok) {
-                    const errData = await response.json();
-                    throw new Error(errData.detail || 'Verification failed');
+                    const errData = await response.json().catch(() => null);
+                    throw new Error(errData?.detail || 'Verification failed');
                 }
 
+                sessionStorage.setItem('ks_email_verified_notice', '1');
+                await authService.restoreSession(true).catch(() => false);
                 setStatus('done');
-                setTimeout(() => navigate('/login', { state: { emailVerified: true } }), 3000);
+                const destination = authService.isAuthenticated() ? '/dashboard?emailVerified=1' : '/login?emailVerified=1';
+                setTimeout(() => navigate(destination), 2000);
             } catch (err) {
                 setErrorMsg(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
                 setStatus('error');
@@ -40,7 +47,7 @@ export function VerifyEmailPage() {
         };
 
         verify();
-    }, [token, navigate]);
+    }, [token, navigate, apiBaseUrl]);
 
     return (
         <div className="min-h-screen bg-background flex">
