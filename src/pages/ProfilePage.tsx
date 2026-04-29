@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpen, Building, CheckCircle2, CreditCard, Key, Mail, Pencil, Rocket, Shield, Trash2, User, X } from 'lucide-react';
+import { AlertTriangle, BookOpen, Building, CheckCircle2, CreditCard, Key, Mail, Pencil, Rocket, Trash2, User, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../components/ToastNotification';
@@ -44,11 +44,11 @@ export function ProfilePage() {
 			setResendingEmail(true);
 			await api.resendVerificationEmail();
 			setResendSuccess(true);
-			toast.show('Verification email sent successfully', 'success');
-			setTimeout(() => setResendSuccess(false), 3000);
-		} catch (err) {
-			const message = err instanceof Error ? err.message : 'Failed to resend verification email';
-			toast.show(message, 'error');
+				toast.success('Verification email sent successfully');
+				setTimeout(() => setResendSuccess(false), 3000);
+			} catch (err) {
+				const message = err instanceof Error ? err.message : 'Failed to resend verification email';
+				toast.error(message);
 		} finally {
 			setResendingEmail(false);
 		}
