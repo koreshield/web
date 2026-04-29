@@ -48,4 +48,4 @@ It's the firewall every LLM deployment is missing.
 
 If you are building with LLMs in production, or you know someone who is, this is the conversation that needs to happen now.
 
-[Get started with koreshield.com today.](https://koreshield.com/)
+[Get started with KoreShield today.](https://koreshield.ai/)
