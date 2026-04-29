@@ -140,7 +140,7 @@ export function SEOMeta({
 			<meta property="twitter:image" content={ogImage} />
 			<meta name="twitter:site" content="@koreshield" />
 			<meta name="twitter:creator" content="@koreshield" />
-			<meta name="twitter:domain" content="koreshield.com" />
+			<meta name="twitter:domain" content="koreshield.ai" />
 
 			{/* Additional Meta Tags */}
 			<meta name="language" content="English" />
@@ -163,5 +163,4 @@ export function SEOMeta({
 		</Helmet>
 	);
 }
-
 
