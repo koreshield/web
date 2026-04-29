@@ -145,8 +145,8 @@ export const authService = {
 		return Boolean(inMemoryToken || sessionStorage.getItem(USER_STORAGE_KEY));
 	},
 
-	async restoreSession(): Promise<boolean> {
-		if (this.isAuthenticated()) {
+	async restoreSession(force = false): Promise<boolean> {
+		if (!force && this.isAuthenticated()) {
 			return true;
 		}
 
@@ -162,7 +162,7 @@ export const authService = {
 			if (!data?.user) {
 				return false;
 			}
-			persistSession(data.user);
+			persistSession(data.user, inMemoryToken);
 			return true;
 		} catch {
 			return false;

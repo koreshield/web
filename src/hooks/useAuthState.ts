@@ -53,6 +53,7 @@ export function useAuthState(): AuthState {
 			};
 		} else {
 			syncState();
+			void authService.restoreSession(true).finally(syncState);
 		}
 
 		return () => {

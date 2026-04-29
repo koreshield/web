@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpen, Building, CheckCircle2, CreditCard, Key, Mail, Pencil, Rocket, Trash2, User, X } from 'lucide-react';
+import { AlertTriangle, BookOpen, Building, CheckCircle2, CreditCard, Key, Mail, Pencil, Rocket, Shield, Trash2, User, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../components/ToastNotification';
@@ -253,35 +253,44 @@ export function ProfilePage() {
 								<div className="p-3 bg-muted rounded-md text-foreground font-medium">
 									{user.email}
 								</div>
-							
-							{/* Email verification status */}
-							<div className="pt-2 border-t border-border">
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2">
-										{user.email_verified ? (
-											<>
-												<CheckCircle2 className="w-4 h-4 text-green-500" />
-												<span className="text-xs font-medium text-green-600">Email verified</span>
-											</>
-										) : (
-											<>
-												<AlertTriangle className="w-4 h-4 text-amber-500" />
-												<span className="text-xs font-medium text-amber-600">Unverified</span>
-											</>
+							</div>
+
+							<div className="space-y-2">
+								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+									<AlertTriangle className="w-4 h-4" /> Email Verification
+								</label>
+								<div className="p-3 bg-muted rounded-md">
+									<div className="flex items-center justify-between gap-3">
+										<div className="flex items-center gap-2">
+											{user.email_verified ? (
+												<>
+													<CheckCircle2 className="w-4 h-4 text-green-500" />
+													<span className="text-sm font-medium text-green-600">Verified</span>
+												</>
+											) : (
+												<>
+													<AlertTriangle className="w-4 h-4 text-amber-500" />
+													<span className="text-sm font-medium text-amber-600">Unverified</span>
+												</>
+											)}
+										</div>
+										{!user.email_verified && (
+											<button
+												onClick={() => void handleResendVerificationEmail()}
+												disabled={resendingEmail || resendSuccess}
+												className="text-xs px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+											>
+												{resendSuccess ? '✓ Sent' : resendingEmail ? 'Sending...' : 'Resend'}
+											</button>
 										)}
 									</div>
-									{!user.email_verified && (
-										<button
-											onClick={handleResendVerificationEmail}
-											disabled={resendingEmail || resendSuccess}
-											className="text-xs px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-										>
-											{resendSuccess ? '✓ Sent' : resendingEmail ? 'Sending...' : 'Resend'}
-										</button>
-									)}
 								</div>
 							</div>
-							
+
+							<div className="space-y-2">
+								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+									<Shield className="w-4 h-4" /> Role
+								</label>
 								<div className="p-3 bg-muted rounded-md text-foreground font-medium capitalize">
 									{user.role}
 								</div>
