@@ -30,6 +30,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m
 const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage })));
 const GitHubCallbackPage = lazy(() => import('./pages/GitHubCallbackPage').then(m => ({ default: m.GitHubCallbackPage })));
 const GoogleCallbackPage = lazy(() => import('./pages/GoogleCallbackPage').then(m => ({ default: m.GoogleCallbackPage })));
 const IntegrationsPage = lazy(() => import('./pages/IntegrationsPage'));
@@ -246,6 +247,16 @@ function AppContent() {
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<ResetPasswordPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/verify-email"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<VerifyEmailPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}
