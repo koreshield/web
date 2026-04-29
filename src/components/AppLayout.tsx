@@ -22,6 +22,8 @@ import {
 	WifiOff,
 	X,
 	Map,
+	AlertTriangle,
+	CheckCircle2,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -30,6 +32,7 @@ import { authService } from '../lib/auth';
 import { useAuthState } from '../hooks/useAuthState';
 import { wsClient } from '../lib/websocket-client';
 import { ThemeToggle } from './ThemeToggle';
+import { api } from '../lib/api-client';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -354,9 +357,10 @@ function WsStatus() {
 
 export function AppLayout() {
 	const navigate = useNavigate();
-	const { isAuthenticated } = useAuthState();
-	const user = authService.getCurrentUser();
+	const { isAuthenticated, user } = useAuthState();
 	const isAdmin = user?.role === 'admin' || user?.role === 'owner' || user?.role === 'superuser';
+	const [resendingVerification, setResendingVerification] = useState(false);
+	const [verificationBannerState, setVerificationBannerState] = useState<'none' | 'sent' | 'verified'>('none');
 
 	// Sidebar collapse state (persisted)
 	const [collapsed, setCollapsed] = useState(() => {
@@ -406,10 +410,37 @@ export function AppLayout() {
 		};
 	}, [mobileOpen]);
 
+	useEffect(() => {
+		const showVerifiedNotice =
+			typeof window !== 'undefined' &&
+			(new URLSearchParams(window.location.search).get('emailVerified') === '1' ||
+				sessionStorage.getItem('ks_email_verified_notice') === '1');
+
+		if (user?.email_verified && showVerifiedNotice) {
+			setVerificationBannerState('verified');
+			sessionStorage.removeItem('ks_email_verified_notice');
+			return;
+		}
+
+		if (!user?.email_verified) {
+			setVerificationBannerState('none');
+		}
+	}, [user?.email_verified]);
+
 	const handleLogout = async () => {
 		wsClient.disconnect();
 		await authService.logout();
 		navigate('/');
+	};
+
+	const handleResendVerification = async () => {
+		try {
+			setResendingVerification(true);
+			await api.resendVerificationEmail();
+			setVerificationBannerState('sent');
+		} finally {
+			setResendingVerification(false);
+		}
 	};
 
 	const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
@@ -507,6 +538,49 @@ export function AppLayout() {
 
 				{/* Page content */}
 				<main className="flex-1">
+					{isAuthenticated && user && (
+						<div className="px-4 sm:px-6 lg:px-8 pt-4">
+							{!user.email_verified ? (
+								<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded-lg px-4 py-3 text-sm">
+									<div className="flex items-start gap-3">
+										<AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+										<div>
+											<p className="font-medium">Verify your email to unlock the full account flow.</p>
+											<p className="text-xs sm:text-sm opacity-90">
+												We sent a verification link to <strong>{user.email}</strong>. Need a fresh one?
+											</p>
+										</div>
+									</div>
+									<button
+										type="button"
+										onClick={() => void handleResendVerification()}
+										disabled={resendingVerification}
+										className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 text-sm font-medium"
+									>
+										{resendingVerification ? 'Sending...' : verificationBannerState === 'sent' ? 'Sent' : 'Resend verification'}
+									</button>
+								</div>
+							) : verificationBannerState === 'verified' ? (
+								<div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 rounded-lg px-4 py-3 text-sm">
+									<CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
+									<div className="flex-1">
+										<p className="font-medium">Email verified.</p>
+										<p className="text-xs sm:text-sm opacity-90">
+											Your account is confirmed and ready to use.
+										</p>
+									</div>
+									<button
+										type="button"
+										onClick={() => setVerificationBannerState('none')}
+										className="text-current/80 hover:text-current"
+										aria-label="Dismiss verification banner"
+									>
+										<X className="w-4 h-4" />
+									</button>
+								</div>
+							) : null}
+						</div>
+					)}
 					<Outlet />
 				</main>
 			</div>
