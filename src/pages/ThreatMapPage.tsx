@@ -30,6 +30,7 @@ type TimeRange = '7d' | '30d' | '90d';
 
 export function ThreatMapPage() {
 	const [threats, setThreats] = useState<ThreatLocation[]>([]);
+	const [liveThreatEvents, setLiveThreatEvents] = useState(0);
 	const [wsConnected, setWsConnected] = useState(() => wsClient.isConnected());
 	const [selectedThreat, setSelectedThreat] = useState<ThreatLocation | null>(null);
 	const [timeRange, setTimeRange] = useState<TimeRange>('7d');
@@ -86,10 +87,23 @@ export function ThreatMapPage() {
 		const cleanupThreats = wsClient.on<ThreatDetectedEvent>(
 			'threat_detected',
 			(event: WebSocketEvent<ThreatDetectedEvent>) => {
+				setLiveThreatEvents(prev => prev + 1);
+				const threatWithLocation = event.data as ThreatDetectedEvent & {
+					latitude?: number;
+					longitude?: number;
+					country?: string;
+				};
+				if (
+					typeof threatWithLocation.longitude !== 'number' ||
+					typeof threatWithLocation.latitude !== 'number'
+				) {
+					return;
+				}
+
 				const newThreat: ThreatLocation = {
 					id: event.data.threat_id,
-					coordinates: [Math.random() * 360 - 180, Math.random() * 180 - 90],
-					country: 'Unknown',
+					coordinates: [threatWithLocation.longitude, threatWithLocation.latitude],
+					country: threatWithLocation.country || 'Unknown',
 					threatType: event.data.attack_type,
 					severity: event.data.severity,
 					timestamp: event.timestamp,
@@ -105,7 +119,7 @@ export function ThreatMapPage() {
 	}, []);
 
 	const stats = {
-		total: threats.length,
+		total: liveThreatEvents,
 		critical: threats.filter(t => t.severity === 'critical').length,
 		countries: new Set(threats.map(t => t.country)).size,
 	};
@@ -181,10 +195,11 @@ export function ThreatMapPage() {
 			</header>
 
 			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
-				{/* Data status notice */}
 				<div className="mb-6 flex items-start gap-3 bg-blue-500/10 border border-blue-500/30 text-blue-700 dark:text-blue-400 rounded-lg px-4 py-3 text-sm">
 					<span className="mt-0.5 flex-shrink-0">ℹ</span>
-					<span>The map updates in <strong>real-time</strong> via WebSocket as threats are detected. Attack vector statistics and top endpoints reflect <strong>sample data</strong> while live aggregation API endpoints are in development.</span>
+					<span>
+						The map updates in <strong>real-time</strong> via WebSocket as threats are detected. Attack vector statistics and top endpoints reflect <strong>live tenant data</strong>. Geographic markers appear only when source events include location metadata.
+					</span>
 				</div>
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
 					<div className="bg-card border border-border rounded-lg p-6">
@@ -193,7 +208,7 @@ export function ThreatMapPage() {
 							<Activity className="w-5 h-5 text-blue-500" />
 						</div>
 						<div className="text-3xl font-bold">{stats.total}</div>
-						<p className="text-xs text-muted-foreground mt-1">Current session</p>
+						<p className="text-xs text-muted-foreground mt-1">Current live session</p>
 					</div>
 
 					<div className="bg-card border border-border rounded-lg p-6">
