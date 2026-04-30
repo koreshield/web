@@ -180,7 +180,7 @@ export default function VsLakeraPage() {
 						<div>
 							<h3 className="text-xl font-semibold text-electric-green mb-4">KoreShield</h3>
 							<ul className="space-y-3 text-muted-foreground">
-								<li>• <strong>£0:</strong> Free tier with 10,000 protected requests</li>
+								<li>• <strong>£0:</strong> Dev tier with 10,000 protected requests</li>
 								<li>• <strong>£99/mo:</strong> Growth with 100,000 protected requests</li>
 								<li>• <strong>£399/mo:</strong> Scale with 1,000,000 protected requests</li>
 								<li>• <strong>From £18k/year:</strong> Enterprise with private deployment and governance controls</li>
