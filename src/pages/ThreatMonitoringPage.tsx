@@ -31,7 +31,22 @@ export function ThreatMonitoringPage() {
 
 	// Fetch initial data
 	const { data: attacksData, isLoading } = useRecentAttacks(50);
-	const initialAttacks = (attacksData as any)?.logs || [];
+	// Normalise raw API log records into the Attack interface.
+	// The backend returns `attack_type` (not `threat_type`) and has no `confidence` field.
+	const initialAttacks: Attack[] = ((attacksData as any)?.logs || []).map((log: any) => ({
+		id: log.id || log.request_id || String(Math.random()),
+		timestamp: log.timestamp || log.created_at || new Date().toISOString(),
+		threat_type: log.threat_type || log.attack_type || 'Unknown',
+		confidence: typeof log.confidence === 'number'
+			? log.confidence
+			: typeof log.risk_score === 'number'
+				? log.risk_score / 100
+				: 0,
+		content_preview: log.content_preview || log.prompt_preview || `${log.attack_type || 'Threat'} detected`,
+		action_taken: log.action_taken || (log.blocked ? 'blocked' : 'warned'),
+		severity: log.severity,
+		metadata: log.metadata,
+	}));
 
 	// WebSocket real-time updates
 	useEffect(() => {
@@ -113,7 +128,8 @@ export function ThreatMonitoringPage() {
 
 
 	const threatTypeData = filteredThreats.reduce((acc, threat) => {
-		acc[threat.threat_type] = (acc[threat.threat_type] || 0) + 1;
+		const key = threat.threat_type || 'Unknown';
+		acc[key] = (acc[key] || 0) + 1;
 		return acc;
 	}, {} as Record<string, number>);
 
@@ -277,7 +293,7 @@ export function ThreatMonitoringPage() {
 																<Clock className="w-3 h-3" />
 																{formatDistanceToNow(new Date(threat.timestamp), { addSuffix: true })}
 															</span>
-															<span>Confidence: {(threat.confidence * 100).toFixed(0)}%</span>
+															<span>Confidence: {((threat.confidence ?? 0) * 100).toFixed(0)}%</span>
 														</div>
 													</div>
 													<AlertTriangle className={`w-5 h-5 flex-shrink-0 ${severity === 'critical' ? 'text-red-500' :
@@ -316,10 +332,11 @@ export function ThreatMonitoringPage() {
 	);
 }
 
-function getSeverityFromConfidence(confidence: number): 'critical' | 'high' | 'medium' | 'low' {
-	if (confidence >= 0.9) return 'critical';
-	if (confidence >= 0.7) return 'high';
-	if (confidence >= 0.5) return 'medium';
+function getSeverityFromConfidence(confidence: number | undefined | null): 'critical' | 'high' | 'medium' | 'low' {
+	const c = confidence ?? 0;
+	if (c >= 0.9) return 'critical';
+	if (c >= 0.7) return 'high';
+	if (c >= 0.5) return 'medium';
 	return 'low';
 }
 
