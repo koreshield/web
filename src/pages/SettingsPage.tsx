@@ -1,15 +1,20 @@
 import {
 	AlertTriangle,
+	ArrowRight,
 	Building,
 	CheckCircle2,
+	Lock,
 	Mail,
 	Pencil,
+	Settings as SettingsIcon,
 	Shield,
 	Trash2,
 	User,
+	Users,
 	X,
 } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useToast } from '../components/ToastNotification';
 import { useAuthState } from '../hooks/useAuthState';
 import { api } from '../lib/api-client';
@@ -18,7 +23,7 @@ import { authService } from '../lib/auth';
 const inputClass =
 	'w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-foreground text-sm transition-colors placeholder:text-muted-foreground/50';
 
-type Tab = 'profile' | 'danger';
+type Tab = 'profile' | 'security' | 'danger';
 
 export function SettingsPage() {
 	const { user } = useAuthState();
@@ -36,6 +41,9 @@ export function SettingsPage() {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [deleteConfirmText, setDeleteConfirmText] = useState('');
 	const [deleting, setDeleting] = useState(false);
+	const [sendingResetEmail, setSendingResetEmail] = useState(false);
+
+	const isPrivilegedAccount = user?.role === 'admin' || user?.role === 'owner' || user?.role === 'superuser';
 
 	const handleStartEdit = () => {
 		setEditName(user?.name || '');
@@ -92,6 +100,20 @@ export function SettingsPage() {
 		}
 	};
 
+	const handleSendPasswordReset = async () => {
+		if (!user?.email) return;
+		setSendingResetEmail(true);
+		try {
+			await authService.forgotPassword(user.email);
+			toast.success('Reset email sent', 'A password reset link has been sent to your account email.');
+		} catch (err: unknown) {
+			const msg = err instanceof Error ? err.message : 'Please try again.';
+			toast.error('Failed to send reset email', msg);
+		} finally {
+			setSendingResetEmail(false);
+		}
+	};
+
 	if (!user) {
 		return (
 			<div className="flex items-center justify-center min-h-[50vh]">
@@ -100,9 +122,10 @@ export function SettingsPage() {
 		);
 	}
 
-	const tabs: { id: Tab; label: string }[] = [
-		{ id: 'profile', label: 'Profile' },
-		{ id: 'danger', label: 'Danger zone' },
+	const tabs: { id: Tab; label: string; description: string }[] = [
+		{ id: 'profile', label: 'Profile', description: 'Identity, workspace links, and onboarding' },
+		{ id: 'security', label: 'Security', description: 'Verification, password, and privileged access' },
+		{ id: 'danger', label: 'Danger zone', description: 'Permanent account deletion controls' },
 	];
 
 	return (
@@ -112,7 +135,7 @@ export function SettingsPage() {
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
 					<div className="flex items-center gap-3">
 						<div className="p-2 bg-primary/10 rounded-lg">
-							<Shield className="w-6 h-6 text-primary" />
+							<SettingsIcon className="w-6 h-6 text-primary" />
 						</div>
 						<div>
 							<h1 className="text-2xl font-bold">Settings</h1>
@@ -126,19 +149,22 @@ export function SettingsPage() {
 
 			<div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				{/* Tabs */}
-				<div className="flex gap-1 border-b border-border mb-8">
+				<div className="mb-8 grid gap-3 md:grid-cols-3">
 					{tabs.map((tab) => (
 						<button
 							key={tab.id}
 							type="button"
 							onClick={() => { setActiveTab(tab.id); setEditing(false); }}
-							className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
+							className={`rounded-xl border p-4 text-left transition-all ${
 								activeTab === tab.id
-									? 'border-primary text-primary'
-									: 'border-transparent text-muted-foreground hover:text-foreground'
+									? 'border-primary/50 bg-primary/5 shadow-sm'
+									: 'border-border bg-card hover:border-primary/30 hover:bg-primary/5'
 							}`}
 						>
-							{tab.label}
+							<div className={`text-sm font-semibold ${activeTab === tab.id ? 'text-primary' : 'text-foreground'}`}>
+								{tab.label}
+							</div>
+							<p className="mt-1 text-xs leading-5 text-muted-foreground">{tab.description}</p>
 						</button>
 					))}
 				</div>
@@ -286,6 +312,180 @@ export function SettingsPage() {
 										</button>
 									</div>
 								)}
+							</div>
+						</div>
+
+						<div className="grid gap-4 md:grid-cols-2">
+							<div className="rounded-lg border border-border bg-card/70 p-5">
+								<div className="flex items-start justify-between gap-3">
+									<div>
+										<h3 className="text-sm font-semibold text-foreground">KoreShield access</h3>
+										<p className="mt-1 text-sm leading-6 text-muted-foreground">
+											Manage the credentials and team controls that govern how your workspace connects to KoreShield.
+										</p>
+									</div>
+									<Shield className="mt-0.5 h-5 w-5 text-primary" />
+								</div>
+								<div className="mt-4 space-y-2">
+									<Link
+										to="/settings/api-keys"
+										className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+									>
+										<span className="inline-flex items-center gap-2">
+											<Shield className="h-4 w-4 text-primary" />
+											Server API keys
+										</span>
+										<ArrowRight className="h-4 w-4 text-muted-foreground" />
+									</Link>
+									<Link
+										to="/teams"
+										className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+									>
+										<span className="inline-flex items-center gap-2">
+											<Users className="h-4 w-4 text-primary" />
+											Team access
+										</span>
+										<ArrowRight className="h-4 w-4 text-muted-foreground" />
+									</Link>
+								</div>
+							</div>
+
+							<div className="rounded-lg border border-border bg-card/70 p-5">
+								<div className="flex items-start justify-between gap-3">
+									<div>
+										<h3 className="text-sm font-semibold text-foreground">Plan and onboarding</h3>
+										<p className="mt-1 text-sm leading-6 text-muted-foreground">
+											Keep billing, rollout steps, and documentation close by while you finish setting up your production path.
+										</p>
+									</div>
+									<CheckCircle2 className="mt-0.5 h-5 w-5 text-primary" />
+								</div>
+								<div className="mt-4 space-y-2">
+									<Link
+										to="/billing"
+										className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+									>
+										<span className="inline-flex items-center gap-2">
+											<SettingsIcon className="h-4 w-4 text-primary" />
+											Billing and plan
+										</span>
+										<ArrowRight className="h-4 w-4 text-muted-foreground" />
+									</Link>
+									<Link
+										to="/docs/getting-started/quick-start"
+										className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+									>
+										<span className="inline-flex items-center gap-2">
+											<Mail className="h-4 w-4 text-primary" />
+											Quick-start docs
+										</span>
+										<ArrowRight className="h-4 w-4 text-muted-foreground" />
+									</Link>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{/* ── Security tab ───────────────────────────────────────────── */}
+				{activeTab === 'security' && (
+					<div className="space-y-6">
+						<div className="bg-card border border-border rounded-lg shadow-sm">
+							<div className="p-5 border-b border-border">
+								<h2 className="text-base font-semibold">Email verification</h2>
+								<p className="text-sm text-muted-foreground mt-0.5">
+									Keep your account verified so you can create keys, receive critical account mail, and avoid friction in account recovery.
+								</p>
+							</div>
+							<div className="p-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+								<div className="flex items-start gap-3">
+									<div className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-full ${user.email_verified ? 'bg-emerald-500/10' : 'bg-amber-500/10'}`}>
+										{user.email_verified ? (
+											<CheckCircle2 className="h-5 w-5 text-emerald-500" />
+										) : (
+											<AlertTriangle className="h-5 w-5 text-amber-500" />
+										)}
+									</div>
+									<div>
+										<p className="text-sm font-medium text-foreground">
+											{user.email_verified ? 'Email verified' : 'Email not verified'}
+										</p>
+										<p className="mt-1 text-sm leading-6 text-muted-foreground">
+											{user.email_verified
+												? 'Your account email is verified and ready for protected account actions.'
+												: 'Verify this email to unlock the smoothest account flow and reduce support friction later.'}
+										</p>
+									</div>
+								</div>
+								{!user.email_verified && (
+									<button
+										type="button"
+										onClick={() => void api.resendVerificationEmail().then(() => {
+											toast.success('Verification email sent', 'A fresh verification email is on the way.');
+										}).catch((err: unknown) => {
+											const msg = err instanceof Error ? err.message : 'Please try again.';
+											toast.error('Failed to resend verification email', msg);
+										})}
+										className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+									>
+										Resend verification
+									</button>
+								)}
+							</div>
+						</div>
+
+						<div className="grid gap-4 md:grid-cols-2">
+							<div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+								<div className="flex items-start justify-between gap-3">
+									<div>
+										<h3 className="text-sm font-semibold text-foreground">Password and recovery</h3>
+										<p className="mt-1 text-sm leading-6 text-muted-foreground">
+											Send yourself a reset link if you want to rotate your password without waiting for an access problem.
+										</p>
+									</div>
+									<Lock className="mt-0.5 h-5 w-5 text-primary" />
+								</div>
+								<div className="mt-4 rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+									Password changes are currently handled through secure email reset links rather than an in-session password form.
+								</div>
+								<button
+									type="button"
+									onClick={() => void handleSendPasswordReset()}
+									disabled={sendingResetEmail}
+									className="mt-4 inline-flex items-center gap-2 rounded-lg border border-primary/30 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5 disabled:opacity-50"
+								>
+									<Mail className="h-4 w-4" />
+									{sendingResetEmail ? 'Sending reset link…' : 'Send password reset link'}
+								</button>
+							</div>
+
+							<div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+								<div className="flex items-start justify-between gap-3">
+									<div>
+										<h3 className="text-sm font-semibold text-foreground">Privileged verification</h3>
+										<p className="mt-1 text-sm leading-6 text-muted-foreground">
+											KoreShield currently enforces an extra email verification step for privileged sign-ins, rather than a self-serve MFA enrollment flow for every user.
+										</p>
+									</div>
+									<Shield className="mt-0.5 h-5 w-5 text-primary" />
+								</div>
+								<div className="mt-4 rounded-lg border border-border bg-muted/40 p-4">
+									<p className="text-sm font-medium text-foreground">
+										{isPrivilegedAccount ? 'Extra verification required for your role' : 'No privileged-access challenge on your current role'}
+									</p>
+									<p className="mt-1 text-sm leading-6 text-muted-foreground">
+										{isPrivilegedAccount
+											? 'Admin, owner, and superuser sign-ins require a one-time email verification code before privileged access is granted.'
+											: 'If your role is elevated later, privileged sign-in protection will apply automatically.'}
+									</p>
+								</div>
+								<Link
+									to="/contact?subject=Security%20controls%20question"
+									className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+								>
+									Ask about stronger account controls
+									<ArrowRight className="h-4 w-4" />
+								</Link>
 							</div>
 						</div>
 					</div>
