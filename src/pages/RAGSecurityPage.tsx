@@ -508,6 +508,7 @@ export function RAGSecurityPage() {
 	const [scanHistory, setScanHistory] = useState<RAGScanHistoryItem[]>([]);
 	const [historyLoading, setHistoryLoading] = useState(false);
 	const [historyError, setHistoryError] = useState<string | null>(null);
+	const [isUploading, setIsUploading] = useState(false);
 
 	const refreshHistory = useCallback(async () => {
 		if (!isAuthenticated) {
@@ -552,35 +553,40 @@ export function RAGSecurityPage() {
 		const files = e.target.files;
 		if (!files || files.length === 0) return;
 
+		setIsUploading(true);
 		const newDocuments: RetrievedDocument[] = [];
 		const uploadErrors: string[] = [];
 
-		for (let i = 0; i < files.length; i++) {
-			const file = files[i];
-			try {
-				if (file.size > maxFileSizeBytes) {
-					uploadErrors.push(`File too large (max 10MB): ${file.name}`);
-					continue;
-				}
-				const content = await readUploadedDocument(file);
-				if (!content.trim()) {
-					uploadErrors.push(`No readable text found in: ${file.name}`);
-					continue;
-				}
-				newDocuments.push({
-					id: `file_${Date.now()}_${i}`,
-					content,
-					metadata: {
-						filename: file.name,
-						type: file.type,
-						size: file.size,
-						lastModified: file.lastModified,
-						extracted_at: new Date().toISOString()
+		try {
+			for (let i = 0; i < files.length; i++) {
+				const file = files[i];
+				try {
+					if (file.size > maxFileSizeBytes) {
+						uploadErrors.push(`File too large (max 10MB): ${file.name}`);
+						continue;
 					}
-				});
-			} catch (err) {
-				uploadErrors.push(getDocumentReadErrorMessage(file, err));
+					const content = await readUploadedDocument(file);
+					if (!content.trim()) {
+						uploadErrors.push(`No readable text found in: ${file.name}`);
+						continue;
+					}
+					newDocuments.push({
+						id: `file_${Date.now()}_${i}`,
+						content,
+						metadata: {
+							filename: file.name,
+							type: file.type,
+							size: file.size,
+							lastModified: file.lastModified,
+							extracted_at: new Date().toISOString()
+						}
+					});
+				} catch (err) {
+					uploadErrors.push(getDocumentReadErrorMessage(file, err));
+				}
 			}
+		} finally {
+			setIsUploading(false);
 		}
 
 		setDocuments(prev => [...prev, ...newDocuments]);
@@ -881,20 +887,31 @@ export function RAGSecurityPage() {
 							<div className="mt-4">
 								{activeTab === 'upload' && (
 									<div>
-										<label className="block w-full">
+										<label className={`block w-full ${isUploading ? 'pointer-events-none' : ''}`}>
 											<input
 												type="file"
 												multiple
 												accept=".txt,.md,.json,.csv,.pdf,.docx"
 												onChange={handleFileUpload}
+												disabled={isUploading}
 												className="hidden"
 											/>
-											<div className="border-2 border-dashed border-border rounded-lg p-6 sm:p-8 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
-												<Upload className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 sm:mb-4 text-muted-foreground" />
-												<p className="text-xs sm:text-sm font-medium mb-1">Click to upload files</p>
-												<p className="text-xs text-muted-foreground">
-													Supports TXT, MD, JSON, CSV, PDF, DOCX (max 10MB per file)
-												</p>
+											<div className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-colors ${isUploading ? 'border-primary bg-primary/5 cursor-wait' : 'border-border cursor-pointer hover:border-primary hover:bg-primary/5'}`}>
+												{isUploading ? (
+													<>
+														<div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary mx-auto mb-3 sm:mb-4" />
+														<p className="text-xs sm:text-sm font-medium mb-1">Extracting text…</p>
+														<p className="text-xs text-muted-foreground">This may take a moment for PDFs</p>
+													</>
+												) : (
+													<>
+														<Upload className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 sm:mb-4 text-muted-foreground" />
+														<p className="text-xs sm:text-sm font-medium mb-1">Click to upload files</p>
+														<p className="text-xs text-muted-foreground">
+															Supports TXT, MD, JSON, CSV, PDF, DOCX (max 10MB per file)
+														</p>
+													</>
+												)}
 											</div>
 										</label>
 									</div>
