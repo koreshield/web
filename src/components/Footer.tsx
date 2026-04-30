@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 
+const linkClass = 'text-muted-foreground hover:text-foreground transition-colors text-sm';
+
 function Footer() {
 	return (
 		<footer className="bg-card border-t border-border py-16 px-6 transition-colors">
@@ -10,9 +12,7 @@ function Footer() {
 						<img src="/logo/dark/SVG/Black.svg" alt="KoreShield Logo" className="w-8 h-8 dark:hidden" />
 						<img src="/logo/light/SVG/White.svg" alt="KoreShield Logo" className="w-8 h-8 hidden dark:block" />
 						<div>
-							<div className="text-xl font-bold text-foreground tracking-tight">
-								KoreShield
-							</div>
+							<div className="text-xl font-bold text-foreground tracking-tight">KoreShield</div>
 							<p className="text-muted-foreground text-sm mt-0.5">The security layer your LLM provider doesn't include.</p>
 						</div>
 					</div>
@@ -66,18 +66,28 @@ function Footer() {
 					</div>
 				</div>
 
-				{/* 4-column link grid */}
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+				{/* 5-column link grid */}
+				<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
+					{/* Solutions */}
+					<div>
+						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Solutions</h4>
+						<ul className="space-y-3">
+							<li><Link to="/solutions/ai-detection-response" className={linkClass}>AI Detection & Response</Link></li>
+							<li><Link to="/solutions/ai-application-protection" className={linkClass}>Application Protection</Link></li>
+							<li><Link to="/solutions/ai-agents-security" className={linkClass}>AI Agents Security</Link></li>
+							<li><Link to="/solutions/ai-usage-control" className={linkClass}>AI Usage Control</Link></li>
+							<li><Link to="/solutions/rag-security" className={linkClass}>RAG Security</Link></li>
+						</ul>
+					</div>
+
 					{/* Product */}
 					<div>
 						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Product</h4>
 						<ul className="space-y-3">
-							<li><Link to="/docs/features" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Features</Link></li>
-							<li><Link to="/integrations" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Integrations</Link></li>
-							<li><Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Pricing</Link></li>
-							<li><Link to="/demo" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Live Demo</Link></li>
-							<li><Link to="/playground" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Playground</Link></li>
-							<li><Link to="/changelog" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Changelog</Link></li>
+							<li><Link to="/pricing" className={linkClass}>Pricing</Link></li>
+							<li><Link to="/demo" className={linkClass}>Book a Demo</Link></li>
+							<li><Link to="/integrations" className={linkClass}>Integrations</Link></li>
+							<li><Link to="/changelog" className={linkClass}>Changelog</Link></li>
 						</ul>
 					</div>
 
@@ -85,11 +95,10 @@ function Footer() {
 					<div>
 						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Resources</h4>
 						<ul className="space-y-3">
-							<li><Link to="/docs" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Documentation</Link></li>
-							<li><Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Blog</Link></li>
-							<li><Link to="/research" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Research</Link></li>
-							<li><Link to="/status" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Status</Link></li>
-							<li><Link to="/why-koreshield" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Why KoreShield</Link></li>
+							<li><Link to="/docs" className={linkClass}>Documentation</Link></li>
+							<li><Link to="/blog" className={linkClass}>Blog</Link></li>
+							<li><Link to="/research" className={linkClass}>Research</Link></li>
+							<li><Link to="/status" className={linkClass}>Status</Link></li>
 						</ul>
 					</div>
 
@@ -97,9 +106,13 @@ function Footer() {
 					<div>
 						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Company</h4>
 						<ul className="space-y-3">
-							<li><Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors text-sm">About</Link></li>
-							<li><Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Contact</Link></li>
-							<li><Link to="/careers" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Careers <span className="text-electric-green text-xs">hiring</span></Link></li>
+							<li><Link to="/about" className={linkClass}>About</Link></li>
+							<li><Link to="/contact" className={linkClass}>Contact</Link></li>
+							<li>
+								<Link to="/careers" className={linkClass}>
+									Careers <span className="text-electric-green text-xs">hiring</span>
+								</Link>
+							</li>
 						</ul>
 					</div>
 
@@ -107,10 +120,10 @@ function Footer() {
 					<div>
 						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Legal</h4>
 						<ul className="space-y-3">
-							<li><Link to="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Privacy Policy</Link></li>
-							<li><Link to="/terms-of-service" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Terms of Service</Link></li>
-							<li><Link to="/cookie-policy" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Cookie Policy</Link></li>
-							<li><Link to="/dpa" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Data Processing Agreement</Link></li>
+							<li><Link to="/privacy-policy" className={linkClass}>Privacy Policy</Link></li>
+							<li><Link to="/terms-of-service" className={linkClass}>Terms of Service</Link></li>
+							<li><Link to="/cookie-policy" className={linkClass}>Cookie Policy</Link></li>
+							<li><Link to="/dpa" className={linkClass}>Data Processing Agreement</Link></li>
 						</ul>
 					</div>
 				</div>
