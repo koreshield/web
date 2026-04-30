@@ -3,9 +3,12 @@ import {
 	ArrowRight,
 	Building,
 	CheckCircle2,
+	CreditCard,
+	Globe,
 	Lock,
 	Mail,
 	Pencil,
+	Rocket,
 	Settings as SettingsIcon,
 	Shield,
 	Trash2,
@@ -128,6 +131,19 @@ export function SettingsPage() {
 		{ id: 'danger', label: 'Danger zone', description: 'Permanent account deletion controls' },
 	];
 
+	const initials = user.name
+		? user.name
+			.split(' ')
+			.map((part) => part[0])
+			.join('')
+			.slice(0, 2)
+			.toUpperCase()
+		: user.email.slice(0, 2).toUpperCase();
+
+	const accountStatusTone = user.status === 'active'
+		? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+		: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+
 	return (
 		<div>
 			{/* Page header */}
@@ -147,7 +163,7 @@ export function SettingsPage() {
 				</div>
 			</header>
 
-			<div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+			<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				{/* Tabs */}
 				<div className="mb-8 grid gap-3 md:grid-cols-3">
 					{tabs.map((tab) => (
@@ -172,13 +188,89 @@ export function SettingsPage() {
 				{/* ── Profile tab ─────────────────────────────────────────────── */}
 				{activeTab === 'profile' && (
 					<div className="space-y-6">
+						<div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+							<div className="bg-gradient-to-r from-primary/12 via-primary/6 to-transparent p-6 sm:p-7">
+								<div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+									<div className="flex items-start gap-4">
+										<div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-lg font-semibold text-primary shadow-[0_0_30px_rgba(16,185,129,0.12)]">
+											{initials}
+										</div>
+										<div>
+											<p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Workspace profile</p>
+											<h2 className="mt-2 text-2xl font-bold text-foreground">
+												{user.name || 'KoreShield account'}
+											</h2>
+											<p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+												Manage the identity, plan, and account controls that shape how your workspace uses KoreShield in development and production.
+											</p>
+										</div>
+									</div>
+									<div className="grid gap-2 sm:grid-cols-2 lg:min-w-[280px]">
+										<div className={`rounded-xl border px-4 py-3 ${accountStatusTone}`}>
+											<p className="text-[11px] font-semibold uppercase tracking-[0.16em]">Account status</p>
+											<p className="mt-1 text-sm font-semibold capitalize">{user.status || 'unknown'}</p>
+										</div>
+										<div className={`rounded-xl border px-4 py-3 ${user.email_verified ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'}`}>
+											<p className="text-[11px] font-semibold uppercase tracking-[0.16em]">Verification</p>
+											<p className="mt-1 text-sm font-semibold">{user.email_verified ? 'Verified' : 'Unverified'}</p>
+										</div>
+										<div className="rounded-xl border border-border bg-background/70 px-4 py-3">
+											<p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Role</p>
+											<p className="mt-1 text-sm font-semibold capitalize text-foreground">{user.role}</p>
+										</div>
+										<div className="rounded-xl border border-border bg-background/70 px-4 py-3">
+											<p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Company</p>
+											<p className="mt-1 text-sm font-semibold text-foreground">{user.company || 'Not set'}</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div className="grid gap-3 border-t border-border p-5 md:grid-cols-3">
+								<Link
+									to="/settings/api-keys"
+									className="rounded-xl border border-border bg-background/60 p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+								>
+									<div className="flex items-center justify-between gap-3">
+										<Shield className="h-5 w-5 text-primary" />
+										<ArrowRight className="h-4 w-4 text-muted-foreground" />
+									</div>
+									<p className="mt-4 text-sm font-semibold text-foreground">Manage API keys</p>
+									<p className="mt-1 text-sm leading-6 text-muted-foreground">Create or rotate keys used by your servers and integrations.</p>
+								</Link>
+								<Link
+									to="/billing"
+									className="rounded-xl border border-border bg-background/60 p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+								>
+									<div className="flex items-center justify-between gap-3">
+										<CreditCard className="h-5 w-5 text-primary" />
+										<ArrowRight className="h-4 w-4 text-muted-foreground" />
+									</div>
+									<p className="mt-4 text-sm font-semibold text-foreground">Review plan and usage</p>
+									<p className="mt-1 text-sm leading-6 text-muted-foreground">Check your billing tier, protected-request usage, and workspace limits.</p>
+								</Link>
+								<a
+									href="https://koreshield.ai"
+									target="_blank"
+									rel="noreferrer noopener"
+									className="rounded-xl border border-border bg-background/60 p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+								>
+									<div className="flex items-center justify-between gap-3">
+										<Globe className="h-5 w-5 text-primary" />
+										<ArrowRight className="h-4 w-4 text-muted-foreground" />
+									</div>
+									<p className="mt-4 text-sm font-semibold text-foreground">Visit website</p>
+									<p className="mt-1 text-sm leading-6 text-muted-foreground">Jump back to the main KoreShield site, docs, and public product pages.</p>
+								</a>
+							</div>
+						</div>
+
 						{/* Account info (read-only) */}
 						<div className="bg-card border border-border rounded-lg shadow-sm">
 							<div className="p-5 border-b border-border">
 								<h2 className="text-base font-semibold">Account information</h2>
 								<p className="text-sm text-muted-foreground mt-0.5">Read-only details tied to your account.</p>
 							</div>
-							<div className="p-5 grid gap-4 sm:grid-cols-2">
+							<div className="p-5 grid gap-4 md:grid-cols-3">
 								<div className="space-y-1.5">
 									<label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
 										<Mail className="w-3.5 h-3.5" /> Email
@@ -199,6 +291,15 @@ export function SettingsPage() {
 									<div className="flex items-center gap-2 p-3 bg-muted rounded-md text-sm font-medium capitalize">
 										<span className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-green-500' : 'bg-yellow-500'}`} />
 										{user.status || 'unknown'}
+									</div>
+								</div>
+								<div className="space-y-1.5">
+									<label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+										<CheckCircle2 className="w-3.5 h-3.5" /> Email verification
+									</label>
+									<div className="flex items-center gap-2 p-3 bg-muted rounded-md text-sm font-medium">
+										<span className={`w-2 h-2 rounded-full ${user.email_verified ? 'bg-green-500' : 'bg-yellow-500'}`} />
+										{user.email_verified ? 'Verified' : 'Unverified'}
 									</div>
 								</div>
 							</div>
@@ -358,7 +459,7 @@ export function SettingsPage() {
 											Keep billing, rollout steps, and documentation close by while you finish setting up your production path.
 										</p>
 									</div>
-									<CheckCircle2 className="mt-0.5 h-5 w-5 text-primary" />
+									<Rocket className="mt-0.5 h-5 w-5 text-primary" />
 								</div>
 								<div className="mt-4 space-y-2">
 									<Link
@@ -376,7 +477,7 @@ export function SettingsPage() {
 										className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
 									>
 										<span className="inline-flex items-center gap-2">
-											<Mail className="h-4 w-4 text-primary" />
+											<Rocket className="h-4 w-4 text-primary" />
 											Quick-start docs
 										</span>
 										<ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -390,6 +491,16 @@ export function SettingsPage() {
 				{/* ── Security tab ───────────────────────────────────────────── */}
 				{activeTab === 'security' && (
 					<div className="space-y-6">
+						<div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+							<div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 sm:p-7">
+								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Security controls</p>
+								<h2 className="mt-2 text-2xl font-bold text-foreground">Protect your workspace access</h2>
+								<p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+									Use verification, password recovery, and privileged-access protections to keep your KoreShield account ready for secure rollout work.
+								</p>
+							</div>
+						</div>
+
 						<div className="bg-card border border-border rounded-lg shadow-sm">
 							<div className="p-5 border-b border-border">
 								<h2 className="text-base font-semibold">Email verification</h2>
@@ -448,6 +559,9 @@ export function SettingsPage() {
 								<div className="mt-4 rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
 									Password changes are currently handled through secure email reset links rather than an in-session password form.
 								</div>
+								<div className="mt-3 rounded-lg border border-primary/10 bg-primary/5 p-3 text-sm text-muted-foreground">
+									Use this before you forget a password, rotate credentials after access changes, or hand off an account to a new approved owner.
+								</div>
 								<button
 									type="button"
 									onClick={() => void handleSendPasswordReset()}
@@ -478,6 +592,9 @@ export function SettingsPage() {
 											? 'Admin, owner, and superuser sign-ins require a one-time email verification code before privileged access is granted.'
 											: 'If your role is elevated later, privileged sign-in protection will apply automatically.'}
 									</p>
+								</div>
+								<div className="mt-3 rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+									There is not yet a general self-serve MFA enrollment screen for every account, so this page reflects the real protections currently available instead of pretending otherwise.
 								</div>
 								<Link
 									to="/contact?subject=Security%20controls%20question"
