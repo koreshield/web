@@ -31,8 +31,18 @@ export function VerifyEmailPage() {
                 });
 
                 if (!response.ok) {
-                    const errData = await response.json().catch(() => null);
-                    throw new Error(errData?.detail || 'Verification failed');
+                    // Read body as text first to avoid synchronous throws from
+                    // response.json() when the body is empty (Safari behaviour).
+                    let errData: { detail?: string; message?: string } | null = null;
+                    try {
+                        const text = await response.text();
+                        if (text.trim()) errData = JSON.parse(text);
+                    } catch { /* ignore parse errors */ }
+                    throw new Error(
+                        errData?.detail ||
+                        errData?.message ||
+                        'Verification failed. The link may have expired — please request a new one from your account settings.'
+                    );
                 }
 
                 sessionStorage.setItem('ks_email_verified_notice', '1');
