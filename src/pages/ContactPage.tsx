@@ -1,6 +1,6 @@
 import emailjs from '@emailjs/browser';
 import { motion } from 'framer-motion';
-import { ArrowRight, FileText, Github, Mail, MessageSquare, Send } from 'lucide-react';
+import { ArrowRight, FileText, Github, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
@@ -63,25 +63,9 @@ function buildTemplatePayload(values: {
 
 const supportOptions = [
 	{
-		icon: <MessageSquare className="w-6 h-6" />,
-		title: 'Community Discord',
-		description: 'Get answers fast from fellow developers and our team. Best for general questions and integration help.',
-		cta: 'Join Discord',
-		link: 'https://discord.gg/koreshield',
-		external: true,
-	},
-	{
-		icon: <Send className="w-6 h-6" />,
-		title: 'Telegram Channel',
-		description: 'Follow product updates, security notes, and launch announcements from the KoreShield team.',
-		cta: 'Join Telegram',
-		link: 'https://t.me/koreshield',
-		external: true,
-	},
-	{
 		icon: <Mail className="w-6 h-6" />,
 		title: 'Email Support',
-		description: 'For technical issues, bug reports, or feature requests. Our engineering team reviews every ticket.',
+		description: 'For technical issues, bugs, account help, or rollout questions. Our team reviews every message directly.',
 		cta: 'Email Us',
 		link: 'mailto:hello@koreshield.com',
 		external: true,
@@ -89,15 +73,15 @@ const supportOptions = [
 	{
 		icon: <FileText className="w-6 h-6" />,
 		title: 'Documentation',
-		description: 'Comprehensive guides, API references, and tutorials. Most questions are answered here first.',
+		description: 'Start here for setup guides, SDK references, rollout steps, and operational docs before opening a ticket.',
 		cta: 'Browse Docs',
 		link: '/docs',
-		external: true,
+		external: false,
 	},
 	{
 		icon: <Github className="w-6 h-6" />,
 		title: 'GitHub',
-		description: 'Report bugs, request features, or follow development progress on our public repositories.',
+		description: 'Best for public issues, reproducible bugs, and feature requests that are easier to track in the open.',
 		cta: 'View on GitHub',
 		link: 'https://github.com/koreshield/',
 		external: true,
@@ -139,27 +123,61 @@ export default function ContactPage() {
 			<section className="py-16 px-6 border-t border-border">
 				<div className="max-w-6xl mx-auto">
 					<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">How can we help?</h2>
-					<div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+					<div className="grid gap-5 md:grid-cols-3">
 						{supportOptions.map((option, index) => (
-							<motion.a
+							<motion.div
 								key={option.title}
-								href={option.link}
-								target={option.external ? '_blank' : undefined}
-								rel={option.external ? 'noreferrer noopener' : undefined}
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.4, delay: index * 0.08 }}
-								className="group bg-card border border-border hover:border-primary/40 rounded-xl p-6 transition-all duration-200 hover:-translate-y-0.5 block"
+								className="group bg-card border border-border hover:border-primary/40 rounded-xl p-6 transition-all duration-200 hover:-translate-y-0.5"
 							>
 								<div className="text-electric-green mb-4">{option.icon}</div>
 								<h3 className="text-base font-semibold text-foreground mb-2">{option.title}</h3>
-								<p className="text-sm text-muted-foreground mb-4 leading-relaxed">{option.description}</p>
-								<span className="inline-flex items-center gap-1.5 text-sm font-medium text-primary group-hover:gap-2.5 transition-all">
-									{option.cta}
-									<ArrowRight className="w-3.5 h-3.5" />
-								</span>
-							</motion.a>
+								<p className="text-sm text-muted-foreground mb-6 leading-relaxed">{option.description}</p>
+								{option.external ? (
+									<a
+										href={option.link}
+										target="_blank"
+										rel="noreferrer noopener"
+										className="inline-flex items-center gap-1.5 text-sm font-medium text-primary group-hover:gap-2.5 transition-all"
+									>
+										{option.cta}
+										<ArrowRight className="w-3.5 h-3.5" />
+									</a>
+								) : (
+									<Link
+										to={option.link}
+										className="inline-flex items-center gap-1.5 text-sm font-medium text-primary group-hover:gap-2.5 transition-all"
+									>
+										{option.cta}
+										<ArrowRight className="w-3.5 h-3.5" />
+									</Link>
+								)}
+							</motion.div>
 						))}
+					</div>
+					<div className="mt-6 rounded-2xl border border-white/[0.08] bg-card/70 p-6 md:p-7">
+						<div className="grid gap-6 md:grid-cols-3">
+							<div>
+								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Before you write</p>
+								<p className="mt-2 text-sm leading-6 text-muted-foreground">
+									Have your account email, affected endpoint, and a short summary ready. That helps us reply faster and more accurately.
+								</p>
+							</div>
+							<div>
+								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Best route for urgent issues</p>
+								<p className="mt-2 text-sm leading-6 text-muted-foreground">
+									Use email support for account access, failed scans, provider routing issues, or anything blocking production rollout.
+								</p>
+							</div>
+							<div>
+								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Typical response</p>
+								<p className="mt-2 text-sm leading-6 text-muted-foreground">
+									We usually reply within 24 to 48 hours. Enterprise and active rollout conversations are prioritized.
+								</p>
+							</div>
+						</div>
 					</div>
 				</div>
 			</section>
