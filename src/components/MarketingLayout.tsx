@@ -295,7 +295,7 @@ export function MarketingLayout() {
 									<p className="text-xs text-muted-foreground">Solutions, pricing, and resources.</p>
 								</div>
 								<div className="flex items-center gap-2">
-									<ThemeToggle showLabel />
+									<ThemeToggle />
 									<button
 										type="button"
 										onClick={closeMobile}
