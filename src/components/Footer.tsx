@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 function Footer() {
 	return (
-		<footer className="bg-card/50 dark:bg-[#0A0A0C] border-t border-white/[0.06] py-16 px-6 transition-colors">
+		<footer className="bg-card border-t border-border py-16 px-6 transition-colors">
 			<div className="max-w-7xl mx-auto">
 				{/* Logo + Tagline */}
 				<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8 mb-12">
@@ -116,7 +116,7 @@ function Footer() {
 				</div>
 
 				{/* Copyright */}
-				<div className="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-muted-foreground text-sm">
+				<div className="pt-8 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-muted-foreground text-sm">
 					<p>© {new Date().getFullYear()} KoreShield. All rights reserved.</p>
 					<p className="text-xs text-muted-foreground/60">
 						Koreshield Labs Ltd. · Incorporated in England & Wales · Co. No. 17057784
