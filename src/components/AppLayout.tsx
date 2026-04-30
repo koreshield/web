@@ -6,6 +6,7 @@ import {
 	ChevronRight,
 	ClipboardList,
 	DollarSign,
+	ExternalLink,
 	FileText,
 	Key,
 	LayoutDashboard,
@@ -302,6 +303,14 @@ function UserMenu({ onLogout }: { onLogout: () => void }) {
 					</Link>
 
 					<div className="border-t border-white/[0.06] mt-1 pt-1">
+						<Link
+							to="/"
+							onClick={() => setOpen(false)}
+							className="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
+						>
+							<ExternalLink className="w-4 h-4" />
+							Visit website
+						</Link>
 						<button
 							type="button"
 							onClick={() => { setOpen(false); onLogout(); }}
