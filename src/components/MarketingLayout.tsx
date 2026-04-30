@@ -9,9 +9,6 @@ import { ThemeToggle } from './ThemeToggle';
 const mobileNavLinkClass =
 	'flex items-center justify-between rounded-2xl border border-border/70 bg-card/70 px-4 py-3 text-sm font-medium text-foreground transition-all hover:border-primary/30 hover:bg-card';
 
-const mobileQuickLinkClass =
-	'flex items-center justify-between rounded-2xl border border-border/70 bg-background/70 px-3.5 py-3 text-sm font-medium text-foreground transition-all hover:border-primary/30 hover:bg-primary/5';
-
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type DropdownItem =
@@ -153,7 +150,7 @@ function MobileNavSection({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="space-y-2.5">
+		<div className="space-y-3">
 			<p className="px-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground/80">
 				{title}
 			</p>
@@ -291,129 +288,112 @@ export function MarketingLayout() {
 				{isMobileMenuOpen ? (
 					<div className="md:hidden">
 						<div className="fixed inset-0 z-40 bg-black/55 backdrop-blur-sm" onClick={closeMobile} />
-						<div className="fixed inset-x-3 top-[4.5rem] bottom-3 z-50 flex overflow-hidden rounded-[28px] border border-white/10 bg-background/95 shadow-2xl shadow-black/30">
-							<div className="flex min-h-0 flex-1 flex-col">
-								<div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-4">
-									<div className="pr-3">
-										<p className="text-sm font-semibold text-foreground">Navigate KoreShield</p>
-										<p className="text-xs text-muted-foreground">Browse product pages, docs, pricing, and company links.</p>
-									</div>
-									<div className="flex items-center gap-2">
-										<ThemeToggle className="px-3 py-2" />
-										<button
-											type="button"
-											onClick={closeMobile}
-											className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card/80 text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
-											aria-label="Close mobile menu"
-										>
-											<X className="h-5 w-5" />
-										</button>
-									</div>
+						<div className="fixed inset-x-4 top-20 z-50 max-h-[calc(100vh-6rem)] overflow-hidden rounded-[28px] border border-white/10 bg-background/95 shadow-2xl shadow-black/30">
+							<div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
+								<div>
+									<p className="text-sm font-semibold text-foreground">Navigate KoreShield</p>
+									<p className="text-xs text-muted-foreground">Solutions, pricing, and resources.</p>
 								</div>
+								<ThemeToggle showLabel />
+							</div>
 
-								<div className="flex-1 overflow-y-auto px-4 py-4">
-									<div className="space-y-5">
-										<div className="grid grid-cols-2 gap-2">
-											<Link to="/pricing" onClick={closeMobile} className={mobileQuickLinkClass}>
-												<span>Pricing</span>
-												<span className="text-[11px] text-muted-foreground">Plans</span>
+							<div className="max-h-[calc(100vh-11rem)] overflow-y-auto px-5 py-5">
+								<div className="space-y-6">
+									<MobileNavSection title="Solutions">
+										{solutionsLinks.map((item) => (
+											<Link
+												key={item.to}
+												to={item.to}
+												onClick={closeMobile}
+												className={mobileNavLinkClass}
+											>
+												<span>{item.label}</span>
+												<Sparkles className="h-4 w-4 text-primary/80" />
 											</Link>
-											<Link to="/docs" onClick={closeMobile} className={mobileQuickLinkClass}>
-												<span>Docs</span>
-												<span className="text-[11px] text-muted-foreground">Guides</span>
-											</Link>
-										</div>
+										))}
+									</MobileNavSection>
 
-										<MobileNavSection title="Solutions">
-											{solutionsLinks.map((item) => (
+									<MobileNavSection title="Product">
+										<Link to="/pricing" onClick={closeMobile} className={mobileNavLinkClass}>
+											<span>Pricing</span>
+											<span className="text-xs text-muted-foreground">Plans</span>
+										</Link>
+										<Link to="/demo" onClick={closeMobile} className={mobileNavLinkClass}>
+											<span>Book a Demo</span>
+											<span className="text-xs text-muted-foreground">30 min</span>
+										</Link>
+									</MobileNavSection>
+
+									<MobileNavSection title="Company">
+										{companyLinks.map((item) => (
+											<Link
+												key={item.to}
+												to={item.to}
+												onClick={closeMobile}
+												className={mobileNavLinkClass}
+											>
+												<span>{item.label}</span>
+												<span className="text-xs text-muted-foreground">Open</span>
+											</Link>
+										))}
+									</MobileNavSection>
+
+									<MobileNavSection title="Resources">
+										{resourceLinks.map((item) =>
+											item.to ? (
 												<Link
 													key={item.to}
 													to={item.to}
 													onClick={closeMobile}
 													className={mobileNavLinkClass}
 												>
-													<div className="pr-4">
-														<p>{item.label}</p>
-														<p className="mt-1 text-xs leading-5 text-muted-foreground">{item.desc}</p>
-													</div>
-													<Sparkles className="h-4 w-4 shrink-0 text-primary/80" />
+													<span>{item.label}</span>
+													<span className="text-xs text-muted-foreground">Open</span>
 												</Link>
-											))}
-										</MobileNavSection>
-
-										<div className="grid gap-5 sm:grid-cols-2">
-											<MobileNavSection title="Company">
-												{companyLinks.map((item) => (
-													<Link
-														key={item.to}
-														to={item.to}
-														onClick={closeMobile}
-														className={mobileNavLinkClass}
-													>
-														<span>{item.label}</span>
-														<span className="text-xs text-muted-foreground">Open</span>
-													</Link>
-												))}
-											</MobileNavSection>
-
-											<MobileNavSection title="Resources">
-												{resourceLinks.map((item) =>
-													item.to ? (
-														<Link
-															key={item.to}
-															to={item.to}
-															onClick={closeMobile}
-															className={mobileNavLinkClass}
-														>
-															<span>{item.label}</span>
-															<span className="text-xs text-muted-foreground">Open</span>
-														</Link>
-													) : (
-														<a
-															key={item.href}
-															href={item.href}
-															target="_blank"
-															rel="noreferrer noopener"
-															className={mobileNavLinkClass}
-														>
-															<span>{item.label}</span>
-															<span className="text-xs text-muted-foreground">External</span>
-														</a>
-													),
-												)}
-											</MobileNavSection>
-										</div>
-									</div>
+											) : (
+												<a
+													key={item.href}
+													href={item.href}
+													target="_blank"
+													rel="noreferrer noopener"
+													className={mobileNavLinkClass}
+												>
+													<span>{item.label}</span>
+													<span className="text-xs text-muted-foreground">External</span>
+												</a>
+											),
+										)}
+									</MobileNavSection>
 								</div>
+							</div>
 
-								<div className="border-t border-white/[0.08] bg-card/50 px-4 py-4">
-									{isAuthenticated ? (
+							<div className="border-t border-white/[0.08] bg-card/50 px-5 py-4">
+								{isAuthenticated ? (
+									<Link
+										to="/dashboard"
+										onClick={closeMobile}
+										className="block rounded-2xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+									>
+										Go to Dashboard
+									</Link>
+								) : (
+									<div className="grid grid-cols-2 gap-3">
 										<Link
-											to="/dashboard"
+											to="/login"
 											onClick={closeMobile}
-											className="block rounded-2xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+											className="rounded-2xl border border-border bg-background px-4 py-3 text-center text-sm font-semibold text-foreground transition-colors hover:border-primary/30"
 										>
-											Go to Dashboard
+											Sign In
 										</Link>
-									) : (
-										<div className="grid grid-cols-2 gap-3">
-											<Link
-												to="/login"
-												onClick={closeMobile}
-												className="rounded-2xl border border-border bg-background px-4 py-3 text-center text-sm font-semibold text-foreground transition-colors hover:border-primary/30"
-											>
-												Sign In
-											</Link>
-											<Link
-												to="/demo"
-												onClick={closeMobile}
-												className="rounded-2xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-											>
-												Book Demo
-											</Link>
-										</div>
-									)}
-								</div>
+										<Link
+											to="/demo"
+											onClick={closeMobile}
+											className="rounded-2xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+										>
+											Book Demo
+										</Link>
+									</div>
+								)}
 							</div>
 						</div>
 					</div>
