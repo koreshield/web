@@ -294,7 +294,17 @@ export function MarketingLayout() {
 									<p className="text-sm font-semibold text-foreground">Navigate KoreShield</p>
 									<p className="text-xs text-muted-foreground">Solutions, pricing, and resources.</p>
 								</div>
-								<ThemeToggle showLabel />
+								<div className="flex items-center gap-2">
+									<ThemeToggle showLabel />
+									<button
+										type="button"
+										onClick={closeMobile}
+										aria-label="Close menu"
+										className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+									>
+										<X className="h-4 w-4" />
+									</button>
+								</div>
 							</div>
 
 							<div className="max-h-[calc(100dvh-13rem)] overflow-y-auto px-5 py-5">
