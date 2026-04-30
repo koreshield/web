@@ -205,19 +205,15 @@ export function MarketingLayout() {
 
 					{/* Desktop nav */}
 					<nav className="hidden items-center gap-6 md:flex">
-						{!isAuthenticated ? (
-							<>
-								<NavDropdown label="Solutions" items={solutionsLinks} />
-								<Link
-									to="/pricing"
-									className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-								>
-									Pricing
-								</Link>
-								<NavDropdown label="Company" items={companyLinks} />
-								<NavDropdown label="Resources" items={resourceLinks} />
-							</>
-						) : null}
+						<NavDropdown label="Solutions" items={solutionsLinks} />
+						<Link
+							to="/pricing"
+							className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+						>
+							Pricing
+						</Link>
+						<NavDropdown label="Company" items={companyLinks} />
+						<NavDropdown label="Resources" items={resourceLinks} />
 
 						<ThemeToggle />
 
