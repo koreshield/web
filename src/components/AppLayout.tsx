@@ -6,6 +6,7 @@ import {
 	ChevronRight,
 	ClipboardList,
 	DollarSign,
+	ExternalLink,
 	FileText,
 	Key,
 	LayoutDashboard,
@@ -24,6 +25,7 @@ import {
 	Map,
 	AlertTriangle,
 	CheckCircle2,
+	Settings as SettingsIcon,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -77,7 +79,7 @@ const NAV_GROUPS: NavGroup[] = [
 			{ label: 'Rules', to: '/rules', icon: ListFilter },
 			{ label: 'Policies', to: '/policies', icon: Shield },
 			{ label: 'Teams', to: '/teams', icon: Users },
-			{ label: 'Settings', to: '/settings', icon: User },
+			{ label: 'Settings', to: '/settings', icon: SettingsIcon },
 		],
 	},
 	{
@@ -203,8 +205,25 @@ function Sidebar({
 				})}
 			</nav>
 
-			{/* Collapse toggle */}
 			<div className="shrink-0 border-t border-white/[0.06] p-2">
+				<a
+					href="https://koreshield.ai"
+					target="_blank"
+					rel="noreferrer noopener"
+					title={collapsed ? 'Visit website' : undefined}
+					className={[
+						'group relative mb-1.5 flex items-center gap-2 w-full px-3 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all duration-150',
+						collapsed ? 'justify-center' : '',
+					].join(' ')}
+				>
+					<ExternalLink className="w-4 h-4 shrink-0" />
+					{!collapsed && <span>Visit website</span>}
+					{collapsed && (
+						<span className="pointer-events-none absolute left-full ml-3 px-2 py-1 rounded bg-card border border-white/[0.08] text-xs font-medium text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg">
+							Visit website
+						</span>
+					)}
+				</a>
 				<button
 					type="button"
 					onClick={onCollapse}
@@ -289,7 +308,7 @@ function UserMenu({ onLogout }: { onLogout: () => void }) {
 						onClick={() => setOpen(false)}
 						className="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
 					>
-						<Shield className="w-4 h-4" />
+						<SettingsIcon className="w-4 h-4" />
 						Settings
 					</Link>
 					<Link
@@ -302,6 +321,14 @@ function UserMenu({ onLogout }: { onLogout: () => void }) {
 					</Link>
 
 					<div className="border-t border-white/[0.06] mt-1 pt-1">
+						<Link
+							to="/"
+							onClick={() => setOpen(false)}
+							className="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
+						>
+							<ExternalLink className="w-4 h-4" />
+							Visit website
+						</Link>
 						<button
 							type="button"
 							onClick={() => { setOpen(false); onLogout(); }}

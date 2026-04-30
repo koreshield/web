@@ -212,18 +212,18 @@ export default function AboutPage() {
 									{member.role}
 								</span>
 								<p className="text-sm text-muted-foreground leading-relaxed">{member.bio}</p>
-								{member.linkedin ? (
+								<div className="mt-5">
 									<a
 										href={member.linkedin}
 										target="_blank"
 										rel="noreferrer noopener"
-										className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-electric-green hover:text-electric-green/80 transition-colors"
+										className="inline-flex items-center gap-2 text-sm font-medium text-electric-green hover:text-electric-green/80 transition-colors"
 										aria-label={`${member.name} on LinkedIn`}
 									>
 										<Linkedin className="w-4 h-4" />
 										LinkedIn
 									</a>
-								) : null}
+								</div>
 							</motion.div>
 						))}
 					</div>

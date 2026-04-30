@@ -20,6 +20,10 @@ type ChangelogBatch = {
 	entries: ChangelogEntry[];
 };
 
+function batchAnchor(label: string) {
+	return label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
 const CATEGORY_STYLES: Record<ChangeCategory, string> = {
 	Added: 'bg-emerald-500 text-black',
 	Improved: 'bg-sky-500 text-white',
@@ -501,11 +505,33 @@ function ChangelogPage() {
 						Curated updates for customers, operators, and buyers who want the real story of what changed in KoreShield.
 						We summarize product, security, infrastructure, and onboarding work in monthly batches instead of publishing raw commit noise.
 					</p>
+					<div className="mt-8 rounded-3xl border border-white/[0.08] bg-card/70 p-6 sm:p-8">
+						<div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+							<div className="max-w-2xl">
+								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Latest batch</p>
+								<h2 className="mt-2 text-2xl font-bold text-foreground">{CHANGELOG_BATCHES[0]?.label}</h2>
+								<p className="mt-3 text-sm leading-6 text-muted-foreground">
+									{CHANGELOG_BATCHES[0]?.overview}
+								</p>
+							</div>
+							<div className="flex flex-wrap gap-2">
+								{CHANGELOG_BATCHES.map((batch) => (
+									<a
+										key={batch.label}
+										href={`#${batchAnchor(batch.label)}`}
+										className="rounded-full border border-white/[0.08] bg-background/60 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+									>
+										{batch.timeframe}
+									</a>
+								))}
+							</div>
+						</div>
+					</div>
 				</section>
 
 				<div className="space-y-16">
 					{CHANGELOG_BATCHES.map((batch) => (
-						<section key={batch.label} className="space-y-8">
+						<section key={batch.label} id={batchAnchor(batch.label)} className="space-y-8 scroll-mt-28">
 							<div className="rounded-3xl border border-border bg-card/70 p-8 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
 								<div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
 									<div className="max-w-3xl">
