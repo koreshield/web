@@ -63,7 +63,7 @@ export const SEOConfig = {
 					name: 'Can I start for free?',
 					acceptedAnswer: {
 						'@type': 'Answer',
-						text: 'Yes! The free tier includes 10,000 protected requests per month, which is ideal for evaluation and early prototypes.',
+						text: 'Yes! The Dev tier includes 10,000 protected requests per month, which is ideal for evaluation and early prototypes.',
 					},
 				},
 			],
