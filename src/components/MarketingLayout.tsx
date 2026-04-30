@@ -7,7 +7,7 @@ import Footer from './Footer';
 import { ThemeToggle } from './ThemeToggle';
 
 const mobileNavLinkClass =
-	'flex items-center justify-between rounded-2xl border border-border/70 bg-card/70 px-4 py-3 text-sm font-medium text-foreground transition-all hover:border-primary/30 hover:bg-card';
+	'flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-all hover:border-primary/30 hover:bg-muted';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -287,9 +287,9 @@ export function MarketingLayout() {
 				{/* Mobile drawer */}
 				{isMobileMenuOpen ? (
 					<div className="md:hidden">
-						<div className="fixed inset-0 z-40 bg-black/55 backdrop-blur-sm" onClick={closeMobile} />
-						<div className="fixed inset-x-4 top-20 z-50 max-h-[calc(100vh-6rem)] overflow-hidden rounded-[28px] border border-white/10 bg-background/95 shadow-2xl shadow-black/30">
-							<div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
+						<div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={closeMobile} />
+						<div className="fixed inset-x-3 top-[4.5rem] z-50 max-h-[calc(100dvh-5.5rem)] overflow-hidden rounded-[24px] border border-border bg-background shadow-2xl shadow-black/40">
+							<div className="flex items-center justify-between border-b border-border px-5 py-4">
 								<div>
 									<p className="text-sm font-semibold text-foreground">Navigate KoreShield</p>
 									<p className="text-xs text-muted-foreground">Solutions, pricing, and resources.</p>
@@ -297,7 +297,7 @@ export function MarketingLayout() {
 								<ThemeToggle showLabel />
 							</div>
 
-							<div className="max-h-[calc(100vh-11rem)] overflow-y-auto px-5 py-5">
+							<div className="max-h-[calc(100dvh-13rem)] overflow-y-auto px-5 py-5">
 								<div className="space-y-6">
 									<MobileNavSection title="Solutions">
 										{solutionsLinks.map((item) => (
@@ -367,7 +367,7 @@ export function MarketingLayout() {
 								</div>
 							</div>
 
-							<div className="border-t border-white/[0.08] bg-card/50 px-5 py-4">
+							<div className="border-t border-border bg-card px-5 py-4">
 								{isAuthenticated ? (
 									<Link
 										to="/dashboard"
