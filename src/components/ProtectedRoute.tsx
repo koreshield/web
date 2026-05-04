@@ -15,7 +15,8 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     useEffect(() => {
         let isMounted = true;
         const checkAuth = async () => {
-            const ok = await authService.restoreSession();
+            // Always validate with backend on route check - don't use cache
+            const ok = await authService.restoreSession(true);
             if (isMounted) {
                 setIsAuthenticated(ok);
             }
