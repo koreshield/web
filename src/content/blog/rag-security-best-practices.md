@@ -214,14 +214,14 @@ Attempt to have model assume different personas
 
 RAG systems are powerful but require careful security consideration:
 
-✅ **Do:**
+[YES] **Do:**
 - Validate all inputs and outputs
 - Audit your knowledge base regularly
 - Use rate limiting and monitoring
 - Keep security rules explicit
 - Test thoroughly before deployment
 
-❌ **Don't:**
+[NO] **Don't:**
 - Trust retrieved documents without validation
 - Use loose/flexible prompts
 - Retrieve unlimited context
