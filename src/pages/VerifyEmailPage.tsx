@@ -82,8 +82,8 @@ export function VerifyEmailPage() {
                 </div>
 
                 <div className="relative z-10 space-y-4 text-sm text-muted-foreground">
-                    <p>🔐 Two-factor authentication available</p>
-                    <p>🛡️ Enterprise-grade security</p>
+                    <p>[SECURE] Two-factor authentication available</p>
+                    <p>[SHIELD] Enterprise-grade security</p>
                     <p>✓ SOC 2 Type II compliant</p>
                 </div>
             </div>

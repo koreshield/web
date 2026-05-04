@@ -127,7 +127,7 @@ function generateBlogContent() {
 	if (!fs.existsSync(BLOG_DIR)) {
 		console.log(`📁 Blog directory not found at ${BLOG_DIR}`);
 		console.log('ℹ️  Create blog posts in src/content/blog/ with .md or .mdx extension');
-		console.log('📝 Example frontmatter:');
+		console.log('[DOCS] Example frontmatter:');
 		console.log(`
 ---
 title: My Blog Post
@@ -148,7 +148,7 @@ coverImage: /images/my-image.png
 	const blogFiles = findBlogFiles(BLOG_DIR);
 
 	if (blogFiles.length === 0) {
-		console.log('⚠️  No blog posts found in', BLOG_DIR);
+		console.log('[WARN]  No blog posts found in', BLOG_DIR);
 		return;
 	}
 
@@ -163,7 +163,7 @@ coverImage: /images/my-image.png
 
 			// Validate required fields
 			if (!metadata.title || !metadata.excerpt || !metadata.date || !metadata.author) {
-				console.warn(`⚠️  Skipping ${filePath}: Missing required fields`);
+				console.warn(`[WARN]  Skipping ${filePath}: Missing required fields`);
 				continue;
 			}
 
@@ -184,9 +184,9 @@ coverImage: /images/my-image.png
 			};
 
 			posts.push(post);
-			console.log(`✅ ${post.slug}`);
+			console.log(`[YES] ${post.slug}`);
 		} catch (error) {
-			console.error(`❌ Error processing ${filePath}:`, error.message);
+			console.error(`[NO] Error processing ${filePath}:`, error.message);
 		}
 	}
 
@@ -259,7 +259,7 @@ initializeBlog();
 
 	fs.writeFileSync(OUTPUT_FILE, tsContent, 'utf-8');
 	console.log(`\n✨ Generated ${OUTPUT_FILE}`);
-	console.log(`📝 Total blog posts: ${posts.length}`);
+	console.log(`[DOCS] Total blog posts: ${posts.length}`);
 }
 
 // Run generation

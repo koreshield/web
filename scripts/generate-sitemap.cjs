@@ -143,12 +143,12 @@ function writeSitemaps() {
 	// Create sitemap.xml
 	const sitemapContent = generateSitemap();
 	fs.writeFileSync(path.join(outputDir, 'sitemap.xml'), sitemapContent, 'utf-8');
-	console.log('✅ Created: web/public/sitemap.xml');
+	console.log('[YES] Created: web/public/sitemap.xml');
 
 	// Create robots.txt
 	const robotsContent = generateRobotsTxt();
 	fs.writeFileSync(path.join(outputDir, 'robots.txt'), robotsContent, 'utf-8');
-	console.log('✅ Created: web/public/robots.txt');
+	console.log('[YES] Created: web/public/robots.txt');
 
 	// Create sitemap index for large sites
 	const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
@@ -168,9 +168,9 @@ function writeSitemaps() {
 </sitemapindex>`;
 
 	fs.writeFileSync(path.join(outputDir, 'sitemap-index.xml'), sitemapIndex, 'utf-8');
-	console.log('✅ Created: web/public/sitemap-index.xml');
+	console.log('[YES] Created: web/public/sitemap-index.xml');
 
-	console.log('\n✅ All sitemaps generated successfully!');
+	console.log('\n[YES] All sitemaps generated successfully!');
 }
 
 // Run generator
@@ -178,7 +178,7 @@ if (require.main === module) {
 	try {
 		writeSitemaps();
 	} catch (error) {
-		console.error('❌ Error generating sitemaps:', error);
+		console.error('[NO] Error generating sitemaps:', error);
 		process.exit(1);
 	}
 }
