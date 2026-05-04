@@ -53,10 +53,10 @@ const code = 'here';
 ## Naming Convention
 
 Use kebab-case for file names:
-- ✅ `my-blog-post-title.md`
-- ✅ `weekly-update-april-27.md`
-- ❌ `My Blog Post Title.md`
-- ❌ `MyBlogPostTitle.md`
+- [YES] `my-blog-post-title.md`
+- [YES] `weekly-update-april-27.md`
+- [NO] `My Blog Post Title.md`
+- [NO] `MyBlogPostTitle.md`
 
 ## Post Status
 
