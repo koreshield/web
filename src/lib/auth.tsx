@@ -165,9 +165,14 @@ export const authService = {
 			persistSession(data.user, inMemoryToken);
 			return true;
 		} catch {
-			// Network error - if we have local data, trust it temporarily
-			// but log warning for debugging
-			console.warn('Session restore failed due to network error');
+			// Network error - if we have local data, trust it temporarily.
+			// Forced checks still hit the backend first, but can fall back to cached
+			// state when the network itself is the only failure mode.
+			console.warn(
+				force
+					? 'Forced session validation failed due to network error; using cached session data when available'
+					: 'Session restore failed due to network error'
+			);
 			if (this.isAuthenticated()) {
 				console.warn('Using cached session data');
 				return true;
