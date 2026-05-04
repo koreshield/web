@@ -146,25 +146,32 @@ export const authService = {
 	},
 
 	async restoreSession(force = false): Promise<boolean> {
-		if (!force && this.isAuthenticated()) {
-			return true;
-		}
-
+		// Always validate with backend - don't trust stale sessionStorage
+		// This prevents logout-on-refresh bug where old data causes false auth checks
 		try {
 			const response = await fetch(`${API_BASE_URL}/v1/management/me`, {
 				method: 'GET',
 				credentials: 'include',
 			});
 			if (!response.ok) {
+				clearSession();
 				return false;
 			}
 			const data = await response.json();
 			if (!data?.user) {
+				clearSession();
 				return false;
 			}
 			persistSession(data.user, inMemoryToken);
 			return true;
 		} catch {
+			// Network error - if we have local data, trust it temporarily
+			// but log warning for debugging
+			console.warn('Session restore failed due to network error');
+			if (this.isAuthenticated()) {
+				console.warn('Using cached session data');
+				return true;
+			}
 			return false;
 		}
 	},
