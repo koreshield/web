@@ -13,11 +13,11 @@ describe('IntegrationsPage', () => {
 
 		expect(screen.getByRole('link', { name: /Python SDK/i })).toHaveAttribute(
 			'href',
-			'https://github.com/koreshield/koreshield-python-sdk',
+			'https://github.com/koreshield/python-sdk',
 		);
 		expect(screen.getByRole('link', { name: /JS\/TS SDK/i })).toHaveAttribute(
 			'href',
-			'https://github.com/koreshield/koreshield-js-sdk',
+			'https://github.com/koreshield/node-sdk',
 		);
 		expect(screen.getAllByText(/SDK repo live/i)).toHaveLength(2);
 	});
