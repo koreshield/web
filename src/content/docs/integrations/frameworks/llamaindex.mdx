@@ -20,30 +20,30 @@ The best way to integrate is by subclassing `CustomLLM`. This allows Koreshield 
 Create a custom LLM class:
 
 ```python
+import os
 from typing import Any
 from llama_index.core.llms import CustomLLM, CompletionResponse
 from llama_index.core.llms.callbacks import llm_completion_callback
 from koreshield_sdk import KoreShieldClient
-import asyncio
 
-class KoreshieldLLM(CustomLLM):
-    base_url: str = "http://localhost:8000"
+class KoreShieldLLM(CustomLLM):
+    api_key: str = ""
     client: Any = None
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.client = KoreshieldClient(base_url=self.base_url)
+        self.client = KoreShieldClient(api_key=self.api_key or os.environ["KORESHIELD_API_KEY"])
 
     @llm_completion_callback()
     def complete(self, prompt: str, **kwargs: Any) -> CompletionResponse:
-        # 1. Guard check
-        guard_result = asyncio.run(self.client.guard(prompt))
-        
-        if not guard_result.is_safe:
-            raise ValueError(f"Blocked: {guard_result.reason}")
+        # 1. Scan prompt before forwarding
+        result = self.client.scan_prompt(prompt)
 
-        # 2. Forward to real LLM or Proxy
-        # In this example, we mock the return or you can use `http` request to /v1/chat/completions
+        if not result.is_safe:
+            raise ValueError(f"Blocked: threat level {result.threat_level}")
+
+        # 2. Forward to real LLM or proxy endpoint
+        # Use requests/httpx to call /v1/chat/completions as needed
         return CompletionResponse(text="Safe response from LLM")
 ```
 
@@ -53,7 +53,7 @@ class KoreshieldLLM(CustomLLM):
 from llama_index.core import Settings
 
 # Set as the global LLM
-Settings.llm = KoreshieldLLM()
+Settings.llm = KoreShieldLLM()
 
 # Now all query engine calls will be protected
 query_engine = index.as_query_engine()

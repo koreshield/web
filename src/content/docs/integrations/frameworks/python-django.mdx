@@ -22,44 +22,38 @@ pip install koreshield django
 Create a file named `middleware.py` in one of your apps (e.g., `yourapp/middleware.py`):
 
 ```python
-import asyncio
 import json
 from django.http import JsonResponse
 from django.conf import settings
 from koreshield_sdk import KoreShieldClient
 
-class KoreshieldMiddleware:
+class KoreShieldMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        self.client = KoreshieldClient(
-            base_url=getattr(settings, "Koreshield_URL", "http://localhost:8000")
+        self.client = KoreShieldClient(
+            api_key=getattr(settings, "KORESHIELD_API_KEY", ""),
+            base_url=getattr(settings, "KORESHIELD_URL", "https://api.koreshield.com")
         )
-        self.protected_paths = getattr(settings, "Koreshield_PROTECTED_PATHS", [])
+        self.protected_paths = getattr(settings, "KORESHIELD_PROTECTED_PATHS", [])
 
     def __call__(self, request):
         if request.path in self.protected_paths and request.method == "POST":
             try:
-                # Basic body parsing - adjust based on your needs
                 body = json.loads(request.body)
                 prompt = body.get("message") or body.get("prompt")
-                
+
                 if prompt:
-                    # Sync wrapper around async call
-                    is_safe = asyncio.run(self._check_safety(prompt))
-                    
-                    if not is_safe["is_safe"]:
+                    result = self.client.scan_prompt(prompt)
+
+                    if not result.is_safe:
                         return JsonResponse({
-                            "error": "Blocked by Koreshield", 
-                            "reason": is_safe["reason"]
+                            "error": "Blocked by KoreShield",
+                            "threat_level": result.threat_level
                         }, status=403)
             except Exception:
                 pass
 
         return self.get_response(request)
-
-    async def _check_safety(self, prompt):
-        result = await self.client.guard(prompt)
-        return {"is_safe": result.is_safe, "reason": result.reason}
 ```
 
 ## Configuration
@@ -69,13 +63,14 @@ In your `settings.py`:
 ```python
 MIDDLEWARE = [
     # ...
-    'yourapp.middleware.KoreshieldMiddleware',
+    'yourapp.middleware.KoreShieldMiddleware',
 ]
 
-Koreshield_URL = "http://localhost:8000"
-Koreshield_PROTECTED_PATHS = ["/api/v1/chat", "/api/v1/generate"]
+KORESHIELD_API_KEY = "ks_..."
+KORESHIELD_URL = "https://api.koreshield.com"
+KORESHIELD_PROTECTED_PATHS = ["/api/v1/chat", "/api/v1/generate"]
 ```
 
 ## Notes
-- For high-performance async Django (Generic Async Views), use `__acall__` instead of `__call__`.
-- Ensure `KoreshieldProxy` is reachable from your Django backend.
+- For high-performance async Django (Generic Async Views), use `__acall__` and `AsyncKoreShieldClient` instead.
+- Ensure your `KORESHIELD_API_KEY` is set via environment variable in production, not hardcoded.
