@@ -23,9 +23,8 @@ Integration typically happens at the **Workflow** level or via a custom **Middle
 
 ```python
 from koreshield_sdk import AsyncKoreShieldClient
-from koreshield.crm_templates.hubspot import HUBSPOT_TEMPLATE
 
-client = AsyncKoreshieldClient(api_key="ks_...")
+client = AsyncKoreShieldClient(api_key="ks_...")
 
 # Incoming ticket webhook payload
 ticket_data = {
@@ -38,10 +37,13 @@ result = await client.scan_rag_context(
     user_query="Process ticket request",
     documents=[{
         "id": "ticket_123",
-        "text": ticket_data['content'],
+        "content": ticket_data['content'],
         "metadata": {"source": "hubspot_ticket"}
     }],
-    config=HUBSPOT_TEMPLATE
+    config={
+        "min_confidence": 0.6,
+        "enable_cross_document_analysis": True
+    }
 )
 
 if result.is_safe:
