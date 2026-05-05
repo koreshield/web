@@ -24,7 +24,7 @@ import os
 from typing import Any
 from llama_index.core.llms import CustomLLM, CompletionResponse
 from llama_index.core.llms.callbacks import llm_completion_callback
-from koreshield_sdk import KoreShieldClient
+from koreshield import KoreShieldClient
 
 class KoreShieldLLM(CustomLLM):
     api_key: str = ""

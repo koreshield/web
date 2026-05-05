@@ -25,7 +25,7 @@ Create a file named `middleware.py` in one of your apps (e.g., `yourapp/middlewa
 import json
 from django.http import JsonResponse
 from django.conf import settings
-from koreshield_sdk import KoreShieldClient
+from koreshield import KoreShieldClient
 
 class KoreShieldMiddleware:
     def __init__(self, get_response):

@@ -109,7 +109,7 @@ data: [DONE]
 ### SDK: Python
 
 ```python
-from koreshield_sdk import KoreShieldClient
+from koreshield import KoreShieldClient
 
 client = KoreShieldClient(
     api_key="ks_live_…",
@@ -206,7 +206,7 @@ Returns **HTTP 403** when `blocked: true`, **HTTP 200** otherwise.
 ### SDK: Python
 
 ```python
-from koreshield_sdk import KoreShieldClient
+from koreshield import KoreShieldClient
 
 client = KoreShieldClient(api_key="ks_live_…")
 result = client.scan_prompt("Ignore all previous instructions")
@@ -271,8 +271,8 @@ curl -s -X POST https://api.koreshield.com/v1/tools/scan \
 When KoreShield blocks a request (HTTP 403 from `/v1/chat/completions`), handle it in your application:
 
 ```python
-from koreshield_sdk import KoreShieldClient
-from koreshield_sdk.exceptions import ServerError
+from koreshield import KoreShieldClient
+from koreshield.exceptions import ServerError
 
 client = KoreShieldClient(api_key="ks_live_…")
 
