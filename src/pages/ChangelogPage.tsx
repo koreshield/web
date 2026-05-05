@@ -447,7 +447,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				customerImpact:
 					'All KoreShield components share a single versioned repository, making it straightforward for contributors and integrations to stay aligned.',
 				items: [
-					'Created monorepo with koreshield (API), koreshield-web (frontend), koreshield-python-sdk, koreshield-js-sdk, koreshield-docs, and koreshield-blog.',
+					'Created monorepo with koreshield (API), koreshield-web (frontend), python-sdk, node-sdk, koreshield-docs, and koreshield-blog.',
 					'Set up shared tooling including linting, formatting, and CI configuration.',
 					'Defined core architectural principles: scan-first, provider-agnostic, policy-driven.',
 				],
