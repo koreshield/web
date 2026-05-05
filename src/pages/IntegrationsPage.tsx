@@ -104,7 +104,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'Framework',
 		description: 'Async client for FastAPI/Django/Flask apps.',
 		icon: Code2,
-		link: 'https://github.com/koreshield/koreshield-python-sdk',
+		link: 'https://github.com/koreshield/python-sdk',
 		statusNote: 'SDK repo live'
 	},
 	{
@@ -113,7 +113,7 @@ const INTEGRATIONS: Integration[] = [
 		category: 'Framework',
 		description: 'Client for Node.js, Next.js, and browser.',
 		icon: Code2,
-		link: 'https://github.com/koreshield/koreshield-js-sdk',
+		link: 'https://github.com/koreshield/node-sdk',
 		statusNote: 'SDK repo live'
 	},
 
