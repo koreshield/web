@@ -10,12 +10,19 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
     const location = useLocation();
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+    // Start optimistically if we already have a cached session (localStorage token/user).
+    // This eliminates the spinner on refresh when the user was previously logged in.
+    // The background restoreSession call still validates with the backend and will
+    // redirect to login if the session has genuinely expired.
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
+        () => authService.isAuthenticated() ? true : null
+    );
 
     useEffect(() => {
         let isMounted = true;
         const checkAuth = async () => {
-            // Always validate with backend on route check - don't use cache
+            // Always validate with backend — belt-and-suspenders with localStorage token fallback.
             const ok = await authService.restoreSession(true);
             if (isMounted) {
                 setIsAuthenticated(ok);
@@ -28,6 +35,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     }, []);
 
     if (isAuthenticated === null) {
+        // Only shown when there is truly no cached session at all (first visit / after logout)
         return (
             <div className="min-h-[40vh] flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
