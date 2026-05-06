@@ -1,45 +1,101 @@
 ---
 title: Installation
-description: Install and run KoreShield server.
+description: Run KoreShield on your own infrastructure.
 icon: Terminal
 sidebar_position: 2
 last_update:
-  date: 2026-03-10
+  date: 2026-05-06
 ---
 
-# Installation
+# Installation (Self-Hosted)
 
-:::note
-This guide is for **self-hosted** KoreShield deployments. Hosted customers can skip installation and proceed with the [API integration](/docs/client-integration).
+:::note Using the hosted API?
+If you are using KoreShield's hosted service at `api.koreshield.com`, you do not need to install anything. Go straight to the [Quick Start](/docs/getting-started/quick-start) and create an API key in the dashboard.
 :::
+
+This guide is for teams running KoreShield on their own infrastructure — on-prem, private cloud, or air-gapped environments.
+
+---
 
 ## Prerequisites
 
-- Docker + Docker Compose
-- A KoreShield deployment bundle provided by the KoreShield team
-- Environment values for JWT and provider keys
+- Docker and Docker Compose installed on your host
+- A KoreShield deployment bundle (provided by the KoreShield team)
+- Credentials for your LLM provider(s) (OpenAI, Anthropic, etc.)
 
 ## Get the Deployment Bundle
 
-Your account team will provide a deployment bundle and environment variables. This avoids needing access to the private core repository.
+Contact the KoreShield team at [koreshield.ai](https://koreshield.ai) to request a deployment bundle for your plan. The bundle includes:
 
-## Configure
+- A pre-built Docker image
+- A `docker-compose.yml` configured for your environment
+- An `.env.example` file listing every required environment variable
 
-Apply the JWT, database, Redis, and provider values provided by KoreShield.
+This approach keeps the core engine private and lets us provide you with signed, audited builds.
 
-## Run
+## Configure Environment Variables
 
-Start the container stack included with your deployment bundle.
-
-## Verify
+Copy `.env.example` to `.env` and fill in the values provided by your account team:
 
 ```bash
+cp .env.example .env
+```
+
+At minimum you will need:
+
+| Variable | Description |
+|---|---|
+| `JWT_SECRET` or `JWT_PUBLIC_KEY` | Signs and verifies session tokens |
+| `JWT_ISSUER` | Your issuer string (e.g. `koreshield.your-company.com`) |
+| `JWT_AUDIENCE` | Your audience string (e.g. `koreshield-api`) |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `REDIS_URL` | Redis connection string |
+| `OPENAI_API_KEY` | Required if routing to OpenAI |
+| `ANTHROPIC_API_KEY` | Required if routing to Anthropic |
+| `ENVIRONMENT` | Set to `production` for production deployments |
+
+Never commit `.env` to version control.
+
+## Start the Stack
+
+```bash
+docker compose up -d
+```
+
+This starts the KoreShield API server, PostgreSQL, and Redis. Depending on your bundle, additional services (worker, dashboard) may also start.
+
+## Verify It Is Running
+
+```bash
+# Health check
 curl http://localhost:8000/health
-curl http://localhost:8000/openapi.json | head
+
+# Confirm the API schema is accessible
+curl http://localhost:8000/openapi.json | head -5
+```
+
+A healthy response from `/health` looks like:
+
+```json
+{"status": "ok", "version": "…"}
+```
+
+## First Request
+
+Once running, follow the [Quick Start](/docs/getting-started/quick-start) using your local endpoint instead of `api.koreshield.com`:
+
+```bash
+export KORESHIELD_API_KEY="ks_live_…"
+export KORESHIELD_BASE_URL="http://localhost:8000"
+
+curl -s -X POST "$KORESHIELD_BASE_URL/v1/scan" \
+  -H "X-API-Key: $KORESHIELD_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Ignore all previous instructions"}'
 ```
 
 ## Next Steps
 
-- [Client Integration Guide](/docs/client-integration)
-- [REST API](/docs/api/rest-api)
-- [Integrations](/docs/integrations)
+- [Client Integration Guide](/docs/client-integration) — wire KoreShield into your application code
+- [Configuration](/docs/configuration) — tune detection sensitivity, policies, and rate limits
+- [Production Checklist](/docs/configuration/production-checklist) — harden your deployment before go-live
