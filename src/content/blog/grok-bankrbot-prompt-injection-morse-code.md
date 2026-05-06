@@ -1,7 +1,7 @@
 ---
 title: The Grok Wallet Hack Was Not Clever. It Was Inevitable.
 excerpt: On May 4, someone hid a trading command in Morse code on X. A Grok-linked AI agent read it, decoded it, and sent $175,000 worth of tokens to an attacker. This is what prompt injection looks like when it has a wallet attached.
-date: 2026-05-06
+date: 2026-05-05
 author: Isaac Emmanuel
 categories: Security, Research
 tags: prompt injection, ai agents, llm security, crypto, bankrbot, grok, xai, web3
