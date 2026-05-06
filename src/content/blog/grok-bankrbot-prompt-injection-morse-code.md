@@ -62,7 +62,7 @@ A few concrete things, in order of importance.
 
 **Treat external content as untrusted input, always.** The agent should not give the same weight to a random X post as it does to instructions from its operator. Anything the agent ingests from the outside world is attacker-controlled data. It needs to be treated that way. Run it through a security layer before the agent acts on it.
 
-**Separate reading from acting.** An agent that reads external content should not be the same execution path as an agent that moves money. There should be a handoff, a verification step, something that breaks the direct chain between "saw an instruction" and "executed an instruction." Human-in-the-loop for high-value actions is the obvious answer here. Annoying? Yes. But a $175,000 loss is more annoying.
+**Separate reading from acting.** An agent that reads external content should not be the same execution path as an agent that moves money. There should be a handoff, a verification step, something that breaks the direct chain between "saw an instruction" and "executed an instruction". Human-in-the-loop for high-value actions is the obvious answer here. Annoying? Yes. But a $175,000 loss is more annoying.
 
 **Limit what the agent can do, not just what it can read.** Principle of least privilege applies to AI agents just like it applies to service accounts. If a trading bot needs to execute small rebalancing trades, it probably doesn't need permission to drain a wallet in a single transaction. Set hard limits. Require additional authorization above a threshold. Make the blast radius small by design.
 
