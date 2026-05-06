@@ -30,15 +30,15 @@ Your App  →  KoreShield  →  OpenAI / Anthropic / Gemini / DeepSeek
          Decision here
 ```
 
-Every request passes through KoreShield first. It scans the prompt, applies your security policy, and either forwards the request to the model or blocks it with a structured error your app can handle. In most integrations, you only change the `base_url` — your existing LLM code stays the same.
+Every request passes through KoreShield first. It scans the prompt, applies your security policy, and either forwards the request to the model or blocks it with a structured error your app can handle. In most integrations, you only change the `base_url`. Your existing LLM code stays the same.
 
 ## What It Detects
 
-- **Prompt injection** — direct attacks in user messages ("ignore previous instructions…")
-- **Indirect / RAG injection** — malicious instructions hidden in retrieved documents, web pages, or emails the model reads
-- **Jailbreaks** — persona injection, role-play bypasses, many-shot attacks, encoded requests
-- **Policy violations** — content your organisation defines as off-limits (topics, formats, data types)
-- **System prompt extraction** — attempts to make the model reveal its own instructions
+- **Prompt injection:** direct attacks in user messages ("ignore previous instructions…")
+- **Indirect / RAG injection:** malicious instructions hidden in retrieved documents, web pages, or emails the model reads
+- **Jailbreaks:** persona injection, role-play bypasses, many-shot attacks, encoded requests
+- **Policy violations:** content your organisation defines as off-limits (topics, formats, data types)
+- **System prompt extraction:** attempts to make the model reveal its own instructions
 
 ## Supported Model Providers
 
@@ -52,7 +52,7 @@ KoreShield routes to the right provider automatically based on the model name yo
 | `deepseek-*` | DeepSeek |
 | `gpt-*` via Azure endpoint | Azure OpenAI |
 
-## Authentication — Which Should I Use?
+## Authentication: Which Method Should I Use?
 
 KoreShield supports two auth methods. **Use API keys for almost everything.**
 
@@ -67,9 +67,9 @@ You create an API key in the KoreShield dashboard. It works immediately, has no 
 
 **New to KoreShield?** Follow this path in order:
 
-1. **[Quick Start](/docs/getting-started/quick-start)** — sign up, create an API key, and scan your first prompt in under 5 minutes
-2. **[Client Integration Guide](/docs/client-integration)** — drop KoreShield into your existing LLM code
-3. **[Integrations](/docs/integrations)** — framework guides: LangChain, LlamaIndex, Django, FastAPI, Next.js, and more
-4. **[API Reference](/docs/api/rest-api)** — full reference for all endpoints and response fields
+1. **[Quick Start](/docs/getting-started/quick-start):** sign up, create an API key, and scan your first prompt in under 5 minutes
+2. **[Client Integration Guide](/docs/client-integration):** drop KoreShield into your existing LLM code
+3. **[Integrations](/docs/integrations):** framework guides: LangChain, LlamaIndex, Django, FastAPI, Next.js, and more
+4. **[API Reference](/docs/api/rest-api):** full reference for all endpoints and response fields
 
 **Self-hosting KoreShield** (on-prem or private cloud)? Start with [Installation](/docs/getting-started/installation) instead.
