@@ -7,7 +7,7 @@ categories: Security, Research
 tags: prompt injection, ai agents, llm security, crypto, bankrbot, grok, xai, web3
 status: published
 readingTime: 6
-coverImage: /images/blog/hacked-grok1.jpeg
+coverImage: /images/blog/grok-xai-hack.png
 ---
 
 On May 4, 2026, someone posted Morse code on X.
