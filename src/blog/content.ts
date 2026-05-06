@@ -31,7 +31,7 @@ const BLOG_POSTS: BlogPost[] = [
 		tags: ['prompt injection', 'ai agents', 'llm security', 'crypto', 'bankrbot', 'grok', 'xai', 'web3'],
 		status: 'published',
 		
-		coverImage: '/images/blog/hacked-grok1.jpeg',
+		coverImage: '/images/blog/grok-xai-hack.png',
 		readingTime: 7,
 		path: '/blog/grok-bankrbot-prompt-injection-morse-code',
 		content: `On May 4, 2026, someone posted Morse code on X.
