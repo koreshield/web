@@ -49,8 +49,16 @@ function transformDocContent(content: string) {
 		.replace(/^\s*#\s+[^\n]+\n+/, '')
 		.replace(/^import\s+.*$/gm, '')
 		.replace(/<DocCardList\s*\/>/g, '')
-		.replace(/^::::(note|info|tip|warning|danger)\s*$/gm, '> **$1**')
-		.replace(/^::::\s*$/gm, '')
+		.replace(/^:::(note|info|tip|warning|caution|danger)([^\n]*)\n([\s\S]*?)^:::\s*$/gm, (_match, type, titleText, body) => {
+			const title = titleText.trim();
+			const typeLabels: Record<string, string> = {
+				note: 'Note', info: 'Note', tip: 'Tip',
+				warning: 'Warning', caution: 'Important', danger: 'Important',
+			};
+			const label = title || typeLabels[type] || type;
+			const lines = body.trimEnd().split('\n').map((l: string) => `> ${l}`).join('\n');
+			return `> **${label}**\n>\n${lines}`;
+		})
 		.replace(/https:\/\/docs\.koreshield\.com\/docs\/?/g, '/docs/')
 		.replace(/https:\/\/docs\.koreshield\.com/g, '/docs');
 }
