@@ -3,47 +3,73 @@ title: Documentation
 description: Welcome to the KoreShield documentation
 icon: House
 last_update:
-  date: 2026-03-10
+  date: 2026-05-06
 ---
 
-KoreShield is an LLM security gateway that sits between your app and model providers. It scans prompts and RAG context, applies policy decisions, and blocks unsafe requests before they reach providers.
+# Welcome to KoreShield
 
-## What It Protects
+KoreShield is an LLM security gateway. It sits between your application and your AI model provider, scanning every prompt and retrieved document for threats before they reach the model and before any damage is done.
 
-- direct prompt injection attempts
-- indirect/RAG injection hidden in retrieved documents
-- policy and compliance violations based on configured rules
+## Why KoreShield
 
-## Current Provider Support
+When you wire an LLM into your product, your users control the input. That means attackers can:
 
-- DeepSeek
-- OpenAI
-- Anthropic
-- Gemini
-- Azure OpenAI
+- **Inject instructions** into prompts to override your system prompt or extract internal data
+- **Hide malicious commands** inside documents your RAG pipeline retrieves and passes to the model
+- **Jailbreak the model** to bypass your content policies
+- **Abuse your LLM API budget** with expensive or automated queries
 
-## Core Runtime Endpoints
+KoreShield blocks all of this at the gateway layer, without requiring changes to your model provider or your prompts.
 
-- `POST /v1/chat/completions` (protected)
-- `POST /v1/rag/scan` (protected)
-- `POST /v1/scan` and `POST /v1/scan/batch` (protected)
-- `GET /v1/scans` (protected)
-- `GET /health`, `GET /status`, `GET /metrics`
+## How It Works
 
-## Authentication
+```
+Your App  →  KoreShield  →  OpenAI / Anthropic / Gemini / DeepSeek
+                ↓
+         Scan + Policy
+         Decision here
+```
 
-Protected endpoints accept:
+Every request passes through KoreShield first. It scans the prompt, applies your security policy, and either forwards the request to the model or blocks it with a structured error your app can handle. In most integrations, you only change the `base_url` — your existing LLM code stays the same.
 
-1. `Authorization: Bearer <jwt>`
-2. `X-API-Key: ks_...`
-3. `ks_access_token` httpOnly cookie
+## What It Detects
 
-JWT validation enforces `iss`, `aud`, signature, and expiration checks.
+- **Prompt injection** — direct attacks in user messages ("ignore previous instructions…")
+- **Indirect / RAG injection** — malicious instructions hidden in retrieved documents, web pages, or emails the model reads
+- **Jailbreaks** — persona injection, role-play bypasses, many-shot attacks, encoded requests
+- **Policy violations** — content your organisation defines as off-limits (topics, formats, data types)
+- **System prompt extraction** — attempts to make the model reveal its own instructions
+
+## Supported Model Providers
+
+KoreShield routes to the right provider automatically based on the model name you pass:
+
+| Model prefix | Provider |
+|---|---|
+| `gpt-*`, `o1-*`, `o3-*` | OpenAI |
+| `claude-*` | Anthropic |
+| `gemini-*` | Google Gemini |
+| `deepseek-*` | DeepSeek |
+| `gpt-*` via Azure endpoint | Azure OpenAI |
+
+## Authentication — Which Should I Use?
+
+KoreShield supports two auth methods. **Use API keys for almost everything.**
+
+| Method | When to use |
+|---|---|
+| `X-API-Key: ks_live_…` | All SDK and direct API integrations. Create one in the dashboard. |
+| `Authorization: Bearer <JWT>` | Server-to-server flows where you manage your own JWT issuance. Most users don't need this. |
+
+You create an API key in the KoreShield dashboard. It works immediately, has no expiry by default, and can be scoped and rotated at any time.
 
 ## Start Here
 
-- [Client Integration Guide](/docs/client-integration)
-- [Quick Start](/docs/getting-started/quick-start)
-- [Installation](/docs/getting-started/installation)
-- [API Reference](/docs/api)
-- [Integrations](/docs/integrations)
+**New to KoreShield?** Follow this path in order:
+
+1. **[Quick Start](/docs/getting-started/quick-start)** — sign up, create an API key, and scan your first prompt in under 5 minutes
+2. **[Client Integration Guide](/docs/client-integration)** — drop KoreShield into your existing LLM code
+3. **[Integrations](/docs/integrations)** — framework guides: LangChain, LlamaIndex, Django, FastAPI, Next.js, and more
+4. **[API Reference](/docs/api/rest-api)** — full reference for all endpoints and response fields
+
+**Self-hosting KoreShield** (on-prem or private cloud)? Start with [Installation](/docs/getting-started/installation) instead.
