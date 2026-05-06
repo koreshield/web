@@ -8,27 +8,23 @@ last_update:
 
 # Quick Start
 
-This guide takes you from zero to scanning your first prompt in under 5 minutes. No self-hosting required — everything runs against the KoreShield hosted API.
+This guide takes you from zero to scanning your first prompt in under 5 minutes. No self-hosting required everything runs against the KoreShield hosted API.
 
-:::info Self-hosting?
-If you are running KoreShield on your own infrastructure, start with the [Installation guide](/docs/getting-started/installation) first, then come back here and replace `https://api.koreshield.com` with your local endpoint.
-:::
+> **Self-hosting?** If you are running KoreShield on your own infrastructure, start with the [Installation guide](/docs/getting-started/installation) first, then come back here and replace `https://api.koreshield.com` with your local endpoint.
 
 ---
 
-## Step 1 — Create Your Account
+## Step 1: Create Your Account
 
 Go to [koreshield.ai](https://koreshield.ai) and sign up. After verifying your email, you will land in the KoreShield dashboard.
 
 ---
 
-## Step 2 — Create an API Key
+## Step 2: Create an API Key
 
-In the dashboard, go to **API Keys** and click **Create key**. Give it a name (e.g. `my-first-integration`) and copy the key — it starts with `ks_live_`.
+In the dashboard, go to **API Keys** and click **Create key**. Give it a name (e.g. `my-first-integration`) and copy the key. It starts with `ks_live_`.
 
-:::caution Store your key now
-The full API key is shown only once. Save it somewhere secure (a `.env` file, your secrets manager) before leaving the page.
-:::
+> **Store your key now.** The full API key is shown only once. Save it somewhere secure (a `.env` file, your secrets manager) before leaving the page.
 
 Set it as an environment variable so you do not have to paste it in every command:
 
@@ -38,7 +34,7 @@ export KORESHIELD_API_KEY="ks_live_your_key_here"
 
 ---
 
-## Step 3 — Scan Your First Prompt
+## Step 3: Scan Your First Prompt
 
 This is the core KoreShield operation: you send a prompt, and KoreShield tells you whether it is safe to forward to the model.
 
@@ -92,13 +88,13 @@ console.log(attack.attackType); // "prompt_injection"
 ### curl
 
 ```bash
-# Safe prompt — expect HTTP 200
+# Safe prompt (expect HTTP 200)
 curl -s -X POST https://api.koreshield.com/v1/scan \
   -H "X-API-Key: $KORESHIELD_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"prompt": "Summarise the Q1 sales report"}'
 
-# Injection attempt — expect HTTP 403
+# Injection attempt (expect HTTP 403)
 curl -s -X POST https://api.koreshield.com/v1/scan \
   -H "X-API-Key: $KORESHIELD_API_KEY" \
   -H "Content-Type: application/json" \
@@ -136,11 +132,11 @@ curl -s -X POST https://api.koreshield.com/v1/scan \
 
 ---
 
-## Step 4 — Send a Protected Chat Request
+## Step 4: Send a Protected Chat Request
 
 Instead of scanning and then calling your LLM separately, you can send chat requests directly through KoreShield's proxy. It scans the prompt, then forwards the request to your model and returns the response in one step.
 
-This is a **drop-in replacement** for the OpenAI chat completions API. You only change the URL.
+This is a **drop-in replacement** for the OpenAI chat completions API. You only need to change the URL.
 
 ```bash
 curl -s -X POST https://api.koreshield.com/v1/chat/completions \
@@ -161,13 +157,13 @@ KoreShield routes to the right provider automatically based on the model name:
 | `gemini-*` | Google Gemini |
 | `deepseek-*` | DeepSeek |
 
-If a user sends an injected prompt, KoreShield blocks the request before it ever reaches the model — your LLM provider never sees it and you are not billed for it.
+If a user sends an injected prompt, KoreShield blocks the request before it ever reaches the model. Your LLM provider never sees it and you are not billed for it.
 
 ---
 
-## Step 5 — Check the Dashboard
+## Step 5: Check the Dashboard
 
-Go back to the dashboard and open **Audit Logs**. Every scan you just ran — blocked and allowed — appears here with the full threat details, confidence score, attack type, and timestamp.
+Go back to the dashboard and open **Audit Logs**. Every scan you just ran (blocked and allowed) appears here with the full threat details, confidence score, attack type, and timestamp.
 
 This is your complete audit trail. Every prompt your application sends through KoreShield is logged automatically.
 
@@ -188,19 +184,19 @@ You now have everything working:
 
 **Add KoreShield to your existing code:**
 
-The [Client Integration Guide](/docs/client-integration) shows exactly how to wire up scan and proxy calls in your application — including how to handle blocked responses gracefully.
+The [Client Integration Guide](/docs/client-integration) shows exactly how to wire up scan and proxy calls in your application, including how to handle blocked responses gracefully.
 
 **Use your framework's integration:**
 
-- [LangChain](/docs/integrations/frameworks/langchain) — drop-in callback handler, no prompt changes needed
-- [LlamaIndex](/docs/integrations/frameworks/llamaindex) — custom LLM subclass that scans automatically
-- [FastAPI middleware](/docs/integrations/frameworks/python-fastapi) — protects every route in one line
-- [Django middleware](/docs/integrations/frameworks/python-django) — path-scoped protection for Django views
-- [Next.js / Express](/docs/integrations/frameworks/react-nextjs) — route-level protection for Node backends
+- [LangChain](/docs/integrations/frameworks/langchain): drop-in callback handler, no prompt changes needed
+- [LlamaIndex](/docs/integrations/frameworks/llamaindex): custom LLM subclass that scans automatically
+- [FastAPI middleware](/docs/integrations/frameworks/python-fastapi): protects every route in one line
+- [Django middleware](/docs/integrations/frameworks/python-django): path-scoped protection for Django views
+- [Next.js / Express](/docs/integrations/frameworks/react-nextjs): route-level protection for Node backends
 
 **Protect your RAG pipeline:**
 
-If your application retrieves documents and passes them to a model, scan the retrieved chunks too — not just the user prompt. Attackers can hide injection instructions inside documents your model will read. See [RAG Defense](/docs/features/rag-defense) and the [RAG scan endpoint](/docs/client-integration#rag-pre-scan-v1ragscan).
+If your application retrieves documents and passes them to a model, scan the retrieved chunks too, not just the user prompt. Attackers can hide injection instructions inside documents your model will read. See [RAG Defense](/docs/features/rag-defense) and the [RAG scan endpoint](/docs/client-integration#rag-pre-scan-v1ragscan).
 
 **Tune your security policy:**
 
