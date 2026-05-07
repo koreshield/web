@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
+import { MemoryRouter } from 'react-router-dom';
 import IntegrationsPage from './IntegrationsPage';
 
 describe('IntegrationsPage', () => {
 	it('points SDK entries at live repositories when docs pages do not exist', () => {
 		render(
 			<HelmetProvider>
-				<IntegrationsPage />
+				<MemoryRouter>
+					<IntegrationsPage />
+				</MemoryRouter>
 			</HelmetProvider>,
 		);
 
