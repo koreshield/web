@@ -452,7 +452,8 @@ export function buildDocsNavigation(): NavItem[] {
 }
 
 export function getDocPageByRoute(routePath: string): DocPageData | null {
-	const doc = docsByPath.get(routePath);
+	const pathOnly = routePath.split('#')[0] ?? routePath;
+	const doc = docsByPath.get(pathOnly);
 	if (doc) {
 		const node = directoriesByPath.get(doc.isIndex ? doc.path : toRoutePath(doc.dir));
 		return {
@@ -466,7 +467,7 @@ export function getDocPageByRoute(routePath: string): DocPageData | null {
 		};
 	}
 
-	const node = directoriesByPath.get(routePath);
+	const node = directoriesByPath.get(pathOnly);
 	if (!node) {
 		return null;
 	}
