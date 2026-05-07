@@ -3,9 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
 import StatusPage from './StatusPage';
 
-const { getHealth, getStats, getProviderHealth, getOperationalStatus } = vi.hoisted(() => ({
+const { getHealth, getPublicStats, getProviderHealth, getOperationalStatus } = vi.hoisted(() => ({
 	getHealth: vi.fn(),
-	getStats: vi.fn(),
+	getPublicStats: vi.fn(),
 	getProviderHealth: vi.fn(),
 	getOperationalStatus: vi.fn(),
 }));
@@ -13,7 +13,7 @@ const { getHealth, getStats, getProviderHealth, getOperationalStatus } = vi.hois
 vi.mock('../lib/api-client', () => ({
 	api: {
 		getHealth,
-		getStats,
+		getPublicStats,
 		getProviderHealth,
 		getOperationalStatus,
 	},
@@ -22,7 +22,7 @@ vi.mock('../lib/api-client', () => ({
 describe('StatusPage', () => {
 	it('shows real status actions and live component messaging', async () => {
 		getHealth.mockResolvedValue({ status: 'healthy', version: '0.1.0' });
-		getStats.mockResolvedValue({
+		getPublicStats.mockResolvedValue({
 			status: 'healthy',
 			version: '0.1.0',
 			statistics: {
