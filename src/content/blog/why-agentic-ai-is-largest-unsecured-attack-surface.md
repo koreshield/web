@@ -5,6 +5,7 @@ date: 2026-05-09
 author: Teslim O. Kazeem
 categories: Security, AI, Agents
 tags: agentic ai, ai security, agent security, prompt injection, llm security, goal hijack, owasp, runtime enforcement
+image: /images/blog/lethal-trifecta-featured.png
 status: published
 readingTime: 6
 ---
