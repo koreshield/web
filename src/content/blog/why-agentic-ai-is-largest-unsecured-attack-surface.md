@@ -1,7 +1,7 @@
 ---
 title: Why Agentic AI Is Your Largest Unsecured Attack Surface
 excerpt: 88% of organizations running AI agents have reported security incidents. The architectural vulnerabilities of agentic systems require structural defense, not just classifiers.
-date: 2026-05-09
+date: 2026-05-11
 author: Teslim O. Kazeem
 categories: Security, AI, Agents
 tags: agentic ai, ai security, agent security, prompt injection, llm security, goal hijack, owasp, runtime enforcement
