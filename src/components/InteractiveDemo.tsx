@@ -11,12 +11,15 @@ const PRESET_ATTACKS = [
 
 export function InteractiveDemo() {
     const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null);
+    const [customText, setCustomText] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<{ verdict: string; confidence: number } | null>(null);
     const [latency, setLatency] = useState(0);
     const [error, setError] = useState<string | null>(null);
 
-    const handleSelectExample = async (prompt: string) => {
+    const analyzePrompt = async (prompt: string) => {
+        if (!prompt.trim()) return;
+        
         setSelectedPrompt(prompt);
         setLoading(true);
         setError(null);
@@ -40,6 +43,16 @@ export function InteractiveDemo() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSelectExample = async (prompt: string) => {
+        setCustomText('');
+        await analyzePrompt(prompt);
+    };
+
+    const handleCustomSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await analyzePrompt(customText);
     };
 
     const isBlocked = result?.verdict === 'blocked';
@@ -66,6 +79,27 @@ export function InteractiveDemo() {
                         {attack}
                     </button>
                 ))}
+            </div>
+
+            <div className="border-t border-border pt-6 mt-8 mb-8">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Or enter your own prompt:</p>
+                <form onSubmit={handleCustomSubmit} className="flex gap-2">
+                    <input
+                        type="text"
+                        value={customText}
+                        onChange={(e) => setCustomText(e.target.value)}
+                        placeholder="Type a prompt to test..."
+                        disabled={loading}
+                        className="flex-1 px-4 py-2 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                    <button
+                        type="submit"
+                        disabled={loading || !customText.trim()}
+                        className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Test
+                    </button>
+                </form>
             </div>
 
             {loading && (
