@@ -16,7 +16,6 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 const BlogPage = lazy(() => import('./pages/BlogPageWrapper'));
 const DocsPage = lazy(() => import('./pages/DocsPage'));
 const StatusPage = lazy(() => import('./pages/StatusPage'));
-const PlaygroundPage = lazy(() => import('./pages/PlaygroundPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -99,16 +98,6 @@ function AppContent() {
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<StatusPage />
-								</RouteErrorBoundary>
-							</Suspense>
-						}
-					/>
-					<Route
-						path="/playground"
-						element={
-							<Suspense fallback={<SuspenseFallback />}>
-								<RouteErrorBoundary>
-									<PlaygroundPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}

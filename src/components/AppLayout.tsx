@@ -28,6 +28,7 @@ import {
 	CheckCircle2,
 	Settings as SettingsIcon,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
@@ -100,7 +101,6 @@ const NAV_GROUPS: NavGroup[] = [
 const SIDEBAR_WIDTH = 220;
 const SIDEBAR_COLLAPSED_WIDTH = 56;
 const SIDEBAR_STORAGE_KEY = 'ks_sidebar_collapsed';
-const FOUNDER_PORTAL_EMAILS = new Set(['isaacnsisong@gmail.com', 'ei@koreshield.com', 'tes@koreshield.com']);
 
 // ─── Sidebar nav item ────────────────────────────────────────────────────────
 
@@ -396,7 +396,15 @@ export function AppLayout() {
 	const navigate = useNavigate();
 	const { isAuthenticated, user } = useAuthState();
 	const isAdmin = user?.role === 'admin' || user?.role === 'owner' || user?.role === 'superuser';
-	const isFounder = Boolean(user?.email && FOUNDER_PORTAL_EMAILS.has(user.email.toLowerCase()));
+	const founderAccessQuery = useQuery({
+		queryKey: ['founder-access'],
+		queryFn: () => api.getFounderAccess() as Promise<{ allowed: boolean }>,
+		enabled: Boolean(isAuthenticated && isAdmin),
+		staleTime: 5 * 60 * 1000,
+		retry: false,
+		refetchOnWindowFocus: false,
+	});
+	const isFounder = Boolean(founderAccessQuery.data?.allowed);
 	const [resendingVerification, setResendingVerification] = useState(false);
 	const [verificationBannerState, setVerificationBannerState] = useState<'none' | 'sent' | 'verified'>('none');
 

@@ -295,10 +295,10 @@ export default function VsLLMGuardPage() {
 							<Code className="w-5 h-5" />
 							Upgrade Now
 						</Link>
-						<Link to="/playground"
+						<Link to="/demo"
 							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"
 						>
-							Try Interactive Demo
+							Book a Demo
 							<ExternalLink className="w-5 h-5" />
 						</Link>
 					</div>
