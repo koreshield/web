@@ -173,6 +173,15 @@ class ApiClient {
 		}, this.maxRetries, [403]);
 	}
 
+	async detectText(text: string) {
+		// Public detection endpoint for demo/playground
+		// Returns real-time detection results from the ML detector
+		return this.fetch('/detect', {
+			method: 'POST',
+			body: JSON.stringify({ text }),
+		});
+	}
+
 	async getAuditLogs(limit = 100, offset = 0, level?: string) {
 		const params = new URLSearchParams({
 			limit: String(limit),
