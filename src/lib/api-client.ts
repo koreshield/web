@@ -659,20 +659,12 @@ class ApiClient {
 				return this.fetch(`/v1/founder/requests?limit=${limit}`);
 			}
 
-			async getFounderThreats(limit = 25) {
-				return this.fetch(`/v1/founder/threats?limit=${limit}`);
-			}
-
 			async getFounderBilling(limit = 100) {
 				return this.fetch(`/v1/founder/billing?limit=${limit}`);
 			}
 
 			async getFounderTeamMembers(limit = 100) {
 				return this.fetch(`/v1/founder/team-members?limit=${limit}`);
-			}
-
-			async getFounderAudit(limit = 100) {
-				return this.fetch(`/v1/founder/audit?limit=${limit}`);
 			}
 
 			async getFounderHealth() {
@@ -694,12 +686,6 @@ class ApiClient {
 			async founderReactivateUser(userId: string) {
 				return this.fetch(`/v1/founder/users/${userId}/reactivate`, {
 					method: 'POST',
-				}, 0);
-			}
-
-			async founderDeleteUser(userId: string, confirmEmail: string) {
-				return this.fetch(`/v1/founder/users/${userId}?confirm_email=${encodeURIComponent(confirmEmail)}`, {
-					method: 'DELETE',
 				}, 0);
 			}
 
