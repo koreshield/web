@@ -158,7 +158,7 @@ type FounderUserDetail = {
 };
 
 const DONUT_COLORS = ['#dc2626', '#f59e0b', '#b45309', '#737373', '#0f766e', '#2563eb', '#7c3aed'];
-const FOUNDER_PORTAL_EMAILS = new Set(['isaacnsisong@gmail.com', 'ei@koreshield.com']);
+const FOUNDER_PORTAL_EMAILS = new Set(['isaacnsisong@gmail.com', 'ei@koreshield.com', 'tes@koreshield.com']);
 
 function numberFormat(value: number | undefined) {
 	return (value ?? 0).toLocaleString();
@@ -335,6 +335,13 @@ export function FounderPortalPage() {
 			void queryClient.invalidateQueries({ queryKey: ['founder-user-detail', selectedUserId] });
 		},
 	});
+	const reactivateUserMutation = useMutation({
+		mutationFn: (userId: string) => api.founderReactivateUser(userId),
+		onSuccess: () => {
+			refreshAll();
+			void queryClient.invalidateQueries({ queryKey: ['founder-user-detail', selectedUserId] });
+		},
+	});
 	const syncBillingMutation = useMutation({
 		mutationFn: (billingId: string) => api.founderSyncBilling(billingId),
 		onSuccess: refreshAll,
@@ -373,7 +380,7 @@ export function FounderPortalPage() {
 				<AlertTriangle className="mx-auto h-10 w-10 text-destructive" />
 				<h1 className="mt-4 text-2xl font-bold">Founder access required</h1>
 				<p className="mx-auto mt-2 max-w-xl text-muted-foreground">
-					This private operating view is only visible to the founder allowlist. Sign in as isaacnsisong@gmail.com or ei@koreshield.com to continue.
+					This private operating view is only visible to the founder allowlist. Sign in as isaacnsisong@gmail.com, ei@koreshield.com, or tes@koreshield.com to continue.
 				</p>
 			</div>
 		);
@@ -443,14 +450,14 @@ export function FounderPortalPage() {
 					<StatCard title="Billing accounts" value={numberFormat(overview?.billing_accounts)} subtitle={`${numberFormat(overview?.paid_accounts)} paid accounts`} icon={CreditCard} />
 				</div>
 
-				<div className="grid gap-6 xl:grid-cols-2">
-					<SectionCard title="Daily request volume">
-						{chartData.length ? (
-							<div className="h-[320px]">
-								<ResponsiveContainer width="100%" height="100%">
-									<BarChart data={chartData}>
-										<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-										<XAxis dataKey="label" tick={{ fontSize: 12 }} />
+					<div className="grid gap-6 xl:grid-cols-2">
+						<SectionCard title="Daily request volume">
+							{chartData.length ? (
+								<div className="min-h-[320px] min-w-0">
+									<ResponsiveContainer width="100%" height={320} minWidth={0}>
+										<BarChart data={chartData}>
+											<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+											<XAxis dataKey="label" tick={{ fontSize: 12 }} />
 										<YAxis tick={{ fontSize: 12 }} />
 										<Tooltip />
 										<Bar dataKey="requests" fill="#2563eb" radius={[8, 8, 0, 0]} />
@@ -458,14 +465,14 @@ export function FounderPortalPage() {
 								</ResponsiveContainer>
 							</div>
 						) : <EmptyState label="No request volume data yet." />}
-					</SectionCard>
-					<SectionCard title="Attack type breakdown">
-						{attackData.length ? (
-							<div className="h-[320px]">
-								<ResponsiveContainer width="100%" height="100%">
-									<PieChart>
-										<Pie data={attackData} dataKey="count" nameKey="type" innerRadius={70} outerRadius={120} paddingAngle={2}>
-											{attackData.map((_entry, index) => (
+						</SectionCard>
+						<SectionCard title="Attack type breakdown">
+							{attackData.length ? (
+								<div className="min-h-[320px] min-w-0">
+									<ResponsiveContainer width="100%" height={320} minWidth={0}>
+										<PieChart>
+											<Pie data={attackData} dataKey="count" nameKey="type" innerRadius={70} outerRadius={120} paddingAngle={2}>
+												{attackData.map((_entry, index) => (
 												<Cell key={`attack-${index}`} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />
 											))}
 										</Pie>
@@ -530,28 +537,38 @@ export function FounderPortalPage() {
 										<td className="py-3 pr-4 text-muted-foreground">{dateLabel(user.last_login_at)}</td>
 										<td className="py-3 pr-4">
 											<div className="flex flex-wrap gap-2">
-												{!user.email_verified ? (
-													<button
-														onClick={(event) => {
-															event.stopPropagation();
+													{!user.email_verified ? (
+														<button
+															onClick={(event) => {
+																event.stopPropagation();
 															resendVerificationMutation.mutate(user.id);
 														}}
 														className="rounded-lg border border-border px-2 py-1 text-xs font-semibold hover:bg-muted"
-													>
-														Resend
-													</button>
-												) : null}
-												{user.status === 'active' ? (
-													<button
-														onClick={(event) => {
-															event.stopPropagation();
-															if (window.confirm(`Disable ${user.email}?`)) disableUserMutation.mutate(user.id);
+														>
+															Resend
+														</button>
+													) : null}
+													{user.status === 'active' ? (
+														<button
+															onClick={(event) => {
+																event.stopPropagation();
+																if (window.confirm(`Disable ${user.email}?`)) disableUserMutation.mutate(user.id);
 														}}
 														className="rounded-lg border border-red-500/30 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-500/10"
-													>
-														Disable
-													</button>
-												) : null}
+														>
+															Disable
+														</button>
+													) : (
+														<button
+															onClick={(event) => {
+																event.stopPropagation();
+																if (window.confirm(`Reactivate ${user.email}?`)) reactivateUserMutation.mutate(user.id);
+															}}
+															className="rounded-lg border border-emerald-500/30 px-2 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-500/10"
+														>
+															Reactivate
+														</button>
+													)}
 											</div>
 										</td>
 									</tr>
@@ -659,12 +676,13 @@ export function FounderPortalPage() {
 											{account.subscription_status ? <Badge>{account.subscription_status}</Badge> : null}
 										</div>
 									</div>
-									<button
-										onClick={() => syncBillingMutation.mutate(account.id)}
-										className="rounded-lg border border-border px-3 py-2 text-xs font-semibold hover:bg-muted"
-									>
-										Sync billing
-									</button>
+										<button
+											onClick={() => syncBillingMutation.mutate(account.id)}
+											disabled={syncBillingMutation.isPending}
+											className="rounded-lg border border-border px-3 py-2 text-xs font-semibold hover:bg-muted"
+										>
+											{syncBillingMutation.isPending ? 'Syncing...' : 'Sync billing'}
+										</button>
 								</div>
 							))}
 						</div>
@@ -772,14 +790,25 @@ export function FounderPortalPage() {
 												<button
 													onClick={() => {
 														if (window.confirm(`Disable ${userDetailQuery.data!.user!.email}?`)) {
-															disableUserMutation.mutate(userDetailQuery.data!.user!.id);
-														}
-													}}
-													className="rounded-xl border border-red-500/30 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-500/10"
+																	disableUserMutation.mutate(userDetailQuery.data!.user!.id);
+															}
+														}}
+														className="rounded-xl border border-red-500/30 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-500/10"
 												>
 													Disable account
 												</button>
-											) : null}
+											) : (
+												<button
+													onClick={() => {
+														if (window.confirm(`Reactivate ${userDetailQuery.data!.user!.email}?`)) {
+															reactivateUserMutation.mutate(userDetailQuery.data!.user!.id);
+														}
+													}}
+													className="rounded-xl border border-emerald-500/30 px-3 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-500/10"
+												>
+													Reactivate account
+												</button>
+											)}
 										</div>
 									</div>
 
