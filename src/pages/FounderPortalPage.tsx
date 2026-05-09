@@ -15,7 +15,6 @@ import {
 	Search,
 	ShieldAlert,
 	ShieldX,
-	ClipboardList,
 	Trash2,
 	Users,
 	XCircle,
@@ -167,43 +166,31 @@ type FounderUserDetail = {
 };
 
 type FounderThreatsResponse = {
-	summary: {
-		blocked_total: number;
-		detected_total: number;
-		blocked_24h: number;
-	};
-	attack_type_breakdown: Array<{ type: string; count: number }>;
-	latest_blocked: Array<{
+	attack_family_breakdown: Array<{ family: string; count: number }>;
+	top_affected_keys: Array<{ api_key_id: string; prefix: string; name?: string | null; blocked_count: number }>;
+	recent_blocked: Array<{
 		id: string;
-		request_id: string;
 		timestamp?: string | null;
-		endpoint: string;
-		user_email?: string | null;
-		api_key_prefix?: string | null;
-		api_key_name?: string | null;
-		attack_type: string;
-		confidence?: number | string | null;
-		ip_address?: string | null;
-		status_code: number;
+		attack_type?: string | null;
+		provider?: string | null;
+		model?: string | null;
+		latency_ms?: number | null;
 	}>;
-	top_endpoints: Array<{ endpoint: string; count: number }>;
-	top_users: Array<{ email: string; count: number }>;
-	top_api_keys: Array<{ key_prefix: string; name: string; count: number }>;
-	confidence_distribution: Array<{ bucket: string; count: number }>;
-	suspicious_ips: Array<{ ip_address: string; count: number; last_seen_at?: string | null }>;
+	total_blocked: number;
+	window_days: number;
 };
 
 type FounderAuditEntry = {
 	id: string;
 	timestamp?: string | null;
-	actor_email?: string | null;
-	actor_role?: string | null;
+	actor: string;
 	action: string;
 	target_type?: string | null;
 	target_id?: string | null;
+	target_label?: string | null;
 	result: string;
 	ip_address?: string | null;
-	metadata?: Record<string, unknown>;
+	detail?: string | null;
 };
 
 type FounderAuditResponse = {
@@ -449,8 +436,8 @@ export function FounderPortalPage() {
 		onSuccess: refreshAll,
 	});
 	const deleteUserMutation = useMutation({
-		mutationFn: ({ userId, confirmEmail }: { userId: string; confirmEmail: string }) =>
-			api.founderDeleteUser(userId, confirmEmail),
+		mutationFn: ({ userId, confirm }: { userId: string; confirm: boolean }) =>
+			api.founderDeleteUser(userId, confirm),
 		onSuccess: () => {
 			refreshAll();
 			void queryClient.invalidateQueries({ queryKey: ['founder-audit'] });
@@ -464,10 +451,8 @@ export function FounderPortalPage() {
 	const users = usersQuery.data?.users ?? [];
 	const apiKeys = apiKeysQuery.data?.api_keys ?? [];
 	const requests = requestsQuery.data?.requests ?? [];
-	const threats = threatsQuery.data;
 	const billingAccounts = billingQuery.data?.billing_accounts ?? [];
 	const teamMembers = teamQuery.data?.team_members ?? [];
-	const auditLogs = auditQuery.data?.audit_logs ?? [];
 
 	const chartData = useMemo(
 		() => (overviewQuery.data?.daily_request_volume ?? []).map(item => ({
@@ -898,7 +883,7 @@ export function FounderPortalPage() {
 
 				{/* ── Admin Audit Log ────────────────────────────────────── */}
 				<SectionCard title={`Admin audit log (${auditQuery.data?.total ?? 0} entries)`}>
-					{(auditQuery.data?.audit_log ?? []).length ? (
+					{(auditQuery.data?.audit_logs ?? []).length ? (
 						<div className="overflow-x-auto">
 							<table className="w-full min-w-[900px] text-left text-sm">
 								<thead>
@@ -912,7 +897,7 @@ export function FounderPortalPage() {
 									</tr>
 								</thead>
 								<tbody className="divide-y divide-border">
-									{auditQuery.data!.audit_log.map((entry, i) => (
+									{auditQuery.data!.audit_logs.map((entry, i) => (
 										<tr key={`${entry.timestamp}-${i}`} className="hover:bg-muted/40">
 											<td className="py-2.5 pr-4 text-xs text-muted-foreground whitespace-nowrap">{dateLabel(entry.timestamp)}</td>
 											<td className="py-2.5 pr-4 font-mono text-xs">{entry.actor}</td>
