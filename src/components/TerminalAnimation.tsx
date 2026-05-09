@@ -269,29 +269,36 @@ function TerminalAnimation() {
 
 			{/* ── Pill examples ────────────────────────────────── */}
 			<div className="space-y-1.5">
-				<p className="text-[10px] font-mono text-gray-600 uppercase tracking-widest px-1">
-					Try an example →
+				<p className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-widest px-1">
+					Try an example
 				</p>
 				<div className="flex flex-wrap gap-2">
-					{DEMO_PILLS.map((pill, idx) => (
-						<button
-							key={pill.label}
-							onClick={() => handlePill(idx)}
-							disabled={phase !== 'idle'}
-							className={`
-								text-xs font-mono px-3 py-1.5 rounded-full border transition-all duration-200
-								disabled:opacity-40 disabled:cursor-not-allowed
-								${activePill === idx
-									? pill.blocked
-										? 'border-red-500/60 bg-red-500/10 text-red-400'
-										: 'border-emerald-500/60 bg-emerald-500/10 text-emerald-400'
-									: 'border-gray-700 bg-gray-800/60 text-gray-400 hover:border-gray-500 hover:text-gray-300'
-								}
-							`}
-						>
-							{pill.blocked ? '🔴' : '🟢'} {pill.label}
-						</button>
-					))}
+					{DEMO_PILLS.map((pill, idx) => {
+						const isActive = activePill === idx;
+						const blocked = pill.blocked;
+						return (
+							<button
+								key={pill.label}
+								onClick={() => handlePill(idx)}
+								disabled={phase !== 'idle'}
+								className={[
+									'inline-flex items-center gap-2 text-xs font-mono px-3 py-1.5 rounded-full border transition-all duration-200',
+									'disabled:opacity-40 disabled:cursor-not-allowed',
+									isActive && blocked
+										? 'border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400'
+										: isActive && !blocked
+										? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+										: 'border-border bg-muted/60 text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground',
+								].join(' ')}
+							>
+								<span className={[
+									'w-2 h-2 rounded-full shrink-0',
+									blocked ? 'bg-red-500' : 'bg-emerald-500',
+								].join(' ')} />
+								{pill.label}
+							</button>
+						);
+					})}
 				</div>
 			</div>
 		</div>
