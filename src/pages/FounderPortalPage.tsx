@@ -14,6 +14,9 @@ import {
 	RefreshCw,
 	Search,
 	ShieldAlert,
+	ShieldX,
+	ClipboardList,
+	Trash2,
 	Users,
 	XCircle,
 	X,
@@ -163,6 +166,51 @@ type FounderUserDetail = {
 	requests: Array<Pick<FounderRequest, 'id' | 'request_id' | 'timestamp' | 'endpoint' | 'status_code' | 'latency_ms' | 'api_key_prefix' | 'attack_type' | 'blocked' | 'attack_detected'>>;
 };
 
+type FounderThreatsResponse = {
+	summary: {
+		blocked_total: number;
+		detected_total: number;
+		blocked_24h: number;
+	};
+	attack_type_breakdown: Array<{ type: string; count: number }>;
+	latest_blocked: Array<{
+		id: string;
+		request_id: string;
+		timestamp?: string | null;
+		endpoint: string;
+		user_email?: string | null;
+		api_key_prefix?: string | null;
+		api_key_name?: string | null;
+		attack_type: string;
+		confidence?: number | string | null;
+		ip_address?: string | null;
+		status_code: number;
+	}>;
+	top_endpoints: Array<{ endpoint: string; count: number }>;
+	top_users: Array<{ email: string; count: number }>;
+	top_api_keys: Array<{ key_prefix: string; name: string; count: number }>;
+	confidence_distribution: Array<{ bucket: string; count: number }>;
+	suspicious_ips: Array<{ ip_address: string; count: number; last_seen_at?: string | null }>;
+};
+
+type FounderAuditEntry = {
+	id: string;
+	timestamp?: string | null;
+	actor_email?: string | null;
+	actor_role?: string | null;
+	action: string;
+	target_type?: string | null;
+	target_id?: string | null;
+	result: string;
+	ip_address?: string | null;
+	metadata?: Record<string, unknown>;
+};
+
+type FounderAuditResponse = {
+	audit_logs: FounderAuditEntry[];
+	total: number;
+};
+
 const DONUT_COLORS = ['#dc2626', '#f59e0b', '#b45309', '#737373', '#0f766e', '#2563eb', '#7c3aed'];
 const STANDARD_REFRESH_INTERVAL = 60_000;
 const REQUEST_LOG_REFRESH_INTERVAL = 30_000;
@@ -283,6 +331,8 @@ export function FounderPortalPage() {
 	const queryClient = useQueryClient();
 	const [search, setSearch] = useState('');
 	const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+	const [deleteTarget, setDeleteTarget] = useState<{ id: string; email: string } | null>(null);
+	const [deleteConfirmText, setDeleteConfirmText] = useState('');
 	const accessQuery = useQuery({
 		queryKey: ['founder-access'],
 		queryFn: () => api.getFounderAccess() as Promise<FounderAccessResponse>,
@@ -347,6 +397,18 @@ export function FounderPortalPage() {
 		retry: false,
 		refetchOnWindowFocus: false,
 	});
+	const threatsQuery = useQuery({
+		queryKey: ['founder-threats'],
+		queryFn: () => api.getFounderThreats(25) as Promise<FounderThreatsResponse>,
+		refetchInterval: STANDARD_REFRESH_INTERVAL,
+		...founderQueryOptions,
+	});
+	const auditQuery = useQuery({
+		queryKey: ['founder-audit'],
+		queryFn: () => api.getFounderAudit(100) as Promise<FounderAuditResponse>,
+		refetchInterval: 30_000,
+		...founderQueryOptions,
+	});
 
 	const refreshAll = () => {
 		void queryClient.invalidateQueries({ queryKey: ['founder-overview'] });
@@ -356,6 +418,8 @@ export function FounderPortalPage() {
 		void queryClient.invalidateQueries({ queryKey: ['founder-billing'] });
 		void queryClient.invalidateQueries({ queryKey: ['founder-team-members'] });
 		void queryClient.invalidateQueries({ queryKey: ['founder-health'] });
+		void queryClient.invalidateQueries({ queryKey: ['founder-threats'] });
+		void queryClient.invalidateQueries({ queryKey: ['founder-audit'] });
 	};
 
 	const revokeKeyMutation = useMutation({
@@ -384,13 +448,26 @@ export function FounderPortalPage() {
 		mutationFn: (billingId: string) => api.founderSyncBilling(billingId),
 		onSuccess: refreshAll,
 	});
+	const deleteUserMutation = useMutation({
+		mutationFn: ({ userId, confirmEmail }: { userId: string; confirmEmail: string }) =>
+			api.founderDeleteUser(userId, confirmEmail),
+		onSuccess: () => {
+			refreshAll();
+			void queryClient.invalidateQueries({ queryKey: ['founder-audit'] });
+			setDeleteTarget(null);
+			setDeleteConfirmText('');
+			setSelectedUserId(null);
+		},
+	});
 
 	const overview = overviewQuery.data?.overview;
 	const users = usersQuery.data?.users ?? [];
 	const apiKeys = apiKeysQuery.data?.api_keys ?? [];
 	const requests = requestsQuery.data?.requests ?? [];
+	const threats = threatsQuery.data;
 	const billingAccounts = billingQuery.data?.billing_accounts ?? [];
 	const teamMembers = teamQuery.data?.team_members ?? [];
+	const auditLogs = auditQuery.data?.audit_logs ?? [];
 
 	const chartData = useMemo(
 		() => (overviewQuery.data?.daily_request_volume ?? []).map(item => ({
@@ -401,15 +478,17 @@ export function FounderPortalPage() {
 	);
 	const attackData = overviewQuery.data?.attack_type_breakdown ?? [];
 	const isLoading = overviewQuery.isLoading || usersQuery.isLoading || apiKeysQuery.isLoading || requestsQuery.isLoading;
-	const loadError = overviewQuery.error || usersQuery.error || apiKeysQuery.error || requestsQuery.error;
+	const loadError = overviewQuery.error || usersQuery.error || apiKeysQuery.error || requestsQuery.error || threatsQuery.error || auditQuery.error;
 	const founderApiNotDeployed = [
 		overviewQuery.error,
 		usersQuery.error,
 		apiKeysQuery.error,
 		requestsQuery.error,
+		threatsQuery.error,
 		billingQuery.error,
 		teamQuery.error,
 		healthQuery.error,
+		auditQuery.error,
 	].some(error => hasStatusCode(error, 404));
 
 	if (accessQuery.isLoading) {
@@ -760,6 +839,100 @@ export function FounderPortalPage() {
 					</SectionCard>
 				</div>
 
+				{/* ── Threats Panel ─────────────────────────────────────── */}
+				<SectionCard title={`Threats — last ${threatsQuery.data?.window_days ?? 30} days (${(threatsQuery.data?.total_blocked ?? 0).toLocaleString()} blocked)`}>
+					<div className="grid gap-6 xl:grid-cols-3">
+						<div>
+							<p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+								<ShieldX className="h-3.5 w-3.5" /> Attack families
+							</p>
+							{(threatsQuery.data?.attack_family_breakdown ?? []).length ? (
+								<div className="space-y-2">
+									{threatsQuery.data!.attack_family_breakdown.slice(0, 8).map(item => (
+										<div key={item.family} className="flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2">
+											<span className="min-w-0 flex-1 truncate text-sm font-medium">{item.family}</span>
+											<span className="text-sm font-bold text-red-500">{item.count.toLocaleString()}</span>
+										</div>
+									))}
+								</div>
+							) : <EmptyState label="No blocked attacks in this window yet." />}
+						</div>
+						<div>
+							<p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+								<KeyRound className="h-3.5 w-3.5" /> Top targeted API keys
+							</p>
+							{(threatsQuery.data?.top_affected_keys ?? []).length ? (
+								<div className="space-y-2">
+									{threatsQuery.data!.top_affected_keys.map(key => (
+										<div key={key.api_key_id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2">
+											<div className="min-w-0">
+												<div className="font-mono text-sm font-semibold">{key.prefix}</div>
+												{key.name ? <div className="text-xs text-muted-foreground truncate">{key.name}</div> : null}
+											</div>
+											<span className="text-sm font-bold text-amber-500">{key.blocked_count}</span>
+										</div>
+									))}
+								</div>
+							) : <EmptyState label="No key-level threat data yet." />}
+						</div>
+						<div>
+							<p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+								<AlertTriangle className="h-3.5 w-3.5" /> Recent blocked
+							</p>
+							{(threatsQuery.data?.recent_blocked ?? []).length ? (
+								<div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+									{threatsQuery.data!.recent_blocked.slice(0, 10).map(r => (
+										<div key={r.id} className="rounded-lg border border-border bg-background px-3 py-2">
+											<div className="flex items-center justify-between gap-2">
+												<span className="truncate text-xs font-medium text-red-500">{r.attack_type ?? 'unknown'}</span>
+												<span className="shrink-0 text-xs text-muted-foreground">{r.latency_ms?.toFixed?.(0)}ms</span>
+											</div>
+											<div className="mt-1 text-xs text-muted-foreground">{dateLabel(r.timestamp)} · {r.provider}/{r.model}</div>
+										</div>
+									))}
+								</div>
+							) : <EmptyState label="No recent blocked attacks." />}
+						</div>
+					</div>
+				</SectionCard>
+
+				{/* ── Admin Audit Log ────────────────────────────────────── */}
+				<SectionCard title={`Admin audit log (${auditQuery.data?.total ?? 0} entries)`}>
+					{(auditQuery.data?.audit_log ?? []).length ? (
+						<div className="overflow-x-auto">
+							<table className="w-full min-w-[900px] text-left text-sm">
+								<thead>
+									<tr className="border-b border-border text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+										<th className="pb-3 pr-4">Time</th>
+										<th className="pb-3 pr-4">Actor</th>
+										<th className="pb-3 pr-4">Action</th>
+										<th className="pb-3 pr-4">Target</th>
+										<th className="pb-3 pr-4">Result</th>
+										<th className="pb-3">IP</th>
+									</tr>
+								</thead>
+								<tbody className="divide-y divide-border">
+									{auditQuery.data!.audit_log.map((entry, i) => (
+										<tr key={`${entry.timestamp}-${i}`} className="hover:bg-muted/40">
+											<td className="py-2.5 pr-4 text-xs text-muted-foreground whitespace-nowrap">{dateLabel(entry.timestamp)}</td>
+											<td className="py-2.5 pr-4 font-mono text-xs">{entry.actor}</td>
+											<td className="py-2.5 pr-4"><Badge>{entry.action}</Badge></td>
+											<td className="py-2.5 pr-4 text-xs">
+												<span className="text-muted-foreground">{entry.target_type}:</span>{' '}
+												<span className="font-medium">{entry.target_label || entry.target_id}</span>
+											</td>
+											<td className="py-2.5 pr-4"><Badge>{entry.result}</Badge></td>
+											<td className="py-2.5 font-mono text-xs text-muted-foreground">{entry.ip_address}</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					) : (
+						<EmptyState label="No admin actions recorded yet. Disable, reactivate, revoke, and delete actions appear here with full audit trail." />
+					)}
+				</SectionCard>
+
 				<SectionCard title="System health">
 					<div className="grid gap-4 sm:grid-cols-3">
 						<div className="rounded-xl border border-border bg-background p-4">
@@ -777,6 +950,50 @@ export function FounderPortalPage() {
 					</div>
 				</SectionCard>
 			</main>
+
+			{/* ── Delete Confirmation Dialog ─────────────────────────────── */}
+			{deleteTarget ? (
+				<div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+					<div className="w-full max-w-md rounded-2xl border border-red-500/30 bg-card p-6 shadow-2xl">
+						<div className="flex items-center gap-3 mb-4">
+							<div className="rounded-full bg-red-500/10 p-2">
+								<Trash2 className="h-5 w-5 text-red-500" />
+							</div>
+							<h2 className="text-lg font-bold text-foreground">Delete account permanently</h2>
+						</div>
+						<p className="text-sm text-muted-foreground mb-4">
+							This will <span className="font-semibold text-foreground">permanently delete</span> the account for{' '}
+							<span className="font-mono font-semibold text-red-500">{deleteTarget.email}</span>. All API keys will be revoked
+							and request logs will be anonymised. This cannot be undone.
+						</p>
+						<p className="text-sm text-muted-foreground mb-3">
+							Type <span className="font-mono font-semibold">DELETE</span> to confirm:
+						</p>
+						<input
+							type="text"
+							value={deleteConfirmText}
+							onChange={e => setDeleteConfirmText(e.target.value)}
+							placeholder="DELETE"
+							className="w-full rounded-xl border border-red-500/40 bg-background px-4 py-2.5 text-sm font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-red-500/40 mb-5"
+						/>
+						<div className="flex gap-3">
+							<button
+								onClick={() => { setDeleteTarget(null); setDeleteConfirmText(''); }}
+								className="flex-1 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold hover:bg-muted"
+							>
+								Cancel
+							</button>
+							<button
+								onClick={() => deleteUserMutation.mutate({ userId: deleteTarget.id, confirm: true })}
+								disabled={deleteConfirmText !== 'DELETE' || deleteUserMutation.isPending}
+								className="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed"
+							>
+								{deleteUserMutation.isPending ? 'Deleting…' : 'Delete permanently'}
+							</button>
+						</div>
+					</div>
+				</div>
+			) : null}
 
 			{selectedUserId ? (
 				<div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedUserId(null)}>
@@ -869,6 +1086,12 @@ export function FounderPortalPage() {
 													Reactivate account
 												</button>
 											)}
+											<button
+												onClick={() => setDeleteTarget({ id: userDetailQuery.data!.user!.id, email: userDetailQuery.data!.user!.email })}
+												className="rounded-xl border border-red-700/40 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-700/10 ml-auto"
+											>
+												Delete account…
+											</button>
 										</div>
 									</div>
 
