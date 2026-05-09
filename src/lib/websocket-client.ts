@@ -70,6 +70,7 @@ class WebSocketClient {
     private heartbeatTimer: number | null = null;
     private heartbeatInterval = 30000; // 30 seconds
     private isIntentionalDisconnect = false;
+    private lastDisconnectedSendLog = 0;
     private eventHandlers: Map<EventType, Set<EventHandler>> = new Map();
     private subscriptions: Set<EventType> = new Set();
 
@@ -166,8 +167,15 @@ class WebSocketClient {
     private send(data: any) {
         if (this.isConnected()) {
             this.ws!.send(JSON.stringify(data));
-        } else {
-            console.warn('[WebSocket] Cannot send - not connected');
+            return;
+        }
+
+        if (import.meta.env.DEV) {
+            const now = Date.now();
+            if (now - this.lastDisconnectedSendLog > 30000) {
+                console.debug('[WebSocket] Skipping send until connection is ready');
+                this.lastDisconnectedSendLog = now;
+            }
         }
     }
 

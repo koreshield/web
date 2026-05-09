@@ -174,7 +174,7 @@ class ApiClient {
 	}
 
 	async detectText(text: string) {
-		// Public detection endpoint for demo/playground
+		// Public detection endpoint for demo surfaces
 		// Returns real-time detection results from the ML detector
 		return this.fetch('/detect', {
 			method: 'POST',
@@ -630,6 +630,10 @@ class ApiClient {
 		}
 
 		// Founder Portal APIs
+		async getFounderAccess() {
+			return this.fetch('/v1/founder/access');
+		}
+
 		async getFounderOverview() {
 			return this.fetch('/v1/founder/overview');
 		}
