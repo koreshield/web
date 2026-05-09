@@ -655,21 +655,29 @@ class ApiClient {
 			return this.fetch(`/v1/founder/api-keys?limit=${limit}`);
 		}
 
-		async getFounderRequests(limit = 50) {
-			return this.fetch(`/v1/founder/requests?limit=${limit}`);
-		}
+			async getFounderRequests(limit = 50) {
+				return this.fetch(`/v1/founder/requests?limit=${limit}`);
+			}
 
-		async getFounderBilling(limit = 100) {
-			return this.fetch(`/v1/founder/billing?limit=${limit}`);
-		}
+			async getFounderThreats(limit = 25) {
+				return this.fetch(`/v1/founder/threats?limit=${limit}`);
+			}
 
-		async getFounderTeamMembers(limit = 100) {
-			return this.fetch(`/v1/founder/team-members?limit=${limit}`);
-		}
+			async getFounderBilling(limit = 100) {
+				return this.fetch(`/v1/founder/billing?limit=${limit}`);
+			}
 
-		async getFounderHealth() {
-			return this.fetch('/v1/founder/health');
-		}
+			async getFounderTeamMembers(limit = 100) {
+				return this.fetch(`/v1/founder/team-members?limit=${limit}`);
+			}
+
+			async getFounderAudit(limit = 100) {
+				return this.fetch(`/v1/founder/audit?limit=${limit}`);
+			}
+
+			async getFounderHealth() {
+				return this.fetch('/v1/founder/health');
+			}
 
 		async founderResendVerification(userId: string) {
 			return this.fetch(`/v1/founder/users/${userId}/resend-verification`, {
@@ -683,21 +691,44 @@ class ApiClient {
 			}, 0);
 		}
 
-		async founderReactivateUser(userId: string) {
-			return this.fetch(`/v1/founder/users/${userId}/reactivate`, {
-				method: 'POST',
-			}, 0);
-		}
+			async founderReactivateUser(userId: string) {
+				return this.fetch(`/v1/founder/users/${userId}/reactivate`, {
+					method: 'POST',
+				}, 0);
+			}
 
-		async founderRevokeApiKey(keyId: string) {
-			return this.fetch(`/v1/founder/api-keys/${keyId}/revoke`, {
-				method: 'POST',
+			async founderDeleteUser(userId: string, confirmEmail: string) {
+				return this.fetch(`/v1/founder/users/${userId}?confirm_email=${encodeURIComponent(confirmEmail)}`, {
+					method: 'DELETE',
+				}, 0);
+			}
+
+			async founderRevokeApiKey(keyId: string) {
+				return this.fetch(`/v1/founder/api-keys/${keyId}/revoke`, {
+					method: 'POST',
 			}, 0);
 		}
 
 		async founderSyncBilling(billingAccountId: string) {
 			return this.fetch(`/v1/founder/billing/${billingAccountId}/sync`, {
 				method: 'POST',
+			}, 0);
+		}
+
+		async getFounderThreats(days = 30, limit = 50) {
+			return this.fetch(`/v1/founder/threats?days=${days}&limit=${limit}`);
+		}
+
+		async getFounderAudit(limit = 100, action?: string, actor?: string) {
+			const params = new URLSearchParams({ limit: String(limit) });
+			if (action) params.set('action', action);
+			if (actor) params.set('actor', actor);
+			return this.fetch(`/v1/founder/audit?${params.toString()}`);
+		}
+
+		async founderDeleteUser(userId: string, confirm: boolean) {
+			return this.fetch(`/v1/founder/users/${userId}?confirm=${confirm}`, {
+				method: 'DELETE',
 			}, 0);
 		}
 
