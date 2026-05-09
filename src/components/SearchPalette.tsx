@@ -17,7 +17,6 @@ const staticPages: SearchItem[] = [
   { title: 'Home', path: '/', content: 'KoreShield LLM security platform', category: 'Pages' },
   { title: 'Pricing', path: '/pricing', content: 'Plans and pricing', category: 'Pages' },
   { title: 'Status', path: '/status', content: 'System status', category: 'Pages' },
-  { title: 'Playground', path: '/playground', content: 'Test KoreShield', category: 'Pages' },
   { title: 'Why KoreShield', path: '/why-koreshield', content: 'Benefits', category: 'Pages' },
 ];
 

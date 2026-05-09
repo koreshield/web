@@ -3,7 +3,6 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import Features from '../components/Features';
 import Hero from '../components/Hero';
 import { IntegrationTicker } from '../components/IntegrationTicker';
-import { InteractiveDemo } from '../components/InteractiveDemo';
 import { RAGShowcase } from '../components/RAGShowcase';
 import { StatsBanner } from '../components/StatsBanner';
 import { ThreatDashboard } from '../components/ThreatDashboard';
@@ -51,14 +50,6 @@ function LandingPage() {
             </section>
 
             <StatsBanner />
-
-            <section className="py-28 md:py-36 px-6 bg-muted/30 dark:bg-muted/20">
-                <div className="max-w-7xl mx-auto">
-                    <ErrorBoundary fallback={null}>
-                        <InteractiveDemo />
-                    </ErrorBoundary>
-                </div>
-            </section>
 
             <ErrorBoundary fallback={null}>
                 <RAGShowcase />
