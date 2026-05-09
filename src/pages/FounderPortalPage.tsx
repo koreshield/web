@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -26,14 +26,12 @@ import {
 	Legend,
 	Pie,
 	PieChart,
-	ResponsiveContainer,
 	Tooltip,
 	XAxis,
 	YAxis,
 } from 'recharts';
 import { SEOMeta } from '../components/SEOMeta';
 import { api } from '../lib/api-client';
-import { authService } from '../lib/auth';
 
 type Overview = {
 	total_users: number;
@@ -61,6 +59,13 @@ type FounderOverviewResponse = {
 	generated_at: string;
 };
 
+type FounderAccessResponse = {
+	allowed: boolean;
+	role: string;
+	email: string;
+	source: 'role' | 'allowlist' | 'none';
+};
+
 type FounderUser = {
 	id: string;
 	email: string;
@@ -71,6 +76,7 @@ type FounderUser = {
 	auth_provider: string;
 	email_verified: boolean;
 	created_at?: string | null;
+	first_login_at?: string | null;
 	last_login_at?: string | null;
 	request_count: number;
 	api_key_count: number;
@@ -158,7 +164,8 @@ type FounderUserDetail = {
 };
 
 const DONUT_COLORS = ['#dc2626', '#f59e0b', '#b45309', '#737373', '#0f766e', '#2563eb', '#7c3aed'];
-const FOUNDER_PORTAL_EMAILS = new Set(['isaacnsisong@gmail.com', 'ei@koreshield.com', 'tes@koreshield.com']);
+const STANDARD_REFRESH_INTERVAL = 60_000;
+const REQUEST_LOG_REFRESH_INTERVAL = 30_000;
 
 function numberFormat(value: number | undefined) {
 	return (value ?? 0).toLocaleString();
@@ -242,72 +249,103 @@ function EmptyState({ label }: { label: string }) {
 	return <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{label}</div>;
 }
 
+function ChartFrame({ children }: { children: (width: number) => ReactNode }) {
+	const containerRef = useRef<HTMLDivElement>(null);
+	const [width, setWidth] = useState(0);
+
+	useEffect(() => {
+		const container = containerRef.current;
+		if (!container) return;
+
+		const updateWidth = () => {
+			const nextWidth = Math.floor(container.getBoundingClientRect().width);
+			setWidth(nextWidth > 0 ? nextWidth : 0);
+		};
+
+		updateWidth();
+		const observer = new ResizeObserver(updateWidth);
+		observer.observe(container);
+		return () => observer.disconnect();
+	}, []);
+
+	return (
+		<div ref={containerRef} className="min-h-[320px] min-w-0">
+			{width > 0 ? children(width) : <EmptyState label="Preparing chart..." />}
+		</div>
+	);
+}
+
 function hasStatusCode(error: unknown, code: number) {
 	return typeof error === 'object' && error !== null && 'code' in error && (error as { code?: number }).code === code;
 }
 
 export function FounderPortalPage() {
 	const queryClient = useQueryClient();
-	const currentUser = authService.getCurrentUser();
-	const isFounder = Boolean(currentUser?.email && FOUNDER_PORTAL_EMAILS.has(currentUser.email.toLowerCase()));
 	const [search, setSearch] = useState('');
 	const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+	const accessQuery = useQuery({
+		queryKey: ['founder-access'],
+		queryFn: () => api.getFounderAccess() as Promise<FounderAccessResponse>,
+		staleTime: 5 * 60 * 1000,
+		retry: false,
+		refetchOnWindowFocus: false,
+	});
+	const isFounder = Boolean(accessQuery.data?.allowed);
+	const founderQueryOptions = {
+		enabled: isFounder,
+		retry: false,
+		refetchOnWindowFocus: false,
+	} as const;
 
 	const overviewQuery = useQuery({
 		queryKey: ['founder-overview'],
 		queryFn: () => api.getFounderOverview() as Promise<FounderOverviewResponse>,
-		enabled: isFounder,
-		refetchInterval: 30_000,
-		retry: false,
+		refetchInterval: STANDARD_REFRESH_INTERVAL,
+		...founderQueryOptions,
 	});
 	const usersQuery = useQuery({
 		queryKey: ['founder-users', search],
 		queryFn: () => api.getFounderUsers({ search, limit: 150 }) as Promise<{ users: FounderUser[]; total: number }>,
-		enabled: isFounder,
-		refetchInterval: 30_000,
-		retry: false,
+		refetchInterval: STANDARD_REFRESH_INTERVAL,
+		...founderQueryOptions,
 	});
 	const apiKeysQuery = useQuery({
 		queryKey: ['founder-api-keys'],
 		queryFn: () => api.getFounderApiKeys(200) as Promise<{ api_keys: FounderApiKey[]; total: number }>,
-		enabled: isFounder,
-		refetchInterval: 30_000,
-		retry: false,
+		refetchInterval: STANDARD_REFRESH_INTERVAL,
+		...founderQueryOptions,
 	});
 	const requestsQuery = useQuery({
 		queryKey: ['founder-requests'],
 		queryFn: () => api.getFounderRequests(50) as Promise<{ requests: FounderRequest[]; total: number }>,
-		enabled: isFounder,
-		refetchInterval: 10_000,
-		retry: false,
+		refetchInterval: REQUEST_LOG_REFRESH_INTERVAL,
+		...founderQueryOptions,
 	});
 	const billingQuery = useQuery({
 		queryKey: ['founder-billing'],
 		queryFn: () => api.getFounderBilling(100) as Promise<{ billing_accounts: FounderBillingAccount[]; total: number }>,
-		enabled: isFounder,
-		refetchInterval: 60_000,
-		retry: false,
+		refetchInterval: STANDARD_REFRESH_INTERVAL,
+		...founderQueryOptions,
 	});
 	const teamQuery = useQuery({
 		queryKey: ['founder-team-members'],
 		queryFn: () => api.getFounderTeamMembers(100) as Promise<{ team_members: FounderTeamMember[]; total: number }>,
-		enabled: isFounder,
-		refetchInterval: 60_000,
-		retry: false,
+		refetchInterval: STANDARD_REFRESH_INTERVAL,
+		...founderQueryOptions,
 	});
 	const healthQuery = useQuery({
 		queryKey: ['founder-health'],
 		queryFn: () => api.getFounderHealth() as Promise<{ database: string; environment: string; generated_at: string }>,
-		enabled: isFounder,
-		refetchInterval: 30_000,
-		retry: false,
+		refetchInterval: STANDARD_REFRESH_INTERVAL,
+		...founderQueryOptions,
 	});
 	const userDetailQuery = useQuery({
 		queryKey: ['founder-user-detail', selectedUserId],
 		queryFn: () => api.getFounderUser(selectedUserId!) as Promise<FounderUserDetail>,
 		enabled: isFounder && Boolean(selectedUserId),
-		refetchInterval: 30_000,
+		refetchInterval: STANDARD_REFRESH_INTERVAL,
 		retry: false,
+		refetchOnWindowFocus: false,
 	});
 
 	const refreshAll = () => {
@@ -374,13 +412,25 @@ export function FounderPortalPage() {
 		healthQuery.error,
 	].some(error => hasStatusCode(error, 404));
 
+	if (accessQuery.isLoading) {
+		return (
+			<div className="mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4 py-16 text-center">
+				<div>
+					<Loader2 className="mx-auto h-10 w-10 animate-spin text-primary" />
+					<h1 className="mt-4 text-2xl font-bold">Checking founder access</h1>
+					<p className="mx-auto mt-2 max-w-xl text-muted-foreground">Verifying your admin session before loading private operating data.</p>
+				</div>
+			</div>
+		);
+	}
+
 	if (!isFounder) {
 		return (
 			<div className="mx-auto max-w-5xl px-4 py-16 text-center">
 				<AlertTriangle className="mx-auto h-10 w-10 text-destructive" />
 				<h1 className="mt-4 text-2xl font-bold">Founder access required</h1>
 				<p className="mx-auto mt-2 max-w-xl text-muted-foreground">
-					This private operating view is only visible to the founder allowlist. Sign in as isaacnsisong@gmail.com, ei@koreshield.com, or tes@koreshield.com to continue.
+					This private operating view is controlled by backend founder roles and access configuration. Ask an owner to grant founder access if this account should see it.
 				</p>
 			</div>
 		);
@@ -450,37 +500,37 @@ export function FounderPortalPage() {
 					<StatCard title="Billing accounts" value={numberFormat(overview?.billing_accounts)} subtitle={`${numberFormat(overview?.paid_accounts)} paid accounts`} icon={CreditCard} />
 				</div>
 
-					<div className="grid gap-6 xl:grid-cols-2">
-						<SectionCard title="Daily request volume">
-							{chartData.length ? (
-								<div className="min-h-[320px] min-w-0">
-									<ResponsiveContainer width="100%" height={320} minWidth={0}>
-										<BarChart data={chartData}>
-											<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-											<XAxis dataKey="label" tick={{ fontSize: 12 }} />
+				<div className="grid gap-6 xl:grid-cols-2">
+					<SectionCard title="Daily request volume">
+						{chartData.length ? (
+							<ChartFrame>
+								{width => (
+									<BarChart width={width} height={320} data={chartData}>
+										<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+										<XAxis dataKey="label" tick={{ fontSize: 12 }} />
 										<YAxis tick={{ fontSize: 12 }} />
 										<Tooltip />
 										<Bar dataKey="requests" fill="#2563eb" radius={[8, 8, 0, 0]} />
 									</BarChart>
-								</ResponsiveContainer>
-							</div>
+								)}
+							</ChartFrame>
 						) : <EmptyState label="No request volume data yet." />}
-						</SectionCard>
-						<SectionCard title="Attack type breakdown">
-							{attackData.length ? (
-								<div className="min-h-[320px] min-w-0">
-									<ResponsiveContainer width="100%" height={320} minWidth={0}>
-										<PieChart>
-											<Pie data={attackData} dataKey="count" nameKey="type" innerRadius={70} outerRadius={120} paddingAngle={2}>
-												{attackData.map((_entry, index) => (
+					</SectionCard>
+					<SectionCard title="Attack type breakdown">
+						{attackData.length ? (
+							<ChartFrame>
+								{width => (
+									<PieChart width={width} height={320}>
+										<Pie data={attackData} dataKey="count" nameKey="type" innerRadius={70} outerRadius={120} paddingAngle={2}>
+											{attackData.map((_entry, index) => (
 												<Cell key={`attack-${index}`} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />
 											))}
 										</Pie>
 										<Tooltip />
 										<Legend />
 									</PieChart>
-								</ResponsiveContainer>
-							</div>
+								)}
+							</ChartFrame>
 						) : <EmptyState label="No attack breakdown data yet." />}
 					</SectionCard>
 				</div>
@@ -499,7 +549,7 @@ export function FounderPortalPage() {
 						<p className="text-xs text-muted-foreground">Live account records. Raw secrets are never shown.</p>
 					</div>
 					<div className="overflow-x-auto">
-						<table className="w-full min-w-[1100px] text-left text-sm">
+							<table className="w-full min-w-[1220px] text-left text-sm">
 							<thead className="border-b border-border text-xs uppercase tracking-[0.14em] text-muted-foreground">
 								<tr>
 									<th className="py-3 pr-4">Email</th>
@@ -510,6 +560,7 @@ export function FounderPortalPage() {
 									<th className="py-3 pr-4">Plan</th>
 									<th className="py-3 pr-4">Requests</th>
 									<th className="py-3 pr-4">Keys</th>
+									<th className="py-3 pr-4">First login</th>
 									<th className="py-3 pr-4">Last login</th>
 									<th className="py-3 pr-4">Actions</th>
 								</tr>
@@ -531,10 +582,11 @@ export function FounderPortalPage() {
 												{user.email_verified ? 'Verified' : 'Unverified'}
 											</span>
 										</td>
-										<td className="py-3 pr-4"><Badge>{user.plan_slug || 'free'}</Badge></td>
-										<td className="py-3 pr-4 font-mono">{numberFormat(user.request_count)}</td>
-										<td className="py-3 pr-4 font-mono">{numberFormat(user.api_key_count)}</td>
-										<td className="py-3 pr-4 text-muted-foreground">{dateLabel(user.last_login_at)}</td>
+											<td className="py-3 pr-4"><Badge>{user.plan_slug || 'free'}</Badge></td>
+											<td className="py-3 pr-4 font-mono">{numberFormat(user.request_count)}</td>
+											<td className="py-3 pr-4 font-mono">{numberFormat(user.api_key_count)}</td>
+											<td className="py-3 pr-4 text-muted-foreground">{dateLabel(user.first_login_at ?? user.created_at)}</td>
+											<td className="py-3 pr-4 text-muted-foreground">{dateLabel(user.last_login_at)}</td>
 										<td className="py-3 pr-4">
 											<div className="flex flex-wrap gap-2">
 													{!user.email_verified ? (
@@ -772,11 +824,19 @@ export function FounderPortalPage() {
 												<p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Email</p>
 												<p className="mt-1"><Badge>{userDetailQuery.data.user.email_verified ? 'verified' : 'unverified'}</Badge></p>
 											</div>
-											<div>
-												<p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Status</p>
-												<p className="mt-1"><Badge>{userDetailQuery.data.user.status}</Badge></p>
+												<div>
+													<p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Status</p>
+													<p className="mt-1"><Badge>{userDetailQuery.data.user.status}</Badge></p>
+												</div>
+												<div>
+													<p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">First login</p>
+													<p className="mt-1 font-semibold">{dateLabel(userDetailQuery.data.user.first_login_at ?? userDetailQuery.data.user.created_at)}</p>
+												</div>
+												<div>
+													<p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Last login</p>
+													<p className="mt-1 font-semibold">{dateLabel(userDetailQuery.data.user.last_login_at)}</p>
+												</div>
 											</div>
-										</div>
 										<div className="mt-5 flex flex-wrap gap-2">
 											{!userDetailQuery.data.user.email_verified ? (
 												<button
