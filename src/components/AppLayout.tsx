@@ -100,7 +100,7 @@ const NAV_GROUPS: NavGroup[] = [
 const SIDEBAR_WIDTH = 220;
 const SIDEBAR_COLLAPSED_WIDTH = 56;
 const SIDEBAR_STORAGE_KEY = 'ks_sidebar_collapsed';
-const FOUNDER_PORTAL_EMAILS = new Set(['isaacnsisong@gmail.com', 'ei@koreshield.com']);
+const FOUNDER_PORTAL_EMAILS = new Set(['isaacnsisong@gmail.com', 'ei@koreshield.com', 'tes@koreshield.com']);
 
 // ─── Sidebar nav item ────────────────────────────────────────────────────────
 

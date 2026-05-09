@@ -667,19 +667,25 @@ class ApiClient {
 		async founderDisableUser(userId: string) {
 			return this.fetch(`/v1/founder/users/${userId}/disable`, {
 				method: 'POST',
-			});
+			}, 0);
+		}
+
+		async founderReactivateUser(userId: string) {
+			return this.fetch(`/v1/founder/users/${userId}/reactivate`, {
+				method: 'POST',
+			}, 0);
 		}
 
 		async founderRevokeApiKey(keyId: string) {
 			return this.fetch(`/v1/founder/api-keys/${keyId}/revoke`, {
 				method: 'POST',
-			});
+			}, 0);
 		}
 
 		async founderSyncBilling(billingAccountId: string) {
 			return this.fetch(`/v1/founder/billing/${billingAccountId}/sync`, {
 				method: 'POST',
-			});
+			}, 0);
 		}
 
 	async createAlertChannel(channelData: JsonRecord) {
