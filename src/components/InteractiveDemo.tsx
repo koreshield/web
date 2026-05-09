@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Loader2, Send, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Loader2, ShieldAlert } from 'lucide-react';
 import { useState } from 'react';
 
 const PRESET_ATTACKS = [
@@ -9,45 +9,30 @@ const PRESET_ATTACKS = [
 ];
 
 export function InteractiveDemo() {
-    const [input, setInput] = useState('');
+    const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<'safe' | 'blocked' | null>(null);
+    const [result, setResult] = useState<'blocked' | null>(null);
     const [confidence, setConfidence] = useState(0);
     const [latency, setLatency] = useState(0);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!input) return;
+    // Predefined results for each curated example (all blocked)
+    const PROMPT_RESULTS: Record<string, { result: 'blocked'; confidence: number; }> = {
+        [PRESET_ATTACKS[0]]: { result: 'blocked', confidence: 0.99 },
+        [PRESET_ATTACKS[1]]: { result: 'blocked', confidence: 0.98 },
+        [PRESET_ATTACKS[2]]: { result: 'blocked', confidence: 0.96 },
+    };
 
+    const handleSelectExample = async (prompt: string) => {
+        setSelectedPrompt(prompt);
         setLoading(true);
         setResult(null);
 
-        // Simulate detection - for demo purposes on landing page
+        // Simulate latency
         await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
 
-        // Simple detection rules for demo
-        const lowerInput = input.toLowerCase();
-        const maliciousPatterns = [
-            'ignore previous',
-            'ignore instructions',
-            'credit card',
-            'password',
-            'delete',
-            'drop table',
-            'system prompt',
-            'jailbreak'
-        ];
-
-        const isBlocked = maliciousPatterns.some(pattern => lowerInput.includes(pattern));
-
-        if (isBlocked) {
-            setResult('blocked');
-            setConfidence(0.98);
-        } else {
-            setResult('safe');
-            setConfidence(0.94);
-        }
-
+        const detection = PROMPT_RESULTS[prompt];
+        setResult(detection.result);
+        setConfidence(detection.confidence);
         setLatency(Math.floor(Math.random() * 50) + 15);
         setLoading(false);
     };
@@ -58,54 +43,40 @@ export function InteractiveDemo() {
 
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold mb-2">Test the Firewall Live</h2>
-                <p className="text-muted-foreground">Paste any prompt and see how KoreShield classifies it. No signup required.</p>
+                <p className="text-muted-foreground">Click an attack example below to see KoreShield detect it in real-time.</p>
             </div>
 
-            <div className="space-y-4 mb-6">
+            <div className="space-y-3 mb-8">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Try these attack patterns:</p>
                 {PRESET_ATTACKS.map((attack, i) => (
                     <button
                         key={i}
-                        onClick={() => setInput(attack)}
-                        className="text-xs bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground px-3 py-2 rounded-full transition-colors border border-transparent hover:border-border cursor-pointer"
+                        onClick={() => handleSelectExample(attack)}
+                        disabled={loading}
+                        className="w-full text-left text-sm bg-gradient-to-r from-muted/50 to-muted/30 hover:from-muted hover:to-muted/50 text-muted-foreground hover:text-foreground px-4 py-3 rounded-lg transition-all border border-border hover:border-primary/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-mono"
                     >
+                        <span className="text-xs text-primary font-bold mr-2">Attack {i + 1}:</span>
                         {attack}
                     </button>
                 ))}
             </div>
 
-            <form onSubmit={handleSubmit} className="relative">
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Enter a prompt to scan..."
-                    className="w-full bg-muted/30 border border-border rounded-lg px-4 py-4 pr-12 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono text-sm"
-                />
-                <button
-                    type="submit"
-                    disabled={loading || !input}
-                    className="absolute right-2 top-2 bottom-2 bg-primary/10 hover:bg-primary/20 text-primary p-2 rounded-md transition-colors cursor-pointer disabled:opacity-50"
-                >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                </button>
-            </form>
-
             {result && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`mt-6 p-4 rounded-lg border flex items-start gap-4 ${result === 'blocked'
-                        ? 'bg-red-500/10 border-red-500/50 text-red-500'
-                        : 'bg-green-500/10 border-green-500/50 text-green-500'
-                        }`}
+                    className="mt-8 p-4 rounded-lg border bg-red-500/10 border-red-500/50 text-red-500 flex items-start gap-4"
                 >
-                    {result === 'blocked' ? <ShieldAlert className="w-6 h-6 mt-1" /> : <ShieldCheck className="w-6 h-6 mt-1" />}
-                    <div>
-                        <div className="font-bold text-lg">{result === 'blocked' ? 'Threat Blocked' : 'Request Allowed'}</div>
-                        <div className="opacity-80 text-sm mt-1">
-                            Confidence Score: <span className="font-mono font-bold">{(confidence * 100).toFixed(1)}%</span>
+                    <ShieldAlert className="w-6 h-6 mt-1 flex-shrink-0" />
+                    <div className="flex-1">
+                        <div className="font-bold text-lg">🛑 Threat Blocked</div>
+                        <div className="opacity-80 text-sm mt-2 mb-3">
+                            Confidence Score: <span className="font-mono font-bold text-red-400">{(confidence * 100).toFixed(1)}%</span>
                             <br />
-                            Latency: <span className="font-mono">{latency}ms</span>
+                            Latency: <span className="font-mono text-red-400">{latency}ms</span>
+                        </div>
+                        <div className="text-xs bg-red-500/20 rounded px-2 py-1 border border-red-500/30 font-mono">
+                            Prompt: <span className="block mt-1 text-red-300">{selectedPrompt}</span>
                         </div>
                     </div>
                 </motion.div>
