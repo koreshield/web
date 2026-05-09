@@ -616,9 +616,71 @@ class ApiClient {
 		});
 	}
 
-	async getAlertChannels() {
-		return this.fetch('/v1/management/alerts/channels');
-	}
+		async getAlertChannels() {
+			return this.fetch('/v1/management/alerts/channels');
+		}
+
+		// Founder Portal APIs
+		async getFounderOverview() {
+			return this.fetch('/v1/founder/overview');
+		}
+
+		async getFounderUsers(params?: { search?: string; role?: string; status?: string; limit?: number }) {
+			const queryParams = new URLSearchParams(
+				Object.entries(params ?? {}).flatMap(([key, value]) =>
+					value !== undefined && value !== null && String(value) ? [[key, String(value)]] : [],
+				),
+			).toString();
+			return this.fetch(`/v1/founder/users${queryParams ? '?' + queryParams : ''}`);
+		}
+
+		async getFounderUser(userId: string) {
+			return this.fetch(`/v1/founder/users/${userId}`);
+		}
+
+		async getFounderApiKeys(limit = 200) {
+			return this.fetch(`/v1/founder/api-keys?limit=${limit}`);
+		}
+
+		async getFounderRequests(limit = 50) {
+			return this.fetch(`/v1/founder/requests?limit=${limit}`);
+		}
+
+		async getFounderBilling(limit = 100) {
+			return this.fetch(`/v1/founder/billing?limit=${limit}`);
+		}
+
+		async getFounderTeamMembers(limit = 100) {
+			return this.fetch(`/v1/founder/team-members?limit=${limit}`);
+		}
+
+		async getFounderHealth() {
+			return this.fetch('/v1/founder/health');
+		}
+
+		async founderResendVerification(userId: string) {
+			return this.fetch(`/v1/founder/users/${userId}/resend-verification`, {
+				method: 'POST',
+			});
+		}
+
+		async founderDisableUser(userId: string) {
+			return this.fetch(`/v1/founder/users/${userId}/disable`, {
+				method: 'POST',
+			});
+		}
+
+		async founderRevokeApiKey(keyId: string) {
+			return this.fetch(`/v1/founder/api-keys/${keyId}/revoke`, {
+				method: 'POST',
+			});
+		}
+
+		async founderSyncBilling(billingAccountId: string) {
+			return this.fetch(`/v1/founder/billing/${billingAccountId}/sync`, {
+				method: 'POST',
+			});
+		}
 
 	async createAlertChannel(channelData: JsonRecord) {
 		return this.fetch('/v1/management/alerts/channels', {
