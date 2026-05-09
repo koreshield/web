@@ -54,6 +54,7 @@ const ApiKeyManagementPage = lazy(() => import('./pages/ApiKeyManagementPage'));
 const AuditLogsPage = lazy(() => import('./pages/AuditLogsPage'));
 const AdvancedAnalyticsPage = lazy(() => import('./pages/AdvancedAnalyticsPage').then(m => ({ default: m.AdvancedAnalyticsPage })));
 const ComplianceReportsPage = lazy(() => import('./pages/ComplianceReportsPage').then(m => ({ default: m.ComplianceReportsPage })));
+const FounderPortalPage = lazy(() => import('./pages/FounderPortalPage').then(m => ({ default: m.FounderPortalPage })));
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const BillingPage = lazy(() => import('./pages/BillingPage'));
@@ -772,8 +773,8 @@ function AppContent() {
 							</Suspense>
 						}
 					/>
-					<Route
-						path="/advanced-analytics"
+						<Route
+							path="/advanced-analytics"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
@@ -782,10 +783,22 @@ function AppContent() {
 									</ProtectedRoute>
 								</RouteErrorBoundary>
 							</Suspense>
-						}
-					/>
-					<Route
-						path="/compliance-reports"
+							}
+						/>
+						<Route
+							path="/founder"
+							element={
+								<Suspense fallback={<SuspenseFallback />}>
+									<RouteErrorBoundary>
+										<ProtectedRoute requiredRole="admin">
+											<FounderPortalPage />
+										</ProtectedRoute>
+									</RouteErrorBoundary>
+								</Suspense>
+							}
+						/>
+						<Route
+							path="/compliance-reports"
 						element={
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>

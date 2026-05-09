@@ -1,0 +1,840 @@
+import { useMemo, useState, type ReactNode } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { LucideIcon } from 'lucide-react';
+import {
+	Activity,
+	AlertTriangle,
+	BadgeCheck,
+	BarChart3,
+	CheckCircle2,
+	CreditCard,
+	Database,
+	KeyRound,
+	Loader2,
+	RefreshCw,
+	Search,
+	ShieldAlert,
+	Users,
+	XCircle,
+	X,
+} from 'lucide-react';
+import {
+	Bar,
+	BarChart,
+	CartesianGrid,
+	Cell,
+	Legend,
+	Pie,
+	PieChart,
+	ResponsiveContainer,
+	Tooltip,
+	XAxis,
+	YAxis,
+} from 'recharts';
+import { SEOMeta } from '../components/SEOMeta';
+import { api } from '../lib/api-client';
+import { authService } from '../lib/auth';
+
+type Overview = {
+	total_users: number;
+	new_users_today: number;
+	new_users_7d: number;
+	active_users: number;
+	verified_users: number;
+	unverified_users: number;
+	billing_accounts: number;
+	paid_accounts: number;
+	total_requests: number;
+	requests_today: number;
+	attacks_blocked: number;
+	attacks_detected: number;
+	api_keys: number;
+	revoked_api_keys: number;
+	block_rate: number;
+};
+
+type FounderOverviewResponse = {
+	overview: Overview;
+	daily_request_volume: Array<{ date: string; requests: number }>;
+	attack_type_breakdown: Array<{ type: string; count: number }>;
+	plan_distribution: Array<{ plan: string; count: number }>;
+	generated_at: string;
+};
+
+type FounderUser = {
+	id: string;
+	email: string;
+	name?: string | null;
+	company?: string | null;
+	role: string;
+	status: string;
+	auth_provider: string;
+	email_verified: boolean;
+	created_at?: string | null;
+	last_login_at?: string | null;
+	request_count: number;
+	api_key_count: number;
+	plan_slug: string;
+	plan_name?: string | null;
+	subscription_status?: string | null;
+	billing_status: string;
+};
+
+type FounderApiKey = {
+	id: string;
+	key_prefix: string;
+	name: string;
+	environment: string;
+	owner_name?: string | null;
+	owner_email: string;
+	status: string;
+	is_revoked: boolean;
+	created_at?: string | null;
+	last_used_at?: string | null;
+	request_count: number;
+	blocked_count: number;
+	rate_limit_rpm?: number | null;
+	monthly_ceiling?: number | null;
+};
+
+type FounderRequest = {
+	id: string;
+	request_id: string;
+	timestamp?: string | null;
+	endpoint: string;
+	method: string;
+	status_code: number;
+	latency_ms: number;
+	provider: string;
+	model: string;
+	user_email?: string | null;
+	api_key_prefix?: string | null;
+	api_key_name?: string | null;
+	attack_type: string;
+	confidence?: number | string | null;
+	blocked: boolean;
+	attack_detected: boolean;
+	tokens_total: number;
+	cost: number;
+};
+
+type FounderBillingAccount = {
+	id: string;
+	owner_email: string;
+	owner_name?: string | null;
+	status: string;
+	plan_slug: string;
+	plan_name?: string | null;
+	subscription_status?: string | null;
+	currency?: string | null;
+	cancel_at_period_end: boolean;
+	current_period_end?: string | null;
+	updated_at?: string | null;
+};
+
+type FounderTeamMember = {
+	id: string;
+	email: string;
+	name?: string | null;
+	team: string;
+	role: string;
+	status: string;
+	joined_at?: string | null;
+};
+
+type FounderUserDetail = {
+	user: FounderUser | null;
+	billing_account?: {
+		id: string;
+		status: string;
+		plan_slug: string;
+		plan_name?: string | null;
+		subscription_status?: string | null;
+		current_period_end?: string | null;
+		updated_at?: string | null;
+	} | null;
+	api_keys: Array<Pick<FounderApiKey, 'id' | 'key_prefix' | 'name' | 'environment' | 'status' | 'created_at' | 'last_used_at'>>;
+	requests: Array<Pick<FounderRequest, 'id' | 'request_id' | 'timestamp' | 'endpoint' | 'status_code' | 'latency_ms' | 'api_key_prefix' | 'attack_type' | 'blocked' | 'attack_detected'>>;
+};
+
+const DONUT_COLORS = ['#dc2626', '#f59e0b', '#b45309', '#737373', '#0f766e', '#2563eb', '#7c3aed'];
+const FOUNDER_PORTAL_EMAILS = new Set(['isaacnsisong@gmail.com', 'ei@koreshield.com']);
+
+function numberFormat(value: number | undefined) {
+	return (value ?? 0).toLocaleString();
+}
+
+function dateLabel(value?: string | null) {
+	if (!value) return 'Never';
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) return value;
+	return date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function shortDate(value: string) {
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) return value;
+	return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function badgeClass(kind: string) {
+	const value = kind.toLowerCase();
+	if (['active', 'allowed', 'owner', 'admin', 'production', 'verified', 'growth', 'paid'].includes(value)) {
+		return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300';
+	}
+	if (['blocked', 'revoked', 'inactive', 'error', 'unverified'].includes(value)) {
+		return 'bg-red-500/10 text-red-700 dark:text-red-300';
+	}
+	if (['ci', 'google', 'github', 'apple', 'internal'].includes(value)) {
+		return 'bg-blue-500/10 text-blue-700 dark:text-blue-300';
+	}
+	if (['dev', 'local', 'free', 'email', 'user', 'member'].includes(value)) {
+		return 'bg-muted text-muted-foreground';
+	}
+	return 'bg-amber-500/10 text-amber-700 dark:text-amber-300';
+}
+
+function Badge({ children }: { children: string }) {
+	return (
+		<span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold ${badgeClass(children)}`}>
+			{children}
+		</span>
+	);
+}
+
+function StatCard({
+	title,
+	value,
+	subtitle,
+	icon: Icon,
+}: {
+	title: string;
+	value: string | number;
+	subtitle: string;
+	icon: LucideIcon;
+}) {
+	return (
+		<div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+			<div className="flex items-start justify-between gap-4">
+				<div>
+					<p className="text-sm font-medium text-muted-foreground">{title}</p>
+					<div className="mt-3 text-4xl font-bold tracking-tight text-foreground">{value}</div>
+					<p className="mt-2 text-sm leading-5 text-muted-foreground">{subtitle}</p>
+				</div>
+				<div className="rounded-xl bg-primary/10 p-2 text-primary">
+					<Icon className="h-5 w-5" />
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function SectionCard({ title, children }: { title: string; children: ReactNode }) {
+	return (
+		<section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+			<h2 className="text-lg font-bold text-foreground">{title}</h2>
+			<div className="mt-4">{children}</div>
+		</section>
+	);
+}
+
+function EmptyState({ label }: { label: string }) {
+	return <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{label}</div>;
+}
+
+function hasStatusCode(error: unknown, code: number) {
+	return typeof error === 'object' && error !== null && 'code' in error && (error as { code?: number }).code === code;
+}
+
+export function FounderPortalPage() {
+	const queryClient = useQueryClient();
+	const currentUser = authService.getCurrentUser();
+	const isFounder = Boolean(currentUser?.email && FOUNDER_PORTAL_EMAILS.has(currentUser.email.toLowerCase()));
+	const [search, setSearch] = useState('');
+	const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+	const overviewQuery = useQuery({
+		queryKey: ['founder-overview'],
+		queryFn: () => api.getFounderOverview() as Promise<FounderOverviewResponse>,
+		enabled: isFounder,
+		refetchInterval: 30_000,
+		retry: false,
+	});
+	const usersQuery = useQuery({
+		queryKey: ['founder-users', search],
+		queryFn: () => api.getFounderUsers({ search, limit: 150 }) as Promise<{ users: FounderUser[]; total: number }>,
+		enabled: isFounder,
+		refetchInterval: 30_000,
+		retry: false,
+	});
+	const apiKeysQuery = useQuery({
+		queryKey: ['founder-api-keys'],
+		queryFn: () => api.getFounderApiKeys(200) as Promise<{ api_keys: FounderApiKey[]; total: number }>,
+		enabled: isFounder,
+		refetchInterval: 30_000,
+		retry: false,
+	});
+	const requestsQuery = useQuery({
+		queryKey: ['founder-requests'],
+		queryFn: () => api.getFounderRequests(50) as Promise<{ requests: FounderRequest[]; total: number }>,
+		enabled: isFounder,
+		refetchInterval: 10_000,
+		retry: false,
+	});
+	const billingQuery = useQuery({
+		queryKey: ['founder-billing'],
+		queryFn: () => api.getFounderBilling(100) as Promise<{ billing_accounts: FounderBillingAccount[]; total: number }>,
+		enabled: isFounder,
+		refetchInterval: 60_000,
+		retry: false,
+	});
+	const teamQuery = useQuery({
+		queryKey: ['founder-team-members'],
+		queryFn: () => api.getFounderTeamMembers(100) as Promise<{ team_members: FounderTeamMember[]; total: number }>,
+		enabled: isFounder,
+		refetchInterval: 60_000,
+		retry: false,
+	});
+	const healthQuery = useQuery({
+		queryKey: ['founder-health'],
+		queryFn: () => api.getFounderHealth() as Promise<{ database: string; environment: string; generated_at: string }>,
+		enabled: isFounder,
+		refetchInterval: 30_000,
+		retry: false,
+	});
+	const userDetailQuery = useQuery({
+		queryKey: ['founder-user-detail', selectedUserId],
+		queryFn: () => api.getFounderUser(selectedUserId!) as Promise<FounderUserDetail>,
+		enabled: isFounder && Boolean(selectedUserId),
+		refetchInterval: 30_000,
+		retry: false,
+	});
+
+	const refreshAll = () => {
+		void queryClient.invalidateQueries({ queryKey: ['founder-overview'] });
+		void queryClient.invalidateQueries({ queryKey: ['founder-users'] });
+		void queryClient.invalidateQueries({ queryKey: ['founder-api-keys'] });
+		void queryClient.invalidateQueries({ queryKey: ['founder-requests'] });
+		void queryClient.invalidateQueries({ queryKey: ['founder-billing'] });
+		void queryClient.invalidateQueries({ queryKey: ['founder-team-members'] });
+		void queryClient.invalidateQueries({ queryKey: ['founder-health'] });
+	};
+
+	const revokeKeyMutation = useMutation({
+		mutationFn: (keyId: string) => api.founderRevokeApiKey(keyId),
+		onSuccess: refreshAll,
+	});
+	const resendVerificationMutation = useMutation({
+		mutationFn: (userId: string) => api.founderResendVerification(userId),
+		onSuccess: refreshAll,
+	});
+	const disableUserMutation = useMutation({
+		mutationFn: (userId: string) => api.founderDisableUser(userId),
+		onSuccess: () => {
+			refreshAll();
+			void queryClient.invalidateQueries({ queryKey: ['founder-user-detail', selectedUserId] });
+		},
+	});
+	const syncBillingMutation = useMutation({
+		mutationFn: (billingId: string) => api.founderSyncBilling(billingId),
+		onSuccess: refreshAll,
+	});
+
+	const overview = overviewQuery.data?.overview;
+	const users = usersQuery.data?.users ?? [];
+	const apiKeys = apiKeysQuery.data?.api_keys ?? [];
+	const requests = requestsQuery.data?.requests ?? [];
+	const billingAccounts = billingQuery.data?.billing_accounts ?? [];
+	const teamMembers = teamQuery.data?.team_members ?? [];
+
+	const chartData = useMemo(
+		() => (overviewQuery.data?.daily_request_volume ?? []).map(item => ({
+			...item,
+			label: shortDate(item.date),
+		})),
+		[overviewQuery.data],
+	);
+	const attackData = overviewQuery.data?.attack_type_breakdown ?? [];
+	const isLoading = overviewQuery.isLoading || usersQuery.isLoading || apiKeysQuery.isLoading || requestsQuery.isLoading;
+	const loadError = overviewQuery.error || usersQuery.error || apiKeysQuery.error || requestsQuery.error;
+	const founderApiNotDeployed = [
+		overviewQuery.error,
+		usersQuery.error,
+		apiKeysQuery.error,
+		requestsQuery.error,
+		billingQuery.error,
+		teamQuery.error,
+		healthQuery.error,
+	].some(error => hasStatusCode(error, 404));
+
+	if (!isFounder) {
+		return (
+			<div className="mx-auto max-w-5xl px-4 py-16 text-center">
+				<AlertTriangle className="mx-auto h-10 w-10 text-destructive" />
+				<h1 className="mt-4 text-2xl font-bold">Founder access required</h1>
+				<p className="mx-auto mt-2 max-w-xl text-muted-foreground">
+					This private operating view is only visible to the founder allowlist. Sign in as isaacnsisong@gmail.com or ei@koreshield.com to continue.
+				</p>
+			</div>
+		);
+	}
+
+	if (loadError) {
+		return (
+			<div className="mx-auto max-w-5xl px-4 py-16 text-center">
+				<AlertTriangle className="mx-auto h-10 w-10 text-destructive" />
+				<h1 className="mt-4 text-2xl font-bold">Founder portal could not load</h1>
+				<p className="mx-auto mt-2 max-w-2xl text-muted-foreground">
+					{founderApiNotDeployed
+						? 'The dashboard is loaded, but the live API does not have the founder endpoints deployed yet. Deploy the backend that registers /v1/founder/*, then refresh this page.'
+						: 'You may need founder access, admin MFA, or a reachable backend database.'}
+				</p>
+			</div>
+		);
+	}
+
+	return (
+		<div className="min-h-screen bg-background">
+			<SEOMeta title="Founder Portal | KoreShield" description="Private KoreShield founder operating dashboard." />
+
+			<header className="border-b border-border bg-card/80 backdrop-blur">
+				<div className="mx-auto flex max-w-[1500px] flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8 xl:flex-row xl:items-center xl:justify-between">
+					<div>
+						<div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+							<Database className="h-3.5 w-3.5" />
+							Live Founder View
+						</div>
+						<h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground">Founder Portal</h1>
+						<p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+							Users, requests, API keys, billing, threats, and platform health from live KoreShield data.
+						</p>
+					</div>
+					<div className="flex flex-wrap items-center gap-3">
+						<div className="rounded-xl border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
+							<span className="font-semibold text-foreground">DB:</span> {healthQuery.data?.database ?? 'checking'}
+						</div>
+						<div className="rounded-xl border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
+							<span className="font-semibold text-foreground">Env:</span> {healthQuery.data?.environment ?? 'unknown'}
+						</div>
+						<button
+							onClick={refreshAll}
+							className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+						>
+							<RefreshCw className="h-4 w-4" />
+							Refresh data
+						</button>
+					</div>
+				</div>
+			</header>
+
+			<main className="mx-auto max-w-[1500px] space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+				{isLoading ? (
+					<div className="flex items-center justify-center rounded-2xl border border-border bg-card p-12">
+						<Loader2 className="h-8 w-8 animate-spin text-primary" />
+					</div>
+				) : null}
+
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+					<StatCard title="Total users" value={numberFormat(overview?.total_users)} subtitle={`${numberFormat(overview?.new_users_7d)} new in 7 days`} icon={Users} />
+					<StatCard title="Total requests" value={numberFormat(overview?.total_requests)} subtitle={`${numberFormat(overview?.requests_today)} today`} icon={Activity} />
+					<StatCard title="Attacks blocked" value={numberFormat(overview?.attacks_blocked)} subtitle={`${numberFormat(overview?.attacks_detected)} detected`} icon={ShieldAlert} />
+					<StatCard title="API keys" value={numberFormat(overview?.api_keys)} subtitle={`${numberFormat(overview?.revoked_api_keys)} revoked`} icon={KeyRound} />
+					<StatCard title="Block rate" value={`${overview?.block_rate ?? 0}%`} subtitle="of scanned requests" icon={BarChart3} />
+					<StatCard title="Billing accounts" value={numberFormat(overview?.billing_accounts)} subtitle={`${numberFormat(overview?.paid_accounts)} paid accounts`} icon={CreditCard} />
+				</div>
+
+				<div className="grid gap-6 xl:grid-cols-2">
+					<SectionCard title="Daily request volume">
+						{chartData.length ? (
+							<div className="h-[320px]">
+								<ResponsiveContainer width="100%" height="100%">
+									<BarChart data={chartData}>
+										<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+										<XAxis dataKey="label" tick={{ fontSize: 12 }} />
+										<YAxis tick={{ fontSize: 12 }} />
+										<Tooltip />
+										<Bar dataKey="requests" fill="#2563eb" radius={[8, 8, 0, 0]} />
+									</BarChart>
+								</ResponsiveContainer>
+							</div>
+						) : <EmptyState label="No request volume data yet." />}
+					</SectionCard>
+					<SectionCard title="Attack type breakdown">
+						{attackData.length ? (
+							<div className="h-[320px]">
+								<ResponsiveContainer width="100%" height="100%">
+									<PieChart>
+										<Pie data={attackData} dataKey="count" nameKey="type" innerRadius={70} outerRadius={120} paddingAngle={2}>
+											{attackData.map((_entry, index) => (
+												<Cell key={`attack-${index}`} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />
+											))}
+										</Pie>
+										<Tooltip />
+										<Legend />
+									</PieChart>
+								</ResponsiveContainer>
+							</div>
+						) : <EmptyState label="No attack breakdown data yet." />}
+					</SectionCard>
+				</div>
+
+				<SectionCard title={`Users (${usersQuery.data?.total ?? users.length})`}>
+					<div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<div className="relative w-full sm:max-w-md">
+							<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+							<input
+								value={search}
+								onChange={(event) => setSearch(event.target.value)}
+								placeholder="Search users by email or name"
+								className="w-full rounded-xl border border-border bg-background py-2 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+							/>
+						</div>
+						<p className="text-xs text-muted-foreground">Live account records. Raw secrets are never shown.</p>
+					</div>
+					<div className="overflow-x-auto">
+						<table className="w-full min-w-[1100px] text-left text-sm">
+							<thead className="border-b border-border text-xs uppercase tracking-[0.14em] text-muted-foreground">
+								<tr>
+									<th className="py-3 pr-4">Email</th>
+									<th className="py-3 pr-4">Name</th>
+									<th className="py-3 pr-4">Role</th>
+									<th className="py-3 pr-4">Auth</th>
+									<th className="py-3 pr-4">Verified</th>
+									<th className="py-3 pr-4">Plan</th>
+									<th className="py-3 pr-4">Requests</th>
+									<th className="py-3 pr-4">Keys</th>
+									<th className="py-3 pr-4">Last login</th>
+									<th className="py-3 pr-4">Actions</th>
+								</tr>
+							</thead>
+							<tbody className="divide-y divide-border">
+								{users.map(user => (
+									<tr
+										key={user.id}
+										className="cursor-pointer align-middle transition hover:bg-muted/40"
+										onClick={() => setSelectedUserId(user.id)}
+									>
+										<td className="py-3 pr-4 font-medium text-foreground">{user.email}</td>
+										<td className="py-3 pr-4">{user.name || '-'}</td>
+										<td className="py-3 pr-4"><Badge>{user.role}</Badge></td>
+										<td className="py-3 pr-4"><Badge>{user.auth_provider}</Badge></td>
+										<td className="py-3 pr-4">
+											<span className="inline-flex items-center gap-1">
+												{user.email_verified ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <XCircle className="h-4 w-4 text-red-500" />}
+												{user.email_verified ? 'Verified' : 'Unverified'}
+											</span>
+										</td>
+										<td className="py-3 pr-4"><Badge>{user.plan_slug || 'free'}</Badge></td>
+										<td className="py-3 pr-4 font-mono">{numberFormat(user.request_count)}</td>
+										<td className="py-3 pr-4 font-mono">{numberFormat(user.api_key_count)}</td>
+										<td className="py-3 pr-4 text-muted-foreground">{dateLabel(user.last_login_at)}</td>
+										<td className="py-3 pr-4">
+											<div className="flex flex-wrap gap-2">
+												{!user.email_verified ? (
+													<button
+														onClick={(event) => {
+															event.stopPropagation();
+															resendVerificationMutation.mutate(user.id);
+														}}
+														className="rounded-lg border border-border px-2 py-1 text-xs font-semibold hover:bg-muted"
+													>
+														Resend
+													</button>
+												) : null}
+												{user.status === 'active' ? (
+													<button
+														onClick={(event) => {
+															event.stopPropagation();
+															if (window.confirm(`Disable ${user.email}?`)) disableUserMutation.mutate(user.id);
+														}}
+														className="rounded-lg border border-red-500/30 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-500/10"
+													>
+														Disable
+													</button>
+												) : null}
+											</div>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+					{!users.length ? <EmptyState label="No users found." /> : null}
+				</SectionCard>
+
+				<SectionCard title={`API Keys (${apiKeysQuery.data?.total ?? apiKeys.length})`}>
+					<div className="overflow-x-auto">
+						<table className="w-full min-w-[1000px] text-left text-sm">
+							<thead className="border-b border-border text-xs uppercase tracking-[0.14em] text-muted-foreground">
+								<tr>
+									<th className="py-3 pr-4">Key prefix</th>
+									<th className="py-3 pr-4">Label</th>
+									<th className="py-3 pr-4">Env</th>
+									<th className="py-3 pr-4">Owner</th>
+									<th className="py-3 pr-4">Status</th>
+									<th className="py-3 pr-4">Requests</th>
+									<th className="py-3 pr-4">Blocked</th>
+									<th className="py-3 pr-4">Last used</th>
+									<th className="py-3 pr-4">Actions</th>
+								</tr>
+							</thead>
+							<tbody className="divide-y divide-border">
+								{apiKeys.map(key => (
+									<tr key={key.id}>
+										<td className="py-3 pr-4 font-mono font-semibold">{key.key_prefix}</td>
+										<td className="py-3 pr-4">{key.name}</td>
+										<td className="py-3 pr-4"><Badge>{key.environment}</Badge></td>
+										<td className="py-3 pr-4">
+											<div className="font-medium">{key.owner_name || '-'}</div>
+											<div className="text-xs text-muted-foreground">{key.owner_email}</div>
+										</td>
+										<td className="py-3 pr-4"><Badge>{key.status}</Badge></td>
+										<td className="py-3 pr-4 font-mono">{numberFormat(key.request_count)}</td>
+										<td className="py-3 pr-4 font-mono">{numberFormat(key.blocked_count)}</td>
+										<td className="py-3 pr-4 text-muted-foreground">{dateLabel(key.last_used_at)}</td>
+										<td className="py-3 pr-4">
+											{key.status !== 'revoked' ? (
+												<button
+													onClick={() => {
+														if (window.confirm(`Revoke ${key.key_prefix}?`)) revokeKeyMutation.mutate(key.id);
+													}}
+													className="rounded-lg border border-red-500/30 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-500/10"
+												>
+													Revoke
+												</button>
+											) : <span className="text-xs text-muted-foreground">No action</span>}
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+					{!apiKeys.length ? <EmptyState label="No API keys found." /> : null}
+				</SectionCard>
+
+				<SectionCard title={`Recent request log (${requests.length})`}>
+					<div className="overflow-x-auto">
+						<table className="w-full min-w-[1100px] text-left text-sm">
+							<thead className="border-b border-border text-xs uppercase tracking-[0.14em] text-muted-foreground">
+								<tr>
+									<th className="py-3 pr-4">Time</th>
+									<th className="py-3 pr-4">Endpoint</th>
+									<th className="py-3 pr-4">User</th>
+									<th className="py-3 pr-4">API key</th>
+									<th className="py-3 pr-4">Attack type</th>
+									<th className="py-3 pr-4">Blocked</th>
+									<th className="py-3 pr-4">Latency</th>
+									<th className="py-3 pr-4">Provider</th>
+								</tr>
+							</thead>
+							<tbody className="divide-y divide-border">
+								{requests.map(request => (
+									<tr key={request.id}>
+										<td className="py-3 pr-4 text-muted-foreground">{dateLabel(request.timestamp)}</td>
+										<td className="py-3 pr-4 font-mono">{request.endpoint}</td>
+										<td className="py-3 pr-4">{request.user_email || '-'}</td>
+										<td className="py-3 pr-4 font-mono">{request.api_key_prefix || '-'}</td>
+										<td className="py-3 pr-4"><Badge>{request.attack_type}</Badge></td>
+										<td className="py-3 pr-4"><Badge>{request.blocked ? 'blocked' : 'allowed'}</Badge></td>
+										<td className="py-3 pr-4 font-mono">{request.latency_ms?.toFixed?.(1) ?? request.latency_ms}ms</td>
+										<td className="py-3 pr-4">{request.provider} / {request.model}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+					{!requests.length ? <EmptyState label="No request logs yet." /> : null}
+				</SectionCard>
+
+				<div className="grid gap-6 xl:grid-cols-2">
+					<SectionCard title={`Billing accounts (${billingQuery.data?.total ?? billingAccounts.length})`}>
+						<div className="space-y-3">
+							{billingAccounts.slice(0, 12).map(account => (
+								<div key={account.id} className="flex flex-col gap-3 rounded-xl border border-border bg-background p-4 sm:flex-row sm:items-center sm:justify-between">
+									<div>
+										<div className="font-semibold">{account.owner_email}</div>
+										<div className="mt-1 flex flex-wrap gap-2">
+											<Badge>{account.plan_slug || 'free'}</Badge>
+											<Badge>{account.status || 'inactive'}</Badge>
+											{account.subscription_status ? <Badge>{account.subscription_status}</Badge> : null}
+										</div>
+									</div>
+									<button
+										onClick={() => syncBillingMutation.mutate(account.id)}
+										className="rounded-lg border border-border px-3 py-2 text-xs font-semibold hover:bg-muted"
+									>
+										Sync billing
+									</button>
+								</div>
+							))}
+						</div>
+						{!billingAccounts.length ? <EmptyState label="No billing accounts found." /> : null}
+					</SectionCard>
+
+					<SectionCard title={`Team members (${teamQuery.data?.total ?? teamMembers.length})`}>
+						<div className="space-y-3">
+							{teamMembers.slice(0, 12).map(member => (
+								<div key={member.id} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background p-4">
+									<div>
+										<div className="font-semibold">{member.email}</div>
+										<div className="text-sm text-muted-foreground">{member.team}</div>
+									</div>
+									<div className="flex gap-2">
+										<Badge>{member.role}</Badge>
+										<Badge>{member.status}</Badge>
+									</div>
+								</div>
+							))}
+						</div>
+						{!teamMembers.length ? <EmptyState label="No team members found." /> : null}
+					</SectionCard>
+				</div>
+
+				<SectionCard title="System health">
+					<div className="grid gap-4 sm:grid-cols-3">
+						<div className="rounded-xl border border-border bg-background p-4">
+							<div className="flex items-center gap-2 text-sm font-semibold"><Database className="h-4 w-4 text-primary" /> Database</div>
+							<div className="mt-3"><Badge>{healthQuery.data?.database ?? 'checking'}</Badge></div>
+						</div>
+						<div className="rounded-xl border border-border bg-background p-4">
+							<div className="flex items-center gap-2 text-sm font-semibold"><BadgeCheck className="h-4 w-4 text-primary" /> Environment</div>
+							<div className="mt-3"><Badge>{healthQuery.data?.environment ?? 'unknown'}</Badge></div>
+						</div>
+						<div className="rounded-xl border border-border bg-background p-4">
+							<div className="flex items-center gap-2 text-sm font-semibold"><RefreshCw className="h-4 w-4 text-primary" /> Last refresh</div>
+							<p className="mt-3 text-sm text-muted-foreground">{dateLabel(healthQuery.data?.generated_at || overviewQuery.data?.generated_at)}</p>
+						</div>
+					</div>
+				</SectionCard>
+			</main>
+
+			{selectedUserId ? (
+				<div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedUserId(null)}>
+					<aside
+						className="absolute right-0 top-0 h-full w-full max-w-2xl overflow-y-auto border-l border-border bg-background shadow-2xl"
+						onClick={(event) => event.stopPropagation()}
+					>
+						<div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-6 py-4 backdrop-blur">
+							<div>
+								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">User detail</p>
+								<h2 className="mt-1 text-xl font-bold">{userDetailQuery.data?.user?.email || 'Loading user'}</h2>
+							</div>
+							<button
+								onClick={() => setSelectedUserId(null)}
+								className="rounded-full border border-border p-2 transition hover:bg-muted"
+								aria-label="Close user detail"
+							>
+								<X className="h-5 w-5" />
+							</button>
+						</div>
+						<div className="space-y-6 p-6">
+							{userDetailQuery.isLoading ? (
+								<div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+							) : userDetailQuery.data?.user ? (
+								<>
+									<div className="rounded-2xl border border-border bg-card p-5">
+										<div className="grid gap-4 sm:grid-cols-2">
+											<div>
+												<p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Name</p>
+												<p className="mt-1 font-semibold">{userDetailQuery.data.user.name || '-'}</p>
+											</div>
+											<div>
+												<p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Company</p>
+												<p className="mt-1 font-semibold">{userDetailQuery.data.user.company || '-'}</p>
+											</div>
+											<div>
+												<p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Role</p>
+												<p className="mt-1"><Badge>{userDetailQuery.data.user.role}</Badge></p>
+											</div>
+											<div>
+												<p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Auth</p>
+												<p className="mt-1"><Badge>{userDetailQuery.data.user.auth_provider}</Badge></p>
+											</div>
+											<div>
+												<p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Email</p>
+												<p className="mt-1"><Badge>{userDetailQuery.data.user.email_verified ? 'verified' : 'unverified'}</Badge></p>
+											</div>
+											<div>
+												<p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Status</p>
+												<p className="mt-1"><Badge>{userDetailQuery.data.user.status}</Badge></p>
+											</div>
+										</div>
+										<div className="mt-5 flex flex-wrap gap-2">
+											{!userDetailQuery.data.user.email_verified ? (
+												<button
+													onClick={() => resendVerificationMutation.mutate(userDetailQuery.data!.user!.id)}
+													className="rounded-xl border border-border px-3 py-2 text-xs font-semibold hover:bg-muted"
+												>
+													Resend verification
+												</button>
+											) : null}
+											{userDetailQuery.data.user.status === 'active' ? (
+												<button
+													onClick={() => {
+														if (window.confirm(`Disable ${userDetailQuery.data!.user!.email}?`)) {
+															disableUserMutation.mutate(userDetailQuery.data!.user!.id);
+														}
+													}}
+													className="rounded-xl border border-red-500/30 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-500/10"
+												>
+													Disable account
+												</button>
+											) : null}
+										</div>
+									</div>
+
+									<div className="rounded-2xl border border-border bg-card p-5">
+										<h3 className="font-bold">Billing</h3>
+										{userDetailQuery.data.billing_account ? (
+											<div className="mt-3 flex flex-wrap items-center gap-2">
+												<Badge>{userDetailQuery.data.billing_account.plan_slug}</Badge>
+												<Badge>{userDetailQuery.data.billing_account.status}</Badge>
+												{userDetailQuery.data.billing_account.subscription_status ? <Badge>{userDetailQuery.data.billing_account.subscription_status}</Badge> : null}
+											</div>
+										) : <p className="mt-3 text-sm text-muted-foreground">No billing account found.</p>}
+									</div>
+
+									<div className="rounded-2xl border border-border bg-card p-5">
+										<h3 className="font-bold">API keys</h3>
+										<div className="mt-3 space-y-2">
+											{userDetailQuery.data.api_keys.map(key => (
+												<div key={key.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background p-3">
+													<div>
+														<div className="font-mono font-semibold">{key.key_prefix}</div>
+														<div className="text-sm text-muted-foreground">{key.name}</div>
+													</div>
+													<div className="flex gap-2"><Badge>{key.environment}</Badge><Badge>{key.status}</Badge></div>
+												</div>
+											))}
+											{!userDetailQuery.data.api_keys.length ? <EmptyState label="No API keys for this user." /> : null}
+										</div>
+									</div>
+
+									<div className="rounded-2xl border border-border bg-card p-5">
+										<h3 className="font-bold">Recent requests</h3>
+										<div className="mt-3 space-y-2">
+											{userDetailQuery.data.requests.map(request => (
+												<div key={request.id} className="rounded-xl border border-border bg-background p-3">
+													<div className="flex flex-wrap items-center justify-between gap-2">
+														<div className="font-mono text-sm">{request.endpoint}</div>
+														<div className="flex gap-2"><Badge>{request.attack_type}</Badge><Badge>{request.blocked ? 'blocked' : 'allowed'}</Badge></div>
+													</div>
+													<div className="mt-2 text-xs text-muted-foreground">
+														{dateLabel(request.timestamp)} · {request.api_key_prefix || 'no key'} · {request.latency_ms?.toFixed?.(1) ?? request.latency_ms}ms
+													</div>
+												</div>
+											))}
+											{!userDetailQuery.data.requests.length ? <EmptyState label="No requests for this user yet." /> : null}
+										</div>
+									</div>
+								</>
+							) : (
+								<EmptyState label="User not found." />
+							)}
+						</div>
+					</aside>
+				</div>
+			) : null}
+		</div>
+	);
+}

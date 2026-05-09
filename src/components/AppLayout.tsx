@@ -5,6 +5,7 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	ClipboardList,
+	Crown,
 	DollarSign,
 	ExternalLink,
 	FileText,
@@ -43,6 +44,7 @@ interface NavItem {
 	to: string;
 	icon: React.ComponentType<{ className?: string }>;
 	adminOnly?: boolean;
+	founderOnly?: boolean;
 }
 
 interface NavGroup {
@@ -86,6 +88,7 @@ const NAV_GROUPS: NavGroup[] = [
 		label: 'Admin',
 		adminOnly: true,
 		items: [
+			{ label: 'Founder Portal', to: '/founder', icon: Crown, founderOnly: true },
 			{ label: 'Analytics', to: '/advanced-analytics', icon: BarChart3 },
 			{ label: 'Compliance', to: '/compliance-reports', icon: ClipboardList },
 			{ label: 'RBAC', to: '/rbac', icon: Lock },
@@ -97,6 +100,7 @@ const NAV_GROUPS: NavGroup[] = [
 const SIDEBAR_WIDTH = 220;
 const SIDEBAR_COLLAPSED_WIDTH = 56;
 const SIDEBAR_STORAGE_KEY = 'ks_sidebar_collapsed';
+const FOUNDER_PORTAL_EMAILS = new Set(['isaacnsisong@gmail.com', 'ei@koreshield.com']);
 
 // ─── Sidebar nav item ────────────────────────────────────────────────────────
 
@@ -153,11 +157,13 @@ function Sidebar({
 	collapsed,
 	onCollapse,
 	isAdmin,
+	isFounder,
 	onNavClick,
 }: {
 	collapsed: boolean;
 	onCollapse: () => void;
 	isAdmin: boolean;
+	isFounder: boolean;
 	onNavClick?: () => void;
 }) {
 	const { theme } = useTheme();
@@ -180,7 +186,11 @@ function Sidebar({
 				{NAV_GROUPS.map(group => {
 					if (group.adminOnly && !isAdmin) return null;
 
-					const visibleItems = group.items.filter(item => !item.adminOnly || isAdmin);
+					const visibleItems = group.items.filter(item => {
+						if (item.adminOnly && !isAdmin) return false;
+						if (item.founderOnly && !isFounder) return false;
+						return true;
+					});
 					if (visibleItems.length === 0) return null;
 
 					return (
@@ -386,6 +396,7 @@ export function AppLayout() {
 	const navigate = useNavigate();
 	const { isAuthenticated, user } = useAuthState();
 	const isAdmin = user?.role === 'admin' || user?.role === 'owner' || user?.role === 'superuser';
+	const isFounder = Boolean(user?.email && FOUNDER_PORTAL_EMAILS.has(user.email.toLowerCase()));
 	const [resendingVerification, setResendingVerification] = useState(false);
 	const [verificationBannerState, setVerificationBannerState] = useState<'none' | 'sent' | 'verified'>('none');
 
@@ -484,6 +495,7 @@ export function AppLayout() {
 					collapsed={collapsed}
 					onCollapse={toggleCollapse}
 					isAdmin={isAdmin}
+					isFounder={isFounder}
 				/>
 			</aside>
 
@@ -515,6 +527,7 @@ export function AppLayout() {
 							collapsed={false}
 							onCollapse={() => setMobileOpen(false)}
 							isAdmin={isAdmin}
+							isFounder={isFounder}
 							onNavClick={() => setMobileOpen(false)}
 						/>
 					</aside>
