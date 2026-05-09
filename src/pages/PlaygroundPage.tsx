@@ -474,32 +474,51 @@ export default function PlaygroundPage() {
 									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Enter Prompt to Scan:
 									</label>
-									<textarea
-										value={prompt}
-										onChange={(e) => setPrompt(e.target.value)}
-										placeholder="Type or select a preset attack example..."
-										rows={4}
-										className="w-full bg-muted border border-border rounded-lg px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono text-sm text-foreground resize-none"
-									/>
+									{!isAuthenticated ? (
+										<div className="w-full bg-amber-500/10 border border-amber-500/50 rounded-lg px-4 py-4 text-amber-700 dark:text-amber-300 text-sm space-y-2">
+											<div className="flex items-start gap-2">
+												<AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+												<div>
+													<p className="font-medium">Free-text input disabled for public demo</p>
+													<p className="text-xs opacity-80 mt-1">
+														For the most accurate results and to prevent false negatives, please <Link to="/login" className="underline font-semibold">sign in</Link> to access the full playground with live API scanning.
+													</p>
+													<p className="text-xs opacity-80 mt-2">
+														Use the preset examples below to test our detection capabilities.
+													</p>
+												</div>
+											</div>
+										</div>
+									) : (
+										<textarea
+											value={prompt}
+											onChange={(e) => setPrompt(e.target.value)}
+											placeholder="Type a custom prompt to scan..."
+											rows={4}
+											className="w-full bg-muted border border-border rounded-lg px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono text-sm text-foreground resize-none"
+										/>
+									)}
 								</div>
 
-								<button
-									type="submit"
-									disabled={loading || !prompt.trim()}
-									className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium px-6 py-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									{loading ? (
-										<>
-											<Loader2 className="w-5 h-5 animate-spin" />
-											Scanning...
-										</>
-									) : (
-										<>
-											<ShieldCheck className="w-5 h-5" />
-											Scan Prompt
-										</>
-									)}
-								</button>
+								{isAuthenticated && (
+									<button
+										type="submit"
+										disabled={loading || !prompt.trim()}
+										className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium px-6 py-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+									>
+										{loading ? (
+											<>
+												<Loader2 className="w-5 h-5 animate-spin" />
+												Scanning...
+											</>
+										) : (
+											<>
+												<ShieldCheck className="w-5 h-5" />
+												Scan Prompt
+											</>
+										)}
+									</button>
+								)}
 							</form>
 
 							{/* Results */}
