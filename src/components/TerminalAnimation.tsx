@@ -268,36 +268,36 @@ function TerminalAnimation() {
 			</div>
 
 			{/* ── Pill examples ────────────────────────────────── */}
-			<div className="space-y-1.5">
-				<p className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-widest px-1">
-					Try an example
-				</p>
-				<div className="flex flex-wrap gap-2">
-					{DEMO_PILLS.map((pill, idx) => {
-						const isActive = activePill === idx;
-						const blocked = pill.blocked;
-						return (
-							<button
+				<div className="space-y-2">
+					<p className="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.26em] px-1">
+						Try an example
+					</p>
+					<div className="flex flex-wrap gap-2.5">
+						{DEMO_PILLS.map((pill, idx) => {
+							const isActive = activePill === idx;
+							const blocked = pill.blocked;
+							return (
+								<button
 								key={pill.label}
-								onClick={() => handlePill(idx)}
-								disabled={phase !== 'idle'}
-								className={[
-									'inline-flex items-center gap-2 text-xs font-mono px-3 py-1.5 rounded-full border transition-all duration-200',
-									'disabled:opacity-40 disabled:cursor-not-allowed',
-									isActive && blocked
-										? 'border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400'
-										: isActive && !blocked
-										? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-										: 'border-border bg-muted/60 text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground',
-								].join(' ')}
-							>
-								<span className={[
-									'w-2 h-2 rounded-full shrink-0',
-									blocked ? 'bg-red-500' : 'bg-emerald-500',
-								].join(' ')} />
-								{pill.label}
-							</button>
-						);
+									onClick={() => handlePill(idx)}
+									disabled={phase !== 'idle'}
+									className={[
+										'group inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-mono shadow-sm backdrop-blur transition-all duration-200',
+										'disabled:opacity-40 disabled:cursor-not-allowed',
+										isActive && blocked
+											? 'border-red-500/45 bg-red-500/10 text-red-700 shadow-red-500/10 dark:text-red-300'
+											: isActive && !blocked
+											? 'border-emerald-500/45 bg-emerald-500/10 text-emerald-700 shadow-emerald-500/10 dark:text-emerald-300'
+											: 'border-border/80 bg-card/90 text-foreground hover:-translate-y-0.5 hover:border-primary/35 hover:bg-muted/60 hover:shadow-md dark:bg-slate-950/45 dark:text-slate-200 dark:hover:bg-slate-900/70',
+									].join(' ')}
+								>
+									<span className={[
+										'h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-background transition-transform group-hover:scale-110 dark:ring-slate-950',
+										blocked ? 'bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.55)]' : 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.55)]',
+									].join(' ')} />
+									{pill.label}
+								</button>
+							);
 					})}
 				</div>
 			</div>
