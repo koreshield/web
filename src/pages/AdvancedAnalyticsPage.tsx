@@ -39,6 +39,35 @@ type TimeRange = '7d' | '30d' | '90d' | '1y';
 
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4'];
 
+// ── Provider display name helper ──────────────────────────────────────────────
+// Normalise raw DB provider values into readable names for the UI.
+// The DB stores Python class names (e.g. "OpenAIProvider") from __class__.__name__
+// as well as config-key slugs (e.g. "openai"). All lookups are case-insensitive.
+function formatProviderName(raw: string): string {
+	const MAP: Record<string, string> = {
+		// Class-name variants (what actually gets stored in RequestLog.provider)
+		openaiprovider: 'OpenAI',
+		azureopenaiprovider: 'Azure OpenAI',
+		anthropicprovider: 'Anthropic',
+		cohereprovider: 'Cohere',
+		mistralprovider: 'Mistral',
+		groqprovider: 'Groq',
+		togetherAIprovider: 'Together AI',
+		// Config-key slug variants
+		openai: 'OpenAI',
+		openai_provider: 'OpenAI',
+		anthropic: 'Anthropic',
+		azure: 'Azure OpenAI',
+		azure_openai: 'Azure OpenAI',
+		cohere: 'Cohere',
+		mistral: 'Mistral',
+		groq: 'Groq',
+		together: 'Together AI',
+		together_ai: 'Together AI',
+	};
+	return MAP[raw.toLowerCase()] ?? raw.replace(/Provider$/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 // ── Compute cost optimization recommendations from real provider data ─────────
 function computeOptimizations(providers: ProviderMetric[]): CostOptimization[] {
 	if (!providers.length) return [];
@@ -47,7 +76,9 @@ function computeOptimizations(providers: ProviderMetric[]): CostOptimization[] {
 	const cheapest = providers.reduce((min, p) => p.cost_per_request < min.cost_per_request ? p : min, providers[0]);
 	const mostExpensive = sorted[0];
 	const highLatency = providers.filter(p => p.avg_latency_ms > 1500);
-	const lowReliability = providers.filter(p => p.success_rate < 99);
+	// 90% threshold — anything above is acceptable provider reliability.
+	// (Previously 99%, which flagged every provider including healthy ones.)
+	const lowReliability = providers.filter(p => p.success_rate < 90);
 
 	const recs: CostOptimization[] = [];
 
@@ -55,7 +86,7 @@ function computeOptimizations(providers: ProviderMetric[]): CostOptimization[] {
 		const ratio = mostExpensive.cost_per_request / cheapest.cost_per_request;
 		if (ratio > 1.5) {
 			recs.push({
-				recommendation: `${mostExpensive.provider} costs ${ratio.toFixed(1)}x more per request than ${cheapest.provider}. Route lower-complexity queries to ${cheapest.provider}.`,
+				recommendation: `${formatProviderName(mostExpensive.provider)} costs ${ratio.toFixed(1)}x more per request than ${formatProviderName(cheapest.provider)}. Route lower-complexity queries to ${formatProviderName(cheapest.provider)}.`,
 				potentialSavings: `~${Math.round((mostExpensive.total_cost - cheapest.cost_per_request * mostExpensive.total_requests) * 100) / 100}`,
 				priority: ratio > 3 ? 'high' : 'medium',
 				category: 'Model Selection',
@@ -65,7 +96,7 @@ function computeOptimizations(providers: ProviderMetric[]): CostOptimization[] {
 
 	highLatency.forEach(p => {
 		recs.push({
-			recommendation: `${p.provider} averages ${p.avg_latency_ms.toFixed(0)}ms latency. Consider request timeouts or a faster fallback provider for real-time use cases.`,
+			recommendation: `${formatProviderName(p.provider)} averages ${p.avg_latency_ms.toFixed(0)}ms latency. Consider request timeouts or a faster fallback provider for real-time use cases.`,
 			potentialSavings: 'UX improvement',
 			priority: 'medium',
 			category: 'Latency Optimization',
@@ -74,7 +105,7 @@ function computeOptimizations(providers: ProviderMetric[]): CostOptimization[] {
 
 	lowReliability.forEach(p => {
 		recs.push({
-			recommendation: `${p.provider} has a ${p.success_rate.toFixed(1)}% success rate. Add retry logic and circuit breaker to improve resilience.`,
+			recommendation: `${formatProviderName(p.provider)} has a ${p.success_rate.toFixed(1)}% success rate. Add retry logic and circuit breaker to improve resilience.`,
 			potentialSavings: 'Reliability improvement',
 			priority: 'high',
 			category: 'Reliability',
@@ -151,13 +182,13 @@ export function AdvancedAnalyticsPage() {
 
 	// Cost allocation by provider (pie chart from provider totals)
 	const costAllocation = providers.map(p => ({
-		name: p.provider,
+		name: formatProviderName(p.provider),
 		value: p.total_cost,
 	})).filter(p => p.value > 0);
 
 	// Provider chart data shaped for recharts
 	const providerChartData = providers.map(p => ({
-		provider: p.provider.replace('OpenAI ', '').replace('Anthropic ', ''),
+		provider: formatProviderName(p.provider),
 		latency: p.avg_latency_ms,
 		cost: p.cost_per_request,
 		reliability: p.success_rate,
