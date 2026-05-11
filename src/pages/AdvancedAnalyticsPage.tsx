@@ -342,7 +342,7 @@ export function AdvancedAnalyticsPage() {
 						) : (
 							<>
 								<div className="text-3xl font-bold">
-									${costSummary?.projected_monthly_cost?.toFixed(2) ?? 'N/A'}
+									${(costSummary?.projected_monthly_cost ?? 0).toFixed(2)}
 								</div>
 								<p className="text-xs text-muted-foreground mt-1">Based on recent trend</p>
 							</>
@@ -359,7 +359,7 @@ export function AdvancedAnalyticsPage() {
 						) : (
 							<>
 								<div className="text-3xl font-bold">
-									{providers.length ? `${avgSuccessRate.toFixed(1)}%` : 'N/A'}
+									{avgSuccessRate.toFixed(1)}%
 								</div>
 								<p className="text-xs text-muted-foreground mt-1">Across all providers</p>
 							</>
