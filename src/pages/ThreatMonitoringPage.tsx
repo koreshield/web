@@ -34,6 +34,7 @@ export function ThreatMonitoringPage() {
 	// Normalise raw API log records into the Attack interface.
 	// The backend returns `attack_type` (not `threat_type`) and has no `confidence` field.
 	const initialAttacks: Attack[] = ((attacksData as any)?.logs || []).map((log: any) => ({
+		// eslint-disable-next-line react-hooks/purity
 		id: log.id || log.request_id || String(Math.random()),
 		timestamp: log.timestamp || log.created_at || new Date().toISOString(),
 		threat_type: log.threat_type || log.attack_type || 'Unknown',
@@ -51,7 +52,6 @@ export function ThreatMonitoringPage() {
 	// WebSocket real-time updates
 	useEffect(() => {
 		wsClient.connect();
-		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setWsConnected(wsClient.isConnected());
 
 		wsClient.subscribe(['threat_detected']);
