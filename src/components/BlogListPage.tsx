@@ -2,7 +2,7 @@
  * BlogListPage - Main blog page with filtering, pagination, and search
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Calendar, Clock, User, Folder, Tag, ChevronRight, ArrowRight } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -12,24 +12,22 @@ import {
 	getBlogTags,
 	searchBlogPosts,
 	toSlug,
-	type BlogPost,
 } from '../blog/loader';
 
 export function BlogListPage() {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const [posts, setPosts] = useState<BlogPost[]>([]);
 	const [categories] = useState(getBlogCategories());
 	const [tags] = useState(getBlogTags());
 	const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-	const [isSearching, setIsSearching] = useState(false);
 
 	const category = searchParams.get('category');
 	const tag = searchParams.get('tag');
 	const page = parseInt(searchParams.get('page') || '1');
 	const perPage = 10;
+	const isSearching = !!searchQuery;
 
 	// Compute posts based on filters using useMemo
-	const computedPosts = useMemo(() => {
+	const posts = useMemo(() => {
 		if (searchQuery) {
 			return searchBlogPosts(searchQuery);
 		}
@@ -42,13 +40,6 @@ export function BlogListPage() {
 			sortBy: 'date-desc',
 		});
 	}, [searchQuery, category, tag]);
-
-	// Update posts and searching state whenever computed posts change
-	// eslint-disable-next-line react-hooks/set-state-in-effect
-	useEffect(() => {
-		setPosts(computedPosts);
-		setIsSearching(!!searchQuery);
-	}, [computedPosts, searchQuery]);
 
 	const paginatedPosts = useMemo(() => {
 		const start = (page - 1) * perPage;
