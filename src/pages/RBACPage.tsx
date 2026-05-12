@@ -371,10 +371,15 @@ export function RBACPage() {
 																		deleteUserMutation.mutate(user.id);
 																	}
 																}}
+																disabled={deleteUserMutation.isPending && deleteUserMutation.variables === user.id}
 																aria-label={`Delete ${user.email}`}
-																className="p-1 hover:bg-muted rounded transition-colors"
+																className="p-1 hover:bg-muted rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 															>
-																<Trash2 className="w-4 h-4 text-red-600" />
+																{deleteUserMutation.isPending && deleteUserMutation.variables === user.id ? (
+																	<span className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin inline-block" />
+																) : (
+																	<Trash2 className="w-4 h-4 text-red-600" />
+																)}
 															</button>
 														</div>
 													</td>
