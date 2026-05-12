@@ -31,7 +31,7 @@ const BLOG_POSTS: BlogPost[] = [
 		tags: ['agentic ai', 'ai security', 'agent security', 'prompt injection', 'llm security', 'goal hijack', 'owasp', 'runtime enforcement'],
 		status: 'published',
 		
-		
+		coverImage: '/images/blog/lethal-trifecta-featured.png',
 		readingTime: 6,
 		path: '/blog/why-agentic-ai-is-largest-unsecured-attack-surface',
 		content: `It's May 2026, and the first wave of agentic AI breaches has already arrived. Microsoft 365 Copilot has been exploited via [EchoLeak](https://www.varonis.com/blog/echoleak). Gemini Enterprise has been compromised through indirect injection in Google Docs and Calendar. The GitHub MCP server has been used to exfiltrate data from private repositories via crafted issues in public ones. Researchers at Check Point disclosed [CVE-2025-59536 and CVE-2026-21852](https://www.mintmcp.com/blog/claude-code-cve) in Claude Code, demonstrating that simply opening an untrusted repository can trigger remote code execution and API key exfiltration. Four CVEs in CrewAI chained prompt injection into RCE. Azure SRE Agent shipped with [CVE-2026-32173](https://www.cve.org/CVERecord?id=CVE-2026-32173), exposing live command streams over an unauthenticated WebSocket.
