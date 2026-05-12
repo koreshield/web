@@ -73,8 +73,8 @@ function NavDropdown({
 	const location = useLocation();
 
 	// Close menu when route changes
-	// eslint-disable-next-line react-hooks/set-state-in-effect
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setOpen(false);
 	}, [location.pathname]);
 
