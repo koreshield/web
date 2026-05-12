@@ -466,10 +466,20 @@ export function TeamDetailsPage() {
 										{canManageTeam && (
 											<button
 												onClick={() => cancelInviteMutation.mutate(invite.id)}
-												className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors text-sm"
-											>
-												<XCircle className="w-4 h-4" />
-												Cancel
+											disabled={cancelInviteMutation.isPending && cancelInviteMutation.variables === invite.id}
+											className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+										>
+											{cancelInviteMutation.isPending && cancelInviteMutation.variables === invite.id ? (
+												<>
+													<span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+													Cancelling...
+												</>
+											) : (
+												<>
+													<XCircle className="w-4 h-4" />
+													Cancel
+												</>
+											)}
 											</button>
 										)}
 									</div>
