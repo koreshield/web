@@ -57,7 +57,7 @@ export function parseMarkdown(markdown: string): string {
 
 	// Unordered lists — collect consecutive <li> items into a single <ul>
 	html = html.replace(/^\* (.*?)$/gm, '<li>$1</li>');
-	html = html.replace(/^\- (.*?)$/gm, '<li>$1</li>');
+	html = html.replace(/^- (.*?)$/gm, '<li>$1</li>');
 	html = html.replace(/(<li>[\s\S]*?<\/li>)(\n<li>[\s\S]*?<\/li>)*/g, (match) => {
 		return `<ul class="list-disc list-outside ml-6 mb-4 space-y-1">${match}</ul>`;
 	});
