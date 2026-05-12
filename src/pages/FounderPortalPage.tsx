@@ -16,6 +16,7 @@ import {
 	ShieldAlert,
 	ShieldX,
 	Trash2,
+	TrendingUp,
 	Users,
 	XCircle,
 	X,
@@ -196,6 +197,47 @@ type FounderAuditEntry = {
 type FounderAuditResponse = {
 	audit_logs: FounderAuditEntry[];
 	total: number;
+};
+
+type PlanBreakdownItem = { plan: string; count: number; monthly_price: number; mrr_contribution: number };
+type TopTenant = {
+	user_id: string; email: string; name?: string | null; plan: string; billing_status: string;
+	total_requests_30d: number; attacks_detected_30d: number; blocked_30d: number;
+	block_rate_pct: number; last_seen?: string | null;
+};
+type DailyAttackPoint = { date: string; total_requests: number; attacks: number; blocked: number };
+type AttackTypeItem = { type: string; count: number };
+
+type FounderMetricsResponse = {
+	revenue: {
+		mrr: number; arr: number; arpu: number; paying_users: number; free_accounts: number;
+		total_billing_accounts: number; paid_conversion_rate_pct: number;
+		plan_breakdown: PlanBreakdownItem[];
+	};
+	retention: {
+		dau: number; wau: number; mau: number; activated_users: number;
+		activation_rate_pct: number; churn_risk_users: number;
+		new_users_today: number; new_users_7d: number; new_users_30d: number;
+		total_users: number; verified_users: number;
+	};
+	funnel: {
+		signups: number; verified: number; activated: number; paid: number;
+		signup_to_verified_pct: number; verified_to_activated_pct: number;
+		activated_to_paid_pct: number; overall_conversion_pct: number;
+	};
+	teams: {
+		total_teams: number; total_members: number; avg_team_size: number;
+		paid_teams: number; new_teams_7d: number; new_teams_30d: number;
+	};
+	top_tenants: TopTenant[];
+	attack_intel: {
+		total_requests: number; total_blocked: number; total_attacks: number;
+		requests_today: number; attacks_today: number;
+		block_rate_pct: number; detection_rate_pct: number;
+		attack_type_distribution: AttackTypeItem[];
+		daily_attack_trend: DailyAttackPoint[];
+	};
+	generated_at: string;
 };
 
 const DONUT_COLORS = ['#dc2626', '#f59e0b', '#b45309', '#737373', '#0f766e', '#2563eb', '#7c3aed'];
@@ -396,6 +438,12 @@ export function FounderPortalPage() {
 		refetchInterval: 30_000,
 		...founderQueryOptions,
 	});
+	const metricsQuery = useQuery({
+		queryKey: ['founder-metrics'],
+		queryFn: () => api.getFounderMetrics() as Promise<FounderMetricsResponse>,
+		refetchInterval: STANDARD_REFRESH_INTERVAL,
+		...founderQueryOptions,
+	});
 
 	const refreshAll = () => {
 		void queryClient.invalidateQueries({ queryKey: ['founder-overview'] });
@@ -407,6 +455,7 @@ export function FounderPortalPage() {
 		void queryClient.invalidateQueries({ queryKey: ['founder-health'] });
 		void queryClient.invalidateQueries({ queryKey: ['founder-threats'] });
 		void queryClient.invalidateQueries({ queryKey: ['founder-audit'] });
+		void queryClient.invalidateQueries({ queryKey: ['founder-metrics'] });
 	};
 
 	const revokeKeyMutation = useMutation({
@@ -448,6 +497,7 @@ export function FounderPortalPage() {
 	});
 
 	const overview = overviewQuery.data?.overview;
+	const metrics = metricsQuery.data;
 	const users = usersQuery.data?.users ?? [];
 	const apiKeys = apiKeysQuery.data?.api_keys ?? [];
 	const requests = requestsQuery.data?.requests ?? [];
@@ -598,6 +648,171 @@ export function FounderPortalPage() {
 						) : <EmptyState label="No attack breakdown data yet." />}
 					</SectionCard>
 				</div>
+
+				{/* ── Business Metrics ──────────────────────────────────── */}
+				{metrics && (
+					<>
+						{/* Revenue */}
+						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+							<StatCard title="MRR" value={`$${numberFormat(metrics.revenue.mrr)}`} subtitle={`ARR: $${numberFormat(metrics.revenue.arr)}`} icon={CreditCard} />
+							<StatCard title="ARPU" value={`$${metrics.revenue.arpu}`} subtitle={`${metrics.revenue.paying_users} paying customers`} icon={BadgeCheck} />
+							<StatCard title="Paid conversion" value={`${metrics.revenue.paid_conversion_rate_pct}%`} subtitle={`${metrics.revenue.free_accounts} still on free`} icon={TrendingUp} />
+							<StatCard title="Teams" value={numberFormat(metrics.teams.total_teams)} subtitle={`${metrics.teams.avg_team_size} avg members · ${metrics.teams.paid_teams} paid`} icon={Users} />
+						</div>
+
+						{/* Retention & Funnel */}
+						<div className="grid gap-6 xl:grid-cols-2">
+							<SectionCard title="User retention">
+								<div className="grid grid-cols-3 gap-4 mb-4">
+									{[
+										{ label: 'DAU', value: metrics.retention.dau, sub: 'last 24 h' },
+										{ label: 'WAU', value: metrics.retention.wau, sub: 'last 7 days' },
+										{ label: 'MAU', value: metrics.retention.mau, sub: 'last 30 days' },
+									].map(({ label, value, sub }) => (
+										<div key={label} className="rounded-xl border border-border bg-muted/30 p-4 text-center">
+											<div className="text-2xl font-bold">{numberFormat(value)}</div>
+											<div className="mt-1 text-xs font-semibold text-primary">{label}</div>
+											<div className="text-xs text-muted-foreground">{sub}</div>
+										</div>
+									))}
+								</div>
+								<div className="space-y-2 text-sm">
+									<div className="flex justify-between py-2 border-b border-border">
+										<span className="text-muted-foreground">Activation rate</span>
+										<span className="font-semibold">{metrics.retention.activation_rate_pct}% <span className="text-muted-foreground font-normal">({numberFormat(metrics.retention.activated_users)} of {numberFormat(metrics.retention.verified_users)} verified)</span></span>
+									</div>
+									<div className="flex justify-between py-2 border-b border-border">
+										<span className="text-muted-foreground">Churn risk</span>
+										<span className={`font-semibold ${metrics.retention.churn_risk_users > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>{numberFormat(metrics.retention.churn_risk_users)} users inactive 30d+</span>
+									</div>
+									<div className="flex justify-between py-2 border-b border-border">
+										<span className="text-muted-foreground">New users today</span>
+										<span className="font-semibold">{numberFormat(metrics.retention.new_users_today)}</span>
+									</div>
+									<div className="flex justify-between py-2">
+										<span className="text-muted-foreground">New users (30d)</span>
+										<span className="font-semibold">{numberFormat(metrics.retention.new_users_30d)}</span>
+									</div>
+								</div>
+							</SectionCard>
+
+							<SectionCard title="Conversion funnel">
+								<div className="space-y-3 mt-2">
+									{[
+										{ label: 'Signups', value: metrics.funnel.signups, pct: 100, color: 'bg-blue-500' },
+										{ label: 'Email verified', value: metrics.funnel.verified, pct: metrics.funnel.signup_to_verified_pct, color: 'bg-primary' },
+										{ label: 'Activated (made API call)', value: metrics.funnel.activated, pct: metrics.funnel.verified_to_activated_pct > 0 ? (metrics.funnel.activated / metrics.funnel.signups) * 100 : 0, color: 'bg-emerald-500' },
+										{ label: 'Converted to paid', value: metrics.funnel.paid, pct: metrics.funnel.overall_conversion_pct, color: 'bg-violet-500' },
+									].map(({ label, value, pct, color }) => (
+										<div key={label}>
+											<div className="flex justify-between text-sm mb-1">
+												<span className="text-muted-foreground">{label}</span>
+												<span className="font-semibold">{numberFormat(value)} <span className="text-muted-foreground font-normal text-xs">({pct.toFixed(1)}%)</span></span>
+											</div>
+											<div className="h-2 rounded-full bg-muted overflow-hidden">
+												<div className={`h-full rounded-full ${color}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+											</div>
+										</div>
+									))}
+								</div>
+								<div className="mt-4 pt-4 border-t border-border grid grid-cols-2 gap-3 text-sm">
+									<div className="rounded-lg bg-muted/40 p-3">
+										<div className="text-muted-foreground text-xs mb-1">Verified → Activated</div>
+										<div className="font-bold text-lg">{metrics.funnel.verified_to_activated_pct}%</div>
+									</div>
+									<div className="rounded-lg bg-muted/40 p-3">
+										<div className="text-muted-foreground text-xs mb-1">Activated → Paid</div>
+										<div className="font-bold text-lg">{metrics.funnel.activated_to_paid_pct}%</div>
+									</div>
+								</div>
+							</SectionCard>
+						</div>
+
+						{/* Plan breakdown + attack trend */}
+						<div className="grid gap-6 xl:grid-cols-2">
+							<SectionCard title="Revenue by plan">
+								<div className="space-y-2 mt-2">
+									{metrics.revenue.plan_breakdown.filter(p => p.count > 0).map(p => (
+										<div key={p.plan} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+											<div className="flex-1 min-w-0">
+												<div className="flex justify-between text-sm">
+													<span className="font-medium capitalize">{p.plan}</span>
+													<span className="text-muted-foreground">{p.count} accounts</span>
+												</div>
+												<div className="flex justify-between text-xs text-muted-foreground mt-0.5">
+													<span>${p.monthly_price}/mo per seat</span>
+													<span className={p.mrr_contribution > 0 ? 'text-emerald-600 font-semibold' : ''}>${numberFormat(p.mrr_contribution)} MRR</span>
+												</div>
+											</div>
+										</div>
+									))}
+									<div className="flex justify-between pt-3 font-bold text-sm">
+										<span>Total MRR</span>
+										<span className="text-emerald-600">${numberFormat(metrics.revenue.mrr)}</span>
+									</div>
+								</div>
+							</SectionCard>
+
+							<SectionCard title="Attack trend (30 days)">
+								{metrics.attack_intel.daily_attack_trend.length ? (
+									<ChartFrame>
+										{width => (
+											<BarChart width={width} height={280} data={metrics.attack_intel.daily_attack_trend.map(d => ({ ...d, label: shortDate(d.date) }))}>
+												<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+												<XAxis dataKey="label" tick={{ fontSize: 11 }} />
+												<YAxis tick={{ fontSize: 11 }} />
+												<Tooltip />
+												<Legend />
+												<Bar dataKey="total_requests" name="Requests" fill="#2563eb" radius={[4,4,0,0]} />
+												<Bar dataKey="attacks" name="Attacks" fill="#dc2626" radius={[4,4,0,0]} />
+												<Bar dataKey="blocked" name="Blocked" fill="#f59e0b" radius={[4,4,0,0]} />
+											</BarChart>
+										)}
+									</ChartFrame>
+								) : <EmptyState label="No attack trend data yet." />}
+							</SectionCard>
+						</div>
+
+						{/* Top tenants */}
+						<SectionCard title={`Top tenants by usage — last 30 days (${metrics.top_tenants.length})`}>
+							{metrics.top_tenants.length ? (
+								<div className="overflow-x-auto">
+									<table className="w-full text-sm">
+										<thead>
+											<tr className="border-b border-border text-left text-muted-foreground">
+												<th className="py-3 pr-4 font-medium">User</th>
+												<th className="py-3 pr-4 font-medium">Plan</th>
+												<th className="py-3 pr-4 font-medium text-right">Requests</th>
+												<th className="py-3 pr-4 font-medium text-right">Attacks</th>
+												<th className="py-3 pr-4 font-medium text-right">Blocked</th>
+												<th className="py-3 font-medium text-right">Block rate</th>
+											</tr>
+										</thead>
+										<tbody className="divide-y divide-border">
+											{metrics.top_tenants.map(t => (
+												<tr key={t.user_id} className="hover:bg-muted/30 transition-colors">
+													<td className="py-3 pr-4">
+														<div className="font-medium truncate max-w-[200px]">{t.email}</div>
+														{t.name && <div className="text-xs text-muted-foreground">{t.name}</div>}
+													</td>
+													<td className="py-3 pr-4"><Badge>{t.plan}</Badge></td>
+													<td className="py-3 pr-4 text-right font-mono">{numberFormat(t.total_requests_30d)}</td>
+													<td className="py-3 pr-4 text-right font-mono">{numberFormat(t.attacks_detected_30d)}</td>
+													<td className="py-3 pr-4 text-right font-mono">{numberFormat(t.blocked_30d)}</td>
+													<td className="py-3 text-right">
+														<span className={`font-semibold ${t.block_rate_pct > 10 ? 'text-red-500' : t.block_rate_pct > 2 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+															{t.block_rate_pct}%
+														</span>
+													</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</div>
+							) : <EmptyState label="No tenant usage data yet." />}
+						</SectionCard>
+					</>
+				)}
 
 				<SectionCard title={`Users (${usersQuery.data?.total ?? users.length})`}>
 					<div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
