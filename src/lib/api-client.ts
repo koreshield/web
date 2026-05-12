@@ -520,6 +520,21 @@ class ApiClient {
 		});
 	}
 
+	async previewTeamInvite(token: string) {
+		return this.fetch(`/v1/teams/invites/preview?token=${encodeURIComponent(token)}`);
+	}
+
+	async acceptTeamInvite(token: string) {
+		return this.fetch(`/v1/teams/invites/accept`, {
+			method: 'POST',
+			body: JSON.stringify({ token }),
+		});
+	}
+
+	async getFounderMetrics() {
+		return this.fetch('/v1/founder/metrics');
+	}
+
 	async getSharedDashboards(teamId: string, type?: string) {
 		const queryParams = type ? `?dashboard_type=${type}` : '';
 		return this.fetch(`/v1/teams/${teamId}/dashboards${queryParams}`);
