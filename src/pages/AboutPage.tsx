@@ -20,13 +20,6 @@ const team = [
 		linkedin: 'https://www.linkedin.com/in/isaacnsisong/',
 	},
 	{
-		name: 'Ahmed Oladapo',
-		role: 'Security Engineer (IR)',
-		bio: 'Security engineer focused on detection coverage, and response workflows.',
-		image: '/team/ahmed-oladapo.png',
-		linkedin: 'https://www.linkedin.com/in/ahmed-oladapo',
-	},
-	{
 		name: 'Uwagba Obinna',
 		role: 'AI Risk & GRC Lead',
 		bio: 'Leading governance, risk, and compliance workflows across KoreShield.',
