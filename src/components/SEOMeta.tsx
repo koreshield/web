@@ -1,4 +1,6 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect, useMemo } from 'react';
+import { syncJsonLd } from '../lib/seoSchema';
 
 interface SEOMetaProps {
 	title?: string;
@@ -49,16 +51,18 @@ export function SEOMeta({
 	const robotsContent = noindex ? 'noindex, nofollow' : nofollow ? 'index, nofollow' : robots;
 
 	// Breadcrumb schema
-	const breadcrumbSchema = breadcrumbs ? {
-		'@context': 'https://schema.org',
-		'@type': 'BreadcrumbList',
-		itemListElement: breadcrumbs.map((item, index) => ({
-			'@type': 'ListItem',
-			position: index + 1,
-			name: item.name,
-			item: item.url,
-		})),
-	} : null;
+	const breadcrumbSchema = useMemo(() => breadcrumbs ? {
+			'@context': 'https://schema.org',
+			'@type': 'BreadcrumbList',
+			itemListElement: breadcrumbs.map((item, index) => ({
+				'@type': 'ListItem',
+				position: index + 1,
+				name: item.name,
+				item: item.url,
+			})),
+		} : null,
+		[breadcrumbs],
+	);
 
 	// Default organization structured data
 	const defaultStructuredData = {
@@ -97,6 +101,14 @@ export function SEOMeta({
 	};
 
 	const finalStructuredData = structuredData || defaultStructuredData;
+	useEffect(() => {
+		syncJsonLd('page', finalStructuredData);
+		syncJsonLd('breadcrumbs', breadcrumbSchema);
+		return () => {
+			syncJsonLd('page', null);
+			syncJsonLd('breadcrumbs', null);
+		};
+	}, [finalStructuredData, breadcrumbSchema]);
 
 	return (
 		<Helmet>
@@ -149,18 +161,6 @@ export function SEOMeta({
 			<meta name="apple-mobile-web-app-capable" content="yes" />
 			<meta name="format-detection" content="telephone=no" />
 
-			{/* Structured Data (JSON-LD) */}
-			<script type="application/ld+json">
-				{JSON.stringify(finalStructuredData)}
-			</script>
-
-			{/* Breadcrumb Schema if provided */}
-			{breadcrumbSchema && (
-				<script type="application/ld+json">
-					{JSON.stringify(breadcrumbSchema)}
-				</script>
-			)}
 		</Helmet>
 	);
 }
-
