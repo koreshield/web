@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import type { JSX } from 'react';
+import { syncJsonLd } from '../lib/seoSchema';
 
 export interface SEOMetadata {
 	title: string;
@@ -44,6 +45,11 @@ export function useSEO(metadata: SEOMetadata): JSX.Element {
 	const ogImage = metadata.ogImage || defaultOgImage;
 	const schemaJson = metadata.schema || defaultSchema(metadata);
 
+	useEffect(() => {
+		syncJsonLd('page', schemaJson);
+		return () => syncJsonLd('page', null);
+	}, [schemaJson]);
+
 	return (
 		<Helmet>
 			<title>{metadata.title}</title>
@@ -77,13 +83,6 @@ export function useSEO(metadata: SEOMetadata): JSX.Element {
 			/>
 			{metadata.twitterImage && <meta name="twitter:image" content={metadata.twitterImage} />}
 			<meta name="twitter:site" content="@koreshield" />
-
-			{/* Structured Data (JSON-LD) */}
-			{schemaJson && (
-				<script type="application/ld+json">
-					{JSON.stringify(schemaJson)}
-				</script>
-			)}
 
 			{/* Article-specific metadata */}
 			{metadata.ogType === 'article' && metadata.publishDate && (
