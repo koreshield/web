@@ -64,43 +64,48 @@ export function SEOMeta({
 		[breadcrumbs],
 	);
 
-	// Default organization structured data
-	const defaultStructuredData = {
-		'@context': 'https://schema.org',
-		'@type': 'SoftwareApplication',
-		name: 'KoreShield',
-		description: DEFAULT_DESCRIPTION,
-		url: SITE_URL,
-		applicationCategory: 'SecurityApplication',
-		operatingSystem: 'Cross-platform',
-		offers: {
-			'@type': 'Offer',
-			price: '0',
-			priceCurrency: 'USD',
-		},
-		provider: {
-			'@type': 'Organization',
+	const defaultStructuredData = useMemo(
+		() => ({
+			'@context': 'https://schema.org',
+			'@type': 'SoftwareApplication',
 			name: 'KoreShield',
+			description: DEFAULT_DESCRIPTION,
 			url: SITE_URL,
-			logo: {
-				'@type': 'ImageObject',
-			'url': 'https://koreshield.ai/logo/light/1x/White.png',
+			applicationCategory: 'SecurityApplication',
+			operatingSystem: 'Cross-platform',
+			offers: {
+				'@type': 'Offer',
+				price: '0',
+				priceCurrency: 'USD',
 			},
-			sameAs: [
-				'https://github.com/koreshield/',
-				'https://twitter.com/koreshield',
-				'https://linkedin.com/company/koreshield',
-			],
-		},
-		screenshot: ogImage,
-		aggregateRating: {
-			'@type': 'AggregateRating',
-			ratingValue: '4.8',
-			ratingCount: '156',
-		},
-	};
+			provider: {
+				'@type': 'Organization',
+				name: 'KoreShield',
+				url: SITE_URL,
+				logo: {
+					'@type': 'ImageObject',
+					url: 'https://koreshield.ai/logo/light/1x/White.png',
+				},
+				sameAs: [
+					'https://github.com/koreshield/',
+					'https://twitter.com/koreshield',
+					'https://linkedin.com/company/koreshield',
+				],
+			},
+			screenshot: ogImage,
+			aggregateRating: {
+				'@type': 'AggregateRating',
+				ratingValue: '4.8',
+				ratingCount: '156',
+			},
+		}),
+		[ogImage],
+	);
 
-	const finalStructuredData = structuredData || defaultStructuredData;
+	const finalStructuredData = useMemo(
+		() => structuredData || defaultStructuredData,
+		[structuredData, defaultStructuredData],
+	);
 	useEffect(() => {
 		syncJsonLd('page', finalStructuredData);
 		syncJsonLd('breadcrumbs', breadcrumbSchema);
