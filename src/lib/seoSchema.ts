@@ -35,7 +35,7 @@ export function syncJsonLd(id: string, data?: object | null) {
 export const defaultOrganizationSchema = {
 	'@context': 'https://schema.org',
 	'@type': 'Organization',
-	name: 'KoreShield',
+	name: 'Koreshield',
 	url: SITE_URL,
 	logo: `${SITE_URL}/logo.png`,
 	description: 'Enterprise-grade LLM security firewall for protecting AI infrastructure',

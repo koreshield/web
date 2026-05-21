@@ -109,7 +109,7 @@ function defaultSchema(metadata: SEOMetadata): Record<string, unknown> {
 		...(metadata.ogType === 'article' && {
 			author: {
 				'@type': 'Organization',
-				name: metadata.author || 'KoreShield',
+				name: metadata.author || 'Koreshield',
 			},
 			datePublished: metadata.publishDate,
 			dateModified: metadata.modifiedDate,
@@ -177,7 +177,7 @@ export function generateOrganizationSchema() {
 	return {
 		'@context': 'https://schema.org',
 		'@type': 'Organization',
-		name: 'KoreShield',
+		name: 'Koreshield',
 		url: 'https://koreshield.ai',
 		logo: 'https://koreshield.ai/logo.png',
 		description: 'Enterprise-grade LLM security firewall. Secure your AI infrastructure.',

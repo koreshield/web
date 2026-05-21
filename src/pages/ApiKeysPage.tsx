@@ -376,7 +376,7 @@ export function ApiKeysPage() {
 							<ol className="list-decimal ml-5 space-y-1 text-muted-foreground">
 								<li>Create one key for your backend, worker, or gateway.</li>
 								<li>Store it in an environment variable, not in browser code.</li>
-								<li>Send one protected request through KoreShield.</li>
+								<li>Send one protected request through Koreshield.</li>
 								<li>Run one malicious prompt or RAG scan so you can see the detection in the dashboard.</li>
 							</ol>
 						</div>

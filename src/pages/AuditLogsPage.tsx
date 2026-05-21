@@ -258,7 +258,7 @@ export default function AuditLogsPage() {
 	return (
 		<div className="bg-background pt-20 pb-12">
 			<SEOMeta
-				title="Audit & Compliance Logs | KoreShield"
+				title="Audit & Compliance Logs | Koreshield"
 				description="View and analyze audit logs for compliance and security monitoring"
 			/>
 
@@ -334,7 +334,7 @@ export default function AuditLogsPage() {
 							<h2 className="text-base sm:text-lg font-semibold text-foreground">Tool Runtime Focus</h2>
 						</div>
 						<p className="text-xs sm:text-sm text-muted-foreground">
-							KoreShield now records server-side tool scan decisions here so runtime enforcement is visible alongside normal audit history.
+							Koreshield now records server-side tool scan decisions here so runtime enforcement is visible alongside normal audit history.
 						</p>
 					</div>
 					<div className="bg-card rounded-xl p-4 sm:p-6 border border-border">
@@ -406,7 +406,7 @@ export default function AuditLogsPage() {
 					<div className="bg-card rounded-xl border border-border overflow-hidden">
 						<div className="px-4 sm:px-6 py-4 border-b border-border">
 							<h2 className="text-base sm:text-lg font-semibold text-foreground">Runtime Sessions</h2>
-							<p className="text-xs sm:text-sm text-muted-foreground">KoreShield session governance for MCP-style or agent-driven tool execution.</p>
+							<p className="text-xs sm:text-sm text-muted-foreground">Koreshield session governance for MCP-style or agent-driven tool execution.</p>
 						</div>
 						<div className="p-4 sm:p-6">
 							<div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4">

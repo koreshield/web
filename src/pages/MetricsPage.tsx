@@ -52,7 +52,7 @@ export function MetricsPage() {
                 <div className="bg-card border border-border rounded-lg p-6 mb-6">
                     <h2 className="text-lg font-semibold mb-2">How to use</h2>
                     <p className="text-sm text-muted-foreground">
-                        Point your Prometheus or monitoring system at <code>/metrics</code> on your KoreShield API.
+                        Point your Prometheus or monitoring system at <code>/metrics</code> on your Koreshield API.
                         The endpoint returns standard Prometheus text format.
                     </p>
                 </div>

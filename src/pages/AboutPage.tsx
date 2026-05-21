@@ -22,7 +22,7 @@ const team = [
 	{
 		name: 'Uwagba Obinna',
 		role: 'AI Risk & GRC Lead',
-		bio: 'Leading governance, risk, and compliance workflows across KoreShield.',
+		bio: 'Leading governance, risk, and compliance workflows across Koreshield.',
 		image: '/team/obinna.jpeg',
 		linkedin: 'https://www.linkedin.com/in/uwagba-obinna',
 	},
@@ -68,7 +68,7 @@ export default function AboutPage() {
 							Securing the<br className="hidden md:block" /> AI-Powered Future
 						</h1>
 						<p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-							KoreShield was built on one belief: production AI deserves the same security rigour as any critical infrastructure, and teams should not need a breach before they act on it.
+							Koreshield was built on one belief: production AI deserves the same security rigour as any critical infrastructure, and teams should not need a breach before they act on it.
 						</p>
 					</motion.div>
 				</div>
@@ -83,7 +83,7 @@ export default function AboutPage() {
 							Large Language Models are transforming how we build software, but they introduce entirely new security challenges. Traditional application security tools were not designed for prompt injection, jailbreaking, data exfiltration, and adversarial attacks.
 						</p>
 						<p>
-							KoreShield was founded to solve this problem. We combine cutting-edge AI safety research with enterprise-grade infrastructure to provide comprehensive protection for LLM applications. Our mission is to make AI systems as secure as traditional software, enabling organisations to deploy AI confidently.
+							Koreshield was founded to solve this problem. We combine cutting-edge AI safety research with enterprise-grade infrastructure to provide comprehensive protection for LLM applications. Our mission is to make AI systems as secure as traditional software, enabling organisations to deploy AI confidently.
 						</p>
 						<p>
 							We believe security shouldn't be an afterthought. By providing accessible SDKs, clear documentation, and commercial services, we're making world-class LLM security available to startups and enterprises alike.
@@ -125,9 +125,9 @@ export default function AboutPage() {
 				<div className="max-w-4xl mx-auto">
 					<h2 className="text-2xl font-bold text-foreground mb-4">Licensing & IP</h2>
 					<p className="text-muted-foreground leading-relaxed">
-						KoreShield core is proprietary software. The SDKs, documentation, website, and blog are MIT-licensed
+						Koreshield core is proprietary software. The SDKs, documentation, website, and blog are MIT-licensed
 						in their respective repositories and directories. Commercial use of the core platform requires a valid
-						licence or agreement with KoreShield.
+						licence or agreement with Koreshield.
 					</p>
 				</div>
 			</section>
@@ -151,7 +151,7 @@ export default function AboutPage() {
 						<div>
 							<h3 className="text-xl font-semibold text-foreground mb-4">Innovation at Scale</h3>
 							<p className="text-muted-foreground mb-4 leading-relaxed">
-								KoreShield represents a genuinely innovative approach to LLM security. Our 50+ detection patterns, real-time threat analysis, and multi-provider support architecture are designed for a category that is growing fast and needs serious operational tooling.
+								Koreshield represents a genuinely innovative approach to LLM security. Our 50+ detection patterns, real-time threat analysis, and multi-provider support architecture are designed for a category that is growing fast and needs serious operational tooling.
 							</p>
 							<p className="text-muted-foreground leading-relaxed">
 								Our technology is designed for global scalability, supporting multi-tenancy, cloud-native deployment, and enterprise-grade compliance. We're building not just for today's market, but for the next decade of AI adoption.

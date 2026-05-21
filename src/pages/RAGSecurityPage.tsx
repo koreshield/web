@@ -815,7 +815,7 @@ export function RAGSecurityPage() {
 	return (
 		<div className="bg-background">
 			<SEOMeta
-				title="RAG Security Scanner | KoreShield"
+				title="RAG Security Scanner | Koreshield"
 				description="Scan retrieved documents for indirect prompt injection attacks in RAG systems"
 			/>
 
@@ -1322,7 +1322,7 @@ export function RAGSecurityPage() {
 									<div className="font-semibold mb-1">About RAG Security</div>
 									<p>
 										This scanner detects indirect prompt injection attacks in retrieved documents
-										using KoreShield's 5-dimensional taxonomy.
+										using Koreshield's 5-dimensional taxonomy.
 									</p>
 								</div>
 							</div>

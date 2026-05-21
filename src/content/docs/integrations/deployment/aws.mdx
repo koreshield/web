@@ -1,13 +1,13 @@
 ---
 title: AWS Deployment
-description: Deploy the KoreShield proxy on AWS using Docker or ECS.
+description: Deploy the Koreshield proxy on AWS using Docker or ECS.
 last_update:
   date: 2026-03-10
 ---
 
 # AWS Deployment
 
-This guide shows two common ways to run KoreShield on AWS: a simple EC2 Docker host or a managed ECS service.
+This guide shows two common ways to run Koreshield on AWS: a simple EC2 Docker host or a managed ECS service.
 
 ## Use Cases
 
@@ -26,7 +26,7 @@ This guide shows two common ways to run KoreShield on AWS: a simple EC2 Docker h
 ### 1. Provision an EC2 instance
 
 - Choose Amazon Linux 2023 or Ubuntu 22.04
-- Open inbound ports for your app and KoreShield (default 8000)
+- Open inbound ports for your app and Koreshield (default 8000)
 - Prefer placing the instance in a private subnet with an ALB in front
 
 ### 2. Install Docker
@@ -39,17 +39,17 @@ sudo systemctl enable --now docker
 sudo usermod -aG docker ec2-user
 ```
 
-### 3. Configure KoreShield
+### 3. Configure Koreshield
 
-Self-hosted customers receive a deployment bundle or a prebuilt image from KoreShield. Configure JWT and provider keys via environment variables or a managed secret store.
+Self-hosted customers receive a deployment bundle or a prebuilt image from Koreshield. Configure JWT and provider keys via environment variables or a managed secret store.
 
 ### 4. Run with Docker
 
-Run the KoreShield image provided for your account and pass environment variables (JWT + provider keys). Consult your deployment bundle for exact commands.
+Run the Koreshield image provided for your account and pass environment variables (JWT + provider keys). Consult your deployment bundle for exact commands.
 
 ## Option B: ECS (Fargate)
 
-### 1. Push the KoreShield image to ECR
+### 1. Push the Koreshield image to ECR
 
 ```bash
 aws ecr create-repository --repository-name koreshield

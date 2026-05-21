@@ -1,6 +1,6 @@
 ---
 title: Prompt Injection Is Not Solved - How a Real-Time LLM Firewall Actually Works
-excerpt: Learn how KoreShield's detection engine works through three layers of protection - text normalization, rule-based detection, and semantic scoring - to catch prompt injection attacks in production systems.
+excerpt: Learn how Koreshield's detection engine works through three layers of protection - text normalization, rule-based detection, and semantic scoring - to catch prompt injection attacks in production systems.
 date: 2026-04-14
 author: Isaac Emmanuel
 categories: Security, Research
@@ -12,7 +12,7 @@ readingTime: 5
 
 Most teams building LLM powered products treat prompt injection as a known, manageable risk - something you handle with a careful system prompt and maybe some output filtering. This is the wrong mental model. Prompt injection is a structural vulnerability in how language models process input, and it requires a structural solution.
 
-This post explains how KoreShield's detection engine works: the architecture, the detection layers, the specific attack patterns it covers, and the design decisions behind it.
+This post explains how Koreshield's detection engine works: the architecture, the detection layers, the specific attack patterns it covers, and the design decisions behind it.
 
 ## What Prompt Injection Actually Is
 
@@ -48,7 +48,7 @@ A binary classifier fails in two directions. It produces false positives on secu
 
 The latency constraint matters because a security layer in the prompt hot path adds directly to the end-to-end response time. An additional 200ms per request from a remote ML inference call is not acceptable for a product that already carries LLM latency.
 
-KoreShield's detection engine runs three layers in order of increasing cost, aborting early when possible.
+Koreshield's detection engine runs three layers in order of increasing cost, aborting early when possible.
 
 ## Layer 1: Text Normalisation
 
@@ -92,7 +92,7 @@ Each pattern describes an attack concept. This is what makes pattern matching vi
 
 ## Integration
 
-Integration is a single endpoint change. Replace your LLM provider's base URL with the KoreShield proxy endpoint:
+Integration is a single endpoint change. Replace your LLM provider's base URL with the Koreshield proxy endpoint:
 
 All existing API calls, streaming, tool use, and multi-turn conversations work without modification. The proxy is transparent to the application layer.
 
@@ -100,6 +100,6 @@ All existing API calls, streaming, tool use, and multi-turn conversations work w
 
 Prompt injection is the primary attack surface of every LLM application, and it is one that the models themselves cannot defend against. The solution is an external security layer that runs fast enough to be invisible in production and smart enough to catch attacks across their full space of natural language variations.
 
-KoreShield's detection engine involving text normalisation, weighted rule matching, and semantic scoring all handles the majority of traffic with sub-5ms overhead and catches attack patterns across their real-world realisations.
+Koreshield's detection engine involving text normalisation, weighted rule matching, and semantic scoring all handles the majority of traffic with sub-5ms overhead and catches attack patterns across their real-world realisations.
 
-[Get started with KoreShield →](https://koreshield.ai/)
+[Get started with Koreshield →](https://koreshield.ai/)

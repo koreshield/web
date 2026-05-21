@@ -11,7 +11,7 @@ describe('GettingStartedPage', () => {
 			</MemoryRouter>,
 		);
 
-		expect(screen.getByText('How clients actually use KoreShield')).toBeInTheDocument();
+		expect(screen.getByText('How clients actually use Koreshield')).toBeInTheDocument();
 		expect(screen.getAllByText(/\/v1\/chat\/completions/).length).toBeGreaterThan(0);
 		expect(screen.getByText('Create a server credential')).toBeInTheDocument();
 		expect(screen.getByText('Minimal integration example')).toBeInTheDocument();

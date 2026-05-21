@@ -64,7 +64,7 @@ export function RAGShowcase() {
                     {/* Mobile arrow 1→2 */}
                     <div className="lg:hidden"><FlowArrow /></div>
 
-                    {/* Step 2: KoreShield Scan */}
+                    {/* Step 2: Koreshield Scan */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
@@ -76,7 +76,7 @@ export function RAGShowcase() {
                         <div className="flex justify-center mb-3">
                             <span className="inline-flex items-center gap-1.5 bg-emerald-600 dark:bg-electric-green text-white font-bold px-5 py-2 text-xs rounded-full uppercase tracking-widest shadow-lg shadow-emerald-600/30 dark:shadow-emerald-500/30 ring-2 ring-emerald-600/20 dark:ring-emerald-400/20">
                                 <Shield className="w-3.5 h-3.5" />
-                                KoreShield Guard
+                                Koreshield Guard
                             </span>
                         </div>
 

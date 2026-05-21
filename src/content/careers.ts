@@ -26,20 +26,20 @@ export const careerRoles: CareerRole[] = [
 		location: 'Remote',
 		type: 'Flexible / Remote',
 		summary:
-			'Help KoreShield show up where LLM security conversations are already happening. This is a hands-on role for someone who understands X and LinkedIn deeply and knows how to earn attention with sharp, human, technically credible engagement.',
+			'Help Koreshield show up where LLM security conversations are already happening. This is a hands-on role for someone who understands X and LinkedIn deeply and knows how to earn attention with sharp, human, technically credible engagement.',
 		hero:
-			'We are not looking for someone to queue bland posts. We need someone who knows how attention moves on X and LinkedIn, can join fast-moving AI security conversations with confidence, and can help make KoreShield impossible to ignore in the right rooms.',
+			'We are not looking for someone to queue bland posts. We need someone who knows how attention moves on X and LinkedIn, can join fast-moving AI security conversations with confidence, and can help make Koreshield impossible to ignore in the right rooms.',
 		overview: [
 			'Koreshield is a runtime LLM security proxy. We sit between applications and model providers and stop prompt injection, data leakage, and agent exploits before they complete.',
-			'Your job is to be in the room where those conversations are already happening and make sure KoreShield is part of them, with the right tone, timing, and technical credibility.',
+			'Your job is to be in the room where those conversations are already happening and make sure Koreshield is part of them, with the right tone, timing, and technical credibility.',
 		],
 		responsibilities: [
 			'Monitor X and LinkedIn daily for conversations around AI security, LLM vulnerabilities, prompt injection, and AI risk.',
 			'Identify threads and posts worth engaging with and respond quickly with substance, not filler.',
 			'Draft replies and comments that sound human, sharp, and informed rather than like a scheduled brand account.',
-			'Spot ragebait and debate-worthy posts on X where a well-placed response can pull attention back to KoreShield.',
+			'Spot ragebait and debate-worthy posts on X where a well-placed response can pull attention back to Koreshield.',
 			'Engage founders, security leads, and developers on LinkedIn through comments, replies, and shares that build credibility.',
-			'Grow KoreShield’s presence across both platforms and help the brand earn standing in the developer and AI security community.',
+			'Grow Koreshield’s presence across both platforms and help the brand earn standing in the developer and AI security community.',
 			'Flag fast-moving topics to the founder so we can turn them into stronger content quickly.',
 		],
 		profile: [
@@ -64,7 +64,7 @@ export const careerRoles: CareerRole[] = [
 		whatWeOffer: [
 			'Flexible hours and a fully remote setup.',
 			'Direct access to the founder and the real product story.',
-			'A role that can expand into broader brand, content, or community ownership as KoreShield grows.',
+			'A role that can expand into broader brand, content, or community ownership as Koreshield grows.',
 		],
 		recruitmentEmail,
 		featured: true,
@@ -76,12 +76,12 @@ export const careerRoles: CareerRole[] = [
 		location: 'London / Remote',
 		type: 'Full-time',
 		summary:
-			"Help us scale the KoreShield detection engine to handle billions of LLM requests. You'll own core infrastructure, shape API design, and work closely with our security research team.",
+			"Help us scale the Koreshield detection engine to handle billions of LLM requests. You'll own core infrastructure, shape API design, and work closely with our security research team.",
 		hero:
-			'This role is for someone who wants to sit close to the security engine, the API edge, and the reliability decisions that determine whether KoreShield holds up under real production pressure.',
+			'This role is for someone who wants to sit close to the security engine, the API edge, and the reliability decisions that determine whether Koreshield holds up under real production pressure.',
 		overview: [
 			'You will work on the core backend that powers detection, policy enforcement, logging, provider routing, and account-aware controls.',
-			'You will help define the technical backbone that allows KoreShield to stay fast while dealing with adversarial traffic and high-volume runtime inspection.',
+			'You will help define the technical backbone that allows Koreshield to stay fast while dealing with adversarial traffic and high-volume runtime inspection.',
 		],
 		responsibilities: [
 			'Design and evolve backend services that sit directly in the request path for LLM security enforcement.',
@@ -126,7 +126,7 @@ export const careerRoles: CareerRole[] = [
 			'Investigate emerging prompt injection, data leakage, jailbreak, tool abuse, and agent exploitation patterns.',
 			'Build and refine detection logic, corpora, and evaluation datasets.',
 			'Partner with engineering to turn research findings into reliable shipped defenses.',
-			'Help define how KoreShield measures detection quality, coverage, and false positive tradeoffs.',
+			'Help define how Koreshield measures detection quality, coverage, and false positive tradeoffs.',
 			'Contribute to external-facing analysis, explainers, or research artifacts where useful.',
 		],
 		profile: [
@@ -154,12 +154,12 @@ export const careerRoles: CareerRole[] = [
 		location: 'London / Remote',
 		type: 'Full-time',
 		summary:
-			"Own the end-to-end design of KoreShield's dashboard and developer tooling. You care about clarity, motion, and making complex security data feel immediately understandable.",
+			"Own the end-to-end design of Koreshield's dashboard and developer tooling. You care about clarity, motion, and making complex security data feel immediately understandable.",
 		hero:
 			'This role is about making dense security and operational information feel sharp, trustworthy, and surprisingly usable for both technical and non-technical audiences.',
 		overview: [
 			'You will shape the experience across onboarding, dashboard workflows, status surfaces, docs, settings, and reporting.',
-			'You will help turn KoreShield into a product that feels intentional and credible, not just functional.',
+			'You will help turn Koreshield into a product that feels intentional and credible, not just functional.',
 		],
 		responsibilities: [
 			'Design core product flows across dashboard, policy, analytics, onboarding, and account surfaces.',
@@ -198,7 +198,7 @@ export const careerRoles: CareerRole[] = [
 			'This role is for someone who can translate urgency around AI risk into serious customer conversations without resorting to empty security theater.',
 		overview: [
 			'You will own customer conversations with technical and security-conscious buyers who are actively trying to control AI risk in production.',
-			'You will help shape how KoreShield is sold, positioned, and expanded inside larger organizations.',
+			'You will help shape how Koreshield is sold, positioned, and expanded inside larger organizations.',
 		],
 		responsibilities: [
 			'Run enterprise sales cycles with security, platform, engineering, and leadership stakeholders.',
@@ -236,7 +236,7 @@ export const careerRoles: CareerRole[] = [
 		hero:
 			'This role is about building the operating rhythm, structure, and global discipline required to turn strong demand into a scalable commercial engine.',
 		overview: [
-			'You will help define and run the broader sales motion as KoreShield expands across geographies and customer profiles.',
+			'You will help define and run the broader sales motion as Koreshield expands across geographies and customer profiles.',
 			'You will work closely with leadership to bring more consistency to pipeline quality, forecasting, and execution.',
 		],
 		responsibilities: [
@@ -244,7 +244,7 @@ export const careerRoles: CareerRole[] = [
 			'Support and coach enterprise selling behaviors as the sales function grows.',
 			'Help establish forecasting, qualification, and follow-through standards.',
 			'Work across product, marketing, and founder-led sales to improve conversion quality.',
-			'Bring international commercial judgment to how KoreShield expands and prioritizes opportunities.',
+			'Bring international commercial judgment to how Koreshield expands and prioritizes opportunities.',
 		],
 		profile: [
 			'Experience leading or shaping B2B sales motions beyond a single rep workflow.',
@@ -279,7 +279,7 @@ export const careerRoles: CareerRole[] = [
 			'You will work on the details that separate “working” from “feels right.”',
 		],
 		responsibilities: [
-			'Build and refine high-quality frontend experiences across the KoreShield product.',
+			'Build and refine high-quality frontend experiences across the Koreshield product.',
 			'Improve clarity, speed, and interaction quality in data-heavy UI.',
 			'Work closely with design and product on the polish that users immediately feel.',
 			'Strengthen component quality, consistency, and maintainability.',
@@ -312,7 +312,7 @@ export const careerRoles: CareerRole[] = [
 		summary:
 			"Attempt to break what we build. You'll simulate adversarial attacks against LLM-powered systems, uncover weaknesses in our detection pipeline, and feed your findings directly into hardening our defences.",
 		hero:
-			'This role exists to keep KoreShield honest by attacking the product and the assumptions around it before real attackers do.',
+			'This role exists to keep Koreshield honest by attacking the product and the assumptions around it before real attackers do.',
 		overview: [
 			'You will run adversarial thinking directly against the product and customer use cases we care about most.',
 			'The work is practical, applied, and meant to produce stronger shipped defenses quickly.',
@@ -322,7 +322,7 @@ export const careerRoles: CareerRole[] = [
 			'Identify detector gaps, policy weaknesses, and bypass opportunities.',
 			'Work with engineering and research to turn findings into product improvements.',
 			'Help define regression suites and attack libraries that keep quality honest over time.',
-			'Contribute to KoreShield’s internal understanding of attacker tradecraft around AI systems.',
+			'Contribute to Koreshield’s internal understanding of attacker tradecraft around AI systems.',
 		],
 		profile: [
 			'Strong adversarial mindset and practical security instincts.',
@@ -349,9 +349,9 @@ export const careerRoles: CareerRole[] = [
 		location: 'London / Remote',
 		type: 'Full-time',
 		summary:
-			'Design and operate the data infrastructure that powers KoreShield at scale. You have hands-on experience with large-scale streaming and batch pipelines and a strong bias towards reliability and observability.',
+			'Design and operate the data infrastructure that powers Koreshield at scale. You have hands-on experience with large-scale streaming and batch pipelines and a strong bias towards reliability and observability.',
 		hero:
-			'This role is about building the data foundation that lets KoreShield move from “works now” to “works reliably at large volume with confidence.”',
+			'This role is about building the data foundation that lets Koreshield move from “works now” to “works reliably at large volume with confidence.”',
 		overview: [
 			'You will work on the ingestion, processing, and reporting pipelines that support product analytics, logs, and operational visibility.',
 			'You will help keep data systems reliable enough for customer-facing security and compliance workflows.',
@@ -388,12 +388,12 @@ export const careerRoles: CareerRole[] = [
 		location: 'London / Remote',
 		type: 'Full-time',
 		summary:
-			"Define the roadmap for KoreShield's AI-powered detection and policy features. You sit at the intersection of security research, engineering, and customer needs, translating signals into a coherent product strategy.",
+			"Define the roadmap for Koreshield's AI-powered detection and policy features. You sit at the intersection of security research, engineering, and customer needs, translating signals into a coherent product strategy.",
 		hero:
 			'This role is about making good decisions in a fast-moving category where the product has to stay credible, practical, and sharp at the same time.',
 		overview: [
 			'You will work across product, security, engineering, and customer input to turn signals into roadmap and execution choices.',
-			'You will help make sure KoreShield grows in a coherent direction rather than as a pile of disconnected security features.',
+			'You will help make sure Koreshield grows in a coherent direction rather than as a pile of disconnected security features.',
 		],
 		responsibilities: [
 			'Define priorities across detection, governance, onboarding, reporting, and platform features.',
@@ -427,11 +427,11 @@ export const careerRoles: CareerRole[] = [
 		location: 'London / Remote',
 		type: 'Full-time',
 		summary:
-			'Own the infrastructure that keeps KoreShield fast, secure, and always-on. You bring deep experience with cloud-native deployments, CI/CD, and operating systems at high availability under real production pressure.',
+			'Own the infrastructure that keeps Koreshield fast, secure, and always-on. You bring deep experience with cloud-native deployments, CI/CD, and operating systems at high availability under real production pressure.',
 		hero:
 			'This role is for someone who wants to own the platform layer that decides whether product promises survive contact with production reality.',
 		overview: [
-			'You will work on deployment, runtime health, incident resilience, delivery quality, and the systems that keep KoreShield dependable.',
+			'You will work on deployment, runtime health, incident resilience, delivery quality, and the systems that keep Koreshield dependable.',
 			'You will be close to the operational edge of the product and help make it calmer, cleaner, and more robust.',
 		],
 		responsibilities: [

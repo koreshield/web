@@ -25,7 +25,7 @@ export interface ChatCompletionResponse {
         completion_tokens: number;
         total_tokens: number;
     };
-    // KoreShield specific fields
+    // Koreshield specific fields
     koreshield_audit_log_id?: string;
     koreshield_policy_violation?: boolean;
     koreshield_blocked?: boolean;

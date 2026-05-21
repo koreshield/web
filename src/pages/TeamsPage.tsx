@@ -107,7 +107,7 @@ export function TeamsPage() {
 							Failed to load teams. This is usually a network or backend connectivity issue.
 						</p>
 						<p className="text-xs text-muted-foreground mb-6">
-							{getErrorMessage(teamsError, 'Unable to reach the KoreShield API.')}
+							{getErrorMessage(teamsError, 'Unable to reach the Koreshield API.')}
 						</p>
 						<button
 							onClick={() => refetch()}

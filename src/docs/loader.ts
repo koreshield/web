@@ -530,7 +530,7 @@ export function buildDocsSearchIndex(): SearchItem[] {
 		{
 			title: 'Documentation',
 			path: '/docs',
-			content: directories.root.indexDoc?.content || 'KoreShield documentation overview',
+			content: directories.root.indexDoc?.content || 'Koreshield documentation overview',
 			description: directories.root.indexDoc?.description,
 			category: 'Documentation',
 		},

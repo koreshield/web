@@ -558,7 +558,7 @@ export function TeamDetailsPage() {
 									<option value="viewer">Viewer</option>
 								</select>
 								<p className="text-xs text-muted-foreground mt-2">
-									If the email already belongs to an existing KoreShield user, they can accept and join immediately. Otherwise the invite stays pending until they sign up.
+									If the email already belongs to an existing Koreshield user, they can accept and join immediately. Otherwise the invite stays pending until they sign up.
 								</p>
 							</div>
 
