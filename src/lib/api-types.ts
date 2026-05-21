@@ -1,5 +1,5 @@
 /**
- * TypeScript types for KoreShield API
+ * TypeScript types for Koreshield API
  */
 
 // Base API Response

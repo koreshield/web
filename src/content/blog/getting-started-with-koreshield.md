@@ -1,6 +1,6 @@
 ---
-title: Getting Started with KoreShield
-excerpt: A comprehensive guide to integrating KoreShield into your application for AI security.
+title: Getting Started with Koreshield
+excerpt: A comprehensive guide to integrating Koreshield into your application for AI security.
 date: 2025-11-27
 author: Koreshield Labs
 categories: Getting Started, Tutorials
@@ -9,9 +9,9 @@ status: published
 coverImage: /images/blog/getting-started.png
 ---
 
-# Getting Started with KoreShield
+# Getting Started with Koreshield
 
-KoreShield is a comprehensive security platform designed to protect your AI applications from threats. This guide will walk you through the setup process.
+Koreshield is a comprehensive security platform designed to protect your AI applications from threats. This guide will walk you through the setup process.
 
 ## Installation
 
@@ -22,9 +22,9 @@ npm install @koreshield/sdk
 ## Quick Start
 
 ```javascript
-import { KoreShield } from '@koreshield/sdk';
+import { Koreshield } from '@koreshield/sdk';
 
-const shield = new KoreShield({
+const shield = new Koreshield({
   apiKey: 'your-api-key',
 });
 ```

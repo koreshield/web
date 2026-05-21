@@ -134,7 +134,7 @@ export default function ResearchPage() {
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="Research"
-				description="Research from KoreShield on prompt injection, RAG pipeline security, agentic AI threats, and production attack patterns."
+				description="Research from Koreshield on prompt injection, RAG pipeline security, agentic AI threats, and production attack patterns."
 			/>
 
 			<section className="relative overflow-hidden px-6 py-24 ambient-glow">
@@ -157,7 +157,7 @@ export default function ResearchPage() {
 							<div className="rounded-2xl border border-border bg-card/80 p-5">
 								<p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Research Lead</p>
 								<p className="mt-2 text-lg font-semibold">Isaac Emmanuel</p>
-								<p className="mt-1 text-sm text-muted-foreground">CTO, KoreShield</p>
+								<p className="mt-1 text-sm text-muted-foreground">CTO, Koreshield</p>
 							</div>
 							<div className="rounded-2xl border border-border bg-card/80 p-5">
 								<p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Focus</p>
@@ -205,7 +205,7 @@ export default function ResearchPage() {
 				<div className="mx-auto max-w-5xl">
 					<h2 className="mb-3 text-3xl font-bold tracking-tight">Published papers</h2>
 					<p className="mb-12 max-w-xl text-muted-foreground">
-						Published and preprint work from the KoreShield research program, with papers authored by Isaac Emmanuel and collaborators.
+						Published and preprint work from the Koreshield research program, with papers authored by Isaac Emmanuel and collaborators.
 					</p>
 					<div className="space-y-8">
 						{publishedPapers.map((item, index) => (

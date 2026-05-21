@@ -1,6 +1,6 @@
 ---
 title: REST API
-description: Generated OpenAPI contract, authentication model, and endpoint reference for KoreShield APIs.
+description: Generated OpenAPI contract, authentication model, and endpoint reference for Koreshield APIs.
 slug: /api/rest-api
 last_update:
   date: 2026-04-12
@@ -8,7 +8,7 @@ last_update:
 
 # REST API
 
-KoreShield's REST API contract is generated from the live FastAPI app.
+Koreshield's REST API contract is generated from the live FastAPI app.
 
 - Interactive docs (Swagger UI): `GET /docs`
 - ReDoc: `GET /redoc`
@@ -106,7 +106,7 @@ curl -s -N -X POST https://api.koreshield.com/v1/chat/completions \
 
 ### Automatic Model Routing
 
-KoreShield routes requests to the correct upstream provider based on the model name prefix, with no extra configuration needed:
+Koreshield routes requests to the correct upstream provider based on the model name prefix, with no extra configuration needed:
 
 | Model prefix | Provider |
 |---|---|
@@ -115,7 +115,7 @@ KoreShield routes requests to the correct upstream provider based on the model n
 | `gemini-*` | Google Gemini |
 | `deepseek-*` | DeepSeek |
 
-If the preferred provider is unhealthy, KoreShield automatically fails over to the next available provider.
+If the preferred provider is unhealthy, Koreshield automatically fails over to the next available provider.
 
 ### Blocked Request Response
 

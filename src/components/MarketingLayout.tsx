@@ -194,9 +194,9 @@ export function MarketingLayout() {
 				<div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
 					{/* Logo */}
 					<Link to="/" className="flex items-center gap-2.5 tracking-tight">
-						<img src={logoSrc} alt="KoreShield" className="h-8 w-8" />
+						<img src={logoSrc} alt="Koreshield" className="h-8 w-8" />
 						<div className="min-w-0">
-							<span className="block text-lg font-bold text-foreground">KoreShield</span>
+							<span className="block text-lg font-bold text-foreground">Koreshield</span>
 							<span className="hidden text-[11px] uppercase tracking-[0.22em] text-muted-foreground sm:block">
 								AI Security
 							</span>
@@ -222,7 +222,7 @@ export function MarketingLayout() {
 							target="_blank"
 							rel="noreferrer noopener"
 							className="text-muted-foreground transition-colors hover:text-foreground"
-							aria-label="KoreShield on GitHub"
+							aria-label="Koreshield on GitHub"
 						>
 							<Github className="h-4.5 w-4.5" />
 						</a>
@@ -291,7 +291,7 @@ export function MarketingLayout() {
 						<div className="fixed inset-x-3 top-[4.5rem] z-50 max-h-[calc(100dvh-5.5rem)] overflow-hidden rounded-[24px] border border-border bg-background shadow-2xl shadow-black/40">
 							<div className="flex items-center justify-between border-b border-border px-5 py-4">
 								<div>
-									<p className="text-sm font-semibold text-foreground">Navigate KoreShield</p>
+									<p className="text-sm font-semibold text-foreground">Navigate Koreshield</p>
 									<p className="text-xs text-muted-foreground">Solutions, pricing, and resources.</p>
 								</div>
 								<div className="flex items-center gap-2">

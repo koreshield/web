@@ -42,7 +42,7 @@ function LandingPage() {
             <section className="py-28 md:py-36 px-6 relative ambient-glow">
                 <div className="max-w-7xl mx-auto relative z-10">
                     <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4 tracking-[-0.04em]">Threats Blocked. Right Now.</h2>
-                    <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto">Watch KoreShield intercept real attack patterns as they happen. These are the same threats hitting production AI systems today: classified, scored, and stopped.</p>
+                    <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto">Watch Koreshield intercept real attack patterns as they happen. These are the same threats hitting production AI systems today: classified, scored, and stopped.</p>
                     <ErrorBoundary fallback={<div className="h-64 bg-muted/20 border border-white/[0.08] rounded-2xl text-center p-8">Unable to load dashboard</div>}>
                         <ThreatDashboard />
                     </ErrorBoundary>
@@ -76,7 +76,7 @@ function LandingPage() {
                             Your AI Is in Production.<br className="hidden md:block" /> Is Your Security?
                         </h2>
                         <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
-                            Most teams discover their LLM is vulnerable after something goes wrong. KoreShield ships in under 5 minutes. Incidents don't.
+                            Most teams discover their LLM is vulnerable after something goes wrong. Koreshield ships in under 5 minutes. Incidents don't.
                         </p>
                     </motion.div>
 

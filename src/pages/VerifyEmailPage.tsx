@@ -67,9 +67,9 @@ export function VerifyEmailPage() {
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-electric-green/[0.03] rounded-full translate-x-1/2 translate-y-1/2 blur-3xl pointer-events-none" />
 
                 <div className="relative z-10 flex items-center gap-3">
-                    <img src="/logo/dark/SVG/Black.svg" alt="KoreShield" className="w-8 h-8 dark:hidden" />
-                    <img src="/logo/light/SVG/White.svg" alt="KoreShield" className="w-8 h-8 hidden dark:block" />
-                    <span className="text-xl font-bold text-foreground tracking-tight">KoreShield</span>
+                    <img src="/logo/dark/SVG/Black.svg" alt="Koreshield" className="w-8 h-8 dark:hidden" />
+                    <img src="/logo/light/SVG/White.svg" alt="Koreshield" className="w-8 h-8 hidden dark:block" />
+                    <span className="text-xl font-bold text-foreground tracking-tight">Koreshield</span>
                 </div>
 
                 <div className="relative z-10 space-y-8">
@@ -77,7 +77,7 @@ export function VerifyEmailPage() {
                         "Email verification is a simple but critical step to keep your account secure."
                     </blockquote>
                     <div>
-                        <p className="text-sm text-muted-foreground">— KoreShield Security Team</p>
+                        <p className="text-sm text-muted-foreground">— Koreshield Security Team</p>
                     </div>
                 </div>
 

@@ -484,7 +484,7 @@ export default function StatusPage() {
         );
 
         if (totalProviders === 0 && health?.status === 'healthy') {
-          setStatusError('Core KoreShield services are healthy. Provider routing depends on credentials configured in each deployment environment.');
+          setStatusError('Core Koreshield services are healthy. Provider routing depends on credentials configured in each deployment environment.');
         }
       } catch {
         if (!cancelled) {
@@ -524,7 +524,7 @@ export default function StatusPage() {
     <div className="min-h-screen bg-background">
       <SEOMeta
         title="System Status"
-        description="Real-time status and uptime information for KoreShield services. View current system status, resolved incidents, and scheduled maintenance."
+        description="Real-time status and uptime information for Koreshield services. View current system status, resolved incidents, and scheduled maintenance."
       />
 
       <section className="py-20 px-4 bg-card/40">
@@ -542,7 +542,7 @@ export default function StatusPage() {
               <h1 className="text-5xl font-bold text-foreground">System Status</h1>
             </div>
             <p className="text-lg text-muted-foreground">
-              Live platform health, resolved incidents, and scheduled maintenance for KoreShield.
+              Live platform health, resolved incidents, and scheduled maintenance for Koreshield.
             </p>
           </motion.div>
         </div>
@@ -593,7 +593,7 @@ export default function StatusPage() {
             </div>
             <div className="flex gap-3 flex-wrap">
               <a
-                href="mailto:hello@koreshield.com?subject=Subscribe%20to%20KoreShield%20status%20alerts"
+                href="mailto:hello@koreshield.com?subject=Subscribe%20to%20Koreshield%20status%20alerts"
                 className="flex items-center gap-2 px-4 py-2 bg-card text-foreground border border-border rounded-lg font-medium hover:bg-muted transition-colors"
               >
                 <Bell className="w-4 h-4" />

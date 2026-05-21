@@ -183,7 +183,7 @@ export function FullPageLoader({ message = 'Loading...' }: { message?: string })
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          KoreShield
+          Koreshield
         </motion.div>
 
         <div className="flex flex-col items-center gap-4">

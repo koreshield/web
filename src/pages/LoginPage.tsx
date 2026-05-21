@@ -139,9 +139,9 @@ export function LoginPage() {
 				<div className="absolute bottom-0 right-0 w-96 h-96 bg-electric-green/[0.03] rounded-full translate-x-1/2 translate-y-1/2 blur-3xl pointer-events-none" />
 
 				<div className="relative z-10 flex items-center gap-3">
-					<img src="/logo/dark/SVG/Black.svg" alt="KoreShield" className="w-8 h-8 dark:hidden" />
-					<img src="/logo/light/SVG/White.svg" alt="KoreShield" className="w-8 h-8 hidden dark:block" />
-					<span className="text-xl font-bold text-foreground tracking-tight">KoreShield</span>
+					<img src="/logo/dark/SVG/Black.svg" alt="Koreshield" className="w-8 h-8 dark:hidden" />
+					<img src="/logo/light/SVG/White.svg" alt="Koreshield" className="w-8 h-8 hidden dark:block" />
+					<span className="text-xl font-bold text-foreground tracking-tight">Koreshield</span>
 				</div>
 
 				<div className="relative z-10 space-y-8">
@@ -164,16 +164,16 @@ export function LoginPage() {
 				</div>
 
 				<p className="relative z-10 text-xs text-muted-foreground/60">
-					© {new Date().getFullYear()} KoreShield. All rights reserved.
+					© {new Date().getFullYear()} Koreshield. All rights reserved.
 				</p>
 			</div>
 
 			<div className="flex-1 flex items-center justify-center p-6 sm:p-12">
 				<div className="w-full max-w-md">
 					<div className="flex items-center gap-2 mb-8 lg:hidden">
-							<img src="/logo/dark/SVG/Black.svg" alt="KoreShield" className="w-7 h-7 dark:hidden" />
-							<img src="/logo/light/SVG/White.svg" alt="KoreShield" className="w-7 h-7 hidden dark:block" />
-						<span className="font-bold text-foreground">KoreShield</span>
+							<img src="/logo/dark/SVG/Black.svg" alt="Koreshield" className="w-7 h-7 dark:hidden" />
+							<img src="/logo/light/SVG/White.svg" alt="Koreshield" className="w-7 h-7 hidden dark:block" />
+						<span className="font-bold text-foreground">Koreshield</span>
 					</div>
 
 					{locationState?.passwordReset && (

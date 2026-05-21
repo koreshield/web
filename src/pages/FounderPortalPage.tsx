@@ -566,7 +566,7 @@ export function FounderPortalPage() {
 
 	return (
 		<div className="min-h-screen bg-background">
-			<SEOMeta title="Founder Portal | KoreShield" description="Private KoreShield founder operating dashboard." />
+			<SEOMeta title="Founder Portal | Koreshield" description="Private Koreshield founder operating dashboard." />
 
 			<header className="border-b border-border bg-card/80 backdrop-blur">
 				<div className="mx-auto flex max-w-[1500px] flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8 xl:flex-row xl:items-center xl:justify-between">
@@ -577,7 +577,7 @@ export function FounderPortalPage() {
 						</div>
 						<h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground">Founder Portal</h1>
 						<p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-							Users, requests, API keys, billing, threats, and platform health from live KoreShield data.
+							Users, requests, API keys, billing, threats, and platform health from live Koreshield data.
 						</p>
 					</div>
 					<div className="flex flex-wrap items-center gap-3">

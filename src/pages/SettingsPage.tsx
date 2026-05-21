@@ -198,10 +198,10 @@ export function SettingsPage() {
 										<div>
 											<p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Workspace profile</p>
 											<h2 className="mt-2 text-2xl font-bold text-foreground">
-												{user.name || 'KoreShield account'}
+												{user.name || 'Koreshield account'}
 											</h2>
 											<p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-												Manage the identity, plan, and account controls that shape how your workspace uses KoreShield in development and production.
+												Manage the identity, plan, and account controls that shape how your workspace uses Koreshield in development and production.
 											</p>
 										</div>
 									</div>
@@ -259,7 +259,7 @@ export function SettingsPage() {
 										<ArrowRight className="h-4 w-4 text-muted-foreground" />
 									</div>
 									<p className="mt-4 text-sm font-semibold text-foreground">Visit website</p>
-									<p className="mt-1 text-sm leading-6 text-muted-foreground">Jump back to the main KoreShield site, docs, and public product pages.</p>
+									<p className="mt-1 text-sm leading-6 text-muted-foreground">Jump back to the main Koreshield site, docs, and public product pages.</p>
 								</a>
 							</div>
 						</div>
@@ -420,9 +420,9 @@ export function SettingsPage() {
 							<div className="rounded-lg border border-border bg-card/70 p-5">
 								<div className="flex items-start justify-between gap-3">
 									<div>
-										<h3 className="text-sm font-semibold text-foreground">KoreShield access</h3>
+										<h3 className="text-sm font-semibold text-foreground">Koreshield access</h3>
 										<p className="mt-1 text-sm leading-6 text-muted-foreground">
-											Manage the credentials and team controls that govern how your workspace connects to KoreShield.
+											Manage the credentials and team controls that govern how your workspace connects to Koreshield.
 										</p>
 									</div>
 									<Shield className="mt-0.5 h-5 w-5 text-primary" />
@@ -496,7 +496,7 @@ export function SettingsPage() {
 								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Security controls</p>
 								<h2 className="mt-2 text-2xl font-bold text-foreground">Protect your workspace access</h2>
 								<p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-									Use verification, password recovery, and privileged-access protections to keep your KoreShield account ready for secure rollout work.
+									Use verification, password recovery, and privileged-access protections to keep your Koreshield account ready for secure rollout work.
 								</p>
 							</div>
 						</div>
@@ -578,7 +578,7 @@ export function SettingsPage() {
 									<div>
 										<h3 className="text-sm font-semibold text-foreground">Privileged verification</h3>
 										<p className="mt-1 text-sm leading-6 text-muted-foreground">
-											KoreShield currently enforces an extra email verification step for privileged sign-ins, rather than a self-serve MFA enrollment flow for every user.
+											Koreshield currently enforces an extra email verification step for privileged sign-ins, rather than a self-serve MFA enrollment flow for every user.
 										</p>
 									</div>
 									<Shield className="mt-0.5 h-5 w-5 text-primary" />

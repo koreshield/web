@@ -37,7 +37,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		label: 'April 2026 Roundup',
 		timeframe: 'April 2026',
 		overview:
-			'April focused on operational trust: live status, provider health, account lifecycle hardening, richer alerting, and cleaner dashboard flows for customers using KoreShield day to day.',
+			'April focused on operational trust: live status, provider health, account lifecycle hardening, richer alerting, and cleaner dashboard flows for customers using Koreshield day to day.',
 		stats: [
 			{ label: 'Curated updates', value: '7' },
 			{ label: 'Customer-facing fixes', value: '4' },
@@ -63,7 +63,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				title: 'Telegram alerting now carries operational detail',
 				category: 'Improved',
 				summary:
-					'Alert delivery was expanded beyond surface-level events so KoreShield operators can trace scans, batch work, provider failures, and report processing from one alert stream.',
+					'Alert delivery was expanded beyond surface-level events so Koreshield operators can trace scans, batch work, provider failures, and report processing from one alert stream.',
 				customerImpact:
 					'Faster incident response when scan batches, report jobs, or provider routes drift out of expected health.',
 				items: [
@@ -106,7 +106,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		label: 'March 2026 Roundup',
 		timeframe: 'March 2026',
 		overview:
-			'March focused on platform depth: RAG evidence visibility, runtime tool security, detector hardening, enterprise billing, and clearer onboarding for customers integrating KoreShield into production systems.',
+			'March focused on platform depth: RAG evidence visibility, runtime tool security, detector hardening, enterprise billing, and clearer onboarding for customers integrating Koreshield into production systems.',
 		stats: [
 			{ label: 'Curated updates', value: '8' },
 			{ label: 'Security upgrades', value: '5' },
@@ -132,7 +132,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				title: 'Runtime tool security and governed sessions expanded',
 				category: 'Security',
 				summary:
-					'KoreShield now goes beyond prompt scanning by evaluating risky tool calls, provider trust context, approval workflows, and suspicious tool chains in agentic flows.',
+					'Koreshield now goes beyond prompt scanning by evaluating risky tool calls, provider trust context, approval workflows, and suspicious tool chains in agentic flows.',
 				customerImpact:
 					'Customers evaluating agents and tool use can apply policy-backed review flows instead of trusting raw tool execution.',
 				items: [
@@ -148,7 +148,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				summary:
 					'Detector normalization, prompt-injection pattern coverage, indirect prompt-injection analysis, and RAG heuristics all received major upgrades.',
 				customerImpact:
-					'KoreShield is better at catching evasive instructions, poisoning attempts, and retrieved-document abuse before content reaches a model.',
+					'Koreshield is better at catching evasive instructions, poisoning attempts, and retrieved-document abuse before content reaches a model.',
 				items: [
 					'Added stronger normalization and raw plus normalized scanning paths.',
 					'Expanded the detector corpus for prompt override, leakage, and exfiltration attempts.',
@@ -160,7 +160,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				title: 'Hosted billing and subscription management were introduced',
 				category: 'Added',
 				summary:
-					'KoreShield added Polar-backed billing flows so hosted pricing, checkout, and customer account state can be managed inside the product.',
+					'Koreshield added Polar-backed billing flows so hosted pricing, checkout, and customer account state can be managed inside the product.',
 				customerImpact:
 					'Hosted customers now have a clearer path from evaluation to paid plan selection and entitlement management.',
 				items: [
@@ -175,7 +175,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		label: 'February 2026 Roundup',
 		timeframe: 'February 2026',
 		overview:
-			'February focused on hardening the scanning pipeline, expanding analytics, and making the dashboard more useful for teams who depend on KoreShield in daily operations.',
+			'February focused on hardening the scanning pipeline, expanding analytics, and making the dashboard more useful for teams who depend on Koreshield in daily operations.',
 		stats: [
 			{ label: 'Curated updates', value: '7' },
 			{ label: 'Security upgrades', value: '3' },
@@ -188,7 +188,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				isMajor: true,
 				category: 'Added',
 				summary:
-					'The KoreShield hosted web platform launched with a comprehensive monitoring and management dashboard, marking the transition from API-only to a fully integrated product.',
+					'The Koreshield hosted web platform launched with a comprehensive monitoring and management dashboard, marking the transition from API-only to a fully integrated product.',
 				customerImpact:
 					'Customers can now monitor threats, manage API keys, audit activity, and test policies through a dedicated dashboard, with no custom tooling required.',
 				items: [
@@ -220,7 +220,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				summary:
 					'Operators can now see exactly which retrieved documents triggered a RAG security signal, rather than seeing a binary block result.',
 				customerImpact:
-					'Security teams get actionable attribution when KoreShield flags a RAG retrieval flow, making it easier to tune policies and explain decisions.',
+					'Security teams get actionable attribution when Koreshield flags a RAG retrieval flow, making it easier to tune policies and explain decisions.',
 				items: [
 					'Added document-level evidence cards to RAG scan results in the dashboard.',
 					'Improved scan result payloads to include chunk index and retrieval score context.',
@@ -234,7 +234,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				summary:
 					'The prompt injection detector was updated with a broader pattern corpus targeting obfuscation, role override, and context manipulation evasion techniques.',
 				customerImpact:
-					'KoreShield catches more sophisticated injection attempts that use encoding, synonym substitution, or multi-step manipulation to bypass simpler detectors.',
+					'Koreshield catches more sophisticated injection attempts that use encoding, synonym substitution, or multi-step manipulation to bypass simpler detectors.',
 				items: [
 					'Added detection patterns for Base64-encoded instruction injection.',
 					'Improved role-override detection to cover persona and instruction-reversal attacks.',
@@ -274,7 +274,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				title: 'Team invite and permission management shipped',
 				category: 'Added',
 				summary:
-					'KoreShield now supports multi-member teams with role-based access so administrators can invite colleagues and assign permissions without sharing credentials.',
+					'Koreshield now supports multi-member teams with role-based access so administrators can invite colleagues and assign permissions without sharing credentials.',
 				customerImpact:
 					'Security and engineering teams can collaborate inside the dashboard with appropriate access boundaries instead of sharing a single account.',
 				items: [
@@ -303,7 +303,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				summary:
 					'The authenticated dashboard shell launched with sidebar navigation, theme switching, and a persistent layout for the metrics, alerts, policies, and settings sections.',
 				customerImpact:
-					'Customers can now log into a real product interface instead of interacting with KoreShield only through the API.',
+					'Customers can now log into a real product interface instead of interacting with Koreshield only through the API.',
 				items: [
 					'Launched the authenticated app shell with route-based navigation.',
 					'Added dark and light theme support with persistent preference storage.',
@@ -331,7 +331,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				summary:
 					'The core prompt screening pipeline, from request receipt through detector evaluation to audit log write and policy decision, was completed and validated in a staging environment.',
 				customerImpact:
-					'KoreShield can now intercept, evaluate, and enforce policy on real AI requests rather than running synthetic simulations.',
+					'Koreshield can now intercept, evaluate, and enforce policy on real AI requests rather than running synthetic simulations.',
 				items: [
 					'Completed the synchronous scan path from API ingress to policy enforcement.',
 					'Added audit log writes for every scan decision with full detector payloads.',
@@ -357,9 +357,9 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				title: 'Public marketing site launched',
 				category: 'Added',
 				summary:
-					'The public KoreShield website launched with the landing page, pricing page, documentation links, and basic contact flow.',
+					'The public Koreshield website launched with the landing page, pricing page, documentation links, and basic contact flow.',
 				customerImpact:
-					'Prospective customers can evaluate KoreShield, compare plans, and start the signup process without needing a direct introduction.',
+					'Prospective customers can evaluate Koreshield, compare plans, and start the signup process without needing a direct introduction.',
 				items: [
 					'Launched landing page with feature overview and integration code samples.',
 					'Published pricing page with plan comparisons and FAQ.',
@@ -372,7 +372,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		label: 'December 2025 Roundup',
 		timeframe: 'December 2025',
 		overview:
-			'December was the initial build sprint: infrastructure setup, the backend framework, the first detector implementations, and the foundational architecture that KoreShield runs on today.',
+			'December was the initial build sprint: infrastructure setup, the backend framework, the first detector implementations, and the foundational architecture that Koreshield runs on today.',
 		stats: [
 			{ label: 'Curated updates', value: '5' },
 			{ label: 'Infrastructure milestones', value: '3' },
@@ -385,12 +385,12 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				isMajor: true,
 				category: 'Added',
 				summary:
-					'KoreShield published a comprehensive research preprint on LLM security and indirect prompt injection taxonomy, establishing the theoretical foundation for the platform\'s detection approach.',
+					'Koreshield published a comprehensive research preprint on LLM security and indirect prompt injection taxonomy, establishing the theoretical foundation for the platform\'s detection approach.',
 				customerImpact:
-					'The published framework gives customers and prospects a rigorous, peer-reviewed basis for evaluating KoreShield\'s security model.',
+					'The published framework gives customers and prospects a rigorous, peer-reviewed basis for evaluating Koreshield\'s security model.',
 				items: [
 					'Released preprint: "LLM Firewall: A Novel Taxonomy of Indirect Prompt Injection Attacks in Enterprise RAG Systems".',
-					'Introduced the 5-dimensional threat classification framework underpinning KoreShield\'s detectors.',
+					'Introduced the 5-dimensional threat classification framework underpinning Koreshield\'s detectors.',
 					'Documented attack vectors and defense mechanisms with empirical analysis.',
 					'Published on Academia.edu for open peer review.',
 				],
@@ -402,7 +402,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				summary:
 					'The production environment was provisioned with a Docker Compose stack, Caddy reverse proxy with automatic TLS, PostgreSQL, and Redis, ready for the first real deployment.',
 				customerImpact:
-					'KoreShield has a stable, self-hosted production foundation with HTTPS and proper service isolation from day one.',
+					'Koreshield has a stable, self-hosted production foundation with HTTPS and proper service isolation from day one.',
 				items: [
 					'Set up Docker Compose production stack with API, web, database, and cache services.',
 					'Configured Caddy for automatic TLS with HTTPS routing for koreshield.ai and api.koreshield.com.',
@@ -417,7 +417,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				summary:
 					'The first two production-grade security detectors landed: a prompt injection classifier and a PII leakage detector covering common personal data patterns.',
 				customerImpact:
-					'KoreShield can intercept prompt injection attacks and flag responses that might expose personal information from the first integration.',
+					'Koreshield can intercept prompt injection attacks and flag responses that might expose personal information from the first integration.',
 				items: [
 					'Implemented baseline prompt injection detector with pattern matching and heuristic scoring.',
 					'Added PII leakage detector covering email, phone, SSN, and credit card patterns.',
@@ -431,7 +431,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				summary:
 					'The Python backend was built on FastAPI with the initial database schema, migration tooling, and health check infrastructure that all subsequent features are layered on top of.',
 				customerImpact:
-					'KoreShield\'s backend is structured for extensibility and production reliability from the start, not retrofitted later.',
+					'Koreshield\'s backend is structured for extensibility and production reliability from the start, not retrofitted later.',
 				items: [
 					'Bootstrapped FastAPI application with structured routing and middleware.',
 					'Designed and migrated initial database schema covering users, scans, policies, and audit logs.',
@@ -440,12 +440,12 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 			},
 			{
 				date: '2025-12-08',
-				title: 'KoreShield project initiated and monorepo structure set up',
+				title: 'Koreshield project initiated and monorepo structure set up',
 				category: 'Added',
 				summary:
-					'The KoreShield monorepo was created with the initial project structure for the backend API, web frontend, Python SDK, JavaScript SDK, documentation site, and blog.',
+					'The Koreshield monorepo was created with the initial project structure for the backend API, web frontend, Python SDK, JavaScript SDK, documentation site, and blog.',
 				customerImpact:
-					'All KoreShield components share a single versioned repository, making it straightforward for contributors and integrations to stay aligned.',
+					'All Koreshield components share a single versioned repository, making it straightforward for contributors and integrations to stay aligned.',
 				items: [
 					'Created monorepo with koreshield (API), koreshield-web (frontend), python-sdk, node-sdk, koreshield-docs, and koreshield-blog.',
 					'Set up shared tooling including linting, formatting, and CI configuration.',
@@ -458,7 +458,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		label: 'November 2025 Roundup',
 		timeframe: 'November 2025',
 		overview:
-			'November marked the public launch of KoreShield with its first stable release: multi-provider LLM support, real-time prompt injection detection, and foundational SDK integrations.',
+			'November marked the public launch of Koreshield with its first stable release: multi-provider LLM support, real-time prompt injection detection, and foundational SDK integrations.',
 		stats: [
 			{ label: 'Curated updates', value: '1' },
 			{ label: 'Launch milestones', value: '1' },
@@ -470,7 +470,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				isMajor: true,
 				category: 'Added',
 				summary:
-					'KoreShield\'s first public release shipped with core LLM security features: multi-provider support, real-time prompt injection detection, Python and JavaScript SDKs, basic RAG context scanning, and Docker-based deployment.',
+					'Koreshield\'s first public release shipped with core LLM security features: multi-provider support, real-time prompt injection detection, Python and JavaScript SDKs, basic RAG context scanning, and Docker-based deployment.',
 				customerImpact:
 					'Developers can immediately protect LLM applications across OpenAI, Anthropic, and DeepSeek with a drop-in SDK, with no infrastructure changes required.',
 				items: [
@@ -489,8 +489,8 @@ function ChangelogPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground pt-24 pb-20 transition-colors">
 			<SEOMeta
-				title="Changelog | KoreShield"
-				description="Manual, curated release notes for KoreShield platform updates, security improvements, and operational milestones."
+				title="Changelog | Koreshield"
+				description="Manual, curated release notes for Koreshield platform updates, security improvements, and operational milestones."
 			/>
 
 			<div className="max-w-6xl mx-auto px-6">
@@ -502,7 +502,7 @@ function ChangelogPage() {
 						Changelog
 					</h1>
 					<p className="mt-4 max-w-3xl text-lg text-muted-foreground">
-						Curated updates for customers, operators, and buyers who want the real story of what changed in KoreShield.
+						Curated updates for customers, operators, and buyers who want the real story of what changed in Koreshield.
 						We summarize product, security, infrastructure, and onboarding work in monthly batches instead of publishing raw commit noise.
 					</p>
 					<div className="mt-8 rounded-3xl border border-white/[0.08] bg-card/70 p-6 sm:p-8">

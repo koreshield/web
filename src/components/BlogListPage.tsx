@@ -73,10 +73,10 @@ export function BlogListPage() {
 	return (
 		<>
 			<Helmet>
-				<title>Blog | KoreShield</title>
-				<meta name="description" content="Stay updated with KoreShield blog - Security news, tutorials, and insights." />
-				<meta property="og:title" content="Blog | KoreShield" />
-				<meta property="og:description" content="Stay updated with KoreShield blog - Security news, tutorials, and insights." />
+				<title>Blog | Koreshield</title>
+				<meta name="description" content="Stay updated with Koreshield blog - Security news, tutorials, and insights." />
+				<meta property="og:title" content="Blog | Koreshield" />
+				<meta property="og:description" content="Stay updated with Koreshield blog - Security news, tutorials, and insights." />
 				<meta property="og:type" content="website" />
 				<meta property="og:url" content="https://koreshield.ai/blog" />
 			</Helmet>
@@ -85,9 +85,9 @@ export function BlogListPage() {
 			<div className="border-b border-border pb-12 pt-12">
 				<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 					<p className="text-sm font-semibold uppercase tracking-widest text-primary mb-3">Blog</p>
-					<h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">KoreShield Blog</h1>
+					<h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">Koreshield Blog</h1>
 					<p className="text-lg text-muted-foreground max-w-2xl">
-						Stay informed about AI security, threat intelligence, and KoreShield updates
+						Stay informed about AI security, threat intelligence, and Koreshield updates
 					</p>
 				</div>
 			</div>

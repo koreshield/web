@@ -29,7 +29,7 @@ Carefully crafted inputs designed to fool AI systems.
 
 ## Mitigation Strategies
 
-KoreShield provides comprehensive protection against these threats through:
+Koreshield provides comprehensive protection against these threats through:
 
 - Input validation and filtering
 - Model integrity monitoring

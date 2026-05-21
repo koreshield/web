@@ -1,5 +1,5 @@
 ---
-title: Why We Built KoreShield - Securing the New Intelligence Layer
+title: Why We Built Koreshield - Securing the New Intelligence Layer
 excerpt: For the last two decades, enterprise security was structurally straightforward. But LLMs changed everything. A valid English sentence can now drop tables or exfiltrate PII. Traditional security tools are blind to semantic manipulation.
 date: 2026-03-02
 author: Isaac Emmanuel
@@ -23,6 +23,6 @@ Traditional WAFs (Web Application Firewalls) and DLP (Data Loss Prevention) scan
 
 As CTO, when I looked at the security landscape for companies racing to build AI applications, I realized we were about to hit a massive wall. Enterprises want the power of AI, but they cannot accept the catastrophic risk of an unconstrained intelligence layer operating with access to their private data.
 
-That is why we built KoreShield.
+That is why we built Koreshield.
 
-KoreShield is a runtime enforcement proxy that sits between your application and your LLM provider, providing the structural security boundary that the AI era demands. It's not a prompt engineering fix. It's infrastructure.
+Koreshield is a runtime enforcement proxy that sits between your application and your LLM provider, providing the structural security boundary that the AI era demands. It's not a prompt engineering fix. It's infrastructure.

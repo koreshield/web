@@ -160,8 +160,8 @@ function IntegrationsPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground pt-24 pb-20">
 			<SEOMeta
-				title="Integrations Catalog | KoreShield"
-				description="Connect KoreShield with your favorite tools, CRMs, and LLM frameworks."
+				title="Integrations Catalog | Koreshield"
+				description="Connect Koreshield with your favorite tools, CRMs, and LLM frameworks."
 			/>
 
 			<div className="max-w-7xl mx-auto px-6">
@@ -176,7 +176,7 @@ function IntegrationsPage() {
 						Connect Your <span className="text-electric-green">Stack</span>
 					</h1>
 					<p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-						Secure your AI infrastructure with the integrations, guides, and SDKs KoreShield supports today.
+						Secure your AI infrastructure with the integrations, guides, and SDKs Koreshield supports today.
 					</p>
 
 					{/* Search & Filter */}

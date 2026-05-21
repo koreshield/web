@@ -34,7 +34,7 @@ describe('DemoPage', () => {
 		fireEvent.change(screen.getByLabelText(/first name/i), { target: { value: 'Isaac' } });
 		fireEvent.change(screen.getByLabelText(/last name/i), { target: { value: 'Nsisong' } });
 		fireEvent.change(screen.getByLabelText(/work email/i), { target: { value: 'isaac@example.com' } });
-		fireEvent.change(screen.getByLabelText(/^company/i), { target: { value: 'KoreShield' } });
+		fireEvent.change(screen.getByLabelText(/^company/i), { target: { value: 'Koreshield' } });
 		fireEvent.change(screen.getByLabelText(/job title/i), { target: { value: 'Founder' } });
 		fireEvent.change(screen.getByLabelText(/what are you building/i), {
 			target: { value: 'We need runtime AI security for our production copilots.' },
@@ -61,7 +61,7 @@ describe('DemoPage', () => {
 			first_name: 'Isaac',
 			last_name: 'Nsisong',
 			work_email: 'isaac@example.com',
-			company: 'KoreShield',
+			company: 'Koreshield',
 			job_title: 'Founder',
 			source: 'LinkedIn',
 		});
@@ -91,7 +91,7 @@ describe('DemoPage', () => {
 		fireEvent.change(screen.getByLabelText(/first name/i), { target: { value: 'Isaac' } });
 		fireEvent.change(screen.getByLabelText(/last name/i), { target: { value: 'Nsisong' } });
 		fireEvent.change(screen.getByLabelText(/work email/i), { target: { value: 'isaac@example.com' } });
-		fireEvent.change(screen.getByLabelText(/^company/i), { target: { value: 'KoreShield' } });
+		fireEvent.change(screen.getByLabelText(/^company/i), { target: { value: 'Koreshield' } });
 		fireEvent.change(screen.getByLabelText(/job title/i), { target: { value: 'Founder' } });
 		fireEvent.change(screen.getByLabelText(/what are you building/i), {
 			target: { value: 'We need runtime AI security for our production copilots.' },

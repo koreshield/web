@@ -1,4 +1,4 @@
-// KoreShield Threat Detection Engine v2.1
+// Koreshield Threat Detection Engine v2.1
 // Comprehensive client-side pattern matching for the demo sandbox.
 // Features:
 //   • 24 detection rules with 160+ regex patterns

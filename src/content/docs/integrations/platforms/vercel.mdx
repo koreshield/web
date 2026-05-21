@@ -7,7 +7,7 @@ last_update:
 
 # Vercel Integration
 
-Use KoreShield as a security proxy in front of your LLM requests from Vercel. You can deploy the KoreShield server separately and point your Vercel functions or edge handlers at it.
+Use Koreshield as a security proxy in front of your LLM requests from Vercel. You can deploy the Koreshield server separately and point your Vercel functions or edge handlers at it.
 
 ## Use Cases
 
@@ -18,13 +18,13 @@ Use KoreShield as a security proxy in front of your LLM requests from Vercel. Yo
 ## Architecture
 
 - Vercel app (Edge Functions or Serverless Functions)
-- KoreShield proxy (self-hosted or cloud)
+- Koreshield proxy (self-hosted or cloud)
 - LLM provider (OpenAI, Anthropic, Gemini, Azure OpenAI, DeepSeek)
 
 ## Prerequisites
 
-- A running KoreShield instance
-- Provider API key configured on the KoreShield server
+- A running Koreshield instance
+- Provider API key configured on the Koreshield server
 
 ## Configure Environment Variables
 
@@ -85,7 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 ## Operational Tips
 
 - Use `KORESHIELD_BASE_URL` for the proxy endpoint, not the provider endpoint.
-- Keep provider keys on the KoreShield server, not in the Vercel app.
+- Keep provider keys on the Koreshield server, not in the Vercel app.
 - Adjust security policies in [/configuration/](/docs/configuration).
 
 ## Troubleshooting

@@ -9,10 +9,10 @@ function Footer() {
 				{/* Logo + Tagline */}
 				<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8 mb-12">
 					<div className="flex items-center gap-3">
-						<img src="/logo/dark/SVG/Black.svg" alt="KoreShield Logo" className="w-8 h-8 dark:hidden" />
-						<img src="/logo/light/SVG/White.svg" alt="KoreShield Logo" className="w-8 h-8 hidden dark:block" />
+						<img src="/logo/dark/SVG/Black.svg" alt="Koreshield Logo" className="w-8 h-8 dark:hidden" />
+						<img src="/logo/light/SVG/White.svg" alt="Koreshield Logo" className="w-8 h-8 hidden dark:block" />
 						<div>
-							<div className="text-xl font-bold text-foreground tracking-tight">KoreShield</div>
+							<div className="text-xl font-bold text-foreground tracking-tight">Koreshield</div>
 							<p className="text-muted-foreground text-sm mt-0.5">The security layer your LLM provider doesn't include.</p>
 						</div>
 					</div>
@@ -23,7 +23,7 @@ function Footer() {
 							href="https://github.com/koreshield"
 							target="_blank"
 							rel="noreferrer noopener"
-							aria-label="KoreShield on GitHub"
+							aria-label="Koreshield on GitHub"
 							className="text-muted-foreground hover:text-foreground transition-colors"
 						>
 							<svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -34,7 +34,7 @@ function Footer() {
 							href="https://twitter.com/koreshield"
 							target="_blank"
 							rel="noreferrer noopener"
-							aria-label="KoreShield on X (Twitter)"
+							aria-label="Koreshield on X (Twitter)"
 							className="text-muted-foreground hover:text-foreground transition-colors"
 						>
 							<svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -45,7 +45,7 @@ function Footer() {
 							href="https://www.linkedin.com/company/koreshield"
 							target="_blank"
 							rel="noreferrer noopener"
-							aria-label="KoreShield on LinkedIn"
+							aria-label="Koreshield on LinkedIn"
 							className="text-muted-foreground hover:text-foreground transition-colors"
 						>
 							<svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -119,7 +119,7 @@ function Footer() {
 
 				{/* Copyright */}
 				<div className="pt-8 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-muted-foreground text-sm">
-					<p>© {new Date().getFullYear()} KoreShield. All rights reserved.</p>
+					<p>© {new Date().getFullYear()} Koreshield. All rights reserved.</p>
 					<p className="text-xs text-muted-foreground/60">
 						Koreshield Labs Ltd. · Incorporated in England & Wales · Co. No. 17057784
 					</p>

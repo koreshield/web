@@ -61,7 +61,7 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 	return (
 		<>
 			<Helmet>
-				<title>{post.title} | KoreShield Blog</title>
+				<title>{post.title} | Koreshield Blog</title>
 				<meta name="description" content={post.excerpt} />
 				<meta property="og:title" content={post.title} />
 				<meta property="og:description" content={post.excerpt} />
@@ -205,7 +205,7 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 						<div>
 							<h3 className="font-semibold text-foreground">{post.author}</h3>
 							<p className="text-sm text-muted-foreground">
-								KoreShield Security Team
+								Koreshield Security Team
 							</p>
 						</div>
 					</div>
