@@ -1,13 +1,13 @@
 ---
 title: Cloudflare Workers Integration
-description: Run KoreShield-protected requests on Cloudflare's edge network.
+description: Run Koreshield-protected requests on Cloudflare's edge network.
 last_update:
   date: 2026-03-10
 ---
 
 # Cloudflare Workers Integration
 
-Cloudflare Workers can call a remote KoreShield proxy to secure LLM requests at the edge. Keep provider keys on the KoreShield server and use the Worker as a thin routing layer.
+Cloudflare Workers can call a remote Koreshield proxy to secure LLM requests at the edge. Keep provider keys on the Koreshield server and use the Worker as a thin routing layer.
 
 ## Use Cases
 
@@ -17,8 +17,8 @@ Cloudflare Workers can call a remote KoreShield proxy to secure LLM requests at 
 
 ## Prerequisites
 
-- A running KoreShield instance reachable from Cloudflare
-- Provider API key configured on the KoreShield server
+- A running Koreshield instance reachable from Cloudflare
+- Provider API key configured on the Koreshield server
 
 ## Environment Variables
 
@@ -63,8 +63,8 @@ export default {
 
 ## Operational Tips
 
-- Use a regional KoreShield deployment close to your Worker locations.
-- Keep provider API keys on the KoreShield server.
+- Use a regional Koreshield deployment close to your Worker locations.
+- Keep provider API keys on the Koreshield server.
 - Adjust policies in [/configuration/](/docs/configuration).
 
 ## Troubleshooting

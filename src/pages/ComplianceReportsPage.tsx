@@ -86,7 +86,7 @@ export function ComplianceReportsPage() {
 
 	const exportReport = (framework: string, controls: ComplianceControl[]) => {
 		const lines = [
-			`KoreShield Compliance Report: ${framework}`,
+			`Koreshield Compliance Report: ${framework}`,
 			`Generated: ${format(new Date(), 'PPpp')}`,
 			'',
 			'CONTROLS:',
@@ -106,7 +106,7 @@ export function ComplianceReportsPage() {
 	return (
 		<div>
 			<SEOMeta
-				title="Compliance Reports | KoreShield"
+				title="Compliance Reports | Koreshield"
 				description="Real-time compliance posture assessment for SOC 2, ISO 27001, and GDPR"
 			/>
 

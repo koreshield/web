@@ -111,7 +111,7 @@ export function AnalyticsPage() {
                         <BarChart3 className="w-10 h-10 mx-auto mb-4 text-primary" />
                         <h2 className="text-xl font-semibold mb-2">Analytics require an admin seat</h2>
                         <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-                            Your account can use KoreShield, but tenant-level analytics are currently restricted to admin users.
+                            Your account can use Koreshield, but tenant-level analytics are currently restricted to admin users.
                             Finish onboarding with teams, API keys, rules, alerts, and protected requests first, then return once your role is upgraded.
                         </p>
                         <div className="flex flex-wrap items-center justify-center gap-3">
@@ -154,7 +154,7 @@ export function AnalyticsPage() {
                         <BarChart3 className="w-10 h-10 mx-auto mb-4 text-muted-foreground" />
                         <h2 className="text-xl font-semibold mb-2">No analytics data yet</h2>
                         <p className="text-muted-foreground max-w-lg mx-auto text-sm">
-                            Usage analytics appear here once requests are flowing through the KoreShield proxy.
+                            Usage analytics appear here once requests are flowing through the Koreshield proxy.
                             Send your first request via <code className="bg-muted px-1 rounded text-xs">POST /v1/scan</code> or{' '}
                             <code className="bg-muted px-1 rounded text-xs">POST /v1/chat/completions</code> using your API key to get started.
                         </p>

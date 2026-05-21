@@ -174,9 +174,9 @@ function Sidebar({
 			{/* Logo */}
 			<div className={['flex items-center h-16 shrink-0 border-b border-white/[0.06] px-3', collapsed ? 'justify-center' : 'gap-2.5 px-4'].join(' ')}>
 				<Link to="/dashboard" className="flex items-center gap-2.5 min-w-0">
-					<img src={logoSrc} alt="KoreShield" className="w-7 h-7 shrink-0" />
+					<img src={logoSrc} alt="Koreshield" className="w-7 h-7 shrink-0" />
 					{!collapsed && (
-						<span className="text-base font-bold text-foreground truncate">KoreShield</span>
+						<span className="text-base font-bold text-foreground truncate">Koreshield</span>
 					)}
 				</Link>
 			</div>
@@ -563,12 +563,12 @@ export function AppLayout() {
 					<Link to="/dashboard" className="md:hidden flex items-center gap-2 mr-2">
 						<img
 							src="/logo/light/SVG/White.svg"
-							alt="KoreShield"
+							alt="Koreshield"
 							className="w-6 h-6 dark:block hidden"
 						/>
 						<img
 							src="/logo/dark/SVG/Black.svg"
-							alt="KoreShield"
+							alt="Koreshield"
 							className="w-6 h-6 dark:hidden"
 						/>
 					</Link>

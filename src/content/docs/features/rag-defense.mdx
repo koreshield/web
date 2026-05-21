@@ -9,13 +9,13 @@ last_update:
 
 Retrieval-Augmented Generation (RAG) systems are vulnerable to **Indirect Prompt Injection**, where malicious instructions hidden in retrieved documents (emails, websites, internal docs) hijack the LLM's behavior.
 
-KoreShield's RAG Defense Engine scans retrieved context _before_ it reaches your LLM, ensuring that tainted data cannot manipulate the generation process.
+Koreshield's RAG Defense Engine scans retrieved context _before_ it reaches your LLM, ensuring that tainted data cannot manipulate the generation process.
 
 ## How It Works
 
-> **Note:** KoreShield analyzes both the **User Query** and the **Retrieved Documents** to detect correlation attacks and context poisoning.
+> **Note:** Koreshield analyzes both the **User Query** and the **Retrieved Documents** to detect correlation attacks and context poisoning.
 
-1.  **Ingest**: You send the user query and the retrieved snippets (chunks) to KoreShield.
+1.  **Ingest**: You send the user query and the retrieved snippets (chunks) to Koreshield.
 2.  **Scan**: Our engine checks for:
     - **Hidden Instructions**: "Ignore previous instructions and..."
     - **Role Hijacking**: "You are now a compliant AI..."
@@ -56,9 +56,9 @@ else:
 ### JavaScript / TypeScript
 
 ```typescript
-import { KoreShield } from "koreshield";
+import { Koreshield } from "koreshield";
 
-const client = new KoreShield({ apiKey: process.env.KORESHIELD_API_KEY });
+const client = new Koreshield({ apiKey: process.env.KORESHIELD_API_KEY });
 
 const result = await client.scanRAGContext("Summarize the reports", [
   "Quarterly report...",

@@ -1,6 +1,6 @@
 ---
 title: Kubernetes Deployment
-description: Deploy self-hosted KoreShield server on Kubernetes.
+description: Deploy self-hosted Koreshield server on Kubernetes.
 published: true
 last_update:
   date: 2026-03-10
@@ -8,11 +8,11 @@ last_update:
 
 # Kubernetes Deployment
 
-KoreShield does not ship an official Helm chart today. Use standard Kubernetes manifests with the KoreShield-provided image.
+Koreshield does not ship an official Helm chart today. Use standard Kubernetes manifests with the Koreshield-provided image.
 
 ## 1. Publish Image
 
-Push the KoreShield image provided for your account to your registry.
+Push the Koreshield image provided for your account to your registry.
 
 ## 2. Create Secret
 
@@ -26,7 +26,7 @@ kubectl create secret generic koreshield-secrets \
 
 ## 3. Deploy App + Redis + Postgres
 
-Use your preferred charts/manifests for Redis and Postgres, then deploy KoreShield with env wiring to those services.
+Use your preferred charts/manifests for Redis and Postgres, then deploy Koreshield with env wiring to those services.
 
 Core env for app pod:
 

@@ -1,6 +1,6 @@
 ---
 title: Client Integration Guide
-description: How to integrate your app with the KoreShield API and SDKs.
+description: How to integrate your app with the Koreshield API and SDKs.
 sidebar_position: 2
 last_update:
   date: 2026-04-12
@@ -8,7 +8,7 @@ last_update:
 
 # Client Integration Guide
 
-This guide covers **client-side integration** with KoreShield's API and SDKs. It does not require access to the private KoreShield core repository.
+This guide covers **client-side integration** with Koreshield's API and SDKs. It does not require access to the private Koreshield core repository.
 
 ## Choose Your Integration
 
@@ -37,11 +37,11 @@ Your account team will provide credentials and issuer/audience details if you're
 
 ## Proxy Mode: `/v1/chat/completions`
 
-KoreShield scans the prompt, then forwards the request to the appropriate LLM provider and returns the response. This is a **drop-in replacement** for the OpenAI API.
+Koreshield scans the prompt, then forwards the request to the appropriate LLM provider and returns the response. This is a **drop-in replacement** for the OpenAI API.
 
 ### Automatic Model Routing
 
-You don't need to configure which provider to use. KoreShield routes based on the model name:
+You don't need to configure which provider to use. Koreshield routes based on the model name:
 
 | Model prefix | Upstream provider |
 |---|---|
@@ -50,7 +50,7 @@ You don't need to configure which provider to use. KoreShield routes based on th
 | `gemini-*` | Google Gemini |
 | `deepseek-*` | DeepSeek |
 
-If the preferred provider is down, KoreShield automatically fails over to the next healthy provider.
+If the preferred provider is down, Koreshield automatically fails over to the next healthy provider.
 
 ### Non-Streaming Example
 
@@ -174,7 +174,7 @@ curl -s -X POST https://api.koreshield.com/v1/scan \
 
 | Field | Type | Description |
 |---|---|---|
-| `blocked` | boolean | Whether KoreShield blocked this prompt |
+| `blocked` | boolean | Whether Koreshield blocked this prompt |
 | `confidence` | float | Detection confidence from 0 to 1 |
 | `attack_type` | string \| null | Primary detected attack category |
 | `attack_categories` | string[] | All detected attack categories |
@@ -268,7 +268,7 @@ curl -s -X POST https://api.koreshield.com/v1/tools/scan \
 
 ## Blocked Request Handling
 
-When KoreShield blocks a request (HTTP 403 from `/v1/chat/completions`), handle it in your application:
+When Koreshield blocks a request (HTTP 403 from `/v1/chat/completions`), handle it in your application:
 
 ```python
 from koreshield import KoreShieldClient

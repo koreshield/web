@@ -1,6 +1,6 @@
-# KoreShield Web
+# Koreshield Web
 
-KoreShield Web is the customer-facing dashboard and public site for the KoreShield platform.
+Koreshield Web is the customer-facing dashboard and public site for the Koreshield platform.
 
 It serves two jobs:
 

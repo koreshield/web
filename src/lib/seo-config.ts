@@ -8,7 +8,7 @@ export const SEOConfig = {
 		structuredData: {
 			'@context': 'https://schema.org',
 			'@type': 'WebSite',
-			name: 'KoreShield',
+			name: 'Koreshield',
 			url: 'https://koreshield.ai',
 			description: 'Enterprise-grade LLM security firewall',
 			potentialAction: {
@@ -27,7 +27,7 @@ export const SEOConfig = {
 	},
 	features: {
 		title: 'Features',
-		description: 'Discover KoreShield\'s advanced LLM security features including real-time threat detection, prompt injection prevention, jailbreak detection, and comprehensive threat monitoring.',
+		description: 'Discover Koreshield\'s advanced LLM security features including real-time threat detection, prompt injection prevention, jailbreak detection, and comprehensive threat monitoring.',
 		keywords: 'LLM security features, prompt injection detection, jailbreak detection, threat monitoring, security controls, API filtering',
 		ogImage: 'https://koreshield.ai/og-features.png',
 		ogType: 'website' as const,
@@ -38,7 +38,7 @@ export const SEOConfig = {
 	},
 	pricing: {
 		title: 'Pricing Plans',
-		description: 'KoreShield pricing plans for teams of all sizes. Start free with 10,000 protected requests/month, then pay-as-you-grow. Enterprise plans available.',
+		description: 'Koreshield pricing plans for teams of all sizes. Start free with 10,000 protected requests/month, then pay-as-you-grow. Enterprise plans available.',
 		keywords: 'LLM security pricing, protected requests pricing, AI security cost, enterprise LLM security pricing, pricing plans',
 		ogImage: 'https://koreshield.ai/og-pricing.png',
 		ogType: 'website' as const,
@@ -52,10 +52,10 @@ export const SEOConfig = {
 			mainEntity: [
 				{
 					'@type': 'Question',
-					name: 'How does KoreShield pricing work?',
+					name: 'How does Koreshield pricing work?',
 					acceptedAnswer: {
 						'@type': 'Answer',
-						text: 'KoreShield charges a platform fee plus included protected requests each month. Additional requests scale with usage. Enterprise plans are available with advanced governance and deployment controls.',
+						text: 'Koreshield charges a platform fee plus included protected requests each month. Additional requests scale with usage. Enterprise plans are available with advanced governance and deployment controls.',
 					},
 				},
 				{
@@ -71,8 +71,8 @@ export const SEOConfig = {
 	},
 	docs: {
 		title: 'Documentation',
-		description: 'Complete documentation for KoreShield LLM security platform. API reference, SDK guides, installation instructions, and integration examples.',
-		keywords: 'KoreShield documentation, LLM security docs, API reference, SDK guide, installation guide, integration',
+		description: 'Complete documentation for Koreshield LLM security platform. API reference, SDK guides, installation instructions, and integration examples.',
+		keywords: 'Koreshield documentation, LLM security docs, API reference, SDK guide, installation guide, integration',
 		ogImage: 'https://koreshield.ai/og-docs.png',
 		ogType: 'website' as const,
 		breadcrumbs: [
@@ -93,8 +93,8 @@ export const SEOConfig = {
 	},
 	demo: {
 		title: 'Request a Demo',
-		description: 'See KoreShield in action. Request a personalized demo to learn how we protect your AI applications from LLM threats.',
-		keywords: 'KoreShield demo, LLM security demo, AI firewall demo, request demo',
+		description: 'See Koreshield in action. Request a personalized demo to learn how we protect your AI applications from LLM threats.',
+		keywords: 'Koreshield demo, LLM security demo, AI firewall demo, request demo',
 		ogImage: 'https://koreshield.ai/og-demo.png',
 		ogType: 'website' as const,
 		breadcrumbs: [
@@ -104,8 +104,8 @@ export const SEOConfig = {
 	},
 	about: {
 		title: 'About Us',
-		description: 'KoreShield is pioneering enterprise-grade LLM security. Built in the UK, we\'re making AI-powered applications safer for everyone.',
-		keywords: 'KoreShield team, AI security company, LLM security research, UK AI startup, about',
+		description: 'Koreshield is pioneering enterprise-grade LLM security. Built in the UK, we\'re making AI-powered applications safer for everyone.',
+		keywords: 'Koreshield team, AI security company, LLM security research, UK AI startup, about',
 		ogImage: 'https://koreshield.ai/og-about.png',
 		ogType: 'website' as const,
 		breadcrumbs: [
@@ -115,7 +115,7 @@ export const SEOConfig = {
 		structuredData: {
 			'@context': 'https://schema.org',
 			'@type': 'Organization',
-			name: 'KoreShield',
+			name: 'Koreshield',
 			url: 'https://koreshield.ai',
 			logo: 'https://koreshield.ai/logo.png',
 			description: 'Enterprise-grade LLM security firewall protecting AI applications.',
@@ -123,7 +123,7 @@ export const SEOConfig = {
 			founders: [
 				{
 					'@type': 'Person',
-					name: 'KoreShield Team',
+					name: 'Koreshield Team',
 				},
 			],
 			address: {
@@ -140,8 +140,8 @@ export const SEOConfig = {
 	},
 	contact: {
 		title: 'Contact',
-		description: 'Contact the KoreShield team. Technical support, enterprise sales, or general enquiries. We\'re here to help.',
-		keywords: 'contact KoreShield, LLM security support, enterprise sales, technical support, contact',
+		description: 'Contact the Koreshield team. Technical support, enterprise sales, or general enquiries. We\'re here to help.',
+		keywords: 'contact Koreshield, LLM security support, enterprise sales, technical support, contact',
 		ogImage: 'https://koreshield.ai/og-contact.png',
 		ogType: 'website' as const,
 		breadcrumbs: [

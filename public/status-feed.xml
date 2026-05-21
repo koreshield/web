@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>KoreShield Status Feed</title>
+    <title>Koreshield Status Feed</title>
     <link>https://koreshield.ai/status</link>
-    <description>Resolved incidents and scheduled maintenance for KoreShield.</description>
+    <description>Resolved incidents and scheduled maintenance for Koreshield.</description>
     <language>en-gb</language>
     <lastBuildDate>Fri, 03 Apr 2026 10:00:00 GMT</lastBuildDate>
 

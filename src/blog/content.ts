@@ -176,7 +176,7 @@ The model is not your firewall.
 
 ---
 
-*Isaac Emmanuel is the co-founder and CTO of KoreShield, an LLM security gateway that scans prompts and retrieved context for injection attacks before they reach your model.*`,
+*Isaac Emmanuel is the co-founder and CTO of Koreshield, an LLM security gateway that scans prompts and retrieved context for injection attacks before they reach your model.*`,
 	},
 
 	{
@@ -220,7 +220,7 @@ Next week we'll be launching:
 
 ## Stay Secure
 
-Remember to keep your KoreShield SDK updated and enable all security features in your settings.
+Remember to keep your Koreshield SDK updated and enable all security features in your settings.
 
 [Read full changelog](/changelog)`,
 	},
@@ -258,7 +258,7 @@ Carefully crafted inputs designed to fool AI systems.
 
 ## Mitigation Strategies
 
-KoreShield provides comprehensive protection against these threats through:
+Koreshield provides comprehensive protection against these threats through:
 
 - Input validation and filtering
 - Model integrity monitoring
@@ -283,7 +283,7 @@ KoreShield provides comprehensive protection against these threats through:
 	{
 		slug: 'prompt-injection-is-not-solved',
 		title: 'Prompt Injection Is Not Solved - How a Real-Time LLM Firewall Actually Works',
-		excerpt: 'Learn how KoreShield\'s detection engine works through three layers of protection - text normalization, rule-based detection, and semantic scoring - to catch prompt injection attacks in production systems.',
+		excerpt: 'Learn how Koreshield\'s detection engine works through three layers of protection - text normalization, rule-based detection, and semantic scoring - to catch prompt injection attacks in production systems.',
 		date: '2026-04-14',
 		author: 'Isaac Emmanuel',
 		categories: ['Security', 'Research'],
@@ -295,7 +295,7 @@ KoreShield provides comprehensive protection against these threats through:
 		path: '/blog/prompt-injection-is-not-solved',
 		content: `Most teams building LLM powered products treat prompt injection as a known, manageable risk - something you handle with a careful system prompt and maybe some output filtering. This is the wrong mental model. Prompt injection is a structural vulnerability in how language models process input, and it requires a structural solution.
 
-This post explains how KoreShield's detection engine works: the architecture, the detection layers, the specific attack patterns it covers, and the design decisions behind it.
+This post explains how Koreshield's detection engine works: the architecture, the detection layers, the specific attack patterns it covers, and the design decisions behind it.
 
 ## What Prompt Injection Actually Is
 
@@ -331,7 +331,7 @@ A binary classifier fails in two directions. It produces false positives on secu
 
 The latency constraint matters because a security layer in the prompt hot path adds directly to the end-to-end response time. An additional 200ms per request from a remote ML inference call is not acceptable for a product that already carries LLM latency.
 
-KoreShield's detection engine runs three layers in order of increasing cost, aborting early when possible.
+Koreshield's detection engine runs three layers in order of increasing cost, aborting early when possible.
 
 ## Layer 1: Text Normalisation
 
@@ -375,7 +375,7 @@ Each pattern describes an attack concept. This is what makes pattern matching vi
 
 ## Integration
 
-Integration is a single endpoint change. Replace your LLM provider's base URL with the KoreShield proxy endpoint:
+Integration is a single endpoint change. Replace your LLM provider's base URL with the Koreshield proxy endpoint:
 
 All existing API calls, streaming, tool use, and multi-turn conversations work without modification. The proxy is transparent to the application layer.
 
@@ -383,9 +383,9 @@ All existing API calls, streaming, tool use, and multi-turn conversations work w
 
 Prompt injection is the primary attack surface of every LLM application, and it is one that the models themselves cannot defend against. The solution is an external security layer that runs fast enough to be invisible in production and smart enough to catch attacks across their full space of natural language variations.
 
-KoreShield's detection engine involving text normalisation, weighted rule matching, and semantic scoring all handles the majority of traffic with sub-5ms overhead and catches attack patterns across their real-world realisations.
+Koreshield's detection engine involving text normalisation, weighted rule matching, and semantic scoring all handles the majority of traffic with sub-5ms overhead and catches attack patterns across their real-world realisations.
 
-[Get started with KoreShield →](https://koreshield.ai/)`,
+[Get started with Koreshield →](https://koreshield.ai/)`,
 	},
 
 	{
@@ -440,13 +440,13 @@ It's the firewall every LLM deployment is missing.
 
 If you are building with LLMs in production, or you know someone who is, this is the conversation that needs to happen now.
 
-[Get started with KoreShield today.](https://koreshield.ai/)`,
+[Get started with Koreshield today.](https://koreshield.ai/)`,
 	},
 
 	{
 		slug: 'meet-koreshield-llm-firewall',
-		title: 'Meet KoreShield - An LLM Firewall for AI Systems in CRM, Fintech, and Healthcare',
-		excerpt: 'Your AI Agent is one CRM note away from a data breach. KoreShield is a security proxy that sits between your data sources and models, evaluating every input before it reaches your LLM.',
+		title: 'Meet Koreshield - An LLM Firewall for AI Systems in CRM, Fintech, and Healthcare',
+		excerpt: 'Your AI Agent is one CRM note away from a data breach. Koreshield is a security proxy that sits between your data sources and models, evaluating every input before it reaches your LLM.',
 		date: '2026-03-04',
 		author: 'Teslim O. Kazeem',
 		categories: ['Product', 'Security'],
@@ -474,13 +474,13 @@ The instinct many teams reach for is prompt hardening: carefully worded system p
 
 **Prompt injection is an architectural problem. It needs an architectural solution.**
 
-## What KoreShield Does
+## What Koreshield Does
 
-KoreShield is a security proxy built on research into LLM vulnerabilities and RAG pipeline attacks. It sits between your user inputs, data sources and your models, evaluating every input before it reaches your LLM.
+Koreshield is a security proxy built on research into LLM vulnerabilities and RAG pipeline attacks. It sits between your user inputs, data sources and your models, evaluating every input before it reaches your LLM.
 
-Most AI stacks have no trust boundary between untrusted external data and the models acting on it. KoreShield is that boundary.
+Most AI stacks have no trust boundary between untrusted external data and the models acting on it. Koreshield is that boundary.
 
-Every input that would otherwise flow directly into your model passes through KoreShield first. It classifies the source, evaluates the content for injection patterns, applies your configured policies, and either passes the sanitised input through or blocks and logs it.
+Every input that would otherwise flow directly into your model passes through Koreshield first. It classifies the source, evaluates the content for injection patterns, applies your configured policies, and either passes the sanitised input through or blocks and logs it.
 
 Here's what that looks like in practice:
 
@@ -520,7 +520,7 @@ We're pre-launch and working with a small group of early customers. If this is a
 
 	{
 		slug: 'why-we-built-koreshield',
-		title: 'Why We Built KoreShield - Securing the New Intelligence Layer',
+		title: 'Why We Built Koreshield - Securing the New Intelligence Layer',
 		excerpt: 'For the last two decades, enterprise security was structurally straightforward. But LLMs changed everything. A valid English sentence can now drop tables or exfiltrate PII. Traditional security tools are blind to semantic manipulation.',
 		date: '2026-03-02',
 		author: 'Isaac Emmanuel',
@@ -545,9 +545,9 @@ Traditional WAFs (Web Application Firewalls) and DLP (Data Loss Prevention) scan
 
 As CTO, when I looked at the security landscape for companies racing to build AI applications, I realized we were about to hit a massive wall. Enterprises want the power of AI, but they cannot accept the catastrophic risk of an unconstrained intelligence layer operating with access to their private data.
 
-That is why we built KoreShield.
+That is why we built Koreshield.
 
-KoreShield is a runtime enforcement proxy that sits between your application and your LLM provider, providing the structural security boundary that the AI era demands. It's not a prompt engineering fix. It's infrastructure.`,
+Koreshield is a runtime enforcement proxy that sits between your application and your LLM provider, providing the structural security boundary that the AI era demands. It's not a prompt engineering fix. It's infrastructure.`,
 	},
 
 	{
@@ -607,9 +607,9 @@ Attackers can craft retrieval documents that confuse the model:
 - Irrelevant but persuasive content
 - Instructions wrapped in documents
 
-## KoreShield Protection
+## Koreshield Protection
 
-KoreShield provides multi-layer protection for RAG systems:
+Koreshield provides multi-layer protection for RAG systems:
 
 ### 1. Input Validation
 - Validate user queries before retrieval
@@ -694,9 +694,9 @@ function validateOutput(output: string): boolean {
 ## Implementation Example
 
 \`\`\`typescript
-import { KoreShield } from '@koreshield/sdk';
+import { Koreshield } from '@koreshield/sdk';
 
-const shield = new KoreShield({
+const shield = new Koreshield({
   apiKey: process.env.KORESHIELD_API_KEY,
 });
 
@@ -738,7 +738,7 @@ Set up monitoring for:
 3. **Anomalies**: Track retrieval patterns for unusual activity
 4. **Performance**: Monitor retrieval speed and quality
 
-Configure alerts in KoreShield dashboard:
+Configure alerts in Koreshield dashboard:
 \`\`\`
 Alert on: Prompt injection attempt
 Threshold: 5 in 1 hour
@@ -784,7 +784,7 @@ RAG systems are powerful but require careful security consideration:
 
 ## Resources
 
-- [KoreShield RAG Security Guide](/docs/rag-security)
+- [Koreshield RAG Security Guide](/docs/rag-security)
 - [Threat Report: RAG Vulnerabilities](/docs/threat-reports)
 - [API Reference](/docs/api)
 - [Join Community](https://discord.gg/koreshield)
@@ -798,8 +798,8 @@ RAG systems are powerful but require careful security consideration:
 
 	{
 		slug: 'getting-started-with-koreshield',
-		title: 'Getting Started with KoreShield',
-		excerpt: 'A comprehensive guide to integrating KoreShield into your application for AI security.',
+		title: 'Getting Started with Koreshield',
+		excerpt: 'A comprehensive guide to integrating Koreshield into your application for AI security.',
 		date: '2025-11-27',
 		author: 'Koreshield Labs',
 		categories: ['Getting Started', 'Tutorials'],
@@ -809,9 +809,9 @@ RAG systems are powerful but require careful security consideration:
 		coverImage: '/images/blog/getting-started.png',
 		readingTime: 1,
 		path: '/blog/getting-started-with-koreshield',
-		content: `# Getting Started with KoreShield
+		content: `# Getting Started with Koreshield
 
-KoreShield is a comprehensive security platform designed to protect your AI applications from threats. This guide will walk you through the setup process.
+Koreshield is a comprehensive security platform designed to protect your AI applications from threats. This guide will walk you through the setup process.
 
 ## Installation
 
@@ -822,9 +822,9 @@ npm install @koreshield/sdk
 ## Quick Start
 
 \`\`\`javascript
-import { KoreShield } from '@koreshield/sdk';
+import { Koreshield } from '@koreshield/sdk';
 
-const shield = new KoreShield({
+const shield = new Koreshield({
   apiKey: 'your-api-key',
 });
 \`\`\`

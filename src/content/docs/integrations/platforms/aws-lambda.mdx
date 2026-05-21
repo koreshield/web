@@ -1,13 +1,13 @@
 ---
 title: AWS Lambda Integration
-description: Secure AWS Lambda-based LLM calls with the KoreShield proxy.
+description: Secure AWS Lambda-based LLM calls with the Koreshield proxy.
 last_update:
   date: 2026-03-10
 ---
 
 # AWS Lambda Integration
 
-Use KoreShield as a security proxy for LLM requests made from AWS Lambda. Deploy KoreShield separately and route requests through its OpenAI-compatible endpoint.
+Use Koreshield as a security proxy for LLM requests made from AWS Lambda. Deploy Koreshield separately and route requests through its OpenAI-compatible endpoint.
 
 ## Use Cases
 
@@ -17,8 +17,8 @@ Use KoreShield as a security proxy for LLM requests made from AWS Lambda. Deploy
 
 ## Prerequisites
 
-- A running KoreShield instance
-- Provider API key configured on the KoreShield server
+- A running Koreshield instance
+- Provider API key configured on the Koreshield server
 
 ## Environment Variables
 
@@ -57,8 +57,8 @@ export const handler = async (event: any) => {
 
 ## Operational Tips
 
-- Keep provider API keys on the KoreShield server, not inside the Lambda.
-- Use VPC or private networking if your KoreShield endpoint is private.
+- Keep provider API keys on the Koreshield server, not inside the Lambda.
+- Use VPC or private networking if your Koreshield endpoint is private.
 - Increase Lambda timeout for streaming responses.
 - Adjust policies in [/configuration/](/docs/configuration).
 

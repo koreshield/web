@@ -127,9 +127,9 @@ export function SignupPage() {
 
                 {/* Logo */}
                 <div className="relative z-10 flex items-center gap-3">
-                    <img src="/logo/dark/SVG/Black.svg" alt="KoreShield" className="w-8 h-8 dark:hidden" />
-                    <img src="/logo/light/SVG/White.svg" alt="KoreShield" className="w-8 h-8 hidden dark:block" />
-                    <span className="text-xl font-bold text-foreground tracking-tight">KoreShield</span>
+                    <img src="/logo/dark/SVG/Black.svg" alt="Koreshield" className="w-8 h-8 dark:hidden" />
+                    <img src="/logo/light/SVG/White.svg" alt="Koreshield" className="w-8 h-8 hidden dark:block" />
+                    <span className="text-xl font-bold text-foreground tracking-tight">Koreshield</span>
                 </div>
 
                 <div className="relative z-10 space-y-8">
@@ -157,7 +157,7 @@ export function SignupPage() {
                 </div>
 
                 <p className="relative z-10 text-xs text-muted-foreground/60">
-                    © {new Date().getFullYear()} KoreShield. All rights reserved.
+                    © {new Date().getFullYear()} Koreshield. All rights reserved.
                 </p>
             </div>
 
@@ -166,9 +166,9 @@ export function SignupPage() {
                 <div className="w-full max-w-md">
                     {/* Mobile logo */}
                     <div className="flex items-center gap-2 mb-8 lg:hidden">
-                        <img src="/logo/dark/SVG/Black.svg" alt="KoreShield" className="w-7 h-7 dark:hidden" />
-                        <img src="/logo/light/SVG/White.svg" alt="KoreShield" className="w-7 h-7 hidden dark:block" />
-                        <span className="font-bold text-foreground">KoreShield</span>
+                        <img src="/logo/dark/SVG/Black.svg" alt="Koreshield" className="w-7 h-7 dark:hidden" />
+                        <img src="/logo/light/SVG/White.svg" alt="Koreshield" className="w-7 h-7 hidden dark:block" />
+                        <span className="font-bold text-foreground">Koreshield</span>
                     </div>
 
                     <div className="mb-8">

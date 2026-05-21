@@ -1,5 +1,5 @@
 /**
- * Authentication service for KoreShield admin UI.
+ * Authentication service for Koreshield admin UI.
  *
  * Session persistence strategy (belt-and-suspenders):
  *   1. HttpOnly cookie (ks_access_token) — set by backend, sent automatically by browser.

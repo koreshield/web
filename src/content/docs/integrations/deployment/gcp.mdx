@@ -1,6 +1,6 @@
 ---
 title: GCP Deployment
-description: Deploy the KoreShield proxy on Google Cloud using Compute Engine or Cloud Run.
+description: Deploy the Koreshield proxy on Google Cloud using Compute Engine or Cloud Run.
 last_update:
   date: 2026-03-10
 ---
@@ -36,13 +36,13 @@ sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
 ```
 
-### 3. Configure KoreShield
+### 3. Configure Koreshield
 
-Self-hosted customers receive a deployment bundle or a prebuilt image from KoreShield. Configure JWT and provider keys via environment variables or Secret Manager.
+Self-hosted customers receive a deployment bundle or a prebuilt image from Koreshield. Configure JWT and provider keys via environment variables or Secret Manager.
 
 ### 4. Run with Docker
 
-Run the KoreShield image provided for your account and pass environment variables (JWT + provider keys).
+Run the Koreshield image provided for your account and pass environment variables (JWT + provider keys).
 
 ## Option B: Cloud Run
 

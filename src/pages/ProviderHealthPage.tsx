@@ -203,7 +203,7 @@ export function ProviderHealthPage() {
 						<div className="rounded-lg border border-border bg-card p-8">
 							<h3 className="text-lg font-semibold mb-2">No providers configured yet</h3>
 							<p className="text-sm text-muted-foreground">
-								Provider health becomes useful after you add at least one model provider in KoreShield configuration. Finish onboarding with API keys, rules, and your first protected request first, then return here for live provider status.
+								Provider health becomes useful after you add at least one model provider in Koreshield configuration. Finish onboarding with API keys, rules, and your first protected request first, then return here for live provider status.
 							</p>
 						</div>
 					) : (
