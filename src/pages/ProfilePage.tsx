@@ -384,7 +384,7 @@ export function ProfilePage() {
 						<Link to="/getting-started" className="rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
 							<Rocket className="w-5 h-5 text-primary mb-3" />
 							<div className="font-medium">Integration guide</div>
-							<p className="text-sm text-muted-foreground mt-2">See the exact steps clients take to connect their app to KoreShield.</p>
+							<p className="text-sm text-muted-foreground mt-2">See the exact steps clients take to connect their app to Koreshield.</p>
 						</Link>
 						<Link to="/settings/api-keys" className="rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
 							<Key className="w-5 h-5 text-primary mb-3" />

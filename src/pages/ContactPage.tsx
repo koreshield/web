@@ -113,7 +113,7 @@ export default function ContactPage() {
 							Get in Touch
 						</h1>
 						<p className="text-lg text-muted-foreground leading-relaxed">
-							Evaluating KoreShield, comparing plans, or preparing an enterprise rollout? We are here and we reply fast.
+							Evaluating Koreshield, comparing plans, or preparing an enterprise rollout? We are here and we reply fast.
 						</p>
 					</motion.div>
 				</div>
@@ -462,7 +462,7 @@ function TechnicalSupportForm() {
 			</div>
 			<div>
 				<label htmlFor="technical-environment" className={labelClass}>Environment details</label>
-				<textarea id="technical-environment" rows={3} value={formData.environment} onChange={(e) => setFormData({ ...formData, environment: e.target.value })} className={inputClass} placeholder="KoreShield version, deployment method, Python/Node version, OS…" />
+				<textarea id="technical-environment" rows={3} value={formData.environment} onChange={(e) => setFormData({ ...formData, environment: e.target.value })} className={inputClass} placeholder="Koreshield version, deployment method, Python/Node version, OS…" />
 			</div>
 			<button type="submit" disabled={loading} className={submitClass}>
 				{loading ? 'Submitting…' : 'Submit support ticket'}

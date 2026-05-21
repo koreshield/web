@@ -38,7 +38,7 @@ export default function CareerRolePage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground transition-colors">
 			<SEOMeta
-				title={`${role.title} at KoreShield`}
+				title={`${role.title} at Koreshield`}
 				description={role.summary}
 			/>
 

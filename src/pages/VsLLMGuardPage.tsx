@@ -7,8 +7,8 @@ export default function VsLLMGuardPage() {
 	return (
 		<div className="min-h-screen bg-background">
 			<SEOMeta
-				title="KoreShield vs LLM Guard"
-				description="Compare KoreShield and LLM Guard: enterprise features, detection accuracy, support options, and when to choose each solution."
+				title="Koreshield vs LLM Guard"
+				description="Compare Koreshield and LLM Guard: enterprise features, detection accuracy, support options, and when to choose each solution."
 			/>
 
 			{/* Hero */}
@@ -20,7 +20,7 @@ export default function VsLLMGuardPage() {
 						className="text-center"
 					>
 						<h1 className="text-5xl font-bold text-foreground mb-6">
-							KoreShield vs LLM Guard
+							Koreshield vs LLM Guard
 						</h1>
 						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
 							Comparing two LLM security solutions with different deployment models
@@ -40,7 +40,7 @@ export default function VsLLMGuardPage() {
 					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
 						<div className="flex items-center gap-3 mb-4">
 							<Shield className="w-8 h-8 text-electric-green" />
-							<h2 className="text-2xl font-bold text-foreground">KoreShield</h2>
+							<h2 className="text-2xl font-bold text-foreground">Koreshield</h2>
 						</div>
 						<p className="text-muted-foreground mb-4">
 							Enterprise-ready LLM security with 95% detection accuracy, professional support, and managed cloud option.
@@ -108,7 +108,7 @@ export default function VsLLMGuardPage() {
 								<thead className="border-b border-border">
 									<tr>
 										<th className="text-left py-4 px-4 text-foreground font-semibold">Feature</th>
-										<th className="text-center py-4 px-4 text-electric-green font-semibold">KoreShield</th>
+										<th className="text-center py-4 px-4 text-electric-green font-semibold">Koreshield</th>
 										<th className="text-center py-4 px-4 text-green-600 dark:text-green-400 font-semibold">LLM Guard</th>
 									</tr>
 								</thead>
@@ -173,7 +173,7 @@ export default function VsLLMGuardPage() {
 					className="grid md:grid-cols-2 gap-8"
 				>
 					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
-						<h3 className="text-2xl font-bold text-electric-green mb-6">KoreShield Best For:</h3>
+						<h3 className="text-2xl font-bold text-electric-green mb-6">Koreshield Best For:</h3>
 						<ul className="space-y-3">
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
@@ -250,12 +250,12 @@ export default function VsLLMGuardPage() {
 				>
 					<h2 className="text-3xl font-bold text-foreground mb-6">Easy Migration from LLM Guard</h2>
 					<p className="text-muted-foreground mb-6">
-						Already using LLM Guard? KoreShield offers a straightforward migration path with minimal code changes.
+						Already using LLM Guard? Koreshield offers a straightforward migration path with minimal code changes.
 					</p>
 					<div className="grid md:grid-cols-3 gap-6">
 						<div className="bg-card rounded-lg p-6">
 							<div className="text-3xl font-bold text-electric-green mb-2">1</div>
-							<h3 className="font-semibold text-foreground mb-2">Install KoreShield</h3>
+							<h3 className="font-semibold text-foreground mb-2">Install Koreshield</h3>
 							<p className="text-sm text-muted-foreground">
 								<code className="bg-muted px-2 py-1 rounded">pip install koreshield-sdk</code>
 							</p>
@@ -264,7 +264,7 @@ export default function VsLLMGuardPage() {
 							<div className="text-3xl font-bold text-electric-green mb-2">2</div>
 							<h3 className="font-semibold text-foreground mb-2">Update Import</h3>
 							<p className="text-sm text-muted-foreground">
-								Replace LLM Guard imports with KoreShield SDK
+								Replace LLM Guard imports with Koreshield SDK
 							</p>
 						</div>
 						<div className="bg-card rounded-lg p-6">
@@ -284,7 +284,7 @@ export default function VsLLMGuardPage() {
 					transition={{ delay: 0.5 }}
 					className="bg-card border border-border rounded-xl p-10 text-center"
 				>
-					<h2 className="text-3xl font-bold mb-4 text-foreground">Upgrade to KoreShield</h2>
+					<h2 className="text-3xl font-bold mb-4 text-foreground">Upgrade to Koreshield</h2>
 					<p className="text-lg mb-8 text-muted-foreground">
 						Get enterprise-ready security with the same security-first values
 					</p>

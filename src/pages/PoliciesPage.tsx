@@ -193,7 +193,7 @@ export function PoliciesPage() {
     const modalTitle = editingPolicy ? 'Edit Security Policy' : 'Create Security Policy';
     const modalDescription = editingPolicy
         ? 'Update how this policy behaves in your workspace.'
-        : 'Add a policy that can be referenced and managed from the KoreShield dashboard.';
+        : 'Add a policy that can be referenced and managed from the Koreshield dashboard.';
     const submitLabel = editingPolicy ? 'Save changes' : 'Create policy';
     const permissionBanner = useMemo(() => {
         if (isAdmin) {
@@ -265,7 +265,7 @@ export function PoliciesPage() {
                     {(hasPermissionError || permissionBanner) && (
                         <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
                             {hasPermissionError
-                                ? 'Policy management is only available to workspace owners and admins. If this is your first KoreShield workspace, sign out and sign back in once so your account can refresh its role before trying again.'
+                                ? 'Policy management is only available to workspace owners and admins. If this is your first Koreshield workspace, sign out and sign back in once so your account can refresh its role before trying again.'
                                 : permissionBanner}
                         </div>
                     )}

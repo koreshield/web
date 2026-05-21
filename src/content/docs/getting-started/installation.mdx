@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Run KoreShield on your own infrastructure.
+description: Run Koreshield on your own infrastructure.
 icon: Terminal
 sidebar_position: 2
 last_update:
@@ -9,21 +9,21 @@ last_update:
 
 # Installation (Self-Hosted)
 
-> **Using the hosted API?** If you are using KoreShield's hosted service at `api.koreshield.com`, you do not need to install anything. Go straight to the [Quick Start](/docs/getting-started/quick-start) and create an API key in the dashboard.
+> **Using the hosted API?** If you are using Koreshield's hosted service at `api.koreshield.com`, you do not need to install anything. Go straight to the [Quick Start](/docs/getting-started/quick-start) and create an API key in the dashboard.
 
-This guide is for teams running KoreShield on their own infrastructure (on-prem, private cloud, or air-gapped environments).
+This guide is for teams running Koreshield on their own infrastructure (on-prem, private cloud, or air-gapped environments).
 
 ---
 
 ## Prerequisites
 
 - Docker and Docker Compose installed on your host
-- A KoreShield deployment bundle (provided by the KoreShield team)
+- A Koreshield deployment bundle (provided by the Koreshield team)
 - Credentials for your LLM provider(s) (OpenAI, Anthropic, etc.)
 
 ## Get the Deployment Bundle
 
-Contact the KoreShield team at [koreshield.ai](https://koreshield.ai) to request a deployment bundle for your plan. The bundle includes:
+Contact the Koreshield team at [koreshield.ai](https://koreshield.ai) to request a deployment bundle for your plan. The bundle includes:
 
 - A pre-built Docker image
 - A `docker-compose.yml` configured for your environment
@@ -60,7 +60,7 @@ Never commit `.env` to version control.
 docker compose up -d
 ```
 
-This starts the KoreShield API server, PostgreSQL, and Redis. Depending on your bundle, additional services (worker, dashboard) may also start.
+This starts the Koreshield API server, PostgreSQL, and Redis. Depending on your bundle, additional services (worker, dashboard) may also start.
 
 ## Verify It Is Running
 
@@ -94,6 +94,6 @@ curl -s -X POST "$KORESHIELD_BASE_URL/v1/scan" \
 
 ## Next Steps
 
-- [Client Integration Guide](/docs/client-integration): wire KoreShield into your application code
+- [Client Integration Guide](/docs/client-integration): wire Koreshield into your application code
 - [Configuration](/docs/configuration): tune detection sensitivity, policies, and rate limits
 - [Production Checklist](/docs/configuration/production-checklist): harden your deployment before go-live

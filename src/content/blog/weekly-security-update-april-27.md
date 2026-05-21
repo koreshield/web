@@ -37,6 +37,6 @@ Next week we'll be launching:
 
 ## Stay Secure
 
-Remember to keep your KoreShield SDK updated and enable all security features in your settings.
+Remember to keep your Koreshield SDK updated and enable all security features in your settings.
 
 [Read full changelog](/changelog)

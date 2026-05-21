@@ -1,6 +1,6 @@
 ---
 title: AutoGen Integration
-description: Secure multi-agent workflows in AutoGen with KoreShield.
+description: Secure multi-agent workflows in AutoGen with Koreshield.
 sidebar_position: 2
 last_update:
   date: 2026-03-10
@@ -8,7 +8,7 @@ last_update:
 
 # AutoGen Integration
 
-Use KoreShield as a proxy for AutoGen agent requests to enforce sanitization, detection, and policy controls before traffic reaches your provider.
+Use Koreshield as a proxy for AutoGen agent requests to enforce sanitization, detection, and policy controls before traffic reaches your provider.
 
 ## Use Cases
 
@@ -18,8 +18,8 @@ Use KoreShield as a proxy for AutoGen agent requests to enforce sanitization, de
 
 ## Prerequisites
 
-- A running KoreShield instance
-- Provider API key configured on the KoreShield server
+- A running Koreshield instance
+- Provider API key configured on the Koreshield server
 - AutoGen installed in your Python app
 
 ## Environment Variables
@@ -29,7 +29,7 @@ KORESHIELD_BASE_URL=http://localhost:8000
 KORESHIELD_API_KEY=your-koreshield-api-key
 ```
 
-## Example: AutoGen Agents with KoreShield
+## Example: AutoGen Agents with Koreshield
 
 ```python
 import autogen
@@ -67,7 +67,7 @@ user_proxy.initiate_chat(
 
 ## Security Notes
 
-- Keep provider API keys on the KoreShield server.
+- Keep provider API keys on the Koreshield server.
 - Use a Koreshield API key for client access when needed.
 - Tune policies in [/configuration/](/docs/configuration).
 
@@ -75,7 +75,7 @@ user_proxy.initiate_chat(
 
 - 401 responses: confirm `Authorization: Bearer <JWT_TOKEN> or X-API-Key: <API_KEY>`
 - Agent errors: confirm AutoGen uses the proxy `base_url`
-- Provider failures: verify provider keys on the KoreShield server
+- Provider failures: verify provider keys on the Koreshield server
 
 ## Next Steps
 

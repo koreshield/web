@@ -8,15 +8,15 @@ last_update:
 
 # Quick Start
 
-This guide takes you from zero to scanning your first prompt in under 5 minutes. No self-hosting required everything runs against the KoreShield hosted API.
+This guide takes you from zero to scanning your first prompt in under 5 minutes. No self-hosting required everything runs against the Koreshield hosted API.
 
-> **Self-hosting?** If you are running KoreShield on your own infrastructure, start with the [Installation guide](/docs/getting-started/installation) first, then come back here and replace `https://api.koreshield.com` with your local endpoint.
+> **Self-hosting?** If you are running Koreshield on your own infrastructure, start with the [Installation guide](/docs/getting-started/installation) first, then come back here and replace `https://api.koreshield.com` with your local endpoint.
 
 ---
 
 ## Step 1: Create Your Account
 
-Go to [koreshield.ai](https://koreshield.ai) and sign up. After verifying your email, you will land in the KoreShield dashboard.
+Go to [koreshield.ai](https://koreshield.ai) and sign up. After verifying your email, you will land in the Koreshield dashboard.
 
 ---
 
@@ -36,7 +36,7 @@ export KORESHIELD_API_KEY="ks_live_your_key_here"
 
 ## Step 3: Scan Your First Prompt
 
-This is the core KoreShield operation: you send a prompt, and KoreShield tells you whether it is safe to forward to the model.
+This is the core Koreshield operation: you send a prompt, and Koreshield tells you whether it is safe to forward to the model.
 
 ### Python SDK
 
@@ -134,7 +134,7 @@ curl -s -X POST https://api.koreshield.com/v1/scan \
 
 ## Step 4: Send a Protected Chat Request
 
-Instead of scanning and then calling your LLM separately, you can send chat requests directly through KoreShield's proxy. It scans the prompt, then forwards the request to your model and returns the response in one step.
+Instead of scanning and then calling your LLM separately, you can send chat requests directly through Koreshield's proxy. It scans the prompt, then forwards the request to your model and returns the response in one step.
 
 This is a **drop-in replacement** for the OpenAI chat completions API. You only need to change the URL.
 
@@ -148,7 +148,7 @@ curl -s -X POST https://api.koreshield.com/v1/chat/completions \
   }'
 ```
 
-KoreShield routes to the right provider automatically based on the model name:
+Koreshield routes to the right provider automatically based on the model name:
 
 | Model prefix | Provider |
 |---|---|
@@ -157,7 +157,7 @@ KoreShield routes to the right provider automatically based on the model name:
 | `gemini-*` | Google Gemini |
 | `deepseek-*` | DeepSeek |
 
-If a user sends an injected prompt, KoreShield blocks the request before it ever reaches the model. Your LLM provider never sees it and you are not billed for it.
+If a user sends an injected prompt, Koreshield blocks the request before it ever reaches the model. Your LLM provider never sees it and you are not billed for it.
 
 ---
 
@@ -165,7 +165,7 @@ If a user sends an injected prompt, KoreShield blocks the request before it ever
 
 Go back to the dashboard and open **Audit Logs**. Every scan you just ran (blocked and allowed) appears here with the full threat details, confidence score, attack type, and timestamp.
 
-This is your complete audit trail. Every prompt your application sends through KoreShield is logged automatically.
+This is your complete audit trail. Every prompt your application sends through Koreshield is logged automatically.
 
 ---
 
@@ -182,7 +182,7 @@ You now have everything working:
 
 ## What to Do Next
 
-**Add KoreShield to your existing code:**
+**Add Koreshield to your existing code:**
 
 The [Client Integration Guide](/docs/client-integration) shows exactly how to wire up scan and proxy calls in your application, including how to handle blocked responses gracefully.
 
@@ -200,4 +200,4 @@ If your application retrieves documents and passes them to a model, scan the ret
 
 **Tune your security policy:**
 
-KoreShield ships with a balanced detection sensitivity by default. You can tighten or relax it per team, add topic-level policies, or configure alert rules in **Settings → Policies**. See [Policies](/docs/configuration/policies).
+Koreshield ships with a balanced detection sensitivity by default. You can tighten or relax it per team, add topic-level policies, or configure alert rules in **Settings → Policies**. See [Policies](/docs/configuration/policies).

@@ -1,13 +1,13 @@
 ---
 title: PostgreSQL Integration
-description: Store KoreShield security events and metrics in PostgreSQL.
+description: Store Koreshield security events and metrics in PostgreSQL.
 last_update:
   date: 2026-03-10
 ---
 
 # PostgreSQL Integration
 
-Use PostgreSQL to persist security events, metrics, and audit data. This guide outlines a typical setup and schema direction for storing KoreShield outputs.
+Use PostgreSQL to persist security events, metrics, and audit data. This guide outlines a typical setup and schema direction for storing Koreshield outputs.
 
 ## Use Cases
 
@@ -23,7 +23,7 @@ Use PostgreSQL to persist security events, metrics, and audit data. This guide o
 
 ## Recommended Architecture
 
-- KoreShield writes structured logs (JSON)
+- Koreshield writes structured logs (JSON)
 - A log shipper or worker ingests events into PostgreSQL
 - Dashboards or BI tools read from PostgreSQL
 
@@ -73,7 +73,7 @@ ORDER BY count DESC;
 ## Ingestion Options
 
 - Log exporter (Fluent Bit, Vector, Logstash)
-- A lightweight worker that reads KoreShield logs and inserts rows
+- A lightweight worker that reads Koreshield logs and inserts rows
 - Server-side hooks in your app if you already capture LLM traffic
 
 ## Operational Tips

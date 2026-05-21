@@ -21,7 +21,7 @@ interface SEOMetaProps {
 	breadcrumbs?: Array<{ name: string; url: string }>;
 }
 
-const DEFAULT_TITLE = 'KoreShield - Enterprise-Grade LLM Security Firewall';
+const DEFAULT_TITLE = 'Koreshield - Enterprise-Grade LLM Security Firewall';
 const DEFAULT_DESCRIPTION = 'Enterprise-grade LLM security firewall protecting AI applications from prompt injection, jailbreaks, and data exfiltration with 95%+ detection accuracy.';
 const DEFAULT_KEYWORDS = 'LLM security, AI security, prompt injection, jailbreak detection, GPT security, OpenAI security, LLM firewall, AI safety, AI infrastructure protection, threat detection';
 const DEFAULT_OG_IMAGE = 'https://koreshield.ai/og-image.png';
@@ -68,7 +68,7 @@ export function SEOMeta({
 		() => ({
 			'@context': 'https://schema.org',
 			'@type': 'SoftwareApplication',
-			name: 'KoreShield',
+			name: 'Koreshield',
 			description: DEFAULT_DESCRIPTION,
 			url: SITE_URL,
 			applicationCategory: 'SecurityApplication',
@@ -80,7 +80,7 @@ export function SEOMeta({
 			},
 			provider: {
 				'@type': 'Organization',
-				name: 'KoreShield',
+				name: 'Koreshield',
 				url: SITE_URL,
 				logo: {
 					'@type': 'ImageObject',
@@ -144,7 +144,7 @@ export function SEOMeta({
 			<meta property="og:image" content={ogImage} />
 			<meta property="og:image:width" content="1200" />
 			<meta property="og:image:height" content="630" />
-			<meta property="og:site_name" content="KoreShield" />
+			<meta property="og:site_name" content="Koreshield" />
 			{publishedTime && <meta property="article:published_time" content={publishedTime} />}
 			{modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
 			{section && <meta property="article:section" content={section} />}

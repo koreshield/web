@@ -243,7 +243,7 @@ export default function BillingPage() {
 						<div className="flex-1">
 							<h1 className="text-2xl font-bold sm:text-3xl">Billing</h1>
 							<p className="mt-2 max-w-2xl text-xs text-muted-foreground sm:text-sm">
-								Manage your KoreShield subscription, upgrade your plan, and keep your account in sync.
+								Manage your Koreshield subscription, upgrade your plan, and keep your account in sync.
 							</p>
 						</div>
 						<button
@@ -309,7 +309,7 @@ export default function BillingPage() {
 						<div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:gap-3">
 							{isInternalUnlimited ? (
 								<div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-700 sm:text-sm">
-									This KoreShield team account is provisioned with internal unlimited enterprise access. Hosted checkout and customer portal are not needed.
+									This Koreshield team account is provisioned with internal unlimited enterprise access. Hosted checkout and customer portal are not needed.
 								</div>
 							) : !hasPolarCustomer ? (
 								<div className="rounded-lg border border-border bg-muted px-4 py-3 text-xs text-muted-foreground sm:text-sm">

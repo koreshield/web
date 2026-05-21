@@ -24,7 +24,7 @@ export default function ResearchArticlePage() {
 		},
 		publisher: {
 			'@type': 'Organization',
-			name: 'KoreShield',
+			name: 'Koreshield',
 			url: 'https://koreshield.ai',
 		},
 		datePublished: article.date,
@@ -121,7 +121,7 @@ export default function ResearchArticlePage() {
 								Research Note
 							</p>
 							<p className="mt-3 text-sm leading-7 text-muted-foreground">
-								This page presents the full text for the KoreShield research entry as published on the research index.
+								This page presents the full text for the Koreshield research entry as published on the research index.
 							</p>
 							<div className="mt-6 space-y-3">
 								<Link
