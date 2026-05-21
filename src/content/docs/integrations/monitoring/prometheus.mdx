@@ -1,13 +1,13 @@
 ---
 title: Prometheus Monitoring
-description: Scrape KoreShield metrics from the built-in Prometheus endpoint.
+description: Scrape Koreshield metrics from the built-in Prometheus endpoint.
 last_update:
   date: 2026-03-10
 ---
 
 # Prometheus Monitoring
 
-KoreShield exposes Prometheus-compatible metrics at `/metrics`. You can scrape this endpoint and build alerts based on request volume, block rates, and provider latency.
+Koreshield exposes Prometheus-compatible metrics at `/metrics`. You can scrape this endpoint and build alerts based on request volume, block rates, and provider latency.
 
 ## Use Cases
 
@@ -27,7 +27,7 @@ monitoring:
 
 ## Metrics Endpoint
 
-KoreShield exposes metrics at:
+Koreshield exposes metrics at:
 
 ```
 http://<koreshield-host>:8000/metrics
@@ -46,7 +46,7 @@ scrape_configs:
 
 ## Key Metrics
 
-These are some of the metrics exported by KoreShield:
+These are some of the metrics exported by Koreshield:
 
 - `koreshield_requests_total` (labels: `method`, `endpoint`, `status`)
 - `koreshield_requests_duration_seconds` (labels: `method`, `endpoint`)

@@ -141,7 +141,7 @@ export function InviteAcceptPage() {
 					</div>
 					<h1 className="text-2xl font-bold">Team Invitation</h1>
 					<p className="text-muted-foreground">
-						You've been invited to join a team on KoreShield.
+						You've been invited to join a team on Koreshield.
 					</p>
 				</div>
 
@@ -184,7 +184,7 @@ export function InviteAcceptPage() {
 				{!isAuthenticated ? (
 					<div className="space-y-3">
 						<p className="text-sm text-center text-muted-foreground">
-							Sign in to your KoreShield account to accept this invitation.
+							Sign in to your Koreshield account to accept this invitation.
 						</p>
 						<Link
 							to={`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`}

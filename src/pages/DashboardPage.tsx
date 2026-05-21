@@ -93,7 +93,7 @@ const client = new OpenAI({
 					<AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
 					<h2 className="text-xl font-bold mb-2">Failed to Connect</h2>
 					<p className="text-muted-foreground mb-4">
-						Unable to reach the KoreShield backend. Please check your connection.
+						Unable to reach the Koreshield backend. Please check your connection.
 					</p>
 					<button
 						onClick={() => window.location.reload()}
@@ -122,7 +122,7 @@ const client = new OpenAI({
 				<div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">
 					<CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
 					<span className="text-xs text-green-600 font-medium">
-						Connected to KoreShield API
+						Connected to Koreshield API
 					</span>
 				</div>
 			</div>
@@ -175,7 +175,7 @@ const client = new OpenAI({
 							<Rocket className="w-6 h-6 text-primary" />
 						</div>
 						<div className="flex-1 min-w-0">
-							<h2 className="text-lg font-bold mb-1">Welcome to KoreShield</h2>
+							<h2 className="text-lg font-bold mb-1">Welcome to Koreshield</h2>
 							<p className="text-sm text-muted-foreground mb-5">
 								Everything you need to protect your first integration is right here. Generate a key, review your protection rules, and copy the integration snippet without bouncing between pages.
 							</p>
@@ -230,7 +230,7 @@ const client = new OpenAI({
 									) : (
 										<div>
 											<p className="text-xs text-muted-foreground mb-3">
-												Create the key your application will use to send protected traffic through KoreShield.
+												Create the key your application will use to send protected traffic through Koreshield.
 											</p>
 											<button
 												onClick={() => setShowKeyForm(true)}

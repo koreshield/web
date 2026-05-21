@@ -27,7 +27,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from koreshield import KoreShieldClient
 
-class KoreShieldMiddleware:
+class KoreshieldMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         self.client = KoreShieldClient(
@@ -47,7 +47,7 @@ class KoreShieldMiddleware:
 
                     if not result.is_safe:
                         return JsonResponse({
-                            "error": "Blocked by KoreShield",
+                            "error": "Blocked by Koreshield",
                             "threat_level": result.threat_level
                         }, status=403)
             except Exception:
@@ -63,7 +63,7 @@ In your `settings.py`:
 ```python
 MIDDLEWARE = [
     # ...
-    'yourapp.middleware.KoreShieldMiddleware',
+    'yourapp.middleware.KoreshieldMiddleware',
 ]
 
 KORESHIELD_API_KEY = "ks_..."

@@ -7,7 +7,7 @@ import { careerRoles, getFeaturedCareerRole } from '../content/careers';
 const values = [
 	{
 		title: 'Ship work that matters',
-		body: 'KoreShield sits in the runtime path of real AI systems. The work here is not theoretical or decorative.',
+		body: 'Koreshield sits in the runtime path of real AI systems. The work here is not theoretical or decorative.',
 	},
 	{
 		title: 'Small team, high ownership',
@@ -29,8 +29,8 @@ export default function CareersPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground transition-colors">
 			<SEOMeta
-				title="Careers at KoreShield"
-				description="Explore open roles at KoreShield across growth, product, security, research, engineering, and sales."
+				title="Careers at Koreshield"
+				description="Explore open roles at Koreshield across growth, product, security, research, engineering, and sales."
 			/>
 
 			<section className="py-24 px-6 relative ambient-glow overflow-hidden">
@@ -47,7 +47,7 @@ export default function CareersPage() {
 									<br className="hidden md:block" /> the AI industry needs.
 								</h1>
 								<p className="text-lg text-muted-foreground max-w-3xl leading-relaxed">
-									KoreShield is building the runtime protection layer for LLM-powered applications. We work across security, platform, product, growth, and research, and we care about shipping work that is technically real and commercially useful.
+									Koreshield is building the runtime protection layer for LLM-powered applications. We work across security, platform, product, growth, and research, and we care about shipping work that is technically real and commercially useful.
 								</p>
 							</div>
 

@@ -1,6 +1,6 @@
 ---
 title: Astro Integration
-description: Secure Astro server routes by proxying LLM requests through KoreShield.
+description: Secure Astro server routes by proxying LLM requests through Koreshield.
 sidebar_position: 1
 last_update:
   date: 2026-03-10
@@ -8,7 +8,7 @@ last_update:
 
 # Astro Integration
 
-Use KoreShield as a security proxy for LLM requests made from Astro server routes. Keep provider API keys on the KoreShield server and send requests to the proxy endpoint.
+Use Koreshield as a security proxy for LLM requests made from Astro server routes. Keep provider API keys on the Koreshield server and send requests to the proxy endpoint.
 
 ## Use Cases
 
@@ -18,8 +18,8 @@ Use KoreShield as a security proxy for LLM requests made from Astro server route
 
 ## Prerequisites
 
-- A running KoreShield instance
-- Provider API key configured on the KoreShield server
+- A running Koreshield instance
+- Provider API key configured on the Koreshield server
 
 ## Environment Variables
 
@@ -63,7 +63,7 @@ export const POST: APIRoute = async ({ request }) => {
 
 ## Operational Tips
 
-- Keep provider API keys on the KoreShield server.
+- Keep provider API keys on the Koreshield server.
 - Route all LLM traffic through the proxy for consistent policy enforcement.
 - Add timeouts for streaming and long responses.
 - Tune security settings in [/configuration/](/docs/configuration).
@@ -71,7 +71,7 @@ export const POST: APIRoute = async ({ request }) => {
 ## Troubleshooting
 
 - 401 responses: confirm `KORESHIELD_API_KEY` header
-- CORS errors: enable allowed origins on the KoreShield server
+- CORS errors: enable allowed origins on the Koreshield server
 - Provider errors: verify provider keys on the proxy
 
 ## Next Steps

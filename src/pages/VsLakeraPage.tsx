@@ -7,8 +7,8 @@ export default function VsLakeraPage() {
 	return (
 		<div className="min-h-screen bg-background">
 			<SEOMeta
-				title="KoreShield vs Lakera Guard"
-				description="Compare KoreShield and Lakera Guard: features, pricing, and which LLM security solution is right for your needs."
+				title="Koreshield vs Lakera Guard"
+				description="Compare Koreshield and Lakera Guard: features, pricing, and which LLM security solution is right for your needs."
 			/>
 
 			{/* Hero */}
@@ -20,7 +20,7 @@ export default function VsLakeraPage() {
 						className="text-center"
 					>
 						<h1 className="text-5xl font-bold text-foreground mb-6">
-							KoreShield vs Lakera Guard
+							Koreshield vs Lakera Guard
 						</h1>
 						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
 							An honest comparison of two leading LLM security solutions
@@ -40,7 +40,7 @@ export default function VsLakeraPage() {
 					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
 						<div className="flex items-center gap-3 mb-4">
 							<Shield className="w-8 h-8 text-electric-green" />
-							<h2 className="text-2xl font-bold text-foreground">KoreShield</h2>
+							<h2 className="text-2xl font-bold text-foreground">Koreshield</h2>
 						</div>
 						<p className="text-muted-foreground mb-4">
 							Enterprise-grade LLM security with 95% detection accuracy and multi-provider support.
@@ -108,7 +108,7 @@ export default function VsLakeraPage() {
 								<thead className="border-b border-border">
 									<tr>
 										<th className="text-left py-4 px-4 text-foreground font-semibold">Feature</th>
-										<th className="text-center py-4 px-4 text-electric-green font-semibold">KoreShield</th>
+										<th className="text-center py-4 px-4 text-electric-green font-semibold">Koreshield</th>
 										<th className="text-center py-4 px-4 text-purple-600 dark:text-purple-400 font-semibold">Lakera Guard</th>
 									</tr>
 								</thead>
@@ -178,7 +178,7 @@ export default function VsLakeraPage() {
 					</div>
 					<div className="grid md:grid-cols-2 gap-8">
 						<div>
-							<h3 className="text-xl font-semibold text-electric-green mb-4">KoreShield</h3>
+							<h3 className="text-xl font-semibold text-electric-green mb-4">Koreshield</h3>
 							<ul className="space-y-3 text-muted-foreground">
 								<li>• <strong>£0:</strong> Dev tier with 10,000 protected requests</li>
 								<li>• <strong>£99/mo:</strong> Growth with 100,000 protected requests</li>
@@ -208,7 +208,7 @@ export default function VsLakeraPage() {
 					className="grid md:grid-cols-2 gap-8"
 				>
 					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
-						<h3 className="text-2xl font-bold text-electric-green mb-6">KoreShield Advantages</h3>
+						<h3 className="text-2xl font-bold text-electric-green mb-6">Koreshield Advantages</h3>
 						<ul className="space-y-3">
 							<li className="flex gap-3">
 								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
@@ -278,7 +278,7 @@ export default function VsLakeraPage() {
 					<h2 className="text-3xl font-bold text-foreground mb-8 text-center">Which Should You Choose?</h2>
 					<div className="grid md:grid-cols-2 gap-8">
 						<div className="bg-card rounded-lg p-6">
-							<h3 className="text-xl font-bold text-electric-green mb-4">Choose KoreShield if:</h3>
+							<h3 className="text-xl font-bold text-electric-green mb-4">Choose Koreshield if:</h3>
 							<ul className="space-y-2 text-muted-foreground">
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You value transparency and control</li>
 								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You want cost-effective enterprise security</li>
@@ -309,7 +309,7 @@ export default function VsLakeraPage() {
 					transition={{ delay: 0.6 }}
 					className="bg-card border border-border rounded-xl p-10 text-center"
 				>
-					<h2 className="text-3xl font-bold mb-4 text-foreground">Upgrade to KoreShield</h2>
+					<h2 className="text-3xl font-bold mb-4 text-foreground">Upgrade to Koreshield</h2>
 					<p className="text-lg mb-8 text-muted-foreground">
 						Get enterprise-ready security with the same security-first values
 					</p>

@@ -569,7 +569,7 @@ export function AlertsPage() {
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-6 rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
-                    Alerts help customers prove that KoreShield is operating, but they only become useful after you connect at least one notification channel and one rule.
+                    Alerts help customers prove that Koreshield is operating, but they only become useful after you connect at least one notification channel and one rule.
                 </div>
                 {/* Rules Tab */}
                 {activeTab === 'rules' && (

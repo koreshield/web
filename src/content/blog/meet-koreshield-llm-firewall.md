@@ -1,6 +1,6 @@
 ---
-title: Meet KoreShield - An LLM Firewall for AI Systems in CRM, Fintech, and Healthcare
-excerpt: Your AI Agent is one CRM note away from a data breach. KoreShield is a security proxy that sits between your data sources and models, evaluating every input before it reaches your LLM.
+title: Meet Koreshield - An LLM Firewall for AI Systems in CRM, Fintech, and Healthcare
+excerpt: Your AI Agent is one CRM note away from a data breach. Koreshield is a security proxy that sits between your data sources and models, evaluating every input before it reaches your LLM.
 date: 2026-03-04
 author: Teslim O. Kazeem
 categories: Product, Security
@@ -28,13 +28,13 @@ The instinct many teams reach for is prompt hardening: carefully worded system p
 
 **Prompt injection is an architectural problem. It needs an architectural solution.**
 
-## What KoreShield Does
+## What Koreshield Does
 
-KoreShield is a security proxy built on research into LLM vulnerabilities and RAG pipeline attacks. It sits between your user inputs, data sources and your models, evaluating every input before it reaches your LLM.
+Koreshield is a security proxy built on research into LLM vulnerabilities and RAG pipeline attacks. It sits between your user inputs, data sources and your models, evaluating every input before it reaches your LLM.
 
-Most AI stacks have no trust boundary between untrusted external data and the models acting on it. KoreShield is that boundary.
+Most AI stacks have no trust boundary between untrusted external data and the models acting on it. Koreshield is that boundary.
 
-Every input that would otherwise flow directly into your model passes through KoreShield first. It classifies the source, evaluates the content for injection patterns, applies your configured policies, and either passes the sanitised input through or blocks and logs it.
+Every input that would otherwise flow directly into your model passes through Koreshield first. It classifies the source, evaluates the content for injection patterns, applies your configured policies, and either passes the sanitised input through or blocks and logs it.
 
 Here's what that looks like in practice:
 

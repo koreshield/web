@@ -82,4 +82,4 @@ The model is not your firewall.
 
 ---
 
-*Isaac Emmanuel is the co-founder and CTO of KoreShield, an LLM security gateway that scans prompts and retrieved context for injection attacks before they reach your model.*
+*Isaac Emmanuel is the co-founder and CTO of Koreshield, an LLM security gateway that scans prompts and retrieved context for injection attacks before they reach your model.*

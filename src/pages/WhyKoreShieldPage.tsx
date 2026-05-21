@@ -41,7 +41,7 @@ const advantages = [
 	{
 		icon: <Lock className="w-7 h-7" />,
 		title: 'Defense in Depth',
-		description: 'We don\'t rely on a single detection method. KoreShield uses 8 layers of security: sanitization, heuristic detection, ML-based analysis, custom rules, blocklists/allowlists, policy enforcement, RBAC, and provider validation.',
+		description: 'We don\'t rely on a single detection method. Koreshield uses 8 layers of security: sanitization, heuristic detection, ML-based analysis, custom rules, blocklists/allowlists, policy enforcement, RBAC, and provider validation.',
 		bullets: [
 			'Pattern matching with 50+ attack signatures',
 			'ML-based anomaly detection',
@@ -52,7 +52,7 @@ const advantages = [
 	{
 		icon: <Globe className="w-7 h-7" />,
 		title: 'Multi-Provider Excellence',
-		description: 'Unlike competitors locked to specific providers, KoreShield works seamlessly with OpenAI, Anthropic, Google Gemini, DeepSeek, Azure OpenAI, and any OpenAI-compatible API.',
+		description: 'Unlike competitors locked to specific providers, Koreshield works seamlessly with OpenAI, Anthropic, Google Gemini, DeepSeek, Azure OpenAI, and any OpenAI-compatible API.',
 		bullets: [
 			'Unified security across all LLM providers',
 			'No vendor lock-in',
@@ -108,17 +108,17 @@ const stats = [
 ];
 
 const comparisons = [
-	{ to: '/vs/lakera-guard', title: 'KoreShield vs Lakera Guard', description: 'See why KoreShield is the enterprise-grade alternative to legacy solutions.' },
-	{ to: '/vs/llm-guard', title: 'KoreShield vs LLM Guard', description: 'Compare features, ease of use, and enterprise readiness.' },
-	{ to: '/vs/build-yourself', title: 'KoreShield vs Building In-House', description: 'Understand the hidden costs of maintenance and custom training.' },
+	{ to: '/vs/lakera-guard', title: 'Koreshield vs Lakera Guard', description: 'See why Koreshield is the enterprise-grade alternative to legacy solutions.' },
+	{ to: '/vs/llm-guard', title: 'Koreshield vs LLM Guard', description: 'Compare features, ease of use, and enterprise readiness.' },
+	{ to: '/vs/build-yourself', title: 'Koreshield vs Building In-House', description: 'Understand the hidden costs of maintenance and custom training.' },
 ];
 
-export default function WhyKoreShieldPage() {
+export default function WhyKoreshieldPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground transition-colors">
 			<SEOMeta
-				title="Why KoreShield"
-				description="Discover what makes KoreShield the best LLM security solution: 95% detection accuracy, enterprise-ready features, and flexible deployment."
+				title="Why Koreshield"
+				description="Discover what makes Koreshield the best LLM security solution: 95% detection accuracy, enterprise-ready features, and flexible deployment."
 			/>
 
 			{/* Hero */}
@@ -127,7 +127,7 @@ export default function WhyKoreShieldPage() {
 					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
 						<div className="inline-flex items-center gap-2 bg-electric-green/10 border border-electric-green/20 text-electric-green text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-widest">
 							<span className="w-1.5 h-1.5 rounded-full bg-electric-green" />
-							Why KoreShield
+							Why Koreshield
 						</div>
 						<h1 className="text-5xl md:text-6xl font-extrabold mb-6 tracking-[-0.04em] text-foreground">
 							Enterprise-grade LLM security.<br className="hidden md:block" /> Without the enterprise wait.
@@ -144,7 +144,7 @@ export default function WhyKoreShieldPage() {
 				{/* Core Differentiators */}
 				<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
 					<h2 className="text-3xl font-bold text-foreground mb-3 text-center tracking-tight">Core Differentiators</h2>
-					<p className="text-center text-muted-foreground mb-10">What sets KoreShield apart from every other option.</p>
+					<p className="text-center text-muted-foreground mb-10">What sets Koreshield apart from every other option.</p>
 					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
 						{differentiators.map((d) => (
 							<div key={d.title} className="bg-card border border-border rounded-xl p-6">
@@ -158,9 +158,9 @@ export default function WhyKoreShieldPage() {
 					</div>
 				</motion.div>
 
-				{/* The KoreShield Advantage */}
+				{/* The Koreshield Advantage */}
 				<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-					<h2 className="text-3xl font-bold text-foreground mb-3 text-center tracking-tight">The KoreShield Advantage</h2>
+					<h2 className="text-3xl font-bold text-foreground mb-3 text-center tracking-tight">The Koreshield Advantage</h2>
 					<p className="text-center text-muted-foreground mb-10">Layers of security working together, not just pattern matching.</p>
 					<div className="bg-card border border-border rounded-2xl divide-y divide-border">
 						{advantages.map((adv) => (
@@ -218,7 +218,7 @@ export default function WhyKoreShieldPage() {
 					className="bg-card border border-white/[0.08] rounded-2xl p-12 relative overflow-hidden"
 				>
 					<div className="absolute inset-0 bg-gradient-to-br from-electric-green/[0.04] via-transparent to-transparent pointer-events-none" />
-					<h2 className="text-3xl font-bold text-center text-foreground mb-12 tracking-tight relative z-10">KoreShield by the Numbers</h2>
+					<h2 className="text-3xl font-bold text-center text-foreground mb-12 tracking-tight relative z-10">Koreshield by the Numbers</h2>
 					<div className="grid md:grid-cols-4 gap-8 text-center relative z-10">
 						{stats.map((s) => (
 							<div key={s.label}>
@@ -262,7 +262,7 @@ export default function WhyKoreShieldPage() {
 						Ready to Secure Your LLM?
 					</h2>
 					<p className="text-muted-foreground mb-8 max-w-lg mx-auto relative z-10">
-						Join teams protecting their AI with KoreShield, from early-stage startups to enterprise deployments.
+						Join teams protecting their AI with Koreshield, from early-stage startups to enterprise deployments.
 					</p>
 					<div className="flex flex-wrap justify-center gap-4 relative z-10">
 						<Link

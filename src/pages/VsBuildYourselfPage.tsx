@@ -7,8 +7,8 @@ export default function VsBuildYourselfPage() {
 	return (
 		<div className="min-h-screen bg-background">
 			<SEOMeta
-				title="KoreShield vs Building Your Own"
-				description="Should you build your own LLM security solution or use KoreShield? Compare costs, time investment, maintenance burden, and long-term TCO."
+				title="Koreshield vs Building Your Own"
+				description="Should you build your own LLM security solution or use Koreshield? Compare costs, time investment, maintenance burden, and long-term TCO."
 			/>
 
 			{/* Hero */}
@@ -23,7 +23,7 @@ export default function VsBuildYourselfPage() {
 							Build vs Buy: The Real Cost
 						</h1>
 						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-							An honest analysis of building your own LLM security vs using KoreShield
+							An honest analysis of building your own LLM security vs using Koreshield
 						</p>
 					</motion.div>
 				</div>
@@ -73,10 +73,10 @@ export default function VsBuildYourselfPage() {
 						</div>
 
 						<div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-6 border-2 border-green-200 dark:border-green-900">
-							<h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">Using KoreShield</h3>
+							<h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">Using Koreshield</h3>
 							<div className="space-y-3">
 								<div className="flex justify-between items-center">
-									<span className="text-muted-foreground">KoreShield Enterprise License</span>
+									<span className="text-muted-foreground">Koreshield Enterprise License</span>
 									<span className="font-bold text-foreground">$50,000</span>
 								</div>
 								<div className="flex justify-between items-center">
@@ -152,7 +152,7 @@ export default function VsBuildYourselfPage() {
 							</ul>
 						</div>
 						<div>
-							<h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-4">Using KoreShield: 1 Week</h3>
+							<h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-4">Using Koreshield: 1 Week</h3>
 							<ul className="space-y-3 text-muted-foreground">
 								<li className="flex gap-3">
 									<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
@@ -240,7 +240,7 @@ export default function VsBuildYourselfPage() {
 					</div>
 				</motion.div>
 
-				{/* What You Get with KoreShield */}
+				{/* What You Get with Koreshield */}
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -249,7 +249,7 @@ export default function VsBuildYourselfPage() {
 				>
 					<div className="flex items-center gap-3 mb-6">
 						<Shield className="w-8 h-8 text-electric-green" />
-						<h2 className="text-3xl font-bold text-foreground">What's Included in KoreShield</h2>
+						<h2 className="text-3xl font-bold text-foreground">What's Included in Koreshield</h2>
 					</div>
 					<div className="grid md:grid-cols-3 gap-6">
 						<div className="space-y-3">
@@ -310,7 +310,7 @@ export default function VsBuildYourselfPage() {
 							</div>
 						</div>
 						<div className="bg-card rounded-lg p-6">
-							<h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-4">Use KoreShield</h3>
+							<h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-4">Use Koreshield</h3>
 							<div className="space-y-2 text-muted-foreground">
 								<div className="flex justify-between"><span>Year 1:</span><span className="font-bold">$65,500</span></div>
 								<div className="flex justify-between"><span>Year 2:</span><span className="font-bold">$60,000</span></div>

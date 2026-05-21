@@ -31,7 +31,7 @@ function Architecture() {
                         Zero Rearchitecting Required
                     </h2>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                        Point KoreShield at your existing LLM provider. Every request is inspected, scored, and either passed through or stopped, without changing a line of your application code.
+                        Point Koreshield at your existing LLM provider. Every request is inspected, scored, and either passed through or stopped, without changing a line of your application code.
                     </p>
                 </motion.div>
 
@@ -66,7 +66,7 @@ function Architecture() {
                     {/* Mobile arrow */}
                     <div className="lg:hidden"><FlowArrow /></div>
 
-                    {/* Step 2: KoreShield Proxy  -  the "star" card */}
+                    {/* Step 2: Koreshield Proxy  -  the "star" card */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
@@ -77,7 +77,7 @@ function Architecture() {
                         <div className="flex justify-center mb-3">
                             <span className="inline-flex items-center gap-1.5 bg-emerald-600 dark:bg-electric-green text-white font-bold px-5 py-2 text-xs rounded-full uppercase tracking-widest shadow-lg shadow-emerald-600/30 dark:shadow-emerald-500/30 ring-2 ring-emerald-600/20 dark:ring-emerald-400/20">
                                 <Shield className="w-3.5 h-3.5" />
-                                KoreShield Proxy
+                                Koreshield Proxy
                             </span>
                         </div>
 

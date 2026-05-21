@@ -143,7 +143,7 @@ export function ThreatMapPage() {
 	return (
 		<div className="bg-background">
 			<SEOMeta
-				title="Threat Map | KoreShield"
+				title="Threat Map | Koreshield"
 				description="Real-time geographic visualization of security threats and attack patterns"
 			/>
 

@@ -1,13 +1,13 @@
 ---
 title: Datadog Monitoring
-description: Export KoreShield metrics to Datadog using Prometheus scraping.
+description: Export Koreshield metrics to Datadog using Prometheus scraping.
 last_update:
   date: 2026-03-10
 ---
 
 # Datadog Monitoring
 
-KoreShield exposes Prometheus metrics at `/metrics`. Datadog can scrape these metrics using the Prometheus integration or OpenMetrics check.
+Koreshield exposes Prometheus metrics at `/metrics`. Datadog can scrape these metrics using the Prometheus integration or OpenMetrics check.
 
 ## Use Cases
 
@@ -17,12 +17,12 @@ KoreShield exposes Prometheus metrics at `/metrics`. Datadog can scrape these me
 
 ## Prerequisites
 
-- KoreShield running with `/metrics` reachable
+- Koreshield running with `/metrics` reachable
 - Datadog Agent installed on the host or as a sidecar
 
 ## Enable Prometheus Metrics
 
-KoreShield exposes metrics by default at:
+Koreshield exposes metrics by default at:
 
 ```
 http://<koreshield-host>:8000/metrics
@@ -57,13 +57,13 @@ instances:
 ## Logs and Traces
 
 - Enable `json_logs: true` and ship logs via Datadog Agent
-- Add a service name tag for the KoreShield proxy
+- Add a service name tag for the Koreshield proxy
 - Use log correlation to trace incidents back to requests
 
 ## Security Notes
 
 - Restrict access to `/metrics` with network controls.
-- Use TLS for traffic between the Agent and KoreShield.
+- Use TLS for traffic between the Agent and Koreshield.
 
 ## Troubleshooting
 

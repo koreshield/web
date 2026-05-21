@@ -53,9 +53,9 @@ Attackers can craft retrieval documents that confuse the model:
 - Irrelevant but persuasive content
 - Instructions wrapped in documents
 
-## KoreShield Protection
+## Koreshield Protection
 
-KoreShield provides multi-layer protection for RAG systems:
+Koreshield provides multi-layer protection for RAG systems:
 
 ### 1. Input Validation
 - Validate user queries before retrieval
@@ -140,9 +140,9 @@ function validateOutput(output: string): boolean {
 ## Implementation Example
 
 ```typescript
-import { KoreShield } from '@koreshield/sdk';
+import { Koreshield } from '@koreshield/sdk';
 
-const shield = new KoreShield({
+const shield = new Koreshield({
   apiKey: process.env.KORESHIELD_API_KEY,
 });
 
@@ -184,7 +184,7 @@ Set up monitoring for:
 3. **Anomalies**: Track retrieval patterns for unusual activity
 4. **Performance**: Monitor retrieval speed and quality
 
-Configure alerts in KoreShield dashboard:
+Configure alerts in Koreshield dashboard:
 ```
 Alert on: Prompt injection attempt
 Threshold: 5 in 1 hour
@@ -230,7 +230,7 @@ RAG systems are powerful but require careful security consideration:
 
 ## Resources
 
-- [KoreShield RAG Security Guide](/docs/rag-security)
+- [Koreshield RAG Security Guide](/docs/rag-security)
 - [Threat Report: RAG Vulnerabilities](/docs/threat-reports)
 - [API Reference](/docs/api)
 - [Join Community](https://discord.gg/koreshield)

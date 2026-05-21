@@ -260,7 +260,7 @@ export function AdvancedAnalyticsPage() {
 	return (
 		<div className="bg-background">
 			<SEOMeta
-				title="Advanced Analytics | KoreShield"
+				title="Advanced Analytics | Koreshield"
 				description="Cost optimization, performance metrics, and provider comparison analytics"
 			/>
 

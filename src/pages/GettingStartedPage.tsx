@@ -10,7 +10,7 @@ const steps = [
 		linkLabel: 'Open API keys',
 	},
 	{
-		title: 'Point your app at KoreShield',
+		title: 'Point your app at Koreshield',
 		description: 'Send chat traffic to /v1/chat/completions and document scans to /v1/rag/scan or /v1/scan.',
 		href: '/docs/getting-started/quick-start',
 		icon: Shield,
@@ -46,10 +46,10 @@ export default function GettingStartedPage() {
 			<header className="border-b border-border bg-card">
 				<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
 					<p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Client onboarding</p>
-					<h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight">How clients actually use KoreShield</h1>
+					<h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight">How clients actually use Koreshield</h1>
 					<p className="mt-3 max-w-3xl text-xs sm:text-sm text-muted-foreground">
-						KoreShield sits between your application and your model provider. Clients sign into the dashboard to manage access,
-						policies, billing, and teams, then their server-side application sends protected traffic through the KoreShield API.
+						Koreshield sits between your application and your model provider. Clients sign into the dashboard to manage access,
+						policies, billing, and teams, then their server-side application sends protected traffic through the Koreshield API.
 					</p>
 				</div>
 			</header>
@@ -122,7 +122,7 @@ export default function GettingStartedPage() {
 					<div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
 						<h2 className="text-lg sm:text-xl font-semibold">Minimal integration example</h2>
 						<p className="mt-2 text-xs sm:text-sm text-muted-foreground">
-							This is the shape clients should understand first: point the OpenAI-compatible client at KoreShield and keep the real credential server-side.
+							This is the shape clients should understand first: point the OpenAI-compatible client at Koreshield and keep the real credential server-side.
 						</p>
 						<pre className="mt-4 overflow-x-auto rounded-xl bg-muted p-3 sm:p-4 text-[10px] sm:text-xs leading-6">
 {`import OpenAI from 'openai';

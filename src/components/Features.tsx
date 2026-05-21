@@ -52,7 +52,7 @@ function Features() {
                     className="text-center mb-16"
                 >
                     <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-foreground tracking-[-0.04em]">
-                        What KoreShield Catches Before Your LLM Does
+                        What Koreshield Catches Before Your LLM Does
                     </h2>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
                         50+ attack detection patterns, tuned on real production traffic, not just benchmark datasets.
