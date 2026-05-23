@@ -12,6 +12,58 @@ interface APIError {
 
 type JsonRecord = Record<string, unknown>;
 
+export type UsageSummary = {
+	period: {
+		start: string;
+		end: string;
+		label: string;
+	};
+	plan: {
+		slug: string;
+		name: string;
+		protected_request_limit: number | null;
+		overage_unit_requests: number | null;
+		overage_unit_price_gbp: number | null;
+	};
+	usage: {
+		protected_requests: number;
+		requests_allowed: number;
+		requests_blocked: number;
+		attacks_detected: number;
+		rag_scans: number;
+		tokens_total: number;
+		estimated_cost_gbp: number;
+	};
+	limits: {
+		protected_requests: number | null;
+		remaining: number | null;
+		percent_used: number | null;
+		status: 'ok' | 'watch' | 'near_limit' | 'limit_reached' | 'unlimited';
+	};
+	breakdown: {
+		daily: Array<{
+			date: string;
+			protected_requests: number;
+			requests_blocked: number;
+			attacks_detected: number;
+		}>;
+		by_api_key: Array<{
+			id: string;
+			name: string;
+			key_prefix: string | null;
+			monthly_ceiling: number | null;
+			protected_requests: number;
+			requests_blocked: number;
+			attacks_detected: number;
+			last_used_at: string | null;
+		}>;
+	};
+	alerts: Array<{
+		level: 'warning' | 'critical';
+		message: string;
+	}>;
+};
+
 interface ValidationErrorItem {
 	msg?: string;
 	message?: string;
@@ -141,6 +193,10 @@ class ApiClient {
 	async getStats(): Promise<AttackStats> {
 		// Per-account stats scoped to the authenticated user — never platform-wide
 		return this.fetch<AttackStats>('/v1/management/stats');
+	}
+
+	async getUsageSummary(): Promise<UsageSummary> {
+		return this.fetch<UsageSummary>('/v1/management/usage');
 	}
 
 	async getPublicStats(): Promise<AttackStats> {
