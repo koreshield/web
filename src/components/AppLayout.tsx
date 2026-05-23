@@ -496,7 +496,7 @@ export function AppLayout() {
 
 			{/* ── Desktop sidebar ── */}
 			<aside
-				className="hidden md:flex flex-col fixed top-0 left-0 bottom-0 z-40 bg-card/60 border-r border-white/[0.06] transition-all duration-200 ease-in-out"
+				className="dashboard-sidebar hidden md:flex flex-col fixed top-0 left-0 bottom-0 z-40 border-r transition-all duration-200 ease-in-out"
 				style={{ width: sidebarWidth }}
 			>
 				<Sidebar
@@ -518,7 +518,7 @@ export function AppLayout() {
 
 					{/* Drawer */}
 					<aside
-						className="relative z-10 flex flex-col bg-card border-r border-white/[0.06] h-full"
+						className="dashboard-sidebar relative z-10 flex flex-col border-r h-full"
 						style={{ width: SIDEBAR_WIDTH }}
 						onClick={e => e.stopPropagation()}
 					>
@@ -544,11 +544,12 @@ export function AppLayout() {
 
 			{/* ── Main area ── */}
 			<div
-				className="flex flex-col flex-1 min-h-screen transition-all duration-200 ease-in-out"
+				className="dashboard-shell relative flex flex-col flex-1 min-h-screen transition-all duration-200 ease-in-out"
 				style={{ marginLeft: typeof window !== 'undefined' && window.innerWidth >= 768 ? sidebarWidth : 0 }}
 			>
+				<div className="dashboard-grid pointer-events-none absolute inset-0" />
 				{/* Top bar */}
-				<header className="sticky top-0 z-30 h-14 bg-background/80 backdrop-blur-xl border-b border-white/[0.06] flex items-center gap-3 px-4 shrink-0">
+				<header className="sticky top-0 z-30 h-14 bg-background/70 backdrop-blur-xl border-b border-white/[0.06] flex items-center gap-3 px-4 shrink-0">
 					{/* Mobile hamburger */}
 					<button
 						type="button"
@@ -585,7 +586,7 @@ export function AppLayout() {
 				</header>
 
 				{/* Page content */}
-				<main className="flex-1">
+				<main className="relative z-10 flex-1">
 					{isAuthenticated && user && (
 						<div className="px-4 sm:px-6 lg:px-8 pt-4">
 							{!user.email_verified ? (

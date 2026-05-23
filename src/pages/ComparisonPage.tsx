@@ -1,200 +1,119 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Check, X } from 'lucide-react';
+import { ArrowRight, Code2, GitBranch, Layers3, Scale, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
-interface Competitor {
-	id: string;
-	name: string;
-	path: string;
-	tagline: string;
-	category: string;
-	features: {
-		label: string;
-		koreshield: boolean;
-		competitor: boolean;
-	}[];
-}
-
-const COMPETITORS: Competitor[] = [
+const comparisons = [
 	{
-		id: 'llm-guard',
 		name: 'LLM Guard',
 		path: '/vs/llm-guard',
-		tagline: 'Pattern-based prompt filtering',
-		category: 'Prompt Defense',
-		features: [
-			{ label: 'Real-time RAG scanning', koreshield: true, competitor: false },
-			{ label: 'Cross-document correlation', koreshield: true, competitor: false },
-			{ label: 'Multi-provider support', koreshield: true, competitor: true },
-			{ label: 'Production audit logs', koreshield: true, competitor: false },
-			{ label: 'Compliance ready', koreshield: true, competitor: false },
-		],
+		type: 'Open-source scanner toolkit',
+		icon: GitBranch,
+		bestFor: 'Teams that want to assemble and operate scanners inside their own application code.',
+		koreshieldAngle: 'Koreshield is the managed enforcement layer that sits in the live AI traffic path.',
 	},
 	{
-		id: 'lakera-guard',
 		name: 'Lakera Guard',
 		path: '/vs/lakera-guard',
-		tagline: 'API-based prompt filtering',
-		category: 'API Security',
-		features: [
-			{ label: 'RAG document scanning', koreshield: true, competitor: false },
-			{ label: 'Self-hosted deployment', koreshield: true, competitor: false },
-			{ label: 'Enterprise RBAC', koreshield: true, competitor: false },
-			{ label: 'Policy engine', koreshield: true, competitor: false },
-			{ label: 'Immutable audit trail', koreshield: true, competitor: false },
-		],
+		type: 'Commercial AI security API',
+		icon: ShieldCheck,
+		bestFor: 'Teams evaluating a managed API-first prompt-security product.',
+		koreshieldAngle: 'Koreshield emphasizes runtime proxy control, audit evidence, RAG security, and product-roadmap transparency.',
 	},
 	{
-		id: 'build-yourself',
-		name: 'Build It Yourself',
+		name: 'Build yourself',
 		path: '/vs/build-yourself',
-		tagline: 'Custom detection logic',
-		category: 'In-house Solution',
-		features: [
-			{ label: 'Time to production', koreshield: true, competitor: false },
-			{ label: 'Cost efficiency', koreshield: true, competitor: false },
-			{ label: 'Compliance evidence', koreshield: true, competitor: false },
-			{ label: 'Vendor independence', koreshield: true, competitor: true },
-			{ label: 'Production reliability', koreshield: true, competitor: false },
-		],
+		type: 'Internal security project',
+		icon: Code2,
+		bestFor: 'Teams with security engineering capacity and appetite to own detection, policy, QA, and operations.',
+		koreshieldAngle: 'Koreshield compresses that work into a maintained security layer your team can deploy now.',
 	},
 ];
 
-function ComparisonCard({ competitor, index }: { competitor: Competitor; index: number }) {
-	return (
-		<motion.div
-			key={competitor.id}
-			initial={{ opacity: 0, y: 20 }}
-			whileInView={{ opacity: 1, y: 0 }}
-			viewport={{ once: true }}
-			transition={{ duration: 0.4, delay: index * 0.1 }}
-			className="group rounded-2xl border border-border bg-card/90 p-8 hover:border-primary/50 hover:bg-card/95 transition-all shadow-sm hover:shadow-lg hover:shadow-primary/10"
-		>
-			<div className="mb-4">
-				<span className="inline-block rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-					{competitor.category}
-				</span>
-			</div>
-
-			<h3 className="text-2xl font-black text-foreground mb-2">{competitor.name}</h3>
-			<p className="text-muted-foreground mb-6">{competitor.tagline}</p>
-
-			<div className="space-y-3 mb-8">
-				{competitor.features.slice(0, 3).map((feature) => (
-					<div key={feature.label} className="flex items-center gap-3">
-						{feature.koreshield ? (
-							<Check className="h-5 w-5 text-emerald-500 flex-shrink-0" />
-						) : (
-							<X className="h-5 w-5 text-muted-foreground/40 flex-shrink-0" />
-						)}
-						<span className="text-sm text-foreground/80">{feature.label}</span>
-					</div>
-				))}
-			</div>
-
-			<Link
-				to={competitor.path}
-				className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-semibold transition-colors group-hover:bg-primary group-hover:text-background"
-			>
-				Compare Details
-				<ArrowRight className="h-4 w-4" />
-			</Link>
-		</motion.div>
-	);
-}
+const criteria = ['Deployment model', 'Evidence and auditability', 'Operating burden', 'RAG and agent coverage', 'Support path'];
 
 export default function ComparisonPage() {
 	return (
-		<div className="min-h-screen bg-background text-foreground pt-24 pb-24">
+		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="Koreshield vs Competitors | Comparison"
-				description="See how Koreshield compares to LLM Guard, Lakera Guard, and building your own security layer."
+				title="Koreshield vs Alternatives"
+				description="Compare Koreshield with LLM Guard, Lakera Guard, and building your own AI security layer."
 			/>
 
-			<div className="max-w-7xl mx-auto px-6">
-				{/* Hero */}
-				<section className="mb-20 text-center">
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5 }}
-					>
-						<h1 className="text-5xl md:text-6xl font-black tracking-tight text-foreground mb-6">
-							How does Koreshield compare?
+			<section className="relative overflow-hidden px-6 py-24 ambient-glow md:py-32">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(16,185,129,0.16),transparent_28%),radial-gradient(circle_at_80%_16%,rgba(59,130,246,0.08),transparent_24%)]" />
+				<div className="relative mx-auto max-w-5xl text-center">
+					<motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+						<span className="mb-6 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-electric-green">
+							<Scale className="h-3.5 w-3.5" />
+							Compare
+						</span>
+						<h1 className="text-5xl font-extrabold tracking-[-0.055em] md:text-7xl">
+							Choose the right AI security layer.
 						</h1>
-						<p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-12">
-							Side-by-side comparison with other LLM security solutions. 
-							See what sets Koreshield apart for production AI applications.
+						<p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+							This is not a scoreboard. It is a practical buyer guide: where each option fits, what your team has to operate, and where enforcement actually happens.
 						</p>
+						<p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Last reviewed May 2026</p>
 					</motion.div>
+				</div>
+			</section>
 
-					{/* Stats */}
-					<div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto mt-12">
-						<div className="rounded-xl border border-primary/30 bg-primary/10 p-4">
-							<div className="text-3xl font-black text-primary">{COMPETITORS.length}</div>
-							<div className="text-xs uppercase tracking-[0.16em] text-muted-foreground mt-2">
-								Solutions Compared
-							</div>
-						</div>
-						<div className="rounded-xl border border-primary/30 bg-primary/10 p-4">
-							<div className="text-3xl font-black text-primary">
-								{COMPETITORS.reduce((acc, c) => acc + c.features.filter(f => f.koreshield).length, 0)}
-							</div>
-							<div className="text-xs uppercase tracking-[0.16em] text-muted-foreground mt-2">
-								Koreshield Advantages
-							</div>
-						</div>
-						<div className="rounded-xl border border-primary/30 bg-primary/10 p-4">
-							<div className="text-3xl font-black text-primary">Production</div>
-							<div className="text-xs uppercase tracking-[0.16em] text-muted-foreground mt-2">
-								Ready Today
-							</div>
-						</div>
+			<section className="border-y border-border bg-card/35 px-6 py-20">
+				<div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-3">
+					{comparisons.map((item, index) => (
+						<motion.article
+							key={item.name}
+							initial={{ opacity: 0, y: 16 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true }}
+							transition={{ duration: 0.4, delay: index * 0.07 }}
+							className="group rounded-[2rem] border border-border bg-card/90 p-7 shadow-sm transition-all hover:-translate-y-1 hover:border-electric-green/30"
+						>
+							<item.icon className="mb-6 h-8 w-8 text-electric-green" />
+							<p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">{item.type}</p>
+							<h2 className="text-3xl font-extrabold tracking-[-0.04em]">{item.name}</h2>
+							<p className="mt-4 text-sm leading-relaxed text-muted-foreground">{item.bestFor}</p>
+							<p className="mt-4 rounded-2xl border border-electric-green/20 bg-electric-green/10 p-4 text-sm leading-relaxed text-foreground/85">{item.koreshieldAngle}</p>
+							<Link to={item.path} className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-electric-green hover:underline">
+								Compare details <ArrowRight className="h-4 w-4" />
+							</Link>
+						</motion.article>
+					))}
+				</div>
+			</section>
+
+			<section className="px-6 py-20">
+				<div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+					<div>
+						<p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-electric-green">How we compare</p>
+						<h2 className="text-4xl font-extrabold tracking-[-0.04em] md:text-5xl">The real questions are operational.</h2>
+						<p className="mt-5 text-muted-foreground">
+							A security product can look strong in a feature list but still fail if it lands in the wrong place in your architecture.
+						</p>
 					</div>
-				</section>
-
-				{/* Comparison Cards */}
-				<section>
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{COMPETITORS.map((competitor, index) => (
-							<ComparisonCard key={competitor.id} competitor={competitor} index={index} />
+					<div className="grid gap-3">
+						{criteria.map((item, index) => (
+							<div key={item} className="flex items-center gap-4 rounded-2xl border border-border bg-card/85 p-4 shadow-sm">
+								<span className="flex h-8 w-8 items-center justify-center rounded-full bg-electric-green/10 text-xs font-black text-electric-green">0{index + 1}</span>
+								<span className="font-semibold">{item}</span>
+							</div>
 						))}
 					</div>
-				</section>
+				</div>
+			</section>
 
-				{/* CTA */}
-				<section className="mt-20 text-center">
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						viewport={{ once: true }}
-						transition={{ duration: 0.5 }}
-						className="rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 to-primary/5 p-8 md:p-12"
-					>
-						<h2 className="text-3xl font-black text-foreground mb-4">Ready to protect your LLM?</h2>
-						<p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-							Start with a free evaluation or request a personalized demo to see Koreshield in action.
-						</p>
-						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<Link
-								to="/demo"
-								className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary text-background font-bold hover:bg-primary/90 transition-colors"
-							>
-								Request Demo
-								<ArrowRight className="h-4 w-4" />
-							</Link>
-							<Link
-								to="/pricing"
-								className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-border bg-background hover:bg-muted text-foreground font-bold transition-colors"
-							>
-								View Pricing
-								<ArrowRight className="h-4 w-4" />
-							</Link>
-						</div>
-					</motion.div>
-				</section>
-			</div>
+			<section className="border-t border-border px-6 py-20">
+				<div className="mx-auto flex max-w-7xl flex-col gap-5 rounded-[2rem] border border-border bg-card/85 p-7 shadow-sm md:flex-row md:items-center md:justify-between">
+					<div>
+						<h2 className="text-3xl font-extrabold tracking-[-0.03em]">Want a side-by-side for your stack?</h2>
+						<p className="mt-2 text-sm text-muted-foreground">Bring your providers, RAG flow, agent framework, and compliance requirements.</p>
+					</div>
+					<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright">
+						Book a demo <Layers3 className="h-4 w-4" />
+					</Link>
+				</div>
+			</section>
 		</div>
 	);
 }
