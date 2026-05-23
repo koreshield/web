@@ -585,136 +585,199 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 
 function ChangelogPage() {
 	return (
-		<div className="min-h-screen bg-background text-foreground pt-24 pb-20 transition-colors">
+		<div className="min-h-screen bg-background text-foreground pt-24 pb-24 transition-colors">
 			<SEOMeta
 				title="Changelog | Koreshield"
 				description="Manual, curated release notes for Koreshield platform updates, security improvements, and operational milestones."
 			/>
 
-			<div className="max-w-6xl mx-auto px-6">
-				<section className="mb-16">
-					<div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+			<div className="max-w-7xl mx-auto px-6">
+				{/* Hero Section */}
+				<section className="mb-20">
+					<div className="inline-flex items-center rounded-full border border-primary/40 bg-gradient-to-r from-primary/15 to-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
 						Manual Release Notes
 					</div>
-					<h1 className="mt-5 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-						Changelog
+					
+					<h1 className="mt-6 text-5xl md:text-6xl font-black tracking-tight text-foreground">
+						What Changed
 					</h1>
-					<p className="mt-4 max-w-3xl text-lg text-muted-foreground">
-						Curated updates for customers, operators, and buyers who want the real story of what changed in Koreshield.
-						We summarize product, security, infrastructure, and onboarding work in monthly batches instead of publishing raw commit noise.
+					
+					<p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground font-light">
+						Curated updates for customers who care about the real story. 
+						We skip commit noise and focus on what matters: features that drive value, 
+						security improvements that raise the bar, and infrastructure that stays reliable.
 					</p>
-					<div className="mt-8 rounded-3xl border border-white/[0.08] bg-card/70 p-6 sm:p-8">
-						<div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-							<div className="max-w-2xl">
-								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Latest batch</p>
-								<h2 className="mt-2 text-2xl font-bold text-foreground">{CHANGELOG_BATCHES[0]?.label}</h2>
-								<p className="mt-3 text-sm leading-6 text-muted-foreground">
-									{CHANGELOG_BATCHES[0]?.overview}
-								</p>
-							</div>
-							<div className="flex flex-wrap gap-2">
-								{CHANGELOG_BATCHES.map((batch) => (
-									<a
-										key={batch.label}
-										href={`#${batchAnchor(batch.label)}`}
-										className="rounded-full border border-white/[0.08] bg-background/60 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
-									>
-										{batch.timeframe}
-									</a>
-								))}
+
+					{/* Latest Batch Spotlight */}
+					{CHANGELOG_BATCHES[0] && (
+						<div className="mt-12 rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-background to-background p-8 md:p-10 shadow-lg shadow-primary/5 hover:border-primary/50 transition-all">
+							<div className="flex flex-col gap-8 md:gap-12">
+								<div>
+									<p className="text-xs font-black uppercase tracking-[0.22em] text-primary mb-3">
+									Latest Release
+									</p>
+									<h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">
+										{CHANGELOG_BATCHES[0]?.label}
+									</h2>
+									<p className="text-base leading-8 text-muted-foreground max-w-2xl">
+										{CHANGELOG_BATCHES[0]?.overview}
+									</p>
+								</div>
+
+								<div className="grid grid-cols-3 gap-4 md:gap-6">
+									{CHANGELOG_BATCHES[0]?.stats.map((stat) => (
+										<div
+											key={stat.label}
+											className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 md:p-6 hover:border-primary/40 transition-colors"
+										>
+											<div className="text-3xl md:text-4xl font-black text-primary mb-1">
+												{stat.value}
+											</div>
+											<div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+												{stat.label}
+											</div>
+										</div>
+									))}
+								</div>
 							</div>
 						</div>
+					)}
+
+					{/* Timeline Navigation */}
+					<div className="mt-10 flex flex-wrap gap-2">
+						{CHANGELOG_BATCHES.map((batch, idx) => (
+							<a
+								key={batch.label}
+								href={`#${batchAnchor(batch.label)}`}
+								className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-[0.14em] transition-all border ${
+									idx === 0
+										? 'border-primary/60 bg-primary/10 text-primary hover:bg-primary/15'
+										: 'border-white/10 bg-background/60 text-muted-foreground hover:border-primary/30 hover:text-foreground'
+								}`}
+							>
+								{batch.timeframe}
+							</a>
+						))}
 					</div>
 				</section>
 
-				<div className="space-y-16">
+				{/* Changelog Entries */}
+				<div className="space-y-20">
 					{CHANGELOG_BATCHES.map((batch) => (
-						<section key={batch.label} id={batchAnchor(batch.label)} className="space-y-8 scroll-mt-28">
-							<div className="rounded-3xl border border-border bg-card/70 p-8 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
-								<div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-									<div className="max-w-3xl">
-										<p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary/80">
-											{batch.timeframe}
-										</p>
-										<h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-											{batch.label}
-										</h2>
-										<p className="mt-4 text-base leading-7 text-muted-foreground">
-											{batch.overview}
-										</p>
-									</div>
+						<section key={batch.label} id={batchAnchor(batch.label)} className="scroll-mt-32">
+							{/* Batch Header */}
+							<div className="mb-10 pb-8 border-b border-white/10">
+								<p className="text-xs font-black uppercase tracking-[0.22em] text-primary mb-3">
+									{batch.timeframe}
+								</p>
+								<h2 className="text-3xl md:text-4xl font-black tracking-tight text-foreground mb-4">
+									{batch.label}
+								</h2>
+								<p className="text-base leading-7 text-muted-foreground max-w-2xl">
+									{batch.overview}
+								</p>
 
-									<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-										{batch.stats.map((stat) => (
-											<div
-												key={stat.label}
-												className="min-w-[140px] rounded-2xl border border-white/[0.06] bg-background/60 px-4 py-4"
-											>
-												<div className="text-2xl font-bold text-foreground">{stat.value}</div>
-												<div className="mt-1 text-xs uppercase tracking-[0.16em] text-muted-foreground">
-													{stat.label}
-												</div>
+								{/* Batch Stats */}
+								<div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+									{batch.stats.map((stat) => (
+										<div
+											key={stat.label}
+											className="rounded-xl border border-white/8 bg-white/3 p-4 backdrop-blur-sm hover:border-white/15 transition-colors"
+										>
+											<div className="text-2xl font-bold text-foreground">{stat.value}</div>
+											<div className="mt-1 text-xs uppercase tracking-[0.14em] text-muted-foreground font-semibold">
+												{stat.label}
 											</div>
-										))}
-									</div>
+										</div>
+									))}
 								</div>
 							</div>
 
+							{/* Entries */}
 							<div className="space-y-6">
 								{batch.entries.map((entry) => (
 									<article
 										key={`${entry.date}-${entry.title}`}
-										className="rounded-3xl border border-border bg-card/50 p-7 transition-colors hover:border-primary/25"
+										className="group rounded-2xl border border-white/10 bg-gradient-to-br from-white/3 to-white/1 p-7 md:p-8 backdrop-blur-sm transition-all hover:border-primary/40 hover:from-primary/5 hover:to-white/5 hover:shadow-lg hover:shadow-primary/10"
 									>
-										<div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-											<div className="max-w-3xl">
-												<div className="flex flex-wrap items-center gap-3">
-													{entry.isMajor && (
-														<span className="rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-black">
-															Major
-														</span>
-													)}
-													<span
-														className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${CATEGORY_STYLES[entry.category]}`}
-													>
-														{entry.category}
-													</span>
-													<span className="text-xs font-mono text-muted-foreground">
-														{entry.date}
-													</span>
-												</div>
-												<h3 className="mt-4 text-2xl font-semibold text-foreground">
-													{entry.title}
-												</h3>
-												<p className="mt-3 text-base leading-7 text-muted-foreground">
-													{entry.summary}
-												</p>
+										{/* Entry Header */}
+										<div className="mb-5 flex flex-wrap items-center gap-2.5">
+											{entry.isMajor && (
+												<span className="rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-white shadow-lg shadow-emerald-500/30">
+													Major Release
+												</span>
+											)}
+											<span
+												className={`rounded-lg px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] shadow-md ${CATEGORY_STYLES[entry.category]}`}
+											>
+												{entry.category}
+											</span>
+											<span className="text-xs font-mono text-muted-foreground/70 ml-auto md:ml-0">
+												{entry.date}
+											</span>
+										</div>
+
+										{/* Entry Title */}
+										<h3 className="text-xl md:text-2xl font-black text-foreground mb-3 group-hover:text-primary transition-colors">
+											{entry.title}
+										</h3>
+
+										{/* Entry Summary */}
+										<p className="text-base leading-7 text-muted-foreground mb-6">
+											{entry.summary}
+										</p>
+
+										{/* Two Column Layout */}
+										<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+											{/* Items (spans 2 columns) */}
+											<div className="lg:col-span-2">
+												<ul className="space-y-3">
+													{entry.items.map((item) => (
+														<li key={item} className="flex items-start gap-3">
+															<span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary/60 group-hover:bg-primary transition-colors" />
+															<span className="text-sm leading-6 text-foreground/80 group-hover:text-foreground transition-colors">
+																{item}
+															</span>
+														</li>
+													))}
+												</ul>
 											</div>
 
-											<div className="w-full max-w-sm rounded-2xl border border-primary/15 bg-primary/5 p-4">
-												<div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary/80">
-													Customer Impact
+											{/* Customer Impact */}
+											<div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 p-5 backdrop-blur-sm lg:col-span-1">
+												<div className="text-xs font-black uppercase tracking-[0.16em] text-primary mb-3">
+													Impact
 												</div>
-												<p className="mt-2 text-sm leading-6 text-foreground/85">
+												<p className="text-sm leading-6 text-foreground/85 font-medium">
 													{entry.customerImpact}
 												</p>
 											</div>
 										</div>
-
-										<ul className="mt-6 space-y-3">
-											{entry.items.map((item) => (
-												<li key={item} className="flex items-start gap-3 text-sm leading-6 text-foreground/85">
-													<span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/70" />
-													<span>{item}</span>
-												</li>
-											))}
-										</ul>
 									</article>
 								))}
 							</div>
 						</section>
 					))}
 				</div>
+
+				{/* Footer CTA */}
+				<section className="mt-20 pt-12 border-t border-white/10">
+					<div className="rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 to-primary/5 p-8 md:p-10 text-center">
+						<h3 className="text-xl md:text-2xl font-black text-foreground mb-3">
+							More detailed technical notes?
+						</h3>
+						<p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+							Check our technical documentation for deep dives into architecture, 
+							security models, and integration guides.
+						</p>
+						<a
+							href="/docs"
+							className="inline-block px-6 py-2.5 rounded-lg bg-primary text-black font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
+						>
+							→ View Documentation
+						</a>
+					</div>
+				</section>
 			</div>
 		</div>
 	);
