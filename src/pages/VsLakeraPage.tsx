@@ -1,340 +1,79 @@
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle, Code, DollarSign, ExternalLink, Minus, Shield, XCircle } from 'lucide-react';
+import { ArrowRight, Cloud, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
+
+const rows = [
+	['Primary shape', 'Runtime proxy and evidence layer', 'Commercial prompt-security API/platform'],
+	['Good fit', 'Teams that want policy, audit evidence, and provider routing in one layer', 'Teams that want a managed vendor API for prompt defense'],
+	['Architecture question', 'Where should enforcement and evidence live?', 'How much do you want delegated to a vendor API?'],
+	['RAG and agents', 'Positioned around retrieved context, tool output, tenant context, and audit logs', 'Evaluate current vendor coverage against your exact workflow'],
+	['Decision lens', 'Operational control and evidence', 'Managed platform convenience'],
+];
 
 export default function VsLakeraPage() {
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="Koreshield vs Lakera Guard"
-				description="Compare Koreshield and Lakera Guard: features, pricing, and which LLM security solution is right for your needs."
+				description="Compare Koreshield and Lakera Guard by deployment model, operating model, RAG coverage, and governance needs."
 			/>
 
-			{/* Hero */}
-			<section className="py-20 px-4 bg-background relative ambient-glow">
-				<div className="max-w-7xl mx-auto">
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						className="text-center"
-					>
-						<h1 className="text-5xl font-bold text-foreground mb-6">
-							Koreshield vs Lakera Guard
-						</h1>
-						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-							An honest comparison of two leading LLM security solutions
+			<section className="relative overflow-hidden px-6 py-24 ambient-glow md:py-32">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(16,185,129,0.16),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(168,85,247,0.1),transparent_24%)]" />
+				<div className="relative mx-auto max-w-5xl text-center">
+					<motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+						<span className="mb-6 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-electric-green">
+							<ShieldCheck className="h-3.5 w-3.5" />
+							Comparison
+						</span>
+						<h1 className="text-5xl font-extrabold tracking-[-0.055em] md:text-7xl">Koreshield vs Lakera Guard</h1>
+						<p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+							Both live in the AI security category. The choice is less about slogans and more about where you want enforcement, evidence, and operational control to sit.
 						</p>
+						<p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Last reviewed May 2026</p>
 					</motion.div>
 				</div>
 			</section>
 
-			<div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-				{/* Quick Summary */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.1 }}
-					className="grid md:grid-cols-2 gap-8"
-				>
-					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
-						<div className="flex items-center gap-3 mb-4">
-							<Shield className="w-8 h-8 text-electric-green" />
-							<h2 className="text-2xl font-bold text-foreground">Koreshield</h2>
-						</div>
-						<p className="text-muted-foreground mb-4">
-							Enterprise-grade LLM security with 95% detection accuracy and multi-provider support.
-						</p>
-						<div className="space-y-2">
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>Transparent security controls</span>
-							</div>
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>50-70% lower cost</span>
-							</div>
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>Self-hosted option</span>
-							</div>
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>Research-driven innovation</span>
-							</div>
-						</div>
+			<section className="border-y border-border bg-card/35 px-6 py-20">
+				<div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-2">
+					<div className="rounded-[2rem] border border-electric-green/25 bg-electric-green/10 p-7 shadow-sm">
+						<ShieldCheck className="mb-5 h-8 w-8 text-electric-green" />
+						<h2 className="text-3xl font-extrabold tracking-[-0.04em]">Koreshield</h2>
+						<p className="mt-3 text-sm leading-relaxed text-muted-foreground">Built around runtime proxy protection, provider routing, RAG/context scanning, policy decisions, alerts, and audit evidence.</p>
 					</div>
+					<div className="rounded-[2rem] border border-border bg-card/90 p-7 shadow-sm">
+						<Cloud className="mb-5 h-8 w-8 text-electric-green" />
+						<h2 className="text-3xl font-extrabold tracking-[-0.04em]">Lakera Guard</h2>
+						<p className="mt-3 text-sm leading-relaxed text-muted-foreground">A commercial AI security product to evaluate if you want a managed vendor option for prompt and model protection.</p>
+					</div>
+				</div>
+			</section>
 
-					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
-						<div className="flex items-center gap-3 mb-4">
-							<Shield className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-							<h2 className="text-2xl font-bold text-foreground">Lakera Guard</h2>
+			<section className="px-6 py-20">
+				<div className="mx-auto overflow-hidden rounded-[2rem] border border-border bg-card/90 shadow-sm">
+					{rows.map(([label, koreshield, competitor]) => (
+						<div key={label} className="grid gap-4 border-b border-border p-5 last:border-b-0 md:grid-cols-[0.7fr_1fr_1fr] md:items-center">
+							<p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
+							<p className="rounded-2xl bg-electric-green/10 px-4 py-3 text-sm font-semibold">{koreshield}</p>
+							<p className="rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground">{competitor}</p>
 						</div>
-						<p className="text-muted-foreground mb-4">
-							Closed-source enterprise LLM security platform with Fortune 500 customers and proven track record.
-						</p>
-						<div className="space-y-2">
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>First-mover advantage</span>
-							</div>
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>Enterprise-focused</span>
-							</div>
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>Strong marketing presence</span>
-							</div>
-							<div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-								<XCircle className="w-5 h-5" />
-								<span>Closed-source (no transparency)</span>
-							</div>
-						</div>
-					</div>
-				</motion.div>
+					))}
+				</div>
+			</section>
 
-				{/* Feature Comparison Table */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.2 }}
-					className="bg-card rounded-xl shadow-lg border border-border overflow-hidden"
-				>
-					<div className="p-8">
-						<h2 className="text-3xl font-bold text-foreground mb-6">Feature Comparison</h2>
-						<div className="overflow-x-auto">
-							<table className="w-full">
-								<thead className="border-b border-border">
-									<tr>
-										<th className="text-left py-4 px-4 text-foreground font-semibold">Feature</th>
-										<th className="text-center py-4 px-4 text-electric-green font-semibold">Koreshield</th>
-										<th className="text-center py-4 px-4 text-purple-600 dark:text-purple-400 font-semibold">Lakera Guard</th>
-									</tr>
-								</thead>
-								<tbody className="divide-y divide-border">
-								
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Detection Accuracy</td>
-										<td className="py-4 px-4 text-center text-foreground">95%+</td>
-										<td className="py-4 px-4 text-center text-foreground">~90%</td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Multi-Provider Support</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><Minus className="w-6 h-6 text-yellow-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Self-Hosted Option</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Multi-Tenancy</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">RBAC</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Custom Rules</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><Minus className="w-6 h-6 text-yellow-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">RAG Protection</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><Minus className="w-6 h-6 text-yellow-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Starting Price</td>
-										<td className="py-4 px-4 text-center text-foreground font-semibold">£99/mo paid tier</td>
-										<td className="py-4 px-4 text-center text-foreground font-semibold">$999/mo</td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Community Support</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
+			<section className="border-t border-border px-6 py-20">
+				<div className="mx-auto flex max-w-7xl flex-col gap-5 rounded-[2rem] border border-border bg-card/85 p-7 shadow-sm md:flex-row md:items-center md:justify-between">
+					<div>
+						<h2 className="text-3xl font-extrabold tracking-[-0.03em]">Ask the architecture question first.</h2>
+						<p className="mt-2 text-sm text-muted-foreground">Where will policy, tenant context, and audit evidence live in your AI stack?</p>
 					</div>
-				</motion.div>
-
-				{/* Pricing Comparison */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.3 }}
-					className="bg-card rounded-xl shadow-lg border border-border p-8"
-				>
-					<div className="flex items-center gap-3 mb-6">
-						<DollarSign className="w-8 h-8 text-electric-green" />
-						<h2 className="text-3xl font-bold text-foreground">Pricing Comparison</h2>
-					</div>
-					<div className="grid md:grid-cols-2 gap-8">
-						<div>
-							<h3 className="text-xl font-semibold text-electric-green mb-4">Koreshield</h3>
-							<ul className="space-y-3 text-muted-foreground">
-								<li>• <strong>£0:</strong> Dev tier with 10,000 protected requests</li>
-								<li>• <strong>£99/mo:</strong> Growth with 100,000 protected requests</li>
-								<li>• <strong>£399/mo:</strong> Scale with 1,000,000 protected requests</li>
-								<li>• <strong>From £18k/year:</strong> Enterprise with private deployment and governance controls</li>
-								<li>• <strong>Usage-based overages</strong> instead of seat-based pricing</li>
-							</ul>
-						</div>
-						<div>
-							<h3 className="text-xl font-semibold text-purple-600 dark:text-purple-400 mb-4">Lakera Guard</h3>
-							<ul className="space-y-3 text-muted-foreground">
-								<li>• <strong>No free tier</strong></li>
-								<li>• <strong>$999/mo:</strong> Starting plan</li>
-								<li>• <strong>$5K+/mo:</strong> Professional</li>
-								<li>• <strong>$50K+/year:</strong> Enterprise (cloud only)</li>
-								<li>• <strong>Premium pricing</strong> for enterprise features</li>
-							</ul>
-						</div>
-					</div>
-				</motion.div>
-
-				{/* Pros and Cons */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.4 }}
-					className="grid md:grid-cols-2 gap-8"
-				>
-					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
-						<h3 className="text-2xl font-bold text-electric-green mb-6">Koreshield Advantages</h3>
-						<ul className="space-y-3">
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>Deployment Flexibility:</strong> Self-hosted and managed options</span>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>Cost:</strong> 50-70% cheaper for similar features</span>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>Flexibility:</strong> Self-hosted or cloud deployment</span>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>Multi-Provider:</strong> Works with all major LLMs</span>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>Community:</strong> Active contributors and support</span>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>Accuracy:</strong> 95%+ detection rate</span>
-							</li>
-						</ul>
-					</div>
-
-					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
-						<h3 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-6">Lakera Guard Advantages</h3>
-						<ul className="space-y-3">
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>First-Mover:</strong> Established market presence</span>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>Enterprise Customers:</strong> Fortune 500 validation</span>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>Managed Service:</strong> Fully managed platform</span>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>Marketing:</strong> Strong brand recognition</span>
-							</li>
-							<li className="flex gap-3">
-								<XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>Closed Source:</strong> No code transparency</span>
-							</li>
-							<li className="flex gap-3">
-								<XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-1" />
-								<span className="text-foreground"><strong>Expensive:</strong> Premium pricing tier</span>
-							</li>
-						</ul>
-					</div>
-				</motion.div>
-
-				{/* When to Choose */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.5 }}
-					className="bg-card border border-border rounded-xl p-8"
-				>
-					<h2 className="text-3xl font-bold text-foreground mb-8 text-center">Which Should You Choose?</h2>
-					<div className="grid md:grid-cols-2 gap-8">
-						<div className="bg-card rounded-lg p-6">
-							<h3 className="text-xl font-bold text-electric-green mb-4">Choose Koreshield if:</h3>
-							<ul className="space-y-2 text-muted-foreground">
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You value transparency and control</li>
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You want cost-effective enterprise security</li>
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You need self-hosted/air-gapped deployment</li>
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You use multiple LLM providers</li>
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You want to customize detection rules</li>
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" /> You're building a startup or mid-market product</li>
-							</ul>
-						</div>
-						<div className="bg-card rounded-lg p-6">
-							<h3 className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-4">Choose Lakera Guard if:</h3>
-							<ul className="space-y-2 text-muted-foreground">
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" /> You prefer fully managed solutions</li>
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" /> You have a large enterprise budget</li>
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" /> You want proven Fortune 500 validation</li>
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" /> You prioritize brand recognition</li>
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" /> You don't need source code access</li>
-								<li className="flex items-start gap-2"><CheckCircle className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" /> You're okay with cloud-only deployment</li>
-							</ul>
-						</div>
-					</div>
-				</motion.div>
-
-				{/* CTA */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.6 }}
-					className="bg-card border border-border rounded-xl p-10 text-center"
-				>
-					<h2 className="text-3xl font-bold mb-4 text-foreground">Upgrade to Koreshield</h2>
-					<p className="text-lg mb-8 text-muted-foreground">
-						Get enterprise-ready security with the same security-first values
-					</p>
-					<div className="flex flex-wrap justify-center gap-4">
-						<Link to="/pricing"
-							className="inline-flex items-center gap-2 px-6 py-3 bg-electric-green hover:bg-emerald-bright text-white rounded-lg font-semibold transition-colors"
-						>
-							<Code className="w-5 h-5" />
-							Upgrade Now
-						</Link>
-						<Link to="/demo"
-							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"
-						>
-							Book a Demo
-							<ExternalLink className="w-5 h-5" />
-						</Link>
-						<Link to="/vs"
-							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"
-						>
-							Compare Other Options
-							<ExternalLink className="w-5 h-5" />
-						</Link>
-					</div>
-				</motion.div>
-			</div>
+					<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright">
+						Compare with us <ArrowRight className="h-4 w-4" />
+					</Link>
+				</div>
+			</section>
 		</div>
 	);
 }
