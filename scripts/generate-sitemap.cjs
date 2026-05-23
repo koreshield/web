@@ -32,11 +32,13 @@ const ROUTES = [
 	{ path: '/vs/build-yourself', priority: 0.8, changefreq: 'monthly' },
 
 	// Solution pages
-	{ path: '/solutions/detection-response', priority: 0.7, changefreq: 'monthly' },
-	{ path: '/solutions/application-protection', priority: 0.7, changefreq: 'monthly' },
-	{ path: '/solutions/agents-security', priority: 0.7, changefreq: 'monthly' },
-	{ path: '/solutions/usage-control', priority: 0.7, changefreq: 'monthly' },
+	{ path: '/solutions/ai-detection-response', priority: 0.7, changefreq: 'monthly' },
+	{ path: '/solutions/ai-application-protection', priority: 0.7, changefreq: 'monthly' },
+	{ path: '/solutions/ai-agents-security', priority: 0.7, changefreq: 'monthly' },
+	{ path: '/solutions/ai-usage-control', priority: 0.7, changefreq: 'monthly' },
 	{ path: '/solutions/rag-security', priority: 0.7, changefreq: 'monthly' },
+	{ path: '/solutions/korepilot', priority: 0.7, changefreq: 'monthly' },
+	{ path: '/solutions/voice-audio-protection', priority: 0.7, changefreq: 'monthly' },
 
 	// Why KoreShield
 	{ path: '/why-koreshield', priority: 0.7, changefreq: 'monthly' },

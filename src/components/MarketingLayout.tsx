@@ -43,6 +43,16 @@ const solutionsLinks: Array<{ label: string; to: string; desc: string }> = [
 		to: '/solutions/rag-security',
 		desc: 'Stop indirect injection via retrieved content',
 	},
+	{
+		label: 'KorePilot',
+		to: '/solutions/korepilot',
+		desc: 'Audit-ready evidence from AI security data',
+	},
+	{
+		label: 'Voice & Audio Protection',
+		to: '/solutions/voice-audio-protection',
+		desc: 'Secure speech prompts and voice agents',
+	},
 ];
 
 const companyLinks: Array<{ label: string; to: string }> = [
