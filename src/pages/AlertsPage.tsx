@@ -12,6 +12,7 @@ import {
 	AppEmptyState,
 	AppPrimaryButton,
 	AppSecondaryButton,
+	AppPageSection,
 	AppSurface,
 } from '../components/AppPageLayout';
 
@@ -357,7 +358,7 @@ export function AlertsPage() {
                                 ...channelFormData, 
                                 config: { ...channelFormData.config, recipients: e.target.value } 
                             })}
-                            className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                            className="dashboard-input w-full"
                             placeholder="admin@example.com, ops@example.com"
                         />
                     </div>
@@ -375,7 +376,7 @@ export function AlertsPage() {
                                     ...channelFormData, 
                                     config: { ...channelFormData.config, webhook_url: e.target.value } 
                                 })}
-                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="dashboard-input w-full"
                                 placeholder="https://hooks.slack.com/services/..."
                             />
                         </div>
@@ -388,7 +389,7 @@ export function AlertsPage() {
                                     ...channelFormData, 
                                     config: { ...channelFormData.config, channel: e.target.value } 
                                 })}
-                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="dashboard-input w-full"
                                 placeholder="#alerts"
                             />
                         </div>
@@ -407,7 +408,7 @@ export function AlertsPage() {
                                     ...channelFormData, 
                                     config: { ...channelFormData.config, url: e.target.value } 
                                 })}
-                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="dashboard-input w-full"
                                 placeholder="https://your-webhook-url.com"
                             />
                         </div>
@@ -419,7 +420,7 @@ export function AlertsPage() {
                                     ...channelFormData, 
                                     config: { ...channelFormData.config, method: e.target.value } 
                                 })}
-                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="dashboard-input w-full"
                             >
                                 <option value="POST">POST</option>
                                 <option value="PUT">PUT</option>
@@ -434,7 +435,7 @@ export function AlertsPage() {
                                     ...channelFormData, 
                                     config: { ...channelFormData.config, headers: e.target.value } 
                                 })}
-                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                                className="dashboard-input w-full font-mono"
                                 rows={3}
                                 placeholder='{"Authorization": "Bearer token"}'
                             />
@@ -453,7 +454,7 @@ export function AlertsPage() {
                                 ...channelFormData, 
                                 config: { ...channelFormData.config, teams_webhook_url: e.target.value } 
                             })}
-                            className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                            className="dashboard-input w-full"
                             placeholder="https://outlook.office.com/webhook/..."
                         />
                     </div>
@@ -471,7 +472,7 @@ export function AlertsPage() {
                                     ...channelFormData,
                                     config: { ...channelFormData.config, bot_token: e.target.value }
                                 })}
-                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="dashboard-input w-full"
                                 placeholder="Telegram bot token"
                             />
                         </div>
@@ -485,7 +486,7 @@ export function AlertsPage() {
                                     ...channelFormData,
                                     config: { ...channelFormData.config, channel_id: e.target.value }
                                 })}
-                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="dashboard-input w-full"
                                 placeholder="-1001234567890"
                             />
                         </div>
@@ -498,7 +499,7 @@ export function AlertsPage() {
                                     ...channelFormData,
                                     config: { ...channelFormData.config, message_thread_id: e.target.value }
                                 })}
-                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="dashboard-input w-full"
                                 placeholder="Optional forum topic thread id"
                             />
                         </div>
@@ -516,7 +517,7 @@ export function AlertsPage() {
                                 ...channelFormData, 
                                 config: { ...channelFormData.config, integration_key: e.target.value } 
                             })}
-                            className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                            className="dashboard-input w-full"
                             placeholder="your-pagerduty-integration-key"
                         />
                     </div>
@@ -579,7 +580,7 @@ export function AlertsPage() {
                             />
                         </AppStatGrid>
 
-                        <div className="dashboard-card rounded-2xl overflow-hidden border border-border">
+                        <AppPageSection title="Alert rules" className="overflow-hidden p-0" variant="card">
                             {rulesLoading ? (
                                 <div className="flex items-center justify-center py-12">
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -597,7 +598,7 @@ export function AlertsPage() {
                                     }
                                 />
                             ) : (
-                                <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                                <div className="dashboard-table-wrap">
                                     <table className="w-full">
                                         <thead className="bg-muted/50 border-b border-border">
                                             <tr>
@@ -679,7 +680,7 @@ export function AlertsPage() {
                                     </table>
                                 </div>
                             )}
-                        </div>
+                        </AppPageSection>
                     </>
                 )}
 
@@ -707,7 +708,8 @@ export function AlertsPage() {
                             />
                         </AppStatGrid>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <AppPageSection title="Notification channels">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3 lg:gap-6">
                             {channelsLoading ? (
                                 <div className="col-span-full flex items-center justify-center py-12">
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -778,6 +780,7 @@ export function AlertsPage() {
                                 ))
                             )}
                         </div>
+                        </AppPageSection>
                     </>
                 )}
             </AppPage>
@@ -802,7 +805,7 @@ export function AlertsPage() {
                                     required
                                     value={ruleFormData.name}
                                     onChange={(e) => setRuleFormData({ ...ruleFormData, name: e.target.value })}
-                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="dashboard-input w-full"
                                     placeholder="High Error Rate Alert"
                                 />
                             </div>
@@ -811,7 +814,7 @@ export function AlertsPage() {
                                 <textarea
                                     value={ruleFormData.description}
                                     onChange={(e) => setRuleFormData({ ...ruleFormData, description: e.target.value })}
-                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="dashboard-input w-full"
                                     rows={2}
                                     placeholder="Alert when error rate exceeds threshold"
                                 />
@@ -823,7 +826,7 @@ export function AlertsPage() {
                                     required
                                     value={ruleFormData.condition}
                                     onChange={(e) => setRuleFormData({ ...ruleFormData, condition: e.target.value })}
-                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                                    className="dashboard-input w-full font-mono"
                                     placeholder="error_rate > 0.05"
                                 />
                             </div>
@@ -833,7 +836,7 @@ export function AlertsPage() {
                                     <select
                                         value={ruleFormData.severity}
                                         onChange={(e) => setRuleFormData({ ...ruleFormData, severity: e.target.value as AlertRuleFormData['severity'] })}
-                                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="dashboard-input w-full"
                                     >
                                         <option value="critical">Critical</option>
                                         <option value="high">High</option>
@@ -847,7 +850,7 @@ export function AlertsPage() {
                                         type="number"
                                         value={ruleFormData.cooldown_minutes}
                                         onChange={(e) => setRuleFormData({ ...ruleFormData, cooldown_minutes: parseInt(e.target.value) })}
-                                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="dashboard-input w-full"
                                     />
                                 </div>
                             </div>
@@ -857,7 +860,7 @@ export function AlertsPage() {
                                     type="text"
                                     value={ruleFormData.channels}
                                     onChange={(e) => setRuleFormData({ ...ruleFormData, channels: e.target.value })}
-                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="dashboard-input w-full"
                                     placeholder="email-primary, slack-ops"
                                 />
                             </div>
@@ -905,7 +908,7 @@ export function AlertsPage() {
                                     required
                                     value={ruleFormData.name}
                                     onChange={(e) => setRuleFormData({ ...ruleFormData, name: e.target.value })}
-                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="dashboard-input w-full"
                                 />
                             </div>
                             <div>
@@ -913,7 +916,7 @@ export function AlertsPage() {
                                 <textarea
                                     value={ruleFormData.description}
                                     onChange={(e) => setRuleFormData({ ...ruleFormData, description: e.target.value })}
-                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="dashboard-input w-full"
                                     rows={2}
                                 />
                             </div>
@@ -924,7 +927,7 @@ export function AlertsPage() {
                                     required
                                     value={ruleFormData.condition}
                                     onChange={(e) => setRuleFormData({ ...ruleFormData, condition: e.target.value })}
-                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                                    className="dashboard-input w-full font-mono"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
@@ -933,7 +936,7 @@ export function AlertsPage() {
                                     <select
                                         value={ruleFormData.severity}
 	                                        onChange={(e) => setRuleFormData({ ...ruleFormData, severity: asSeverity(e.target.value) })}
-                                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="dashboard-input w-full"
                                     >
                                         <option value="critical">Critical</option>
                                         <option value="high">High</option>
@@ -947,7 +950,7 @@ export function AlertsPage() {
                                         type="number"
                                         value={ruleFormData.cooldown_minutes}
                                         onChange={(e) => setRuleFormData({ ...ruleFormData, cooldown_minutes: parseInt(e.target.value) })}
-                                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="dashboard-input w-full"
                                     />
                                 </div>
                             </div>
@@ -957,7 +960,7 @@ export function AlertsPage() {
                                     type="text"
                                     value={ruleFormData.channels}
                                     onChange={(e) => setRuleFormData({ ...ruleFormData, channels: e.target.value })}
-                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="dashboard-input w-full"
                                 />
                             </div>
                             <div>
@@ -1003,7 +1006,7 @@ export function AlertsPage() {
                                     <select
                                         value={channelFormData.type}
 	                                        onChange={(e) => setChannelFormData({ ...channelFormData, type: asChannelType(e.target.value), config: {} })}
-                                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="dashboard-input w-full"
                                     >
                                         <option value="email">Email</option>
                                         <option value="slack">Slack</option>
@@ -1020,7 +1023,7 @@ export function AlertsPage() {
                                         required
                                         value={channelFormData.name}
                                         onChange={(e) => setChannelFormData({ ...channelFormData, name: e.target.value })}
-                                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="dashboard-input w-full"
                                         placeholder="Primary Email Channel"
                                     />
                                 </div>
@@ -1088,7 +1091,7 @@ export function AlertsPage() {
                                         required
                                         value={channelFormData.name}
                                         onChange={(e) => setChannelFormData({ ...channelFormData, name: e.target.value })}
-                                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="dashboard-input w-full"
                                     />
                                 </div>
                             </div>
