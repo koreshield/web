@@ -1,48 +1,18 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckSquare, FileText, Settings, Users } from 'lucide-react';
+import { ArrowRight, FileText, KeyRound, ListChecks, Settings2, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
-const capabilities = [
-	{
-		icon: <Settings className="h-6 w-6 text-electric-green" />,
-		title: 'Configurable policy rules',
-		body: 'Define what is and is not permitted through your LLM deployment. Block entire categories of output. Restrict the topics or data types a model can discuss. Enforce custom content policies at the proxy level without touching the model.',
-	},
-	{
-		icon: <Users className="h-6 w-6 text-electric-green" />,
-		title: 'Per-key and per-team policy scoping',
-		body: 'Different API keys can carry different policy profiles. An internal engineering key and a customer-facing key can be governed by different rules, all enforced at the proxy, not in application code.',
-	},
-	{
-		icon: <FileText className="h-6 w-6 text-electric-green" />,
-		title: 'Audit trail and compliance evidence',
-		body: 'Every policy decision is logged with timestamp, threat type, severity, and block reason. Growth and Scale tiers include structured audit logs and compliance-ready reporting.',
-	},
-	{
-		icon: <CheckSquare className="h-6 w-6 text-electric-green" />,
-		title: 'Alerts on policy violations',
-		body: 'Get notified when usage patterns hit your configured thresholds. Real-time alerts give your security team visibility without having to query logs manually.',
-	},
+const policyRows = [
+	['Customer support bot', 'Redact PII', 'Log evidence'],
+	['Internal analyst', 'Allow summaries', 'Block secrets'],
+	['Developer copilot', 'Block key leakage', 'Alert security'],
 ];
 
-const useCases = [
-	{
-		title: 'Preventing data exfiltration',
-		body: 'Block prompts that attempt to extract credentials, PII, or confidential business data through the LLM.',
-	},
-	{
-		title: 'Topic and content restrictions',
-		body: 'Enforce policies that prevent the model from producing content outside its intended use case.',
-	},
-	{
-		title: 'Regulated industry compliance',
-		body: 'Log every AI interaction for audit purposes and demonstrate active governance over your LLM deployments.',
-	},
-	{
-		title: 'Shadow AI governance',
-		body: 'Centralise all LLM traffic through one proxy to get visibility over how AI is being used across your organisation.',
-	},
+const controls = [
+	{ icon: SlidersHorizontal, title: 'Policy profiles', body: 'Different teams and API keys can carry different enforcement rules.' },
+	{ icon: KeyRound, title: 'Scoped keys', body: 'Separate customer-facing, internal, and testing traffic without branching app code.' },
+	{ icon: FileText, title: 'Audit trail', body: 'Every policy decision keeps the reason, route, tenant, and outcome attached.' },
 ];
 
 export default function SolutionUsageControlPage() {
@@ -50,104 +20,87 @@ export default function SolutionUsageControlPage() {
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="AI Usage Control | Koreshield"
-				description="Define and enforce policies over what your AI can and cannot do. Configurable rules, per-key scoping, and audit logs, without touching your model."
+				description="Define and enforce what your AI systems can and cannot do using scoped policies, logs, and alerts."
 			/>
 
-			{/* Hero */}
-			<section className="relative px-6 py-24 overflow-hidden ambient-glow">
-				<div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
-				<div className="relative mx-auto max-w-4xl text-center">
-					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-						<span className="inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-electric-green mb-6">
-							<span className="h-1.5 w-1.5 rounded-full bg-electric-green" />
+			<section className="relative overflow-hidden px-6 py-24 ambient-glow md:py-32">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(16,185,129,0.14),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(14,165,233,0.08),transparent_24%)]" />
+				<div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+					<motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+						<span className="mb-6 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-electric-green">
+							<Settings2 className="h-3.5 w-3.5" />
 							AI Usage Control
 						</span>
-						<h1 className="text-5xl font-bold tracking-tight md:text-6xl">
-							Define what your AI can and cannot do.
+						<h1 className="max-w-4xl text-5xl font-extrabold tracking-[-0.055em] md:text-7xl">
+							Define the rules your AI must follow.
 						</h1>
-						<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-							Policy enforcement without model retraining. Koreshield applies configurable rules to every LLM request and response: blocking, logging, and alerting based on what you define.
+						<p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+							Control what models can receive, reveal, discuss, and do. Enforce it in the traffic path, not in a policy document nobody reads.
 						</p>
-						<div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-							<Link to="/signup?plan=free" className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500">
-								Start for free <ArrowRight className="h-4 w-4" />
+						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
+							<Link to="/pricing" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-bold text-white transition-colors hover:bg-emerald-bright">
+								See plans <ArrowRight className="h-4 w-4" />
 							</Link>
-							<Link to="/demo" className="inline-flex items-center gap-2 rounded-xl border border-border px-7 py-3 font-semibold transition-colors hover:bg-muted">
+							<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card/70 px-7 py-3 font-bold text-foreground transition-colors hover:bg-muted">
 								Book a demo
 							</Link>
+						</div>
+					</motion.div>
+
+					<motion.div
+						initial={{ opacity: 0, y: 18 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.55, delay: 0.1 }}
+						className="rounded-[2rem] border border-border bg-card/90 p-5 shadow-2xl shadow-emerald-900/10 dark:bg-card/75"
+					>
+						<p className="mb-4 text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">policy matrix</p>
+						<div className="space-y-3">
+							{policyRows.map(([profile, rule, outcome]) => (
+								<div key={profile} className="grid gap-2 rounded-2xl border border-border bg-background/70 p-4 sm:grid-cols-3">
+									<span className="font-semibold">{profile}</span>
+									<span className="rounded-xl bg-electric-green/10 px-3 py-2 text-sm text-electric-green">{rule}</span>
+									<span className="rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">{outcome}</span>
+								</div>
+							))}
 						</div>
 					</motion.div>
 				</div>
 			</section>
 
-			{/* Capabilities */}
-			<section className="px-6 py-20 border-t border-border">
-				<div className="mx-auto max-w-5xl">
-					<h2 className="text-3xl font-bold tracking-tight mb-12">What usage control covers</h2>
-					<div className="grid gap-8 md:grid-cols-2">
-						{capabilities.map((item, i) => (
+			<section className="border-y border-border bg-card/35 px-6 py-20">
+				<div className="mx-auto max-w-7xl">
+					<div className="mb-10 max-w-3xl">
+						<p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-electric-green">Governance layer</p>
+						<h2 className="text-4xl font-extrabold tracking-[-0.04em] md:text-5xl">Rules that execute.</h2>
+					</div>
+					<div className="grid gap-5 md:grid-cols-3">
+						{controls.map((item, index) => (
 							<motion.div
 								key={item.title}
 								initial={{ opacity: 0, y: 16 }}
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true }}
-								transition={{ duration: 0.4, delay: i * 0.07 }}
-								className="flex gap-4 rounded-2xl border border-border bg-card p-6"
+								transition={{ duration: 0.4, delay: index * 0.07 }}
+								className="rounded-[1.5rem] border border-border bg-card/85 p-6 shadow-sm"
 							>
-								<div className="mt-0.5 flex-shrink-0 rounded-xl border border-electric-green/20 bg-electric-green/10 p-2.5">
-									{item.icon}
-								</div>
-								<div>
-									<p className="font-semibold">{item.title}</p>
-									<p className="mt-1 text-sm text-muted-foreground leading-relaxed">{item.body}</p>
-								</div>
+								<item.icon className="mb-5 h-6 w-6 text-electric-green" />
+								<h3 className="text-xl font-bold">{item.title}</h3>
+								<p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
 							</motion.div>
 						))}
 					</div>
 				</div>
 			</section>
 
-			{/* Use cases */}
-			<section className="bg-muted/30 px-6 py-20 border-t border-border">
-				<div className="mx-auto max-w-5xl">
-					<h2 className="text-3xl font-bold tracking-tight mb-10">Use cases</h2>
-					<div className="grid gap-6 md:grid-cols-2">
-						{useCases.map((item, i) => (
-							<motion.div
-								key={item.title}
-								initial={{ opacity: 0, y: 12 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								viewport={{ once: true }}
-								transition={{ duration: 0.35, delay: i * 0.06 }}
-								className="rounded-2xl border border-border bg-card p-6"
-							>
-								<h3 className="font-semibold">{item.title}</h3>
-								<p className="mt-2 text-sm text-muted-foreground leading-relaxed">{item.body}</p>
-							</motion.div>
-						))}
+			<section className="px-6 py-20">
+				<div className="mx-auto flex max-w-7xl flex-col gap-5 rounded-[2rem] border border-border bg-card/85 p-7 shadow-sm md:flex-row md:items-center md:justify-between">
+					<div>
+						<h2 className="text-3xl font-extrabold tracking-[-0.03em]">Give legal and security a real control surface.</h2>
+						<p className="mt-2 text-sm text-muted-foreground">Policy, tenant context, and evidence all travel with the request.</p>
 					</div>
-				</div>
-			</section>
-
-			{/* Plan callout */}
-			<section className="px-6 py-16 border-t border-border">
-				<div className="mx-auto max-w-4xl rounded-2xl border border-primary/20 bg-primary/5 p-8">
-					<div className="grid gap-8 md:grid-cols-2 md:items-center">
-						<div>
-							<h2 className="text-2xl font-bold">Governance on Growth and above</h2>
-							<p className="mt-3 text-muted-foreground text-sm leading-relaxed">
-								Basic policies and alerts are available on all paid plans. Advanced RBAC, audit logs, and compliance reporting are included on Scale and above. Enterprise plans include custom policy configurations, SIEM export, and dedicated governance review support.
-							</p>
-						</div>
-						<div className="flex flex-col gap-3">
-							<Link to="/pricing" className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
-								See all plan features <ArrowRight className="h-4 w-4" />
-							</Link>
-							<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-6 py-3 font-semibold transition-colors hover:bg-muted">
-								Talk to us about Enterprise
-							</Link>
-						</div>
-					</div>
+					<Link to="/solutions/korepilot" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-6 py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted">
+						See KorePilot <ListChecks className="h-4 w-4" />
+					</Link>
 				</div>
 			</section>
 		</div>

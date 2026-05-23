@@ -1,144 +1,107 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Bot, GitBranch, Network, ShieldAlert } from 'lucide-react';
+import { ArrowRight, Bot, Braces, GitBranch, MousePointerClick, ShieldAlert, Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
-const challenges = [
-	{
-		icon: <Network className="h-6 w-6 text-electric-green" />,
-		title: 'Tool call policy enforcement',
-		body: 'Koreshield inspects every tool call an agent attempts before execution. If an agent tries to invoke a tool outside its permitted scope, the call is blocked before it runs.',
-	},
-	{
-		icon: <GitBranch className="h-6 w-6 text-electric-green" />,
-		title: 'Indirect injection via retrieved content',
-		body: 'Agents retrieve documents, call APIs, and consume external data mid-chain. Any of that content can carry injected instructions. Koreshield scans tool outputs and retrieved content before the agent acts on them.',
-	},
-	{
-		icon: <ShieldAlert className="h-6 w-6 text-electric-green" />,
-		title: 'Chain-level threat detection',
-		body: 'A single-turn jailbreak is easy to catch. Multi-step attacks that build across an agent chain are harder. Koreshield monitors for escalating patterns that only become visible across multiple interactions.',
-	},
-	{
-		icon: <Bot className="h-6 w-6 text-electric-green" />,
-		title: 'Autonomous action guardrails',
-		body: 'The more autonomous the agent, the larger the blast radius of a successful attack. Koreshield applies configurable policy rules that cap what an agent can do, enforced at the proxy level.',
-	},
+const agentRisks = [
+	{ icon: Braces, title: 'Tool output becomes instruction', body: 'A web page, API response, or retrieved file can smuggle a command back into the chain.' },
+	{ icon: Wrench, title: 'Tools expand blast radius', body: 'The model is not just talking. It can search, email, update records, or call internal systems.' },
+	{ icon: GitBranch, title: 'Attacks span multiple turns', body: 'The unsafe intent may only become obvious after several observations and actions.' },
 ];
 
-const riskPatterns = [
-	'Injected instructions hidden inside retrieved documents',
-	'Tool calls to external APIs outside permitted scope',
-	'Agents exfiltrating data via allowed-looking outputs',
-	'Cascading injection across multi-agent pipelines',
-	'Privilege escalation through orchestrator manipulation',
-];
+const chain = ['User goal', 'Agent plan', 'Tool call', 'Koreshield check', 'Allowed action'];
 
 export default function SolutionAgentsSecurityPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="AI Agents Security | Koreshield"
-				description="Secure agentic AI pipelines against indirect injection, tool abuse, and autonomous action escalation. Koreshield enforces policy at the proxy level."
+				description="Secure agentic AI pipelines against tool abuse, indirect prompt injection, and autonomous action escalation."
 			/>
 
-			{/* Hero */}
-			<section className="relative px-6 py-24 overflow-hidden ambient-glow">
-				<div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
-				<div className="relative mx-auto max-w-4xl text-center">
-					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-						<span className="inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-electric-green mb-6">
-							<span className="h-1.5 w-1.5 rounded-full bg-electric-green" />
+			<section className="relative overflow-hidden px-6 py-24 ambient-glow md:py-32">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(16,185,129,0.14),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(168,85,247,0.1),transparent_24%)]" />
+				<div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+					<motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+						<span className="mb-6 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-electric-green">
+							<Bot className="h-3.5 w-3.5" />
 							AI Agents Security
 						</span>
-						<h1 className="text-5xl font-bold tracking-tight md:text-6xl">
-							Agentic AI expands the attack surface. We close it.
+						<h1 className="max-w-4xl text-5xl font-extrabold tracking-[-0.055em] md:text-7xl">
+							Agents need guardrails where they act.
 						</h1>
-						<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-							Agents that browse, execute, and retrieve are exposed to every piece of content they touch. Koreshield enforces policy at the proxy level (tool calls, retrieved content, and outputs) before the agent acts.
+						<p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+							Koreshield checks retrieved content, tool output, and planned actions before autonomous systems do something expensive.
 						</p>
-						<div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-							<Link to="/signup?plan=free" className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500">
+						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
+							<Link to="/signup?plan=free" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-bold text-white transition-colors hover:bg-emerald-bright">
 								Start for free <ArrowRight className="h-4 w-4" />
 							</Link>
-							<Link to="/demo" className="inline-flex items-center gap-2 rounded-xl border border-border px-7 py-3 font-semibold transition-colors hover:bg-muted">
+							<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card/70 px-7 py-3 font-bold text-foreground transition-colors hover:bg-muted">
 								Book a demo
 							</Link>
+						</div>
+					</motion.div>
+
+					<motion.div
+						initial={{ opacity: 0, y: 18 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.55, delay: 0.1 }}
+						className="rounded-[2rem] border border-border bg-card/90 p-5 shadow-2xl shadow-emerald-900/10 dark:bg-card/75"
+					>
+						<div className="mb-4 flex items-center justify-between">
+							<p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">agent chain</p>
+							<span className="rounded-full bg-electric-green/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-electric-green">policy enforced</span>
+						</div>
+						<div className="space-y-3">
+							{chain.map((step, index) => (
+								<div key={step} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-2xl border border-border bg-background/70 p-4">
+									<span className="flex h-8 w-8 items-center justify-center rounded-full bg-electric-green/10 text-xs font-black text-electric-green">
+										{index + 1}
+									</span>
+									<span className="font-semibold">{step}</span>
+									{index === 3 ? <ShieldAlert className="h-5 w-5 text-electric-green" /> : <MousePointerClick className="h-5 w-5 text-muted-foreground" />}
+								</div>
+							))}
 						</div>
 					</motion.div>
 				</div>
 			</section>
 
-			{/* Why agents are different */}
-			<section className="px-6 py-20 border-t border-border">
-				<div className="mx-auto max-w-4xl">
-					<div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-8 mb-12">
-						<h2 className="text-xl font-bold text-foreground">Why agentic AI is a different threat model</h2>
-						<p className="mt-3 text-muted-foreground leading-relaxed">
-							Traditional LLM security focuses on what users send to the model. Agents also consume outputs from external systems (retrieved documents, API responses, web pages) and act on them autonomously. An attacker who plants a malicious instruction in a document your agent retrieves can hijack the entire chain without ever interacting with your application directly.
-						</p>
+			<section className="border-y border-border bg-card/35 px-6 py-20">
+				<div className="mx-auto max-w-7xl">
+					<div className="mb-10 max-w-3xl">
+						<p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-electric-green">Why agents are different</p>
+						<h2 className="text-4xl font-extrabold tracking-[-0.04em] md:text-5xl">They read, decide, and execute.</h2>
 					</div>
-					<div className="grid gap-8 md:grid-cols-2">
-						{challenges.map((item, i) => (
+					<div className="grid gap-5 md:grid-cols-3">
+						{agentRisks.map((item, index) => (
 							<motion.div
 								key={item.title}
 								initial={{ opacity: 0, y: 16 }}
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true }}
-								transition={{ duration: 0.4, delay: i * 0.07 }}
-								className="flex gap-4 rounded-2xl border border-border bg-card p-6"
+								transition={{ duration: 0.4, delay: index * 0.07 }}
+								className="rounded-[1.5rem] border border-border bg-card/85 p-6 shadow-sm"
 							>
-								<div className="mt-0.5 flex-shrink-0 rounded-xl border border-electric-green/20 bg-electric-green/10 p-2.5">
-									{item.icon}
-								</div>
-								<div>
-									<p className="font-semibold">{item.title}</p>
-									<p className="mt-1 text-sm text-muted-foreground leading-relaxed">{item.body}</p>
-								</div>
+								<item.icon className="mb-5 h-6 w-6 text-electric-green" />
+								<h3 className="text-xl font-bold">{item.title}</h3>
+								<p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
 							</motion.div>
 						))}
 					</div>
 				</div>
 			</section>
 
-			{/* Risk patterns */}
-			<section className="bg-muted/30 px-6 py-20 border-t border-border">
-				<div className="mx-auto max-w-3xl">
-					<h2 className="text-3xl font-bold tracking-tight">Attack patterns Koreshield addresses</h2>
-					<p className="mt-4 text-muted-foreground mb-10">These are the patterns that emerge specifically in agentic systems. Many are invisible to traditional security tooling.</p>
-					<div className="space-y-4">
-						{riskPatterns.map((item, i) => (
-							<motion.div
-								key={item}
-								initial={{ opacity: 0, x: -12 }}
-								whileInView={{ opacity: 1, x: 0 }}
-								viewport={{ once: true }}
-								transition={{ duration: 0.35, delay: i * 0.06 }}
-								className="flex items-start gap-4 rounded-2xl border border-border bg-card p-5"
-							>
-								<div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-electric-green/10 text-xs font-bold text-electric-green">
-									{i + 1}
-								</div>
-								<span className="text-sm leading-relaxed">{item}</span>
-							</motion.div>
-						))}
+			<section className="px-6 py-20">
+				<div className="mx-auto flex max-w-7xl flex-col gap-5 rounded-[2rem] border border-border bg-card/85 p-7 shadow-sm md:flex-row md:items-center md:justify-between">
+					<div>
+						<h2 className="text-3xl font-extrabold tracking-[-0.03em]">Secure the action boundary, not only the chat box.</h2>
+						<p className="mt-2 text-sm text-muted-foreground">Use Koreshield before tool calls, after retrieval, and before provider execution.</p>
 					</div>
-				</div>
-			</section>
-
-			{/* CTA */}
-			<section className="px-6 py-20 border-t border-border text-center">
-				<div className="mx-auto max-w-2xl">
-					<h2 className="text-3xl font-bold">Ready to secure your agents?</h2>
-					<p className="mt-4 text-muted-foreground">Koreshield works with any agentic framework. One URL change. Under 30 minutes to deploy.</p>
-					<div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-						<Link to="/signup?plan=free" className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500">
-							Start for free <ArrowRight className="h-4 w-4" />
-						</Link>
-						<Link to="/demo" className="inline-flex items-center gap-2 rounded-xl border border-border px-7 py-3 font-semibold transition-colors hover:bg-muted">
-							Book a demo
-						</Link>
-					</div>
+					<Link to="/solutions/rag-security" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-6 py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted">
+						See RAG security <ArrowRight className="h-4 w-4" />
+					</Link>
 				</div>
 			</section>
 		</div>
