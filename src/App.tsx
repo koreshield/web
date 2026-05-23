@@ -47,6 +47,7 @@ const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ defaul
 const TeamsPage = lazy(() => import('./pages/TeamsPage').then(m => ({ default: m.TeamsPage })));
 const TeamDetailsPage = lazy(() => import('./pages/TeamDetailsPage').then(m => ({ default: m.TeamDetailsPage })));
 const RAGSecurityPage = lazy(() => import('./pages/RAGSecurityPage').then(m => ({ default: m.RAGSecurityPage })));
+const AudioSecurityPage = lazy(() => import('./pages/AudioSecurityPage').then(m => ({ default: m.AudioSecurityPage })));
 const ThreatMonitoringPage = lazy(() => import('./pages/ThreatMonitoringPage').then(m => ({ default: m.ThreatMonitoringPage })));
 const ThreatMapPage = lazy(() => import('./pages/ThreatMapPage').then(m => ({ default: m.ThreatMapPage })));
 const ProviderHealthPage = lazy(() => import('./pages/ProviderHealthPage').then(m => ({ default: m.ProviderHealthPage })));
@@ -799,6 +800,18 @@ function AppContent() {
 								<RouteErrorBoundary>
 									<ProtectedRoute>
 										<RAGSecurityPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/voice-security"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<AudioSecurityPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
 							</Suspense>
