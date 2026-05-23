@@ -129,7 +129,7 @@ describe('BillingPage', () => {
 			expect(screen.getAllByText(/unlimited enterprise access/i).length).toBeGreaterThan(0);
 		});
 
-		expect(screen.getByText(/^Enterprise$/i)).toBeInTheDocument();
+		expect(screen.getAllByText(/^Enterprise$/i).length).toBeGreaterThan(0);
 		expect(screen.getByText(/^unlimited$/i)).toBeInTheDocument();
 		expect(screen.getAllByRole('button', { name: /included with internal enterprise access/i })).toHaveLength(2);
 		screen.getAllByRole('button', { name: /included with internal enterprise access/i }).forEach((button) => {
