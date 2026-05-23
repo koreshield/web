@@ -49,6 +49,10 @@ JWT validation is strict:
 | `/v1/rag/scans` | GET | Required | List RAG scan history |
 | `/v1/rag/scans/{id}` | GET | Required | Retrieve a RAG scan by ID |
 | `/v1/rag/scans/{id}/pack` | GET | Required | Download full RAG scan pack (ZIP) |
+| `/v1/audio/scan` | POST | Required | VoiceGuard speech transcript scanning |
+| `/v1/audio/scans` | GET | Required | List VoiceGuard scan history |
+| `/v1/audio/scans/{id}` | GET | Required | Retrieve a VoiceGuard scan by ID |
+| `/v1/audio/scans/{id}/pack` | GET | Required | Download full VoiceGuard scan pack (ZIP) |
 | `/v1/scan` | POST | Required | Scan a single prompt for threats |
 | `/v1/scan/batch` | POST | Required | Scan multiple prompts in one request |
 | `/v1/scans` | GET | Required | List recent prompt scan results |
@@ -189,6 +193,32 @@ Returns **HTTP 403** when `blocked: true`, **HTTP 200** otherwise.
   "timestamp": "2026-04-12T10:30:01Z"
 }
 ```
+
+## `/v1/audio/scan`: VoiceGuard Speech Scan
+
+VoiceGuard is transcript-first. Send ASR output plus source trust metadata before speech reaches an LLM or tool chain.
+
+```bash
+curl -s -X POST https://api.koreshield.com/v1/audio/scan \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "transcript": "Summarise this call for the account notes.",
+    "source_type": "live_microphone",
+    "channel": "user_speech",
+    "speaker_verified": true,
+    "known_user": true,
+    "intended_use": "summarization",
+    "asr": { "confidence": 0.96 },
+    "tools_available": ["lookup_customer", "refund_payment"]
+  }'
+```
+
+Key response fields: `decision`, `risk_level`, `tool_policy`, `safe_transcript`, `threats`.
+
+Returns **HTTP 403** when `decision` is `block`, **HTTP 200** otherwise.
+
+Scan history is available at `/v1/audio/scans` with the same list/get/delete/pack pattern as RAG scans.
 
 ## WebSocket
 
