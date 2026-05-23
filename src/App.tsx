@@ -19,6 +19,7 @@ const StatusPage = lazy(() => import('./pages/StatusPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ComparisonPage = lazy(() => import('./pages/ComparisonPage'));
 const VsLakeraPage = lazy(() => import('./pages/VsLakeraPage'));
 const VsLLMGuardPage = lazy(() => import('./pages/VsLLMGuardPage'));
 const VsBuildYourselfPage = lazy(() => import('./pages/VsBuildYourselfPage'));
@@ -131,6 +132,16 @@ function AppContent() {
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<AboutPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/vs"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ComparisonPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}
