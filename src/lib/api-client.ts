@@ -931,6 +931,64 @@ class ApiClient {
 		return response.blob();
 	}
 
+	// VoiceGuard — scan speech-derived input before LLM/tool execution
+	async scanAudio(payload: {
+		transcript?: string;
+		alternatives?: string[];
+		asr?: { primary?: string; alternatives?: string[]; confidence?: number };
+		source_type?: string;
+		channel?: string;
+		speaker_verified?: boolean;
+		known_user?: boolean;
+		confidence?: number;
+		audio_metadata?: Record<string, boolean>;
+		tools_available?: string[];
+		intended_use?: string;
+	}) {
+		return this.fetch('/v1/audio/scan', {
+			method: 'POST',
+			body: JSON.stringify(payload),
+		}, this.maxRetries, [403]);
+	}
+
+	async getAudioScanHistory(limit = 20, offset = 0) {
+		const params = new URLSearchParams({
+			limit: String(limit),
+			offset: String(offset),
+		});
+		return this.fetch(`/v1/audio/scans?${params.toString()}`);
+	}
+
+	async getAudioScan(scanId: string) {
+		return this.fetch(`/v1/audio/scans/${scanId}`);
+	}
+
+	async deleteAudioScan(scanId: string) {
+		return this.fetch(`/v1/audio/scans/${scanId}`, { method: 'DELETE' });
+	}
+
+	async clearAudioScans() {
+		return this.fetch('/v1/audio/scans', { method: 'DELETE' });
+	}
+
+	async downloadAudioScanPack(scanId: string): Promise<Blob> {
+		const url = `${this.baseUrl}/v1/audio/scans/${scanId}/pack`;
+		const headers: Record<string, string> = {};
+		const adminToken = authService.getToken();
+		if (adminToken) {
+			headers['Authorization'] = `Bearer ${adminToken}`;
+		}
+		const response = await fetch(url, {
+			method: 'GET',
+			headers,
+			credentials: 'include',
+		});
+		if (!response.ok) {
+			throw new Error(`Download failed: ${response.statusText}`);
+		}
+		return response.blob();
+	}
+
 	async resendVerificationEmail() {
 		return this.fetch('/v1/management/resend-verification-email', {
 			method: 'POST',

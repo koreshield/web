@@ -15,7 +15,7 @@ const extensions = [
 	{
 		icon: Mic2,
 		label: 'Voice & Audio Protection',
-		status: 'Ongoing',
+		status: 'Available',
 		title: 'Protection for speech prompts and voice agents',
 		description:
 			'Extend Koreshield beyond typed prompts by scanning transcripts, spoken intent, and downstream model calls before voice agents take sensitive actions.',
