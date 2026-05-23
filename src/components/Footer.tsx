@@ -1,130 +1,167 @@
+import { ArrowRight, CheckCircle2, Github, Linkedin, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const linkClass = 'text-muted-foreground hover:text-foreground transition-colors text-sm';
+const linkClass = 'text-sm text-muted-foreground transition-colors hover:text-foreground';
+
+const footerGroups = [
+	{
+		title: 'Solutions',
+		links: [
+			{ label: 'AI Detection & Response', to: '/solutions/ai-detection-response' },
+			{ label: 'Application Protection', to: '/solutions/ai-application-protection' },
+			{ label: 'AI Agents Security', to: '/solutions/ai-agents-security' },
+			{ label: 'AI Usage Control', to: '/solutions/ai-usage-control' },
+			{ label: 'RAG Security', to: '/solutions/rag-security' },
+			{ label: 'KorePilot', to: '/solutions/korepilot' },
+			{ label: 'Voice & Audio Protection', to: '/solutions/voice-audio-protection' },
+		],
+	},
+	{
+		title: 'Product',
+		links: [
+			{ label: 'Pricing', to: '/pricing' },
+			{ label: 'Book a Demo', to: '/demo' },
+			{ label: 'Integrations', to: '/integrations' },
+			{ label: 'Changelog', to: '/changelog' },
+			{ label: 'Status', to: '/status' },
+		],
+	},
+	{
+		title: 'Resources',
+		links: [
+			{ label: 'Documentation', to: '/docs' },
+			{ label: 'Blog', to: '/blog' },
+			{ label: 'Research', to: '/research' },
+			{ label: 'RAG Security Guide', to: '/solutions/rag-security' },
+			{ label: 'Compare LLM Guard', to: '/compare/llm-guard' },
+		],
+	},
+	{
+		title: 'Company',
+		links: [
+			{ label: 'About', to: '/about' },
+			{ label: 'Contact', to: '/contact' },
+			{ label: 'Careers', to: '/careers', badge: 'hiring' },
+		],
+	},
+	{
+		title: 'Legal',
+		links: [
+			{ label: 'Privacy Policy', to: '/privacy-policy' },
+			{ label: 'Terms of Service', to: '/terms-of-service' },
+			{ label: 'Cookie Policy', to: '/cookie-policy' },
+			{ label: 'Data Processing Agreement', to: '/dpa' },
+		],
+	},
+];
+
+function XIcon({ className }: { className?: string }) {
+	return (
+		<svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+			<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+		</svg>
+	);
+}
 
 function Footer() {
 	return (
-		<footer className="bg-card border-t border-border py-16 px-6 transition-colors">
-			<div className="max-w-7xl mx-auto">
-				{/* Logo + Tagline */}
-				<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8 mb-12">
-					<div className="flex items-center gap-3">
-						<img src="/logo/dark/SVG/Black.svg" alt="Koreshield Logo" className="w-8 h-8 dark:hidden" />
-						<img src="/logo/light/SVG/White.svg" alt="Koreshield Logo" className="w-8 h-8 hidden dark:block" />
-						<div>
-							<div className="text-xl font-bold text-foreground tracking-tight">Koreshield</div>
-							<p className="text-muted-foreground text-sm mt-0.5">The security layer your LLM provider doesn't include.</p>
+		<footer className="relative overflow-hidden border-t border-white/[0.08] bg-[#070909] px-6 py-16 text-foreground">
+			<div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-electric-green/50 to-transparent" />
+			<div className="pointer-events-none absolute -left-32 top-0 h-72 w-72 rounded-full bg-electric-green/10 blur-3xl" />
+			<div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 rounded-full bg-blue-500/5 blur-3xl" />
+
+			<div className="relative mx-auto max-w-7xl">
+				<div className="mb-12 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+					<div className="rounded-[2rem] border border-white/[0.08] bg-white/[0.035] p-7 md:p-8">
+						<div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+							<div>
+								<div className="flex items-center gap-3">
+									<div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
+										<img src="/favicon.svg" alt="" className="h-8 w-8" />
+									</div>
+									<div>
+										<p className="text-2xl font-extrabold tracking-tight text-white">Koreshield</p>
+										<p className="mt-1 text-sm text-muted-foreground">Runtime security for production AI.</p>
+									</div>
+								</div>
+								<p className="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
+									Protect prompts, RAG context, provider calls, policy decisions, and audit evidence before risky AI behaviour reaches customers.
+								</p>
+							</div>
+							<div className="flex gap-3">
+								<a href="https://github.com/koreshield" target="_blank" rel="noreferrer noopener" aria-label="Koreshield on GitHub" className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035] text-muted-foreground transition-colors hover:border-electric-green/30 hover:text-white">
+									<Github className="h-5 w-5" />
+								</a>
+								<a href="https://twitter.com/koreshield" target="_blank" rel="noreferrer noopener" aria-label="Koreshield on X" className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035] text-muted-foreground transition-colors hover:border-electric-green/30 hover:text-white">
+									<XIcon className="h-4 w-4" />
+								</a>
+								<a href="https://www.linkedin.com/company/koreshield" target="_blank" rel="noreferrer noopener" aria-label="Koreshield on LinkedIn" className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035] text-muted-foreground transition-colors hover:border-electric-green/30 hover:text-white">
+									<Linkedin className="h-5 w-5" />
+								</a>
+							</div>
 						</div>
 					</div>
 
-					{/* Social links */}
-					<div className="flex items-center gap-4">
-						<a
-							href="https://github.com/koreshield"
-							target="_blank"
-							rel="noreferrer noopener"
-							aria-label="Koreshield on GitHub"
-							className="text-muted-foreground hover:text-foreground transition-colors"
-						>
-							<svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-								<path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
-							</svg>
-						</a>
-						<a
-							href="https://twitter.com/koreshield"
-							target="_blank"
-							rel="noreferrer noopener"
-							aria-label="Koreshield on X (Twitter)"
-							className="text-muted-foreground hover:text-foreground transition-colors"
-						>
-							<svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-								<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-							</svg>
-						</a>
-						<a
-							href="https://www.linkedin.com/company/koreshield"
-							target="_blank"
-							rel="noreferrer noopener"
-							aria-label="Koreshield on LinkedIn"
-							className="text-muted-foreground hover:text-foreground transition-colors"
-						>
-							<svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-								<path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-							</svg>
-						</a>
+					<div className="rounded-[2rem] border border-electric-green/20 bg-electric-green/[0.075] p-7 md:p-8">
+						<div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-electric-green/15">
+							<ShieldCheck className="h-6 w-6 text-electric-green" />
+						</div>
+						<h2 className="text-2xl font-extrabold tracking-tight text-white">See what your AI is exposed to.</h2>
+						<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+							Run a guided demo against your stack: prompts, RAG, providers, alerts, and audit evidence.
+						</p>
+						<div className="mt-6 flex flex-col gap-3 sm:flex-row">
+							<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright">
+								Book a demo <ArrowRight className="h-4 w-4" />
+							</Link>
+							<Link to="/docs" className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.1] bg-black/20 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-black/35">
+								Read docs
+							</Link>
+						</div>
 					</div>
 				</div>
 
-				{/* 5-column link grid */}
-				<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
-					{/* Solutions */}
-					<div>
-						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Solutions</h4>
-						<ul className="space-y-3">
-							<li><Link to="/solutions/ai-detection-response" className={linkClass}>AI Detection & Response</Link></li>
-							<li><Link to="/solutions/ai-application-protection" className={linkClass}>Application Protection</Link></li>
-							<li><Link to="/solutions/ai-agents-security" className={linkClass}>AI Agents Security</Link></li>
-							<li><Link to="/solutions/ai-usage-control" className={linkClass}>AI Usage Control</Link></li>
-							<li><Link to="/solutions/rag-security" className={linkClass}>RAG Security</Link></li>
-							<li><Link to="/solutions/korepilot" className={linkClass}>KorePilot</Link></li>
-							<li><Link to="/solutions/voice-audio-protection" className={linkClass}>Voice & Audio Protection</Link></li>
-						</ul>
-					</div>
-
-					{/* Product */}
-					<div>
-						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Product</h4>
-						<ul className="space-y-3">
-							<li><Link to="/pricing" className={linkClass}>Pricing</Link></li>
-							<li><Link to="/demo" className={linkClass}>Book a Demo</Link></li>
-							<li><Link to="/integrations" className={linkClass}>Integrations</Link></li>
-							<li><Link to="/changelog" className={linkClass}>Changelog</Link></li>
-						</ul>
-					</div>
-
-					{/* Resources */}
-					<div>
-						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Resources</h4>
-						<ul className="space-y-3">
-							<li><Link to="/docs" className={linkClass}>Documentation</Link></li>
-							<li><Link to="/blog" className={linkClass}>Blog</Link></li>
-							<li><Link to="/research" className={linkClass}>Research</Link></li>
-							<li><Link to="/status" className={linkClass}>Status</Link></li>
-						</ul>
-					</div>
-
-					{/* Company */}
-					<div>
-						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Company</h4>
-						<ul className="space-y-3">
-							<li><Link to="/about" className={linkClass}>About</Link></li>
-							<li><Link to="/contact" className={linkClass}>Contact</Link></li>
-							<li>
-								<Link to="/careers" className={linkClass}>
-									Careers <span className="text-electric-green text-xs">hiring</span>
-								</Link>
-							</li>
-						</ul>
-					</div>
-
-					{/* Legal */}
-					<div>
-						<h4 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Legal</h4>
-						<ul className="space-y-3">
-							<li><Link to="/privacy-policy" className={linkClass}>Privacy Policy</Link></li>
-							<li><Link to="/terms-of-service" className={linkClass}>Terms of Service</Link></li>
-							<li><Link to="/cookie-policy" className={linkClass}>Cookie Policy</Link></li>
-							<li><Link to="/dpa" className={linkClass}>Data Processing Agreement</Link></li>
-						</ul>
-					</div>
+				<div className="grid gap-10 border-y border-white/[0.08] py-10 sm:grid-cols-2 lg:grid-cols-5">
+					{footerGroups.map((group) => (
+						<div key={group.title}>
+							<h3 className="mb-4 text-xs font-bold uppercase tracking-[0.25em] text-white">{group.title}</h3>
+							<ul className="space-y-3">
+								{group.links.map((link) => (
+									<li key={link.to}>
+										<Link to={link.to} className={linkClass}>
+											{link.label}
+											{'badge' in link && link.badge ? (
+												<span className="ml-2 rounded-full bg-electric-green/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-electric-green">
+													{link.badge}
+												</span>
+											) : null}
+										</Link>
+									</li>
+								))}
+							</ul>
+						</div>
+					))}
 				</div>
 
-				{/* Copyright */}
-				<div className="pt-8 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-muted-foreground text-sm">
-					<p>© {new Date().getFullYear()} Koreshield. All rights reserved.</p>
-					<p className="text-xs text-muted-foreground/60">
-						Koreshield Labs Ltd. · Incorporated in England & Wales · Co. No. 17057784
-					</p>
+				<div className="flex flex-col gap-6 pt-8 md:flex-row md:items-center md:justify-between">
+					<div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+						<span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5">
+							<CheckCircle2 className="h-3.5 w-3.5 text-electric-green" />
+							Zero-retention default
+						</span>
+						<span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5">
+							<CheckCircle2 className="h-3.5 w-3.5 text-electric-green" />
+							UK company
+						</span>
+						<span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5">
+							<CheckCircle2 className="h-3.5 w-3.5 text-electric-green" />
+							Python + Node SDKs
+						</span>
+					</div>
+					<div className="text-sm text-muted-foreground md:text-right">
+						<p>© {new Date().getFullYear()} Koreshield. All rights reserved.</p>
+						<p className="mt-1 text-xs text-muted-foreground/70">Koreshield Labs Ltd. · Incorporated in England & Wales · Co. No. 17057784</p>
+					</div>
 				</div>
 			</div>
 		</footer>
