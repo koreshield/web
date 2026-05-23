@@ -19,13 +19,13 @@ const evidenceFeeds = [
 	{
 		icon: LockKeyhole,
 		title: 'Immutable audit logs',
-		body: 'KS-07 audit evidence designed to be verified, tenant-scoped, and resistant to after-the-fact modification.',
+		body: 'Audit evidence designed to be verified, tenant-scoped, and resistant to after-the-fact modification.',
 		highlight: true,
 	},
 	{
 		icon: Database,
 		title: 'Tenant context',
-		body: 'KS-05 isolation metadata keeps every event mapped to the right customer, report, and compliance boundary.',
+		body: 'Isolation metadata keeps every event mapped to the right customer, report, and compliance boundary.',
 		highlight: false,
 	},
 	{
@@ -37,17 +37,17 @@ const evidenceFeeds = [
 	{
 		icon: Bell,
 		title: 'Alert records',
-		body: 'KS-08 alert activity shows monitoring and incident-response controls are active, not just documented.',
+		body: 'Alert activity shows monitoring and incident-response controls are active, not just documented.',
 		highlight: false,
 	},
 ];
 
 const controlFramework = [
-	{ label: 'KS-05 tenant isolation', icon: LockKeyhole },
-	{ label: 'KS-07 immutable audit logs', icon: FileCheck2 },
-	{ label: 'KS-08 real-time alerting', icon: Bell },
-	{ label: 'KS-10 red-team validation', icon: Target },
-	{ label: 'KS-11 CI/CD security gate', icon: GitBranch },
+	{ label: 'Tenant isolation', icon: LockKeyhole },
+	{ label: 'Immutable audit logs', icon: FileCheck2 },
+	{ label: 'Real-time alerting', icon: Bell },
+	{ label: 'Red-team validation', icon: Target },
+	{ label: 'CI/CD security gate', icon: GitBranch },
 ];
 
 const containerVariants = {
