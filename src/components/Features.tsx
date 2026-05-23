@@ -65,17 +65,16 @@ function Features() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
                     viewport={{ once: true }}
-                    className="mx-auto mb-14 max-w-3xl text-center md:mb-16"
+                    className="mx-auto mb-14 max-w-6xl text-center md:mb-16"
                 >
                     <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-electric-green">
                         Protection Layer
                     </p>
-                    <h2 className="text-4xl md:text-5xl font-extrabold mb-5 text-foreground tracking-[-0.04em]">
-                        What Koreshield Catches Before Your LLM Does
+                    <h2 className="mb-5 text-4xl font-extrabold tracking-[-0.04em] text-foreground md:text-5xl lg:whitespace-nowrap">
+                        Block AI Threats Before the Model
                     </h2>
-                    <p className="text-muted-foreground text-base leading-relaxed sm:text-lg">
-                        A proxy-layer security stack for prompts, retrieved context, provider routing, and audit evidence.
-                        Built to sit in the path of real AI traffic, not beside it.
+                    <p className="text-muted-foreground text-base leading-relaxed sm:text-lg lg:whitespace-nowrap">
+                        Secure prompts, RAG context, provider traffic, and audit evidence in one proxy layer.
                     </p>
                 </motion.div>
 
