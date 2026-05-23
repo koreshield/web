@@ -5,31 +5,20 @@ import Features from '../components/Features';
 import Hero from '../components/Hero';
 import { IntegrationTicker } from '../components/IntegrationTicker';
 import { ProductExtensions } from '../components/ProductExtensions';
-import { RAGShowcase } from '../components/RAGShowcase';
 import { StatsBanner } from '../components/StatsBanner';
 import { ThreatDashboard } from '../components/ThreatDashboard';
 import { TrustBadges } from '../components/TrustBadges';
 import UseCases from '../components/UseCases';
 
 import { motion } from 'framer-motion';
-import { ArrowDown, ArrowRight, CheckCircle2, Rocket, Settings, Terminal } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Copy, ShieldCheck, Terminal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
-function CTAFlowArrow() {
-    return (
-        <>
-            <div className="hidden lg:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 items-center justify-center w-10 h-10 rounded-full bg-muted border border-white/[0.08] shadow-sm">
-                <ArrowRight className="text-electric-green w-5 h-5" />
-            </div>
-            <div className="flex lg:hidden justify-center py-2">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted border border-white/[0.08] shadow-sm">
-                    <ArrowDown className="text-electric-green w-5 h-5" />
-                </div>
-            </div>
-        </>
-    );
-}
+const quickStartCommands = [
+    { label: 'Python', command: 'pip install koreshield' },
+    { label: 'Node.js', command: 'npm install koreshield' },
+];
 
 function LandingPage() {
     return (
@@ -55,160 +44,121 @@ function LandingPage() {
 
             <StatsBanner />
 
-            <ErrorBoundary fallback={null}>
-                <RAGShowcase />
-            </ErrorBoundary>
-
             <Architecture />
+
+            <section className="relative overflow-hidden border-y border-white/[0.06] bg-card/30 px-6 py-20">
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12),transparent_55%)]" />
+                <div className="relative mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-electric-green">
+                            <Terminal className="h-3.5 w-3.5" />
+                            Installation
+                        </div>
+                        <h2 className="max-w-2xl text-4xl font-extrabold tracking-[-0.04em] md:text-5xl">
+                            Start with one package, not a platform migration.
+                        </h2>
+                        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                            Works with the SDKs you already use. Add the client, point requests through Koreshield, and keep your provider choices open.
+                        </p>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.08 }}
+                        className="rounded-[1.75rem] border border-white/[0.08] bg-background/70 p-5 shadow-2xl shadow-emerald-500/5"
+                    >
+                        <div className="mb-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-electric-green/10">
+                                    <Terminal className="h-4 w-4 text-electric-green" />
+                                </span>
+                                Choose your runtime
+                            </div>
+                            <span className="rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-electric-green">
+                                Python + Node
+                            </span>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            {quickStartCommands.map((item) => (
+                                <div key={item.label} className="rounded-2xl border border-white/[0.08] bg-card/80 p-4">
+                                    <div className="mb-3 flex items-center justify-between">
+                                        <span className="text-sm font-bold text-foreground">{item.label}</span>
+                                        <Copy className="h-4 w-4 text-muted-foreground" />
+                                    </div>
+                                    <code className="block overflow-x-auto rounded-xl border border-white/[0.06] bg-black/40 px-3 py-3 text-sm text-muted-foreground">
+                                        <span className="text-electric-green">$</span> {item.command}
+                                    </code>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-3">
+                            {['API key auth', 'Provider routing', 'Audit events'].map((item) => (
+                                <div key={item} className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-card/60 px-3 py-2">
+                                    <CheckCircle2 className="h-4 w-4 text-electric-green" />
+                                    <span>{item}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                </div>
+            </section>
+
             <Features />
             <ProductExtensions />
 
             <TrustBadges />
             <UseCases />
 
-            {/*  -  CTA Section  -  */}
-            <section className="py-32 md:py-44 px-6 bg-background relative overflow-hidden ambient-glow">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-electric-green/[0.02] to-transparent pointer-events-none" />
-                <div className="max-w-7xl mx-auto relative z-10">
+            <section className="relative overflow-hidden bg-background px-6 py-24 ambient-glow md:py-32">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-electric-green/40 to-transparent" />
+                <div className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-electric-green/10 blur-3xl" />
+                <div className="relative z-10 mx-auto max-w-5xl">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                         viewport={{ once: true }}
-                        className="text-center mb-16"
+                        className="rounded-[2rem] border border-white/[0.08] bg-card/80 p-8 text-center shadow-2xl shadow-emerald-500/5 md:p-12"
                     >
-                        <h2 className="text-4xl md:text-6xl font-extrabold tracking-[-0.04em] text-foreground mb-6">
-                            Your AI Is in Production.<br className="hidden md:block" /> Is Your Security?
+                        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-electric-green/20 bg-electric-green/10">
+                            <ShieldCheck className="h-7 w-7 text-electric-green" />
+                        </div>
+                        <h2 className="mx-auto max-w-3xl text-4xl font-extrabold tracking-[-0.04em] text-foreground md:text-6xl">
+                            Put a security layer in front of your AI.
                         </h2>
-                        <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
-                            Most teams discover their LLM is vulnerable after something goes wrong. Koreshield ships in under 5 minutes. Incidents don't.
+                        <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                            Start with the proxy, prove the controls in your logs, and expand into RAG, agents, and compliance evidence when you are ready.
                         </p>
-                    </motion.div>
-
-                    {/* 3-column flow */}
-                    <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-10 lg:items-center">
-
-                        {/* Step 1: Install */}
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            className="bg-card border border-white/[0.08] rounded-xl p-6 relative shadow-sm lg:self-center w-full"
-                        >
-                            <div className="hidden lg:block"><CTAFlowArrow /></div>
-                            <div className="flex items-center gap-3 mb-4 text-blue-500">
-                                <Terminal className="w-6 h-6" />
-                                <h3 className="font-semibold">1. Install</h3>
-                            </div>
-                            <div className="space-y-3">
-                                <div className="p-3 bg-muted/50 rounded border border-white/[0.06] text-sm font-mono text-muted-foreground">
-                                    <span className="text-electric-green">$</span> pip install koreshield
-                                </div>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span>or</span>
-                                </div>
-                                <div className="p-3 bg-muted/50 rounded border border-white/[0.06] text-sm font-mono text-muted-foreground">
-                                    <span className="text-electric-green">$</span> npm install koreshield
-                                </div>
-                                <p className="text-xs text-muted-foreground">Python and Node.js. Works with your existing code.</p>
-                            </div>
-                        </motion.div>
-
-                        {/* Mobile arrow */}
-                        <div className="lg:hidden"><CTAFlowArrow /></div>
-
-                        {/* Step 2: Configure  -  star card */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.2 }}
-                            className="relative overflow-visible"
-                        >
-                            <div className="flex justify-center mb-3">
-                                <span className="inline-flex items-center gap-1.5 bg-emerald-600 dark:bg-electric-green text-white font-bold px-5 py-2 text-xs rounded-full uppercase tracking-widest shadow-lg shadow-emerald-600/30 dark:shadow-emerald-500/30 ring-2 ring-emerald-600/20 dark:ring-emerald-400/20">
-                                    <Settings className="w-3.5 h-3.5" />
-                                    Quick Setup
-                                </span>
-                            </div>
-
-                            <div className="bg-card border-2 border-electric-green/20 rounded-xl p-6 md:p-8 relative shadow-lg shadow-emerald-500/10">
-                                <div className="hidden lg:block"><CTAFlowArrow /></div>
-
-                                <div className="flex flex-col items-center text-center gap-3 mb-5">
-                                    <div className="w-14 h-14 bg-electric-green/10 rounded-full flex items-center justify-center">
-                                        <Settings className="w-7 h-7 text-electric-green" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-foreground">2. Configure</h3>
-                                        <p className="text-sm text-muted-foreground">Point to your provider. Set your policies.</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3">
-                                    {/* config.yaml  -  provider selection */}
-                                    <div className="p-3 bg-muted/50 rounded border border-white/[0.06] text-xs font-mono text-muted-foreground leading-relaxed">
-                                        <div className="text-muted-foreground/50 mb-1"># config.yaml</div>
-                                        <div><span className="text-blue-400">providers</span>:</div>
-                                        <div className="ml-4"><span className="text-blue-400">openai</span>:</div>
-                                        <div className="ml-8">enabled: <span className="text-electric-green">true</span></div>
-                                        <div className="ml-8">base_url: <span className="text-electric-green">"https://api.openai.com/v1"</span></div>
-                                        <div className="ml-4"><span className="text-blue-400">anthropic</span>:</div>
-                                        <div className="ml-8">enabled: <span className="text-electric-green">true</span></div>
-                                        <div className="ml-8">base_url: <span className="text-electric-green">"https://api.anthropic.com/v1"</span></div>
-                                    </div>
-
-                                    {/* SDK usage */}
-                                    <div className="p-3 bg-muted/50 rounded border border-white/[0.06] text-xs font-mono text-muted-foreground leading-relaxed">
-                                        <div><span className="text-purple-400">from</span> koreshield <span className="text-purple-400">import</span> KoreShieldClient</div>
-                                        <div className="mt-1.5">client = KoreShieldClient(</div>
-                                        <div className="ml-4">api_key=<span className="text-electric-green">"your-key"</span>,</div>
-                                        <div className="ml-4">base_url=<span className="text-electric-green">"https://api.koreshield.com"</span></div>
-                                        <div>)</div>
-                                        <div className="mt-1.5 text-muted-foreground/50"># Scan before sending to LLM</div>
-                                        <div>result = client.scan_prompt(<span className="text-electric-green">"Summarize emails"</span>)</div>
-                                        <div><span className="text-purple-400">if</span> result.is_safe:</div>
-                                        <div className="ml-4"><span className="text-muted-foreground/50"># Safe to forward to provider</span></div>
-                                        <div className="ml-4">response = openai.chat.completions.create(...)</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        {/* Mobile arrow */}
-                        <div className="lg:hidden"><CTAFlowArrow /></div>
-
-                        {/* Step 3: Protected */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.4 }}
-                            className="bg-card border border-white/[0.08] rounded-xl p-6 shadow-sm lg:self-center w-full"
-                        >
-                            <div className="flex items-center gap-3 mb-4 text-electric-green">
-                                <CheckCircle2 className="w-6 h-6" />
-                                <h3 className="font-semibold">3. Protected</h3>
-                            </div>
-                            <div className="space-y-2 mb-4">
-                                {['Prompt injection blocked', 'PII automatically redacted', 'Requests audited & logged', 'Policies enforced'].map((item) => (
-                                    <div key={item} className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-muted/50 border border-white/[0.04]">
-                                        <div className="w-2 h-2 bg-electric-green rounded-full status-dot-glow shrink-0" />
-                                        <span className="text-sm text-muted-foreground">{item}</span>
-                                    </div>
-                                ))}
-                            </div>
+                        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                             <Link
-                                to="/docs"
-                                className="group relative w-full inline-flex items-center justify-center gap-2 bg-electric-green hover:bg-emerald-bright text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 shadow-lg shadow-emerald-500/20 overflow-hidden"
+                                to="/signup?plan=free"
+                                className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-bright"
                             >
-                                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-0 animate-shimmer" />
-                                <Rocket className="w-4 h-4 relative z-10" />
-                                <span className="relative z-10">Start Building</span>
-                                <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
+                                Start for free <ArrowRight className="h-4 w-4" />
                             </Link>
-                        </motion.div>
-                    </div>
+                            <Link
+                                to="/demo"
+                                className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-background/60 px-7 py-3 font-bold text-foreground transition-colors hover:border-electric-green/30 hover:bg-muted"
+                            >
+                                Book a demo
+                            </Link>
+                            <Link
+                                to="/solutions/rag-security"
+                                className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-background/60 px-7 py-3 font-bold text-foreground transition-colors hover:border-electric-green/30 hover:bg-muted"
+                            >
+                                Explore RAG security
+                            </Link>
+                        </div>
+                    </motion.div>
                 </div>
             </section>
         </div>

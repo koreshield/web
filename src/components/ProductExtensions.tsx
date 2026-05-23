@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, FileCheck2, Mic2, ShieldCheck } from 'lucide-react';
+import { ArrowRight, FileCheck2, Mic2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const extensions = [
@@ -15,7 +15,7 @@ const extensions = [
 	{
 		icon: Mic2,
 		label: 'Voice & Audio Protection',
-		status: 'Planned',
+		status: 'Ongoing',
 		title: 'Protection for speech prompts and voice agents',
 		description:
 			'Extend Koreshield beyond typed prompts by scanning transcripts, spoken intent, and downstream model calls before voice agents take sensitive actions.',
@@ -81,13 +81,6 @@ export function ProductExtensions() {
 							</motion.div>
 						))}
 					</div>
-				</div>
-
-				<div className="mt-6 flex items-start gap-3 rounded-2xl border border-white/[0.08] bg-background/60 p-4 text-sm text-muted-foreground">
-					<ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-electric-green" />
-					<p>
-						These extensions are presented as planned product directions and should be validated against live availability during sales conversations.
-					</p>
 				</div>
 			</div>
 		</section>
