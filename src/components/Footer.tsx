@@ -33,7 +33,7 @@ const footerGroups = [
 			{ label: 'Blog', to: '/blog' },
 			{ label: 'Research', to: '/research' },
 			{ label: 'RAG Security Guide', to: '/solutions/rag-security' },
-			{ label: 'Compare LLM Guard', to: '/compare/llm-guard' },
+			{ label: 'Compare Koreshield', to: '/vs' },
 		],
 	},
 	{
