@@ -63,6 +63,24 @@ function XIcon({ className }: { className?: string }) {
 	);
 }
 
+const socialLinks = [
+	{
+		label: 'GitHub',
+		href: 'https://github.com/koreshield',
+		icon: <Github className="h-10 w-10 md:h-12 md:w-12" />,
+	},
+	{
+		label: 'X / Twitter',
+		href: 'https://twitter.com/koreshield',
+		icon: <XIcon className="h-9 w-9 md:h-11 md:w-11" />,
+	},
+	{
+		label: 'LinkedIn',
+		href: 'https://www.linkedin.com/company/koreshield',
+		icon: <Linkedin className="h-10 w-10 md:h-12 md:w-12" />,
+	},
+];
+
 function Footer() {
 	return (
 		<footer className="relative overflow-hidden border-t border-white/[0.08] bg-[#070909] px-6 py-16 text-foreground">
@@ -72,32 +90,34 @@ function Footer() {
 
 			<div className="relative mx-auto max-w-7xl">
 				<div className="mb-12 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-					<div className="rounded-[2rem] border border-white/[0.08] bg-white/[0.035] p-7 md:p-8">
-						<div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-							<div>
-								<div className="flex items-center gap-3">
-									<div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
-										<img src="/favicon.svg" alt="" className="h-8 w-8" />
-									</div>
-									<div>
-										<p className="text-2xl font-extrabold tracking-tight text-white">Koreshield</p>
-										<p className="mt-1 text-sm text-muted-foreground">Runtime security for production AI.</p>
-									</div>
+					<div className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.03] p-7 md:p-8">
+						<div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-electric-green/10 blur-3xl" />
+						<div className="relative flex h-full flex-col gap-8">
+							<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+								<div>
+									<p className="text-xs font-bold uppercase tracking-[0.28em] text-electric-green">Connect on socials</p>
+									<h2 className="mt-3 text-3xl font-extrabold tracking-tight text-white md:text-4xl">Follow Koreshield</h2>
 								</div>
-								<p className="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
-									Protect prompts, RAG context, provider calls, policy decisions, and audit evidence before risky AI behaviour reaches customers.
-								</p>
+								<div className="flex items-center gap-3 text-sm text-muted-foreground">
+									<img src="/logo/light/SVG/White.svg" alt="Koreshield" className="h-8 w-8" />
+									<span>Secure AI before it acts.</span>
+								</div>
 							</div>
-							<div className="flex gap-3">
-								<a href="https://github.com/koreshield" target="_blank" rel="noreferrer noopener" aria-label="Koreshield on GitHub" className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035] text-muted-foreground transition-colors hover:border-electric-green/30 hover:text-white">
-									<Github className="h-5 w-5" />
-								</a>
-								<a href="https://twitter.com/koreshield" target="_blank" rel="noreferrer noopener" aria-label="Koreshield on X" className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035] text-muted-foreground transition-colors hover:border-electric-green/30 hover:text-white">
-									<XIcon className="h-4 w-4" />
-								</a>
-								<a href="https://www.linkedin.com/company/koreshield" target="_blank" rel="noreferrer noopener" aria-label="Koreshield on LinkedIn" className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035] text-muted-foreground transition-colors hover:border-electric-green/30 hover:text-white">
-									<Linkedin className="h-5 w-5" />
-								</a>
+
+							<div className="grid flex-1 gap-3 sm:grid-cols-3">
+								{socialLinks.map((social) => (
+									<a
+										key={social.label}
+										href={social.href}
+										target="_blank"
+										rel="noreferrer noopener"
+										aria-label={`Koreshield on ${social.label}`}
+										className="group flex min-h-36 flex-col justify-between rounded-[1.35rem] border border-white/[0.08] bg-black/20 p-5 text-muted-foreground transition-all duration-300 hover:-translate-y-1 hover:border-electric-green/35 hover:bg-electric-green/[0.07] hover:text-white hover:shadow-2xl hover:shadow-emerald-500/10"
+									>
+										<span className="transition-colors group-hover:text-electric-green">{social.icon}</span>
+										<span className="text-sm font-bold tracking-tight">{social.label}</span>
+									</a>
+								))}
 							</div>
 						</div>
 					</div>
