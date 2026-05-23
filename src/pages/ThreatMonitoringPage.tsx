@@ -3,6 +3,7 @@ import { AlertTriangle, Shield, Download, Clock, TrendingUp, Activity } from 'lu
 import { useRecentAttacks } from '../hooks/useApi';
 import { AttackDetailModal } from '../components/AttackDetailModal';
 import { ThreatTypeBreakdown, ThreatTimeline } from '../components/ThreatAnalytics';
+import { AppPage, AppPageHeader, AppPageSection, AppStatCard, AppStatGrid, AppSurface } from '../components/AppPageLayout';
 import { wsClient, type ThreatDetectedEvent, type WebSocketEvent } from '../lib/websocket-client';
 import { format, formatDistanceToNow } from 'date-fns';
 
@@ -133,75 +134,44 @@ export function ThreatMonitoringPage() {
 		return acc;
 	}, {} as Record<string, number>);
 
+	const liveStatusBadge = wsConnected ? (
+		<div className="flex items-center gap-2 rounded-lg border border-green-500/50 bg-green-500/10 px-3 py-2">
+			<div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+			<span className="text-sm font-medium text-green-600">Live</span>
+		</div>
+	) : (
+		<div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2">
+			<div className="h-2 w-2 rounded-full bg-muted-foreground/60" />
+			<span className="text-sm font-medium text-muted-foreground">Connecting...</span>
+		</div>
+	);
+
 	return (
-		<div className="bg-background">
-			{/* Header */}
-			<header className="border-b border-border bg-card">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-						<div>
-							<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
-								<Activity className="w-8 h-8 text-primary" />
-								Live Threat Monitoring
-							</h1>
-							<p className="text-sm sm:text-base text-muted-foreground mt-1">
-								Real-time security threat detection and analysis
-							</p>
-						</div>
-						<div className="flex items-center gap-3">
-							{wsConnected ? (
-								<div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/50 rounded-lg">
-									<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-									<span className="text-sm font-medium text-green-600">Live</span>
-								</div>
-							) : (
-								<div className="flex items-center gap-2 px-3 py-2 bg-muted border border-border rounded-lg">
-									<div className="w-2 h-2 bg-muted-foreground/60 rounded-full"></div>
-									<span className="text-sm font-medium text-muted-foreground">Connecting...</span>
-								</div>
-							)}
-						</div>
-					</div>
-				</div>
-			</header>
+		<AppPage>
+			<AppPageHeader
+				eyebrow="Real-time"
+				eyebrowIcon={Activity}
+				icon={Shield}
+				title="Live Threat Monitoring"
+				description="Real-time security threat detection and analysis"
+				actions={liveStatusBadge}
+			/>
 
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
-				{/* Stats Cards */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-					<div className="bg-card border border-border rounded-lg p-6">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Total Threats</span>
-							<TrendingUp className="w-5 h-5 text-blue-500" />
-						</div>
-						<div className="text-3xl font-bold">{stats.total}</div>
-						<p className="text-xs text-muted-foreground mt-1">Last {timeRange}</p>
-					</div>
+			<AppStatGrid columns={3}>
+				<AppStatCard label="Total Threats" value={stats.total} icon={TrendingUp} tone="text-sky-400" detail={`Last ${timeRange}`} />
+				<AppStatCard
+					label="Blocked"
+					value={stats.blocked}
+					icon={Shield}
+					tone="text-red-400"
+					detail={stats.total > 0 ? `${((stats.blocked / stats.total) * 100).toFixed(1)}% of total` : '0%'}
+				/>
+				<AppStatCard label="Critical" value={stats.critical} icon={AlertTriangle} tone="text-amber-400" detail="High priority threats" />
+			</AppStatGrid>
 
-					<div className="bg-card border border-border rounded-lg p-6">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Blocked</span>
-							<Shield className="w-5 h-5 text-red-500" />
-						</div>
-						<div className="text-3xl font-bold text-red-600">{stats.blocked}</div>
-						<p className="text-xs text-muted-foreground mt-1">
-							{stats.total > 0 ? `${((stats.blocked / stats.total) * 100).toFixed(1)}% of total` : '0%'}
-						</p>
-					</div>
-
-					<div className="bg-card border border-border rounded-lg p-6">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Critical</span>
-							<AlertTriangle className="w-5 h-5 text-orange-500" />
-						</div>
-						<div className="text-3xl font-bold text-orange-600">{stats.critical}</div>
-						<p className="text-xs text-muted-foreground mt-1">High priority threats</p>
-					</div>
-				</div>
-
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 mb-8">
-					{/* Live Attack Feed */}
-					<div className="lg:col-span-2">
-						<div className="bg-card border border-border rounded-lg">
+			<div className="mb-8 grid grid-cols-1 gap-4 sm:gap-8 lg:grid-cols-3">
+				<div className="lg:col-span-2">
+					<AppSurface className="overflow-hidden p-0">
 							{/* Controls */}
 							<div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
 								<h2 className="text-base sm:text-lg font-semibold flex items-center gap-2">
@@ -307,28 +277,26 @@ export function ThreatMonitoringPage() {
 									})
 								)}
 							</div>
-						</div>
-					</div>
-
-					{/* Threat Type Breakdown */}
-					<div className="lg:col-span-1">
-						<ThreatTypeBreakdown data={threatTypeData} />
-					</div>
+					</AppSurface>
 				</div>
 
-				{/* Timeline */}
-				{filteredThreats.length > 0 && (
-					<ThreatTimeline attacks={filteredThreats} />
-				)}
-			</main>
+				<div className="dashboard-card rounded-[2rem] lg:col-span-1 [&>*]:border-0 [&>*]:bg-transparent">
+					<ThreatTypeBreakdown data={threatTypeData} />
+				</div>
+			</div>
 
-			{/* Attack Detail Modal */}
+			{filteredThreats.length > 0 && (
+				<AppPageSection variant="card" className="[&>*]:border-0 [&>*]:bg-transparent">
+					<ThreatTimeline attacks={filteredThreats} />
+				</AppPageSection>
+			)}
+
 			<AttackDetailModal
 				attack={selectedAttack}
 				isOpen={selectedAttack !== null}
 				onClose={() => setSelectedAttack(null)}
 			/>
-		</div>
+		</AppPage>
 	);
 }
 

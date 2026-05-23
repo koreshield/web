@@ -5,6 +5,16 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
 import { format } from 'date-fns';
+import {
+	AppPage,
+	AppPageHeader,
+	AppStatGrid,
+	AppStatCard,
+	AppEmptyState,
+	AppPrimaryButton,
+	AppSecondaryButton,
+	AppPageError,
+} from '../components/AppPageLayout';
 
 interface Team {
 	id: string;
@@ -68,76 +78,62 @@ export function TeamsPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-background">
-			{/* Header */}
-			<header className="border-b border-border bg-card">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-						<div className="flex items-center gap-3">
-							<div className="p-2 bg-primary/10 rounded-lg">
-								<Users className="w-6 h-6 text-primary" />
-							</div>
-							<div>
-								<h1 className="text-xl sm:text-2xl font-bold">Teams</h1>
-								<p className="text-xs sm:text-sm text-muted-foreground">
-									Manage your teams and collaborate with others
-								</p>
-							</div>
-						</div>
-						<button
-							onClick={() => setShowCreateModal(true)}
-							className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-						>
+		<>
+			<AppPage>
+				<AppPageHeader
+					eyebrow="Collaboration"
+					eyebrowIcon={Users}
+					title="Teams"
+					description="Manage your teams and collaborate with others"
+					icon={Users}
+					actions={
+						<AppPrimaryButton onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
 							<Plus className="w-4 h-4" />
-							<span>Create Team</span>
-						</button>
-					</div>
-				</div>
-			</header>
+							Create Team
+						</AppPrimaryButton>
+					}
+				/>
 
-			{/* Main Content */}
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+				{!isLoading && !isError && teams.length > 0 && (
+					<AppStatGrid columns={2}>
+						<AppStatCard label="Total Teams" value={teams.length} icon={Users} />
+						<AppStatCard
+							label="Owned"
+							value={teams.filter((team) => team.my_role === 'owner').length}
+							icon={Users}
+							tone="text-violet-400"
+						/>
+					</AppStatGrid>
+				)}
+
 				{isLoading ? (
 					<div className="flex items-center justify-center py-12">
 						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
 					</div>
 				) : isError ? (
-					<div className="bg-card border border-border rounded-lg p-6 text-center">
-						<p className="text-sm text-muted-foreground mb-4">
-							Failed to load teams. This is usually a network or backend connectivity issue.
-						</p>
-						<p className="text-xs text-muted-foreground mb-6">
-							{getErrorMessage(teamsError, 'Unable to reach the Koreshield API.')}
-						</p>
-						<button
-							onClick={() => refetch()}
-							className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-						>
-							Retry
-						</button>
-					</div>
+					<AppPageError
+						message={getErrorMessage(teamsError, 'Unable to reach the Koreshield API.')}
+						onRetry={() => refetch()}
+					/>
 				) : teams.length === 0 ? (
-					<div className="bg-card border border-border rounded-lg p-12 text-center">
-						<Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-						<h3 className="text-lg font-semibold mb-2">No Teams Yet</h3>
-						<p className="text-muted-foreground mb-6">
-							Create your first team to start collaborating.
-						</p>
-						<button
-							onClick={() => setShowCreateModal(true)}
-							className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-						>
-							<Plus className="w-4 h-4" />
-							Create Team
-						</button>
-					</div>
+					<AppEmptyState
+						icon={Users}
+						title="No Teams Yet"
+						description="Create your first team to start collaborating."
+						action={
+							<AppPrimaryButton onClick={() => setShowCreateModal(true)}>
+								<Plus className="w-4 h-4" />
+								Create Team
+							</AppPrimaryButton>
+						}
+					/>
 				) : (
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
 						{teams.map((team) => (
 							<Link
 								key={team.id}
 								to={`/teams/${team.id}`}
-								className="group block bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors"
+								className="dashboard-card group block rounded-2xl border border-border p-6 transition-all hover:-translate-y-0.5 hover:border-primary/40"
 							>
 								<div className="flex items-start justify-between mb-4">
 									<div className="p-2 bg-muted rounded-lg group-hover:bg-primary/10 transition-colors">
@@ -150,7 +146,7 @@ export function TeamsPage() {
 										{team.my_role.toUpperCase()}
 									</span>
 								</div>
-								<h3 className="text-xl font-semibold mb-1 group-hover:text-primary transition-colors">
+								<h3 className="text-xl font-black tracking-[-0.03em] mb-1 group-hover:text-primary transition-colors">
 									{team.name}
 								</h3>
 								<p className="text-sm text-muted-foreground mb-4">
@@ -170,12 +166,11 @@ export function TeamsPage() {
 						))}
 					</div>
 				)}
-			</main>
+			</AppPage>
 
-			{/* Create Team Modal */}
 			{showCreateModal && (
 				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-					<div className="bg-card border border-border rounded-lg max-w-md w-full max-h-[90dvh] overflow-y-auto p-4 sm:p-6 shadow-xl">
+					<div className="dashboard-modal bg-card border border-border rounded-2xl max-w-md w-full max-h-[90dvh] overflow-y-auto p-4 sm:p-6 shadow-xl">
 						<h2 className="text-xl font-bold mb-4">Create New Team</h2>
 						<div className="space-y-4">
 							<div>
@@ -213,28 +208,28 @@ export function TeamsPage() {
 							</div>
 
 							<div className="flex gap-3 mt-6">
-								<button
+								<AppSecondaryButton
 									onClick={() => {
 										setShowCreateModal(false);
 										setFormData({ name: '', slug: '' });
 									}}
-									className="flex-1 px-4 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+									className="flex-1"
 									disabled={createTeamMutation.isPending}
 								>
 									Cancel
-								</button>
-								<button
+								</AppSecondaryButton>
+								<AppPrimaryButton
 									onClick={handleCreateTeam}
 									disabled={!formData.name || !formData.slug || createTeamMutation.isPending}
-									className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+									className="flex-1"
 								>
 									{createTeamMutation.isPending ? 'Creating...' : 'Create Team'}
-								</button>
+								</AppPrimaryButton>
 							</div>
 						</div>
 					</div>
 				</div>
 			)}
-		</div>
+		</>
 	);
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { TrendingUp, DollarSign, Zap, BarChart3, Download, Loader2, AlertCircle } from 'lucide-react';
+import { TrendingUp, DollarSign, Zap, BarChart3, Download, Activity } from 'lucide-react';
 import {
 	BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
 	Tooltip, ResponsiveContainer, PieChart, Pie, Cell
@@ -8,6 +8,19 @@ import {
 import { SEOMeta } from '../components/SEOMeta';
 import { api } from '../lib/api-client';
 import { format } from 'date-fns';
+import {
+	AppPage,
+	AppPageHeader,
+	AppStatGrid,
+	AppStatCard,
+	AppPageSection,
+	AppEmptyState,
+	AppPrimaryButton,
+	AppSecondaryButton,
+	AppSurface,
+	AppPageError,
+	AppPageLoading,
+} from '../components/AppPageLayout';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -250,216 +263,119 @@ export function AdvancedAnalyticsPage() {
 
 	if (errorProviders) {
 		return (
-			<div className="max-w-7xl mx-auto px-4 py-16 text-center">
-				<AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-				<p className="text-muted-foreground">Failed to load analytics data. Please try again.</p>
-			</div>
+			<AppPage>
+				<AppPageError
+					title="Failed to load analytics"
+					message="Failed to load analytics data. Please try again."
+				/>
+			</AppPage>
 		);
 	}
 
 	return (
-		<div className="bg-background">
+		<AppPage>
 			<SEOMeta
 				title="Advanced Analytics | Koreshield"
 				description="Cost optimization, performance metrics, and provider comparison analytics"
 			/>
 
-			<header className="border-b border-border bg-card">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-						<div>
-							<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
-								<BarChart3 className="w-8 h-8 text-primary" />
-								Advanced Analytics
-							</h1>
-							<p className="text-sm sm:text-base text-muted-foreground mt-1">
-								Cost optimization and performance insights
-							</p>
-						</div>
-						<div className="flex items-center gap-3">
-							<select
-								value={timeRange}
-								onChange={e => setTimeRange(e.target.value as TimeRange)}
-								className="px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-							>
-								<option value="7d">Last 7 days</option>
-								<option value="30d">Last 30 days</option>
-								<option value="90d">Last 90 days</option>
-								<option value="1y">Last year</option>
-							</select>
-							<button
-								onClick={exportData}
-								className="flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
-							>
-								<Download className="w-4 h-4" />
-								Export
-							</button>
-						</div>
+			<AppPageHeader
+				eyebrow="Deep insights"
+				eyebrowIcon={BarChart3}
+				title="Advanced Analytics"
+				description="Cost optimization and performance insights"
+				icon={BarChart3}
+				actions={
+					<div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+						<select
+							value={timeRange}
+							onChange={(e) => setTimeRange(e.target.value as TimeRange)}
+							className="rounded-lg border border-border bg-background/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+						>
+							<option value="7d">Last 7 days</option>
+							<option value="30d">Last 30 days</option>
+							<option value="90d">Last 90 days</option>
+							<option value="1y">Last year</option>
+						</select>
+						<AppPrimaryButton onClick={exportData}>
+							<Download className="h-4 w-4" />
+							Export
+						</AppPrimaryButton>
 					</div>
-				</div>
-			</header>
+				}
+			/>
 
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
-				{/* Summary stats */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-					<div className="bg-card border border-border rounded-lg p-6">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Total Spend</span>
-							<DollarSign className="w-5 h-5 text-green-500" />
-						</div>
-						{loadingCosts ? (
-							<Loader2 className="w-6 h-6 animate-spin text-muted-foreground mt-1" />
-						) : (
-							<>
-								<div className="text-3xl font-bold">${totalCost.toFixed(4)}</div>
-								<p className="text-xs text-muted-foreground mt-1">Selected period</p>
-							</>
-						)}
-					</div>
+			<AppStatGrid>
+				<AppStatCard
+					label="Total Spend"
+					value={loadingCosts ? '…' : `$${totalCost.toFixed(4)}`}
+					icon={DollarSign}
+					tone="text-emerald-400"
+					detail="Selected period"
+				/>
+				<AppStatCard
+					label="Total Requests"
+					value={loadingProviders ? '…' : totalRequests.toLocaleString()}
+					icon={TrendingUp}
+					tone="text-sky-400"
+					detail="Proxied requests"
+				/>
+				<AppStatCard
+					label="Projected Monthly"
+					value={loadingCosts ? '…' : `$${(costSummary?.projected_monthly_cost ?? 0).toFixed(2)}`}
+					icon={Zap}
+					tone="text-amber-400"
+					detail="Based on recent trend"
+				/>
+				<AppStatCard
+					label="Avg Success Rate"
+					value={loadingProviders ? '…' : `${avgSuccessRate.toFixed(1)}%`}
+					icon={BarChart3}
+					tone="text-violet-400"
+					detail="Across all providers"
+				/>
+			</AppStatGrid>
 
-					<div className="bg-card border border-border rounded-lg p-6">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Total Requests</span>
-							<TrendingUp className="w-5 h-5 text-blue-500" />
-						</div>
-						{loadingProviders ? (
-							<Loader2 className="w-6 h-6 animate-spin text-muted-foreground mt-1" />
-						) : (
-							<>
-								<div className="text-3xl font-bold">{totalRequests.toLocaleString()}</div>
-								<p className="text-xs text-muted-foreground mt-1">Proxied requests</p>
-							</>
-						)}
-					</div>
-
-					<div className="bg-card border border-border rounded-lg p-6">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Projected Monthly</span>
-							<Zap className="w-5 h-5 text-orange-500" />
-						</div>
-						{loadingCosts ? (
-							<Loader2 className="w-6 h-6 animate-spin text-muted-foreground mt-1" />
-						) : (
-							<>
-								<div className="text-3xl font-bold">
-									${(costSummary?.projected_monthly_cost ?? 0).toFixed(2)}
-								</div>
-								<p className="text-xs text-muted-foreground mt-1">Based on recent trend</p>
-							</>
-						)}
-					</div>
-
-					<div className="bg-card border border-border rounded-lg p-6">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Avg Success Rate</span>
-							<BarChart3 className="w-5 h-5 text-purple-500" />
-						</div>
-						{loadingProviders ? (
-							<Loader2 className="w-6 h-6 animate-spin text-muted-foreground mt-1" />
-						) : (
-							<>
-								<div className="text-3xl font-bold">
-									{avgSuccessRate.toFixed(1)}%
-								</div>
-								<p className="text-xs text-muted-foreground mt-1">Across all providers</p>
-							</>
-						)}
-					</div>
-				</div>
-
-				{/* Recommendations + Budget forecast */}
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-8">
-					<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
-						<h2 className="text-lg sm:text-xl font-semibold mb-4">Cost Optimization Recommendations</h2>
-						{loadingProviders ? (
-							<div className="flex items-center justify-center h-40">
-								<Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-							</div>
-						) : optimizations.length === 0 ? (
-							<div className="text-center py-10 text-muted-foreground text-sm">
-								<p>No recommendations yet. Recommendations are generated automatically as your request volume grows.</p>
-							</div>
-						) : (
-							<div className="space-y-3">
-								{optimizations.map((opt, index) => (
-									<div key={index} className="p-4 bg-muted/50 rounded-lg">
-										<div className="flex items-start justify-between mb-2">
-											<span className={`text-xs px-2 py-1 rounded-full border ${getPriorityColor(opt.priority)}`}>
-												{opt.priority.toUpperCase()}
-											</span>
-											<span className="text-sm font-semibold text-green-600 ml-2 text-right">
-												{opt.potentialSavings}
-											</span>
-										</div>
-										<p className="text-sm mt-2">{opt.recommendation}</p>
-										<p className="text-xs text-muted-foreground mt-1">{opt.category}</p>
-									</div>
-								))}
-							</div>
-						)}
-					</div>
-
-					<div className="bg-card border border-border rounded-lg p-4 sm:p-6 overflow-x-auto">
-						<h2 className="text-lg sm:text-xl font-semibold mb-4">Daily Cost Trend</h2>
-						{loadingCosts ? (
-							<div className="flex items-center justify-center h-[300px]">
-								<Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-							</div>
-						) : budgetChartData.length === 0 ? (
-							<div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
-								No cost data available for this period.
-							</div>
-						) : (
-							<ResponsiveContainer width="100%" height={300}>
-								<LineChart data={budgetChartData}>
-									<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-									<XAxis dataKey="period" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 11 }} />
-									<YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 11 }} />
-									<Tooltip
-										contentStyle={{
-											backgroundColor: 'hsl(var(--card))',
-											border: '1px solid hsl(var(--border))',
-											borderRadius: '8px',
-										}}
-									/>
-									<Line type="monotone" dataKey="cost" stroke="#3b82f6" strokeWidth={2} name="Cost ($)" dot={false} />
-								</LineChart>
-							</ResponsiveContainer>
-						)}
-					</div>
-				</div>
-
-				{/* Provider comparison chart */}
-				<div className="bg-card border border-border rounded-lg p-4 sm:p-6 mb-8 overflow-x-auto">
-					<h2 className="text-lg sm:text-xl font-semibold mb-4">Provider Comparison</h2>
-					<div className="flex flex-wrap gap-2 mb-4">
-						{(['latency', 'cost', 'reliability', 'throughput'] as const).map(metric => (
-							<button
-								key={metric}
-								onClick={() => setSelectedMetric(metric)}
-								className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
-									selectedMetric === metric
-										? 'bg-primary text-primary-foreground'
-										: 'bg-muted hover:bg-muted/80'
-								}`}
-							>
-								{metric.charAt(0).toUpperCase() + metric.slice(1)}
-							</button>
-						))}
-					</div>
+			<div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+				<AppPageSection variant="card" title="Cost Optimization Recommendations">
 					{loadingProviders ? (
-						<div className="flex items-center justify-center h-[300px]">
-							<Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+						<AppPageLoading label="Loading recommendations…" />
+					) : optimizations.length === 0 ? (
+						<AppEmptyState
+							icon={BarChart3}
+							title="No recommendations yet"
+							description="Recommendations are generated automatically as your request volume grows."
+						/>
+					) : (
+						<div className="space-y-3">
+							{optimizations.map((opt, index) => (
+								<AppSurface key={index} className="border-0 bg-background/55">
+									<div className="mb-2 flex items-start justify-between">
+										<span className={`rounded-full border px-2 py-1 text-xs ${getPriorityColor(opt.priority)}`}>
+											{opt.priority.toUpperCase()}
+										</span>
+										<span className="ml-2 text-right text-sm font-semibold text-green-600">
+											{opt.potentialSavings}
+										</span>
+									</div>
+									<p className="mt-2 text-sm">{opt.recommendation}</p>
+									<p className="mt-1 text-xs text-muted-foreground">{opt.category}</p>
+								</AppSurface>
+							))}
 						</div>
-					) : providerChartData.length === 0 ? (
-						<div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
-							No provider data available for this period.
-						</div>
+					)}
+				</AppPageSection>
+
+				<AppPageSection variant="card" title="Daily Cost Trend">
+					{loadingCosts ? (
+						<AppPageLoading label="Loading cost trend…" />
+					) : budgetChartData.length === 0 ? (
+						<AppEmptyState icon={DollarSign} title="No cost data" description="No cost data available for this period." />
 					) : (
 						<ResponsiveContainer width="100%" height={300}>
-							<BarChart data={providerChartData}>
+							<LineChart data={budgetChartData}>
 								<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-								<XAxis dataKey="provider" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 11 }} />
+								<XAxis dataKey="period" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 11 }} />
 								<YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 11 }} />
 								<Tooltip
 									contentStyle={{
@@ -468,132 +384,156 @@ export function AdvancedAnalyticsPage() {
 										borderRadius: '8px',
 									}}
 								/>
-								<Bar dataKey={metricKey} fill="#3b82f6" name={metricLabel} radius={[4, 4, 0, 0]} />
-							</BarChart>
+								<Line type="monotone" dataKey="cost" stroke="#3b82f6" strokeWidth={2} name="Cost ($)" dot={false} />
+							</LineChart>
 						</ResponsiveContainer>
 					)}
+				</AppPageSection>
+			</div>
+
+			<AppPageSection title="Provider Comparison">
+				<div className="mb-4 flex flex-wrap gap-2">
+					{(['latency', 'cost', 'reliability', 'throughput'] as const).map((metric) => (
+						<AppSecondaryButton
+							key={metric}
+							onClick={() => setSelectedMetric(metric)}
+							className={selectedMetric === metric ? 'border-primary/25 bg-primary/12 text-primary' : undefined}
+						>
+							{metric.charAt(0).toUpperCase() + metric.slice(1)}
+						</AppSecondaryButton>
+					))}
 				</div>
+				{loadingProviders ? (
+					<AppPageLoading label="Loading provider data…" />
+				) : providerChartData.length === 0 ? (
+					<AppEmptyState icon={BarChart3} title="No provider data" description="No provider data available for this period." />
+				) : (
+					<ResponsiveContainer width="100%" height={300}>
+						<BarChart data={providerChartData}>
+							<CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+							<XAxis dataKey="provider" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 11 }} />
+							<YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 11 }} />
+							<Tooltip
+								contentStyle={{
+									backgroundColor: 'hsl(var(--card))',
+									border: '1px solid hsl(var(--border))',
+									borderRadius: '8px',
+								}}
+							/>
+							<Bar dataKey={metricKey} fill="#3b82f6" name={metricLabel} radius={[4, 4, 0, 0]} />
+						</BarChart>
+					</ResponsiveContainer>
+				)}
+			</AppPageSection>
 
-				{/* Cost by provider (pie) + Performance summary */}
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
-					<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
-						<h2 className="text-lg sm:text-xl font-semibold mb-4">Cost by Provider</h2>
-						{loadingProviders ? (
-							<div className="flex items-center justify-center h-[300px]">
-								<Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-							</div>
-						) : costAllocation.length === 0 ? (
-							<div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
-								No cost data available yet.
-							</div>
-						) : (
-							<>
-								<ResponsiveContainer width="100%" height={260}>
-									<PieChart>
-										<Pie
-											data={costAllocation}
-											cx="50%"
-											cy="50%"
-											labelLine={false}
-											label={({ name, percent }) =>
-												percent && percent > 0.05
-													? `${name}: ${(percent * 100).toFixed(0)}%`
-													: ''
-											}
-											outerRadius={100}
-											dataKey="value"
-										>
-											{costAllocation.map((_, index) => (
-												<Cell
-													key={`cell-${index}`}
-													fill={CHART_COLORS[index % CHART_COLORS.length]}
-												/>
-											))}
-										</Pie>
-										<Tooltip
-											contentStyle={{
-												backgroundColor: 'hsl(var(--card))',
-												border: '1px solid hsl(var(--border))',
-												borderRadius: '8px',
-											}}
-											formatter={(v: number | undefined) => [v != null ? `$${v.toFixed(6)}` : 'N/A', 'Cost']}
-										/>
-									</PieChart>
-								</ResponsiveContainer>
-								<div className="mt-2 space-y-2">
-									{costAllocation.map((item, index) => (
-										<div key={item.name} className="flex items-center justify-between text-sm">
-											<div className="flex items-center gap-2">
-												<div
-													className="w-3 h-3 rounded-full flex-shrink-0"
-													style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
-												/>
-												<span>{item.name}</span>
-											</div>
-											<span className="font-semibold">${item.value.toFixed(4)}</span>
+			<div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+				<AppPageSection variant="card" title="Cost by Provider">
+					{loadingProviders ? (
+						<AppPageLoading label="Loading cost allocation…" />
+					) : costAllocation.length === 0 ? (
+						<AppEmptyState icon={DollarSign} title="No cost data yet" description="No cost data available yet." />
+					) : (
+						<>
+							<ResponsiveContainer width="100%" height={260}>
+								<PieChart>
+									<Pie
+										data={costAllocation}
+										cx="50%"
+										cy="50%"
+										labelLine={false}
+										label={({ name, percent }) =>
+											percent && percent > 0.05
+												? `${name}: ${(percent * 100).toFixed(0)}%`
+												: ''
+										}
+										outerRadius={100}
+										dataKey="value"
+									>
+										{costAllocation.map((_, index) => (
+											<Cell
+												key={`cell-${index}`}
+												fill={CHART_COLORS[index % CHART_COLORS.length]}
+											/>
+										))}
+									</Pie>
+									<Tooltip
+										contentStyle={{
+											backgroundColor: 'hsl(var(--card))',
+											border: '1px solid hsl(var(--border))',
+											borderRadius: '8px',
+										}}
+										formatter={(v: number | undefined) => [v != null ? `$${v.toFixed(6)}` : 'N/A', 'Cost']}
+									/>
+								</PieChart>
+							</ResponsiveContainer>
+							<div className="mt-2 space-y-2">
+								{costAllocation.map((item, index) => (
+									<div key={item.name} className="flex items-center justify-between text-sm">
+										<div className="flex items-center gap-2">
+											<div
+												className="h-3 w-3 flex-shrink-0 rounded-full"
+												style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
+											/>
+											<span>{item.name}</span>
 										</div>
-									))}
-								</div>
-							</>
-						)}
-					</div>
-
-					<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
-						<h2 className="text-lg sm:text-xl font-semibold mb-4">Performance Summary</h2>
-						{loadingProviders ? (
-							<div className="flex items-center justify-center h-40">
-								<Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+										<span className="font-semibold">${item.value.toFixed(4)}</span>
+									</div>
+								))}
 							</div>
-						) : providers.length === 0 ? (
-							<div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
-								No provider data available yet.
-							</div>
-						) : (
-							<div className="space-y-4">
-								<div className="p-4 bg-muted/50 rounded-lg">
-									<div className="flex items-center justify-between mb-2">
-										<span className="text-sm font-medium">Avg Latency</span>
-										<span className="text-2xl font-bold">{avgLatency.toFixed(0)}ms</span>
-									</div>
-									<div className="w-full bg-muted rounded-full h-2">
-										<div
-											className="bg-blue-500 h-2 rounded-full"
-											style={{ width: `${Math.min((avgLatency / 3000) * 100, 100)}%` }}
-										/>
-									</div>
-								</div>
+						</>
+					)}
+				</AppPageSection>
 
-								<div className="p-4 bg-muted/50 rounded-lg">
-									<div className="flex items-center justify-between mb-2">
-										<span className="text-sm font-medium">Avg Success Rate</span>
-										<span className="text-2xl font-bold">{avgSuccessRate.toFixed(1)}%</span>
-									</div>
-									<div className="w-full bg-muted rounded-full h-2">
-										<div
-											className="bg-green-500 h-2 rounded-full"
-											style={{ width: `${avgSuccessRate}%` }}
-										/>
-									</div>
+				<AppPageSection variant="card" title="Performance Summary">
+					{loadingProviders ? (
+						<AppPageLoading label="Loading performance…" />
+					) : providers.length === 0 ? (
+						<AppEmptyState icon={Activity} title="No provider data yet" description="No provider data available yet." />
+					) : (
+						<div className="space-y-4">
+							<AppSurface className="border-0 bg-background/55">
+								<div className="mb-2 flex items-center justify-between">
+									<span className="text-sm font-medium">Avg Latency</span>
+									<span className="text-2xl font-bold">{avgLatency.toFixed(0)}ms</span>
 								</div>
+								<div className="h-2 w-full rounded-full bg-muted">
+									<div
+										className="h-2 rounded-full bg-blue-500"
+										style={{ width: `${Math.min((avgLatency / 3000) * 100, 100)}%` }}
+									/>
+								</div>
+							</AppSurface>
 
-								<div className="space-y-2 mt-2">
-									{providers.map(p => (
-										<div key={p.provider} className="flex items-center justify-between text-sm py-2 border-b border-border last:border-0">
-											<span className="font-medium truncate max-w-[60%]">{p.provider}</span>
-											<div className="flex items-center gap-3 text-xs text-muted-foreground">
-												<span>{p.avg_latency_ms.toFixed(0)}ms</span>
-												<span>{p.success_rate.toFixed(1)}%</span>
-												<span>{p.total_requests.toLocaleString()} req</span>
-											</div>
+							<AppSurface className="border-0 bg-background/55">
+								<div className="mb-2 flex items-center justify-between">
+									<span className="text-sm font-medium">Avg Success Rate</span>
+									<span className="text-2xl font-bold">{avgSuccessRate.toFixed(1)}%</span>
+								</div>
+								<div className="h-2 w-full rounded-full bg-muted">
+									<div
+										className="h-2 rounded-full bg-green-500"
+										style={{ width: `${avgSuccessRate}%` }}
+									/>
+								</div>
+							</AppSurface>
+
+							<div className="mt-2 space-y-2">
+								{providers.map((p) => (
+									<div key={p.provider} className="flex items-center justify-between border-b border-border py-2 text-sm last:border-0">
+										<span className="max-w-[60%] truncate font-medium">{p.provider}</span>
+										<div className="flex items-center gap-3 text-xs text-muted-foreground">
+											<span>{p.avg_latency_ms.toFixed(0)}ms</span>
+											<span>{p.success_rate.toFixed(1)}%</span>
+											<span>{p.total_requests.toLocaleString()} req</span>
 										</div>
-									))}
-								</div>
+									</div>
+								))}
 							</div>
-						)}
-					</div>
-				</div>
-			</main>
-		</div>
+						</div>
+					)}
+				</AppPageSection>
+			</div>
+		</AppPage>
 	);
 }
 

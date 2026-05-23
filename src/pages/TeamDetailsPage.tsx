@@ -6,12 +6,22 @@ import {
 	UserPlus,
 	ArrowLeft,
 	Trash2,
-	Pencil,
 	LayoutDashboard,
 	Mail,
 	XCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import {
+	AppEmptyState,
+	AppPage,
+	AppPageError,
+	AppPageHeader,
+	AppPageLoading,
+	AppPageSection,
+	AppPrimaryButton,
+	AppSecondaryButton,
+	AppSurface,
+} from '../components/AppPageLayout';
 import { api } from '../lib/api-client';
 import { useAuthState } from '../hooks/useAuthState';
 import { useToast } from '../components/ToastNotification';
@@ -235,18 +245,21 @@ export function TeamDetailsPage() {
 
 	if (isTeamLoading || isMembersLoading || isInvitesLoading || isDashboardsLoading) {
 		return (
-			<div className="flex items-center justify-center min-h-screen">
-				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-			</div>
+			<AppPage>
+				<AppPageLoading label="Loading team…" />
+			</AppPage>
 		);
 	}
 
 	if (teamError || !team) {
 		return (
-			<div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-				<h2 className="text-2xl font-bold">Team not found</h2>
-				<Link to="/teams" className="text-primary hover:underline">Return to Teams</Link>
-			</div>
+			<AppPage>
+				<AppPageError
+					title="Team not found"
+					message="This team may have been deleted or you may not have access."
+					onRetry={() => navigate('/teams')}
+				/>
+			</AppPage>
 		);
 	}
 
@@ -255,109 +268,77 @@ export function TeamDetailsPage() {
 	const currentUserId = currentUser?.id;
 
 	return (
-		<div>
-			<header className="border-b border-border bg-card">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-					<div className="flex flex-col gap-3 sm:gap-4">
-						<Link to="/teams" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit">
-							<ArrowLeft className="w-4 h-4" />
-							Back to Teams
-						</Link>
-						<div className="flex flex-col gap-4">
-							<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-								<div className="flex items-center gap-3 min-w-0">
-									<div className="p-2 sm:p-3 bg-primary/10 rounded-lg flex-shrink-0">
-										<Users className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-									</div>
-									<div className="min-w-0">
-										<h1 className="text-xl sm:text-3xl font-bold flex flex-wrap items-center gap-2">
-											<span className="truncate">{team.name}</span>
-											<span className="text-xs sm:text-sm font-normal text-muted-foreground bg-muted px-2 py-1 rounded">
-												/{team.slug}
-											</span>
-										</h1>
-										<p className="text-xs sm:text-sm text-muted-foreground mt-1">
-											Created on {format(new Date(team.created_at), 'MMM d, yyyy')}
-										</p>
-									</div>
-								</div>
-								<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-									{canManageTeam && (
-										<>
-											<button
-												onClick={() => setShowInviteModal(true)}
-												className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm"
-											>
-												<UserPlus className="w-4 h-4" />
-												Invite Member
-											</button>
-											<button
-												onClick={() => setShowDashboardModal(true)}
-												className="flex items-center justify-center gap-2 px-4 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors text-sm"
-											>
-												<LayoutDashboard className="w-4 h-4" />
-												Share Dashboard
-											</button>
-										</>
-									)}
-									{isOwner && (
-										<button
-											onClick={() => {
-												if (confirm('Are you sure you want to delete this team? This action cannot be undone.')) {
-													setIsDeletingTeam(true);
-													deleteTeamMutation.mutate();
-												}
-											}}
-											className="flex items-center justify-center gap-2 px-4 py-2 border border-destructive/50 text-destructive hover:bg-destructive/10 rounded-lg transition-colors text-sm"
-											disabled={isDeletingTeam}
-										>
-											<Trash2 className="w-4 h-4" />
-											{isDeletingTeam ? 'Deleting...' : 'Delete Team'}
-										</button>
-									)}
-								</div>
-							</div>
+		<AppPage>
+			<Link to="/teams" className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+				<ArrowLeft className="w-4 h-4" />
+				Back to Teams
+			</Link>
 
-							{canManageTeam && (
-								<div className="bg-muted/40 border border-border rounded-lg p-4 space-y-3">
-									<div className="flex items-center gap-2">
-										<Pencil className="w-4 h-4 text-primary" />
-										<h2 className="font-semibold">Team settings</h2>
-									</div>
-									<div className="flex flex-col sm:flex-row gap-3">
-										<input
-											type="text"
-											value={renameValue || team.name}
-											onChange={(event) => setRenameValue(event.target.value)}
-											className="flex-1 px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-											placeholder="Team name"
-										/>
-										<button
-											onClick={() => updateTeamMutation.mutate({ name: (renameValue || team.name).trim() })}
-											disabled={updateTeamMutation.isPending || !(renameValue || team.name).trim()}
-											className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-										>
-											{updateTeamMutation.isPending ? 'Saving...' : 'Save name'}
-										</button>
-									</div>
-									<p className="text-xs text-muted-foreground">
-										The team slug stays fixed once the team is created.
-									</p>
-								</div>
-							)}
-						</div>
+			<AppPageHeader
+				eyebrow="Team workspace"
+				eyebrowIcon={Users}
+				title={team.name}
+				description={`Created on ${format(new Date(team.created_at), 'MMM d, yyyy')} • /${team.slug}`}
+				icon={Users}
+				stats={[
+					{ label: 'Members', value: members.length },
+					{ label: 'Invites', value: pendingInvites.length, tone: 'text-amber-400' },
+				]}
+				actions={
+					<>
+						{canManageTeam && (
+							<>
+								<AppPrimaryButton onClick={() => setShowInviteModal(true)}>
+									<UserPlus className="w-4 h-4" />
+									Invite member
+								</AppPrimaryButton>
+								<AppSecondaryButton onClick={() => setShowDashboardModal(true)}>
+									<LayoutDashboard className="w-4 h-4" />
+									Share dashboard
+								</AppSecondaryButton>
+							</>
+						)}
+						{isOwner && (
+							<AppSecondaryButton
+								onClick={() => {
+									if (confirm('Are you sure you want to delete this team? This action cannot be undone.')) {
+										setIsDeletingTeam(true);
+										deleteTeamMutation.mutate();
+									}
+								}}
+								disabled={isDeletingTeam}
+								className="border-destructive/50 text-destructive hover:bg-destructive/10"
+							>
+								<Trash2 className="w-4 h-4" />
+								{isDeletingTeam ? 'Deleting...' : 'Delete team'}
+							</AppSecondaryButton>
+						)}
+					</>
+				}
+			/>
+
+			{canManageTeam && (
+				<AppPageSection eyebrow="Settings" title="Team settings" description="The team slug stays fixed once the team is created." variant="card">
+					<div className="flex flex-col gap-3 sm:flex-row">
+						<input
+							type="text"
+							value={renameValue || team.name}
+							onChange={(event) => setRenameValue(event.target.value)}
+							className="flex-1 px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+							placeholder="Team name"
+						/>
+						<AppPrimaryButton
+							onClick={() => updateTeamMutation.mutate({ name: (renameValue || team.name).trim() })}
+							disabled={updateTeamMutation.isPending || !(renameValue || team.name).trim()}
+						>
+							{updateTeamMutation.isPending ? 'Saving...' : 'Save name'}
+						</AppPrimaryButton>
 					</div>
-				</div>
-			</header>
+				</AppPageSection>
+			)}
 
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-				<section className="space-y-4">
-					<h2 className="text-xl font-bold flex items-center gap-2">
-						<Users className="w-5 h-5" />
-						Members ({members.length})
-					</h2>
-
-					<div className="bg-card border border-border rounded-lg overflow-hidden">
+			<AppPageSection title={`Members (${members.length})`} description="People with access to this team workspace.">
+				<AppSurface className="overflow-hidden p-0">
 						<div className="overflow-x-auto">
 							<table className="w-full">
 								<thead>
@@ -433,45 +414,48 @@ export function TeamDetailsPage() {
 								</tbody>
 							</table>
 						</div>
-					</div>
-				</section>
+				</AppSurface>
+			</AppPageSection>
 
-				<section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-					<div className="space-y-4">
-						<div className="flex items-center justify-between">
-							<h2 className="text-xl font-bold flex items-center gap-2">
-								<Mail className="w-5 h-5" />
-								Pending invites ({pendingInvites.length})
-							</h2>
-						</div>
-						<div className="bg-card border border-border rounded-lg divide-y divide-border">
-							{pendingInvites.length === 0 ? (
-								<div className="p-6 text-sm text-muted-foreground">
-									No pending invites yet. Invite teammates to collaborate securely.
-								</div>
-							) : (
-								pendingInvites.map((invite) => (
-									<div key={invite.id} className="p-4 flex items-start justify-between gap-4">
-										<div>
-											<div className="font-medium">{invite.email}</div>
-											<div className="text-sm text-muted-foreground">
-												Role: {invite.role} • Sent {format(new Date(invite.created_at), 'MMM d, yyyy')}
-											</div>
-											{invite.expires_at && (
-												<div className="text-xs text-muted-foreground mt-1">
-													Expires {format(new Date(invite.expires_at), 'MMM d, yyyy')}
-												</div>
-											)}
+			<div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+				<AppPageSection title={`Pending invites (${pendingInvites.length})`} variant="card" className="mb-0">
+					{pendingInvites.length === 0 ? (
+						<AppEmptyState
+							icon={Mail}
+							title="No pending invites"
+							description="Invite teammates to collaborate securely."
+							action={
+								canManageTeam ? (
+									<AppPrimaryButton onClick={() => setShowInviteModal(true)}>
+										<UserPlus className="w-4 h-4" />
+										Invite member
+									</AppPrimaryButton>
+								) : undefined
+							}
+						/>
+					) : (
+						<div className="divide-y divide-border">
+							{pendingInvites.map((invite) => (
+								<div key={invite.id} className="flex items-start justify-between gap-4 p-4">
+									<div>
+										<div className="font-medium">{invite.email}</div>
+										<div className="text-sm text-muted-foreground">
+											Role: {invite.role} • Sent {format(new Date(invite.created_at), 'MMM d, yyyy')}
 										</div>
-										{canManageTeam && (
-											<button
-												onClick={() => cancelInviteMutation.mutate(invite.id)}
+										{invite.expires_at && (
+											<div className="mt-1 text-xs text-muted-foreground">
+												Expires {format(new Date(invite.expires_at), 'MMM d, yyyy')}
+											</div>
+										)}
+									</div>
+									{canManageTeam && (
+										<AppSecondaryButton
+											onClick={() => cancelInviteMutation.mutate(invite.id)}
 											disabled={cancelInviteMutation.isPending && cancelInviteMutation.variables === invite.id}
-											className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 										>
 											{cancelInviteMutation.isPending && cancelInviteMutation.variables === invite.id ? (
 												<>
-													<span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+													<span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
 													Cancelling...
 												</>
 											) : (
@@ -480,51 +464,55 @@ export function TeamDetailsPage() {
 													Cancel
 												</>
 											)}
-											</button>
-										)}
-									</div>
-								))
-							)}
-						</div>
-					</div>
-
-					<div className="space-y-4">
-						<div className="flex items-center justify-between">
-							<h2 className="text-xl font-bold flex items-center gap-2">
-								<LayoutDashboard className="w-5 h-5" />
-								Shared dashboards ({dashboards.length})
-							</h2>
-						</div>
-						<div className="bg-card border border-border rounded-lg divide-y divide-border">
-							{dashboards.length === 0 ? (
-								<div className="p-6 text-sm text-muted-foreground">
-									No shared dashboards created yet.
+										</AppSecondaryButton>
+									)}
 								</div>
-							) : (
-								dashboards.map((dashboard) => (
-									<div key={dashboard.id} className="p-4 flex items-start justify-between gap-4">
-										<div>
-											<div className="font-medium">{dashboard.name}</div>
-											<div className="text-sm text-muted-foreground">
-												{DASHBOARD_TYPE_LABELS[dashboard.dashboard_type]} dashboard • Created {format(new Date(dashboard.created_at), 'MMM d, yyyy')}
-											</div>
-										</div>
-										{canManageTeam && (
-											<button
-												onClick={() => deleteDashboardMutation.mutate(dashboard.id)}
-												className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
-												title="Delete shared dashboard"
-											>
-												<Trash2 className="w-4 h-4" />
-											</button>
-										)}
-									</div>
-								))
-							)}
+							))}
 						</div>
-					</div>
-				</section>
-			</main>
+					)}
+				</AppPageSection>
+
+				<AppPageSection title={`Shared dashboards (${dashboards.length})`} variant="card" className="mb-0">
+					{dashboards.length === 0 ? (
+						<AppEmptyState
+							icon={LayoutDashboard}
+							title="No shared dashboards"
+							description="Create a shared dashboard for your team to review security posture together."
+							action={
+								canManageTeam ? (
+									<AppPrimaryButton onClick={() => setShowDashboardModal(true)}>
+										<LayoutDashboard className="w-4 h-4" />
+										Share dashboard
+									</AppPrimaryButton>
+								) : undefined
+							}
+						/>
+					) : (
+						<div className="divide-y divide-border">
+							{dashboards.map((dashboard) => (
+								<div key={dashboard.id} className="flex items-start justify-between gap-4 p-4">
+									<div>
+										<div className="font-medium">{dashboard.name}</div>
+										<div className="text-sm text-muted-foreground">
+											{DASHBOARD_TYPE_LABELS[dashboard.dashboard_type]} dashboard • Created {format(new Date(dashboard.created_at), 'MMM d, yyyy')}
+										</div>
+									</div>
+									{canManageTeam && (
+										<button
+											type="button"
+											onClick={() => deleteDashboardMutation.mutate(dashboard.id)}
+											className="rounded p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+											title="Delete shared dashboard"
+										>
+											<Trash2 className="w-4 h-4" />
+										</button>
+									)}
+								</div>
+							))}
+						</div>
+					)}
+				</AppPageSection>
+			</div>
 
 			{showInviteModal && (
 				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -651,6 +639,6 @@ export function TeamDetailsPage() {
 					</div>
 				</div>
 			)}
-		</div>
+		</AppPage>
 	);
 }

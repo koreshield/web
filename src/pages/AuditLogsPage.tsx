@@ -3,6 +3,7 @@ import { FileText, Search, Download, Filter, User, Activity, Shield, Workflow, E
 import { format } from 'date-fns';
 import { useToast } from '../components/ToastNotification';
 import { SEOMeta } from '../components/SEOMeta';
+import { AppPage, AppPageHeader, AppStatCard, AppStatGrid, AppSurface } from '../components/AppPageLayout';
 import { api } from '../lib/api-client';
 
 interface AuditLog {
@@ -256,63 +257,34 @@ export default function AuditLogsPage() {
 	const suspendedSessions = sessions.filter((session) => session.state === 'suspended');
 
 	return (
-		<div className="bg-background pt-20 pb-12">
+		<>
 			<SEOMeta
 				title="Audit & Compliance Logs | Koreshield"
 				description="View and analyze audit logs for compliance and security monitoring"
 			/>
 
-			<div className="max-w-7xl mx-auto px-4 sm:px-6">
-				{/* Header */}
-				<div className="mb-8">
-					<div className="flex items-center gap-3 mb-4">
-						<FileText className="w-8 h-8 text-electric-green" />
-						<h1 className="text-4xl font-bold text-foreground">Audit & Compliance Logs</h1>
-					</div>
-					<p className="text-muted-foreground">
-						Monitor all system activities, track compliance requirements, and detect security anomalies.
-					</p>
-				</div>
+			<AppPage>
+				<AppPageHeader
+					eyebrow="Compliance"
+					eyebrowIcon={Shield}
+					icon={FileText}
+					title="Audit & Compliance Logs"
+					description="Monitor all system activities, track compliance requirements, and detect security anomalies."
+				/>
 
-				{/* Stats Cards */}
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-8">
-					<div className="bg-card rounded-xl p-3 sm:p-6 border border-border">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-xs sm:text-sm text-muted-foreground">Total Events</span>
-							<Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
-						</div>
-						<div className="text-xl sm:text-2xl font-bold text-foreground">{logs.length}</div>
-					</div>
-					<div className="bg-card rounded-xl p-3 sm:p-6 border border-border">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-xs sm:text-sm text-muted-foreground">Success Rate</span>
-							<Activity className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
-						</div>
-						<div className="text-xl sm:text-2xl font-bold text-foreground">
-							{logs.length === 0 ? '0%' : `${Math.round((logs.filter(l => l.status === 'success').length / logs.length) * 100)}%`}
-						</div>
-					</div>
-					<div className="bg-card rounded-xl p-3 sm:p-6 border border-border">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-xs sm:text-sm text-muted-foreground">Runtime Tool Events</span>
-							<Workflow className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
-						</div>
-						<div className="text-xl sm:text-2xl font-bold text-foreground">
-							{runtimeToolLogs.length}
-						</div>
-					</div>
-					<div className="bg-card rounded-xl p-3 sm:p-6 border border-border">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-xs sm:text-sm text-muted-foreground">Review Required</span>
-							<Eye className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
-						</div>
-						<div className="text-xl sm:text-2xl font-bold text-foreground">
-							{reviewRequiredLogs.length}
-						</div>
-					</div>
-				</div>
+				<AppStatGrid>
+					<AppStatCard label="Total Events" value={logs.length} icon={Activity} tone="text-sky-400" />
+					<AppStatCard
+						label="Success Rate"
+						value={logs.length === 0 ? '0%' : `${Math.round((logs.filter(l => l.status === 'success').length / logs.length) * 100)}%`}
+						icon={Activity}
+						tone="text-emerald-400"
+					/>
+					<AppStatCard label="Runtime Tool Events" value={runtimeToolLogs.length} icon={Workflow} tone="text-amber-400" />
+					<AppStatCard label="Review Required" value={reviewRequiredLogs.length} icon={Eye} tone="text-violet-400" />
+				</AppStatGrid>
 
-				<div className="bg-card rounded-xl p-4 sm:p-6 border border-border mb-8">
+				<AppSurface className="mb-8">
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 						<div>
 							<h2 className="text-base sm:text-lg font-semibold text-foreground">RAG Evidence Visibility</h2>
@@ -325,10 +297,10 @@ export default function AuditLogsPage() {
 							<div className="text-xl sm:text-2xl font-bold text-foreground">{ragScanLogs.length}</div>
 						</div>
 					</div>
-				</div>
+				</AppSurface>
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
-					<div className="bg-card rounded-xl p-4 sm:p-6 border border-border">
+				<div className="mb-8 grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
+					<AppSurface>
 						<div className="flex items-center gap-3 mb-3">
 							<Shield className="w-4 h-4 sm:w-5 sm:h-5 text-electric-green" />
 							<h2 className="text-base sm:text-lg font-semibold text-foreground">Tool Runtime Focus</h2>
@@ -336,31 +308,35 @@ export default function AuditLogsPage() {
 						<p className="text-xs sm:text-sm text-muted-foreground">
 							Koreshield now records server-side tool scan decisions here so runtime enforcement is visible alongside normal audit history.
 						</p>
-					</div>
-					<div className="bg-card rounded-xl p-4 sm:p-6 border border-border">
-						<div className="text-xs sm:text-sm text-muted-foreground mb-2">Blocked Tool Calls</div>
-						<div className="text-xl sm:text-2xl font-bold text-foreground">{blockedToolLogs.length}</div>
-						<p className="text-xs sm:text-sm text-muted-foreground mt-2">High-trust failures and low-trust delegated tool calls are highlighted here.</p>
-					</div>
-					<div className="bg-card rounded-xl p-4 sm:p-6 border border-border">
-						<div className="text-xs sm:text-sm text-muted-foreground mb-2">Unique Actors</div>
-						<div className="text-xl sm:text-2xl font-bold text-foreground">{new Set(logs.map(l => l.user_email)).size}</div>
-						<p className="text-xs sm:text-sm text-muted-foreground mt-2">Includes API-key scoped and user-scoped runtime events.</p>
-					</div>
+					</AppSurface>
+					<AppStatCard
+						label="Blocked Tool Calls"
+						value={blockedToolLogs.length}
+						icon={Shield}
+						tone="text-red-400"
+						detail="High-trust failures and low-trust delegated tool calls are highlighted here."
+					/>
+					<AppStatCard
+						label="Unique Actors"
+						value={new Set(logs.map(l => l.user_email)).size}
+						icon={User}
+						tone="text-sky-400"
+						detail="Includes API-key scoped and user-scoped runtime events."
+					/>
 				</div>
 
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
-					<div className="bg-card rounded-xl border border-border overflow-hidden">
-						<div className="px-4 sm:px-6 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+				<div className="mb-8 grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+					<AppSurface className="overflow-hidden p-0">
+						<div className="flex flex-col gap-2 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
 							<div>
 								<h2 className="text-lg font-semibold text-foreground">Pending Runtime Reviews</h2>
 								<p className="text-sm text-muted-foreground">High-risk tool calls waiting for explicit approval or rejection.</p>
 							</div>
-							<span className="inline-flex px-2 py-1 text-xs font-semibold rounded bg-amber-100 text-amber-700">
+							<span className="inline-flex rounded-full bg-amber-500/10 px-2 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
 								{reviews.length} pending
 							</span>
 						</div>
-						<div className="p-6 space-y-4">
+						<div className="space-y-4 p-6">
 							{reviewLoading ? (
 								<div className="text-sm text-muted-foreground">Loading runtime reviews...</div>
 							) : reviews.length === 0 ? (
@@ -401,12 +377,12 @@ export default function AuditLogsPage() {
 								</div>
 							))}
 						</div>
-					</div>
+					</AppSurface>
 
-					<div className="bg-card rounded-xl border border-border overflow-hidden">
-						<div className="px-4 sm:px-6 py-4 border-b border-border">
-							<h2 className="text-base sm:text-lg font-semibold text-foreground">Runtime Sessions</h2>
-							<p className="text-xs sm:text-sm text-muted-foreground">Koreshield session governance for MCP-style or agent-driven tool execution.</p>
+					<AppSurface className="overflow-hidden p-0">
+						<div className="border-b border-border px-4 py-4 sm:px-6">
+							<h2 className="text-base font-semibold text-foreground sm:text-lg">Runtime Sessions</h2>
+							<p className="text-xs text-muted-foreground sm:text-sm">Koreshield session governance for MCP-style or agent-driven tool execution.</p>
 						</div>
 						<div className="p-4 sm:p-6">
 							<div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4">
@@ -447,11 +423,10 @@ export default function AuditLogsPage() {
 								))}
 							</div>
 						</div>
-					</div>
+					</AppSurface>
 				</div>
 
-				{/* Actions Bar */}
-				<div className="bg-card rounded-xl p-4 sm:p-6 border border-border mb-6">
+				<AppSurface className="mb-6">
 					<div className="flex flex-col gap-4">
 						<div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full">
 							<div className="relative flex-1">
@@ -548,10 +523,9 @@ export default function AuditLogsPage() {
 							</div>
 						</div>
 					)}
-				</div>
+				</AppSurface>
 
-				{/* Audit Logs Table */}
-				<div className="bg-card rounded-xl border border-border overflow-hidden">
+				<AppSurface className="overflow-hidden p-0">
 					{loading ? (
 						<div className="p-12 text-center text-muted-foreground text-sm">Loading audit logs...</div>
 					) : errorMessage ? (
@@ -650,15 +624,14 @@ export default function AuditLogsPage() {
 							</table>
 						</div>
 					)}
-				</div>
+				</AppSurface>
 
-				{/* Footer Info */}
-				<div className="mt-6 text-xs sm:text-sm text-muted-foreground">
+				<div className="mt-6 text-xs text-muted-foreground sm:text-sm">
 					<p>
 						Showing {filteredLogs.length} of {logs.length} audit log entries. Retention policy: 90 days for standard logs, 365 days for compliance logs.
 					</p>
 				</div>
-			</div>
-		</div>
+			</AppPage>
+		</>
 	);
 }

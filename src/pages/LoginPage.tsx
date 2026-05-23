@@ -133,9 +133,9 @@ export function LoginPage() {
 	const anyLoading = loading || oauthLoading !== null;
 
 	return (
-		<div className="min-h-screen bg-background flex">
-			<div className="hidden lg:flex lg:w-[45%] bg-card border-r border-white/[0.06] flex-col justify-between p-12 relative overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-electric-green/[0.04] via-transparent to-transparent pointer-events-none" />
+		<div className="auth-shell min-h-screen flex">
+			<div className="auth-side-panel hidden lg:flex lg:w-[42%] border-r border-white/[0.06] flex-col justify-between p-12 relative overflow-hidden">
+				<div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:48px_48px] opacity-40 pointer-events-none" />
 				<div className="absolute bottom-0 right-0 w-96 h-96 bg-electric-green/[0.03] rounded-full translate-x-1/2 translate-y-1/2 blur-3xl pointer-events-none" />
 
 				<div className="relative z-10 flex items-center gap-3">
@@ -145,19 +145,22 @@ export function LoginPage() {
 				</div>
 
 				<div className="relative z-10 space-y-8">
-					<blockquote className="text-2xl font-semibold text-foreground leading-snug tracking-tight">
-						"The security layer your LLM provider doesn't include."
-					</blockquote>
+					<div>
+						<p className="mb-3 text-xs font-bold uppercase tracking-[0.24em] text-electric-green">Control plane</p>
+						<blockquote className="max-w-md text-4xl font-black leading-tight tracking-[-0.055em] text-foreground">
+							Sign in to your AI security layer.
+						</blockquote>
+					</div>
 
 					<div className="space-y-4">
 						{[
-							'95% detection accuracy across 50+ attack patterns',
-							'Sub-30ms interception, zero perceptible latency',
-							'Zero prompt data stored or retained',
+							'Review threats and audit evidence',
+							'Manage policies, keys, and teams',
+							'Keep production AI traffic protected',
 						].map((item) => (
-							<div key={item} className="flex items-start gap-3">
+							<div key={item} className="flex items-start gap-3 rounded-2xl border border-border bg-background/35 p-4">
 								<ShieldCheck className="w-5 h-5 text-electric-green mt-0.5 shrink-0" />
-								<span className="text-sm text-muted-foreground">{item}</span>
+								<span className="text-sm font-medium text-muted-foreground">{item}</span>
 							</div>
 						))}
 					</div>
@@ -169,7 +172,7 @@ export function LoginPage() {
 			</div>
 
 			<div className="flex-1 flex items-center justify-center p-6 sm:p-12">
-				<div className="w-full max-w-md">
+				<div className="auth-card w-full max-w-md rounded-[2rem] p-6 sm:p-8">
 					<div className="flex items-center gap-2 mb-8 lg:hidden">
 							<img src="/logo/dark/SVG/Black.svg" alt="Koreshield" className="w-7 h-7 dark:hidden" />
 							<img src="/logo/light/SVG/White.svg" alt="Koreshield" className="w-7 h-7 hidden dark:block" />
@@ -183,13 +186,13 @@ export function LoginPage() {
 					)}
 
 					<div className="mb-8">
-						<h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 tracking-tight">
+						<h1 className="text-3xl font-black text-foreground mb-2 tracking-[-0.045em]">
 							{pendingMfa ? 'Verify privileged access' : 'Welcome back'}
 						</h1>
-						<p className="text-muted-foreground">
+						<p className="text-sm leading-6 text-muted-foreground">
 							{pendingMfa
 								? `Enter the 6-digit code we sent to ${pendingMfa.user.email}.`
-								: 'Your security dashboard is one step away.'}
+								: 'Access policies, alerts, audit logs, and protected traffic.'}
 						</p>
 					</div>
 
@@ -206,7 +209,7 @@ export function LoginPage() {
 										type="email"
 										value={email}
 										onChange={(e) => setEmail(e.target.value)}
-										className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-colors"
+										className="w-full pl-10 pr-4 py-3 bg-background/70 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-colors"
 										placeholder="you@company.com"
 										required
 										disabled={anyLoading}
@@ -235,7 +238,7 @@ export function LoginPage() {
 										type="password"
 										value={password}
 										onChange={(e) => setPassword(e.target.value)}
-										className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-colors"
+										className="w-full pl-10 pr-4 py-3 bg-background/70 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-colors"
 										placeholder="••••••••"
 										required
 										disabled={anyLoading}
@@ -256,7 +259,7 @@ export function LoginPage() {
 									autoComplete="one-time-code"
 									value={mfaCode}
 									onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-									className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-center text-lg tracking-[0.4em] transition-colors"
+									className="w-full px-4 py-3 bg-background/70 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-center text-lg tracking-[0.4em] transition-colors"
 									placeholder="000000"
 									required
 									disabled={anyLoading}
@@ -308,7 +311,7 @@ export function LoginPage() {
 						<button
 							type="submit"
 							disabled={anyLoading}
-							className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+							className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-xl font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-lg shadow-primary/20"
 						>
 							{loading ? (pendingMfa ? 'Verifying…' : 'Signing in…') : (pendingMfa ? 'Verify and continue' : 'Sign in')}
 						</button>
@@ -352,7 +355,7 @@ export function LoginPage() {
 										type="button"
 										onClick={handleGitHubLogin}
 										disabled={anyLoading}
-										className="flex items-center justify-center gap-2 px-4 py-3 bg-background hover:bg-muted border border-border rounded-lg font-medium text-foreground transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+										className="flex items-center justify-center gap-2 px-4 py-3 bg-background/70 hover:bg-muted border border-border rounded-xl font-medium text-foreground transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 									>
 										{oauthLoading === 'github' ? (
 											<svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -369,7 +372,7 @@ export function LoginPage() {
 										type="button"
 										onClick={handleGoogleLogin}
 										disabled={anyLoading}
-										className="flex items-center justify-center gap-2 px-4 py-3 bg-background hover:bg-muted border border-border rounded-lg font-medium text-foreground transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+										className="flex items-center justify-center gap-2 px-4 py-3 bg-background/70 hover:bg-muted border border-border rounded-xl font-medium text-foreground transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 									>
 										{oauthLoading === 'google' ? (
 											<svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
