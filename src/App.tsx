@@ -69,6 +69,8 @@ const SolutionApplicationProtectionPage = lazy(() => import('./pages/SolutionApp
 const SolutionAgentsSecurityPage = lazy(() => import('./pages/SolutionAgentsSecurityPage'));
 const SolutionUsageControlPage = lazy(() => import('./pages/SolutionUsageControlPage'));
 const SolutionRAGSecurityPage = lazy(() => import('./pages/SolutionRAGSecurityPage'));
+const SolutionKorePilotPage = lazy(() => import('./pages/SolutionKorePilotPage'));
+const SolutionVoiceAudioProtectionPage = lazy(() => import('./pages/SolutionVoiceAudioProtectionPage'));
 
 function AppContent() {
 	const { addToast } = useToast();
@@ -461,6 +463,26 @@ function AppContent() {
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<SolutionRAGSecurityPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/solutions/korepilot"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<SolutionKorePilotPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/solutions/voice-audio-protection"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<SolutionVoiceAudioProtectionPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}
