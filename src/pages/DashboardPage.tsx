@@ -411,17 +411,23 @@ const client = new OpenAI({
 
 					{/* Threat Analytics */}
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-						<ThreatTypeBreakdown data={attackTypeCounts} />
-						<ThreatSummary
-							totalRequests={(stats as any)?.statistics?.requests_total || 0}
-							blockedRequests={(stats as any)?.statistics?.requests_blocked || 0}
-							attacksDetected={(stats as any)?.statistics?.attacks_detected || 0}
-							topThreatType={getTopThreatType(attackTypeCounts)}
-						/>
+						<div className="dashboard-card rounded-[2rem] [&>*]:border-0 [&>*]:bg-transparent">
+							<ThreatTypeBreakdown data={attackTypeCounts} />
+						</div>
+						<div className="dashboard-card rounded-[2rem] [&>*]:border-0 [&>*]:bg-transparent">
+							<ThreatSummary
+								totalRequests={totalRequests}
+								blockedRequests={blockedRequests}
+								attacksDetected={attacksDetected}
+								topThreatType={getTopThreatType(attackTypeCounts)}
+							/>
+						</div>
 					</div>
 
 					{recentAttacks.length > 0 && (
-						<ThreatTimeline attacks={recentAttacks} />
+						<div className="dashboard-card rounded-[2rem] [&>*]:border-0 [&>*]:bg-transparent">
+							<ThreatTimeline attacks={recentAttacks} />
+						</div>
 					)}
 				</>
 			)}
