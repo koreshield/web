@@ -3,6 +3,15 @@ import { Sliders, Plus, Edit, Trash2, Code, AlertTriangle, CheckCircle, XCircle,
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
+import {
+	AppPage,
+	AppPageHeader,
+	AppStatGrid,
+	AppStatCard,
+	AppEmptyState,
+	AppPrimaryButton,
+	AppSecondaryButton,
+} from '../components/AppPageLayout';
 
 interface Rule {
     id: string;
@@ -207,73 +216,62 @@ export function RulesPage() {
     };
 
     return (
-        <div>
-            {/* Header */}
-            <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                                <Sliders className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                            </div>
-                            <div className="min-w-0">
-                                <h1 className="text-lg sm:text-2xl font-bold">Rule Engine</h1>
-                                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                                    Define custom detection rules and automated responses
-                                </p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => setShowCreateModal(true)}
-                            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm w-full sm:w-auto justify-center"
-                        >
+        <>
+            <AppPage>
+                <AppPageHeader
+                    eyebrow="Detection"
+                    eyebrowIcon={Sliders}
+                    title="Rule Engine"
+                    description="Define custom detection rules and automated responses"
+                    icon={Sliders}
+                    actions={
+                        <AppPrimaryButton onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
                             <Plus className="w-4 h-4" />
                             <span className="hidden sm:inline">Create Rule</span>
                             <span className="sm:hidden">New Rule</span>
-                        </button>
-                    </div>
-                </div>
-            </header>
+                        </AppPrimaryButton>
+                    }
+                />
 
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-                {/* Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
-                        <div className="text-xs sm:text-sm text-muted-foreground mb-1">Total Rules</div>
-                        <div className="text-2xl sm:text-3xl font-bold">{rules.length}</div>
-                    </div>
-                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
-                        <div className="text-xs sm:text-sm text-muted-foreground mb-1">Active</div>
-                        <div className="text-2xl sm:text-3xl font-bold text-green-600">
-                            {rules.filter(r => r.enabled).length}
-                        </div>
-                    </div>
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <div className="text-sm text-muted-foreground mb-1">Critical Severity</div>
-                        <div className="text-3xl font-bold text-red-600">
-                            {rules.filter(r => r.severity === 'critical').length}
-                        </div>
-                    </div>
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <div className="text-sm text-muted-foreground mb-1">Block Actions</div>
-                        <div className="text-3xl font-bold text-purple-600">
-                            {rules.filter(r => r.action === 'block').length}
-                        </div>
-                    </div>
-                </div>
+                <AppStatGrid>
+                    <AppStatCard label="Total Rules" value={rules.length} icon={Sliders} />
+                    <AppStatCard
+                        label="Active"
+                        value={rules.filter(r => r.enabled).length}
+                        icon={CheckCircle}
+                        tone="text-electric-green"
+                    />
+                    <AppStatCard
+                        label="Critical Severity"
+                        value={rules.filter(r => r.severity === 'critical').length}
+                        icon={AlertTriangle}
+                        tone="text-red-400"
+                    />
+                    <AppStatCard
+                        label="Block Actions"
+                        value={rules.filter(r => r.action === 'block').length}
+                        icon={XCircle}
+                        tone="text-violet-400"
+                    />
+                </AppStatGrid>
 
-                {/* Rules Table */}
-                <div className="bg-card border border-border rounded-lg overflow-hidden">
+                <div className="dashboard-card rounded-2xl overflow-hidden border border-border">
                     {isLoading ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                         </div>
                     ) : rules.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-12">
-                            <Sliders className="w-12 h-12 text-muted-foreground opacity-50 mb-4" />
-                            <p className="text-muted-foreground">No rules found</p>
-                        </div>
+                        <AppEmptyState
+                            icon={Sliders}
+                            title="No rules found"
+                            description="Create your first detection rule to start protecting traffic"
+                            action={
+                                <AppPrimaryButton onClick={() => setShowCreateModal(true)}>
+                                    <Plus className="w-4 h-4" />
+                                    Create Rule
+                                </AppPrimaryButton>
+                            }
+                        />
                     ) : (
                         <div className="overflow-x-auto">
                             <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -363,12 +361,11 @@ export function RulesPage() {
                         </div>
                     )}
                 </div>
-            </main>
+            </AppPage>
 
-            {/* Create Rule Modal */}
             {showCreateModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-card border border-border rounded-xl w-full max-w-3xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
+                    <div className="dashboard-modal bg-card border border-border rounded-2xl w-full max-w-3xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-border">
                             <h2 className="text-xl font-bold">Create New Rule</h2>
                             <button
@@ -528,30 +525,21 @@ export function RulesPage() {
                                 />
                             </div>
                             <div className="flex gap-3 justify-end pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => { setShowCreateModal(false); resetForm(); }}
-                                    className="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors"
-                                >
+                                <AppSecondaryButton type="button" onClick={() => { setShowCreateModal(false); resetForm(); }}>
                                     Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={createRuleMutation.isPending}
-                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                >
+                                </AppSecondaryButton>
+                                <AppPrimaryButton type="submit" disabled={createRuleMutation.isPending}>
                                     {createRuleMutation.isPending ? 'Creating...' : 'Create Rule'}
-                                </button>
+                                </AppPrimaryButton>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* Edit Rule Modal */}
             {showEditModal && editingRule && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-card border border-border rounded-xl w-full max-w-3xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
+                    <div className="dashboard-modal bg-card border border-border rounded-2xl w-full max-w-3xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-border">
                             <h2 className="text-xl font-bold">Edit Rule</h2>
                             <button
@@ -708,25 +696,17 @@ export function RulesPage() {
                                 />
                             </div>
                             <div className="flex gap-3 justify-end pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => { setShowEditModal(false); setEditingRule(null); resetForm(); }}
-                                    className="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors"
-                                >
+                                <AppSecondaryButton type="button" onClick={() => { setShowEditModal(false); setEditingRule(null); resetForm(); }}>
                                     Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={updateRuleMutation.isPending}
-                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                >
+                                </AppSecondaryButton>
+                                <AppPrimaryButton type="submit" disabled={updateRuleMutation.isPending}>
                                     {updateRuleMutation.isPending ? 'Updating...' : 'Update Rule'}
-                                </button>
+                                </AppPrimaryButton>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 }

@@ -3,6 +3,17 @@ import { Key, Plus, Copy, Trash2, CheckCircle, AlertTriangle, Calendar, Clock, G
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
+import {
+	AppPage,
+	AppPageHeader,
+	AppStatGrid,
+	AppStatCard,
+	AppCallout,
+	AppEmptyState,
+	AppPrimaryButton,
+	AppSecondaryButton,
+	AppSurface,
+} from '../components/AppPageLayout';
 
 interface APIKey {
 	id: string;
@@ -173,56 +184,52 @@ export function ApiKeysPage() {
 		return new Date(expiresAt) < new Date();
 	};
 
+	const activeKeyCount = apiKeys.filter((key) => !key.is_revoked && !isExpired(key.expires_at)).length;
+	const revokedKeyCount = apiKeys.filter((key) => key.is_revoked).length;
+	const expiredKeyCount = apiKeys.filter((key) => !key.is_revoked && isExpired(key.expires_at)).length;
+
 	return (
-		<div>
-			{/* Header */}
-			<header className="border-b border-border bg-card">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-					<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-						<div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-							<div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-								<Key className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-							</div>
-							<div className="min-w-0">
-								<h1 className="text-lg sm:text-2xl font-bold">API Keys</h1>
-								<p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-									Generate and manage API keys for authentication
-								</p>
-							</div>
-						</div>
-						<button
-							onClick={() => setShowCreateModal(true)}
-							className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm w-full sm:w-auto justify-center"
-						>
+		<>
+			<AppPage>
+				<AppPageHeader
+					eyebrow="Credentials"
+					eyebrowIcon={Key}
+					title="API Keys"
+					description="Generate and manage API keys for authentication"
+					icon={Key}
+					actions={
+						<AppPrimaryButton onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
 							<Plus className="w-4 h-4" />
 							<span className="hidden sm:inline">Generate New Key</span>
 							<span className="sm:hidden">New Key</span>
-						</button>
-					</div>
-				</div>
-			</header>
+						</AppPrimaryButton>
+					}
+				/>
 
-			{/* Main Content */}
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-				{/* New Key Display */}
+				{!isLoading && apiKeys.length > 0 && (
+					<AppStatGrid>
+						<AppStatCard label="Total Keys" value={apiKeys.length} icon={Key} />
+						<AppStatCard label="Active" value={activeKeyCount} icon={CheckCircle} tone="text-electric-green" />
+						<AppStatCard label="Revoked" value={revokedKeyCount} icon={Trash2} tone="text-red-400" />
+						<AppStatCard label="Expired" value={expiredKeyCount} icon={AlertTriangle} tone="text-amber-400" />
+					</AppStatGrid>
+				)}
+
 				{newKeyData && (
-					<div className="mb-6 bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-lg p-6">
+					<AppCallout variant="success" className="p-6">
 						<div className="flex items-start gap-3 mb-4">
-							<CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+							<CheckCircle className="w-5 h-5 mt-0.5 shrink-0" />
 							<div className="flex-1">
-								<h3 className="font-semibold text-green-600 mb-1">API Key Generated!</h3>
-								<p className="text-sm text-muted-foreground">
+								<h3 className="font-bold mb-1">API Key Generated!</h3>
+								<p className="text-sm opacity-90">
 									Copy your API key now. For security reasons, it won't be shown again.
 								</p>
 							</div>
 						</div>
-						<div className="bg-card border border-border rounded-lg p-4">
+						<AppSurface className="border-0 bg-background/60 p-4">
 							<div className="flex items-center justify-between gap-4">
 								<code className="text-sm font-mono flex-1 break-all">{newKeyData.api_key}</code>
-								<button
-									onClick={() => handleCopyKey(newKeyData.api_key)}
-									className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
-								>
+								<AppPrimaryButton onClick={() => handleCopyKey(newKeyData.api_key)}>
 									{copiedKey === newKeyData.api_key ? (
 										<>
 											<CheckCircle className="w-4 h-4" />
@@ -234,38 +241,35 @@ export function ApiKeysPage() {
 											Copy
 										</>
 									)}
-								</button>
+								</AppPrimaryButton>
 							</div>
-						</div>
+						</AppSurface>
 						<button
+							type="button"
 							onClick={() => setNewKeyData(null)}
-							className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors"
+							className="mt-4 text-sm opacity-80 hover:opacity-100 transition-opacity"
 						>
 							I've saved my key securely
 						</button>
-					</div>
+					</AppCallout>
 				)}
 
-				{/* API Keys List */}
 				{isLoading ? (
 					<div className="flex items-center justify-center py-12">
 						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
 					</div>
 				) : apiKeys.length === 0 ? (
-					<div className="bg-card border border-border rounded-lg p-12 text-center">
-						<Key className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-						<h3 className="text-lg font-semibold mb-2">No API Keys Yet</h3>
-						<p className="text-muted-foreground mb-6">
-							Generate your first API key to start using the Koreshield API
-						</p>
-						<button
-							onClick={() => setShowCreateModal(true)}
-							className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-						>
-							<Plus className="w-4 h-4" />
-							Generate Your First Key
-						</button>
-					</div>
+					<AppEmptyState
+						icon={Key}
+						title="No API Keys Yet"
+						description="Generate your first API key to start using the Koreshield API"
+						action={
+							<AppPrimaryButton onClick={() => setShowCreateModal(true)}>
+								<Plus className="w-4 h-4" />
+								Generate Your First Key
+							</AppPrimaryButton>
+						}
+					/>
 				) : (
 					<div className="space-y-4">
 						{apiKeys.map((key: APIKey) => {
@@ -273,12 +277,9 @@ export function ApiKeysPage() {
 							const status = key.is_revoked ? 'revoked' : expired ? 'expired' : 'active';
 
 							return (
-								<div
+								<AppSurface
 									key={key.id}
-									className={`bg-card border rounded-lg p-6 ${status === 'active'
-										? 'border-border'
-										: 'border-red-500/20 opacity-60'
-										}`}
+									className={`p-6 ${status === 'active' ? '' : 'border-red-500/20 opacity-60'}`}
 								>
 									<div className="flex items-start justify-between">
 										<div className="flex-1">
@@ -361,15 +362,14 @@ export function ApiKeysPage() {
 											</button>
 										)}
 									</div>
-								</div>
+								</AppSurface>
 							);
 						})}
 					</div>
 				)}
 
-				{/* Usage Instructions */}
-				<div className="mt-8 bg-card border border-border rounded-lg p-6">
-					<h3 className="text-lg font-semibold mb-4">Using Your API Key</h3>
+				<AppSurface className="mt-8">
+					<h3 className="text-lg font-black tracking-[-0.03em] mb-4">Using Your API Key</h3>
 					<div className="space-y-4 text-sm">
 						<div className="rounded-lg border border-border bg-muted/30 p-4">
 							<div className="font-medium mb-2">What happens next</div>
@@ -396,27 +396,28 @@ export function ApiKeysPage() {
 								</code>
 							</pre>
 						</div>
-						<div className="flex items-start gap-2 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-							<AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-							<div>
-								<p className="font-medium text-yellow-600 mb-1">Security Best Practices</p>
-								<ul className="text-muted-foreground space-y-1 ml-4 list-disc">
-									<li>Never share your API keys or commit them to version control</li>
-									<li>Store keys securely using environment variables</li>
-									<li>Rotate keys regularly and revoke unused keys</li>
-									<li>Use separate keys for different environments (dev, staging, prod)</li>
-									<li>Only the newly generated full key is usable. The list view shows prefixes for identification only.</li>
-								</ul>
+						<AppCallout variant="warning">
+							<div className="flex items-start gap-2">
+								<AlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+								<div>
+									<p className="font-bold mb-1">Security Best Practices</p>
+									<ul className="space-y-1 ml-4 list-disc opacity-90">
+										<li>Never share your API keys or commit them to version control</li>
+										<li>Store keys securely using environment variables</li>
+										<li>Rotate keys regularly and revoke unused keys</li>
+										<li>Use separate keys for different environments (dev, staging, prod)</li>
+										<li>Only the newly generated full key is usable. The list view shows prefixes for identification only.</li>
+									</ul>
+								</div>
 							</div>
-						</div>
+						</AppCallout>
 					</div>
-				</div>
-			</main>
+				</AppSurface>
+			</AppPage>
 
-			{/* Create Key Modal */}
 			{showCreateModal && (
 				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-					<div className="bg-card border border-border rounded-lg max-w-md w-full p-6">
+					<div className="dashboard-modal bg-card border border-border rounded-2xl max-w-md w-full p-6">
 						<h2 className="text-xl font-bold mb-4">Generate New API Key</h2>
 						<div className="space-y-4">
 							<div>
@@ -509,28 +510,28 @@ export function ApiKeysPage() {
 								<p className="text-xs text-muted-foreground mt-1">Optional. Comma-separated list of allowed request origins.</p>
 							</div>
 							<div className="flex gap-3 mt-6">
-								<button
+								<AppSecondaryButton
 									onClick={() => {
 										setShowCreateModal(false);
 										setFormData({ name: '', description: '', expires_at: '', environment: '', rate_limit_rpm: '', monthly_ceiling: '', allowed_origins: '' });
 									}}
-									className="flex-1 px-4 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+									className="flex-1"
 									disabled={generateKeyMutation.isPending}
 								>
 									Cancel
-								</button>
-								<button
+								</AppSecondaryButton>
+								<AppPrimaryButton
 									onClick={handleCreateKey}
 									disabled={!formData.name || generateKeyMutation.isPending}
-									className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+									className="flex-1"
 								>
 									{generateKeyMutation.isPending ? 'Generating...' : 'Generate Key'}
-								</button>
+								</AppPrimaryButton>
 							</div>
 						</div>
 					</div>
 				</div>
 			)}
-		</div>
+		</>
 	);
 }

@@ -494,6 +494,120 @@ select:focus-visible {
   border-color: rgba(15, 23, 42, 0.1);
 }
 
+/* ═══ Auth pages ═══ */
+.auth-shell {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(16, 185, 129, 0.16), transparent 26rem),
+    radial-gradient(circle at 92% 8%, rgba(14, 165, 233, 0.08), transparent 24rem),
+    hsl(var(--background));
+}
+
+:root:not(.dark) .auth-shell {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(16, 185, 129, 0.18), transparent 26rem),
+    radial-gradient(circle at 92% 8%, rgba(14, 165, 233, 0.12), transparent 24rem),
+    hsl(var(--background));
+}
+
+.auth-side-panel {
+  background:
+    linear-gradient(145deg, rgba(16, 185, 129, 0.12), transparent 38%),
+    linear-gradient(180deg, rgba(24, 24, 27, 0.92), rgba(9, 9, 11, 0.94));
+}
+
+:root:not(.dark) .auth-side-panel {
+  background:
+    linear-gradient(145deg, rgba(16, 185, 129, 0.16), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 253, 250, 0.9));
+}
+
+.auth-card {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    hsl(var(--card) / 0.86);
+  border: 1px solid hsl(var(--border) / 0.9);
+  box-shadow:
+    0 28px 90px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+:root:not(.dark) .auth-card {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(240, 253, 250, 0.78)),
+    hsl(var(--card));
+  box-shadow:
+    0 28px 90px rgba(15, 23, 42, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dashboard-shell .dashboard-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border) / 0.82);
+  background: hsl(var(--background) / 0.72);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  transition: box-shadow 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+
+.dashboard-shell .dashboard-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.35);
+  border-color: hsl(var(--primary) / 0.45);
+}
+
+.dashboard-shell .dashboard-modal {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    hsl(var(--card) / 0.96);
+  border: 1px solid hsl(var(--border) / 0.85);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+:root:not(.dark) .dashboard-shell .dashboard-modal {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(240, 253, 250, 0.92)),
+    hsl(var(--card));
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+}
+
+.dashboard-shell .dashboard-table-wrap {
+  overflow: hidden;
+  border-radius: 1.25rem;
+  border: 1px solid hsl(var(--border) / 0.82);
+  background: hsl(var(--background) / 0.45);
+}
+
+.dashboard-shell .dashboard-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dashboard-shell .dashboard-table-wrap thead {
+  background: hsl(var(--muted) / 0.45);
+}
+
+.dashboard-shell .dashboard-table-wrap th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.dashboard-shell .dashboard-table-wrap td {
+  padding: 0.875rem 1rem;
+  border-top: 1px solid hsl(var(--border) / 0.65);
+  font-size: 0.875rem;
+}
+
+.dashboard-shell .dashboard-table-wrap tbody tr:hover {
+  background: hsl(var(--muted) / 0.35);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    Doc prose typography
    Used by DocPage <article className="prose dark:prose-invert ...">

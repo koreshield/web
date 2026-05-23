@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
-import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
 import { AppLayout } from './components/AppLayout';
 import { MarketingLayout } from './components/MarketingLayout';
@@ -73,6 +73,23 @@ const SolutionRAGSecurityPage = lazy(() => import('./pages/SolutionRAGSecurityPa
 const SolutionKorePilotPage = lazy(() => import('./pages/SolutionKorePilotPage'));
 const SolutionVoiceAudioProtectionPage = lazy(() => import('./pages/SolutionVoiceAudioProtectionPage'));
 
+function ScrollToTop() {
+	const { hash, pathname, search } = useLocation();
+
+	useEffect(() => {
+		if (hash) {
+			window.requestAnimationFrame(() => {
+				document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' });
+			});
+			return;
+		}
+
+		window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+	}, [hash, pathname, search]);
+
+	return null;
+}
+
 function AppContent() {
 	const { addToast } = useToast();
 
@@ -83,6 +100,7 @@ function AppContent() {
 
 	return (
 		<Router>
+			<ScrollToTop />
 			<Routes>
 				{/* Marketing/Public Layout */}
 				<Route element={<MarketingLayout />}>

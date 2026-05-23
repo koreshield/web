@@ -1,6 +1,15 @@
 import { AlertTriangle, BookOpen, Building, CheckCircle2, CreditCard, Key, Mail, Pencil, Rocket, Shield, Trash2, User, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+	AppPage,
+	AppPageHeader,
+	AppPageSection,
+	AppPrimaryButton,
+	AppSecondaryButton,
+	AppStatCard,
+	AppStatGrid,
+} from '../components/AppPageLayout';
 import { useToast } from '../components/ToastNotification';
 import { useAuthState } from '../hooks/useAuthState';
 import { api } from '../lib/api-client';
@@ -138,53 +147,41 @@ export function ProfilePage() {
 	}
 
 	return (
-		<div>
-			<header className="border-b border-border bg-card">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-					<div className="flex items-center gap-3">
-						<div className="p-2 bg-primary/10 rounded-lg">
-							<User className="w-6 h-6 text-primary" />
-						</div>
-						<div>
-							<h1 className="text-2xl font-bold">User Profile</h1>
-							<p className="text-sm text-muted-foreground">
-								Manage your account settings, billing state, and onboarding progress.
-							</p>
-						</div>
-					</div>
-				</div>
-			</header>
+		<AppPage maxWidth="6xl">
+			<div className="mx-auto max-w-3xl">
+			<AppPageHeader
+				eyebrow="Account"
+				eyebrowIcon={User}
+				title="User profile"
+				description="Manage your account settings, billing state, and onboarding progress."
+				icon={User}
+			/>
 
-			<main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-				{/* Personal Information card */}
-				<div className="bg-card border border-border rounded-lg shadow-sm">
-					<div className="p-6 border-b border-border flex items-center justify-between">
-						<div>
-							<h2 className="text-lg font-semibold">Personal Information</h2>
-							<p className="text-sm text-muted-foreground">Your display name and account details.</p>
-						</div>
-						{!editing ? (
-							<button
-								type="button"
-								onClick={handleStartEdit}
-								className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-							>
-								<Pencil className="w-3.5 h-3.5" />
-								Edit
-							</button>
-						) : (
-							<button
-								type="button"
-								onClick={handleCancelEdit}
-								className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-							>
-								<X className="w-3.5 h-3.5" />
-								Cancel
-							</button>
-						)}
-					</div>
-
-					<div className="p-6 space-y-6">
+			<AppPageSection
+				title="Personal information"
+				description="Your display name and account details."
+				actions={
+					!editing ? (
+						<button
+							type="button"
+							onClick={handleStartEdit}
+							className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+						>
+							<Pencil className="w-3.5 h-3.5" />
+							Edit
+						</button>
+					) : (
+						<button
+							type="button"
+							onClick={handleCancelEdit}
+							className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+						>
+							<X className="w-3.5 h-3.5" />
+							Cancel
+						</button>
+					)
+				}
+			>
 						<div className="grid gap-4 md:grid-cols-2">
 							{/* Name — editable */}
 							<div className="space-y-2">
@@ -308,119 +305,97 @@ export function ProfilePage() {
 							</div>
 						</div>
 
-						{/* Save button shown only in edit mode */}
-						{editing && (
-							<div className="flex justify-end pt-2">
-								<button
-									type="button"
-									onClick={() => void handleSave()}
-									disabled={saving}
-									className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-5 py-2 rounded-lg transition-colors disabled:opacity-60 text-sm"
-								>
-									{saving ? (
-										<>
-											<span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-											Saving…
-										</>
-									) : (
-										<>
-											<CheckCircle2 className="w-3.5 h-3.5" />
-											Save changes
-										</>
-									)}
-								</button>
-							</div>
-						)}
+				{editing && (
+					<div className="flex justify-end pt-2">
+						<AppPrimaryButton type="button" onClick={() => void handleSave()} disabled={saving}>
+							{saving ? (
+								<>
+									<span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+									Saving…
+								</>
+							) : (
+								<>
+									<CheckCircle2 className="w-3.5 h-3.5" />
+									Save changes
+								</>
+							)}
+						</AppPrimaryButton>
 					</div>
-				</div>
+				)}
+			</AppPageSection>
 
-				{/* Billing card */}
-				<div className="mt-6 bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6">
-					<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-						<div className="flex-1">
-							<h2 className="text-lg font-semibold flex items-center gap-2">
-								<CreditCard className="w-5 h-5 text-primary" />
-								Billing
-							</h2>
-							<p className="text-sm text-muted-foreground mt-1">
-								Manage your subscription, invoices, and customer portal access.
-							</p>
-							<div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2">
-								<div className="rounded-lg bg-muted p-3">
-									<div className="text-xs uppercase tracking-wide text-muted-foreground">Plan</div>
-									<div className="mt-1 font-medium">
-										{billingState === 'ready'
-											? billing?.plan_name || billing?.plan_slug || 'Dev'
-											: billingState === 'loading'
-												? 'Loading…'
-												: 'Unavailable'}
-									</div>
-								</div>
-								<div className="rounded-lg bg-muted p-3">
-									<div className="text-xs uppercase tracking-wide text-muted-foreground">Subscription status</div>
-									<div className="mt-1 font-medium capitalize">
-										{billingState === 'ready'
-											? billing?.subscription_status || billing?.status || 'inactive'
-											: billingState === 'loading'
-												? 'Loading…'
-												: 'Unavailable'}
-									</div>
-								</div>
-							</div>
-						</div>
-						<Link
-							to="/billing"
-							className="w-full sm:w-auto inline-flex items-center justify-center sm:justify-start px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-						>
-							Open billing
-						</Link>
-					</div>
-				</div>
+			<AppPageSection title="Billing" description="Manage your subscription, invoices, and customer portal access.">
+				<AppStatGrid columns={2} className="mb-4">
+					<AppStatCard
+						label="Plan"
+						value={
+							billingState === 'ready'
+								? billing?.plan_name || billing?.plan_slug || 'Dev'
+								: billingState === 'loading'
+									? 'Loading…'
+									: 'Unavailable'
+						}
+						icon={CreditCard}
+					/>
+					<AppStatCard
+						label="Subscription status"
+						value={
+							billingState === 'ready'
+								? <span className="capitalize">{billing?.subscription_status || billing?.status || 'inactive'}</span>
+								: billingState === 'loading'
+									? 'Loading…'
+									: 'Unavailable'
+						}
+					/>
+				</AppStatGrid>
+				<Link
+					to="/billing"
+					className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+				>
+					Open billing
+				</Link>
+			</AppPageSection>
 
-				{/* Getting started */}
-				<div className="mt-6 bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6">
-					<h2 className="text-lg font-semibold mb-4">Getting started</h2>
-					<div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
-						<Link to="/getting-started" className="rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
-							<Rocket className="w-5 h-5 text-primary mb-3" />
-							<div className="font-medium">Integration guide</div>
-							<p className="text-sm text-muted-foreground mt-2">See the exact steps clients take to connect their app to Koreshield.</p>
-						</Link>
-						<Link to="/settings/api-keys" className="rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
-							<Key className="w-5 h-5 text-primary mb-3" />
-							<div className="font-medium">Server API keys</div>
-							<p className="text-sm text-muted-foreground mt-2">Create the credentials your backend or gateway will use.</p>
-						</Link>
-						<Link to="/docs/getting-started/quick-start" className="rounded-lg border border-border p-4 hover:border-primary/40 transition-colors">
-							<BookOpen className="w-5 h-5 text-primary mb-3" />
-							<div className="font-medium">Public docs</div>
-							<p className="text-sm text-muted-foreground mt-2">Open the published docs if you want the broader setup guide.</p>
-						</Link>
-					</div>
+			<AppPageSection title="Getting started" description="Finish connecting Koreshield to your application.">
+				<div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+					<Link to="/getting-started" className="dashboard-card rounded-2xl p-4 transition-colors hover:border-primary/40">
+						<Rocket className="w-5 h-5 text-primary mb-3" />
+						<div className="font-medium">Integration guide</div>
+						<p className="text-sm text-muted-foreground mt-2">See the exact steps clients take to connect their app to Koreshield.</p>
+					</Link>
+					<Link to="/settings/api-keys" className="dashboard-card rounded-2xl p-4 transition-colors hover:border-primary/40">
+						<Key className="w-5 h-5 text-primary mb-3" />
+						<div className="font-medium">Server API keys</div>
+						<p className="text-sm text-muted-foreground mt-2">Create the credentials your backend or gateway will use.</p>
+					</Link>
+					<Link to="/docs/getting-started/quick-start" className="dashboard-card rounded-2xl p-4 transition-colors hover:border-primary/40">
+						<BookOpen className="w-5 h-5 text-primary mb-3" />
+						<div className="font-medium">Public docs</div>
+						<p className="text-sm text-muted-foreground mt-2">Open the published docs if you want the broader setup guide.</p>
+					</Link>
 				</div>
+			</AppPageSection>
 
-				{/* Danger zone */}
-				<div className="mt-6 bg-card border border-destructive/30 rounded-lg shadow-sm p-4 sm:p-6">
-					<div className="flex items-start justify-between gap-4">
-						<div>
-							<h2 className="text-lg font-semibold text-destructive flex items-center gap-2">
-								<AlertTriangle className="w-5 h-5" /> Danger zone
-							</h2>
-							<p className="text-sm text-muted-foreground mt-1">
-								Permanently delete your account and all associated data. This cannot be undone.
-							</p>
-						</div>
-						<button
-							type="button"
-							onClick={() => { setDeleteConfirmText(''); setShowDeleteModal(true); }}
-							className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-destructive/40 text-destructive hover:bg-destructive/10 transition-colors text-sm font-medium"
-						>
-							<Trash2 className="w-4 h-4" />
-							Delete account
-						</button>
+			<AppPageSection className="border-destructive/30">
+				<div className="flex items-start justify-between gap-4">
+					<div>
+						<h2 className="text-lg font-semibold text-destructive flex items-center gap-2">
+							<AlertTriangle className="w-5 h-5" /> Danger zone
+						</h2>
+						<p className="text-sm text-muted-foreground mt-1">
+							Permanently delete your account and all associated data. This cannot be undone.
+						</p>
 					</div>
+					<AppSecondaryButton
+						type="button"
+						onClick={() => { setDeleteConfirmText(''); setShowDeleteModal(true); }}
+						className="shrink-0 border-destructive/40 text-destructive hover:bg-destructive/10"
+					>
+						<Trash2 className="w-4 h-4" />
+						Delete account
+					</AppSecondaryButton>
 				</div>
-			</main>
+			</AppPageSection>
 
 			{/* Delete account modal */}
 			{showDeleteModal && (
@@ -473,6 +448,7 @@ export function ProfilePage() {
 					</div>
 				</div>
 			)}
-		</div>
+			</div>
+		</AppPage>
 	);
 }

@@ -24,6 +24,7 @@ import {
 	Zap
 } from 'lucide-react';
 import { SEOMeta } from '../components/SEOMeta';
+import { AppCallout, AppPage, AppPageHeader, AppStatCard, AppStatGrid, AppSurface } from '../components/AppPageLayout';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
 import { getDocumentReadErrorMessage, readUploadedDocument } from '../lib/documentExtraction';
@@ -813,40 +814,66 @@ export function RAGSecurityPage() {
 	};
 
 	return (
-		<div className="bg-background">
+		<>
 			<SEOMeta
 				title="RAG Security Scanner | Koreshield"
 				description="Scan retrieved documents for indirect prompt injection attacks in RAG systems"
 			/>
 
-			{/* Header */}
-			<header className="border-b border-border bg-card">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-						<div>
-							<h1 className="text-2xl sm:text-3xl font-bold mb-2">RAG Security Scanner</h1>
-							<p className="text-sm sm:text-base text-muted-foreground">
-								Detect indirect prompt injection attacks in retrieved documents
-							</p>
-							<p className="text-xs sm:text-sm text-muted-foreground mt-2">
-								{isAuthenticated
-									? 'Signed in: scans are saved to your account history and scan packs can be downloaded.'
-									: isHydrating
-										? 'Checking your session...'
-										: 'Guest sandbox: scans run locally in the browser. Sign in to save history and download full scan packs.'}
-							</p>
-						</div>
-						<Shield className="hidden sm:block w-12 h-12 text-primary opacity-50 flex-shrink-0" />
-					</div>
-				</div>
-			</header>
+			<AppPage>
+				<AppPageHeader
+					eyebrow="RAG protection"
+					eyebrowIcon={Shield}
+					icon={Search}
+					title="RAG Security Scanner"
+					description="Detect indirect prompt injection attacks in retrieved documents"
+					stats={[
+						{
+							label: 'Session',
+							value: isAuthenticated ? 'Signed in' : isHydrating ? 'Checking…' : 'Guest',
+							tone: isAuthenticated ? 'text-electric-green' : undefined,
+						},
+						{
+							label: 'Documents',
+							value: documents.length,
+						},
+					]}
+				/>
 
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
-					{/* Left Column - Document Input */}
-					<div className="lg:col-span-2 space-y-4 sm:space-y-6">
-						{/* Document Input Section */}
-						<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+				<p className="-mt-4 mb-8 text-sm text-muted-foreground">
+					{isAuthenticated
+						? 'Signed in: scans are saved to your account history and scan packs can be downloaded.'
+						: isHydrating
+							? 'Checking your session...'
+							: 'Guest sandbox: scans run locally in the browser. Sign in to save history and download full scan packs.'}
+				</p>
+
+				{scanResult && (
+					<AppStatGrid columns={3}>
+						<AppStatCard
+							label="Threats Found"
+							value={scanResult.total_threats_found}
+							icon={AlertTriangle}
+							tone={scanResult.is_safe ? 'text-emerald-400' : 'text-red-400'}
+						/>
+						<AppStatCard
+							label="Documents Scanned"
+							value={scanResult.scan_metadata.documents_scanned}
+							icon={FileText}
+							tone="text-sky-400"
+						/>
+						<AppStatCard
+							label="Processing Time"
+							value={`${scanResult.scan_metadata.processing_time_ms.toFixed(0)}ms`}
+							icon={Clock}
+							tone="text-amber-400"
+						/>
+					</AppStatGrid>
+				)}
+
+				<div className="grid grid-cols-1 gap-4 sm:gap-8 lg:grid-cols-3">
+					<div className="space-y-4 sm:space-y-6 lg:col-span-2">
+						<AppSurface>
 							<h2 className="text-lg sm:text-xl font-semibold mb-4">Add Documents</h2>
 
 							{/* Tabs */}
@@ -992,10 +1019,9 @@ export function RAGSecurityPage() {
 									</div>
 								)}
 							</div>
-						</div>
+						</AppSurface>
 
-						{/* User Query (Optional) */}
-						<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+						<AppSurface>
 						<h2 className="text-lg sm:text-xl font-semibold mb-4">User Query (Optional)</h2>
 							<p className="text-sm text-muted-foreground mb-4">
 								Enter the user's query to check for prompt injection attempts
@@ -1007,11 +1033,10 @@ export function RAGSecurityPage() {
 								rows={3}
 								className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
 							/>
-						</div>
+						</AppSurface>
 
-						{/* Document List */}
 						{documents.length > 0 && (
-						<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+						<AppSurface>
 								<div className="flex items-center justify-between mb-4">
 									<h2 className="text-xl font-semibold">
 										Documents ({documents.length})
@@ -1048,10 +1073,9 @@ export function RAGSecurityPage() {
 										</div>
 									))}
 								</div>
-							</div>
+						</AppSurface>
 						)}
 
-						{/* Scan Button */}
 						<button
 							onClick={handleScan}
 							disabled={loading || documents.length === 0}
@@ -1073,8 +1097,7 @@ export function RAGSecurityPage() {
 
 					{/* Right Column - Scan Configuration & Results */}
 					<div className="space-y-4 sm:space-y-6">
-						{/* Scan Configuration */}
-						<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+						<AppSurface>
 						<h2 className="text-base sm:text-lg font-semibold mb-4">Scan Configuration</h2>
 							<div className="space-y-4">
 								<div>
@@ -1138,11 +1161,10 @@ export function RAGSecurityPage() {
 									/>
 								</div>
 							</div>
-						</div>
+						</AppSurface>
 
-						{/* Scan Results Summary */}
 						{scanResult && (
-						<div className="bg-card border border-border rounded-lg p-4 sm:p-6 space-y-4">
+						<AppSurface className="space-y-4">
 								<div className="flex items-center justify-between">
 									<h2 className="text-lg font-semibold">Scan Results</h2>
 								<div className="flex items-center gap-3">
@@ -1243,11 +1265,10 @@ export function RAGSecurityPage() {
 										)}
 									</div>
 								</div>
-							</div>
+						</AppSurface>
 						)}
 
-						{/* Scan History */}
-						<div className="bg-card border border-border rounded-lg p-4 sm:p-6 space-y-4">
+						<AppSurface className="space-y-4">
 						<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
 								<h2 className="text-lg font-semibold">Scan History</h2>
 								{scanHistory.length > 0 && (
@@ -1312,21 +1333,20 @@ export function RAGSecurityPage() {
 									))}
 								</div>
 							)}
-						</div>
+						</AppSurface>
 
-						{/* Info Card */}
-						<div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-3 sm:p-4">
+						<AppCallout variant="info">
 							<div className="flex gap-3">
-								<Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-								<div className="text-sm text-blue-600">
-									<div className="font-semibold mb-1">About RAG Security</div>
+								<Info className="mt-0.5 h-5 w-5 flex-shrink-0" />
+								<div>
+									<div className="mb-1 font-semibold">About RAG Security</div>
 									<p>
 										This scanner detects indirect prompt injection attacks in retrieved documents
 										using Koreshield's 5-dimensional taxonomy.
 									</p>
 								</div>
 							</div>
-						</div>
+						</AppCallout>
 					</div>
 				</div>
 
@@ -1342,7 +1362,7 @@ export function RAGSecurityPage() {
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ delay: index * 0.05 }}
-								className="bg-card border border-border rounded-lg overflow-hidden"
+								className="dashboard-card overflow-hidden rounded-2xl"
 							>
 								<button
 									onClick={() => setExpandedThreat(
@@ -1529,8 +1549,8 @@ export function RAGSecurityPage() {
 						)}
 
 						{/* Taxonomy Summary */}
-						<div className="bg-card border border-border rounded-lg p-6 mt-6">
-							<h3 className="text-lg sm:text-xl font-bold mb-4">Taxonomy Summary</h3>
+						<AppSurface className="mt-6">
+							<h3 className="mb-4 text-lg font-bold sm:text-xl">Taxonomy Summary</h3>
 							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
 								{Object.entries(scanResult.taxonomy_summary).map(([category, data]) => {
 									const total = Object.values(data as Record<string, number>).reduce((a, b) => a + b, 0);
@@ -1558,10 +1578,10 @@ export function RAGSecurityPage() {
 									);
 								})}
 							</div>
-						</div>
+						</AppSurface>
 					</div>
 				)}
-			</main>
-		</div>
+			</AppPage>
+		</>
 	);
 }
