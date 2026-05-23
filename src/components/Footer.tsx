@@ -66,6 +66,8 @@ function Footer() {
 							<li><Link to="/solutions/ai-agents-security" className={linkClass}>AI Agents Security</Link></li>
 							<li><Link to="/solutions/ai-usage-control" className={linkClass}>AI Usage Control</Link></li>
 							<li><Link to="/solutions/rag-security" className={linkClass}>RAG Security</Link></li>
+							<li><Link to="/solutions/korepilot" className={linkClass}>KorePilot</Link></li>
+							<li><Link to="/solutions/voice-audio-protection" className={linkClass}>Voice & Audio Protection</Link></li>
 						</ul>
 					</div>
 
