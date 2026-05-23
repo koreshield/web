@@ -34,6 +34,104 @@ const CATEGORY_STYLES: Record<ChangeCategory, string> = {
 
 const CHANGELOG_BATCHES: ChangelogBatch[] = [
 	{
+		label: 'May 2026 Roundup',
+		timeframe: 'May 2026',
+		overview:
+			'May focused on sharpening the public product story: clearer solution pages, more careful ecosystem positioning, cleaner demo flows, and less distracting motion across marketing pages.',
+		stats: [
+			{ label: 'Curated updates', value: '6' },
+			{ label: 'New solution pages', value: '2' },
+			{ label: 'Website fixes', value: '3' },
+		],
+		entries: [
+			{
+				date: '2026-05-23',
+				title: 'KorePilot and voice protection were added to Solutions',
+				category: 'Added',
+				summary:
+					'The Solutions area now includes KorePilot and Voice & Audio Protection as planned product extensions built around Koreshield security evidence and speech-to-agent protection paths.',
+				customerImpact:
+					'Customers and investors can understand how Koreshield expands from runtime AI traffic protection into compliance evidence and voice-agent security without confusing those roadmap items with fully shipped features.',
+				items: [
+					'Added a KorePilot solution page explaining the evidence flow from detection events, risk scores, immutable audit logs, tenant context, red-team results, CI/CD gates, and alerts.',
+					'Added a Voice & Audio Protection solution page for speech prompts, transcripts, voice agents, and downstream model calls.',
+					'Added landing-page cards for these product extensions with conservative roadmap wording.',
+				],
+				isMajor: true,
+			},
+			{
+				date: '2026-05-23',
+				title: 'Demo request handling and success layout were tightened',
+				category: 'Fixed',
+				summary:
+					'The demo page layout now keeps the success state inside the form column instead of letting it spill into the rest of the page.',
+				customerImpact:
+					'Demo requesters get a cleaner confirmation experience, while submissions continue to be stored and sent to the Koreshield inbox for follow-up.',
+				items: [
+					'Fixed the desktop grid column definition on the demo page.',
+					'Contained the success state so it no longer overlaps the “What you get” content.',
+					'Verified backend demo submission tests still persist requests and trigger the notification side effect.',
+				],
+			},
+			{
+				date: '2026-05-23',
+				title: 'Public marketing motion was made calmer',
+				category: 'Improved',
+				summary:
+					'Small pulsing badge dots across the public site were converted to static indicators after they started reading like stray typing cursors in cropped views.',
+				customerImpact:
+					'Marketing pages feel calmer and less visually noisy, especially around hero sections and solution badges.',
+				items: [
+					'Removed pulsing animation from hero and page badge dots.',
+					'Kept the visual status indicators, but made them static.',
+					'Applied the cleanup across the homepage, demo page, research page, integrations page, careers page, and solution pages.',
+				],
+			},
+			{
+				date: '2026-05-23',
+				title: 'Ecosystem and integration proof were refined',
+				category: 'Improved',
+				summary:
+					'The landing page now presents ecosystem signals and integration coverage with more careful wording and better-supported logos.',
+				customerImpact:
+					'Visitors see credible infrastructure context without over-reading it as endorsement or customer proof.',
+				items: [
+					'Added official NVIDIA, AWS, and Nebius logo assets with conservative “ecosystem signal” framing.',
+					'Kept OVHcloud and Cloudflare as commented future candidates until the precise public claim is safe.',
+					'Expanded the integration ticker with documented/code-backed tools such as Azure OpenAI, LlamaIndex, FastAPI, Vercel, Cloudflare Workers, PostgreSQL, and Redis.',
+				],
+			},
+			{
+				date: '2026-05-23',
+				title: 'Landing feature section was redesigned',
+				category: 'Improved',
+				summary:
+					'The landing-page feature section was rebuilt from a loose bento grid into a clearer protection-layer story with stronger hierarchy and better mobile behaviour.',
+				customerImpact:
+					'Prospects can understand the core protection areas faster: detection, provider control, RAG defense, CRM integrations, audit trails, and threat monitoring.',
+				items: [
+					'Redesigned the feature cards with a stronger metric panel and provider-control panel.',
+					'Removed the orphaned card layout that made the section feel unfinished.',
+					'Shortened the main headline and subtitle so the section reads more sharply.',
+				],
+			},
+			{
+				date: '2026-05-23',
+				title: 'Solution sitemap routes were corrected',
+				category: 'Infra',
+				summary:
+					'The sitemap generator now uses the actual public solution URLs and includes the new KorePilot and voice/audio protection pages.',
+				customerImpact:
+					'Search engines receive cleaner public route metadata and avoid stale solution URLs.',
+				items: [
+					'Corrected sitemap paths from legacy `/solutions/*` entries to the live `/solutions/ai-*` routes.',
+					'Added `/solutions/korepilot` and `/solutions/voice-audio-protection` to the generated sitemap.',
+					'Regenerated the public sitemap files after the route updates.',
+				],
+			},
+		],
+	},
+	{
 		label: 'April 2026 Roundup',
 		timeframe: 'April 2026',
 		overview:

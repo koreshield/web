@@ -37,7 +37,7 @@ export default function CareersPage() {
 				<div className="max-w-6xl mx-auto relative z-10">
 					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
 						<div className="inline-flex items-center gap-2 bg-electric-green/10 border border-electric-green/20 text-electric-green text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-widest">
-							<span className="w-1.5 h-1.5 rounded-full bg-electric-green animate-pulse" />
+							<span className="w-1.5 h-1.5 rounded-full bg-electric-green" />
 							We&apos;re hiring
 						</div>
 						<div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">

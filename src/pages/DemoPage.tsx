@@ -170,7 +170,7 @@ export default function DemoPage() {
 			/>
 
 			<div className="mx-auto max-w-7xl px-4 py-20">
-				<div className="grid gap-16 lg:grid-cols-[1fr,1.1fr] lg:items-start lg:gap-20">
+				<div className="grid gap-16 lg:grid-cols-[1fr_1.1fr] lg:items-start lg:gap-20">
 
 					{/* ── Left: value props ─────────────────────────────── */}
 					<motion.div
@@ -180,7 +180,7 @@ export default function DemoPage() {
 						className="relative z-0 lg:sticky lg:top-24"
 					>
 						<span className="inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-electric-green">
-							<span className="h-1.5 w-1.5 rounded-full bg-electric-green animate-pulse" />
+							<span className="h-1.5 w-1.5 rounded-full bg-electric-green" />
 							30-minute session
 						</span>
 
@@ -235,7 +235,7 @@ export default function DemoPage() {
 					>
 						<div className="rounded-3xl border border-border bg-card p-8 shadow-xl">
 							{submitted ? (
-								<div className="flex flex-col items-center justify-center py-12 text-center">
+								<div className="flex min-h-[520px] flex-col items-center justify-center py-12 text-center">
 									<div className="rounded-full border border-electric-green/30 bg-electric-green/10 p-4">
 										<CheckCircle2 className="h-10 w-10 text-electric-green" />
 									</div>
