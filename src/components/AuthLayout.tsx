@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react';
 import { ShieldCheck } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -58,3 +59,43 @@ export function AuthLayout({
 		</div>
 	);
 }
+
+export function AuthFormHeader({ title, description }: { title: string; description?: string }) {
+	return (
+		<div className="mb-8">
+			<h1 className="mb-2 text-3xl font-black tracking-[-0.045em] text-foreground">{title}</h1>
+			{description && <p className="text-sm leading-6 text-muted-foreground">{description}</p>}
+		</div>
+	);
+}
+
+export function AuthStatusPanel({
+	icon: Icon,
+	tone = 'success',
+	title,
+	children,
+}: {
+	icon: LucideIcon;
+	tone?: 'success' | 'error' | 'loading';
+	title: string;
+	children: ReactNode;
+}) {
+	const toneClass = {
+		success: 'bg-electric-green/10 border-electric-green/20 text-electric-green',
+		error: 'bg-destructive/10 border-destructive/20 text-destructive',
+		loading: 'bg-primary/10 border-primary/20 text-primary animate-pulse',
+	}[tone];
+
+	return (
+		<div className="text-center">
+			<div className={`mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border ${toneClass}`}>
+				<Icon className="h-8 w-8" />
+			</div>
+			<h1 className="mb-3 text-2xl font-black tracking-[-0.04em] text-foreground sm:text-3xl">{title}</h1>
+			{children}
+		</div>
+	);
+}
+
+export const authInputClass =
+	'auth-input w-full rounded-xl border border-border bg-background/70 px-4 py-3 text-sm text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60';
