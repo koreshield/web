@@ -168,7 +168,7 @@ function IntegrationsPage() {
 				<div className="text-center mb-16">
 					{/* Badge */}
 					<div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-electric-green/20 bg-electric-green/5 mb-6">
-						<span className="w-1.5 h-1.5 rounded-full bg-electric-green animate-pulse" />
+						<span className="w-1.5 h-1.5 rounded-full bg-electric-green" />
 						<span className="text-xs font-semibold text-electric-green tracking-wide uppercase">Integrations</span>
 					</div>
 

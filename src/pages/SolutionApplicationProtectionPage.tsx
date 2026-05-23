@@ -48,7 +48,7 @@ export default function SolutionApplicationProtectionPage() {
 				<div className="relative mx-auto max-w-4xl text-center">
 					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
 						<span className="inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-electric-green mb-6">
-							<span className="h-1.5 w-1.5 rounded-full bg-electric-green animate-pulse" />
+							<span className="h-1.5 w-1.5 rounded-full bg-electric-green" />
 							AI Application Protection
 						</span>
 						<h1 className="text-5xl font-bold tracking-tight md:text-6xl">
