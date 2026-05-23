@@ -35,7 +35,6 @@ function Architecture() {
                     </p>
                 </motion.div>
 
-                {/* 3-column flow  -  matches RAGShowcase pattern */}
                 <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-10 lg:items-stretch">
                     {/* Step 1: Your Application */}
                     <motion.div
