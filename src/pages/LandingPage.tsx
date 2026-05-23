@@ -11,7 +11,7 @@ import { TrustBadges } from '../components/TrustBadges';
 import UseCases from '../components/UseCases';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2, Copy, ShieldCheck, Terminal } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Copy, Terminal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
@@ -118,44 +118,35 @@ function LandingPage() {
             <TrustBadges />
             <UseCases />
 
-            <section className="relative overflow-hidden bg-background px-6 py-24 ambient-glow md:py-32">
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-electric-green/40 to-transparent" />
-                <div className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-electric-green/10 blur-3xl" />
-                <div className="relative z-10 mx-auto max-w-5xl">
+            <section className="border-t border-white/[0.08] bg-background px-6 py-14">
+                <div className="mx-auto max-w-7xl">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                         viewport={{ once: true }}
-                        className="rounded-[2rem] border border-white/[0.08] bg-card/80 p-8 text-center shadow-2xl shadow-emerald-500/5 md:p-12"
+                        className="flex flex-col gap-5 rounded-[1.75rem] border border-white/[0.08] bg-card/70 p-6 shadow-sm md:flex-row md:items-center md:justify-between md:p-8"
                     >
-                        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-electric-green/20 bg-electric-green/10">
-                            <ShieldCheck className="h-7 w-7 text-electric-green" />
+                        <div>
+                            <h2 className="text-2xl font-extrabold tracking-[-0.03em] text-foreground md:text-3xl">
+                                Ready to put Koreshield in the path?
+                            </h2>
+                            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                                Start free, or walk through your AI stack with us.
+                            </p>
                         </div>
-                        <h2 className="mx-auto max-w-3xl text-4xl font-extrabold tracking-[-0.04em] text-foreground md:text-6xl">
-                            Put a security layer in front of your AI.
-                        </h2>
-                        <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-                            Start with the proxy, prove the controls in your logs, and expand into RAG, agents, and compliance evidence when you are ready.
-                        </p>
-                        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                        <div className="flex flex-col gap-3 sm:flex-row">
                             <Link
                                 to="/signup?plan=free"
-                                className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-bright"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-bright"
                             >
                                 Start for free <ArrowRight className="h-4 w-4" />
                             </Link>
                             <Link
                                 to="/demo"
-                                className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-background/60 px-7 py-3 font-bold text-foreground transition-colors hover:border-electric-green/30 hover:bg-muted"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.1] bg-background/60 px-6 py-3 text-sm font-bold text-foreground transition-colors hover:border-electric-green/30 hover:bg-muted"
                             >
                                 Book a demo
-                            </Link>
-                            <Link
-                                to="/solutions/rag-security"
-                                className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-background/60 px-7 py-3 font-bold text-foreground transition-colors hover:border-electric-green/30 hover:bg-muted"
-                            >
-                                Explore RAG security
                             </Link>
                         </div>
                     </motion.div>

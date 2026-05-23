@@ -1,14 +1,26 @@
 import { motion } from 'framer-motion';
-import { ArrowDown, ArrowRight, Cloud, Code2, Shield, Zap } from 'lucide-react';
+import { ArrowDown, ArrowRight, Cloud, Code2, Zap } from 'lucide-react';
 
-function FlowArrow() {
+function FlowArrow({ branded = false }: { branded?: boolean }) {
     return (
         <>
-            <div className="hidden lg:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 items-center justify-center w-10 h-10 rounded-full bg-muted border border-white/[0.08] shadow-sm">
-                <ArrowRight className="text-electric-green w-5 h-5" />
+            <div className="hidden lg:flex h-full min-w-16 items-center justify-center">
+                    <div className="relative flex w-20 items-center justify-center">
+                        <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-electric-green/60 to-transparent" />
+                        <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full border border-electric-green/25 bg-background shadow-lg shadow-emerald-500/10">
+                            {branded ? (
+                            <>
+                                <img src="/logo/dark/SVG/Black.svg" alt="" className="h-5 w-5 dark:hidden" />
+                                <img src="/logo/light/SVG/White.svg" alt="" className="hidden h-5 w-5 dark:block" />
+                            </>
+                        ) : (
+                            <ArrowRight className="h-5 w-5 text-electric-green" />
+                        )}
+                    </div>
+                </div>
             </div>
             <div className="flex lg:hidden justify-center py-2">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted border border-white/[0.08] shadow-sm">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-electric-green/25 bg-muted shadow-sm">
                     <ArrowDown className="text-electric-green w-5 h-5" />
                 </div>
             </div>
@@ -35,15 +47,14 @@ function Architecture() {
                     </p>
                 </motion.div>
 
-                <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-10 lg:items-stretch">
+                <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_5rem_minmax(0,1fr)_5rem_minmax(0,1fr)] lg:items-stretch">
                     {/* Step 1: Your Application */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="bg-card border border-white/[0.08] rounded-xl p-6 relative shadow-sm"
+                        className="bg-card border border-white/[0.08] rounded-xl p-6 shadow-sm"
                     >
-                        <div className="hidden lg:block"><FlowArrow /></div>
                         <div className="flex items-center gap-3 mb-4 text-blue-500">
                             <Code2 className="w-6 h-6" />
                             <h3 className="font-semibold">1. Your Application</h3>
@@ -62,8 +73,7 @@ function Architecture() {
                         </div>
                     </motion.div>
 
-                    {/* Mobile arrow */}
-                    <div className="lg:hidden"><FlowArrow /></div>
+                    <FlowArrow branded />
 
                     {/* Step 2: Koreshield Proxy  -  the "star" card */}
                     <motion.div
@@ -74,18 +84,20 @@ function Architecture() {
                         className="relative overflow-visible"
                     >
                         <div className="flex justify-center mb-3">
-                            <span className="inline-flex items-center gap-1.5 bg-emerald-600 dark:bg-electric-green text-white font-bold px-5 py-2 text-xs rounded-full uppercase tracking-widest shadow-lg shadow-emerald-600/30 dark:shadow-emerald-500/30 ring-2 ring-emerald-600/20 dark:ring-emerald-400/20">
-                                <Shield className="w-3.5 h-3.5" />
+                            <span className="inline-flex items-center gap-2 bg-emerald-600 dark:bg-electric-green text-white font-bold px-5 py-2 text-xs rounded-full uppercase tracking-widest shadow-lg shadow-emerald-600/30 dark:shadow-emerald-500/30 ring-2 ring-emerald-600/20 dark:ring-emerald-400/20">
+                                <img src="/logo/light/SVG/White.svg" alt="" className="h-4 w-4" />
                                 Koreshield Proxy
                             </span>
                         </div>
 
-                        <div className="bg-card border-2 border-electric-green/20 rounded-xl p-6 md:p-8 relative shadow-lg shadow-emerald-500/10">
-                            <div className="hidden lg:block"><FlowArrow /></div>
+                        <div className="bg-card border-2 border-electric-green/20 rounded-xl p-6 md:p-8 relative overflow-hidden shadow-lg shadow-emerald-500/10">
+                            <div className="pointer-events-none absolute -left-12 top-8 h-24 w-24 rounded-full border border-electric-green/10" />
+                            <div className="pointer-events-none absolute -right-14 bottom-6 h-28 w-28 rounded-full bg-electric-green/5 blur-2xl" />
 
                             <div className="flex flex-col items-center text-center gap-3 mb-5">
-                                <div className="w-14 h-14 bg-electric-green/10 rounded-full flex items-center justify-center animate-pulse">
-                                    <Shield className="w-7 h-7 text-electric-green" />
+                                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-electric-green/20 bg-electric-green/10 shadow-lg shadow-emerald-500/10">
+                                    <img src="/logo/dark/SVG/Black.svg" alt="Koreshield" className="h-9 w-9 dark:hidden" />
+                                    <img src="/logo/light/SVG/White.svg" alt="Koreshield" className="hidden h-9 w-9 dark:block" />
                                 </div>
                                 <div>
                                     <h3 className="text-lg font-bold text-foreground">Intercepted &amp; Analyzed</h3>
@@ -104,8 +116,7 @@ function Architecture() {
                         </div>
                     </motion.div>
 
-                    {/* Mobile arrow */}
-                    <div className="lg:hidden"><FlowArrow /></div>
+                    <FlowArrow />
 
                     {/* Step 3: LLM Providers */}
                     <motion.div
