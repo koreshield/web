@@ -21,6 +21,18 @@ interface Attack {
 	metadata?: Record<string, any>;
 }
 
+function isThreatLog(log: any) {
+	return Boolean(log?.attack_detected || log?.is_blocked || log?.attack_type || log?.threat_type);
+}
+
+function isWithinRange(timestamp: string, range: TimeRange) {
+	const time = new Date(timestamp).getTime();
+	if (Number.isNaN(time)) return false;
+
+	const hours = range === '24h' ? 24 : range === '7d' ? 24 * 7 : 24 * 30;
+	return time >= Date.now() - hours * 60 * 60 * 1000;
+}
+
 export function ThreatMonitoringPage() {
 	const [selectedAttack, setSelectedAttack] = useState<Attack | null>(null);
 	const [liveThreats, setLiveThreats] = useState<Attack[]>([]);
@@ -34,21 +46,23 @@ export function ThreatMonitoringPage() {
 	const { data: attacksData, isLoading } = useRecentAttacks(50);
 	// Normalise raw API log records into the Attack interface.
 	// The backend returns `attack_type` (not `threat_type`) and has no `confidence` field.
-	const initialAttacks: Attack[] = ((attacksData as any)?.logs || []).map((log: any) => ({
-		// eslint-disable-next-line react-hooks/purity
-		id: log.id || log.request_id || String(Math.random()),
-		timestamp: log.timestamp || log.created_at || new Date().toISOString(),
-		threat_type: log.threat_type || log.attack_type || 'Unknown',
-		confidence: typeof log.confidence === 'number'
-			? log.confidence
-			: typeof log.risk_score === 'number'
-				? log.risk_score / 100
-				: 0,
-		content_preview: log.content_preview || log.prompt_preview || `${log.attack_type || 'Threat'} detected`,
-		action_taken: log.action_taken || (log.blocked ? 'blocked' : 'warned'),
-		severity: log.severity,
-		metadata: log.metadata,
-	}));
+	const initialAttacks: Attack[] = ((attacksData as any)?.logs || [])
+		.filter(isThreatLog)
+		.map((log: any) => ({
+			// eslint-disable-next-line react-hooks/purity
+			id: log.id || log.request_id || String(Math.random()),
+			timestamp: log.timestamp || log.created_at || new Date().toISOString(),
+			threat_type: log.threat_type || log.attack_type || 'Unknown',
+			confidence: typeof log.confidence === 'number'
+				? log.confidence
+				: typeof log.risk_score === 'number'
+					? log.risk_score / 100
+					: 0,
+			content_preview: log.content_preview || log.prompt_preview || `${log.attack_type || 'Threat'} detected`,
+			action_taken: log.action_taken || (log.is_blocked || log.blocked ? 'blocked' : 'warned'),
+			severity: log.severity || log.attack_details?.severity,
+			metadata: log.metadata || log.attack_details,
+		}));
 
 	// WebSocket real-time updates
 	useEffect(() => {
@@ -98,8 +112,7 @@ export function ThreatMonitoringPage() {
 			const severity = threat.severity || getSeverityFromConfidence(threat.confidence);
 			if (severity !== severityFilter) return false;
 		}
-		// Time range filtering would require backend support or client-side date comparison
-		return true;
+		return isWithinRange(threat.timestamp, timeRange);
 	});
 
 	// Calculate stats

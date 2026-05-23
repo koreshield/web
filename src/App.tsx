@@ -59,6 +59,7 @@ const InviteAcceptPage = lazy(() => import('./pages/InviteAcceptPage').then(m =>
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const BillingPage = lazy(() => import('./pages/BillingPage'));
+const UsageLimitsPage = lazy(() => import('./pages/UsageLimitsPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
 const CareersPage = lazy(() => import('./pages/CareersPage'));
 const CareerRolePage = lazy(() => import('./pages/CareerRolePage'));
@@ -630,6 +631,18 @@ function AppContent() {
 								<RouteErrorBoundary>
 									<ProtectedRoute>
 										<BillingPage />
+									</ProtectedRoute>
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/usage"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<ProtectedRoute>
+										<UsageLimitsPage />
 									</ProtectedRoute>
 								</RouteErrorBoundary>
 							</Suspense>
