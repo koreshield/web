@@ -9,6 +9,7 @@ import {
 	DollarSign,
 	ExternalLink,
 	FileText,
+	Gauge,
 	Key,
 	LayoutDashboard,
 	ListFilter,
@@ -78,6 +79,7 @@ const NAV_GROUPS: NavGroup[] = [
 		label: 'Config',
 		items: [
 			{ label: 'API Keys', to: '/settings/api-keys', icon: Key },
+			{ label: 'Usage', to: '/usage', icon: Gauge },
 			{ label: 'Billing', to: '/billing', icon: DollarSign },
 			{ label: 'Rules', to: '/rules', icon: ListFilter },
 			{ label: 'Policies', to: '/policies', icon: Shield },
