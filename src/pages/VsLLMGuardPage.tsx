@@ -1,309 +1,148 @@
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle, Code, ExternalLink, GitBranch, Shield, XCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Code2, ExternalLink, GitBranch, Scale, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
+
+const comparisonRows = [
+	['Deployment model', 'Managed runtime proxy + SDKs', 'Open-source scanner toolkit'],
+	['Best fit', 'Production teams needing enforcement, evidence, and support', 'Teams that want to self-host and assemble controls'],
+	['Request path', 'Designed to sit between app and provider', 'Usually embedded inside application code'],
+	['Governance', 'Tenant context, audit logs, policy decisions, alerts', 'Depends on your implementation'],
+	['Operations', 'Hosted service, product roadmap, support path', 'Community/project maintenance model'],
+];
+
+const koreshieldWins = [
+	'You need runtime enforcement, not only scanner functions.',
+	'You need audit evidence and compliance reporting.',
+	'You want one layer across providers, teams, and applications.',
+	'You need a commercial support path for production incidents.',
+];
+
+const llmGuardFits = [
+	'You prefer open-source components inside your own stack.',
+	'You have engineering time to operate and tune the scanners.',
+	'You are building a prototype or internal evaluation harness.',
+	'You do not need managed multi-tenant governance yet.',
+];
 
 export default function VsLLMGuardPage() {
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="Koreshield vs LLM Guard"
-				description="Compare Koreshield and LLM Guard: enterprise features, detection accuracy, support options, and when to choose each solution."
+				description="A practical comparison of Koreshield and LLM Guard for teams choosing an LLM security layer."
 			/>
 
-			{/* Hero */}
-			<section className="py-20 px-4 bg-background relative ambient-glow">
-				<div className="max-w-7xl mx-auto">
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						className="text-center"
-					>
-						<h1 className="text-5xl font-bold text-foreground mb-6">
+			<section className="relative overflow-hidden px-6 py-24 ambient-glow md:py-32">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(16,185,129,0.16),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(59,130,246,0.08),transparent_24%)]" />
+				<div className="relative mx-auto max-w-5xl text-center">
+					<motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+						<span className="mb-6 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-electric-green">
+							<Scale className="h-3.5 w-3.5" />
+							Comparison
+						</span>
+						<h1 className="text-5xl font-extrabold tracking-[-0.055em] md:text-7xl">
 							Koreshield vs LLM Guard
 						</h1>
-						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-							Comparing two LLM security solutions with different deployment models
+						<p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+							LLM Guard is useful when you want open-source scanners. Koreshield is built for teams that need a managed security layer in the live AI traffic path.
+						</p>
+						<p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+							Last reviewed May 2026
 						</p>
 					</motion.div>
 				</div>
 			</section>
 
-			<div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-				{/* Quick Summary */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.1 }}
-					className="grid md:grid-cols-2 gap-8"
-				>
-					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
-						<div className="flex items-center gap-3 mb-4">
-							<Shield className="w-8 h-8 text-electric-green" />
-							<h2 className="text-2xl font-bold text-foreground">Koreshield</h2>
-						</div>
-						<p className="text-muted-foreground mb-4">
-							Enterprise-ready LLM security with 95% detection accuracy, professional support, and managed cloud option.
+			<section className="border-y border-border bg-card/35 px-6 py-20">
+				<div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-2">
+					<div className="rounded-[2rem] border border-electric-green/25 bg-electric-green/10 p-7 shadow-sm">
+						<ShieldCheck className="mb-5 h-8 w-8 text-electric-green" />
+						<h2 className="text-3xl font-extrabold tracking-[-0.04em]">Koreshield</h2>
+						<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+							A runtime security layer for prompts, retrieved context, provider calls, policy decisions, alerts, and audit evidence.
 						</p>
-						<div className="space-y-2">
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>95%+ detection accuracy</span>
-							</div>
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>Enterprise features (RBAC, multi-tenancy)</span>
-							</div>
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>Professional support & SLAs</span>
-							</div>
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>Managed cloud option</span>
-							</div>
-						</div>
-					</div>
-
-					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
-						<div className="flex items-center gap-3 mb-4">
-							<GitBranch className="w-8 h-8 text-electric-green" />
-							<h2 className="text-2xl font-bold text-foreground">LLM Guard</h2>
-						</div>
-						<p className="text-muted-foreground mb-4">
-							Community-driven LLM security toolkit with basic detection capabilities and MIT license.
-						</p>
-						<div className="space-y-2">
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>100% free to use</span>
-							</div>
-							<div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-								<CheckCircle className="w-5 h-5" />
-								<span>Active community contributions</span>
-							</div>
-							<div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-								<XCircle className="w-5 h-5" />
-								<span>~75% detection accuracy</span>
-							</div>
-							<div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-								<XCircle className="w-5 h-5" />
-								<span>No professional support or SLAs</span>
-							</div>
-						</div>
-					</div>
-				</motion.div>
-
-				{/* Feature Comparison */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.2 }}
-					className="bg-card rounded-xl shadow-lg border border-border overflow-hidden"
-				>
-					<div className="p-8">
-						<h2 className="text-3xl font-bold text-foreground mb-6">Feature Comparison</h2>
-						<div className="overflow-x-auto">
-							<table className="w-full">
-								<thead className="border-b border-border">
-									<tr>
-										<th className="text-left py-4 px-4 text-foreground font-semibold">Feature</th>
-										<th className="text-center py-4 px-4 text-electric-green font-semibold">Koreshield</th>
-										<th className="text-center py-4 px-4 text-green-600 dark:text-green-400 font-semibold">LLM Guard</th>
-									</tr>
-								</thead>
-								<tbody className="divide-y divide-border">
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Detection Accuracy</td>
-										<td className="py-4 px-4 text-center text-foreground font-semibold">95%+</td>
-										<td className="py-4 px-4 text-center text-foreground">~75%</td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Multi-Tenancy</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">RBAC & Policies</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Audit Logs</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Professional Support</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">SLA Guarantees</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Managed Cloud Option</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Documentation Quality</td>
-										<td className="py-4 px-4 text-center text-foreground">Excellent</td>
-										<td className="py-4 px-4 text-center text-foreground">Basic</td>
-									</tr>
-									<tr>
-										<td className="py-4 px-4 text-foreground font-medium">Compliance Ready</td>
-										<td className="py-4 px-4 text-center"><CheckCircle className="w-6 h-6 text-green-500 mx-auto" /></td>
-										<td className="py-4 px-4 text-center"><XCircle className="w-6 h-6 text-red-500 mx-auto" /></td>
-									</tr>
-								
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</motion.div>
-
-				{/* Use Case Comparison */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.3 }}
-					className="grid md:grid-cols-2 gap-8"
-				>
-					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
-						<h3 className="text-2xl font-bold text-electric-green mb-6">Koreshield Best For:</h3>
-						<ul className="space-y-3">
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<div>
-									<strong className="text-foreground">Enterprise Production</strong>
-									<p className="text-muted-foreground text-sm">Need SLAs, support, and compliance</p>
-								</div>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<div>
-									<strong className="text-foreground">SaaS Deployments</strong>
-									<p className="text-muted-foreground text-sm">Require account isolation and RBAC</p>
-								</div>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<div>
-									<strong className="text-foreground">Regulated Industries</strong>
-									<p className="text-muted-foreground text-sm">Healthcare, finance, legal requiring audit logs</p>
-								</div>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<div>
-									<strong className="text-foreground">High Accuracy Needs</strong>
-									<p className="text-muted-foreground text-sm">95%+ detection rate required</p>
-								</div>
-							</li>
-						</ul>
-					</div>
-
-					<div className="bg-card rounded-xl shadow-lg border border-border p-8">
-						<h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-6">LLM Guard Best For:</h3>
-						<ul className="space-y-3">
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<div>
-									<strong className="text-foreground">Hobby Projects</strong>
-									<p className="text-muted-foreground text-sm">Personal projects and learning</p>
-								</div>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<div>
-									<strong className="text-foreground">Proof of Concept</strong>
-									<p className="text-muted-foreground text-sm">Testing and prototyping</p>
-								</div>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<div>
-									<strong className="text-foreground">Learning LLM Security</strong>
-									<p className="text-muted-foreground text-sm">Educational purposes</p>
-								</div>
-							</li>
-							<li className="flex gap-3">
-								<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-								<div>
-									<strong className="text-foreground">Basic Detection</strong>
-									<p className="text-muted-foreground text-sm">Simple use cases, low-stakes applications</p>
-								</div>
-							</li>
-						</ul>
-					</div>
-				</motion.div>
-
-				{/* Migration Path */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.4 }}
-					className="bg-card border border-border rounded-xl p-8"
-				>
-					<h2 className="text-3xl font-bold text-foreground mb-6">Easy Migration from LLM Guard</h2>
-					<p className="text-muted-foreground mb-6">
-						Already using LLM Guard? Koreshield offers a straightforward migration path with minimal code changes.
-					</p>
-					<div className="grid md:grid-cols-3 gap-6">
-						<div className="bg-card rounded-lg p-6">
-							<div className="text-3xl font-bold text-electric-green mb-2">1</div>
-							<h3 className="font-semibold text-foreground mb-2">Install Koreshield</h3>
-							<p className="text-sm text-muted-foreground">
-								<code className="bg-muted px-2 py-1 rounded">pip install koreshield-sdk</code>
-							</p>
-						</div>
-						<div className="bg-card rounded-lg p-6">
-							<div className="text-3xl font-bold text-electric-green mb-2">2</div>
-							<h3 className="font-semibold text-foreground mb-2">Update Import</h3>
-							<p className="text-sm text-muted-foreground">
-								Replace LLM Guard imports with Koreshield SDK
-							</p>
-						</div>
-						<div className="bg-card rounded-lg p-6">
-							<div className="text-3xl font-bold text-electric-green mb-2">3</div>
-							<h3 className="font-semibold text-foreground mb-2">Deploy</h3>
-							<p className="text-sm text-muted-foreground">
-								Enjoy higher accuracy and enterprise features
-							</p>
-						</div>
-					</div>
-				</motion.div>
-
-				{/* CTA */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.5 }}
-					className="bg-card border border-border rounded-xl p-10 text-center"
-				>
-					<h2 className="text-3xl font-bold mb-4 text-foreground">Upgrade to Koreshield</h2>
-					<p className="text-lg mb-8 text-muted-foreground">
-						Get enterprise-ready security with the same security-first values
-					</p>
-					<div className="flex flex-wrap justify-center gap-4">
-						<Link to="/pricing"
-							className="inline-flex items-center gap-2 px-6 py-3 bg-electric-green hover:bg-emerald-bright text-white rounded-lg font-semibold transition-colors"
-						>
-							<Code className="w-5 h-5" />
-							Upgrade Now
-						</Link>
-						<Link to="/demo"
-							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"
-						>
-							Book a Demo
-							<ExternalLink className="w-5 h-5" />
+						<Link to="/demo" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-electric-green px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright">
+							See Koreshield <ArrowRight className="h-4 w-4" />
 						</Link>
 					</div>
-				</motion.div>
-			</div>
+					<div className="rounded-[2rem] border border-border bg-card/90 p-7 shadow-sm">
+						<GitBranch className="mb-5 h-8 w-8 text-electric-green" />
+						<h2 className="text-3xl font-extrabold tracking-[-0.04em]">LLM Guard</h2>
+						<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+							An open-source scanner toolkit from Protect AI for detecting and sanitizing risky LLM inputs and outputs.
+						</p>
+						<a href="https://github.com/protectai/llm-guard" target="_blank" rel="noreferrer noopener" className="mt-6 inline-flex items-center gap-2 rounded-xl border border-border px-5 py-3 text-sm font-bold transition-colors hover:bg-muted">
+							View project <ExternalLink className="h-4 w-4" />
+						</a>
+					</div>
+				</div>
+			</section>
+
+			<section className="px-6 py-20">
+				<div className="mx-auto max-w-7xl">
+					<div className="mb-10">
+						<p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-electric-green">Practical difference</p>
+						<h2 className="text-4xl font-extrabold tracking-[-0.04em] md:text-5xl">Toolkit vs security layer.</h2>
+					</div>
+					<div className="overflow-hidden rounded-[2rem] border border-border bg-card/90 shadow-sm">
+						{comparisonRows.map(([label, koreshield, llmGuard]) => (
+							<div key={label} className="grid gap-4 border-b border-border p-5 last:border-b-0 md:grid-cols-[0.75fr_1fr_1fr] md:items-center">
+								<p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
+								<p className="rounded-2xl bg-electric-green/10 px-4 py-3 text-sm font-semibold text-foreground">{koreshield}</p>
+								<p className="rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground">{llmGuard}</p>
+							</div>
+						))}
+					</div>
+				</div>
+			</section>
+
+			<section className="border-y border-border bg-card/35 px-6 py-20">
+				<div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-2">
+					<div className="rounded-[2rem] border border-border bg-card/90 p-7 shadow-sm">
+						<h2 className="text-3xl font-extrabold tracking-[-0.04em]">Choose Koreshield when...</h2>
+						<div className="mt-6 space-y-3">
+							{koreshieldWins.map((item) => (
+								<div key={item} className="flex gap-3 rounded-2xl border border-border bg-background/70 p-4 text-sm">
+									<CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-electric-green" />
+									<span>{item}</span>
+								</div>
+							))}
+						</div>
+					</div>
+					<div className="rounded-[2rem] border border-border bg-card/90 p-7 shadow-sm">
+						<h2 className="text-3xl font-extrabold tracking-[-0.04em]">LLM Guard may fit when...</h2>
+						<div className="mt-6 space-y-3">
+							{llmGuardFits.map((item) => (
+								<div key={item} className="flex gap-3 rounded-2xl border border-border bg-background/70 p-4 text-sm">
+									<Code2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-electric-green" />
+									<span>{item}</span>
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section className="px-6 py-20">
+				<div className="mx-auto grid max-w-7xl gap-6 rounded-[2rem] border border-border bg-card/90 p-7 shadow-sm lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+					<div>
+						<p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-electric-green">Migration thinking</p>
+						<h2 className="text-3xl font-extrabold tracking-[-0.04em]">If scanners are not enough, move enforcement to the path.</h2>
+						<p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+							The clean migration is not replacing one function call with another. It is deciding where enforcement should live: inside each app, or once at the AI traffic boundary.
+						</p>
+					</div>
+					<div className="grid gap-3 sm:grid-cols-3">
+						{['Route traffic', 'Attach policy', 'Record evidence'].map((item, index) => (
+							<div key={item} className="rounded-2xl border border-border bg-background/70 p-4">
+								<p className="text-xs font-bold tracking-[0.22em] text-electric-green">0{index + 1}</p>
+								<p className="mt-3 font-bold">{item}</p>
+							</div>
+						))}
+					</div>
+				</div>
+			</section>
 		</div>
 	);
 }
