@@ -1,37 +1,20 @@
 import { motion } from 'framer-motion';
-import { AlertTriangle, ArrowRight, Bell, Eye, Shield, Zap } from 'lucide-react';
+import { ArrowRight, Bell, Fingerprint, Radar, ShieldCheck, Siren, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
-const howItWorks = [
-	{
-		icon: <Eye className="h-6 w-6 text-electric-green" />,
-		title: 'Every request inspected in real time',
-		body: 'Koreshield sits between your application and the LLM. Every prompt and every response passes through the detection engine before it completes, adding under 50ms of overhead.',
-	},
-	{
-		icon: <AlertTriangle className="h-6 w-6 text-electric-green" />,
-		title: 'Threat classification across 50+ patterns',
-		body: 'Prompt injection, jailbreak framing, PII exfiltration, credential leakage, indirect RAG injection, tool abuse: all classified by type, severity, and confidence before the model ever sees them.',
-	},
-	{
-		icon: <Shield className="h-6 w-6 text-electric-green" />,
-		title: 'Block or allow with structured policy responses',
-		body: 'Blocked requests return a structured policy violation response to your application with a reason code. No silent failures. Your application always knows what happened.',
-	},
-	{
-		icon: <Bell className="h-6 w-6 text-electric-green" />,
-		title: 'Alerts and audit logs',
-		body: 'Every threat event is logged with type, severity, timestamp, and classification metadata. Alerts fire immediately. The audit trail is always there when you need it.',
-	},
+const signals = [
+	['prompt_injection', 'blocked'],
+	['pii_exfiltration', 'redacted'],
+	['jailbreak_attempt', 'quarantined'],
+	['rag_poisoning', 'blocked'],
 ];
 
-const useCases = [
-	'Catching prompt injection before it reaches the model',
-	'Detecting jailbreak attempts and policy-violating inputs',
-	'Blocking credential and API key leakage in prompts',
-	'Flagging PII entering or leaving the model',
-	'Responding to indirect injection in RAG pipelines',
+const responseLoop = [
+	{ icon: Radar, title: 'Inspect', body: 'Requests, responses, retrieved context, and tool output are scored before they continue.' },
+	{ icon: Fingerprint, title: 'Classify', body: 'Events keep threat type, confidence, tenant, provider, route, and request metadata attached.' },
+	{ icon: ShieldCheck, title: 'Enforce', body: 'Policy decides whether traffic is allowed, blocked, redacted, or escalated.' },
+	{ icon: Bell, title: 'Evidence', body: 'Alerts and audit records give security teams something concrete to investigate.' },
 ];
 
 export default function SolutionDetectionResponsePage() {
@@ -39,113 +22,104 @@ export default function SolutionDetectionResponsePage() {
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="AI Detection & Response | Koreshield"
-				description="Koreshield detects and blocks LLM threats in real time: prompt injection, jailbreaks, PII, and more, before they reach your model. Under 50ms overhead."
+				description="Detect, classify, block, and record LLM threats before they reach your model or users."
 			/>
 
-			{/* Hero */}
-			<section className="relative px-6 py-24 overflow-hidden ambient-glow">
-				<div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
-				<div className="relative mx-auto max-w-4xl text-center">
-					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-						<span className="inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-electric-green mb-6">
-							<span className="h-1.5 w-1.5 rounded-full bg-electric-green" />
-							AI Detection &amp; Response
+			<section className="relative overflow-hidden px-6 py-24 ambient-glow md:py-32">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(16,185,129,0.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(225,29,72,0.08),transparent_24%)]" />
+				<div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+					<motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+						<span className="mb-6 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-electric-green">
+							<Siren className="h-3.5 w-3.5" />
+							AI Detection & Response
 						</span>
-						<h1 className="text-5xl font-bold tracking-tight md:text-6xl">
-							Detect. Block. Move on.
+						<h1 className="max-w-4xl text-5xl font-extrabold tracking-[-0.055em] md:text-7xl">
+							Stop bad AI traffic before it becomes an incident.
 						</h1>
-						<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-							Koreshield inspects every LLM request and response in real time, classifies threats across 50+ attack patterns, and blocks them before the model ever sees them.
+						<p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+							Koreshield turns every risky LLM interaction into a decision: allow, block, redact, alert, or log.
 						</p>
-						<div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-							<Link to="/signup?plan=free" className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500">
+						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
+							<Link to="/signup?plan=free" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-bold text-white transition-colors hover:bg-emerald-bright">
 								Start for free <ArrowRight className="h-4 w-4" />
 							</Link>
-							<Link to="/demo" className="inline-flex items-center gap-2 rounded-xl border border-border px-7 py-3 font-semibold transition-colors hover:bg-muted">
+							<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card/70 px-7 py-3 font-bold text-foreground transition-colors hover:bg-muted">
 								Book a demo
 							</Link>
+						</div>
+					</motion.div>
+
+					<motion.div
+						initial={{ opacity: 0, y: 18 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.55, delay: 0.1 }}
+						className="relative rounded-[2rem] border border-border bg-card/90 p-5 shadow-2xl shadow-emerald-900/10 dark:bg-card/75"
+					>
+						<div className="absolute -inset-px -z-10 rounded-[2rem] bg-gradient-to-br from-electric-green/25 via-transparent to-ruby/15" />
+						<div className="mb-4 flex items-center justify-between">
+							<div>
+								<p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">live decision feed</p>
+								<p className="mt-1 text-sm text-muted-foreground">tenant: prod / route: chat.completions</p>
+							</div>
+							<span className="rounded-full border border-ruby/25 bg-ruby/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-ruby">
+								4 active
+							</span>
+						</div>
+
+						<div className="space-y-3">
+							{signals.map(([threat, outcome], index) => (
+								<div key={threat} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-2xl border border-border bg-background/70 p-4">
+									<span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ruby/10 text-ruby">
+										<Zap className="h-4 w-4" />
+									</span>
+									<div>
+										<p className="font-mono text-sm font-semibold text-foreground">{threat}</p>
+										<p className="text-xs text-muted-foreground">confidence {(94 + index).toString()}%</p>
+									</div>
+									<span className="rounded-full bg-electric-green/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-electric-green">
+										{outcome}
+									</span>
+								</div>
+							))}
 						</div>
 					</motion.div>
 				</div>
 			</section>
 
-			{/* How it works */}
-			<section className="px-6 py-20 border-t border-border">
-				<div className="mx-auto max-w-5xl">
-					<h2 className="text-3xl font-bold tracking-tight mb-3">How it works</h2>
-					<p className="text-muted-foreground mb-12 max-w-xl">One URL change. No code rewrite. Koreshield proxies your LLM traffic and handles the rest.</p>
-					<div className="grid gap-8 md:grid-cols-2">
-						{howItWorks.map((item, i) => (
+			<section className="border-y border-border bg-card/35 px-6 py-20">
+				<div className="mx-auto max-w-7xl">
+					<div className="mb-10 max-w-3xl">
+						<p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-electric-green">Response loop</p>
+						<h2 className="text-4xl font-extrabold tracking-[-0.04em] md:text-5xl">Not a filter. A security workflow.</h2>
+					</div>
+					<div className="grid gap-5 md:grid-cols-4">
+						{responseLoop.map((item, index) => (
 							<motion.div
 								key={item.title}
 								initial={{ opacity: 0, y: 16 }}
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true }}
-								transition={{ duration: 0.4, delay: i * 0.07 }}
-								className="flex gap-4 rounded-2xl border border-border bg-card p-6"
+								transition={{ duration: 0.4, delay: index * 0.07 }}
+								className="rounded-[1.5rem] border border-border bg-card/85 p-6 shadow-sm"
 							>
-								<div className="mt-0.5 flex-shrink-0 rounded-xl border border-electric-green/20 bg-electric-green/10 p-2.5">
-									{item.icon}
-								</div>
-								<div>
-									<p className="font-semibold">{item.title}</p>
-									<p className="mt-1 text-sm text-muted-foreground leading-relaxed">{item.body}</p>
-								</div>
+								<item.icon className="mb-5 h-6 w-6 text-electric-green" />
+								<h3 className="text-xl font-bold">{item.title}</h3>
+								<p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
 							</motion.div>
 						))}
 					</div>
 				</div>
 			</section>
 
-			{/* Use cases */}
-			<section className="bg-muted/30 px-6 py-20 border-t border-border">
-				<div className="mx-auto max-w-4xl">
-					<div className="grid gap-12 md:grid-cols-2 md:items-center">
-						<div>
-							<h2 className="text-3xl font-bold tracking-tight">What it catches</h2>
-							<p className="mt-4 text-muted-foreground">Detection runs on every request and response, not just on inputs your app explicitly flags.</p>
-							<ul className="mt-8 space-y-3">
-								{useCases.map((item) => (
-									<li key={item} className="flex items-start gap-3 text-sm">
-										<Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-electric-green" />
-										<span>{item}</span>
-									</li>
-								))}
-							</ul>
-						</div>
-						<div className="rounded-2xl border border-border bg-card p-8">
-							<div className="space-y-4">
-								{[
-									{ label: 'Threat type', value: 'Prompt injection', color: 'text-red-400' },
-									{ label: 'Severity', value: 'High', color: 'text-orange-400' },
-									{ label: 'Decision', value: 'Blocked', color: 'text-electric-green' },
-									{ label: 'Latency added', value: '23ms', color: 'text-foreground' },
-									{ label: 'Request ID', value: 'ks_req_7f2a9c...', color: 'text-muted-foreground' },
-								].map(({ label, value, color }) => (
-									<div key={label} className="flex items-center justify-between border-b border-border pb-3 last:border-0 last:pb-0">
-										<span className="text-xs uppercase tracking-widest text-muted-foreground">{label}</span>
-										<span className={`text-sm font-semibold ${color}`}>{value}</span>
-									</div>
-								))}
-							</div>
-						</div>
+			<section className="px-6 py-20">
+				<div className="mx-auto flex max-w-7xl flex-col gap-5 rounded-[2rem] border border-border bg-card/85 p-7 shadow-sm md:flex-row md:items-center md:justify-between">
+					<div>
+						<h2 className="text-3xl font-extrabold tracking-[-0.03em]">Put detection in the path of live AI traffic.</h2>
+						<p className="mt-2 text-sm text-muted-foreground">Start with proxy enforcement, then expand into alerts, reports, and audit evidence.</p>
 					</div>
-				</div>
-			</section>
-
-			{/* CTA */}
-			<section className="px-6 py-20 border-t border-border text-center">
-				<div className="mx-auto max-w-2xl">
-					<h2 className="text-3xl font-bold">Ready to intercept your first attack?</h2>
-					<p className="mt-4 text-muted-foreground">Start on the Dev plan. Integration takes under 30 minutes.</p>
-					<div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-						<Link to="/signup?plan=free" className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500">
-							Start for free <ArrowRight className="h-4 w-4" />
-						</Link>
-						<Link to="/pricing" className="inline-flex items-center gap-2 rounded-xl border border-border px-7 py-3 font-semibold transition-colors hover:bg-muted">
-							View pricing
-						</Link>
-					</div>
+					<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright">
+						See it live <ArrowRight className="h-4 w-4" />
+					</Link>
 				</div>
 			</section>
 		</div>
