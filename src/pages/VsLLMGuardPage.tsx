@@ -143,6 +143,31 @@ export default function VsLLMGuardPage() {
 					</div>
 				</div>
 			</section>
+
+			<section className="px-6 py-20">
+				<div className="mx-auto max-w-5xl rounded-[2rem] border border-border bg-card/90 p-8 md:p-10 text-center shadow-sm">
+					<h2 className="text-3xl font-extrabold tracking-[-0.04em] mb-4">Ready to choose Koreshield?</h2>
+					<p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
+						Start with a free evaluation or compare with other solutions to find the right fit for your team.
+					</p>
+					<div className="flex flex-wrap justify-center gap-4">
+						<Link
+							to="/demo"
+							className="inline-flex items-center gap-2 px-6 py-3 bg-electric-green hover:bg-emerald-bright text-black rounded-lg font-semibold transition-colors"
+						>
+							Request Demo
+							<ArrowRight className="w-5 h-5" />
+						</Link>
+						<Link
+							to="/vs"
+							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"
+						>
+							Compare All Options
+							<ArrowRight className="w-5 h-5" />
+						</Link>
+					</div>
+				</div>
+			</section>
 		</div>
 	);
 }
