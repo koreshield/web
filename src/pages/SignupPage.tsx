@@ -1,5 +1,6 @@
 import { authService } from '../lib/auth';
-import { ArrowRight, Github, Lock, Mail, ShieldCheck, User } from 'lucide-react';
+import { ArrowRight, Github, Lock, Mail, User } from 'lucide-react';
+import { AuthLayout } from '../components/AuthLayout';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { resolveApiBaseUrl } from '../lib/api-base';
@@ -119,56 +120,15 @@ export function SignupPage() {
     };
 
     return (
-        <div className="auth-shell min-h-screen flex">
-            {/* Left brand panel  -  hidden on mobile */}
-            <div className="auth-side-panel hidden lg:flex lg:w-[42%] border-r border-white/[0.06] flex-col justify-between p-12 relative overflow-hidden">
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:48px_48px] opacity-40 pointer-events-none" />
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-electric-green/[0.03] rounded-full translate-x-1/2 translate-y-1/2 blur-3xl pointer-events-none" />
-
-                {/* Logo */}
-                <div className="relative z-10 flex items-center gap-3">
-                    <img src="/logo/dark/SVG/Black.svg" alt="Koreshield" className="w-8 h-8 dark:hidden" />
-                    <img src="/logo/light/SVG/White.svg" alt="Koreshield" className="w-8 h-8 hidden dark:block" />
-                    <span className="text-xl font-bold text-foreground tracking-tight">Koreshield</span>
-                </div>
-
-                <div className="relative z-10 space-y-8">
-                    <div>
-                        <p className="text-xs font-bold text-electric-green uppercase tracking-[0.24em] mb-3">Get started</p>
-                        <p className="max-w-md text-4xl font-black text-foreground leading-tight tracking-[-0.055em]">
-                            Protect your first AI request today.
-                        </p>
-                    </div>
-
-                    <div className="space-y-4">
-                        {[
-                            'Generate an API key',
-                            'Route traffic through Koreshield',
-                            'Review threats and audit evidence',
-                        ].map((item) => (
-                            <div key={item} className="flex items-start gap-3 rounded-2xl border border-border bg-background/35 p-4">
-                                <ShieldCheck className="w-5 h-5 text-electric-green mt-0.5 shrink-0" />
-                                <span className="text-sm font-medium text-muted-foreground">{item}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <p className="relative z-10 text-xs text-muted-foreground/60">
-                    © {new Date().getFullYear()} Koreshield. All rights reserved.
-                </p>
-            </div>
-
-            {/* Right form panel */}
-            <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
-                <div className="auth-card w-full max-w-md rounded-[2rem] p-6 sm:p-8">
-                    {/* Mobile logo */}
-                    <div className="flex items-center gap-2 mb-8 lg:hidden">
-                        <img src="/logo/dark/SVG/Black.svg" alt="Koreshield" className="w-7 h-7 dark:hidden" />
-                        <img src="/logo/light/SVG/White.svg" alt="Koreshield" className="w-7 h-7 hidden dark:block" />
-                        <span className="font-bold text-foreground">Koreshield</span>
-                    </div>
-
+        <AuthLayout
+            eyebrow="Get started"
+            headline="Protect your first AI request today."
+            bullets={[
+                'Generate an API key',
+                'Route traffic through Koreshield',
+                'Review threats and audit evidence',
+            ]}
+        >
                     <div className="mb-8">
                         <h1 className="text-3xl font-black text-foreground mb-2 tracking-[-0.045em]">
                             Create your workspace
@@ -324,8 +284,6 @@ export function SignupPage() {
                         {' '}and{' '}
                         <Link to="/privacy-policy" className="text-primary hover:underline">Privacy Policy</Link>.
                     </p>
-                </div>
-            </div>
-        </div>
+        </AuthLayout>
     );
 }
