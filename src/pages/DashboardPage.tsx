@@ -85,6 +85,24 @@ const client = new OpenAI({
 		}, {});
 
 	const isNewUser = !loading && (((stats as any)?.statistics?.requests_total ?? 0) === 0);
+	const statistics = (stats as any)?.statistics ?? {};
+	const totalRequests = statistics.requests_total || 0;
+	const blockedRequests = statistics.requests_blocked || 0;
+	const attacksDetected = statistics.attacks_detected || 0;
+	const allowedRequests = statistics.requests_allowed || 0;
+	const blockRate = totalRequests > 0 ? Math.round((blockedRequests / totalRequests) * 100) : 0;
+	const quickActions = [
+		{ to: '/settings/api-keys', icon: Key, title: 'API Keys', body: 'Server tokens', tone: 'text-sky-400' },
+		{ to: '/policies', icon: Shield, title: 'Policies', body: 'Rules and actions', tone: 'text-electric-green' },
+		{ to: '/rag-security', icon: ScanSearch, title: 'RAG Scanner', body: 'Inspect context', tone: 'text-amber-400' },
+		{ to: '/teams', icon: Users, title: 'Teams', body: 'Access control', tone: 'text-violet-400' },
+	];
+	const statCards = [
+		{ label: 'Total Requests', value: totalRequests.toLocaleString(), icon: Activity, tone: 'text-sky-400', detail: 'Traffic inspected' },
+		{ label: 'Blocked', value: blockedRequests, icon: Shield, tone: 'text-red-400', detail: `${blockRate}% block rate` },
+		{ label: 'Attacks', value: attacksDetected, icon: AlertTriangle, tone: 'text-amber-400', detail: 'Threats detected' },
+		{ label: 'Allowed', value: allowedRequests, icon: CheckCircle, tone: 'text-electric-green', detail: 'Clean requests' },
+	];
 
 	if (statsError) {
 		return (
@@ -107,82 +125,72 @@ const client = new OpenAI({
 	}
 
 	return (
-		<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+		<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
 			{/* Page heading */}
-			<div className="mb-8">
-				<h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-				<p className="text-sm text-muted-foreground mt-1">
-					Welcome back{user?.name ? `, ${user.name}` : ''}.
-				</p>
-			</div>
-
-			{/* Connected indicator */}
-			<div className="mb-6">
-				<div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">
-					<CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-					<span className="text-xs text-green-600 font-medium">
-						Connected to Koreshield API
-					</span>
+			<div className="dashboard-panel mb-8 overflow-hidden rounded-[2rem] p-6 md:p-8">
+				<div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+					<div className="max-w-3xl">
+						<div className="mb-5 inline-flex items-center gap-2 rounded-full border border-electric-green/25 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.22em] text-electric-green">
+							<CheckCircle className="h-3.5 w-3.5" />
+							Connected to Koreshield API
+						</div>
+						<h1 className="text-4xl font-black tracking-[-0.055em] md:text-6xl">
+							Security operations, live.
+						</h1>
+						<p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
+							Welcome back{user?.name ? `, ${user.name}` : ''}. Monitor protected requests, review threats, and move from signal to action without leaving the dashboard.
+						</p>
+					</div>
+					<div className="grid min-w-[260px] grid-cols-2 gap-3">
+						<div className="rounded-2xl border border-border bg-background/55 p-4">
+							<p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Posture</p>
+							<p className="mt-2 text-2xl font-black text-electric-green">{attacksDetected > 0 ? 'Active' : 'Quiet'}</p>
+						</div>
+						<div className="rounded-2xl border border-border bg-background/55 p-4">
+							<p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Blocked</p>
+							<p className="mt-2 text-2xl font-black">{blockedRequests}</p>
+						</div>
+					</div>
 				</div>
 			</div>
 
 			{/* Quick Actions */}
-			<div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-8">
-				<Link to="/settings/api-keys" className="bg-card border border-border rounded-lg p-4 hover:border-primary/40 transition-colors group">
-					<div className="flex items-center gap-3">
-						<Key className="w-5 h-5 text-primary" />
-						<div>
-							<div className="font-semibold text-sm group-hover:text-primary transition-colors">API Keys</div>
-							<div className="text-xs text-muted-foreground">Manage server tokens</div>
-						</div>
-					</div>
-				</Link>
-				<Link to="/policies" className="bg-card border border-border rounded-lg p-4 hover:border-primary/40 transition-colors group">
-					<div className="flex items-center gap-3">
-						<Shield className="w-5 h-5 text-primary" />
-						<div>
-							<div className="font-semibold text-sm group-hover:text-primary transition-colors">Policies</div>
-							<div className="text-xs text-muted-foreground">Security rules & actions</div>
-						</div>
-					</div>
-				</Link>
-				<Link to="/rag-security" className="bg-card border border-border rounded-lg p-4 hover:border-primary/40 transition-colors group">
-					<div className="flex items-center gap-3">
-						<ScanSearch className="w-5 h-5 text-primary" />
-						<div>
-							<div className="font-semibold text-sm group-hover:text-primary transition-colors">RAG Scanner</div>
-							<div className="text-xs text-muted-foreground">Scan retrieved docs</div>
-						</div>
-					</div>
-				</Link>
-				<Link to="/teams" className="bg-card border border-border rounded-lg p-4 hover:border-primary/40 transition-colors group">
-					<div className="flex items-center gap-3">
-						<Users className="w-5 h-5 text-primary" />
-						<div>
-							<div className="font-semibold text-sm group-hover:text-primary transition-colors">Teams</div>
-							<div className="text-xs text-muted-foreground">Manage collaborators</div>
-						</div>
-					</div>
-				</Link>
+			<div className="mb-8 grid grid-cols-2 gap-3 xl:grid-cols-4">
+				{quickActions.map((action) => {
+					const Icon = action.icon;
+					return (
+						<Link key={action.to} to={action.to} className="dashboard-card group rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40">
+							<div className="flex items-center gap-3">
+								<div className="rounded-xl border border-border bg-background/60 p-2">
+									<Icon className={`h-5 w-5 ${action.tone}`} />
+								</div>
+								<div>
+									<div className="text-sm font-bold transition-colors group-hover:text-primary">{action.title}</div>
+									<div className="text-xs text-muted-foreground">{action.body}</div>
+								</div>
+							</div>
+						</Link>
+					);
+				})}
 			</div>
 
 			{/* Getting Started Banner for New Users */}
 			{isNewUser && (
-				<div className="mb-8 bg-card border border-border rounded-lg p-6">
+				<div className="dashboard-panel mb-8 rounded-[2rem] p-6">
 					<div className="flex items-start gap-4">
-						<div className="p-3 bg-primary/10 rounded-lg shrink-0">
+						<div className="rounded-2xl border border-primary/20 bg-primary/10 p-3 shrink-0">
 							<Rocket className="w-6 h-6 text-primary" />
 						</div>
 						<div className="flex-1 min-w-0">
-							<h2 className="text-lg font-bold mb-1">Welcome to Koreshield</h2>
+							<h2 className="mb-1 text-2xl font-black tracking-[-0.04em]">Protect your first request.</h2>
 							<p className="text-sm text-muted-foreground mb-5">
 								Everything you need to protect your first integration is right here. Generate a key, review your protection rules, and copy the integration snippet without bouncing between pages.
 							</p>
 
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 								{/* Step 1 — inline key creator */}
-								<div className="bg-background border border-border rounded-lg p-4">
+								<div className="rounded-2xl border border-border bg-background/60 p-4">
 									<div className="flex items-center gap-2 mb-2">
 										<div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0">1</div>
 										<h3 className="font-semibold text-sm">Get Your Token</h3>
@@ -242,7 +250,7 @@ const client = new OpenAI({
 									)}
 								</div>
 
-								<div className="bg-background border border-border rounded-lg p-4">
+								<div className="rounded-2xl border border-border bg-background/60 p-4">
 									<div className="flex items-center gap-2 mb-2">
 										<div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0">2</div>
 										<h3 className="font-semibold text-sm">Configure Policies</h3>
@@ -260,7 +268,7 @@ const client = new OpenAI({
 									</Link>
 								</div>
 
-								<div className="bg-background border border-border rounded-lg p-4">
+								<div className="rounded-2xl border border-border bg-background/60 p-4">
 									<div className="flex items-center gap-2 mb-2">
 										<div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0">3</div>
 										<h3 className="font-semibold text-sm">Send Requests</h3>
@@ -274,7 +282,7 @@ const client = new OpenAI({
 								</div>
 							</div>
 
-							<div className="bg-background border border-border rounded-lg p-4">
+							<div className="rounded-2xl border border-border bg-background/60 p-4">
 								<div className="flex items-center gap-2 mb-2">
 									<Code className="w-4 h-4 text-primary shrink-0" />
 									<h3 className="font-semibold text-xs">Quick Integration</h3>
@@ -306,13 +314,13 @@ const client = new OpenAI({
 				<>
 					<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 						{Array.from({ length: 4 }).map((_, index) => (
-							<div key={index} className="bg-card border border-border rounded-lg p-5 animate-pulse">
+							<div key={index} className="dashboard-card rounded-2xl p-5 animate-pulse">
 								<div className="h-3 w-20 bg-muted rounded mb-4" />
 								<div className="h-8 w-16 bg-muted rounded" />
 							</div>
 						))}
 					</div>
-					<div className="bg-card border border-border rounded-lg p-6">
+					<div className="dashboard-card rounded-[2rem] p-6">
 						<div className="h-5 w-32 bg-muted rounded mb-4 animate-pulse" />
 						<div className="space-y-3">
 							{Array.from({ length: 3 }).map((_, index) => (
@@ -324,63 +332,48 @@ const client = new OpenAI({
 			) : (
 				<>
 					{/* Stats Grid */}
-					<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-						<div className="bg-card border border-border rounded-lg p-5">
-							<div className="flex items-center justify-between mb-3">
-								<span className="text-xs font-medium text-muted-foreground">Total Requests</span>
-								<Activity className="w-4 h-4 text-blue-500" />
-							</div>
-							<div className="text-2xl font-bold">
-								{((stats as any)?.statistics?.requests_total || 0).toLocaleString()}
-							</div>
-						</div>
-
-						<div className="bg-card border border-border rounded-lg p-5">
-							<div className="flex items-center justify-between mb-3">
-								<span className="text-xs font-medium text-muted-foreground">Blocked</span>
-								<Shield className="w-4 h-4 text-red-500" />
-							</div>
-							<div className="text-2xl font-bold text-red-500">
-								{(stats as any)?.statistics?.requests_blocked || 0}
-							</div>
-						</div>
-
-						<div className="bg-card border border-border rounded-lg p-5">
-							<div className="flex items-center justify-between mb-3">
-								<span className="text-xs font-medium text-muted-foreground">Attacks</span>
-								<AlertTriangle className="w-4 h-4 text-orange-500" />
-							</div>
-							<div className="text-2xl font-bold text-orange-500">
-								{(stats as any)?.statistics?.attacks_detected || 0}
-							</div>
-						</div>
-
-						<div className="bg-card border border-border rounded-lg p-5">
-							<div className="flex items-center justify-between mb-3">
-								<span className="text-xs font-medium text-muted-foreground">Allowed</span>
-								<CheckCircle className="w-4 h-4 text-green-500" />
-							</div>
-							<div className="text-2xl font-bold text-green-500">
-								{(stats as any)?.statistics?.requests_allowed || 0}
-							</div>
-						</div>
+					<div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+						{statCards.map((card) => {
+							const Icon = card.icon;
+							return (
+								<div key={card.label} className="dashboard-card overflow-hidden rounded-2xl p-5">
+									<div className="mb-5 flex items-center justify-between">
+										<span className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{card.label}</span>
+										<div className="rounded-xl border border-border bg-background/60 p-2">
+											<Icon className={`h-4 w-4 ${card.tone}`} />
+										</div>
+									</div>
+									<div className={`text-3xl font-black tracking-[-0.04em] ${card.tone}`}>{card.value}</div>
+									<p className="mt-2 text-xs text-muted-foreground">{card.detail}</p>
+								</div>
+							);
+						})}
 					</div>
 
 					{/* Recent Threats */}
-					<div className="bg-card border border-border rounded-lg p-6 mb-8">
-						<h2 className="text-base font-semibold mb-4">Recent Threats</h2>
+					<div className="dashboard-panel mb-8 rounded-[2rem] p-6">
+						<div className="mb-5 flex items-center justify-between gap-4">
+							<div>
+								<p className="text-xs font-bold uppercase tracking-[0.22em] text-electric-green">Threat evidence</p>
+								<h2 className="mt-1 text-2xl font-black tracking-[-0.04em]">Recent threats</h2>
+							</div>
+							<Link to="/audit-logs" className="hidden rounded-full border border-border px-4 py-2 text-xs font-bold text-muted-foreground transition-colors hover:text-foreground sm:inline-flex">
+								View audit logs
+							</Link>
+						</div>
 						<div className="space-y-2">
 							{recentAttacks.length === 0 ? (
-								<div className="text-center py-10 text-muted-foreground">
-									<Shield className="w-10 h-10 mx-auto mb-2 opacity-30" />
-									<p className="text-sm">No threats detected yet</p>
+								<div className="rounded-2xl border border-border bg-background/45 py-12 text-center text-muted-foreground">
+									<Shield className="mx-auto mb-3 h-10 w-10 text-electric-green opacity-70" />
+									<p className="text-sm font-medium">No threats detected yet</p>
+									<p className="mt-1 text-xs">Protected traffic will appear here when Koreshield catches or flags risky activity.</p>
 								</div>
 							) : (
 								recentAttacks.map((attack: any) => (
 									<div
 										key={attack.id}
 										onClick={() => setSelectedAttack(attack)}
-										className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted transition-colors cursor-pointer"
+										className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-background/55 p-4 transition-colors hover:bg-muted/70"
 									>
 										<div className="mt-0.5 shrink-0">
 											{(attack.action_taken === 'blocked' || attack.is_blocked || attack.status === 'failure') ? (

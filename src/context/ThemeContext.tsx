@@ -36,13 +36,13 @@ function resolveInitialTheme(storageKey: string, defaultTheme: Theme): Theme {
         // Ignore storage access failures and fall back to system/default theme.
     }
 
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return defaultTheme;
 }
 
 export function ThemeProvider({
     children,
     defaultTheme = 'dark',
-    storageKey = 'vite-ui-theme',
+    storageKey = 'koreshield-theme',
 }: ThemeProviderProps) {
     const [theme, setTheme] = useState<Theme>(
         () => resolveInitialTheme(storageKey, defaultTheme)
