@@ -50,60 +50,100 @@ const logos = {
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
         </svg>
     ),
+    Azure: () => (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+            <path d="M13.05 2 4.6 21.91h7.12l1.14-3.39h-3.5l4.93-14.6L13.05 2Zm1.61 4.88-2.39 6.73 4.6 5.72H8.43L7.6 21.91h13.8L14.66 6.88Z" />
+        </svg>
+    ),
+    LlamaIndex: () => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
+            <path d="M5.5 15.5c-.9-1.2-1.1-2.8-.5-4.2.8-1.9 2.7-3.1 4.8-3.1h4.4c2.1 0 4 1.2 4.8 3.1.6 1.4.4 3-.5 4.2" />
+            <path d="M8.2 9.1 6.6 5.8M15.8 9.1l1.6-3.3M8.5 14.1h.01M15.5 14.1h.01" />
+            <path d="M9.2 18.2c1.9 1.1 3.7 1.1 5.6 0" />
+        </svg>
+    ),
+    FastAPI: () => (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1.2 3.7-.9 5.2h4.1l-5.8 7.4.9-5.2H7.6l5.6-7.4Z" />
+        </svg>
+    ),
+    Vercel: () => (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+            <path d="M12 4 24 20H0L12 4Z" />
+        </svg>
+    ),
+    Cloudflare: () => (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
+            <path d="M16.5 17.1H6.1a3.5 3.5 0 0 1-.4-7 5.4 5.4 0 0 1 10.3-1.7 4.4 4.4 0 0 1 .5 8.7Zm.7-7.1a6.8 6.8 0 0 0-.6-1.3 4.9 4.9 0 0 0-9.4 1.7l-.1.7-.7-.1a2.2 2.2 0 0 0-.3 4.4h10.4a2.7 2.7 0 0 0 .7-5.4Z" />
+        </svg>
+    ),
+    PostgreSQL: () => (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+            <path d="M17.2 18.5c.2-1.7.2-3.3.1-4.9 1.2-.3 2.1-.9 2.7-1.8 1.3-1.9.9-4.7-1-6.9-1.8-2.1-4.4-3.1-7-3.1S6.8 2.8 5 4.9c-1.9 2.2-2.3 5-1 6.9.6.9 1.5 1.5 2.7 1.8-.1 1.6-.1 3.2.1 4.9.1.9.8 1.6 1.7 1.6.8 0 1.5-.6 1.7-1.4.4.1.9.1 1.8.1s1.4 0 1.8-.1c.2.8.9 1.4 1.7 1.4.9 0 1.6-.7 1.7-1.6ZM8.5 7.9c.8 0 1.4.6 1.4 1.4s-.6 1.4-1.4 1.4-1.4-.6-1.4-1.4.6-1.4 1.4-1.4Zm7 0c.8 0 1.4.6 1.4 1.4s-.6 1.4-1.4 1.4-1.4-.6-1.4-1.4.6-1.4 1.4-1.4ZM12 17c-.9 0-1.5-.1-1.9-.3l.2-2.8c.5.1 1.1.2 1.7.2s1.2-.1 1.7-.2l.2 2.8c-.4.2-1 .3-1.9.3Z" />
+        </svg>
+    ),
+    Redis: () => (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+            <path d="M21.6 16.3c0 .4-.3.8-.9 1.1l-7.8 4c-.5.3-1.3.3-1.8 0l-7.8-4c-.6-.3-.9-.7-.9-1.1s.3-.8.9-1.1l1.4-.7 6.4 3.3c.5.3 1.3.3 1.8 0l6.4-3.3 1.4.7c.6.3.9.7.9 1.1Zm0-4.1c0 .4-.3.8-.9 1.1l-7.8 4c-.5.3-1.3.3-1.8 0l-7.8-4c-.6-.3-.9-.7-.9-1.1s.3-.8.9-1.1l1.4-.7 6.4 3.3c.5.3 1.3.3 1.8 0l6.4-3.3 1.4.7c.6.3.9.7.9 1.1ZM12.9 2.6l7.8 4c1.2.6 1.2 1.6 0 2.2l-7.8 4c-.5.3-1.3.3-1.8 0l-7.8-4c-1.2-.6-1.2-1.6 0-2.2l7.8-4c.5-.3 1.3-.3 1.8 0Z" />
+        </svg>
+    ),
 };
 
+// Keep this list limited to documented/code-backed integrations.
 const integrations = [
     { name: 'OpenAI', Logo: logos.OpenAI },
     { name: 'Anthropic', Logo: logos.Anthropic },
     { name: 'Gemini', Logo: logos.Google },
+    { name: 'Azure OpenAI', Logo: logos.Azure },
+    { name: 'DeepSeek', Logo: logos.DeepSeek },
     { name: 'Salesforce', Logo: logos.Salesforce },
     { name: 'HubSpot', Logo: logos.HubSpot },
     { name: 'Zendesk', Logo: logos.Zendesk },
     { name: 'Slack', Logo: logos.Slack },
     { name: 'LangChain', Logo: logos.LangChain },
-    { name: 'DeepSeek', Logo: logos.DeepSeek },
+    { name: 'LlamaIndex', Logo: logos.LlamaIndex },
+    { name: 'FastAPI', Logo: logos.FastAPI },
+    { name: 'Vercel', Logo: logos.Vercel },
+    { name: 'Cloudflare Workers', Logo: logos.Cloudflare },
+    { name: 'PostgreSQL', Logo: logos.PostgreSQL },
+    { name: 'Redis', Logo: logos.Redis },
 ];
-
-// Duplicate for seamless loop
-const tickerItems = [...integrations, ...integrations];
 
 export function IntegrationTicker() {
     return (
-        <section className="py-10 border-y border-white/[0.06] bg-background backdrop-blur-sm overflow-hidden relative">
-            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-10"></div>
-            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-10"></div>
+        <section className="relative overflow-hidden border-y border-white/[0.06] bg-background py-8 backdrop-blur-sm sm:py-10">
+            <div className="absolute left-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-r from-background to-transparent sm:w-20"></div>
+            <div className="absolute right-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-l from-background to-transparent sm:w-20"></div>
 
-            <div className="max-w-7xl mx-auto px-6 mb-6 text-center">
-                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">
+            <div className="mx-auto mb-6 max-w-7xl px-4 text-center sm:px-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-sm sm:tracking-widest">
                     Works with the tools your team already uses
                 </p>
             </div>
 
-            <div className="flex">
+            <div className="flex overflow-hidden">
                 <motion.div
-                    className="flex gap-12 sm:gap-20 items-center whitespace-nowrap"
-                    animate={{
-                        x: [0, -1200],
-                    }}
+                    className="flex min-w-max items-center gap-8 whitespace-nowrap pr-8 sm:gap-14 sm:pr-14"
+                    animate={{ x: ['0%', '-50%'] }}
                     transition={{
                         x: {
                             repeat: Infinity,
                             repeatType: "loop",
-                            duration: 35,
+                            duration: 45,
                             ease: "linear",
                         },
                     }}
                 >
-                    {tickerItems.map((item, i) => (
+                    {[...integrations, ...integrations].map((item, i) => (
                         <div
                             key={i}
-                            className="flex items-center gap-3 opacity-70 hover:opacity-100 transition-opacity cursor-default"
+                            className="flex items-center gap-2.5 opacity-70 transition-opacity hover:opacity-100 sm:gap-3 cursor-default"
                             aria-label={item.name}
                         >
                             <span className="text-muted-foreground hover:text-electric-green transition-colors">
                                 <item.Logo />
                             </span>
-                            <span className="text-xl font-semibold text-foreground/80">{item.name}</span>
+                            <span className="text-base font-semibold text-foreground/80 sm:text-xl">{item.name}</span>
                         </div>
                     ))}
                 </motion.div>

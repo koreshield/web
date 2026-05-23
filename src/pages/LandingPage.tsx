@@ -1,5 +1,6 @@
 import Architecture from '../components/Architecture';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { EcosystemProof } from '../components/EcosystemProof';
 import Features from '../components/Features';
 import Hero from '../components/Hero';
 import { IntegrationTicker } from '../components/IntegrationTicker';
@@ -34,6 +35,8 @@ function LandingPage() {
         <div className="bg-background text-foreground">
             <SEOMeta />
             <Hero />
+
+            <EcosystemProof />
 
             <ErrorBoundary fallback={<div className="h-20 bg-muted/50" />}>
                 <IntegrationTicker />
