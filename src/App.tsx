@@ -166,6 +166,8 @@ function AppContent() {
 							</Suspense>
 						}
 					/>
+					<Route path="/compare" element={<Navigate to="/vs" replace />} />
+					<Route path="/compare/" element={<Navigate to="/vs" replace />} />
 					<Route path="/compare/llm-guard" element={<Navigate to="/vs/llm-guard" replace />} />
 					<Route
 						path="/vs/build-yourself"
