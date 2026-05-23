@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { AlertTriangle, CheckCircle, Clock, Code, DollarSign, Shield, TrendingUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Code, DollarSign, ExternalLink, Shield, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
@@ -354,6 +354,12 @@ export default function VsBuildYourselfPage() {
 						>
 							<Code className="w-5 h-5" />
 							Start building
+						</Link>
+						<Link to="/vs"
+							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"
+						>
+							Compare Other Options
+							<ExternalLink className="w-5 h-5" />
 						</Link>
 					</div>
 				</motion.div>
