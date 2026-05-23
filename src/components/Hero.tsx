@@ -23,7 +23,7 @@ function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6, delay: 0.1 }}
 					>
-						<span className="w-1.5 h-1.5 rounded-full bg-electric-green animate-pulse" />
+						<span className="w-1.5 h-1.5 rounded-full bg-electric-green" />
 						LLM Security Firewall
 					</motion.div>
 

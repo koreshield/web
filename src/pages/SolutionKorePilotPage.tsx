@@ -83,7 +83,7 @@ export default function SolutionKorePilotPage() {
 				<div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
 				
 				{/* Animated gradient orb */}
-				<div className="absolute -top-40 -right-40 w-80 h-80 bg-electric-green/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+				<div className="absolute -top-40 -right-40 w-80 h-80 bg-electric-green/10 rounded-full blur-3xl pointer-events-none" />
 				<div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
 
 				<div className="relative mx-auto max-w-5xl">
@@ -94,7 +94,7 @@ export default function SolutionKorePilotPage() {
 						className="text-center"
 					>
 						<div className="inline-flex items-center gap-2 rounded-full border border-electric-green/30 bg-electric-green/5 px-4 py-2 mb-8 backdrop-blur-sm">
-							<span className="h-1.5 w-1.5 rounded-full bg-electric-green animate-pulse" />
+							<span className="h-1.5 w-1.5 rounded-full bg-electric-green" />
 							<span className="text-xs font-semibold uppercase tracking-widest text-electric-green/90">KorePilot roadmap</span>
 						</div>
 
