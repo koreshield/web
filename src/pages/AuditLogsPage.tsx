@@ -20,6 +20,7 @@ interface AuditLog {
 	severity: 'low' | 'medium' | 'high' | 'critical';
 	is_tool_runtime: boolean;
 	is_rag_scan: boolean;
+	is_audio_scan: boolean;
 	tool_name?: string;
 	risk_class?: string;
 	review_required?: boolean;
@@ -123,6 +124,10 @@ export default function AuditLogsPage() {
 			const isRagScan = entry.path === '/v1/rag/scan'
 				|| entry.endpoint === '/v1/rag/scan'
 				|| entry.attack_type === 'indirect_injection';
+			const isAudioScan = entry.path === '/v1/audio/scan'
+				|| entry.endpoint === '/v1/audio/scan'
+				|| entry.attack_type === 'speech_prompt_injection'
+				|| entry.model === 'audio_scan';
 			const toolName = toolAnalysis.tool_name || entry.tool_name || entry.model || undefined;
 			const riskClass = toolAnalysis.risk_class || entry.risk_class || policyResult.risk_class || undefined;
 			const reviewRequired = toolAnalysis.review_required ?? entry.review_required ?? policyResult.review_required ?? false;
@@ -133,6 +138,8 @@ export default function AuditLogsPage() {
 				? `${toolName || 'tool'} ${decisionAction || 'evaluated'}${riskClass ? ` · ${riskClass}` : ''}${reviewRequired ? ' · review required' : ''}`
 				: isRagScan
 					? `RAG scan flagged ${details.total_threats_found || entry.total_threats_found || 'threats'}${firstThreatExcerpt ? ` · ${firstThreatExcerpt}` : ''}`
+				: isAudioScan
+					? `VoiceGuard ${details.decision || entry.decision || 'scan'} · ${details.risk_level || entry.risk_level || 'risk assessed'}`
 				: undefined;
 			return {
 				id: toStringValue(entry.id || entry.request_id || entry.scan_id || entry.event_id, String(index)),
@@ -148,6 +155,7 @@ export default function AuditLogsPage() {
 				severity: toSeverityValue(entry.severity || toolAnalysis.risk_class, severity),
 				is_tool_runtime: isToolRuntime,
 				is_rag_scan: isRagScan,
+				is_audio_scan: isAudioScan,
 				tool_name: typeof toolName === 'string' ? toolName : undefined,
 				risk_class: typeof riskClass === 'string' ? riskClass : undefined,
 				review_required: toBooleanValue(reviewRequired),
@@ -219,6 +227,7 @@ export default function AuditLogsPage() {
 			filterAction === 'all'
 			|| (filterAction === 'tool_runtime' && log.is_tool_runtime)
 			|| (filterAction === 'rag_scan' && log.is_rag_scan)
+			|| (filterAction === 'audio_scan' && log.is_audio_scan)
 			|| (filterAction === 'review_required' && log.review_required)
 			|| (filterAction === 'blocked' && (log.decision_action === 'blocked' || log.status === 'failure'))
 			|| log.action.includes(filterAction);
@@ -251,6 +260,7 @@ export default function AuditLogsPage() {
 
 	const runtimeToolLogs = logs.filter((log) => log.is_tool_runtime);
 	const ragScanLogs = logs.filter((log) => log.is_rag_scan);
+	const audioScanLogs = logs.filter((log) => log.is_audio_scan);
 	const reviewRequiredLogs = runtimeToolLogs.filter((log) => log.review_required);
 	const blockedToolLogs = runtimeToolLogs.filter((log) => log.decision_action === 'blocked' || log.status === 'failure');
 	const activeSessions = sessions.filter((session) => session.state === 'active');
@@ -285,16 +295,30 @@ export default function AuditLogsPage() {
 				</AppStatGrid>
 
 				<AppSurface className="mb-8">
-					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-						<div>
-							<h2 className="text-base sm:text-lg font-semibold text-foreground">RAG Evidence Visibility</h2>
-							<p className="text-xs sm:text-sm text-muted-foreground">
-								Indirect prompt injection findings now log the suspicious excerpt and document reference so reviews can point to concrete evidence instead of a generic flag.
-							</p>
+					<div className="grid gap-6 md:grid-cols-2">
+						<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+							<div>
+								<h2 className="text-base sm:text-lg font-semibold text-foreground">RAG Evidence Visibility</h2>
+								<p className="text-xs sm:text-sm text-muted-foreground">
+									Indirect prompt injection findings log suspicious excerpts and document references for review.
+								</p>
+							</div>
+							<div className="text-left sm:text-right">
+								<div className="text-xs uppercase tracking-wide text-muted-foreground">RAG scan events</div>
+								<div className="text-xl sm:text-2xl font-bold text-foreground">{ragScanLogs.length}</div>
+							</div>
 						</div>
-						<div className="text-left sm:text-right">
-							<div className="text-xs uppercase tracking-wide text-muted-foreground">RAG scan events</div>
-							<div className="text-xl sm:text-2xl font-bold text-foreground">{ragScanLogs.length}</div>
+						<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+							<div>
+								<h2 className="text-base sm:text-lg font-semibold text-foreground">VoiceGuard Visibility</h2>
+								<p className="text-xs sm:text-sm text-muted-foreground">
+									Speech prompt scans log decision, risk level, and tool gating before voice agents act.
+								</p>
+							</div>
+							<div className="text-left sm:text-right">
+								<div className="text-xs uppercase tracking-wide text-muted-foreground">Voice scan events</div>
+								<div className="text-xl sm:text-2xl font-bold text-foreground">{audioScanLogs.length}</div>
+							</div>
 						</div>
 					</div>
 				</AppSurface>
@@ -487,6 +511,7 @@ export default function AuditLogsPage() {
 									<option value="exported">Exported</option>
 									<option value="tool_runtime">Tool Runtime</option>
 									<option value="rag_scan">RAG Scan Findings</option>
+									<option value="audio_scan">VoiceGuard Findings</option>
 									<option value="review_required">Review Required</option>
 									<option value="blocked">Blocked Decisions</option>
 								</select>
