@@ -26,6 +26,19 @@ import {
 } from '../components/AppPageLayout';
 import { api, type UsageSummary } from '../lib/api-client';
 
+type UsageSummaryView = UsageSummary & {
+	source?: 'realtime' | 'fallback';
+};
+
+const PLAN_LIMITS: Record<string, number | null> = {
+	free: 10_000,
+	dev: 10_000,
+	developer: 10_000,
+	growth: 100_000,
+	scale: 1_000_000,
+	enterprise: null,
+};
+
 function formatNumber(value: number | null | undefined) {
 	if (value === null || value === undefined) return 'Unlimited';
 	return new Intl.NumberFormat('en-GB').format(value);
@@ -49,6 +62,130 @@ function usageTone(status: UsageSummary['limits']['status']) {
 	if (status === 'limit_reached' || status === 'near_limit') return 'text-red-500';
 	if (status === 'watch') return 'text-amber-500';
 	return 'text-electric-green';
+}
+
+function getNextMonthStart() {
+	const now = new Date();
+	return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+}
+
+function normalizePlanSlug(value: unknown) {
+	const slug = typeof value === 'string' ? value.toLowerCase() : 'free';
+	if (slug.includes('enterprise')) return 'enterprise';
+	if (slug.includes('scale') || slug.includes('business') || slug.includes('pro')) return 'scale';
+	if (slug.includes('growth') || slug.includes('startup') || slug.includes('paid')) return 'growth';
+	return 'free';
+}
+
+function buildFallbackUsage(statsRaw: unknown, billingRaw: unknown, keysRaw: unknown): UsageSummaryView {
+	const statsEnvelope = statsRaw && typeof statsRaw === 'object' ? statsRaw as Record<string, unknown> : {};
+	const stats = statsEnvelope.statistics && typeof statsEnvelope.statistics === 'object'
+		? statsEnvelope.statistics as Record<string, unknown>
+		: {};
+	const billing = billingRaw && typeof billingRaw === 'object' ? billingRaw as Record<string, unknown> : {};
+	const planSlug = normalizePlanSlug(billing.plan_slug || billing.plan_name);
+	const planLimit = PLAN_LIMITS[planSlug] ?? 10_000;
+	const protectedRequests = typeof stats.requests_total === 'number' ? stats.requests_total : 0;
+	const blocked = typeof stats.requests_blocked === 'number' ? stats.requests_blocked : 0;
+	const attacks = typeof stats.attacks_detected === 'number' ? stats.attacks_detected : 0;
+	const allowed = typeof stats.requests_allowed === 'number' ? stats.requests_allowed : Math.max(protectedRequests - blocked, 0);
+	const percentUsed = planLimit ? Math.round((protectedRequests / planLimit) * 1000) / 10 : null;
+	const remaining = planLimit === null ? null : Math.max(planLimit - protectedRequests, 0);
+	const status = percentUsed === null
+		? 'unlimited'
+		: percentUsed >= 100
+			? 'limit_reached'
+			: percentUsed >= 95
+				? 'near_limit'
+				: percentUsed >= 80
+					? 'watch'
+					: 'ok';
+	const now = new Date();
+	const periodEnd = getNextMonthStart();
+	const keys = Array.isArray(keysRaw)
+		? keysRaw
+		: keysRaw && typeof keysRaw === 'object' && Array.isArray((keysRaw as Record<string, unknown>).api_keys)
+			? (keysRaw as Record<string, unknown>).api_keys as unknown[]
+			: [];
+
+	return {
+		source: 'fallback',
+		period: {
+			start: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0)).toISOString(),
+			end: periodEnd.toISOString(),
+			label: new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' }).format(now),
+		},
+		plan: {
+			slug: planSlug,
+			name: typeof billing.plan_name === 'string' ? billing.plan_name : planSlug[0].toUpperCase() + planSlug.slice(1),
+			protected_request_limit: planLimit,
+			overage_unit_requests: planSlug === 'growth' || planSlug === 'scale' ? 100_000 : null,
+			overage_unit_price_gbp: planSlug === 'growth' || planSlug === 'scale' ? 12 : null,
+		},
+		usage: {
+			protected_requests: protectedRequests,
+			requests_allowed: allowed,
+			requests_blocked: blocked,
+			attacks_detected: attacks,
+			rag_scans: 0,
+			tokens_total: 0,
+			estimated_cost_gbp: 0,
+		},
+		limits: {
+			protected_requests: planLimit,
+			remaining,
+			percent_used: percentUsed,
+			status,
+		},
+		breakdown: {
+			daily: [],
+			by_api_key: keys.map((item, index) => {
+				const key = item && typeof item === 'object' ? item as Record<string, unknown> : {};
+				return {
+					id: typeof key.id === 'string' ? key.id : `key-${index}`,
+					name: typeof key.name === 'string' ? key.name : 'API key',
+					key_prefix: typeof key.key_prefix === 'string' ? key.key_prefix : null,
+					monthly_ceiling: typeof key.monthly_ceiling === 'number' ? key.monthly_ceiling : null,
+					protected_requests: 0,
+					requests_blocked: 0,
+					attacks_detected: 0,
+					last_used_at: typeof key.last_used_at === 'string' ? key.last_used_at : null,
+				};
+			}),
+		},
+		alerts: status === 'watch' || status === 'near_limit' || status === 'limit_reached'
+			? [{ level: status === 'watch' ? 'warning' : 'critical', message: 'Your protected request allowance is getting close to its monthly limit.' }]
+			: [],
+	};
+}
+
+async function loadUsageSummary(): Promise<UsageSummaryView> {
+	try {
+		const usage = await api.getUsageSummary();
+		return { ...usage, source: 'realtime' };
+	} catch (err) {
+		const error = err as { code?: number; message?: string };
+		const isMissingEndpoint = error.code === 404 || error.message === 'Not Found';
+		if (!isMissingEndpoint) {
+			throw err;
+		}
+
+		const [stats, billing, keys] = await Promise.allSettled([
+			api.getStats(),
+			api.getBillingAccount(),
+			api.getApiKeys(),
+		]);
+
+		if (stats.status === 'rejected' && billing.status === 'rejected' && keys.status === 'rejected') {
+			throw err;
+		}
+
+		return buildFallbackUsage(
+			stats.status === 'fulfilled' ? stats.value : null,
+			billing.status === 'fulfilled' ? billing.value : null,
+			keys.status === 'fulfilled' ? keys.value : null,
+		);
+	}
 }
 
 function ProgressBar({ usage }: { usage: UsageSummary }) {
@@ -159,7 +296,7 @@ function KeyUsageTable({ usage }: { usage: UsageSummary }) {
 export default function UsageLimitsPage() {
 	const { data, isLoading, error, refetch } = useQuery({
 		queryKey: ['usage-summary'],
-		queryFn: () => api.getUsageSummary(),
+		queryFn: loadUsageSummary,
 		refetchInterval: 60_000,
 	});
 
@@ -219,6 +356,17 @@ export default function UsageLimitsPage() {
 					</div>
 				</AppCallout>
 			))}
+
+			{data.source === 'fallback' && (
+				<AppCallout variant="info">
+					<div className="flex items-start gap-3">
+						<AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+						<span>
+							Showing a compatibility view from existing dashboard stats while the new usage endpoint is unavailable.
+						</span>
+					</div>
+				</AppCallout>
+			)}
 
 			<AppPageSection
 				title={data.period.label}
