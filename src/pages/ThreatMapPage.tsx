@@ -7,6 +7,7 @@ import { TopEndpointsWidget } from '../components/TopEndpointsWidget';
 import { wsClient, type ThreatDetectedEvent, type WebSocketEvent } from '../lib/websocket-client';
 import { api } from '../lib/api-client';
 import { SEOMeta } from '../components/SEOMeta';
+import { AppCallout, AppPage, AppPageHeader, AppPageSection, AppPrimaryButton, AppStatCard, AppStatGrid, AppSurface } from '../components/AppPageLayout';
 import { format } from 'date-fns';
 
 interface ThreatLocation {
@@ -140,138 +141,104 @@ export function ThreatMapPage() {
 		URL.revokeObjectURL(url);
 	};
 
+	const headerActions = (
+		<div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+			<select
+				value={timeRange}
+				onChange={e => setTimeRange(e.target.value as TimeRange)}
+				className="rounded-lg border border-border bg-background/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+			>
+				<option value="7d">Last 7 days</option>
+				<option value="30d">Last 30 days</option>
+				<option value="90d">Last 90 days</option>
+			</select>
+
+			{wsConnected ? (
+				<div className="flex items-center gap-2 rounded-lg border border-green-500/50 bg-green-500/10 px-3 py-2">
+					<div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+					<span className="text-sm font-medium text-green-600">Live</span>
+				</div>
+			) : (
+				<div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2">
+					<div className="h-2 w-2 rounded-full bg-muted-foreground/60" />
+					<span className="text-sm font-medium text-muted-foreground">Connecting...</span>
+				</div>
+			)}
+
+			<AppPrimaryButton onClick={exportData} className="w-full sm:w-auto">
+				<Download className="h-4 w-4" />
+				Export Data
+			</AppPrimaryButton>
+		</div>
+	);
+
 	return (
-		<div className="bg-background">
+		<>
 			<SEOMeta
 				title="Threat Map | Koreshield"
 				description="Real-time geographic visualization of security threats and attack patterns"
 			/>
 
-			<header className="border-b border-border bg-card">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-						<div>
-							<h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
-								<MapPin className="w-8 h-8 text-primary" />
-								Global Threat Map
-							</h1>
-							<p className="text-sm sm:text-base text-muted-foreground mt-1">
-								Real-time geographic visualization of security threats
-							</p>
-						</div>
-						<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-							{/* Time range selector */}
-							<select
-								value={timeRange}
-								onChange={e => setTimeRange(e.target.value as TimeRange)}
-								className="px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-							>
-								<option value="7d">Last 7 days</option>
-								<option value="30d">Last 30 days</option>
-								<option value="90d">Last 90 days</option>
-							</select>
+			<AppPage>
+				<AppPageHeader
+					eyebrow="Geographic intel"
+					eyebrowIcon={Activity}
+					icon={MapPin}
+					title="Global Threat Map"
+					description="Real-time geographic visualization of security threats"
+					actions={headerActions}
+				/>
 
-							{wsConnected ? (
-								<div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/50 rounded-lg">
-									<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-									<span className="text-sm font-medium text-green-600">Live</span>
-								</div>
-							) : (
-								<div className="flex items-center gap-2 px-3 py-2 bg-gray-500/10 border border-gray-500/50 rounded-lg">
-									<div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-									<span className="text-sm font-medium text-gray-600">Connecting...</span>
-								</div>
-							)}
-							<button
-								onClick={exportData}
-								className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
-							>
-								<Download className="w-4 h-4" />
-								Export Data
-							</button>
-						</div>
-					</div>
-				</div>
-			</header>
+				<AppCallout variant="info">
+					The map updates in <strong>real-time</strong> via WebSocket as threats are detected. Attack vector statistics and top endpoints reflect <strong>live tenant data</strong>. Geographic markers appear only when source events include location metadata.
+				</AppCallout>
 
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
-				<div className="mb-6 flex items-start gap-3 bg-blue-500/10 border border-blue-500/30 text-blue-700 dark:text-blue-400 rounded-lg px-4 py-3 text-sm">
-					<span className="mt-0.5 flex-shrink-0">ℹ</span>
-					<span>
-						The map updates in <strong>real-time</strong> via WebSocket as threats are detected. Attack vector statistics and top endpoints reflect <strong>live tenant data</strong>. Geographic markers appear only when source events include location metadata.
-					</span>
-				</div>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-					<div className="bg-card border border-border rounded-lg p-6">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Live Threats</span>
-							<Activity className="w-5 h-5 text-blue-500" />
-						</div>
-						<div className="text-3xl font-bold">{stats.total}</div>
-						<p className="text-xs text-muted-foreground mt-1">Current live session</p>
-					</div>
+				<AppStatGrid columns={3}>
+					<AppStatCard label="Live Threats" value={stats.total} icon={Activity} tone="text-sky-400" detail="Current live session" />
+					<AppStatCard label="Critical" value={stats.critical} icon={Shield} tone="text-red-400" detail="High priority threats" />
+					<AppStatCard label="Attack Types" value={Object.keys(attackVectors).length} icon={TrendingUp} tone="text-emerald-400" detail="Distinct attack categories" />
+				</AppStatGrid>
 
-					<div className="bg-card border border-border rounded-lg p-6">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Critical</span>
-							<Shield className="w-5 h-5 text-red-500" />
-						</div>
-						<div className="text-3xl font-bold text-red-600">{stats.critical}</div>
-						<p className="text-xs text-muted-foreground mt-1">High priority threats</p>
-					</div>
-
-					<div className="bg-card border border-border rounded-lg p-6">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-muted-foreground">Attack Types</span>
-							<TrendingUp className="w-5 h-5 text-green-500" />
-						</div>
-						<div className="text-3xl font-bold">{Object.keys(attackVectors).length}</div>
-						<p className="text-xs text-muted-foreground mt-1">Distinct attack categories</p>
-					</div>
-				</div>
-
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 mb-8">
+				<div className="mb-8 grid grid-cols-1 gap-4 sm:gap-8 lg:grid-cols-3">
 					<div className="lg:col-span-2">
-						<div className="bg-card border border-border rounded-lg p-4 sm:p-6">
-							<h2 className="text-lg sm:text-xl font-semibold mb-4">Geographic Threat Distribution</h2>
-							<p className="text-xs text-muted-foreground mb-3">
-								Map populates in real-time as threats are detected via WebSocket.
-							</p>
-							<div className="h-[300px] sm:h-[500px] w-full overflow-hidden">
+						<AppPageSection eyebrow="Map" title="Geographic Threat Distribution" description="Map populates in real-time as threats are detected via WebSocket." variant="card">
+							<div className="h-[300px] w-full overflow-hidden sm:h-[500px]">
 								<ThreatMap threats={threats} onMarkerClick={setSelectedThreat} />
 							</div>
-						</div>
+						</AppPageSection>
 					</div>
 
 					<div className="lg:col-span-1">
 						{loadingVectors ? (
-							<div className="bg-card border border-border rounded-lg p-6 flex items-center justify-center h-64">
-								<Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-							</div>
+							<AppSurface className="flex h-64 items-center justify-center">
+								<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+							</AppSurface>
 						) : (
-							<AttackVectorChart data={attackVectors} />
+							<div className="dashboard-card rounded-[2rem] [&>*]:border-0 [&>*]:bg-transparent">
+								<AttackVectorChart data={attackVectors} />
+							</div>
 						)}
 					</div>
 				</div>
 
 				{loadingEndpoints ? (
-					<div className="bg-card border border-border rounded-lg p-6 flex items-center justify-center h-40">
-						<Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-					</div>
+					<AppSurface className="mb-8 flex h-40 items-center justify-center">
+						<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+					</AppSurface>
 				) : (
-					<TopEndpointsWidget endpoints={topEndpoints} />
+					<div className="dashboard-card mb-8 rounded-[2rem] [&>*]:border-0 [&>*]:bg-transparent">
+						<TopEndpointsWidget endpoints={topEndpoints} />
+					</div>
 				)}
-			</main>
+			</AppPage>
 
 			{selectedThreat && (
 				<div
-					className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+					className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
 					onClick={() => setSelectedThreat(null)}
 				>
-					<div
-						className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4"
-						onClick={(e) => e.stopPropagation()}
-					>
+					<div className="mx-4 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+						<AppSurface>
 						<h3 className="text-lg font-semibold mb-4">Threat Details</h3>
 						<div className="space-y-3">
 							<div>
@@ -291,16 +258,14 @@ export function ThreatMapPage() {
 								<p className="font-medium">{format(new Date(selectedThreat.timestamp), 'PPpp')}</p>
 							</div>
 						</div>
-						<button
-							onClick={() => setSelectedThreat(null)}
-							className="mt-6 w-full px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
-						>
+						<AppPrimaryButton onClick={() => setSelectedThreat(null)} className="mt-6 w-full">
 							Close
-						</button>
+						</AppPrimaryButton>
+						</AppSurface>
 					</div>
 				</div>
 			)}
-		</div>
+		</>
 	);
 }
 

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { LucideIcon } from 'lucide-react';
 import {
 	Activity,
 	AlertTriangle,
@@ -35,6 +34,17 @@ import {
 } from 'recharts';
 import { SEOMeta } from '../components/SEOMeta';
 import { api } from '../lib/api-client';
+import {
+	AppPage,
+	AppPageHeader,
+	AppStatGrid,
+	AppStatCard,
+	AppPageSection,
+	AppEmptyState,
+	AppPrimaryButton,
+	AppPageLoading,
+	AppPageError,
+} from '../components/AppPageLayout';
 
 type Overview = {
 	total_users: number;
@@ -286,46 +296,6 @@ function Badge({ children }: { children: string }) {
 	);
 }
 
-function StatCard({
-	title,
-	value,
-	subtitle,
-	icon: Icon,
-}: {
-	title: string;
-	value: string | number;
-	subtitle: string;
-	icon: LucideIcon;
-}) {
-	return (
-		<div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-			<div className="flex items-start justify-between gap-4">
-				<div>
-					<p className="text-sm font-medium text-muted-foreground">{title}</p>
-					<div className="mt-3 text-4xl font-bold tracking-tight text-foreground">{value}</div>
-					<p className="mt-2 text-sm leading-5 text-muted-foreground">{subtitle}</p>
-				</div>
-				<div className="rounded-xl bg-primary/10 p-2 text-primary">
-					<Icon className="h-5 w-5" />
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function SectionCard({ title, children }: { title: string; children: ReactNode }) {
-	return (
-		<section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-			<h2 className="text-lg font-bold text-foreground">{title}</h2>
-			<div className="mt-4">{children}</div>
-		</section>
-	);
-}
-
-function EmptyState({ label }: { label: string }) {
-	return <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{label}</div>;
-}
-
 function ChartFrame({ children }: { children: (width: number) => ReactNode }) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [width, setWidth] = useState(0);
@@ -347,7 +317,7 @@ function ChartFrame({ children }: { children: (width: number) => ReactNode }) {
 
 	return (
 		<div ref={containerRef} className="min-h-[320px] min-w-0">
-			{width > 0 ? children(width) : <EmptyState label="Preparing chart..." />}
+			{width > 0 ? children(width) : <AppEmptyState icon={BarChart3} title="Preparing chart…" />}
 		</div>
 	);
 }
@@ -528,94 +498,80 @@ export function FounderPortalPage() {
 
 	if (accessQuery.isLoading) {
 		return (
-			<div className="mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4 py-16 text-center">
-				<div>
-					<Loader2 className="mx-auto h-10 w-10 animate-spin text-primary" />
-					<h1 className="mt-4 text-2xl font-bold">Checking founder access</h1>
-					<p className="mx-auto mt-2 max-w-xl text-muted-foreground">Verifying your admin session before loading private operating data.</p>
-				</div>
-			</div>
+			<AppPage maxWidth="7xl" className="!max-w-5xl">
+				<AppPageLoading label="Checking founder access…" />
+			</AppPage>
 		);
 	}
 
 	if (!isFounder) {
 		return (
-			<div className="mx-auto max-w-5xl px-4 py-16 text-center">
-				<AlertTriangle className="mx-auto h-10 w-10 text-destructive" />
-				<h1 className="mt-4 text-2xl font-bold">Founder access required</h1>
-				<p className="mx-auto mt-2 max-w-xl text-muted-foreground">
-					This private operating view is controlled by backend founder roles and access configuration. Ask an owner to grant founder access if this account should see it.
-				</p>
-			</div>
+			<AppPage maxWidth="7xl" className="!max-w-5xl">
+				<AppEmptyState
+					icon={AlertTriangle}
+					title="Founder access required"
+					description="This private operating view is controlled by backend founder roles and access configuration. Ask an owner to grant founder access if this account should see it."
+				/>
+			</AppPage>
 		);
 	}
 
 	if (loadError) {
 		return (
-			<div className="mx-auto max-w-5xl px-4 py-16 text-center">
-				<AlertTriangle className="mx-auto h-10 w-10 text-destructive" />
-				<h1 className="mt-4 text-2xl font-bold">Founder portal could not load</h1>
-				<p className="mx-auto mt-2 max-w-2xl text-muted-foreground">
-					{founderApiNotDeployed
-						? 'The dashboard is loaded, but the live API does not have the founder endpoints deployed yet. Deploy the backend that registers /v1/founder/*, then refresh this page.'
-						: 'You may need founder access, admin MFA, or a reachable backend database.'}
-				</p>
-			</div>
+			<AppPage maxWidth="7xl" className="!max-w-5xl">
+				<AppPageError
+					title="Founder portal could not load"
+					message={
+						founderApiNotDeployed
+							? 'The dashboard is loaded, but the live API does not have the founder endpoints deployed yet. Deploy the backend that registers /v1/founder/*, then refresh this page.'
+							: 'You may need founder access, admin MFA, or a reachable backend database.'
+					}
+				/>
+			</AppPage>
 		);
 	}
 
 	return (
-		<div className="min-h-screen bg-background">
+		<AppPage maxWidth="7xl" className="!max-w-[1500px]">
 			<SEOMeta title="Founder Portal | Koreshield" description="Private Koreshield founder operating dashboard." />
 
-			<header className="border-b border-border bg-card/80 backdrop-blur">
-				<div className="mx-auto flex max-w-[1500px] flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8 xl:flex-row xl:items-center xl:justify-between">
-					<div>
-						<div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-							<Database className="h-3.5 w-3.5" />
-							Live Founder View
-						</div>
-						<h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground">Founder Portal</h1>
-						<p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-							Users, requests, API keys, billing, threats, and platform health from live Koreshield data.
-						</p>
-					</div>
+			<AppPageHeader
+				eyebrow="Live founder view"
+				eyebrowIcon={Database}
+				title="Founder Portal"
+				description="Users, requests, API keys, billing, threats, and platform health from live Koreshield data."
+				icon={Database}
+				actions={
 					<div className="flex flex-wrap items-center gap-3">
-						<div className="rounded-xl border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
+						<div className="rounded-xl border border-border bg-background/60 px-3 py-2 text-xs text-muted-foreground">
 							<span className="font-semibold text-foreground">DB:</span> {healthQuery.data?.database ?? 'checking'}
 						</div>
-						<div className="rounded-xl border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
+						<div className="rounded-xl border border-border bg-background/60 px-3 py-2 text-xs text-muted-foreground">
 							<span className="font-semibold text-foreground">Env:</span> {healthQuery.data?.environment ?? 'unknown'}
 						</div>
-						<button
-							onClick={refreshAll}
-							className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-						>
+						<AppPrimaryButton onClick={refreshAll}>
 							<RefreshCw className="h-4 w-4" />
 							Refresh data
-						</button>
+						</AppPrimaryButton>
 					</div>
-				</div>
-			</header>
+				}
+			/>
 
-			<main className="mx-auto max-w-[1500px] space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-				{isLoading ? (
-					<div className="flex items-center justify-center rounded-2xl border border-border bg-card p-12">
-						<Loader2 className="h-8 w-8 animate-spin text-primary" />
-					</div>
-				) : null}
+			{isLoading ? (
+				<AppPageLoading label="Loading founder data…" />
+			) : null}
 
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
-					<StatCard title="Total users" value={numberFormat(overview?.total_users)} subtitle={`${numberFormat(overview?.new_users_7d)} new in 7 days`} icon={Users} />
-					<StatCard title="Total requests" value={numberFormat(overview?.total_requests)} subtitle={`${numberFormat(overview?.requests_today)} today`} icon={Activity} />
-					<StatCard title="Attacks blocked" value={numberFormat(overview?.attacks_blocked)} subtitle={`${numberFormat(overview?.attacks_detected)} detected`} icon={ShieldAlert} />
-					<StatCard title="API keys" value={numberFormat(overview?.api_keys)} subtitle={`${numberFormat(overview?.revoked_api_keys)} revoked`} icon={KeyRound} />
-					<StatCard title="Block rate" value={`${overview?.block_rate ?? 0}%`} subtitle="of scanned requests" icon={BarChart3} />
-					<StatCard title="Billing accounts" value={numberFormat(overview?.billing_accounts)} subtitle={`${numberFormat(overview?.paid_accounts)} paid accounts`} icon={CreditCard} />
-				</div>
+			<AppStatGrid columns={3} className="xl:grid-cols-6">
+				<AppStatCard label="Total users" value={numberFormat(overview?.total_users)} icon={Users} detail={`${numberFormat(overview?.new_users_7d)} new in 7 days`} />
+				<AppStatCard label="Total requests" value={numberFormat(overview?.total_requests)} icon={Activity} detail={`${numberFormat(overview?.requests_today)} today`} />
+				<AppStatCard label="Attacks blocked" value={numberFormat(overview?.attacks_blocked)} icon={ShieldAlert} tone="text-red-400" detail={`${numberFormat(overview?.attacks_detected)} detected`} />
+				<AppStatCard label="API keys" value={numberFormat(overview?.api_keys)} icon={KeyRound} detail={`${numberFormat(overview?.revoked_api_keys)} revoked`} />
+				<AppStatCard label="Block rate" value={`${overview?.block_rate ?? 0}%`} icon={BarChart3} detail="of scanned requests" />
+				<AppStatCard label="Billing accounts" value={numberFormat(overview?.billing_accounts)} icon={CreditCard} detail={`${numberFormat(overview?.paid_accounts)} paid accounts`} />
+			</AppStatGrid>
 
 				<div className="grid gap-6 xl:grid-cols-2">
-					<SectionCard title="Daily request volume">
+					<AppPageSection title="Daily request volume">
 						{chartData.length ? (
 							<ChartFrame>
 								{width => (
@@ -628,9 +584,9 @@ export function FounderPortalPage() {
 									</BarChart>
 								)}
 							</ChartFrame>
-						) : <EmptyState label="No request volume data yet." />}
-					</SectionCard>
-					<SectionCard title="Attack type breakdown">
+						) : <AppEmptyState icon={Database} title="No request volume data yet." />}
+					</AppPageSection>
+					<AppPageSection title="Attack type breakdown">
 						{attackData.length ? (
 							<ChartFrame>
 								{width => (
@@ -645,24 +601,24 @@ export function FounderPortalPage() {
 									</PieChart>
 								)}
 							</ChartFrame>
-						) : <EmptyState label="No attack breakdown data yet." />}
-					</SectionCard>
+						) : <AppEmptyState icon={Database} title="No attack breakdown data yet." />}
+					</AppPageSection>
 				</div>
 
 				{/* ── Business Metrics ──────────────────────────────────── */}
 				{metrics && (
 					<>
 						{/* Revenue */}
-						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-							<StatCard title="MRR" value={`$${numberFormat(metrics.revenue.mrr)}`} subtitle={`ARR: $${numberFormat(metrics.revenue.arr)}`} icon={CreditCard} />
-							<StatCard title="ARPU" value={`$${metrics.revenue.arpu}`} subtitle={`${metrics.revenue.paying_users} paying customers`} icon={BadgeCheck} />
-							<StatCard title="Paid conversion" value={`${metrics.revenue.paid_conversion_rate_pct}%`} subtitle={`${metrics.revenue.free_accounts} still on free`} icon={TrendingUp} />
-							<StatCard title="Teams" value={numberFormat(metrics.teams.total_teams)} subtitle={`${metrics.teams.avg_team_size} avg members · ${metrics.teams.paid_teams} paid`} icon={Users} />
-						</div>
+						<AppStatGrid columns={4}>
+							<AppStatCard label="MRR" value={`$${numberFormat(metrics.revenue.mrr)}`} icon={CreditCard} detail={`ARR: $${numberFormat(metrics.revenue.arr)}`} />
+							<AppStatCard label="ARPU" value={`$${metrics.revenue.arpu}`} icon={BadgeCheck} detail={`${metrics.revenue.paying_users} paying customers`} />
+							<AppStatCard label="Paid conversion" value={`${metrics.revenue.paid_conversion_rate_pct}%`} icon={TrendingUp} detail={`${metrics.revenue.free_accounts} still on free`} />
+							<AppStatCard label="Teams" value={numberFormat(metrics.teams.total_teams)} icon={Users} detail={`${metrics.teams.avg_team_size} avg members · ${metrics.teams.paid_teams} paid`} />
+						</AppStatGrid>
 
 						{/* Retention & Funnel */}
 						<div className="grid gap-6 xl:grid-cols-2">
-							<SectionCard title="User retention">
+							<AppPageSection title="User retention">
 								<div className="grid grid-cols-3 gap-4 mb-4">
 									{[
 										{ label: 'DAU', value: metrics.retention.dau, sub: 'last 24 h' },
@@ -694,9 +650,9 @@ export function FounderPortalPage() {
 										<span className="font-semibold">{numberFormat(metrics.retention.new_users_30d)}</span>
 									</div>
 								</div>
-							</SectionCard>
+							</AppPageSection>
 
-							<SectionCard title="Conversion funnel">
+							<AppPageSection title="Conversion funnel">
 								<div className="space-y-3 mt-2">
 									{[
 										{ label: 'Signups', value: metrics.funnel.signups, pct: 100, color: 'bg-blue-500' },
@@ -725,12 +681,12 @@ export function FounderPortalPage() {
 										<div className="font-bold text-lg">{metrics.funnel.activated_to_paid_pct}%</div>
 									</div>
 								</div>
-							</SectionCard>
+							</AppPageSection>
 						</div>
 
 						{/* Plan breakdown + attack trend */}
 						<div className="grid gap-6 xl:grid-cols-2">
-							<SectionCard title="Revenue by plan">
+							<AppPageSection title="Revenue by plan">
 								<div className="space-y-2 mt-2">
 									{metrics.revenue.plan_breakdown.filter(p => p.count > 0).map(p => (
 										<div key={p.plan} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
@@ -751,9 +707,9 @@ export function FounderPortalPage() {
 										<span className="text-emerald-600">${numberFormat(metrics.revenue.mrr)}</span>
 									</div>
 								</div>
-							</SectionCard>
+							</AppPageSection>
 
-							<SectionCard title="Attack trend (30 days)">
+							<AppPageSection title="Attack trend (30 days)">
 								{metrics.attack_intel.daily_attack_trend.length ? (
 									<ChartFrame>
 										{width => (
@@ -769,12 +725,12 @@ export function FounderPortalPage() {
 											</BarChart>
 										)}
 									</ChartFrame>
-								) : <EmptyState label="No attack trend data yet." />}
-							</SectionCard>
+								) : <AppEmptyState icon={Database} title="No attack trend data yet." />}
+							</AppPageSection>
 						</div>
 
 						{/* Top tenants */}
-						<SectionCard title={`Top tenants by usage — last 30 days (${metrics.top_tenants.length})`}>
+						<AppPageSection title={`Top tenants by usage — last 30 days (${metrics.top_tenants.length})`}>
 							{metrics.top_tenants.length ? (
 								<div className="overflow-x-auto">
 									<table className="w-full text-sm">
@@ -809,12 +765,12 @@ export function FounderPortalPage() {
 										</tbody>
 									</table>
 								</div>
-							) : <EmptyState label="No tenant usage data yet." />}
-						</SectionCard>
+							) : <AppEmptyState icon={Database} title="No tenant usage data yet." />}
+						</AppPageSection>
 					</>
 				)}
 
-				<SectionCard title={`Users (${usersQuery.data?.total ?? users.length})`}>
+				<AppPageSection title={`Users (${usersQuery.data?.total ?? users.length})`}>
 					<div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<div className="relative w-full sm:max-w-md">
 							<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -907,10 +863,10 @@ export function FounderPortalPage() {
 							</tbody>
 						</table>
 					</div>
-					{!users.length ? <EmptyState label="No users found." /> : null}
-				</SectionCard>
+					{!users.length ? <AppEmptyState icon={Database} title="No users found." /> : null}
+				</AppPageSection>
 
-				<SectionCard title={`API Keys (${apiKeysQuery.data?.total ?? apiKeys.length})`}>
+				<AppPageSection title={`API Keys (${apiKeysQuery.data?.total ?? apiKeys.length})`}>
 					<div className="overflow-x-auto">
 						<table className="w-full min-w-[1000px] text-left text-sm">
 							<thead className="border-b border-border text-xs uppercase tracking-[0.14em] text-muted-foreground">
@@ -957,10 +913,10 @@ export function FounderPortalPage() {
 							</tbody>
 						</table>
 					</div>
-					{!apiKeys.length ? <EmptyState label="No API keys found." /> : null}
-				</SectionCard>
+					{!apiKeys.length ? <AppEmptyState icon={Database} title="No API keys found." /> : null}
+				</AppPageSection>
 
-				<SectionCard title={`Recent request log (${requests.length})`}>
+				<AppPageSection title={`Recent request log (${requests.length})`}>
 					<div className="overflow-x-auto">
 						<table className="w-full min-w-[1100px] text-left text-sm">
 							<thead className="border-b border-border text-xs uppercase tracking-[0.14em] text-muted-foreground">
@@ -991,11 +947,11 @@ export function FounderPortalPage() {
 							</tbody>
 						</table>
 					</div>
-					{!requests.length ? <EmptyState label="No request logs yet." /> : null}
-				</SectionCard>
+					{!requests.length ? <AppEmptyState icon={Database} title="No request logs yet." /> : null}
+				</AppPageSection>
 
 				<div className="grid gap-6 xl:grid-cols-2">
-					<SectionCard title={`Billing accounts (${billingQuery.data?.total ?? billingAccounts.length})`}>
+					<AppPageSection title={`Billing accounts (${billingQuery.data?.total ?? billingAccounts.length})`}>
 						<div className="space-y-3">
 							{billingAccounts.slice(0, 12).map(account => (
 								<div key={account.id} className="flex flex-col gap-3 rounded-xl border border-border bg-background p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1017,10 +973,10 @@ export function FounderPortalPage() {
 								</div>
 							))}
 						</div>
-						{!billingAccounts.length ? <EmptyState label="No billing accounts found." /> : null}
-					</SectionCard>
+						{!billingAccounts.length ? <AppEmptyState icon={Database} title="No billing accounts found." /> : null}
+					</AppPageSection>
 
-					<SectionCard title={`Team members (${teamQuery.data?.total ?? teamMembers.length})`}>
+					<AppPageSection title={`Team members (${teamQuery.data?.total ?? teamMembers.length})`}>
 						<div className="space-y-3">
 							{teamMembers.slice(0, 12).map(member => (
 								<div key={member.id} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background p-4">
@@ -1035,12 +991,12 @@ export function FounderPortalPage() {
 								</div>
 							))}
 						</div>
-						{!teamMembers.length ? <EmptyState label="No team members found." /> : null}
-					</SectionCard>
+						{!teamMembers.length ? <AppEmptyState icon={Database} title="No team members found." /> : null}
+					</AppPageSection>
 				</div>
 
 				{/* ── Threats Panel ─────────────────────────────────────── */}
-				<SectionCard title={`Threats — last ${threatsQuery.data?.window_days ?? 30} days (${(threatsQuery.data?.total_blocked ?? 0).toLocaleString()} blocked)`}>
+				<AppPageSection title={`Threats — last ${threatsQuery.data?.window_days ?? 30} days (${(threatsQuery.data?.total_blocked ?? 0).toLocaleString()} blocked)`}>
 					<div className="grid gap-6 xl:grid-cols-3">
 						<div>
 							<p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
@@ -1055,7 +1011,7 @@ export function FounderPortalPage() {
 										</div>
 									))}
 								</div>
-							) : <EmptyState label="No blocked attacks in this window yet." />}
+							) : <AppEmptyState icon={Database} title="No blocked attacks in this window yet." />}
 						</div>
 						<div>
 							<p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
@@ -1073,7 +1029,7 @@ export function FounderPortalPage() {
 										</div>
 									))}
 								</div>
-							) : <EmptyState label="No key-level threat data yet." />}
+							) : <AppEmptyState icon={Database} title="No key-level threat data yet." />}
 						</div>
 						<div>
 							<p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
@@ -1091,13 +1047,13 @@ export function FounderPortalPage() {
 										</div>
 									))}
 								</div>
-							) : <EmptyState label="No recent blocked attacks." />}
+							) : <AppEmptyState icon={Database} title="No recent blocked attacks." />}
 						</div>
 					</div>
-				</SectionCard>
+				</AppPageSection>
 
 				{/* ── Admin Audit Log ────────────────────────────────────── */}
-				<SectionCard title={`Admin audit log (${auditQuery.data?.total ?? 0} entries)`}>
+				<AppPageSection title={`Admin audit log (${auditQuery.data?.total ?? 0} entries)`}>
 					{(auditQuery.data?.audit_logs ?? []).length ? (
 						<div className="overflow-x-auto">
 							<table className="w-full min-w-[900px] text-left text-sm">
@@ -1129,11 +1085,11 @@ export function FounderPortalPage() {
 							</table>
 						</div>
 					) : (
-						<EmptyState label="No admin actions recorded yet. Disable, reactivate, revoke, and delete actions appear here with full audit trail." />
+						<AppEmptyState icon={Database} title="No admin actions recorded yet. Disable, reactivate, revoke, and delete actions appear here with full audit trail." />
 					)}
-				</SectionCard>
+				</AppPageSection>
 
-				<SectionCard title="System health">
+				<AppPageSection title="System health">
 					<div className="grid gap-4 sm:grid-cols-3">
 						<div className="rounded-xl border border-border bg-background p-4">
 							<div className="flex items-center gap-2 text-sm font-semibold"><Database className="h-4 w-4 text-primary" /> Database</div>
@@ -1148,8 +1104,7 @@ export function FounderPortalPage() {
 							<p className="mt-3 text-sm text-muted-foreground">{dateLabel(healthQuery.data?.generated_at || overviewQuery.data?.generated_at)}</p>
 						</div>
 					</div>
-				</SectionCard>
-			</main>
+				</AppPageSection>
 
 			{/* ── Delete Confirmation Dialog ─────────────────────────────── */}
 			{deleteTarget ? (
@@ -1318,7 +1273,7 @@ export function FounderPortalPage() {
 													<div className="flex gap-2"><Badge>{key.environment}</Badge><Badge>{key.status}</Badge></div>
 												</div>
 											))}
-											{!userDetailQuery.data.api_keys.length ? <EmptyState label="No API keys for this user." /> : null}
+											{!userDetailQuery.data.api_keys.length ? <AppEmptyState icon={Database} title="No API keys for this user." /> : null}
 										</div>
 									</div>
 
@@ -1336,17 +1291,17 @@ export function FounderPortalPage() {
 													</div>
 												</div>
 											))}
-											{!userDetailQuery.data.requests.length ? <EmptyState label="No requests for this user yet." /> : null}
+											{!userDetailQuery.data.requests.length ? <AppEmptyState icon={Database} title="No requests for this user yet." /> : null}
 										</div>
 									</div>
 								</>
 							) : (
-								<EmptyState label="User not found." />
+								<AppEmptyState icon={Database} title="User not found." />
 							)}
 						</div>
 					</aside>
 				</div>
 			) : null}
-		</div>
+		</AppPage>
 	);
 }

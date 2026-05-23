@@ -4,6 +4,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
 import { useAuthState } from '../hooks/useAuthState';
+import {
+	AppPage,
+	AppPageHeader,
+	AppStatGrid,
+	AppStatCard,
+	AppCallout,
+	AppEmptyState,
+	AppPrimaryButton,
+	AppSecondaryButton,
+	AppSurface,
+} from '../components/AppPageLayout';
 
 interface Policy {
     id: string;
@@ -203,101 +214,78 @@ export function PoliciesPage() {
     }, [isAdmin]);
 
     return (
-        <div>
-            {/* Header */}
-            <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                                <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                            </div>
-                            <div className="min-w-0">
-                                <h1 className="text-lg sm:text-2xl font-bold">Policy Management</h1>
-                                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                                    Configure security policies and access control
-                                </p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={openCreateModal}
-                            disabled={!isAdmin}
-                            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm w-full sm:w-auto justify-center disabled:opacity-60 disabled:cursor-not-allowed"
-                        >
+        <>
+            <AppPage>
+                <AppPageHeader
+                    eyebrow="Access control"
+                    eyebrowIcon={Shield}
+                    title="Policy Management"
+                    description="Configure security policies and access control"
+                    icon={Shield}
+                    actions={
+                        <AppPrimaryButton onClick={openCreateModal} disabled={!isAdmin} className="w-full sm:w-auto">
                             <Plus className="w-4 h-4" />
                             <span className="hidden sm:inline">Create Policy</span>
                             <span className="sm:hidden">New Policy</span>
-                        </button>
-                    </div>
-                </div>
-            </header>
+                        </AppPrimaryButton>
+                    }
+                />
 
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
-                        <div className="text-xs sm:text-sm text-muted-foreground mb-1">Total Policies</div>
-                        <div className="text-2xl sm:text-3xl font-bold">{policies.length}</div>
-                    </div>
-                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
-                        <div className="text-xs sm:text-sm text-muted-foreground mb-1">Active</div>
-                        <div className="text-2xl sm:text-3xl font-bold text-green-600">
-                            {policies.filter((p: Policy) => p.enabled !== false).length}
-                        </div>
-                    </div>
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <div className="text-sm text-muted-foreground mb-1">Critical</div>
-                        <div className="text-3xl font-bold text-red-600">
-                            {policies.filter((p: Policy) => p.severity === 'critical').length}
-                        </div>
-                    </div>
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <div className="text-sm text-muted-foreground mb-1">Disabled</div>
-                        <div className="text-3xl font-bold text-muted-foreground">
-                            {policies.filter((p: Policy) => p.enabled === false).length}
-                        </div>
-                    </div>
-                </div>
+                <AppStatGrid>
+                    <AppStatCard label="Total Policies" value={policies.length} icon={Shield} />
+                    <AppStatCard
+                        label="Active"
+                        value={policies.filter((p: Policy) => p.enabled !== false).length}
+                        icon={CheckCircle}
+                        tone="text-electric-green"
+                    />
+                    <AppStatCard
+                        label="Critical"
+                        value={policies.filter((p: Policy) => p.severity === 'critical').length}
+                        icon={AlertTriangle}
+                        tone="text-red-400"
+                    />
+                    <AppStatCard
+                        label="Disabled"
+                        value={policies.filter((p: Policy) => p.enabled === false).length}
+                        icon={X}
+                        tone="text-muted-foreground"
+                    />
+                </AppStatGrid>
 
-                {/* Policies Grid */}
                 <div className="grid grid-cols-1 gap-6">
                     {(hasPermissionError || permissionBanner) && (
-                        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
+                        <AppCallout variant="warning">
                             {hasPermissionError
                                 ? 'Policy management is only available to workspace owners and admins. If this is your first Koreshield workspace, sign out and sign back in once so your account can refresh its role before trying again.'
                                 : permissionBanner}
-                        </div>
+                        </AppCallout>
                     )}
                     {isLoading ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                         </div>
                     ) : error ? (
-                        <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-6 text-center">
+                        <AppSurface className="border-red-500/50 p-6 text-center">
                             <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-red-600" />
-                            <p className="text-red-600">Failed to load policies</p>
+                            <p className="text-red-600 font-bold">Failed to load policies</p>
                             <p className="text-sm text-muted-foreground mt-2">Please try again later</p>
-                        </div>
+                        </AppSurface>
                     ) : policies.length === 0 ? (
-                        <div className="bg-card border border-border rounded-lg p-12 text-center">
-                            <Shield className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                            <h3 className="text-lg font-semibold mb-2">No Policies Configured</h3>
-                            <p className="text-muted-foreground mb-4">
-                                Create your first security policy to start protecting your LLM applications
-                            </p>
-                            <button
-                                onClick={openCreateModal}
-                                disabled={!isAdmin}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Create Your First Policy
-                            </button>
-                        </div>
+                        <AppEmptyState
+                            icon={Shield}
+                            title="No Policies Configured"
+                            description="Create your first security policy to start protecting your LLM applications"
+                            action={
+                                <AppPrimaryButton onClick={openCreateModal} disabled={!isAdmin}>
+                                    <Plus className="w-4 h-4" />
+                                    Create Your First Policy
+                                </AppPrimaryButton>
+                            }
+                        />
                     ) : (
                         policies.map((policy) => (
-                            <div key={policy.id} className="bg-card border border-border rounded-lg p-6">
+                            <AppSurface key={policy.id} className="p-6">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex-1">
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
@@ -392,15 +380,15 @@ export function PoliciesPage() {
                                         </div>
                                     </div>
                                 )}
-                            </div>
+                            </AppSurface>
                         ))
                     )}
                 </div>
-            </main>
+            </AppPage>
 
             {showCreateModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-                    <div className="w-full max-w-2xl mx-4 sm:mx-auto rounded-xl border border-border bg-card p-6 shadow-xl max-h-[90dvh] overflow-y-auto">
+                    <div className="dashboard-modal w-full max-w-2xl mx-4 sm:mx-auto rounded-2xl border border-border bg-card p-6 shadow-xl max-h-[90dvh] overflow-y-auto">
                         <div className="mb-6 flex items-start justify-between gap-4">
                             <div>
                                 <h2 className="text-xl font-semibold">{modalTitle}</h2>
@@ -503,30 +491,30 @@ export function PoliciesPage() {
                         </div>
 
                         <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                            <button
+                            <AppSecondaryButton
                                 type="button"
                                 onClick={() => {
                                     setShowCreateModal(false);
                                     setEditingPolicy(null);
                                     setFormData(DEFAULT_POLICY_FORM);
                                 }}
-                                className="flex-1 rounded-lg bg-muted px-4 py-2 hover:bg-muted/80 w-full"
+                                className="flex-1 w-full"
                                 disabled={isSaving}
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </AppSecondaryButton>
+                            <AppPrimaryButton
                                 type="button"
                                 onClick={handleCreatePolicy}
-                                className="flex-1 rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-60 w-full"
+                                className="flex-1 w-full"
                                 disabled={!isAdmin || isSaving}
                             >
                                 {isSaving ? (editingPolicy ? 'Saving...' : 'Creating...') : submitLabel}
-                            </button>
+                            </AppPrimaryButton>
                         </div>
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 }
