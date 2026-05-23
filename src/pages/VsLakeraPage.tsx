@@ -326,6 +326,12 @@ export default function VsLakeraPage() {
 							Book a Demo
 							<ExternalLink className="w-5 h-5" />
 						</Link>
+						<Link to="/vs"
+							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"
+						>
+							Compare Other Options
+							<ExternalLink className="w-5 h-5" />
+						</Link>
 					</div>
 				</motion.div>
 			</div>
