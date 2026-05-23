@@ -4,6 +4,7 @@ import { EcosystemProof } from '../components/EcosystemProof';
 import Features from '../components/Features';
 import Hero from '../components/Hero';
 import { IntegrationTicker } from '../components/IntegrationTicker';
+import { ProductExtensions } from '../components/ProductExtensions';
 import { RAGShowcase } from '../components/RAGShowcase';
 import { StatsBanner } from '../components/StatsBanner';
 import { ThreatDashboard } from '../components/ThreatDashboard';
@@ -60,6 +61,7 @@ function LandingPage() {
 
             <Architecture />
             <Features />
+            <ProductExtensions />
 
             <TrustBadges />
             <UseCases />
