@@ -13,14 +13,14 @@ const features = [
         icon: Network,
         title: 'Multi-Provider',
         eyebrow: 'Provider control',
-        description: 'One SDK, one API key, full coverage across OpenAI, Anthropic, Gemini, and DeepSeek. Switch providers without touching your security layer.',
+        description: 'One SDK. One API key. full coverage across LLMs.',
         proof: 'One policy layer across every model route',
     },
     {
         icon: Database,
         title: 'RAG Defense',
         eyebrow: 'Retrieval inspection',
-        description: 'Scans every document in your retrieval context before it reaches the LLM, catching injected instructions your vector database doesn\'t know to look for.',
+        description: 'Scans every document in your retrieval context before it reaches the LLM, catching injected instructions your vector db doesn\'t know to look for.',
         proof: 'Context scanned before model exposure',
     },
     {
