@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { authService } from '../lib/auth';
-import { Lock, Mail, ShieldCheck, Github } from 'lucide-react';
+import { Lock, Mail, Github } from 'lucide-react';
+import { AuthLayout } from '../components/AuthLayout';
 
 interface LocationState {
 	from?: {
@@ -133,52 +134,15 @@ export function LoginPage() {
 	const anyLoading = loading || oauthLoading !== null;
 
 	return (
-		<div className="auth-shell min-h-screen flex">
-			<div className="auth-side-panel hidden lg:flex lg:w-[42%] border-r border-white/[0.06] flex-col justify-between p-12 relative overflow-hidden">
-				<div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:48px_48px] opacity-40 pointer-events-none" />
-				<div className="absolute bottom-0 right-0 w-96 h-96 bg-electric-green/[0.03] rounded-full translate-x-1/2 translate-y-1/2 blur-3xl pointer-events-none" />
-
-				<div className="relative z-10 flex items-center gap-3">
-					<img src="/logo/dark/SVG/Black.svg" alt="Koreshield" className="w-8 h-8 dark:hidden" />
-					<img src="/logo/light/SVG/White.svg" alt="Koreshield" className="w-8 h-8 hidden dark:block" />
-					<span className="text-xl font-bold text-foreground tracking-tight">Koreshield</span>
-				</div>
-
-				<div className="relative z-10 space-y-8">
-					<div>
-						<p className="mb-3 text-xs font-bold uppercase tracking-[0.24em] text-electric-green">Control plane</p>
-						<blockquote className="max-w-md text-4xl font-black leading-tight tracking-[-0.055em] text-foreground">
-							Sign in to your AI security layer.
-						</blockquote>
-					</div>
-
-					<div className="space-y-4">
-						{[
-							'Review threats and audit evidence',
-							'Manage policies, keys, and teams',
-							'Keep production AI traffic protected',
-						].map((item) => (
-							<div key={item} className="flex items-start gap-3 rounded-2xl border border-border bg-background/35 p-4">
-								<ShieldCheck className="w-5 h-5 text-electric-green mt-0.5 shrink-0" />
-								<span className="text-sm font-medium text-muted-foreground">{item}</span>
-							</div>
-						))}
-					</div>
-				</div>
-
-				<p className="relative z-10 text-xs text-muted-foreground/60">
-					© {new Date().getFullYear()} Koreshield. All rights reserved.
-				</p>
-			</div>
-
-			<div className="flex-1 flex items-center justify-center p-6 sm:p-12">
-				<div className="auth-card w-full max-w-md rounded-[2rem] p-6 sm:p-8">
-					<div className="flex items-center gap-2 mb-8 lg:hidden">
-							<img src="/logo/dark/SVG/Black.svg" alt="Koreshield" className="w-7 h-7 dark:hidden" />
-							<img src="/logo/light/SVG/White.svg" alt="Koreshield" className="w-7 h-7 hidden dark:block" />
-						<span className="font-bold text-foreground">Koreshield</span>
-					</div>
-
+		<AuthLayout
+			eyebrow="Control plane"
+			headline="Sign in to your AI security layer."
+			bullets={[
+				'Review threats and audit evidence',
+				'Manage policies, keys, and teams',
+				'Keep production AI traffic protected',
+			]}
+		>
 					{locationState?.passwordReset && (
 						<div className="mb-6 p-3 bg-electric-green/10 border border-electric-green/20 rounded-lg text-sm text-electric-green font-medium">
 							Password updated. Sign in with your new credentials.
@@ -399,8 +363,6 @@ export function LoginPage() {
 							</>
 						)}
 					</form>
-				</div>
-			</div>
-		</div>
+		</AuthLayout>
 	);
 }

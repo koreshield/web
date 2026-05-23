@@ -1,11 +1,21 @@
 import { useMemo, useState } from 'react';
-import { Activity, Shield, AlertTriangle, CheckCircle, Rocket, Code, BookOpen, ArrowRight, Key, Users, ScanSearch, Plus, Copy, X } from 'lucide-react';
+import { Activity, Shield, AlertTriangle, CheckCircle, Code, BookOpen, ArrowRight, Key, Users, ScanSearch, Plus, Copy, X, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStats, useRecentAttacks } from '../hooks/useApi';
 import { useAuthState } from '../hooks/useAuthState';
 import { AttackDetailModal } from '../components/AttackDetailModal';
 import { ThreatTypeBreakdown, ThreatTimeline, ThreatSummary } from '../components/ThreatAnalytics';
+import {
+	AppPage,
+	AppPageHeader,
+	AppPageSection,
+	AppStatGrid,
+	AppStatCard,
+	AppPageError,
+	AppPrimaryButton,
+	AppSurface,
+} from '../components/AppPageLayout';
 import { api } from '../lib/api-client';
 export function DashboardPage() {
 	const { user } = useAuthState();
@@ -106,55 +116,29 @@ const client = new OpenAI({
 
 	if (statsError) {
 		return (
-			<div className="flex items-center justify-center min-h-[50vh]">
-				<div className="text-center">
-					<AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-					<h2 className="text-xl font-bold mb-2">Failed to Connect</h2>
-					<p className="text-muted-foreground mb-4">
-						Unable to reach the Koreshield backend. Please check your connection.
-					</p>
-					<button
-						onClick={() => window.location.reload()}
-						className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
-					>
-						Retry
-					</button>
-				</div>
-			</div>
+			<AppPage>
+				<AppPageError
+					title="Failed to connect"
+					message="Unable to reach the Koreshield backend. Please check your connection."
+					onRetry={() => window.location.reload()}
+				/>
+			</AppPage>
 		);
 	}
 
 	return (
-		<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-
-			{/* Page heading */}
-			<div className="dashboard-panel mb-6 overflow-hidden rounded-3xl p-5 md:p-6">
-				<div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-					<div className="max-w-3xl">
-						<div className="mb-4 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-electric-green">
-							<CheckCircle className="h-3.5 w-3.5" />
-							API connected
-						</div>
-						<h1 className="text-3xl font-black tracking-[-0.045em] md:text-4xl">
-							Security overview
-						</h1>
-						<p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-							Welcome back{user?.name ? `, ${user.name}` : ''}. Review traffic, threats, and the actions Koreshield has taken.
-						</p>
-					</div>
-					<div className="grid min-w-[230px] grid-cols-2 gap-2">
-						<div className="rounded-2xl border border-border bg-background/45 p-3">
-							<p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Posture</p>
-							<p className="mt-1 text-xl font-black text-electric-green">{attacksDetected > 0 ? 'Active' : 'Quiet'}</p>
-						</div>
-						<div className="rounded-2xl border border-border bg-background/45 p-3">
-							<p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Blocked</p>
-							<p className="mt-1 text-xl font-black">{blockedRequests}</p>
-						</div>
-					</div>
-				</div>
-			</div>
-
+		<AppPage>
+			<AppPageHeader
+				eyebrow="API connected"
+				eyebrowIcon={CheckCircle}
+				title="Security overview"
+				description={`Welcome back${user?.name ? `, ${user.name}` : ''}. Review traffic, threats, and the actions Koreshield has taken.`}
+				icon={LayoutDashboard}
+				stats={[
+					{ label: 'Posture', value: attacksDetected > 0 ? 'Active' : 'Quiet', tone: 'text-electric-green' },
+					{ label: 'Blocked', value: blockedRequests },
+				]}
+			/>
 			{/* Quick Actions */}
 			<div className="mb-8 grid grid-cols-2 gap-3 xl:grid-cols-4">
 				{quickActions.map((action) => {
@@ -177,18 +161,13 @@ const client = new OpenAI({
 
 			{/* Getting Started Banner for New Users */}
 			{isNewUser && (
-				<div className="dashboard-panel mb-8 rounded-[2rem] p-6">
-					<div className="flex items-start gap-4">
-						<div className="rounded-2xl border border-primary/20 bg-primary/10 p-3 shrink-0">
-							<Rocket className="w-6 h-6 text-primary" />
-						</div>
-						<div className="flex-1 min-w-0">
-							<h2 className="mb-1 text-2xl font-black tracking-[-0.04em]">Protect your first request.</h2>
-							<p className="text-sm text-muted-foreground mb-5">
-								Everything you need to protect your first integration is right here. Generate a key, review your protection rules, and copy the integration snippet without bouncing between pages.
-							</p>
-
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+				<AppPageSection
+					eyebrow="Onboarding"
+					title="Protect your first request"
+					description="Generate a key, review your protection rules, and copy the integration snippet without bouncing between pages."
+					variant="panel"
+				>
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-3 mb-4">
 								{/* Step 1 — inline key creator */}
 								<div className="rounded-2xl border border-border bg-background/60 p-4">
 									<div className="flex items-center gap-2 mb-2">
@@ -290,13 +269,13 @@ const client = new OpenAI({
 								<pre className="bg-muted p-3 rounded text-[11px] overflow-x-auto text-muted-foreground">
 									{integrationSnippet}
 								</pre>
-								<div className="mt-3 flex flex-col sm:flex-row gap-2">
-									<button
+								<div className="mt-3 flex flex-col gap-2 sm:flex-row">
+									<AppPrimaryButton
 										onClick={() => { setShowKeyForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-										className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+										className="text-xs"
 									>
-										<Plus className="w-3.5 h-3.5" /> Generate API key
-									</button>
+										<Plus className="h-3.5 w-3.5" /> Generate API key
+									</AppPrimaryButton>
 									<Link
 										to="/docs/getting-started/quick-start"
 										className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted"
@@ -305,9 +284,7 @@ const client = new OpenAI({
 									</Link>
 								</div>
 							</div>
-						</div>
-					</div>
-				</div>
+				</AppPageSection>
 			)}
 
 			{loading ? (
@@ -331,36 +308,28 @@ const client = new OpenAI({
 				</>
 			) : (
 				<>
-					{/* Stats Grid */}
-					<div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-						{statCards.map((card) => {
-							const Icon = card.icon;
-							return (
-								<div key={card.label} className="dashboard-card overflow-hidden rounded-2xl p-5">
-									<div className="mb-5 flex items-center justify-between">
-										<span className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{card.label}</span>
-										<div className="rounded-xl border border-border bg-background/60 p-2">
-											<Icon className={`h-4 w-4 ${card.tone}`} />
-										</div>
-									</div>
-									<div className={`text-3xl font-black tracking-[-0.04em] ${card.tone}`}>{card.value}</div>
-									<p className="mt-2 text-xs text-muted-foreground">{card.detail}</p>
-								</div>
-							);
-						})}
-					</div>
+					<AppStatGrid>
+						{statCards.map((card) => (
+							<AppStatCard
+								key={card.label}
+								label={card.label}
+								value={card.value}
+								icon={card.icon}
+								tone={card.tone}
+								detail={card.detail}
+							/>
+						))}
+					</AppStatGrid>
 
-					{/* Recent Threats */}
-					<div className="dashboard-panel mb-8 rounded-[2rem] p-6">
-						<div className="mb-5 flex items-center justify-between gap-4">
-							<div>
-								<p className="text-xs font-bold uppercase tracking-[0.22em] text-electric-green">Threat evidence</p>
-								<h2 className="mt-1 text-2xl font-black tracking-[-0.04em]">Recent threats</h2>
-							</div>
+					<AppPageSection
+						eyebrow="Threat evidence"
+						title="Recent threats"
+						actions={
 							<Link to="/audit-logs" className="hidden rounded-full border border-border px-4 py-2 text-xs font-bold text-muted-foreground transition-colors hover:text-foreground sm:inline-flex">
 								View audit logs
 							</Link>
-						</div>
+						}
+					>
 						<div className="space-y-2">
 							{recentAttacks.length === 0 ? (
 								<div className="rounded-2xl border border-border bg-background/45 py-12 text-center text-muted-foreground">
@@ -407,27 +376,26 @@ const client = new OpenAI({
 								))
 							)}
 						</div>
-					</div>
+					</AppPageSection>
 
-					{/* Threat Analytics */}
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-						<div className="dashboard-card rounded-[2rem] [&>*]:border-0 [&>*]:bg-transparent">
+					<div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+						<AppSurface className="rounded-[2rem] [&>*]:border-0 [&>*]:bg-transparent">
 							<ThreatTypeBreakdown data={attackTypeCounts} />
-						</div>
-						<div className="dashboard-card rounded-[2rem] [&>*]:border-0 [&>*]:bg-transparent">
+						</AppSurface>
+						<AppSurface className="rounded-[2rem] [&>*]:border-0 [&>*]:bg-transparent">
 							<ThreatSummary
 								totalRequests={totalRequests}
 								blockedRequests={blockedRequests}
 								attacksDetected={attacksDetected}
 								topThreatType={getTopThreatType(attackTypeCounts)}
 							/>
-						</div>
+						</AppSurface>
 					</div>
 
 					{recentAttacks.length > 0 && (
-						<div className="dashboard-card rounded-[2rem] [&>*]:border-0 [&>*]:bg-transparent">
+						<AppSurface className="rounded-[2rem] [&>*]:border-0 [&>*]:bg-transparent">
 							<ThreatTimeline attacks={recentAttacks} />
-						</div>
+						</AppSurface>
 					)}
 				</>
 			)}
@@ -437,7 +405,7 @@ const client = new OpenAI({
 				isOpen={selectedAttack !== null}
 				onClose={() => setSelectedAttack(null)}
 			/>
-		</div>
+		</AppPage>
 	);
 }
 
