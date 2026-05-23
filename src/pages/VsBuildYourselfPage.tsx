@@ -1,369 +1,325 @@
 import { motion } from 'framer-motion';
-import { AlertTriangle, CheckCircle, Clock, Code, DollarSign, ExternalLink, Shield, TrendingUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Code2, DollarSign, Hammer, Shield, TimerReset, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
+const buildBurden = [
+	'Threat research and red-team corpus maintenance',
+	'Low-latency proxy or SDK enforcement',
+	'RAG, tool-output, and agent-chain inspection',
+	'Tenant isolation, audit logs, alerts, and reporting',
+	'False-positive tuning and regression testing',
+	'Documentation, support, and incident response',
+];
+
+const phases = [
+	['Prototype', 'Can you detect the obvious attacks?'],
+	['Production', 'Can you enforce safely at scale?'],
+	['Operations', 'Can you maintain evidence, tests, alerts, and new attack coverage?'],
+];
+
+const yearOneBuild = [
+	['Initial development (2 engineers x 6 months)', '$180,000'],
+	['Ongoing maintenance (1 engineer)', '$120,000'],
+	['Infrastructure and tools', '$24,000'],
+	['Security research and updates', '$36,000'],
+	['Opportunity cost from delayed features', '$100,000+'],
+];
+
+const yearOneKoreshield = [
+	['Koreshield Enterprise license', '$50,000'],
+	['Integration time (1 week)', '$3,500'],
+	['Infrastructure', '$12,000'],
+	['Maintenance', '$0'],
+	['Opportunity cost', '$0'],
+];
+
+const buildTimeline = [
+	['Month 1-2', 'Research attacks, design architecture'],
+	['Month 3-4', 'Build detection engine, test patterns'],
+	['Month 5-6', 'Add RBAC, tenant isolation, and policies'],
+	['Month 7-8', 'Build monitoring, alerting, dashboards'],
+	['Month 9-10', 'Security testing and performance tuning'],
+	['Month 11-12', 'Documentation, training, deployment'],
+];
+
+const koreshieldTimeline = [
+	['Day 1', 'Install and basic setup'],
+	['Day 2-3', 'Configure policies and rules'],
+	['Day 4-5', 'Integration and testing'],
+	['Day 6-7', 'Deploy to production'],
+];
+
+const hiddenCosts = [
+	{
+		title: 'Ongoing maintenance',
+		items: ['New attack vectors emerge weekly', 'LLM providers update APIs frequently', 'Bug fixes and performance optimization', 'Documentation and onboarding', 'Estimated: $120K/year ongoing'],
+	},
+	{
+		title: 'Technical debt',
+		items: ['Code becomes unmaintainable over time', 'Original developers leave the company', 'Refactoring required every 12-18 months', 'Testing and security audits', 'Estimated: $50K-100K/year'],
+	},
+	{
+		title: 'Opportunity cost',
+		items: ['Engineers not building product features', 'Delayed time-to-market', 'Lost competitive advantage', 'Potential customer churn during delays', 'Estimated: $100K-500K+'],
+	},
+	{
+		title: 'Detection quality',
+		items: ['Specialized security expertise required', 'Red-team corpus must stay current', 'False-positive tuning becomes permanent work', 'Regression suite needs constant updates', 'Risk: missed incidents or unusable controls'],
+	},
+];
+
+const included = [
+	['Core features', ['Prompt and response scanning', 'RAG/context inspection', 'Multi-provider support', 'Policy enforcement', 'Python and Node SDKs']],
+	['Enterprise controls', ['Tenant-aware events', 'RBAC and scoped keys', 'Audit logs', 'Alerts', 'Compliance evidence']],
+	['Support and updates', ['Detection updates', 'Red-team informed testing', 'Production support path', 'Documentation', 'Deployment guidance']],
+] satisfies Array<[string, string[]]>;
+
+function CostRows({ rows }: { rows: string[][] }) {
+	return (
+		<div className="space-y-3">
+			{rows.map(([label, value]) => (
+				<div key={label} className="flex items-start justify-between gap-4 text-sm">
+					<span className="text-muted-foreground">{label}</span>
+					<span className="whitespace-nowrap font-bold text-foreground">{value}</span>
+				</div>
+			))}
+		</div>
+	);
+}
+
 export default function VsBuildYourselfPage() {
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="Koreshield vs Building Your Own"
-				description="Should you build your own LLM security solution or use Koreshield? Compare costs, time investment, maintenance burden, and long-term TCO."
+				description="Compare building an internal LLM security layer with using Koreshield."
 			/>
 
-			{/* Hero */}
-			<section className="py-20 px-4 bg-background relative ambient-glow">
-				<div className="max-w-7xl mx-auto">
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						className="text-center"
-					>
-						<h1 className="text-5xl font-bold text-foreground mb-6">
-							Build vs Buy: The Real Cost
-						</h1>
-						<p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-							An honest analysis of building your own LLM security vs using Koreshield
+			<section className="relative overflow-hidden px-6 py-24 ambient-glow md:py-32">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(16,185,129,0.16),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(245,158,11,0.08),transparent_24%)]" />
+				<div className="relative mx-auto max-w-5xl text-center">
+					<motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+						<span className="mb-6 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-electric-green">
+							<Hammer className="h-3.5 w-3.5" />
+							Build vs Buy
+						</span>
+						<h1 className="text-5xl font-extrabold tracking-[-0.055em] md:text-7xl">Building AI security is not one sprint.</h1>
+						<p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+							The first detector is the easy part. The hard part is operating a security layer as attacks, providers, models, and customer requirements keep changing.
 						</p>
 					</motion.div>
 				</div>
 			</section>
 
-			<div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-				{/* Cost Comparison */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.1 }}
-					className="bg-card rounded-xl shadow-lg border border-border p-8"
-				>
-					<div className="flex items-center gap-3 mb-6">
-						<DollarSign className="w-8 h-8 text-electric-green" />
-						<h2 className="text-3xl font-bold text-foreground">Total Cost of Ownership (Year 1)</h2>
+			<section className="border-y border-border bg-card/35 px-6 py-20">
+				<div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+					<div>
+						<p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-electric-green">Operating burden</p>
+						<h2 className="text-4xl font-extrabold tracking-[-0.04em] md:text-5xl">What your team owns.</h2>
+						<p className="mt-5 text-muted-foreground">If you build internally, these do not disappear after launch. They become part of your security roadmap.</p>
 					</div>
-					<div className="grid md:grid-cols-2 gap-8">
-						<div className="bg-red-50 dark:bg-red-950/20 rounded-lg p-6 border-2 border-red-200 dark:border-red-900">
-							<h3 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Building In-House</h3>
-							<div className="space-y-3">
-								<div className="flex justify-between items-center">
-									<span className="text-muted-foreground">Initial Development (2 engineers × 6 months)</span>
-									<span className="font-bold text-foreground">$180,000</span>
-								</div>
-								<div className="flex justify-between items-center">
-									<span className="text-muted-foreground">Ongoing Maintenance (1 engineer)</span>
-									<span className="font-bold text-foreground">$120,000</span>
-								</div>
-								<div className="flex justify-between items-center">
-									<span className="text-muted-foreground">Infrastructure & Tools</span>
-									<span className="font-bold text-foreground">$24,000</span>
-								</div>
-								<div className="flex justify-between items-center">
-									<span className="text-muted-foreground">Security Research & Updates</span>
-									<span className="font-bold text-foreground">$36,000</span>
-								</div>
-								<div className="flex justify-between items-center">
-									<span className="text-muted-foreground">Opportunity Cost (delayed features)</span>
-									<span className="font-bold text-foreground">$100,000+</span>
-								</div>
-								<div className="pt-3 border-t border-red-300 dark:border-red-800 flex justify-between items-center">
-									<span className="font-bold text-lg text-foreground">Total Year 1:</span>
-									<span className="font-bold text-2xl text-red-600 dark:text-red-400">$460,000+</span>
-								</div>
+					<div className="grid gap-3 sm:grid-cols-2">
+						{buildBurden.map((item) => (
+							<div key={item} className="flex gap-3 rounded-2xl border border-border bg-card/85 p-4 shadow-sm">
+								<CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-electric-green" />
+								<span className="text-sm">{item}</span>
 							</div>
-						</div>
+						))}
+					</div>
+				</div>
+			</section>
 
-						<div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-6 border-2 border-green-200 dark:border-green-900">
-							<h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">Using Koreshield</h3>
-							<div className="space-y-3">
-								<div className="flex justify-between items-center">
-									<span className="text-muted-foreground">Koreshield Enterprise License</span>
-									<span className="font-bold text-foreground">$50,000</span>
-								</div>
-								<div className="flex justify-between items-center">
-									<span className="text-muted-foreground">Integration Time (1 week)</span>
-									<span className="font-bold text-foreground">$3,500</span>
-								</div>
-								<div className="flex justify-between items-center">
-									<span className="text-muted-foreground">Infrastructure</span>
-									<span className="font-bold text-foreground">$12,000</span>
-								</div>
-								<div className="flex justify-between items-center">
-									<span className="text-muted-foreground">Maintenance</span>
-									<span className="font-bold text-foreground">$0</span>
-								</div>
-								<div className="flex justify-between items-center">
-									<span className="text-muted-foreground">Opportunity Cost</span>
-									<span className="font-bold text-foreground">$0</span>
-								</div>
-								<div className="pt-3 border-t border-green-300 dark:border-green-800 flex justify-between items-center">
-									<span className="font-bold text-lg text-foreground">Total Year 1:</span>
-									<span className="font-bold text-2xl text-green-600 dark:text-green-400">$65,500</span>
-								</div>
-							</div>
-							<div className="mt-6 pt-6 border-t border-green-300 dark:border-green-800">
-								<div className="text-center">
-									<div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">Save $394,500</div>
-									<div className="text-sm text-muted-foreground">85% cost reduction in Year 1</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</motion.div>
+			<section className="px-6 py-20">
+				<div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-3">
+					{phases.map(([title, body], index) => (
+						<motion.div
+							key={title}
+							initial={{ opacity: 0, y: 16 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true }}
+							transition={{ duration: 0.4, delay: index * 0.07 }}
+							className="rounded-[1.5rem] border border-border bg-card/85 p-6 shadow-sm"
+						>
+							<TimerReset className="mb-5 h-6 w-6 text-electric-green" />
+							<h3 className="text-xl font-bold">{title}</h3>
+							<p className="mt-3 text-sm leading-relaxed text-muted-foreground">{body}</p>
+						</motion.div>
+					))}
+				</div>
+			</section>
 
-				{/* Time to Market */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.2 }}
-					className="bg-card rounded-xl shadow-lg border border-border p-8"
-				>
-					<div className="flex items-center gap-3 mb-6">
-						<Clock className="w-8 h-8 text-electric-green" />
-						<h2 className="text-3xl font-bold text-foreground">Time to Production</h2>
-					</div>
-					<div className="grid md:grid-cols-2 gap-8">
+			<section className="border-y border-border bg-card/35 px-6 py-20">
+				<div className="mx-auto max-w-7xl">
+					<div className="mb-8 flex items-center gap-4">
+						<DollarSign className="h-8 w-8 text-electric-green" />
 						<div>
-							<h3 className="text-xl font-bold text-red-600 dark:text-red-400 mb-4">Building In-House: 6-12 Months</h3>
-							<ul className="space-y-3 text-muted-foreground">
-								<li className="flex gap-3">
-									<span className="text-red-500">Month 1-2:</span>
-									<span>Research attacks, design architecture</span>
-								</li>
-								<li className="flex gap-3">
-									<span className="text-red-500">Month 3-4:</span>
-									<span>Build detection engine, test patterns</span>
-								</li>
-								<li className="flex gap-3">
-									<span className="text-red-500">Month 5-6:</span>
-									<span>Add enterprise features (RBAC, multi-tenancy)</span>
-								</li>
-								<li className="flex gap-3">
-									<span className="text-red-500">Month 7-8:</span>
-									<span>Build monitoring, alerting, dashboards</span>
-								</li>
-								<li className="flex gap-3">
-									<span className="text-red-500">Month 9-10:</span>
-									<span>Security testing, performance tuning</span>
-								</li>
-								<li className="flex gap-3">
-									<span className="text-red-500">Month 11-12:</span>
-									<span>Documentation, training, deployment</span>
-								</li>
-							</ul>
+							<h2 className="text-4xl font-extrabold tracking-[-0.04em]">Total cost of ownership: year one</h2>
+							<p className="mt-2 text-sm text-muted-foreground">Illustrative planning model for a production-grade internal LLM security layer.</p>
+						</div>
+					</div>
+					<div className="grid gap-6 lg:grid-cols-2">
+						<div className="rounded-[1.5rem] border border-red-500/35 bg-red-500/10 p-6">
+							<h3 className="text-2xl font-extrabold text-red-400">Building in-house</h3>
+							<div className="mt-6">
+								<CostRows rows={yearOneBuild} />
+							</div>
+							<div className="mt-6 flex items-center justify-between border-t border-red-500/30 pt-5">
+								<span className="text-lg font-bold">Total year 1</span>
+								<span className="text-3xl font-black text-red-400">$460,000+</span>
+							</div>
+						</div>
+						<div className="rounded-[1.5rem] border border-electric-green/35 bg-electric-green/10 p-6">
+							<h3 className="text-2xl font-extrabold text-electric-green">Using Koreshield</h3>
+							<div className="mt-6">
+								<CostRows rows={yearOneKoreshield} />
+							</div>
+							<div className="mt-6 flex items-center justify-between border-t border-electric-green/30 pt-5">
+								<span className="text-lg font-bold">Total year 1</span>
+								<span className="text-3xl font-black text-electric-green">$65,500</span>
+							</div>
+							<div className="mt-6 rounded-2xl border border-electric-green/25 bg-background/55 p-5 text-center">
+								<p className="text-4xl font-black text-electric-green">Save $394,500</p>
+								<p className="mt-2 text-sm text-muted-foreground">85% cost reduction in year one</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section className="px-6 py-20">
+				<div className="mx-auto max-w-7xl rounded-[2rem] border border-border bg-card/85 p-7 shadow-sm">
+					<div className="mb-8 flex items-center gap-4">
+						<TimerReset className="h-8 w-8 text-electric-green" />
+						<h2 className="text-4xl font-extrabold tracking-[-0.04em]">Time to production</h2>
+					</div>
+					<div className="grid gap-8 lg:grid-cols-2">
+						<div>
+							<h3 className="mb-5 text-2xl font-extrabold text-red-400">Building in-house: 6-12 months</h3>
+							<div className="space-y-3">
+								{buildTimeline.map(([period, item]) => (
+									<div key={period} className="grid gap-2 rounded-2xl border border-border bg-background/60 p-4 sm:grid-cols-[110px_1fr]">
+										<span className="font-bold text-red-400">{period}</span>
+										<span className="text-sm text-muted-foreground">{item}</span>
+									</div>
+								))}
+							</div>
 						</div>
 						<div>
-							<h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-4">Using Koreshield: 1 Week</h3>
-							<ul className="space-y-3 text-muted-foreground">
-								<li className="flex gap-3">
-									<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-									<span><strong>Day 1:</strong> Install and basic setup</span>
-								</li>
-								<li className="flex gap-3">
-									<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-									<span><strong>Day 2-3:</strong> Configure policies and rules</span>
-								</li>
-								<li className="flex gap-3">
-									<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-									<span><strong>Day 4-5:</strong> Integration and testing</span>
-								</li>
-								<li className="flex gap-3">
-									<CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
-									<span><strong>Day 6-7:</strong> Deploy to production</span>
-								</li>
-								<li className="flex gap-3 mt-6">
-									<TrendingUp className="w-5 h-5 text-blue-500 flex-shrink-0 mt-1" />
-									<span><strong>Week 2+:</strong> Focus on building product features instead</span>
-								</li>
-							</ul>
-							<div className="mt-6 p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-900">
-								<div className="text-center">
-									<div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">48x Faster</div>
-									<div className="text-sm text-muted-foreground">From 12 months to 1 week</div>
-								</div>
+							<h3 className="mb-5 text-2xl font-extrabold text-electric-green">Using Koreshield: 1 week</h3>
+							<div className="space-y-3">
+								{koreshieldTimeline.map(([period, item]) => (
+									<div key={period} className="flex gap-3 rounded-2xl border border-border bg-background/60 p-4">
+										<CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-electric-green" />
+										<span className="text-sm text-muted-foreground"><strong className="text-foreground">{period}:</strong> {item}</span>
+									</div>
+								))}
+							</div>
+							<div className="mt-5 rounded-2xl border border-electric-green/25 bg-electric-green/10 p-5 text-center">
+								<TrendingUp className="mx-auto mb-3 h-6 w-6 text-electric-green" />
+								<p className="text-4xl font-black text-electric-green">48x faster</p>
+								<p className="mt-2 text-sm text-muted-foreground">From 12 months to 1 week</p>
 							</div>
 						</div>
 					</div>
-				</motion.div>
+				</div>
+			</section>
 
-				{/* Hidden Costs */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.3 }}
-					className="bg-card rounded-xl shadow-lg border border-border p-8"
-				>
-					<div className="flex items-center gap-3 mb-6">
-						<AlertTriangle className="w-8 h-8 text-orange-600 dark:text-orange-400" />
-						<h2 className="text-3xl font-bold text-foreground">Hidden Costs of Building</h2>
+			<section className="border-y border-border bg-card/35 px-6 py-20">
+				<div className="mx-auto max-w-7xl">
+					<div className="mb-8 flex items-center gap-4">
+						<AlertTriangle className="h-8 w-8 text-amber-400" />
+						<h2 className="text-4xl font-extrabold tracking-[-0.04em]">Hidden costs of building</h2>
 					</div>
-					<div className="grid md:grid-cols-2 gap-6">
-						<div className="bg-orange-50 dark:bg-orange-950/20 rounded-lg p-6 border border-orange-200 dark:border-orange-900">
-							<h3 className="font-bold text-foreground mb-3">Ongoing Maintenance</h3>
-							<ul className="space-y-2 text-muted-foreground text-sm">
-								<li>• New attack vectors emerge weekly</li>
-								<li>• LLM providers update APIs frequently</li>
-								<li>• Bug fixes and performance optimization</li>
-								<li>• Documentation and onboarding</li>
-								<li>• <strong>Estimated: $120K/year ongoing</strong></li>
-							</ul>
-						</div>
-						<div className="bg-orange-50 dark:bg-orange-950/20 rounded-lg p-6 border border-orange-200 dark:border-orange-900">
-							<h3 className="font-bold text-foreground mb-3">Technical Debt</h3>
-							<ul className="space-y-2 text-muted-foreground text-sm">
-								<li>• Code becomes unmaintainable over time</li>
-								<li>• Original developers leave the company</li>
-								<li>• Refactoring required every 12-18 months</li>
-								<li>• Testing and security audits</li>
-								<li>• <strong>Estimated: $50K-100K/year</strong></li>
-							</ul>
-						</div>
-						<div className="bg-orange-50 dark:bg-orange-950/20 rounded-lg p-6 border border-orange-200 dark:border-orange-900">
-							<h3 className="font-bold text-foreground mb-3">Opportunity Cost</h3>
-							<ul className="space-y-2 text-muted-foreground text-sm">
-								<li>• Engineers not building product features</li>
-								<li>• Delayed time-to-market (6-12 months)</li>
-								<li>• Lost competitive advantage</li>
-								<li>• Potential customer churn during delays</li>
-								<li>• <strong>Estimated: $100K-500K+</strong></li>
-							</ul>
-						</div>
-						<div className="bg-orange-50 dark:bg-orange-950/20 rounded-lg p-6 border border-orange-200 dark:border-orange-900">
-							<h3 className="font-bold text-foreground mb-3">Lower Detection Quality</h3>
-							<ul className="space-y-2 text-muted-foreground text-sm">
-								<li>• Your team lacks specialized security expertise</li>
-								<li>• No research team tracking new attacks</li>
-								<li>• Lower accuracy (70-80% vs 95%+)</li>
-								<li>• Higher false positive/negative rates</li>
-								<li>• <strong>Risk: $4.5M average breach cost</strong></li>
-							</ul>
-						</div>
+					<div className="grid gap-5 md:grid-cols-2">
+						{hiddenCosts.map((group) => (
+							<div key={group.title} className="rounded-[1.5rem] border border-amber-500/25 bg-amber-500/5 p-6">
+								<h3 className="text-xl font-bold">{group.title}</h3>
+								<ul className="mt-5 space-y-3">
+									{group.items.map((item) => (
+										<li key={item} className="flex gap-3 text-sm text-muted-foreground">
+											<span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-400" />
+											<span>{item}</span>
+										</li>
+									))}
+								</ul>
+							</div>
+						))}
 					</div>
-				</motion.div>
+				</div>
+			</section>
 
-				{/* What You Get with Koreshield */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.4 }}
-					className="bg-card rounded-xl shadow-lg border border-border p-8"
-				>
-					<div className="flex items-center gap-3 mb-6">
-						<Shield className="w-8 h-8 text-electric-green" />
-						<h2 className="text-3xl font-bold text-foreground">What's Included in Koreshield</h2>
+			<section className="px-6 py-20">
+				<div className="mx-auto max-w-7xl rounded-[2rem] border border-border bg-card/85 p-7 shadow-sm">
+					<div className="mb-8 flex items-center gap-4">
+						<Shield className="h-8 w-8 text-electric-green" />
+						<h2 className="text-4xl font-extrabold tracking-[-0.04em]">What is included in Koreshield</h2>
 					</div>
-					<div className="grid md:grid-cols-3 gap-6">
-						<div className="space-y-3">
-							<h3 className="font-bold text-foreground">Core Features</h3>
-							<ul className="space-y-2 text-muted-foreground text-sm">
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> 95%+ detection accuracy</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> 10+ attack types covered</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Multi-provider support</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Real-time detection (10-50ms)</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Custom rule engine</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Blocklist/allowlist management</li>
-							</ul>
-						</div>
-						<div className="space-y-3">
-							<h3 className="font-bold text-foreground">Enterprise Features</h3>
-							<ul className="space-y-2 text-muted-foreground text-sm">
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Multi-tenancy with isolation</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> RBAC and policies</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Complete audit logs</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Prometheus metrics</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Grafana dashboards</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Alert integrations</li>
-							</ul>
-						</div>
-						<div className="space-y-3">
-							<h3 className="font-bold text-foreground">Support & Updates</h3>
-							<ul className="space-y-2 text-muted-foreground text-sm">
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Weekly pattern updates</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Research team tracking threats</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Professional support</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> SLA guarantees</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> Complete documentation</li>
-								<li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 mt-1" /> SDK for Python & JS</li>
-							</ul>
-						</div>
+					<div className="grid gap-6 md:grid-cols-3">
+							{included.map(([title, items]) => (
+								<div key={title}>
+									<h3 className="mb-4 text-xl font-bold">{title}</h3>
+									<ul className="space-y-3">
+										{items.map((item) => (
+										<li key={item} className="flex gap-3 text-sm text-muted-foreground">
+											<CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-electric-green" />
+											<span>{item}</span>
+										</li>
+									))}
+								</ul>
+							</div>
+						))}
 					</div>
-				</motion.div>
+				</div>
+			</section>
 
-				{/* ROI Calculator */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.5 }}
-					className="bg-card border border-border rounded-xl p-8"
-				>
-					<h2 className="text-3xl font-bold text-foreground mb-6 text-center">3-Year Total Cost of Ownership</h2>
-					<div className="grid md:grid-cols-2 gap-8">
-						<div className="bg-card rounded-lg p-6">
-							<h3 className="text-xl font-bold text-red-600 dark:text-red-400 mb-4">Build In-House</h3>
-							<div className="space-y-2 text-muted-foreground">
-								<div className="flex justify-between"><span>Year 1:</span><span className="font-bold">$460,000</span></div>
-								<div className="flex justify-between"><span>Year 2:</span><span className="font-bold">$220,000</span></div>
-								<div className="flex justify-between"><span>Year 3:</span><span className="font-bold">$250,000</span></div>
-								<div className="pt-3 border-t border-border flex justify-between">
-									<span className="font-bold">3-Year Total:</span>
-									<span className="font-bold text-2xl text-red-600 dark:text-red-400">$930,000</span>
-								</div>
+			<section className="border-y border-border bg-card/35 px-6 py-20">
+				<div className="mx-auto max-w-7xl rounded-[2rem] border border-border bg-card/85 p-7 shadow-sm">
+					<h2 className="text-center text-4xl font-extrabold tracking-[-0.04em]">3-year total cost of ownership</h2>
+					<div className="mt-10 grid gap-8 lg:grid-cols-2">
+						<div className="rounded-[1.5rem] border border-red-500/25 bg-background/60 p-6">
+							<h3 className="text-2xl font-extrabold text-red-400">Build in-house</h3>
+							<div className="mt-5 space-y-3 text-sm text-muted-foreground">
+								<div className="flex justify-between gap-4"><span>Year 1</span><strong>$460,000</strong></div>
+								<div className="flex justify-between gap-4"><span>Year 2</span><strong>$220,000</strong></div>
+								<div className="flex justify-between gap-4"><span>Year 3</span><strong>$250,000</strong></div>
+							</div>
+							<div className="mt-5 flex justify-between border-t border-border pt-5">
+								<span className="font-bold">3-year total</span>
+								<span className="text-3xl font-black text-red-400">$930,000</span>
 							</div>
 						</div>
-						<div className="bg-card rounded-lg p-6">
-							<h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-4">Use Koreshield</h3>
-							<div className="space-y-2 text-muted-foreground">
-								<div className="flex justify-between"><span>Year 1:</span><span className="font-bold">$65,500</span></div>
-								<div className="flex justify-between"><span>Year 2:</span><span className="font-bold">$60,000</span></div>
-								<div className="flex justify-between"><span>Year 3:</span><span className="font-bold">$70,000</span></div>
-								<div className="pt-3 border-t border-border flex justify-between">
-									<span className="font-bold">3-Year Total:</span>
-									<span className="font-bold text-2xl text-green-600 dark:text-green-400">$195,500</span>
-								</div>
+						<div className="rounded-[1.5rem] border border-electric-green/25 bg-background/60 p-6">
+							<h3 className="text-2xl font-extrabold text-electric-green">Use Koreshield</h3>
+							<div className="mt-5 space-y-3 text-sm text-muted-foreground">
+								<div className="flex justify-between gap-4"><span>Year 1</span><strong>$65,500</strong></div>
+								<div className="flex justify-between gap-4"><span>Year 2</span><strong>$60,000</strong></div>
+								<div className="flex justify-between gap-4"><span>Year 3</span><strong>$70,000</strong></div>
+							</div>
+							<div className="mt-5 flex justify-between border-t border-border pt-5">
+								<span className="font-bold">3-year total</span>
+								<span className="text-3xl font-black text-electric-green">$195,500</span>
 							</div>
 						</div>
 					</div>
-					<div className="mt-8 text-center">
-						<div className="inline-block bg-card rounded-lg p-6">
-							<div className="text-4xl font-bold text-electric-green mb-2">Save $734,500</div>
-							<div className="text-lg text-muted-foreground">79% cost reduction over 3 years</div>
-						</div>
+					<div className="mt-10 text-center">
+						<p className="text-5xl font-black text-electric-green">Save $734,500</p>
+						<p className="mt-2 text-sm text-muted-foreground">79% cost reduction over 3 years</p>
 					</div>
-				</motion.div>
+				</div>
+			</section>
 
-				{/* CTA */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.6 }}
-					className="bg-card border border-border rounded-xl p-10 text-center"
-				>
-					<h2 className="text-3xl font-bold mb-4 text-foreground">Focus on Building Your Product</h2>
-					<p className="text-lg mb-8 text-muted-foreground">
-						Let us handle LLM security so you can ship faster and save hundreds of thousands
-					</p>
-					<div className="flex flex-wrap justify-center gap-4">
-						<Link to="/pricing"
-							className="inline-flex items-center gap-2 px-6 py-3 bg-electric-green hover:bg-emerald-bright text-white rounded-lg font-semibold transition-colors"
-						>
-							<DollarSign className="w-5 h-5" />
-							View Pricing
-						</Link>
-						<Link
-							to="/docs/getting-started/installation"
-							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"
-						>
-							<Code className="w-5 h-5" />
-							Start building
-						</Link>
-						<Link to="/vs"
-							className="inline-flex items-center gap-2 px-6 py-3 border border-border hover:border-primary/40 bg-background text-foreground rounded-lg font-semibold transition-colors"
-						>
-							Compare Other Options
-							<ExternalLink className="w-5 h-5" />
-						</Link>
+			<section className="border-t border-border px-6 py-20">
+				<div className="mx-auto flex max-w-7xl flex-col gap-5 rounded-[2rem] border border-border bg-card/85 p-7 shadow-sm md:flex-row md:items-center md:justify-between">
+					<div>
+						<h2 className="text-3xl font-extrabold tracking-[-0.03em]">Use your team for product, not permanent detector upkeep.</h2>
+						<p className="mt-2 text-sm text-muted-foreground">Koreshield gives you a maintained runtime layer while your engineers keep shipping.</p>
 					</div>
-				</motion.div>
-			</div>
+					<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright">
+						Talk through the tradeoff <Code2 className="h-4 w-4" />
+					</Link>
+				</div>
+			</section>
 		</div>
 	);
 }

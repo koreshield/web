@@ -407,6 +407,81 @@ select:focus-visible {
   color: #3b82f6;
 }
 
+/* ═══ Authenticated dashboard surface ═══ */
+.dashboard-shell {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(16, 185, 129, 0.12), transparent 28rem),
+    radial-gradient(circle at 90% 12%, rgba(56, 189, 248, 0.08), transparent 24rem),
+    linear-gradient(180deg, rgba(16, 185, 129, 0.035), transparent 22rem),
+    hsl(var(--background));
+}
+
+:root:not(.dark) .dashboard-shell {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(16, 185, 129, 0.16), transparent 28rem),
+    radial-gradient(circle at 90% 12%, rgba(14, 165, 233, 0.12), transparent 24rem),
+    linear-gradient(180deg, rgba(15, 118, 110, 0.06), transparent 22rem),
+    hsl(var(--background));
+}
+
+.dashboard-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent 42rem);
+}
+
+:root:not(.dark) .dashboard-grid {
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+}
+
+.dashboard-panel {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    hsl(var(--card) / 0.82);
+  border: 1px solid hsl(var(--border) / 0.82);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+:root:not(.dark) .dashboard-panel {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(240, 253, 250, 0.72)),
+    hsl(var(--card));
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dashboard-card {
+  background: hsl(var(--card) / 0.78);
+  border: 1px solid hsl(var(--border) / 0.82);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.14);
+}
+
+:root:not(.dark) .dashboard-card {
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 16px 44px rgba(15, 23, 42, 0.07);
+}
+
+.dashboard-sidebar {
+  background:
+    radial-gradient(circle at 35% 0%, rgba(16, 185, 129, 0.14), transparent 18rem),
+    linear-gradient(180deg, rgba(24, 24, 27, 0.92), rgba(9, 9, 11, 0.94));
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root:not(.dark) .dashboard-sidebar {
+  background:
+    radial-gradient(circle at 35% 0%, rgba(16, 185, 129, 0.13), transparent 18rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 253, 250, 0.9));
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    Doc prose typography
    Used by DocPage <article className="prose dark:prose-invert ...">
