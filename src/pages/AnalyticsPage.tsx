@@ -2,8 +2,20 @@ import { useState } from 'react';
 import { Building2, TrendingUp, Users, Activity, BarChart3, Filter } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, PieChart as RechartsPie, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api-client';
+import {
+	AppPage,
+	AppPageHeader,
+	AppStatGrid,
+	AppStatCard,
+	AppPageSection,
+	AppEmptyState,
+	AppPrimaryButton,
+	AppSecondaryButton,
+	AppPageError,
+	AppPageLoading,
+} from '../components/AppPageLayout';
 
 interface TenantAnalytics {
     tenant_id: string;
@@ -23,6 +35,7 @@ function asSelectedMetric(value: string): 'requests' | 'blocked' | 'attacks' | '
 }
 
 export function AnalyticsPage() {
+    const navigate = useNavigate();
     const [timeRange, setTimeRange] = useState('24h');
     const [selectedMetric, setSelectedMetric] = useState<'requests' | 'blocked' | 'attacks' | 'latency'>('requests');
 
@@ -72,303 +85,223 @@ export function AnalyticsPage() {
     };
 
     return (
-        <div>
-            {/* Header */}
-            <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                                <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                            </div>
-                            <div className="min-w-0">
-                                <h1 className="text-lg sm:text-2xl font-bold truncate">Usage Analytics</h1>
-                                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                                    Account-level insights and performance comparisons
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 w-full sm:w-auto">
-                            <select
-                                value={timeRange}
-                                onChange={(e) => setTimeRange(e.target.value)}
-                                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                            >
-                                <option value="1h">Last hour</option>
-                                <option value="24h">Last 24 hours</option>
-                                <option value="7d">Last 7 days</option>
-                                <option value="30d">Last 30 days</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </header>
+        <AppPage>
+            <AppPageHeader
+                eyebrow="Insights"
+                eyebrowIcon={BarChart3}
+                title="Usage Analytics"
+                description="Account-level insights and performance comparisons"
+                icon={BarChart3}
+                actions={
+                    <select
+                        value={timeRange}
+                        onChange={(e) => setTimeRange(e.target.value)}
+                        className="w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary sm:w-auto sm:px-4"
+                    >
+                        <option value="1h">Last hour</option>
+                        <option value="24h">Last 24 hours</option>
+                        <option value="7d">Last 7 days</option>
+                        <option value="30d">Last 30 days</option>
+                    </select>
+                }
+            />
 
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {accessDenied && (
-                    <div className="bg-card border border-border rounded-lg p-8 text-center">
-                        <BarChart3 className="w-10 h-10 mx-auto mb-4 text-primary" />
-                        <h2 className="text-xl font-semibold mb-2">Analytics require an admin seat</h2>
-                        <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-                            Your account can use Koreshield, but tenant-level analytics are currently restricted to admin users.
-                            Finish onboarding with teams, API keys, rules, alerts, and protected requests first, then return once your role is upgraded.
-                        </p>
+            {accessDenied && (
+                <AppEmptyState
+                    icon={BarChart3}
+                    title="Analytics require an admin seat"
+                    description="Your account can use Koreshield, but tenant-level analytics are currently restricted to admin users. Finish onboarding with teams, API keys, rules, alerts, and protected requests first, then return once your role is upgraded."
+                    action={
                         <div className="flex flex-wrap items-center justify-center gap-3">
-                            <Link
-                                to="/getting-started"
-                                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                            >
+                            <AppPrimaryButton onClick={() => navigate('/getting-started')}>
                                 Continue onboarding
-                            </Link>
-                            <Link
-                                to="/dashboard"
-                                className="px-4 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
-                            >
+                            </AppPrimaryButton>
+                            <AppSecondaryButton onClick={() => navigate('/dashboard')}>
                                 Back to dashboard
-                            </Link>
+                            </AppSecondaryButton>
                         </div>
-                    </div>
-                )}
+                    }
+                />
+            )}
 
-                {!accessDenied && analyticsError && (
-                    <div className="bg-card border border-border rounded-lg p-8 text-center">
-                        <BarChart3 className="w-10 h-10 mx-auto mb-4 text-red-500" />
-                        <h2 className="text-xl font-semibold mb-2">Analytics are not loading right now</h2>
-                        <p className="text-muted-foreground mb-6">
-                            {analyticsError.message || 'Something went wrong while loading analytics.'}
-                        </p>
-                        <button
-                            onClick={() => {
-                                void refetch();
-                            }}
-                            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                        >
-                            Retry
-                        </button>
-                    </div>
-                )}
+            {!accessDenied && analyticsError && (
+                <AppPageError
+                    title="Analytics are not loading right now"
+                    message={analyticsError.message || 'Something went wrong while loading analytics.'}
+                    onRetry={() => void refetch()}
+                />
+            )}
 
-                {!accessDenied && !analyticsError && !isLoading && analytics.length === 0 && (
-                    <div className="bg-card border border-border rounded-lg p-8 text-center mb-8">
-                        <BarChart3 className="w-10 h-10 mx-auto mb-4 text-muted-foreground" />
-                        <h2 className="text-xl font-semibold mb-2">No analytics data yet</h2>
-                        <p className="text-muted-foreground max-w-lg mx-auto text-sm">
-                            Usage analytics appear here once requests are flowing through the Koreshield proxy.
-                            Send your first request via <code className="bg-muted px-1 rounded text-xs">POST /v1/scan</code> or{' '}
-                            <code className="bg-muted px-1 rounded text-xs">POST /v1/chat/completions</code> using your API key to get started.
-                        </p>
-                    </div>
-                )}
+            {!accessDenied && !analyticsError && !isLoading && analytics.length === 0 && (
+                <AppEmptyState
+                    icon={BarChart3}
+                    title="No analytics data yet"
+                    description="Usage analytics appear here once requests are flowing through the Koreshield proxy. Send your first request via POST /v1/scan or POST /v1/chat/completions using your API key to get started."
+                />
+            )}
 
-                {!accessDenied && !analyticsError && (analytics.length > 0 || isLoading) && (
+            {!accessDenied && !analyticsError && (analytics.length > 0 || isLoading) && (
                 <>
-                {/* Global Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">Total Requests</span>
-                            <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
-                        </div>
-                        <div className="text-xl sm:text-3xl font-bold">{totalRequests.toLocaleString()}</div>
-                        <div className="text-xs text-muted-foreground mt-1 hidden sm:block">Across all accounts</div>
-                    </div>
+                    <AppStatGrid>
+                        <AppStatCard label="Total Requests" value={totalRequests.toLocaleString()} icon={Activity} tone="text-sky-400" detail="Across all accounts" />
+                        <AppStatCard
+                            label="Blocked"
+                            value={totalBlocked.toLocaleString()}
+                            icon={TrendingUp}
+                            tone="text-red-400"
+                            detail={`${totalRequests > 0 ? ((totalBlocked / totalRequests) * 100).toFixed(1) : 0}% block rate`}
+                        />
+                        <AppStatCard label="Attacks Detected" value={totalAttacks.toLocaleString()} icon={Building2} tone="text-amber-400" detail="Security incidents" />
+                        <AppStatCard label="Avg Latency" value={`${avgLatency.toFixed(0)}ms`} icon={Users} tone="text-violet-400" detail="Platform-wide" />
+                    </AppStatGrid>
 
-                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">Blocked</span>
-                            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
-                        </div>
-                        <div className="text-xl sm:text-3xl font-bold text-red-600">{totalBlocked.toLocaleString()}</div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                            {totalRequests > 0 ? ((totalBlocked / totalRequests) * 100).toFixed(1) : 0}% block rate
-                        </div>
-                    </div>
-
-                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">Attacks Detected</span>
-                            <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
-                        </div>
-                        <div className="text-xl sm:text-3xl font-bold text-orange-600">{totalAttacks.toLocaleString()}</div>
-                        <div className="text-xs text-muted-foreground mt-1">Security incidents</div>
-                    </div>
-
-                    <div className="bg-card border border-border rounded-lg p-3 sm:p-6">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">Avg Latency</span>
-                            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
-                        </div>
-                        <div className="text-xl sm:text-3xl font-bold">{avgLatency.toFixed(0)}ms</div>
-                        <div className="text-xs text-muted-foreground mt-1 hidden sm:block">Platform-wide</div>
-                    </div>
-                </div>
-
-                {/* Metric Selector */}
-                <div className="bg-card border border-border rounded-lg p-6 mb-8">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold">Account Comparison</h3>
-                        <div className="flex items-center gap-2">
-                            <Filter className="w-4 h-4 text-muted-foreground" />
-                            <select
-                                value={selectedMetric}
-                                onChange={(e) => setSelectedMetric(asSelectedMetric(e.target.value))}
-                                className="px-3 py-1 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                <option value="requests">Total Requests</option>
-                                <option value="blocked">Blocked Requests</option>
-                                <option value="attacks">Attacks Detected</option>
-                                <option value="latency">Average Latency</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    {isLoading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                        </div>
-                    ) : (
-                        <ResponsiveContainer width="100%" height={350} minHeight={350} minWidth={0}>
-                            <BarChart data={tenantComparisonData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                                <XAxis 
-                                    dataKey="name" 
-                                    stroke="hsl(var(--muted-foreground))" 
-                                    fontSize={12}
-                                    angle={-45}
-                                    textAnchor="end"
-                                    height={80}
-                                />
-                                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                                <Tooltip 
-                                    contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
-                                />
-                                <Legend />
-                                <Bar 
-                                    dataKey={selectedMetric} 
-                                    fill="#3b82f6" 
-                                    name={getMetricLabel(selectedMetric)}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    )}
-                </div>
-
-                {/* Tier Distribution & Top Accounts */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                    {/* Tier Distribution */}
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <h3 className="text-lg font-semibold mb-4">Account Tier Distribution</h3>
-                        <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
-                            <RechartsPie>
-                                <Pie
-                                    data={tierDistributionData}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
-                                    outerRadius={100}
-                                    fill="#8884d8"
-                                    dataKey="value"
+                    <AppPageSection
+                        eyebrow="Comparison"
+                        title="Account Comparison"
+                        actions={
+                            <div className="flex items-center gap-2">
+                                <Filter className="h-4 w-4 text-muted-foreground" />
+                                <select
+                                    value={selectedMetric}
+                                    onChange={(e) => setSelectedMetric(asSelectedMetric(e.target.value))}
+                                    className="rounded-lg border border-border bg-background/60 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                                 >
-                                    {tierDistributionData.map((_, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    <option value="requests">Total Requests</option>
+                                    <option value="blocked">Blocked Requests</option>
+                                    <option value="attacks">Attacks Detected</option>
+                                    <option value="latency">Average Latency</option>
+                                </select>
+                            </div>
+                        }
+                    >
+                        {isLoading ? (
+                            <AppPageLoading label="Loading analytics…" />
+                        ) : (
+                            <ResponsiveContainer width="100%" height={350} minHeight={350} minWidth={0}>
+                                <BarChart data={tenantComparisonData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                    <XAxis
+                                        dataKey="name"
+                                        stroke="hsl(var(--muted-foreground))"
+                                        fontSize={12}
+                                        angle={-45}
+                                        textAnchor="end"
+                                        height={80}
+                                    />
+                                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                                    <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
+                                    <Legend />
+                                    <Bar dataKey={selectedMetric} fill="#3b82f6" name={getMetricLabel(selectedMetric)} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </AppPageSection>
+
+                    <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+                        <AppPageSection variant="card" title="Account Tier Distribution">
+                            <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
+                                <RechartsPie>
+                                    <Pie
+                                        data={tierDistributionData}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={false}
+                                        label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                                        outerRadius={100}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                    >
+                                        {tierDistributionData.map((_, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                </RechartsPie>
+                            </ResponsiveContainer>
+                        </AppPageSection>
+
+                        <AppPageSection variant="card" title="Top Accounts by Activity">
+                            <div className="space-y-4">
+                                {analytics
+                                    .sort((a, b) => b.requests_total - a.requests_total)
+                                    .slice(0, 5)
+                                    .map((tenant, index) => (
+                                        <div key={tenant.tenant_id} className="flex items-center gap-4">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                                                {index + 1}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="font-medium">{tenant.tenant_name}</div>
+                                                <div className="text-sm text-muted-foreground">
+                                                    {tenant.requests_total.toLocaleString()} requests
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className={`text-sm font-medium ${
+                                                    tenant.tier === 'enterprise' ? 'text-orange-600' :
+                                                    tenant.tier === 'professional' ? 'text-purple-600' :
+                                                    tenant.tier === 'starter' ? 'text-blue-600' : 'text-muted-foreground'
+                                                }`}>
+                                                    {tenant.tier.charAt(0).toUpperCase() + tenant.tier.slice(1)}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {tenant.avg_latency.toFixed(0)}ms avg
+                                                </div>
+                                            </div>
+                                        </div>
                                     ))}
-                                </Pie>
-                                <Tooltip />
-                            </RechartsPie>
-                        </ResponsiveContainer>
+                            </div>
+                        </AppPageSection>
                     </div>
 
-                    {/* Top Accounts by Activity */}
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <h3 className="text-lg font-semibold mb-4">Top Accounts by Activity</h3>
-                        <div className="space-y-4">
-                            {analytics
-                                .sort((a, b) => b.requests_total - a.requests_total)
-                                .slice(0, 5)
-                                .map((tenant, index) => (
-                                    <div key={tenant.tenant_id} className="flex items-center gap-4">
-                                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">
-                                            {index + 1}
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="font-medium">{tenant.tenant_name}</div>
-                                            <div className="text-sm text-muted-foreground">
-                                                {tenant.requests_total.toLocaleString()} requests
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className={`text-sm font-medium ${
-                                                tenant.tier === 'enterprise' ? 'text-orange-600' :
-                                                tenant.tier === 'professional' ? 'text-purple-600' :
-                                                tenant.tier === 'starter' ? 'text-blue-600' : 'text-muted-foreground'
-                                            }`}>
-                                                {tenant.tier.charAt(0).toUpperCase() + tenant.tier.slice(1)}
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {tenant.avg_latency.toFixed(0)}ms avg
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Detailed Tenant Table */}
-                <div className="bg-card border border-border rounded-lg overflow-hidden">
-                    <div className="px-6 py-4 border-b border-border">
-                        <h3 className="text-lg font-semibold">All Accounts Performance</h3>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-muted border-b border-border">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Account</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Tier</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Requests</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Blocked</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Attacks</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Latency</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Error Rate</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border">
-                                {analytics.map((tenant) => (
-                                    <tr key={tenant.tenant_id} className="hover:bg-muted/50">
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium">{tenant.tenant_name}</div>
-                                            <div className="text-sm text-muted-foreground font-mono">{tenant.tenant_id}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                                tenant.tier === 'enterprise' ? 'bg-orange-500/10 text-orange-600' :
-                                                tenant.tier === 'professional' ? 'bg-purple-500/10 text-purple-600' :
-                                                tenant.tier === 'starter' ? 'bg-blue-500/10 text-blue-600' : 
-                                                'bg-muted text-muted-foreground'
-                                            }`}>
-                                                {tenant.tier.charAt(0).toUpperCase() + tenant.tier.slice(1)}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">{tenant.requests_total.toLocaleString()}</td>
-                                        <td className="px-6 py-4 text-right text-red-600">{tenant.requests_blocked.toLocaleString()}</td>
-                                        <td className="px-6 py-4 text-right text-orange-600">{tenant.attacks_detected.toLocaleString()}</td>
-                                        <td className="px-6 py-4 text-right">{tenant.avg_latency.toFixed(0)}ms</td>
-                                        <td className="px-6 py-4 text-right">
-                                            <span className={tenant.error_rate > 5 ? 'text-red-600' : 'text-green-600'}>
-                                                {tenant.error_rate.toFixed(2)}%
-                                            </span>
-                                        </td>
+                    <AppPageSection title="All Accounts Performance" className="overflow-hidden p-0">
+                        <div className="overflow-x-auto p-6 pt-0">
+                            <table className="w-full">
+                                <thead className="border-b border-border bg-muted/50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Account</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Tier</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium uppercase text-muted-foreground">Requests</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium uppercase text-muted-foreground">Blocked</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium uppercase text-muted-foreground">Attacks</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium uppercase text-muted-foreground">Latency</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium uppercase text-muted-foreground">Error Rate</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                </thead>
+                                <tbody className="divide-y divide-border">
+                                    {analytics.map((tenant) => (
+                                        <tr key={tenant.tenant_id} className="hover:bg-muted/50">
+                                            <td className="px-6 py-4">
+                                                <div className="font-medium">{tenant.tenant_name}</div>
+                                                <div className="font-mono text-sm text-muted-foreground">{tenant.tenant_id}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`rounded px-2 py-1 text-xs font-medium ${
+                                                    tenant.tier === 'enterprise' ? 'bg-orange-500/10 text-orange-600' :
+                                                    tenant.tier === 'professional' ? 'bg-purple-500/10 text-purple-600' :
+                                                    tenant.tier === 'starter' ? 'bg-blue-500/10 text-blue-600' :
+                                                    'bg-muted text-muted-foreground'
+                                                }`}>
+                                                    {tenant.tier.charAt(0).toUpperCase() + tenant.tier.slice(1)}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">{tenant.requests_total.toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-right text-red-600">{tenant.requests_blocked.toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-right text-orange-600">{tenant.attacks_detected.toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-right">{tenant.avg_latency.toFixed(0)}ms</td>
+                                            <td className="px-6 py-4 text-right">
+                                                <span className={tenant.error_rate > 5 ? 'text-red-600' : 'text-green-600'}>
+                                                    {tenant.error_rate.toFixed(2)}%
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </AppPageSection>
                 </>
-                )}
-            </main>
-        </div>
+            )}
+        </AppPage>
     );
 }

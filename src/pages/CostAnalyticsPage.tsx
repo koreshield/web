@@ -1,9 +1,18 @@
 import { useState } from 'react';
-import { DollarSign, TrendingDown, TrendingUp, Filter, Download, Calendar } from 'lucide-react';
+import { DollarSign, Filter, Download, Calendar, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
+import {
+	AppPage,
+	AppPageHeader,
+	AppStatGrid,
+	AppStatCard,
+	AppPageSection,
+	AppPrimaryButton,
+	AppPageLoading,
+} from '../components/AppPageLayout';
 
 interface CostData {
     period: string;
@@ -125,222 +134,184 @@ export function CostAnalyticsPage() {
     };
 
     return (
-        <div>
-            {/* Header */}
-            <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                            </div>
-                            <div className="min-w-0">
-                                <h1 className="text-lg sm:text-2xl font-bold">Cost Analytics</h1>
-                                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                                    Track spending across providers, accounts, and time periods
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                            <select
-                                value={exportFormat}
-                                onChange={(e) => setExportFormat(e.target.value as 'csv' | 'pdf')}
-                                className="px-3 py-2 bg-muted border border-border rounded-lg text-xs sm:text-sm"
-                            >
-                                <option value="csv">CSV</option>
-                                <option value="pdf">PDF</option>
-                            </select>
-                            <button
-                                onClick={downloadReport}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                            >
-                                <Download className="w-4 h-4" />
-                                Export Report
-                            </button>
-                        </div>
+        <AppPage>
+            <AppPageHeader
+                eyebrow="Spend"
+                eyebrowIcon={DollarSign}
+                title="Cost Analytics"
+                description="Track spending across providers, accounts, and time periods"
+                icon={DollarSign}
+                actions={
+                    <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
+                        <select
+                            value={exportFormat}
+                            onChange={(e) => setExportFormat(e.target.value as 'csv' | 'pdf')}
+                            className="rounded-lg border border-border bg-background/60 px-3 py-2 text-xs sm:text-sm"
+                        >
+                            <option value="csv">CSV</option>
+                            <option value="pdf">PDF</option>
+                        </select>
+                        <AppPrimaryButton onClick={downloadReport}>
+                            <Download className="h-4 w-4" />
+                            Export Report
+                        </AppPrimaryButton>
                     </div>
+                }
+            />
 
-                    {/* Filters */}
-                    <div className="flex gap-4 mt-6 flex-wrap">
-                        <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <select
-                                value={timeRange}
-                                onChange={(e) => setTimeRange(e.target.value as AnalyticsTimeRange)}
-                                className="px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                {TIME_RANGE_OPTIONS.map((option) => (
-                                    <option key={option.value} value={option.value}>{option.label}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <Filter className="w-4 h-4 text-muted-foreground" />
-                            <select
-                                value={selectedProvider}
-                                onChange={(e) => setSelectedProvider(e.target.value)}
-                                className="px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                <option value="all">All Providers</option>
-                                <option value="openai">OpenAI</option>
-                                <option value="anthropic">Anthropic</option>
-                                <option value="deepseek">DeepSeek</option>
-                                <option value="gemini">Google Gemini</option>
-                            </select>
-                        </div>
-                    </div>
+            <div className="mb-8 flex flex-wrap gap-4">
+                <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <select
+                        value={timeRange}
+                        onChange={(e) => setTimeRange(e.target.value as AnalyticsTimeRange)}
+                        className="rounded-lg border border-border bg-background/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                        {TIME_RANGE_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                    </select>
                 </div>
-            </header>
+                <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <select
+                        value={selectedProvider}
+                        onChange={(e) => setSelectedProvider(e.target.value)}
+                        className="rounded-lg border border-border bg-background/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                        <option value="all">All Providers</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="gemini">Google Gemini</option>
+                    </select>
+                </div>
+            </div>
 
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {isLoading ? (
-                    <div className="flex items-center justify-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                    </div>
-                ) : (
-                    <>
-                        {/* Cost Summary Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Current Period Cost</div>
-                                <div className="text-3xl font-bold">£{currentPeriodCost.toFixed(2)}</div>
-                                <div className={`flex items-center gap-1 text-sm mt-2 ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                                    {trend.isPositive ? <TrendingDown className="w-4 h-4" /> : <TrendingUp className="w-4 h-4" />}
-                                    {trend.value.toFixed(1)}% vs previous period
-                                </div>
-                            </div>
+            {isLoading ? (
+                <AppPageLoading label="Loading cost analytics…" />
+            ) : (
+                <>
+                    <AppStatGrid>
+                        <AppStatCard
+                            label="Current Period Cost"
+                            value={`£${currentPeriodCost.toFixed(2)}`}
+                            icon={DollarSign}
+                            tone="text-emerald-400"
+                            detail={`${trend.isPositive ? '↓' : '↑'} ${trend.value.toFixed(1)}% vs previous period`}
+                        />
+                        <AppStatCard
+                            label="Avg Cost per Request"
+                            value={`£${avgCostPerRequest.toFixed(4)}`}
+                            icon={TrendingUp}
+                            tone="text-sky-400"
+                            detail={`Based on ${currentRequests.toLocaleString()} requests`}
+                        />
+                        <AppStatCard
+                            label="Most Expensive Provider"
+                            value={providerCostBreakdown[0]?.category || 'N/A'}
+                            icon={Filter}
+                            tone="text-amber-400"
+                            detail={`£${providerCostBreakdown[0]?.amount.toFixed(2) || '0.00'} (${providerCostBreakdown[0]?.percentage.toFixed(1) || '0'}%)`}
+                        />
+                        <AppStatCard
+                            label="Projected Monthly"
+                            value={`£${projectedMonthlyCost.toFixed(2)}`}
+                            icon={Calendar}
+                            tone="text-violet-400"
+                            detail="Based on current usage rate"
+                        />
+                    </AppStatGrid>
 
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Avg Cost per Request</div>
-                                <div className="text-3xl font-bold">£{avgCostPerRequest.toFixed(4)}</div>
-                                <div className="text-sm text-muted-foreground mt-2">
-                                    Based on {currentRequests.toLocaleString()} requests
-                                </div>
-                            </div>
+                    <AppPageSection title="Cost Trend Over Time">
+                        <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
+                            <LineChart data={costData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                                <XAxis dataKey="period" stroke="#9ca3af" />
+                                <YAxis stroke="#9ca3af" />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
+                                    labelStyle={{ color: '#f9fafb' }}
+                                />
+                                <Legend />
+                                <Line type="monotone" dataKey="total_cost" stroke="#3b82f6" strokeWidth={2} name="Total Cost (£)" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </AppPageSection>
 
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Most Expensive Provider</div>
-                                <div className="text-2xl font-bold">
-                                    {providerCostBreakdown[0]?.category || 'N/A'}
-                                </div>
-                                <div className="text-sm text-muted-foreground mt-2">
-                                    £{providerCostBreakdown[0]?.amount.toFixed(2) || '0.00'} ({providerCostBreakdown[0]?.percentage.toFixed(1) || '0'}%)
-                                </div>
-                            </div>
-
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Projected Monthly</div>
-                                <div className="text-3xl font-bold">
-                                    £{projectedMonthlyCost.toFixed(2)}
-                                </div>
-                                <div className="text-sm text-muted-foreground mt-2">
-                                    Based on current usage rate
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Cost Trend Chart */}
-                        <div className="bg-card border border-border rounded-lg p-6 mb-8">
-                            <h2 className="text-lg font-semibold mb-4">Cost Trend Over Time</h2>
+                    <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2">
+                        <AppPageSection variant="card" title="Cost by Provider">
                             <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
-                                <LineChart data={costData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                    <XAxis dataKey="period" stroke="#9ca3af" />
-                                    <YAxis stroke="#9ca3af" />
-                                    <Tooltip
-                                            contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                                            labelStyle={{ color: '#f9fafb' }}
-                                        />
-                                        <Legend />
-                                        <Line type="monotone" dataKey="total_cost" stroke="#3b82f6" strokeWidth={2} name="Total Cost (£)" />
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                        {/* Provider Cost Breakdown */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <h2 className="text-lg font-semibold mb-4">Cost by Provider</h2>
-                                <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
-                                    <PieChart>
-                                        <Pie
-                                            data={providerCostBreakdown}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={({ percent, index }: any) => {
-                                                // FIXED: Access from providerCostBreakdown directly
-                                                const item = providerCostBreakdown[index];
-                                                return `${item.category}: ${(percent * 100).toFixed(1)}%`;
-                                            }}
-                                            outerRadius={100}
-                                            fill="#8884d8"
-                                            dataKey="amount"
-                                        >
-                                            {providerCostBreakdown.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip
-                                            contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                                            formatter={(value: any) => [`£${Number(value).toFixed(2)}`, 'Cost']}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <h2 className="text-lg font-semibold mb-4">Top 10 Accounts by Cost</h2>
-                                <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
-                                    <BarChart data={tenantCostBreakdown} layout="horizontal">
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                        <XAxis type="number" stroke="#9ca3af" />
-                                        <YAxis type="category" dataKey="tenant_name" stroke="#9ca3af" width={120} />
-                                        <Tooltip
-                                            contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                                            formatter={(value: any) => [`£${Number(value).toFixed(2)}`, 'Cost']}
-                                        />
-                                        <Bar dataKey="cost" fill="#3b82f6" />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
-
-                        {/* Detailed Cost Table */}
-                        <div className="bg-card border border-border rounded-lg overflow-hidden">
-                            <div className="p-6 border-b border-border">
-                                <h2 className="text-lg font-semibold">Detailed Cost Breakdown</h2>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-muted/50 border-b border-border">
-                                        <tr>
-                                            <th className="text-left py-3 px-4 font-medium">Provider</th>
-                                            <th className="text-left py-3 px-4 font-medium">Requests</th>
-                                            <th className="text-left py-3 px-4 font-medium">Tokens</th>
-                                            <th className="text-left py-3 px-4 font-medium">Cost</th>
-                                            <th className="text-left py-3 px-4 font-medium">Avg/Request</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {costData && costData.length > 0 && costData[costData.length - 1].provider_costs.map((provider) => (
-                                            <tr key={provider.provider} className="border-b border-border hover:bg-muted/50 transition-colors">
-                                                <td className="py-3 px-4 font-medium">{provider.provider}</td>
-                                                <td className="py-3 px-4">{provider.requests.toLocaleString()}</td>
-                                                <td className="py-3 px-4">{provider.tokens.toLocaleString()}</td>
-                                                <td className="py-3 px-4 font-semibold">£{provider.cost.toFixed(2)}</td>
-                                                <td className="py-3 px-4">£{(provider.requests > 0 ? provider.cost / provider.requests : 0).toFixed(4)}</td>
-                                            </tr>
+                                <PieChart>
+                                    <Pie
+                                        data={providerCostBreakdown}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={false}
+                                        label={({ percent, index }: { percent?: number; index?: number }) => {
+                                            const item = providerCostBreakdown[index ?? 0];
+                                            return `${item.category}: ${((percent ?? 0) * 100).toFixed(1)}%`;
+                                        }}
+                                        outerRadius={100}
+                                        fill="#8884d8"
+                                        dataKey="amount"
+                                    >
+                                        {providerCostBreakdown.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
                                         ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    </Pie>
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
+                                        formatter={(value) => [`£${Number(value).toFixed(2)}`, 'Cost']}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </AppPageSection>
+
+                        <AppPageSection variant="card" title="Top 10 Accounts by Cost">
+                            <ResponsiveContainer width="100%" height={300} minHeight={300} minWidth={0}>
+                                <BarChart data={tenantCostBreakdown} layout="horizontal">
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                                    <XAxis type="number" stroke="#9ca3af" />
+                                    <YAxis type="category" dataKey="tenant_name" stroke="#9ca3af" width={120} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
+                                        formatter={(value) => [`£${Number(value).toFixed(2)}`, 'Cost']}
+                                    />
+                                    <Bar dataKey="cost" fill="#3b82f6" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </AppPageSection>
+                    </div>
+
+                    <AppPageSection title="Detailed Cost Breakdown" className="overflow-hidden p-0">
+                        <div className="overflow-x-auto p-6 pt-0">
+                            <table className="w-full">
+                                <thead className="border-b border-border bg-muted/50">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left font-medium">Provider</th>
+                                        <th className="px-4 py-3 text-left font-medium">Requests</th>
+                                        <th className="px-4 py-3 text-left font-medium">Tokens</th>
+                                        <th className="px-4 py-3 text-left font-medium">Cost</th>
+                                        <th className="px-4 py-3 text-left font-medium">Avg/Request</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {costData && costData.length > 0 && costData[costData.length - 1].provider_costs.map((provider) => (
+                                        <tr key={provider.provider} className="border-b border-border transition-colors hover:bg-muted/50">
+                                            <td className="px-4 py-3 font-medium">{provider.provider}</td>
+                                            <td className="px-4 py-3">{provider.requests.toLocaleString()}</td>
+                                            <td className="px-4 py-3">{provider.tokens.toLocaleString()}</td>
+                                            <td className="px-4 py-3 font-semibold">£{provider.cost.toFixed(2)}</td>
+                                            <td className="px-4 py-3">£{(provider.requests > 0 ? provider.cost / provider.requests : 0).toFixed(4)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                    </>
-                )}
-            </main>
-        </div>
+                    </AppPageSection>
+                </>
+            )}
+        </AppPage>
     );
 }

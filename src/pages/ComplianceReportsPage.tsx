@@ -1,9 +1,20 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { FileText, Download, Calendar, CheckCircle, AlertTriangle, Clock, Loader2, XCircle, Shield } from 'lucide-react';
+import { FileText, Download, Calendar, CheckCircle, AlertTriangle, Clock, XCircle, Shield } from 'lucide-react';
 import { SEOMeta } from '../components/SEOMeta';
 import { api } from '../lib/api-client';
 import { format } from 'date-fns';
+import {
+	AppPage,
+	AppPageHeader,
+	AppPageSection,
+	AppEmptyState,
+	AppPrimaryButton,
+	AppCallout,
+	AppSurface,
+	AppPageError,
+	AppPageLoading,
+} from '../components/AppPageLayout';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -104,167 +115,146 @@ export function ComplianceReportsPage() {
 	};
 
 	return (
-		<div>
+		<AppPage>
 			<SEOMeta
 				title="Compliance Reports | Koreshield"
 				description="Real-time compliance posture assessment for SOC 2, ISO 27001, and GDPR"
 			/>
 
-			<header className="border-b border-border bg-card">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-					<div className="flex items-center gap-2 sm:gap-3">
-						<div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-							<Shield className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
-						</div>
-						<div>
-							<h1 className="text-lg sm:text-2xl font-bold">Compliance Reports</h1>
-							<p className="text-xs sm:text-sm text-muted-foreground mt-0.5 hidden sm:block">
-								Real-time compliance posture assessed from your live system state
-							</p>
-						</div>
-					</div>
-				</div>
-			</header>
+			<AppPageHeader
+				eyebrow="Governance"
+				eyebrowIcon={Shield}
+				title="Compliance Reports"
+				description="Real-time compliance posture assessed from your live system state"
+				icon={Shield}
+			/>
 
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-				{isLoading ? (
-					<div className="flex items-center justify-center py-24">
-						<Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-					</div>
-				) : error ? (
-					<div className="text-center py-24 text-muted-foreground">
-						<AlertTriangle className="w-10 h-10 mx-auto mb-3 text-destructive" />
-						<p>Failed to load compliance data. Please try again.</p>
-					</div>
-				) : (
-					<>
-						{/* Framework summary cards */}
-						<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
-							{postures.map(p => {
-								const status = scoreToStatus(p.score);
-								const passing = p.controls.filter(c => c.status === 'pass').length;
-								const warning = p.controls.filter(c => c.status === 'warning').length;
-								const failing = p.controls.filter(c => c.status === 'fail').length;
-								return (
-									<button
-										key={p.framework}
-										onClick={() => setSelectedFramework(
-											selectedFramework === p.framework ? null : p.framework
-										)}
-										className={`bg-card border rounded-lg p-6 text-left transition-colors cursor-pointer ${
-											selectedFramework === p.framework
-												? 'border-primary ring-2 ring-primary/20'
-												: 'border-border hover:border-primary/50'
-										}`}
-									>
-										<div className="flex items-center justify-between mb-4">
-											<span className="font-semibold text-base">{p.framework}</span>
-											{getStatusIcon(status)}
-										</div>
-										<div className="space-y-2">
-											<div className={`text-xs px-2 py-1 rounded-full border inline-block ${getStatusColor(status)}`}>
-												{status.toUpperCase()}
-											</div>
-											<div className="text-3xl font-bold mt-1">{p.score}%</div>
-											<div className="flex gap-3 text-xs text-muted-foreground mt-2">
-												<span className="text-green-600 font-medium">{passing} passing</span>
-												{warning > 0 && <span className="text-yellow-600 font-medium">{warning} warning</span>}
-												{failing > 0 && <span className="text-red-600 font-medium">{failing} failing</span>}
-											</div>
-										</div>
-									</button>
-								);
-							})}
-						</div>
-
-						{/* Control detail panel */}
-						<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-							<div className="lg:col-span-2 bg-card border border-border rounded-lg p-6">
-								<h2 className="text-xl font-semibold mb-4">
-									{selectedFramework ? `${selectedFramework} Controls` : 'Select a framework above to view controls'}
-								</h2>
-
-								{!selectedFramework ? (
-									<div className="text-center py-16 text-muted-foreground text-sm">
-										<FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
-										<p>Click a framework card to review individual control assessments.</p>
+			{isLoading ? (
+				<AppPageLoading label="Loading compliance data…" />
+			) : error ? (
+				<AppPageError title="Failed to load compliance data" message="Please try again." />
+			) : (
+				<>
+					<div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
+						{postures.map((p) => {
+							const status = scoreToStatus(p.score);
+							const passing = p.controls.filter((c) => c.status === 'pass').length;
+							const warning = p.controls.filter((c) => c.status === 'warning').length;
+							const failing = p.controls.filter((c) => c.status === 'fail').length;
+							return (
+								<button
+									key={p.framework}
+									onClick={() => setSelectedFramework(
+										selectedFramework === p.framework ? null : p.framework,
+									)}
+									className={`dashboard-card rounded-2xl p-6 text-left transition-colors ${
+										selectedFramework === p.framework
+											? 'border-primary ring-2 ring-primary/20'
+											: 'hover:border-primary/50'
+									}`}
+								>
+									<div className="mb-4 flex items-center justify-between">
+										<span className="text-base font-semibold">{p.framework}</span>
+										{getStatusIcon(status)}
 									</div>
-								) : selectedPosture ? (
-									<>
-										<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-											<p className="text-sm text-muted-foreground">
-												Control statuses are assessed from your live system: auth, logging, threat detection, and uptime.
-											</p>
-											<button
-												onClick={() => exportReport(selectedFramework, selectedPosture.controls)}
-												className="flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors text-sm whitespace-nowrap"
-											>
-												<Download className="w-4 h-4" />
-												Export
-											</button>
+									<div className="space-y-2">
+										<div className={`inline-block rounded-full border px-2 py-1 text-xs ${getStatusColor(status)}`}>
+											{status.toUpperCase()}
 										</div>
-										<div className="space-y-3">
-											{selectedPosture.controls.map(control => (
-												<div key={control.id} className="p-4 bg-muted/50 rounded-lg">
-													<div className="flex items-start justify-between mb-2 gap-2">
-														<div className="flex items-center gap-2">
-															{getStatusIcon(control.status)}
-															<span className="font-semibold text-sm">
-																{control.id}: {control.name}
-															</span>
-														</div>
-														<span className={`text-xs px-2 py-1 rounded-full border whitespace-nowrap flex-shrink-0 ${getStatusColor(control.status)}`}>
-															{control.status.toUpperCase()}
+										<div className="mt-1 text-3xl font-black tracking-[-0.04em]">{p.score}%</div>
+										<div className="mt-2 flex gap-3 text-xs text-muted-foreground">
+											<span className="font-medium text-green-600">{passing} passing</span>
+											{warning > 0 && <span className="font-medium text-yellow-600">{warning} warning</span>}
+											{failing > 0 && <span className="font-medium text-red-600">{failing} failing</span>}
+										</div>
+									</div>
+								</button>
+							);
+						})}
+					</div>
+
+					<div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
+						<AppPageSection
+							className="lg:col-span-2"
+							title={selectedFramework ? `${selectedFramework} Controls` : 'Select a framework above to view controls'}
+						>
+							{!selectedFramework ? (
+								<AppEmptyState
+									icon={FileText}
+									title="No framework selected"
+									description="Click a framework card to review individual control assessments."
+								/>
+							) : selectedPosture ? (
+								<>
+									<div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+										<p className="text-sm text-muted-foreground">
+											Control statuses are assessed from your live system: auth, logging, threat detection, and uptime.
+										</p>
+										<AppPrimaryButton onClick={() => exportReport(selectedFramework, selectedPosture.controls)}>
+											<Download className="h-4 w-4" />
+											Export
+										</AppPrimaryButton>
+									</div>
+									<div className="space-y-3">
+										{selectedPosture.controls.map((control) => (
+											<AppSurface key={control.id} className="border-0 bg-background/55">
+												<div className="mb-2 flex items-start justify-between gap-2">
+													<div className="flex items-center gap-2">
+														{getStatusIcon(control.status)}
+														<span className="text-sm font-semibold">
+															{control.id}: {control.name}
 														</span>
 													</div>
-													<p className="text-sm text-muted-foreground mb-2">{control.description}</p>
-													<p className="text-xs text-muted-foreground">
-														<span className="font-medium">Evidence:</span> {control.evidence}
-													</p>
+													<span className={`flex-shrink-0 whitespace-nowrap rounded-full border px-2 py-1 text-xs ${getStatusColor(control.status)}`}>
+														{control.status.toUpperCase()}
+													</span>
 												</div>
-											))}
-										</div>
-									</>
-								) : null}
-							</div>
+												<p className="mb-2 text-sm text-muted-foreground">{control.description}</p>
+												<p className="text-xs text-muted-foreground">
+													<span className="font-medium">Evidence:</span> {control.evidence}
+												</p>
+											</AppSurface>
+										))}
+									</div>
+								</>
+							) : null}
+						</AppPageSection>
 
-							<div className="bg-card border border-border rounded-lg p-6">
-								<h2 className="text-xl font-semibold mb-4">Review Schedule</h2>
-								<div className="space-y-4">
-									<div className="p-4 bg-muted/50 rounded-lg">
-										<div className="flex items-center gap-2 mb-1">
-											<Calendar className="w-4 h-4 text-primary" />
-											<span className="font-semibold text-sm">SOC 2 Type II</span>
-										</div>
-										<p className="text-sm text-muted-foreground">Quarterly review</p>
-										<p className="text-xs text-muted-foreground mt-1">Requires licensed CPA firm</p>
+						<AppPageSection variant="card" title="Review Schedule">
+							<div className="space-y-4">
+								<AppSurface className="border-0 bg-background/55">
+									<div className="mb-1 flex items-center gap-2">
+										<Calendar className="h-4 w-4 text-primary" />
+										<span className="text-sm font-semibold">SOC 2 Type II</span>
 									</div>
-									<div className="p-4 bg-muted/50 rounded-lg">
-										<div className="flex items-center gap-2 mb-1">
-											<Calendar className="w-4 h-4 text-primary" />
-											<span className="font-semibold text-sm">ISO 27001</span>
-										</div>
-										<p className="text-sm text-muted-foreground">Annual surveillance audit</p>
-										<p className="text-xs text-muted-foreground mt-1">Certification body required</p>
+									<p className="text-sm text-muted-foreground">Quarterly review</p>
+									<p className="mt-1 text-xs text-muted-foreground">Requires licensed CPA firm</p>
+								</AppSurface>
+								<AppSurface className="border-0 bg-background/55">
+									<div className="mb-1 flex items-center gap-2">
+										<Calendar className="h-4 w-4 text-primary" />
+										<span className="text-sm font-semibold">ISO 27001</span>
 									</div>
-									<div className="p-4 bg-muted/50 rounded-lg">
-										<div className="flex items-center gap-2 mb-1">
-											<Calendar className="w-4 h-4 text-primary" />
-											<span className="font-semibold text-sm">GDPR Assessment</span>
-										</div>
-										<p className="text-sm text-muted-foreground">Ongoing / as-changed</p>
-										<p className="text-xs text-muted-foreground mt-1">DPA review recommended quarterly</p>
+									<p className="text-sm text-muted-foreground">Annual surveillance audit</p>
+									<p className="mt-1 text-xs text-muted-foreground">Certification body required</p>
+								</AppSurface>
+								<AppSurface className="border-0 bg-background/55">
+									<div className="mb-1 flex items-center gap-2">
+										<Calendar className="h-4 w-4 text-primary" />
+										<span className="text-sm font-semibold">GDPR Assessment</span>
 									</div>
-									<div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg text-xs text-blue-700 dark:text-blue-400">
-										Control statuses above are assessed from your live system state and update automatically as your usage grows.
-									</div>
-								</div>
+									<p className="text-sm text-muted-foreground">Ongoing / as-changed</p>
+									<p className="mt-1 text-xs text-muted-foreground">DPA review recommended quarterly</p>
+								</AppSurface>
+								<AppCallout variant="info">
+									Control statuses above are assessed from your live system state and update automatically as your usage grows.
+								</AppCallout>
 							</div>
-						</div>
-					</>
-				)}
-			</main>
-		</div>
+						</AppPageSection>
+					</div>
+				</>
+			)}
+		</AppPage>
 	);
 }
 

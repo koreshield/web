@@ -64,7 +64,7 @@ describe('ReportsPage', () => {
 		await waitFor(() => {
 			expect(screen.getByText(/Reports require an admin seat/i)).toBeInTheDocument();
 		});
-		expect(screen.getByRole('link', { name: /Continue onboarding/i })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /Continue onboarding/i })).toBeInTheDocument();
 	});
 
 	it('wires report download and edit actions when reports are available', async () => {

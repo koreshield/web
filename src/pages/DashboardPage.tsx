@@ -128,28 +128,28 @@ const client = new OpenAI({
 		<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
 			{/* Page heading */}
-			<div className="dashboard-panel mb-8 overflow-hidden rounded-[2rem] p-6 md:p-8">
-				<div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+			<div className="dashboard-panel mb-6 overflow-hidden rounded-3xl p-5 md:p-6">
+				<div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 					<div className="max-w-3xl">
-						<div className="mb-5 inline-flex items-center gap-2 rounded-full border border-electric-green/25 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.22em] text-electric-green">
+						<div className="mb-4 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-electric-green">
 							<CheckCircle className="h-3.5 w-3.5" />
-							Connected to Koreshield API
+							API connected
 						</div>
-						<h1 className="text-4xl font-black tracking-[-0.055em] md:text-6xl">
-							Security operations, live.
+						<h1 className="text-3xl font-black tracking-[-0.045em] md:text-4xl">
+							Security overview
 						</h1>
-						<p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-							Welcome back{user?.name ? `, ${user.name}` : ''}. Monitor protected requests, review threats, and move from signal to action without leaving the dashboard.
+						<p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+							Welcome back{user?.name ? `, ${user.name}` : ''}. Review traffic, threats, and the actions Koreshield has taken.
 						</p>
 					</div>
-					<div className="grid min-w-[260px] grid-cols-2 gap-3">
-						<div className="rounded-2xl border border-border bg-background/55 p-4">
-							<p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Posture</p>
-							<p className="mt-2 text-2xl font-black text-electric-green">{attacksDetected > 0 ? 'Active' : 'Quiet'}</p>
+					<div className="grid min-w-[230px] grid-cols-2 gap-2">
+						<div className="rounded-2xl border border-border bg-background/45 p-3">
+							<p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Posture</p>
+							<p className="mt-1 text-xl font-black text-electric-green">{attacksDetected > 0 ? 'Active' : 'Quiet'}</p>
 						</div>
-						<div className="rounded-2xl border border-border bg-background/55 p-4">
-							<p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Blocked</p>
-							<p className="mt-2 text-2xl font-black">{blockedRequests}</p>
+						<div className="rounded-2xl border border-border bg-background/45 p-3">
+							<p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Blocked</p>
+							<p className="mt-1 text-xl font-black">{blockedRequests}</p>
 						</div>
 					</div>
 				</div>

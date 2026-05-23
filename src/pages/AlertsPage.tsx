@@ -3,6 +3,17 @@ import { Bell, Plus, Edit, Trash2, Mail, MessageSquare, Webhook, AlertTriangle, 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
+import {
+	AppPage,
+	AppPageHeader,
+	AppStatGrid,
+	AppStatCard,
+	AppCallout,
+	AppEmptyState,
+	AppPrimaryButton,
+	AppSecondaryButton,
+	AppSurface,
+} from '../components/AppPageLayout';
 
 interface AlertRule {
     id: string;
@@ -514,110 +525,77 @@ export function AlertsPage() {
     };
 
     return (
-        <div>
-            {/* Header */}
-            <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                                <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                            </div>
-                            <div className="min-w-0">
-                                <h1 className="text-lg sm:text-2xl font-bold">Alert Management</h1>
-                                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                                    Configure alert rules and notification channels
-                                </p>
-                            </div>
-                        </div>
-                        <button
+        <>
+            <AppPage>
+                <AppPageHeader
+                    eyebrow="Notifications"
+                    eyebrowIcon={Bell}
+                    title="Alert Management"
+                    description="Configure alert rules and notification channels"
+                    icon={Bell}
+                    actions={
+                        <AppPrimaryButton
                             onClick={() => activeTab === 'rules' ? setShowCreateRule(true) : setShowCreateChannel(true)}
-                            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm w-full sm:w-auto justify-center"
+                            className="w-full sm:w-auto"
                         >
                             <Plus className="w-4 h-4" />
                             <span className="hidden sm:inline">{activeTab === 'rules' ? 'Create Rule' : 'Create Channel'}</span>
                             <span className="sm:hidden">{activeTab === 'rules' ? 'Rule' : 'Channel'}</span>
-                        </button>
-                    </div>
+                        </AppPrimaryButton>
+                    }
+                    tabs={[
+                        { id: 'rules', label: 'Rules' },
+                        { id: 'channels', label: 'Channels' },
+                    ]}
+                    activeTab={activeTab}
+                    onTabChange={(id) => setActiveTab(id as 'rules' | 'channels')}
+                />
 
-                    {/* Tabs */}
-                    <div className="flex overflow-x-auto gap-1 border-b border-border -mx-4 px-4 sm:mx-0 sm:px-0">
-                        <button
-                            onClick={() => setActiveTab('rules')}
-                            className={`px-3 sm:px-4 py-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
-                                activeTab === 'rules'
-                                    ? 'text-primary border-b-2 border-primary'
-                                    : 'text-muted-foreground hover:text-foreground'
-                            }`}
-                        >
-                            Rules
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('channels')}
-                            className={`px-3 sm:px-4 py-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
-                                activeTab === 'channels'
-                                    ? 'text-primary border-b-2 border-primary'
-                                    : 'text-muted-foreground hover:text-foreground'
-                            }`}
-                        >
-                            Channels
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="mb-6 rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
+                <AppCallout variant="info">
                     Alerts help customers prove that Koreshield is operating, but they only become useful after you connect at least one notification channel and one rule.
-                </div>
-                {/* Rules Tab */}
+                </AppCallout>
+
                 {activeTab === 'rules' && (
                     <>
-                        {/* Stats */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Total Rules</div>
-                                <div className="text-3xl font-bold">{rules.length}</div>
-                            </div>
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Active</div>
-                                <div className="text-3xl font-bold text-green-600">
-                                    {rules.filter(r => r.enabled).length}
-                                </div>
-                            </div>
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Critical</div>
-                                <div className="text-3xl font-bold text-red-600">
-                                    {rules.filter(r => r.severity === 'critical').length}
-                                </div>
-                            </div>
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Total Triggers</div>
-                                <div className="text-3xl font-bold text-purple-600">
-                                    {rules.reduce((acc, r) => acc + r.trigger_count, 0)}
-                                </div>
-                            </div>
-                        </div>
+                        <AppStatGrid>
+                            <AppStatCard label="Total Rules" value={rules.length} icon={Bell} />
+                            <AppStatCard
+                                label="Active"
+                                value={rules.filter(r => r.enabled).length}
+                                icon={CheckCircle}
+                                tone="text-electric-green"
+                            />
+                            <AppStatCard
+                                label="Critical"
+                                value={rules.filter(r => r.severity === 'critical').length}
+                                icon={AlertTriangle}
+                                tone="text-red-400"
+                            />
+                            <AppStatCard
+                                label="Total Triggers"
+                                value={rules.reduce((acc, r) => acc + r.trigger_count, 0)}
+                                icon={Clock}
+                                tone="text-violet-400"
+                            />
+                        </AppStatGrid>
 
-                        {/* Rules Table */}
-                        <div className="bg-card border border-border rounded-lg overflow-hidden">
+                        <div className="dashboard-card rounded-2xl overflow-hidden border border-border">
                             {rulesLoading ? (
                                 <div className="flex items-center justify-center py-12">
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                                 </div>
                             ) : rules.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-12">
-                                    <Bell className="w-12 h-12 text-muted-foreground opacity-50 mb-4" />
-                                    <p className="text-muted-foreground mb-3">No alert rules found</p>
-                                    <button
-                                        onClick={() => setShowCreateRule(true)}
-                                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                        Create your first rule
-                                    </button>
-                                </div>
+                                <AppEmptyState
+                                    icon={Bell}
+                                    title="No alert rules found"
+                                    description="Create a rule to notify your team when Koreshield detects important events"
+                                    action={
+                                        <AppPrimaryButton onClick={() => setShowCreateRule(true)}>
+                                            <Plus className="w-4 h-4" />
+                                            Create your first rule
+                                        </AppPrimaryButton>
+                                    }
+                                />
                             ) : (
                                 <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                                     <table className="w-full">
@@ -705,56 +683,52 @@ export function AlertsPage() {
                     </>
                 )}
 
-                {/* Channels Tab */}
                 {activeTab === 'channels' && (
                     <>
-                        {/* Stats */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Total Channels</div>
-                                <div className="text-3xl font-bold">{channels.length}</div>
-                            </div>
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Active</div>
-                                <div className="text-3xl font-bold text-green-600">
-                                    {channels.filter(c => c.enabled).length}
-                                </div>
-                            </div>
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Email</div>
-                                <div className="text-3xl font-bold text-blue-600">
-                                    {channels.filter(c => c.type === 'email').length}
-                                </div>
-                            </div>
-                            <div className="bg-card border border-border rounded-lg p-6">
-                                <div className="text-sm text-muted-foreground mb-1">Webhooks</div>
-                                <div className="text-3xl font-bold text-purple-600">
-                                    {channels.filter(c => c.type === 'webhook').length}
-                                </div>
-                            </div>
-                        </div>
+                        <AppStatGrid>
+                            <AppStatCard label="Total Channels" value={channels.length} icon={Bell} />
+                            <AppStatCard
+                                label="Active"
+                                value={channels.filter(c => c.enabled).length}
+                                icon={CheckCircle}
+                                tone="text-electric-green"
+                            />
+                            <AppStatCard
+                                label="Email"
+                                value={channels.filter(c => c.type === 'email').length}
+                                icon={Mail}
+                                tone="text-sky-400"
+                            />
+                            <AppStatCard
+                                label="Webhooks"
+                                value={channels.filter(c => c.type === 'webhook').length}
+                                icon={Webhook}
+                                tone="text-violet-400"
+                            />
+                        </AppStatGrid>
 
-                        {/* Channels Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {channelsLoading ? (
                                 <div className="col-span-full flex items-center justify-center py-12">
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                                 </div>
                             ) : channels.length === 0 ? (
-                                <div className="col-span-full flex flex-col items-center justify-center py-12">
-                                    <Bell className="w-12 h-12 text-muted-foreground opacity-50 mb-4" />
-                                    <p className="text-muted-foreground mb-3">No notification channels found</p>
-                                    <button
-                                        onClick={() => setShowCreateChannel(true)}
-                                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                        Add your first channel
-                                    </button>
+                                <div className="col-span-full">
+                                    <AppEmptyState
+                                        icon={Bell}
+                                        title="No notification channels found"
+                                        description="Add a channel so alert rules can reach your team"
+                                        action={
+                                            <AppPrimaryButton onClick={() => setShowCreateChannel(true)}>
+                                                <Plus className="w-4 h-4" />
+                                                Add your first channel
+                                            </AppPrimaryButton>
+                                        }
+                                    />
                                 </div>
                             ) : (
                                 channels.map((channel) => (
-                                    <div key={channel.id} className="bg-card border border-border rounded-lg p-6">
+                                    <AppSurface key={channel.id} className="p-6">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-primary/10 rounded-lg">
@@ -800,18 +774,17 @@ export function AlertsPage() {
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
-                                    </div>
+                                    </AppSurface>
                                 ))
                             )}
                         </div>
                     </>
                 )}
-            </main>
+            </AppPage>
 
-            {/* Create Alert Rule Modal */}
             {showCreateRule && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-card border border-border rounded-xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
+                    <div className="dashboard-modal bg-card border border-border rounded-2xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-border">
                             <h2 className="text-xl font-bold">Create Alert Rule</h2>
                             <button
@@ -900,30 +873,21 @@ export function AlertsPage() {
                                 </label>
                             </div>
                             <div className="flex gap-3 justify-end pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => { setShowCreateRule(false); resetRuleForm(); }}
-                                    className="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors"
-                                >
+                                <AppSecondaryButton type="button" onClick={() => { setShowCreateRule(false); resetRuleForm(); }}>
                                     Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={createRuleMutation.isPending}
-                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                >
+                                </AppSecondaryButton>
+                                <AppPrimaryButton type="submit" disabled={createRuleMutation.isPending}>
                                     {createRuleMutation.isPending ? 'Creating...' : 'Create Rule'}
-                                </button>
+                                </AppPrimaryButton>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* Edit Alert Rule Modal */}
             {showEditRule && editingRule && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-card border border-border rounded-xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
+                    <div className="dashboard-modal bg-card border border-border rounded-2xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-border">
                             <h2 className="text-xl font-bold">Edit Alert Rule</h2>
                             <button
@@ -1008,30 +972,21 @@ export function AlertsPage() {
                                 </label>
                             </div>
                             <div className="flex gap-3 justify-end pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => { setShowEditRule(false); setEditingRule(null); resetRuleForm(); }}
-                                    className="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors"
-                                >
+                                <AppSecondaryButton type="button" onClick={() => { setShowEditRule(false); setEditingRule(null); resetRuleForm(); }}>
                                     Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={updateRuleMutation.isPending}
-                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                >
+                                </AppSecondaryButton>
+                                <AppPrimaryButton type="submit" disabled={updateRuleMutation.isPending}>
                                     {updateRuleMutation.isPending ? 'Updating...' : 'Update Rule'}
-                                </button>
+                                </AppPrimaryButton>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* Create Alert Channel Modal */}
             {showCreateChannel && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-card border border-border rounded-xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
+                    <div className="dashboard-modal bg-card border border-border rounded-2xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-border">
                             <h2 className="text-xl font-bold">Create Notification Channel</h2>
                             <button
@@ -1085,30 +1040,21 @@ export function AlertsPage() {
                                 </label>
                             </div>
                             <div className="flex gap-3 justify-end pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => { setShowCreateChannel(false); resetChannelForm(); }}
-                                    className="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors"
-                                >
+                                <AppSecondaryButton type="button" onClick={() => { setShowCreateChannel(false); resetChannelForm(); }}>
                                     Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={createChannelMutation.isPending}
-                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                >
+                                </AppSecondaryButton>
+                                <AppPrimaryButton type="submit" disabled={createChannelMutation.isPending}>
                                     {createChannelMutation.isPending ? 'Creating...' : 'Create Channel'}
-                                </button>
+                                </AppPrimaryButton>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* Edit Alert Channel Modal */}
             {showEditChannel && editingChannel && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-card border border-border rounded-xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
+                    <div className="dashboard-modal bg-card border border-border rounded-2xl w-full max-w-2xl mx-4 sm:mx-auto max-h-[90dvh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-border">
                             <h2 className="text-xl font-bold">Edit Notification Channel</h2>
                             <button
@@ -1161,25 +1107,17 @@ export function AlertsPage() {
                                 </label>
                             </div>
                             <div className="flex gap-3 justify-end pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => { setShowEditChannel(false); setEditingChannel(null); resetChannelForm(); }}
-                                    className="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors"
-                                >
+                                <AppSecondaryButton type="button" onClick={() => { setShowEditChannel(false); setEditingChannel(null); resetChannelForm(); }}>
                                     Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={updateChannelMutation.isPending}
-                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                >
+                                </AppSecondaryButton>
+                                <AppPrimaryButton type="submit" disabled={updateChannelMutation.isPending}>
                                     {updateChannelMutation.isPending ? 'Updating...' : 'Update Channel'}
-                                </button>
+                                </AppPrimaryButton>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 }
