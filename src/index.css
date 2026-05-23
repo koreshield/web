@@ -540,6 +540,22 @@ select:focus-visible {
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
+.auth-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border) / 0.9);
+  background: hsl(var(--background) / 0.72);
+  color: hsl(var(--foreground));
+  transition: box-shadow 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+
+.auth-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.35);
+  border-color: hsl(var(--primary) / 0.45);
+}
+
+.dashboard-modal .dashboard-input,
 .dashboard-shell .dashboard-input {
   width: 100%;
   border-radius: 0.75rem;
