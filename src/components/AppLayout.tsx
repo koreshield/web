@@ -17,6 +17,7 @@ import {
 	LogOut,
 	Menu,
 	ScanSearch,
+	AudioLines,
 	Shield,
 	ShieldAlert,
 	User,
@@ -68,6 +69,7 @@ const NAV_GROUPS: NavGroup[] = [
 		label: 'Security',
 		items: [
 			{ label: 'RAG Security', to: '/rag-security', icon: ScanSearch },
+			{ label: 'Voice Security', to: '/voice-security', icon: AudioLines },
 			{ label: 'Threats', to: '/threat-monitoring', icon: ShieldAlert },
 			{ label: 'Threat Map', to: '/threat-map', icon: Map },
 			{ label: 'Alerts', to: '/alerts', icon: Bell },
