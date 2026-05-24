@@ -220,6 +220,7 @@ Key response fields: `decision`, `risk_level`, `policy`, `tool_policy`, `pii_ana
 Returns **HTTP 403** when `decision` is `block`, **HTTP 200** otherwise.
 
 Response includes `scanned_transcript` — the primary speech prompt that was evaluated (from your ASR payload or server transcription).
+When server transcription returns timing data, `asr.speech_segments` and `asr.word_timestamps` are preserved for audit evidence and review.
 
 ### VoiceGuard policies
 
@@ -243,6 +244,8 @@ curl -s -X POST https://api.koreshield.com/v1/audio/scan \
 ```
 
 Requires `OPENAI_API_KEY` on the Koreshield server for Whisper transcription, or send `transcript` / `audio_base64` in JSON instead.
+
+For presigned recording links, send `audio_url` in JSON and enable `KORESHIELD_ALLOW_REMOTE_AUDIO_URLS=true` on the server. Koreshield only fetches HTTPS URLs, rejects private/local network targets, does not follow redirects, and enforces the same 25MB limit.
 
 ### Tool session auto-gate
 
