@@ -208,17 +208,28 @@ curl -s -X POST https://api.koreshield.com/v1/audio/scan \
     "channel": "user_speech",
     "speaker_verified": true,
     "known_user": true,
+    "policy_id": "voiceguard-default",
     "intended_use": "summarization",
     "asr": { "confidence": 0.96 },
     "tools_available": ["lookup_customer", "refund_payment"]
   }'
 ```
 
-Key response fields: `decision`, `risk_level`, `tool_policy`, `safe_transcript`, `threats`.
+Key response fields: `decision`, `risk_level`, `policy`, `tool_policy`, `pii_analysis`, `safe_transcript`, `threats`.
 
 Returns **HTTP 403** when `decision` is `block`, **HTTP 200** otherwise.
 
 Response includes `scanned_transcript` — the primary speech prompt that was evaluated (from your ASR payload or server transcription).
+
+### VoiceGuard policies
+
+Use `policy_id` to make tenant behaviour explicit:
+
+- `voiceguard-default`: redacts PII from `safe_transcript`, blocks prompt/tool abuse, and disables tools for untrusted speech.
+- `voiceguard-strict`: same as default, but blocks speech that contains PII or falls below the stricter ASR confidence threshold.
+- `voiceguard-transcript-only`: for existing ASR pipelines where Koreshield should evaluate transcript text without requiring speaker verification.
+
+You can also send an inline `audio_policy` object for tenant-specific overrides such as `redact_pii`, `block_on_pii`, `minimum_asr_confidence`, and `allow_untrusted_tool_calls`.
 
 ### Raw audio upload
 
