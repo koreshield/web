@@ -19,6 +19,11 @@ type DropdownItem =
 
 const solutionsLinks: Array<{ label: string; to: string; desc: string }> = [
 	{
+		label: 'Solutions overview',
+		to: '/solutions',
+		desc: 'All Koreshield protection layers',
+	},
+	{
 		label: 'AI Detection & Response',
 		to: '/solutions/ai-detection-response',
 		desc: 'Block attacks before they reach the model',

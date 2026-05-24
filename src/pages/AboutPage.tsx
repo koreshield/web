@@ -266,7 +266,7 @@ export default function AboutPage() {
 							If your team is shipping AI agents, RAG features, internal copilots, or customer-facing assistants, Koreshield is designed to give you a practical control point before model behaviour becomes an incident.
 						</p>
 						<div className="mt-7 flex flex-col gap-3 sm:flex-row">
-							<Link to="/solutions/application-protection" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 font-bold text-white transition-colors hover:bg-emerald-bright">
+							<Link to="/solutions" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 font-bold text-white transition-colors hover:bg-emerald-bright">
 								Explore solutions <ArrowRight className="h-4 w-4" />
 							</Link>
 							<Link to="/contact" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-6 py-3 font-bold text-foreground transition-colors hover:bg-muted">
