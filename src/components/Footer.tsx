@@ -7,6 +7,7 @@ const footerGroups = [
 	{
 		title: 'Solutions',
 		links: [
+			{ label: 'Our Solutions', to: '/solutions' },
 			{ label: 'AI Detection & Response', to: '/solutions/ai-detection-response' },
 			{ label: 'Application Protection', to: '/solutions/ai-application-protection' },
 			{ label: 'AI Agents Security', to: '/solutions/ai-agents-security' },
