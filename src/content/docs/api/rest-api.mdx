@@ -218,6 +218,45 @@ Key response fields: `decision`, `risk_level`, `tool_policy`, `safe_transcript`,
 
 Returns **HTTP 403** when `decision` is `block`, **HTTP 200** otherwise.
 
+Response includes `scanned_transcript` — the primary speech prompt that was evaluated (from your ASR payload or server transcription).
+
+### Raw audio upload
+
+```bash
+curl -s -X POST https://api.koreshield.com/v1/audio/scan \
+  -H "Authorization: Bearer <TOKEN>" \
+  -F "audio=@call.wav" \
+  -F "source_type=uploaded_audio" \
+  -F "channel=user_speech" \
+  -F "tools_available=lookup_customer,refund_payment"
+```
+
+Requires `OPENAI_API_KEY` on the Koreshield server for Whisper transcription, or send `transcript` / `audio_base64` in JSON instead.
+
+### Tool session auto-gate
+
+When creating a runtime session, include `speech_context` (or top-level transcript fields). VoiceGuard runs before the session is returned:
+
+```bash
+curl -s -X POST https://api.koreshield.com/v1/tools/sessions \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "voice-agent",
+    "allowed_tools": ["refund_payment"],
+    "speech_context": {
+      "transcript": "Summarise this call for the account notes.",
+      "source_type": "live_microphone",
+      "channel": "user_speech",
+      "speaker_verified": true,
+      "known_user": true,
+      "asr": { "confidence": 0.96 }
+    }
+  }'
+```
+
+The response includes `voice_guard` and `speech_transcript`. Subsequent `/v1/tools/scan` calls with that `session_id` respect `tool_policy.allow_tool_calls`.
+
 Scan history is available at `/v1/audio/scans` with the same list/get/delete/pack pattern as RAG scans.
 
 ## WebSocket
