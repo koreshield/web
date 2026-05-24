@@ -11,6 +11,82 @@ const path = require('path');
 
 const SITE_URL = 'https://koreshield.ai';
 const CURRENT_DATE = new Date().toISOString().split('T')[0];
+const publicDir = path.join(__dirname, '../public');
+const contentDir = path.join(__dirname, '../src/content');
+
+const CAREER_SLUGS = [
+	'social-media-operator',
+	'senior-backend-engineer',
+	'ml-security-researcher',
+	'product-designer',
+	'enterprise-account-executive',
+	'global-sales-manager',
+	'ui-engineer',
+	'security-engineer-red-team',
+	'data-engineer-big-data',
+	'ai-product-manager',
+	'senior-devops-engineer',
+];
+
+const RESEARCH_SLUGS = [
+	'state-of-prompt-injection-in-production-llm-systems',
+	'indirect-prompt-injection-via-retrieved-documents',
+	'tool-call-hijacking-in-agentic-pipelines',
+	'jailbreak-technique-drift',
+	'pii-exfiltration-via-llm-output',
+	'evaluating-confidence-thresholds-for-prompt-injection-classifiers',
+	'bypass-resistance-of-system-prompt-hardening-alone',
+	'multi-turn-injection-building-attack-context-across-conversation-rounds',
+	'false-positive-rates-semantic-vs-rule-based-detectors-at-scale',
+];
+
+function mdSlug(file) {
+	return file.replace(/\.(md|mdx)$/i, '');
+}
+
+function readMarkdownRoutes(folder, prefix) {
+	const dir = path.join(contentDir, folder);
+	if (!fs.existsSync(dir)) {
+		return [];
+	}
+
+	return fs
+		.readdirSync(dir)
+		.filter((file) => /\.(md|mdx)$/i.test(file) && file.toLowerCase() !== 'readme.md')
+		.map((file) => ({ path: `${prefix}/${mdSlug(file)}`, priority: 0.55, changefreq: 'monthly' }));
+}
+
+function readDocsRoutes() {
+	const dir = path.join(contentDir, 'docs');
+	if (!fs.existsSync(dir)) {
+		return [];
+	}
+
+	const routes = [];
+	const stack = [dir];
+	while (stack.length > 0) {
+		const current = stack.pop();
+		for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+			const fullPath = path.join(current, entry.name);
+			if (entry.isDirectory()) {
+				stack.push(fullPath);
+				continue;
+			}
+
+			if (!/\.(md|mdx)$/i.test(entry.name)) {
+				continue;
+			}
+
+			const content = fs.readFileSync(fullPath, 'utf-8');
+			const slugMatch = content.match(/^slug:\s*(.+)$/m);
+			if (slugMatch) {
+				routes.push({ path: `/docs${slugMatch[1].trim()}`, priority: 0.5, changefreq: 'monthly' });
+			}
+		}
+	}
+
+	return routes.sort((a, b) => a.path.localeCompare(b.path));
+}
 
 // Define all public routes with metadata
 const ROUTES = [
@@ -27,11 +103,13 @@ const ROUTES = [
 	{ path: '/contact', priority: 0.6, changefreq: 'yearly' },
 
 	// Comparison pages (high SEO value)
-	{ path: '/vs/lakera', priority: 0.8, changefreq: 'monthly' },
+	{ path: '/vs', priority: 0.8, changefreq: 'monthly' },
+	{ path: '/vs/lakera-guard', priority: 0.8, changefreq: 'monthly' },
 	{ path: '/vs/llm-guard', priority: 0.8, changefreq: 'monthly' },
 	{ path: '/vs/build-yourself', priority: 0.8, changefreq: 'monthly' },
 
 	// Solution pages
+	{ path: '/solutions', priority: 0.85, changefreq: 'weekly' },
 	{ path: '/solutions/ai-detection-response', priority: 0.7, changefreq: 'monthly' },
 	{ path: '/solutions/ai-application-protection', priority: 0.7, changefreq: 'monthly' },
 	{ path: '/solutions/ai-agents-security', priority: 0.7, changefreq: 'monthly' },
@@ -48,18 +126,34 @@ const ROUTES = [
 	{ path: '/changelog', priority: 0.6, changefreq: 'weekly' },
 	{ path: '/research', priority: 0.6, changefreq: 'monthly' },
 	{ path: '/careers', priority: 0.5, changefreq: 'monthly' },
-	{ path: '/legal', priority: 0.5, changefreq: 'yearly' },
+	{ path: '/privacy-policy', priority: 0.4, changefreq: 'yearly' },
+	{ path: '/terms-of-service', priority: 0.4, changefreq: 'yearly' },
+	{ path: '/cookie-policy', priority: 0.4, changefreq: 'yearly' },
+	{ path: '/dpa', priority: 0.4, changefreq: 'yearly' },
+	{ path: '/legal/sub-processors', priority: 0.35, changefreq: 'yearly' },
+	{ path: '/legal/transfer-policy', priority: 0.35, changefreq: 'yearly' },
 
 	// Get Started
 	{ path: '/getting-started', priority: 0.8, changefreq: 'weekly' },
 	{ path: '/demo', priority: 0.8, changefreq: 'weekly' },
+	...CAREER_SLUGS.map((slug) => ({ path: `/careers/${slug}`, priority: 0.45, changefreq: 'monthly' })),
+	...RESEARCH_SLUGS.map((slug) => ({ path: `/research/${slug}`, priority: 0.55, changefreq: 'monthly' })),
 ];
 
 /**
  * Generate sitemap XML
  */
-function generateSitemap() {
-	const urls = ROUTES.map((route) => `
+function generateSitemap(routes = ROUTES) {
+	const seen = new Set();
+	const uniqueRoutes = routes.filter((route) => {
+		if (seen.has(route.path)) {
+			return false;
+		}
+		seen.add(route.path);
+		return true;
+	});
+
+	const urls = uniqueRoutes.map((route) => `
 	<url>
 		<loc>${SITE_URL}${route.path}</loc>
 		<lastmod>${CURRENT_DATE}</lastmod>
@@ -140,16 +234,23 @@ Sitemap: https://koreshield.ai/sitemap-docs.xml
  * Write files
  */
 function writeSitemaps() {
-	const outputDir = path.join(__dirname, '../public');
+	const blogRoutes = readMarkdownRoutes('blog', '/blog');
+	const docsRoutes = readDocsRoutes();
 
 	// Create sitemap.xml
 	const sitemapContent = generateSitemap();
-	fs.writeFileSync(path.join(outputDir, 'sitemap.xml'), sitemapContent, 'utf-8');
+	fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemapContent, 'utf-8');
 	console.log('[YES] Created: web/public/sitemap.xml');
+
+	fs.writeFileSync(path.join(publicDir, 'sitemap-blog.xml'), generateSitemap(blogRoutes), 'utf-8');
+	console.log('[YES] Created: web/public/sitemap-blog.xml');
+
+	fs.writeFileSync(path.join(publicDir, 'sitemap-docs.xml'), generateSitemap(docsRoutes), 'utf-8');
+	console.log('[YES] Created: web/public/sitemap-docs.xml');
 
 	// Create robots.txt
 	const robotsContent = generateRobotsTxt();
-	fs.writeFileSync(path.join(outputDir, 'robots.txt'), robotsContent, 'utf-8');
+	fs.writeFileSync(path.join(publicDir, 'robots.txt'), robotsContent, 'utf-8');
 	console.log('[YES] Created: web/public/robots.txt');
 
 	// Create sitemap index for large sites
@@ -169,7 +270,7 @@ function writeSitemaps() {
 	</sitemap>
 </sitemapindex>`;
 
-	fs.writeFileSync(path.join(outputDir, 'sitemap-index.xml'), sitemapIndex, 'utf-8');
+	fs.writeFileSync(path.join(publicDir, 'sitemap-index.xml'), sitemapIndex, 'utf-8');
 	console.log('[YES] Created: web/public/sitemap-index.xml');
 
 	console.log('\n[YES] All sitemaps generated successfully!');

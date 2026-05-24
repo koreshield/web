@@ -68,6 +68,7 @@ const ResearchPage = lazy(() => import('./pages/ResearchPage'));
 const ResearchArticlePage = lazy(() => import('./pages/ResearchArticlePage'));
 // Solution pages
 const SolutionDetectionResponsePage = lazy(() => import('./pages/SolutionDetectionResponsePage'));
+const SolutionsPage = lazy(() => import('./pages/SolutionsPage'));
 const SolutionApplicationProtectionPage = lazy(() => import('./pages/SolutionApplicationProtectionPage'));
 const SolutionAgentsSecurityPage = lazy(() => import('./pages/SolutionAgentsSecurityPage'));
 const SolutionUsageControlPage = lazy(() => import('./pages/SolutionUsageControlPage'));
@@ -451,6 +452,16 @@ function AppContent() {
 						}
 					/>
 					{/* Solution pages */}
+					<Route
+						path="/solutions"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<SolutionsPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
 					<Route
 						path="/solutions/ai-detection-response"
 						element={

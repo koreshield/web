@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Cloud, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Cloud, FileCheck2, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
@@ -8,6 +8,7 @@ const rows = [
 	['Good fit', 'Teams that want policy, audit evidence, and provider routing in one layer', 'Teams that want a managed vendor API for prompt defense'],
 	['Architecture question', 'Where should enforcement and evidence live?', 'How much do you want delegated to a vendor API?'],
 	['RAG and agents', 'Positioned around retrieved context, tool output, tenant context, and audit logs', 'Evaluate current vendor coverage against your exact workflow'],
+	['Governance', 'KorePilot turns security events, audit logs, red-team results, and CI/CD gates into control evidence', 'Add a separate governance/evidence system if you need continuous control reporting'],
 	['Decision lens', 'Operational control and evidence', 'Managed platform convenience'],
 ];
 
@@ -42,6 +43,11 @@ export default function VsLakeraPage() {
 						<ShieldCheck className="mb-5 h-8 w-8 text-electric-green" />
 						<h2 className="text-3xl font-extrabold tracking-[-0.04em]">Koreshield</h2>
 						<p className="mt-3 text-sm leading-relaxed text-muted-foreground">Built around runtime proxy protection, provider routing, RAG/context scanning, policy decisions, alerts, and audit evidence.</p>
+						<div className="mt-5 rounded-2xl border border-electric-green/20 bg-background/50 p-4">
+							<FileCheck2 className="mb-3 h-5 w-5 text-electric-green" />
+							<p className="text-sm font-bold">Governance path included</p>
+							<p className="mt-1 text-sm leading-relaxed text-muted-foreground">KorePilot maps Koreshield evidence into compliance controls instead of leaving security logs stranded.</p>
+						</div>
 					</div>
 					<div className="rounded-[2rem] border border-border bg-card/90 p-7 shadow-sm">
 						<Cloud className="mb-5 h-8 w-8 text-electric-green" />
