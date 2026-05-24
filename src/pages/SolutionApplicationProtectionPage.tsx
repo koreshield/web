@@ -25,7 +25,7 @@ export default function SolutionApplicationProtectionPage() {
 				description="Protect LLM-powered applications with a proxy security layer and no application rewrite."
 			/>
 
-			<section className="relative overflow-hidden px-6 py-24 ambient-glow md:py-32">
+			<section className="relative overflow-hidden px-4 py-20 ambient-glow sm:px-6 md:py-32">
 				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(16,185,129,0.15),transparent_28%),radial-gradient(circle_at_85%_20%,rgba(59,130,246,0.08),transparent_26%)]" />
 				<div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
 					<motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
@@ -33,10 +33,10 @@ export default function SolutionApplicationProtectionPage() {
 							<PlugZap className="h-3.5 w-3.5" />
 							Application Protection
 						</span>
-						<h1 className="max-w-4xl text-5xl font-extrabold tracking-[-0.055em] md:text-7xl">
+						<h1 className="max-w-4xl text-4xl font-extrabold tracking-[-0.055em] sm:text-5xl md:text-7xl">
 							Secure the app without rebuilding the app.
 						</h1>
-						<p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+						<p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
 							Koreshield sits between your product and your LLM provider. One route change gives every prompt a security checkpoint.
 						</p>
 						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -53,13 +53,13 @@ export default function SolutionApplicationProtectionPage() {
 						initial={{ opacity: 0, y: 18 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.55, delay: 0.1 }}
-						className="rounded-[2rem] border border-border bg-card/90 p-5 shadow-2xl shadow-emerald-900/10 dark:bg-card/75"
+						className="rounded-[1.75rem] border border-border bg-card/90 p-4 shadow-2xl shadow-emerald-900/10 dark:bg-card/75 sm:p-5 md:rounded-[2rem]"
 					>
-						<div className="rounded-2xl border border-slate-800 bg-slate-950 p-5 font-mono text-sm leading-7 text-slate-300">
+						<div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950 p-4 font-mono text-xs leading-7 text-slate-300 sm:p-5 sm:text-sm">
 							<p className="text-slate-500"># before</p>
-							<p>base_url=<span className="text-red-300">"https://api.openai.com/v1"</span></p>
+							<p className="whitespace-nowrap">base_url=<span className="text-red-300">"https://api.openai.com/v1"</span></p>
 							<p className="mt-5 text-slate-500"># after</p>
-							<p>base_url=<span className="text-electric-green">"https://api.koreshield.com/v1"</span></p>
+							<p className="whitespace-nowrap">base_url=<span className="text-electric-green">"https://api.koreshield.com/v1"</span></p>
 						</div>
 						<div className="mt-4 grid gap-3 sm:grid-cols-3">
 							{steps.map(([number, title, body]) => (
@@ -74,11 +74,11 @@ export default function SolutionApplicationProtectionPage() {
 				</div>
 			</section>
 
-			<section className="border-y border-border bg-card/35 px-6 py-20">
+			<section className="border-y border-border bg-card/35 px-4 py-16 sm:px-6 md:py-20">
 				<div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
 					<div>
 						<p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-electric-green">Where it works</p>
-						<h2 className="text-4xl font-extrabold tracking-[-0.04em] md:text-5xl">Any product that calls an LLM.</h2>
+						<h2 className="text-3xl font-extrabold tracking-[-0.04em] sm:text-4xl md:text-5xl">Any product that calls an LLM.</h2>
 						<p className="mt-5 text-muted-foreground">Your application keeps its provider, model, and client code. Koreshield becomes the enforcement boundary.</p>
 					</div>
 					<div className="grid gap-3 sm:grid-cols-2">
@@ -92,14 +92,14 @@ export default function SolutionApplicationProtectionPage() {
 				</div>
 			</section>
 
-			<section className="px-6 py-20">
-				<div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-3">
+			<section className="px-4 py-16 sm:px-6 md:py-20">
+				<div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-3">
 					{[
 						{ icon: Route, title: 'Provider routing', body: 'OpenAI, Anthropic, Gemini, DeepSeek, or OpenAI-compatible endpoints.' },
 						{ icon: ShieldCheck, title: 'Policy enforcement', body: 'Block, redact, log, or allow based on the risk profile of each request.' },
 						{ icon: Code2, title: 'No migration drama', body: 'No full SDK rewrite. No model retraining. No brittle app-side filters.' },
 					].map((item) => (
-						<div key={item.title} className="rounded-[1.5rem] border border-border bg-card/85 p-6 shadow-sm">
+						<div key={item.title} className="rounded-[1.5rem] border border-border bg-card/85 p-5 shadow-sm md:p-6">
 							<item.icon className="mb-5 h-6 w-6 text-electric-green" />
 							<h3 className="text-xl font-bold">{item.title}</h3>
 							<p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
