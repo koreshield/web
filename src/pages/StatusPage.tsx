@@ -527,22 +527,23 @@ export default function StatusPage() {
         description="Real-time status and uptime information for Koreshield services. View current system status, resolved incidents, and scheduled maintenance."
       />
 
-      <section className="py-20 px-4 bg-card/40">
+      <section className="relative overflow-hidden px-4 py-20">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(18,194,150,0.16),transparent_32%),linear-gradient(to_bottom,rgba(18,194,150,0.06),transparent_55%)]" />
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center"
+            className="relative mx-auto max-w-4xl rounded-[2rem] border border-border bg-card/80 p-8 text-center shadow-[0_30px_120px_rgba(0,0,0,0.18)] backdrop-blur md:p-10"
           >
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="bg-electric-green/10 p-4 rounded-lg">
+            <div className="flex flex-col items-center justify-center gap-4 mb-6 sm:flex-row">
+              <div className="bg-electric-green/10 p-4 rounded-2xl border border-electric-green/20">
                 <Activity className="w-8 h-8 text-electric-green" />
               </div>
-              <h1 className="text-5xl font-bold text-foreground">System Status</h1>
+              <h1 className="text-4xl font-black tracking-[-0.06em] text-foreground md:text-6xl">System Status</h1>
             </div>
-            <p className="text-lg text-muted-foreground">
-              Live platform health, resolved incidents, and scheduled maintenance for Koreshield.
+            <p className="mx-auto max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
+              Live platform health, provider routing, incidents, and maintenance evidence for Koreshield.
             </p>
           </motion.div>
         </div>
@@ -553,9 +554,9 @@ export default function StatusPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className={`rounded-xl p-8 mb-12 ${
+          className={`rounded-[2rem] p-6 md:p-8 mb-12 shadow-[0_20px_80px_rgba(0,0,0,0.12)] ${
             overallStatus === 'operational'
-              ? 'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900'
+              ? 'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/70'
               : overallStatus === 'maintenance'
                 ? 'bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900'
                 : 'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900'
@@ -564,7 +565,7 @@ export default function StatusPage() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
               <div
-                className={`w-4 h-4 rounded-full ${
+                className={`h-4 w-4 shrink-0 rounded-full shadow-[0_0_0_8px_rgba(18,194,150,0.08)] ${
                   overallStatus === 'operational'
                     ? 'bg-green-500 animate-pulse'
                     : overallStatus === 'maintenance'
@@ -594,7 +595,7 @@ export default function StatusPage() {
             <div className="flex gap-3 flex-wrap">
               <a
                 href="mailto:hello@koreshield.com?subject=Subscribe%20to%20Koreshield%20status%20alerts"
-                className="flex items-center gap-2 px-4 py-2 bg-card text-foreground border border-border rounded-lg font-medium hover:bg-muted transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-card text-foreground border border-border rounded-xl font-medium hover:bg-muted transition-colors"
               >
                 <Bell className="w-4 h-4" />
                 Subscribe to Alerts
@@ -603,7 +604,7 @@ export default function StatusPage() {
                 href="/status-feed.xml"
                 target="_blank"
                 rel="noreferrer noopener"
-                className="flex items-center gap-2 px-4 py-2 bg-card text-foreground border border-border rounded-lg font-medium hover:bg-muted transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-card text-foreground border border-border rounded-xl font-medium hover:bg-muted transition-colors"
               >
                 RSS Feed
                 <ExternalLink className="w-4 h-4" />
@@ -619,15 +620,15 @@ export default function StatusPage() {
           className="mb-12"
         >
           <div className="grid md:grid-cols-3 gap-4">
-            <div className="bg-card rounded-xl border border-border p-5">
+            <div className="bg-card rounded-2xl border border-border p-5">
               <div className="text-sm text-muted-foreground mb-2">Protected requests observed</div>
               <div className="text-3xl font-bold text-foreground">{protectedRequestsObserved.toLocaleString()}</div>
             </div>
-            <div className="bg-card rounded-xl border border-border p-5">
+            <div className="bg-card rounded-2xl border border-border p-5">
               <div className="text-sm text-muted-foreground mb-2">Threats blocked</div>
               <div className="text-3xl font-bold text-foreground">{threatsBlocked.toLocaleString()}</div>
             </div>
-            <div className="bg-card rounded-xl border border-border p-5">
+            <div className="bg-card rounded-2xl border border-border p-5">
               <div className="text-sm text-muted-foreground mb-2">Configured provider routes</div>
               <div className="text-3xl font-bold text-foreground">{configuredProviderCount}</div>
             </div>
@@ -815,10 +816,10 @@ function ComponentStatusRow({
     <div className={!isLast ? 'border-b border-border' : ''}>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-6 hover:bg-muted/50 transition-colors"
+        className="w-full flex flex-col gap-4 p-5 text-left hover:bg-muted/50 transition-colors md:flex-row md:items-center md:justify-between md:p-6"
       >
-        <div className="flex-1 text-left">
-          <div className="flex items-center gap-3 mb-1">
+        <div className="flex-1">
+          <div className="flex flex-wrap items-center gap-3 mb-1">
             <span className="text-lg font-semibold text-foreground">{component.name}</span>
             <span className={`flex items-center gap-2 ${statusColor}`}>
               {statusIcon}
@@ -827,7 +828,7 @@ function ComponentStatusRow({
           </div>
           <p className="text-sm text-muted-foreground">{component.description}</p>
         </div>
-        <div className="flex items-center gap-8 text-sm text-muted-foreground">
+        <div className="flex w-full items-center justify-between gap-4 text-sm text-muted-foreground md:w-auto md:justify-end md:gap-8">
           <div className="text-right">
             <div className="font-semibold text-foreground">{component.uptime !== null ? `${component.uptime}%` : 'N/A'}</div>
             <div className="text-xs">Uptime</div>
@@ -839,7 +840,7 @@ function ComponentStatusRow({
             </div>
           )}
           <svg
-            className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            className={`w-5 h-5 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -849,8 +850,8 @@ function ComponentStatusRow({
         </div>
       </button>
       {isExpanded && (
-        <div className="px-6 pb-6 bg-muted/30">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div className="px-5 pb-5 bg-muted/30 md:px-6 md:pb-6">
+          <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 md:grid-cols-4">
             <div>
               <div className="text-muted-foreground mb-1">Status</div>
               <div className={`font-medium capitalize ${statusColor}`}>{component.status.replace('_', ' ')}</div>
@@ -888,7 +889,7 @@ function IncidentCard({
   const [isExpanded, setIsExpanded] = useState(!isHistorical);
 
   return (
-    <div className="bg-card rounded-xl shadow-lg border border-border overflow-hidden">
+    <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full p-6 text-left hover:bg-muted/50 transition-colors"
@@ -922,11 +923,11 @@ function IncidentCard({
         </div>
       </button>
       {isExpanded && (
-        <div className="px-6 pb-6 border-t border-border bg-muted/30">
+        <div className="px-5 pb-5 border-t border-border bg-muted/30 md:px-6 md:pb-6">
           <div className="pt-6 space-y-4">
             {incident.updates.map((update, index) => (
-              <div key={index} className="flex gap-4">
-                <div className="flex-shrink-0 w-32 text-sm text-muted-foreground">
+              <div key={index} className="flex flex-col gap-2 sm:flex-row sm:gap-4">
+                <div className="flex-shrink-0 text-sm text-muted-foreground sm:w-32">
                   {new Date(update.timestamp).toLocaleString()}
                 </div>
                 <div className="flex-1">

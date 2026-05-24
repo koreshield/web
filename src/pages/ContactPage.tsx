@@ -98,19 +98,21 @@ export default function ContactPage() {
 			<SEOMeta {...SEOConfig.contact} />
 
 			{/* Hero */}
-			<section className="py-24 px-6 relative ambient-glow">
-				<div className="max-w-3xl mx-auto text-center relative z-10">
+			<section className="relative overflow-hidden px-4 py-20 md:px-6 md:py-24">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(18,194,150,0.16),transparent_34%),linear-gradient(to_bottom,rgba(18,194,150,0.06),transparent_55%)]" />
+				<div className="max-w-4xl mx-auto text-center relative z-10">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6 }}
+						className="rounded-[2rem] border border-border bg-card/75 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.16)] backdrop-blur md:p-10"
 					>
 						<div className="inline-flex items-center gap-2 bg-electric-green/10 border border-electric-green/20 text-electric-green text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-widest">
 							<span className="w-1.5 h-1.5 rounded-full bg-electric-green" />
 							Contact
 						</div>
-						<h1 className="text-5xl md:text-6xl font-extrabold mb-6 tracking-[-0.04em] text-foreground">
-							Get in Touch
+						<h1 className="text-4xl md:text-6xl font-black mb-6 tracking-[-0.06em] text-foreground">
+							Talk to the team protecting AI traffic.
 						</h1>
 						<p className="text-lg text-muted-foreground leading-relaxed">
 							Evaluating Koreshield, comparing plans, or preparing an enterprise rollout? We are here and we reply fast.
@@ -120,7 +122,7 @@ export default function ContactPage() {
 			</section>
 
 			{/* Support channels */}
-			<section className="py-16 px-6 border-t border-border">
+			<section className="py-16 px-4 md:px-6 border-t border-border">
 				<div className="max-w-6xl mx-auto">
 					<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">How can we help?</h2>
 					<div className="grid gap-5 md:grid-cols-3">
@@ -130,7 +132,7 @@ export default function ContactPage() {
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.4, delay: index * 0.08 }}
-								className="group bg-card border border-border hover:border-primary/40 rounded-xl p-6 transition-all duration-200 hover:-translate-y-0.5"
+								className="group bg-card border border-border hover:border-primary/40 rounded-2xl p-6 transition-all duration-200 hover:-translate-y-0.5"
 							>
 								<div className="text-electric-green mb-4">{option.icon}</div>
 								<h3 className="text-base font-semibold text-foreground mb-2">{option.title}</h3>
@@ -183,9 +185,9 @@ export default function ContactPage() {
 			</section>
 
 			{/* Enterprise CTA */}
-			<section className="py-10 px-6">
+			<section className="py-10 px-4 md:px-6">
 				<div className="max-w-4xl mx-auto">
-					<div className="rounded-2xl bg-card border border-white/[0.08] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+					<div className="rounded-[2rem] bg-card border border-white/[0.08] p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
 						<div>
 							<p className="text-xs font-semibold text-electric-green uppercase tracking-wider mb-1">Enterprise</p>
 							<h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Scaling AI at enterprise level?</h3>
@@ -206,9 +208,9 @@ export default function ContactPage() {
 			</section>
 
 			{/* Contact Forms */}
-			<section className="py-20 px-6 border-t border-border">
+			<section className="py-20 px-4 md:px-6 border-t border-border">
 				<div className="max-w-3xl mx-auto">
-					<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">Send us a message</h2>
+					<h2 className="text-2xl font-black tracking-[-0.04em] text-foreground mb-8">Send us a message</h2>
 
 					{/* Tabs */}
 					<div className="flex gap-1 mb-8 p-1 bg-muted/50 rounded-lg w-fit">
