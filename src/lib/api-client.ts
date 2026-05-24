@@ -933,6 +933,9 @@ class ApiClient {
 
 	// VoiceGuard — scan speech-derived input before LLM/tool execution
 	async scanAudio(payload: {
+		policy_id?: string;
+		policy?: Record<string, unknown>;
+		audio_policy?: Record<string, unknown>;
 		transcript?: string;
 		audio_base64?: string;
 		alternatives?: string[];
@@ -961,6 +964,7 @@ class ApiClient {
 			known_user?: boolean;
 			intended_use?: string;
 			tools_available?: string[];
+			policy_id?: string;
 			asr_confidence?: number;
 		} = {},
 	) {
@@ -969,6 +973,7 @@ class ApiClient {
 		if (options.source_type) formData.append('source_type', options.source_type);
 		if (options.channel) formData.append('channel', options.channel);
 		if (options.intended_use) formData.append('intended_use', options.intended_use);
+		if (options.policy_id) formData.append('policy_id', options.policy_id);
 		if (options.speaker_verified !== undefined) {
 			formData.append('speaker_verified', String(options.speaker_verified));
 		}
