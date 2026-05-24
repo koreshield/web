@@ -934,6 +934,7 @@ class ApiClient {
 	// VoiceGuard — scan speech-derived input before LLM/tool execution
 	async scanAudio(payload: {
 		transcript?: string;
+		audio_base64?: string;
 		alternatives?: string[];
 		asr?: { primary?: string; alternatives?: string[]; confidence?: number };
 		source_type?: string;
@@ -949,6 +950,60 @@ class ApiClient {
 			method: 'POST',
 			body: JSON.stringify(payload),
 		}, this.maxRetries, [403]);
+	}
+
+	async scanAudioFile(
+		file: File,
+		options: {
+			source_type?: string;
+			channel?: string;
+			speaker_verified?: boolean;
+			known_user?: boolean;
+			intended_use?: string;
+			tools_available?: string[];
+			asr_confidence?: number;
+		} = {},
+	) {
+		const formData = new FormData();
+		formData.append('audio', file);
+		if (options.source_type) formData.append('source_type', options.source_type);
+		if (options.channel) formData.append('channel', options.channel);
+		if (options.intended_use) formData.append('intended_use', options.intended_use);
+		if (options.speaker_verified !== undefined) {
+			formData.append('speaker_verified', String(options.speaker_verified));
+		}
+		if (options.known_user !== undefined) {
+			formData.append('known_user', String(options.known_user));
+		}
+		if (options.asr_confidence !== undefined) {
+			formData.append('asr_confidence', String(options.asr_confidence));
+		}
+		if (options.tools_available?.length) {
+			formData.append('tools_available', options.tools_available.join(','));
+		}
+
+		const headers: Record<string, string> = {};
+		const adminToken = authService.getToken();
+		if (adminToken) {
+			headers['Authorization'] = `Bearer ${adminToken}`;
+		}
+
+		const response = await fetch(`${this.baseUrl}/v1/audio/scan`, {
+			method: 'POST',
+			headers,
+			body: formData,
+			credentials: 'include',
+		});
+
+		const data = await response.json().catch(() => ({}));
+		if (!response.ok && response.status !== 403) {
+			throw new Error(
+				typeof data.detail === 'string'
+					? data.detail
+					: data.message || `VoiceGuard scan failed (${response.status})`,
+			);
+		}
+		return data;
 	}
 
 	async getAudioScanHistory(limit = 20, offset = 0) {
