@@ -33,16 +33,17 @@ export default function CareersPage() {
 				description="Explore open roles at Koreshield across growth, product, security, research, engineering, and sales."
 			/>
 
-			<section className="py-24 px-6 relative ambient-glow overflow-hidden">
+			<section className="relative overflow-hidden px-4 py-20 md:px-6 md:py-24">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(18,194,150,0.18),transparent_34%),linear-gradient(to_bottom,rgba(18,194,150,0.06),transparent_55%)]" />
 				<div className="max-w-6xl mx-auto relative z-10">
 					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-						<div className="inline-flex items-center gap-2 bg-electric-green/10 border border-electric-green/20 text-electric-green text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-widest">
-							<span className="w-1.5 h-1.5 rounded-full bg-electric-green" />
-							We&apos;re hiring
-						</div>
-						<div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+						<div className="grid gap-8 rounded-[2rem] border border-border bg-card/75 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.18)] backdrop-blur md:p-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
 							<div>
-								<h1 className="text-5xl md:text-6xl font-extrabold mb-6 tracking-[-0.04em] text-foreground">
+								<div className="inline-flex items-center gap-2 bg-electric-green/10 border border-electric-green/20 text-electric-green text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-widest">
+									<span className="w-1.5 h-1.5 rounded-full bg-electric-green" />
+									We&apos;re hiring
+								</div>
+								<h1 className="text-4xl md:text-6xl font-black mb-6 tracking-[-0.06em] text-foreground">
 									Help build the security layer
 									<br className="hidden md:block" /> the AI industry needs.
 								</h1>
@@ -51,7 +52,7 @@ export default function CareersPage() {
 								</p>
 							</div>
 
-							<div className="bg-card/80 backdrop-blur border border-border rounded-2xl p-6 shadow-[0_18px_80px_rgba(0,0,0,0.18)]">
+							<div className="bg-background/70 backdrop-blur border border-border rounded-2xl p-6 shadow-[0_18px_80px_rgba(0,0,0,0.14)]">
 								<div className="inline-flex items-center gap-2 text-electric-green text-xs font-semibold uppercase tracking-[0.18em] mb-4">
 									<Sparkles className="w-3.5 h-3.5" />
 									Latest opening
@@ -84,7 +85,7 @@ export default function CareersPage() {
 				</div>
 			</section>
 
-			<section className="py-16 px-6 border-t border-border">
+			<section className="py-16 px-4 md:px-6 border-t border-border">
 				<div className="max-w-6xl mx-auto">
 					<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">Open roles</h2>
 					<div className="grid gap-5 lg:grid-cols-2">
@@ -95,7 +96,7 @@ export default function CareersPage() {
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true }}
 								transition={{ delay: i * 0.04 }}
-								className="bg-card border border-border hover:border-primary/40 rounded-2xl p-6 transition-colors"
+								className="bg-card border border-border hover:border-primary/40 hover:-translate-y-0.5 rounded-2xl p-6 transition-all"
 							>
 								<div className="flex flex-col gap-4 h-full">
 									<div>
@@ -129,7 +130,7 @@ export default function CareersPage() {
 				</div>
 			</section>
 
-			<section className="py-16 px-6 border-t border-border">
+			<section className="py-16 px-4 md:px-6 border-t border-border">
 				<div className="max-w-6xl mx-auto">
 					<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">How we work</h2>
 					<div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -140,7 +141,7 @@ export default function CareersPage() {
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true }}
 								transition={{ delay: i * 0.06 }}
-								className="bg-card border border-border rounded-xl p-5"
+								className="bg-card border border-border rounded-2xl p-5"
 							>
 								<h3 className="text-sm font-semibold text-foreground mb-2">{value.title}</h3>
 								<p className="text-sm text-muted-foreground leading-relaxed">{value.body}</p>
@@ -150,7 +151,7 @@ export default function CareersPage() {
 				</div>
 			</section>
 
-			<section className="py-16 px-6 border-t border-border">
+			<section className="py-16 px-4 md:px-6 border-t border-border">
 				<div className="max-w-4xl mx-auto">
 					<div className="bg-card border border-white/[0.08] rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
 						<div>
