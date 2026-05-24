@@ -42,7 +42,8 @@ export default function CareerRolePage() {
 				description={role.summary}
 			/>
 
-			<section className="py-20 px-6 relative ambient-glow overflow-hidden">
+			<section className="relative overflow-hidden px-4 py-20 md:px-6">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(18,194,150,0.16),transparent_34%),linear-gradient(to_bottom,rgba(18,194,150,0.06),transparent_55%)]" />
 				<div className="max-w-6xl mx-auto relative z-10">
 					<Link
 						to="/careers"
@@ -53,14 +54,14 @@ export default function CareerRolePage() {
 					</Link>
 
 					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-						<div className="grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-start">
+						<div className="grid gap-8 rounded-[2rem] border border-border bg-card/75 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.16)] backdrop-blur md:p-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-start">
 							<div>
 								<div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-5">
 									<span className="flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />{role.team}</span>
 									<span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{role.location}</span>
 									<span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{role.type}</span>
 								</div>
-								<h1 className="text-4xl md:text-6xl font-extrabold tracking-[-0.04em] text-foreground mb-5">{role.title}</h1>
+								<h1 className="text-4xl md:text-6xl font-black tracking-[-0.06em] text-foreground mb-5">{role.title}</h1>
 								<p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-5">{role.hero}</p>
 								<div className="space-y-4">
 									{role.overview.map((paragraph) => (
@@ -71,7 +72,7 @@ export default function CareerRolePage() {
 								</div>
 							</div>
 
-							<div className="bg-card/80 backdrop-blur border border-border rounded-2xl p-6 shadow-[0_18px_80px_rgba(0,0,0,0.18)]">
+							<div className="bg-background/70 backdrop-blur border border-border rounded-2xl p-6 shadow-[0_18px_80px_rgba(0,0,0,0.14)]">
 								<h2 className="text-xl font-bold text-foreground mb-3">Apply for this role</h2>
 								<p className="text-sm text-muted-foreground leading-relaxed mb-5">
 									Send your note, relevant links, and a short explanation of why this role fits you to <span className="text-foreground font-medium">{role.recruitmentEmail}</span>.
@@ -97,7 +98,7 @@ export default function CareerRolePage() {
 				</div>
 			</section>
 
-			<section className="py-16 px-6 border-t border-border">
+			<section className="py-16 px-4 md:px-6 border-t border-border">
 				<div className="max-w-6xl mx-auto grid gap-6 lg:grid-cols-2">
 					<SectionList title="What you’ll work on" items={role.responsibilities} />
 					<SectionList title="What we’re looking for" items={role.profile} />
@@ -110,13 +111,13 @@ export default function CareerRolePage() {
 				</div>
 			</section>
 
-			<section className="py-16 px-6 border-t border-border">
+			<section className="py-16 px-4 md:px-6 border-t border-border">
 				<div className="max-w-6xl mx-auto">
 					<SectionList title="What we offer" items={role.whatWeOffer} />
 				</div>
 			</section>
 
-			<section className="py-16 px-6 border-t border-border">
+			<section className="py-16 px-4 md:px-6 border-t border-border">
 				<div className="max-w-6xl mx-auto">
 					<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">Other open roles</h2>
 					<div className="grid gap-5 lg:grid-cols-3">
