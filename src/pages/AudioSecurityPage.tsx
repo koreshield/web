@@ -29,6 +29,7 @@ type SourceType = 'live_microphone' | 'phone_call' | 'call_recording' | 'meeting
 type ChannelType = 'user_speech' | 'background_speech' | 'screen_share_audio' | 'media_playback' | 'unknown';
 
 interface AudioScanPayload {
+	policy_id?: string;
 	transcript: string;
 	alternatives: string[];
 	source_type: SourceType;
@@ -57,12 +58,16 @@ interface AudioScanResult {
 	threats?: Array<Record<string, unknown>>;
 	audio_analysis?: Record<string, unknown>;
 	transcript_analysis?: Record<string, unknown>;
+	pii_analysis?: Record<string, unknown>;
+	policy?: Record<string, unknown>;
 	intent_analysis?: Record<string, unknown>;
 	safe_transcript?: string;
 	tool_policy?: {
 		allow_tool_calls?: boolean;
 		allow_llm_response?: boolean;
 		requires_human_confirmation?: boolean;
+		redact_pii?: boolean;
+		policy_id?: string;
 		treat_transcript_as?: string;
 	};
 }
@@ -127,6 +132,7 @@ const PRESETS: Array<{ label: string; payload: Partial<AudioScanPayload> & { tra
 ];
 
 const DEFAULT_FORM: AudioScanPayload = {
+	policy_id: 'voiceguard-default',
 	transcript: '',
 	alternatives: [],
 	source_type: 'live_microphone',
@@ -211,6 +217,7 @@ export function AudioSecurityPage() {
 					speaker_verified: form.speaker_verified,
 					known_user: form.known_user,
 					intended_use: form.intended_use,
+					policy_id: form.policy_id,
 					asr_confidence: form.asr.confidence,
 					tools_available: payload.tools_available,
 				}) as AudioScanResult
@@ -234,7 +241,7 @@ export function AudioSecurityPage() {
 	};
 
 	const applyPreset = (preset: (typeof PRESETS)[number]) => {
-		setForm({ ...DEFAULT_FORM, ...preset.payload });
+		setForm({ ...DEFAULT_FORM, policy_id: 'voiceguard-default', ...preset.payload });
 		setAlternativesText((preset.payload.alternatives || []).join('\n'));
 		setToolsText((preset.payload.tools_available || []).join(', '));
 		setResult(null);
@@ -243,7 +250,7 @@ export function AudioSecurityPage() {
 	const loadHistoryEntry = (entry: AudioHistoryEntry) => {
 		const request = entry.request_payload;
 		if (request) {
-			setForm({ ...DEFAULT_FORM, ...request });
+			setForm({ ...DEFAULT_FORM, policy_id: 'voiceguard-default', ...request });
 			setAlternativesText((request.alternatives || []).join('\n'));
 			setToolsText((request.tools_available || []).join(', '));
 			setScannedTranscript(request.transcript || '');
@@ -462,6 +469,21 @@ export function AudioSecurityPage() {
 								/>
 							</div>
 						</div>
+						<div>
+							<label className="mb-2 block text-sm font-medium">VoiceGuard policy</label>
+							<select
+								value={form.policy_id || 'voiceguard-default'}
+								onChange={(e) => setForm({ ...form, policy_id: e.target.value })}
+								className="dashboard-input w-full"
+							>
+								<option value="voiceguard-default">voiceguard-default</option>
+								<option value="voiceguard-strict">voiceguard-strict</option>
+								<option value="voiceguard-transcript-only">voiceguard-transcript-only</option>
+							</select>
+							<p className="mt-2 text-xs text-muted-foreground">
+								Strict blocks PII-bearing speech; default redacts it before model use.
+							</p>
+						</div>
 						<div className="flex flex-wrap gap-4 text-sm">
 							<label className="flex items-center gap-2">
 								<input type="checkbox" checked={form.speaker_verified} onChange={(e) => setForm({ ...form, speaker_verified: e.target.checked })} />
@@ -530,9 +552,13 @@ export function AudioSecurityPage() {
 								{result.tool_policy && (
 									<AppSurface className="space-y-2 p-4 text-sm">
 										<p className="font-semibold">Tool policy</p>
+										{(result.policy?.policy_id || result.tool_policy.policy_id) && (
+											<p>Policy: {String(result.policy?.policy_id || result.tool_policy.policy_id)}</p>
+										)}
 										<p>Allow tool calls: {result.tool_policy.allow_tool_calls ? 'yes' : 'no'}</p>
 										<p>Allow LLM response: {result.tool_policy.allow_llm_response ? 'yes' : 'no'}</p>
 										<p>Human confirmation: {result.tool_policy.requires_human_confirmation ? 'required' : 'not required'}</p>
+										<p>PII redaction: {result.tool_policy.redact_pii === false ? 'off' : 'on'}</p>
 										<p className="text-muted-foreground">Treat transcript as: {result.tool_policy.treat_transcript_as}</p>
 									</AppSurface>
 								)}
