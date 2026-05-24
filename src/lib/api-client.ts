@@ -937,6 +937,7 @@ class ApiClient {
 		policy?: Record<string, unknown>;
 		audio_policy?: Record<string, unknown>;
 		transcript?: string;
+		audio_url?: string;
 		audio_base64?: string;
 		alternatives?: string[];
 		asr?: { primary?: string; alternatives?: string[]; confidence?: number };
