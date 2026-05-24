@@ -63,17 +63,19 @@ export default function PricingPage() {
 			<SEOMeta {...SEOConfig.pricing} />
 
 			{/* ── Hero ─────────────────────────────────────────────────────── */}
-			<section className="px-4 pt-20 pb-0">
-				<div className="mx-auto max-w-4xl text-center">
+			<section className="relative overflow-hidden px-4 pt-20 pb-0">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(18,194,150,0.16),transparent_34%),linear-gradient(to_bottom,rgba(18,194,150,0.06),transparent_60%)]" />
+				<div className="relative mx-auto max-w-5xl text-center">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5 }}
+						className="rounded-[2rem] border border-border bg-card/75 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.16)] backdrop-blur md:p-10"
 					>
 						<p className="mx-auto mb-6 inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
 							Platform fee plus protected usage
 						</p>
-						<h1 className="text-5xl font-bold tracking-tight md:text-6xl">
+						<h1 className="text-4xl font-black tracking-[-0.06em] md:text-6xl">
 							The firewall every LLM deployment is missing.
 						</h1>
 						<p className="mx-auto mt-6 max-w-3xl text-lg text-muted-foreground md:text-xl">
@@ -134,7 +136,7 @@ export default function PricingPage() {
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true }}
 								transition={{ duration: 0.4, delay: i * 0.07 }}
-								className="flex flex-col items-center text-center"
+								className="rounded-2xl border border-border bg-card/60 p-5 text-center"
 							>
 								<span className="text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">
 									{stat.value}
@@ -153,7 +155,7 @@ export default function PricingPage() {
 
 					{/* Model explanation */}
 					<div className="text-center">
-						<h2 className="text-3xl font-bold">You pay for what you protect. Nothing more.</h2>
+						<h2 className="text-3xl font-black tracking-[-0.04em]">You pay for what you protect. Nothing more.</h2>
 						<p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
 							Most security tools charge per seat. Koreshield charges per protected request: a fixed monthly block with predictable overage pricing. Your costs scale with your AI traffic, not your headcount.
 						</p>
@@ -178,7 +180,7 @@ export default function PricingPage() {
 									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ duration: 0.45, delay: index * 0.08 }}
-									className={`flex h-full flex-col rounded-3xl border bg-card p-8 shadow-lg ${plan.popular ? 'border-electric-green shadow-emerald-500/10' : 'border-border'}`}
+									className={`flex h-full flex-col rounded-[2rem] border bg-card p-6 shadow-lg md:p-8 ${plan.popular ? 'border-electric-green shadow-emerald-500/10' : 'border-border'}`}
 								>
 									<div className="flex items-start justify-between gap-3">
 										<div>
@@ -246,7 +248,7 @@ export default function PricingPage() {
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.45, delay: 0.3 }}
-						className="rounded-3xl border border-primary/25 bg-card p-8 shadow-lg"
+						className="rounded-[2rem] border border-primary/25 bg-card p-6 shadow-lg md:p-8"
 					>
 						<div className="flex flex-col gap-8 lg:flex-row lg:items-center">
 							<div className="flex-1">
@@ -315,7 +317,7 @@ export default function PricingPage() {
 						viewport={{ once: true }}
 						transition={{ duration: 0.5 }}
 					>
-						<h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+						<h2 className="text-3xl font-black tracking-[-0.04em] md:text-4xl">
 							The attack surface is growing faster than your security stack.
 						</h2>
 						<div className="mt-6 space-y-3 text-muted-foreground text-base leading-relaxed text-left max-w-3xl mx-auto">
