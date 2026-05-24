@@ -53,6 +53,7 @@ interface AudioScanResult {
 	is_safe?: boolean;
 	risk_level?: string;
 	decision?: string;
+	scanned_transcript?: string;
 	threats?: Array<Record<string, unknown>>;
 	audio_analysis?: Record<string, unknown>;
 	transcript_analysis?: Record<string, unknown>;
@@ -155,13 +156,17 @@ function decisionTone(decision?: string) {
 
 export function AudioSecurityPage() {
 	const { success, error: showError } = useToast();
+	const [inputMode, setInputMode] = useState<'transcript' | 'audio'>('transcript');
+	const [audioFile, setAudioFile] = useState<File | null>(null);
 	const [form, setForm] = useState<AudioScanPayload>(DEFAULT_FORM);
 	const [alternativesText, setAlternativesText] = useState('');
 	const [toolsText, setToolsText] = useState('');
 	const [scanning, setScanning] = useState(false);
 	const [result, setResult] = useState<AudioScanResult | null>(null);
+	const [scannedTranscript, setScannedTranscript] = useState('');
 	const [history, setHistory] = useState<AudioHistoryEntry[]>([]);
 	const [historyLoading, setHistoryLoading] = useState(false);
+	const [historyError, setHistoryError] = useState<string | null>(null);
 
 	const buildPayload = useCallback((): AudioScanPayload => ({
 		...form,
@@ -171,31 +176,55 @@ export function AudioSecurityPage() {
 
 	const refreshHistory = useCallback(async () => {
 		setHistoryLoading(true);
+		setHistoryError(null);
 		try {
 			const data = await api.getAudioScanHistory(25, 0) as { scans?: AudioHistoryEntry[] };
 			setHistory(data.scans || []);
-		} catch {
-			showError('Failed to load VoiceGuard scan history');
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'Failed to load VoiceGuard scan history';
+			setHistoryError(message);
 		} finally {
 			setHistoryLoading(false);
 		}
-	}, [showError]);
+	}, []);
 
 	useEffect(() => {
 		void refreshHistory();
 	}, [refreshHistory]);
 
 	const handleScan = async () => {
-		if (!form.transcript.trim()) {
+		if (inputMode === 'transcript' && !form.transcript.trim()) {
 			showError('Enter a transcript to scan');
+			return;
+		}
+		if (inputMode === 'audio' && !audioFile) {
+			showError('Choose an audio file to upload');
 			return;
 		}
 		setScanning(true);
 		try {
 			const payload = buildPayload();
-			const response = await api.scanAudio(payload) as AudioScanResult;
+			const response = inputMode === 'audio' && audioFile
+				? await api.scanAudioFile(audioFile, {
+					source_type: form.source_type,
+					channel: form.channel,
+					speaker_verified: form.speaker_verified,
+					known_user: form.known_user,
+					intended_use: form.intended_use,
+					asr_confidence: form.asr.confidence,
+					tools_available: payload.tools_available,
+				}) as AudioScanResult
+				: await api.scanAudio(payload) as AudioScanResult;
+
+			const transcriptScanned = response.scanned_transcript
+				|| payload.transcript
+				|| form.transcript;
+			setScannedTranscript(transcriptScanned);
+			if (transcriptScanned) {
+				setForm((current) => ({ ...current, transcript: transcriptScanned }));
+			}
 			setResult(response);
-			success(response.decision === 'block' ? 'VoiceGuard blocked this transcript' : 'VoiceGuard scan complete');
+			success(response.decision === 'block' ? 'VoiceGuard blocked this speech input' : 'VoiceGuard scan complete');
 			void refreshHistory();
 		} catch (err) {
 			showError(err instanceof Error ? err.message : 'VoiceGuard scan failed');
@@ -217,6 +246,8 @@ export function AudioSecurityPage() {
 			setForm({ ...DEFAULT_FORM, ...request });
 			setAlternativesText((request.alternatives || []).join('\n'));
 			setToolsText((request.tools_available || []).join(', '));
+			setScannedTranscript(request.transcript || '');
+			setInputMode('transcript');
 		}
 		setResult((entry.response as AudioScanResult | undefined) || null);
 	};
@@ -272,8 +303,15 @@ export function AudioSecurityPage() {
 			/>
 
 			<AppCallout variant="info">
-				VoiceGuard is transcript-first: bring your own STT, then POST transcript + trust context to Koreshield before the LLM or tools run.
+				VoiceGuard accepts ASR transcripts or raw audio uploads (WAV, MP3, M4A, WebM). Transcribe server-side with OPENAI_API_KEY, or paste your own ASR output before the LLM or tools run.
 			</AppCallout>
+
+			{scannedTranscript && (
+				<AppSurface className="border-electric-green/30 bg-electric-green/5 p-5">
+					<p className="text-xs font-bold uppercase tracking-[0.2em] text-electric-green">Speech prompt scanned</p>
+					<p className="mt-3 text-base leading-relaxed text-foreground">{scannedTranscript}</p>
+				</AppSurface>
+			)}
 
 			<AppStatGrid>
 				<AppStatCard label="Recent scans" value={history.length} icon={Clock} />
@@ -288,7 +326,32 @@ export function AudioSecurityPage() {
 			</AppStatGrid>
 
 			<div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
-				<AppPageSection title="Transcript playground" description="Model the ASR output and trust envelope your voice agent would send.">
+				<AppPageSection title="VoiceGuard playground" description="Paste ASR output or upload a raw audio file. Koreshield scans the speech prompt before LLM or tool execution.">
+					<div className="mb-4 flex flex-wrap gap-2">
+						<button
+							type="button"
+							onClick={() => setInputMode('transcript')}
+							className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+								inputMode === 'transcript'
+									? 'border-primary bg-primary/10 text-foreground'
+									: 'border-border bg-background/60 text-muted-foreground hover:text-foreground'
+							}`}
+						>
+							ASR transcript
+						</button>
+						<button
+							type="button"
+							onClick={() => setInputMode('audio')}
+							className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+								inputMode === 'audio'
+									? 'border-primary bg-primary/10 text-foreground'
+									: 'border-border bg-background/60 text-muted-foreground hover:text-foreground'
+							}`}
+						>
+							Raw audio file
+						</button>
+					</div>
+
 					<div className="mb-4 flex flex-wrap gap-2">
 						{PRESETS.map((preset) => (
 							<button
@@ -303,16 +366,37 @@ export function AudioSecurityPage() {
 					</div>
 
 					<div className="space-y-4">
-						<div>
-							<label className="mb-2 block text-sm font-medium">Primary transcript</label>
-							<textarea
-								value={form.transcript}
-								onChange={(e) => setForm({ ...form, transcript: e.target.value })}
-								rows={4}
-								className="dashboard-input w-full font-mono text-sm"
-								placeholder="Summarise this call for the account notes."
-							/>
-						</div>
+						{inputMode === 'transcript' ? (
+							<div>
+								<label className="mb-2 block text-sm font-medium">Primary transcript</label>
+								<textarea
+									value={form.transcript}
+									onChange={(e) => setForm({ ...form, transcript: e.target.value })}
+									rows={4}
+									className="dashboard-input w-full font-mono text-sm"
+									placeholder="Summarise this call for the account notes."
+								/>
+							</div>
+						) : (
+							<div>
+								<label className="mb-2 block text-sm font-medium">Audio file</label>
+								<input
+									type="file"
+									accept="audio/*,.wav,.mp3,.m4a,.webm,.ogg,.flac"
+									onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+									className="dashboard-input w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-foreground"
+								/>
+								{audioFile && (
+									<p className="mt-2 text-xs text-muted-foreground">
+										Selected: {audioFile.name} ({Math.round(audioFile.size / 1024)} KB)
+									</p>
+								)}
+								<p className="mt-2 text-xs text-muted-foreground">
+									Server transcribes with Whisper when OPENAI_API_KEY is configured; otherwise use the transcript tab.
+								</p>
+							</div>
+						)}
+						{inputMode === 'transcript' && (
 						<div>
 							<label className="mb-2 block text-sm font-medium">ASR alternatives (one per line)</label>
 							<textarea
@@ -323,6 +407,7 @@ export function AudioSecurityPage() {
 								placeholder="Optional alternative transcripts from your ASR engine"
 							/>
 						</div>
+						)}
 						<div className="grid gap-4 md:grid-cols-2">
 							<div>
 								<label className="mb-2 block text-sm font-medium">Source type</label>
@@ -411,7 +496,7 @@ export function AudioSecurityPage() {
 						</div>
 						<AppPrimaryButton onClick={() => void handleScan()} disabled={scanning} className="w-full sm:w-auto">
 							{scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic2 className="h-4 w-4" />}
-							{scanning ? 'Scanning…' : 'Scan transcript'}
+							{scanning ? 'Scanning…' : inputMode === 'audio' ? 'Scan audio file' : 'Scan transcript'}
 						</AppPrimaryButton>
 					</div>
 				</AppPageSection>
@@ -426,6 +511,12 @@ export function AudioSecurityPage() {
 							/>
 						) : (
 							<div className="space-y-4">
+								{scannedTranscript && (
+									<AppSurface className="p-4">
+										<p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Scanned speech prompt</p>
+										<p className="mt-2 text-sm leading-relaxed">{scannedTranscript}</p>
+									</AppSurface>
+								)}
 								<div className="grid gap-3 sm:grid-cols-2">
 									<AppSurface className="p-4">
 										<p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Decision</p>
@@ -478,7 +569,9 @@ export function AudioSecurityPage() {
 							</div>
 						}
 					>
-						{history.length === 0 ? (
+						{historyError ? (
+							<AppCallout variant="warning">{historyError}</AppCallout>
+						) : history.length === 0 ? (
 							<p className="text-sm text-muted-foreground">No saved scans yet.</p>
 						) : (
 							<div className="space-y-3">
