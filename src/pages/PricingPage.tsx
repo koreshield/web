@@ -20,22 +20,22 @@ const pricingStats = [
 	{
 		value: '£1.9M',
 		label: 'Avg. AI breach cost',
-		sub: 'Approx. GBP equivalent',
+		sub: 'Industry average, 2025',
 	},
 	{
-		value: 'Under 50ms',
+		value: '<30ms',
 		label: 'Latency overhead',
-		sub: 'Inspection without slowdown',
+		sub: 'No noticeable slowdown',
 	},
 	{
 		value: 'Zero-log',
 		label: 'By default',
-		sub: 'Nothing retained unless configured',
+		sub: 'Nothing stored unless configured',
 	},
 	{
 		value: '1 URL',
 		label: 'Change required',
-		sub: 'No code rewrite. Under 30 minutes.',
+		sub: 'No code rewrite needed',
 	},
 ];
 
@@ -323,8 +323,8 @@ export default function PricingPage() {
 							The attack surface is growing faster than your security stack.
 						</h2>
 						<div className="mt-6 space-y-3 text-muted-foreground text-base leading-relaxed text-left max-w-3xl mx-auto">
-							<p>Most teams are shipping LLMs into production with nothing between their app and the model. Prompt injection is the most exploited vulnerability in production LLM systems. The average cost of an AI-related data breach is £1.9M. Fewer than 35% of organisations have any dedicated LLM defence deployed. Agentic AI is the fastest-growing deployment pattern, and it is expanding the attack surface faster than most security teams can respond.</p>
-							<p>Koreshield is an independent LLM security proxy, built by engineers who operated inside this problem before it had a product category. No legacy vendor roadmap. No multi-month implementation. No lock-in.</p>
+							<p>Most teams ship LLMs into production with nothing between their app and the model. Prompt injection is the most exploited vulnerability in production LLM systems. The average cost of an AI-related data breach is £1.9M. Fewer than 35% of organisations have any dedicated LLM defence deployed.</p>
+							<p>Koreshield is an independent LLM security proxy built by engineers who operated inside this problem before it had a product category. No legacy vendor roadmap. No multi-month implementation. No lock-in.</p>
 						</div>
 						<div className="mt-8">
 							<Link
