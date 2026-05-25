@@ -21,7 +21,7 @@ export default function SolutionApplicationProtectionPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="AI Application Protection | Koreshield"
+				title="Application Protection"
 				description="Protect LLM-powered applications with a proxy security layer and no application rewrite."
 			/>
 

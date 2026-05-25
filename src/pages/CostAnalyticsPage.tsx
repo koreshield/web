@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PoundSterling, Filter, Download, Calendar, TrendingUp } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useQuery } from '@tanstack/react-query';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { api } from '../lib/api-client';
@@ -135,6 +136,7 @@ export function CostAnalyticsPage() {
 
     return (
         <AppPage>
+            <SEOMeta title="Cost Analytics" noindex />
             <AppPageHeader
                 eyebrow="Spend"
                 eyebrowIcon={PoundSterling}

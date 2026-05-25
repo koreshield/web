@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, CheckCircle2, CreditCard, Lock, RefreshCw } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useSearchParams } from 'react-router-dom';
 import {
 	AppCallout,
@@ -279,6 +280,7 @@ export default function BillingPage() {
 
 	return (
 		<AppPage maxWidth="6xl">
+			<SEOMeta title="Billing" noindex />
 			<AppPageHeader
 				eyebrow="Subscription"
 				eyebrowIcon={CreditCard}

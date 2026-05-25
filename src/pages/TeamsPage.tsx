@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Users, Plus, ArrowRight, Clock } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api-client';
@@ -79,6 +80,7 @@ export function TeamsPage() {
 
 	return (
 		<>
+			<SEOMeta title="Teams" noindex />
 			<AppPage>
 				<AppPageHeader
 					eyebrow="Collaboration"

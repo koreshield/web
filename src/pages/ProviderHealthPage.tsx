@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Activity, CheckCircle, Server, Zap, XCircle } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useProviderHealth } from '../hooks/useApi';
 import { wsClient, type ProviderHealthEvent, type WebSocketEvent } from '../lib/websocket-client';
 import { AppPage, AppPageHeader, AppPageSection, AppStatCard, AppStatGrid, AppSurface } from '../components/AppPageLayout';
@@ -133,6 +134,7 @@ export function ProviderHealthPage() {
 
 	return (
 		<AppPage>
+			<SEOMeta title="Provider Health" noindex />
 			<AppPageHeader
 				eyebrow="Infrastructure"
 				eyebrowIcon={Activity}

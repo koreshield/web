@@ -29,6 +29,7 @@ import {
 	AppStatGrid,
 	AppSurface,
 } from '../components/AppPageLayout';
+import { SEOMeta } from '../components/SEOMeta';
 import { useToast } from '../components/ToastNotification';
 import { useAuthState } from '../hooks/useAuthState';
 import { api } from '../lib/api-client';
@@ -153,6 +154,7 @@ export function SettingsPage() {
 
 	return (
 		<AppPage maxWidth="6xl">
+			<SEOMeta title="Settings" noindex />
 			<AppPageHeader
 				eyebrow="Workspace"
 				eyebrowIcon={SettingsIcon}

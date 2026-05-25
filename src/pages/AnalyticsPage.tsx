@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Building2, TrendingUp, Users, Activity, BarChart3, Filter } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, PieChart as RechartsPie, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useNavigate } from 'react-router-dom';
@@ -86,6 +87,7 @@ export function AnalyticsPage() {
 
     return (
         <AppPage>
+            <SEOMeta title="Analytics" noindex />
             <AppPageHeader
                 eyebrow="Insights"
                 eyebrowIcon={BarChart3}

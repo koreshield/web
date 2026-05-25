@@ -227,7 +227,7 @@ function IntegrationsPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground pt-24 pb-20">
 			<SEOMeta
-				title="Integrations Catalog | Koreshield"
+				title="Integrations"
 				description="Connect Koreshield with your favorite tools, CRMs, and LLM frameworks."
 			/>
 

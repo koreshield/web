@@ -533,7 +533,7 @@ export function FounderPortalPage() {
 
 	return (
 		<AppPage maxWidth="7xl" className="!max-w-[1500px]">
-			<SEOMeta title="Founder Portal | Koreshield" description="Private Koreshield founder operating dashboard." />
+			<SEOMeta title="Founder Portal" description="Private Koreshield founder operating dashboard." noindex />
 
 			<AppPageHeader
 				eyebrow="Live founder view"

@@ -19,7 +19,7 @@ export default function SolutionUsageControlPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="AI Usage Control | Koreshield"
+				title="Usage Control"
 				description="Define and enforce what your AI systems can and cannot do using scoped policies, logs, and alerts."
 			/>
 

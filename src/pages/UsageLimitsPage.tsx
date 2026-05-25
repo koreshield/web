@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { SEOMeta } from '../components/SEOMeta';
 import {
 	Activity,
 	AlertTriangle,
@@ -321,6 +322,7 @@ export default function UsageLimitsPage() {
 
 	return (
 		<AppPage>
+			<SEOMeta title="Usage Limits" noindex />
 			<AppPageHeader
 				eyebrow="Usage & limits"
 				eyebrowIcon={Gauge}

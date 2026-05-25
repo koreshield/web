@@ -275,7 +275,7 @@ export function AdvancedAnalyticsPage() {
 	return (
 		<AppPage>
 			<SEOMeta
-				title="Advanced Analytics | Koreshield"
+				title="Advanced Analytics"
 				description="Cost optimization, performance metrics, and provider comparison analytics"
 			/>
 

@@ -1,5 +1,6 @@
 import { DocsLayout } from '../components/DocsLayout';
 import { DocPage } from '../components/DocPage';
+import { SEOMeta } from '../components/SEOMeta';
 
 /**
  * DocsPage - Main documentation portal
@@ -8,6 +9,7 @@ import { DocPage } from '../components/DocPage';
 export default function DocsPage() {
 	return (
 		<DocsLayout>
+			<SEOMeta title="Docs" />
 			<DocPage />
 		</DocsLayout>
 	);

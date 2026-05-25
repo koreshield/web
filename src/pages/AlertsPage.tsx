@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Bell, Plus, Edit, Trash2, Mail, MessageSquare, Webhook, AlertTriangle, CheckCircle, Clock, X, TestTube2, Loader, Send } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
@@ -527,6 +528,7 @@ export function AlertsPage() {
 
     return (
         <>
+            <SEOMeta title="Alerts" noindex />
             <AppPage>
                 <AppPageHeader
                     eyebrow="Notifications"
