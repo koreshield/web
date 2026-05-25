@@ -65,7 +65,7 @@ function Architecture() {
                                     <Zap className="w-3 h-3" /> Outgoing Request
                                 </div>
                                 <span className="text-foreground/70">client.chat.completions.create(</span><br />
-                                <span className="ml-4 text-foreground/70">model=<span className="text-blue-400">"gpt-4o-mini"</span>,</span><br />
+                                <span className="ml-4 text-foreground/70">model=<span className="text-blue-400">"gpt-5.4"</span>,</span><br />
                                 <span className="ml-4 text-foreground/70">messages=[&#123;...&#125;]</span><br />
                                 <span className="text-foreground/70">)</span>
                             </div>
@@ -128,7 +128,7 @@ function Architecture() {
                     >
                         <div className="flex items-center gap-3 mb-4 text-purple-500">
                             <Cloud className="w-6 h-6" />
-                            <h3 className="font-semibold">3. LLM Providers</h3>
+                            <h3 className="font-semibold">4. LLM Providers</h3>
                         </div>
                         <div className="space-y-2">
                             {['OpenAI', 'Anthropic', 'Gemini', 'DeepSeek'].map((provider) => (
