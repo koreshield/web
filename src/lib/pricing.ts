@@ -172,10 +172,10 @@ export const PRICING_PLANS: PricingPlan[] = [
 			'Everything in Scale',
 			'SSO and SAML',
 			'SIEM export',
-			'Self-hosted, VPC, or air-gapped deployment',
-			'Offline licence validation and threat corpus',
+			'Self-hosted or air-gapped deployment',
+			'Offline licence and threat corpus',
 			'Custom retention and SLA',
-			'Dedicated onboarding and security review support',
+			'Dedicated onboarding and support',
 		],
 	},
 ];
