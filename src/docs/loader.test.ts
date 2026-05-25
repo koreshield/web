@@ -89,6 +89,7 @@ describe('docs loader', () => {
 			.filter((page): page is NonNullable<ReturnType<typeof getDocPageByRoute>> => Boolean(page));
 
 		const markdownLinkPattern = /\[[^\]]+\]\(([^)]+)\)/g;
+		const appRoutes = new Set(['/faq', '/contact', '/pricing', '/billing', '/dashboard']);
 
 		for (const page of pages) {
 			for (const match of page.content.matchAll(markdownLinkPattern)) {
@@ -98,6 +99,7 @@ describe('docs loader', () => {
 				}
 
 				const normalized = normalizeDocHref(page.path, href);
+				if (appRoutes.has(normalized)) continue;
 				expect(
 					getDocPageByRoute(normalized),
 					`expected link ${href} on ${page.path} to resolve as ${normalized}`
