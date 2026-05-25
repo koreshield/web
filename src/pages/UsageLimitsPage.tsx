@@ -441,16 +441,21 @@ export default function UsageLimitsPage() {
 				variant="card"
 				className="mt-8"
 			>
-				<div className="grid gap-4 md:grid-cols-3">
+				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 					<AppSurface>
 						<CheckCircle2 className="mb-4 h-5 w-5 text-electric-green" />
 						<h3 className="font-bold">Prompts and responses</h3>
-						<p className="mt-2 text-sm text-muted-foreground">Scanned requests count once, whether they pass through or get blocked.</p>
+						<p className="mt-2 text-sm text-muted-foreground">Each prompt or response scanned via the proxy counts as one protected request, whether it passes or gets blocked.</p>
 					</AppSurface>
 					<AppSurface>
 						<CheckCircle2 className="mb-4 h-5 w-5 text-electric-green" />
-						<h3 className="font-bold">RAG context</h3>
-						<p className="mt-2 text-sm text-muted-foreground">Document-context checks are visible so heavy retrieval pipelines do not become a blind spot.</p>
+						<h3 className="font-bold">RAG document scans</h3>
+						<p className="mt-2 text-sm text-muted-foreground">Each call to the RAG scan endpoint counts as one protected request per document batch submitted.</p>
+					</AppSurface>
+					<AppSurface>
+						<CheckCircle2 className="mb-4 h-5 w-5 text-electric-green" />
+						<h3 className="font-bold">VoiceGuard audio scans</h3>
+						<p className="mt-2 text-sm text-muted-foreground">Each transcript or audio file scanned via VoiceGuard counts as one protected request.</p>
 					</AppSurface>
 					<AppSurface>
 						<CheckCircle2 className="mb-4 h-5 w-5 text-electric-green" />

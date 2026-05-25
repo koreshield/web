@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { AlertTriangle, CheckCircle2, Code2, DollarSign, Hammer, Shield, TimerReset, TrendingUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Code2, PoundSterling, Hammer, Shield, TimerReset, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
@@ -19,19 +19,19 @@ const phases = [
 ];
 
 const yearOneBuild = [
-	['Initial development (2 engineers x 6 months)', '$180,000'],
-	['Ongoing maintenance (1 engineer)', '$120,000'],
-	['Infrastructure and tools', '$24,000'],
-	['Security research and updates', '$36,000'],
-	['Opportunity cost from delayed features', '$100,000+'],
+	['Initial development (2 engineers x 6 months)', '£140,000'],
+	['Ongoing maintenance (1 engineer)', '£95,000'],
+	['Infrastructure and tools', '£19,000'],
+	['Security research and updates', '£28,000'],
+	['Opportunity cost from delayed features', '£80,000+'],
 ];
 
 const yearOneKoreshield = [
-	['Koreshield Enterprise license', '$50,000'],
-	['Integration time (1 week)', '$3,500'],
-	['Infrastructure', '$12,000'],
-	['Maintenance', '$0'],
-	['Opportunity cost', '$0'],
+	['Koreshield Enterprise license', '£40,000'],
+	['Integration time (1 week)', '£2,800'],
+	['Infrastructure', '£9,500'],
+	['Maintenance', '£0'],
+	['Opportunity cost', '£0'],
 ];
 
 const buildTimeline = [
@@ -53,15 +53,15 @@ const koreshieldTimeline = [
 const hiddenCosts = [
 	{
 		title: 'Ongoing maintenance',
-		items: ['New attack vectors emerge weekly', 'LLM providers update APIs frequently', 'Bug fixes and performance optimization', 'Documentation and onboarding', 'Estimated: $120K/year ongoing'],
+		items: ['New attack vectors emerge weekly', 'LLM providers update APIs frequently', 'Bug fixes and performance optimization', 'Documentation and onboarding', 'Estimated: £95K/year ongoing'],
 	},
 	{
 		title: 'Technical debt',
-		items: ['Code becomes unmaintainable over time', 'Original developers leave the company', 'Refactoring required every 12-18 months', 'Testing and security audits', 'Estimated: $50K-100K/year'],
+		items: ['Code becomes unmaintainable over time', 'Original developers leave the company', 'Refactoring required every 12-18 months', 'Testing and security audits', 'Estimated: £40K-80K/year'],
 	},
 	{
 		title: 'Opportunity cost',
-		items: ['Engineers not building product features', 'Delayed time-to-market', 'Lost competitive advantage', 'Potential customer churn during delays', 'Estimated: $100K-500K+'],
+		items: ['Engineers not building product features', 'Delayed time-to-market', 'Lost competitive advantage', 'Potential customer churn during delays', 'Estimated: £80K-400K+'],
 	},
 	{
 		title: 'Detection quality',
@@ -152,7 +152,7 @@ export default function VsBuildYourselfPage() {
 			<section className="border-y border-border bg-card/35 px-6 py-20">
 				<div className="mx-auto max-w-7xl">
 					<div className="mb-8 flex items-center gap-4">
-						<DollarSign className="h-8 w-8 text-electric-green" />
+						<PoundSterling className="h-8 w-8 text-electric-green" />
 						<div>
 							<h2 className="text-4xl font-extrabold tracking-[-0.04em]">Total cost of ownership: year one</h2>
 							<p className="mt-2 text-sm text-muted-foreground">Illustrative planning model for a production-grade internal LLM security layer.</p>
@@ -166,7 +166,7 @@ export default function VsBuildYourselfPage() {
 							</div>
 							<div className="mt-6 flex items-center justify-between border-t border-red-500/30 pt-5">
 								<span className="text-lg font-bold">Total year 1</span>
-								<span className="text-3xl font-black text-red-400">$460,000+</span>
+								<span className="text-3xl font-black text-red-400">£362,000+</span>
 							</div>
 						</div>
 						<div className="rounded-[1.5rem] border border-electric-green/35 bg-electric-green/10 p-6">
@@ -176,10 +176,10 @@ export default function VsBuildYourselfPage() {
 							</div>
 							<div className="mt-6 flex items-center justify-between border-t border-electric-green/30 pt-5">
 								<span className="text-lg font-bold">Total year 1</span>
-								<span className="text-3xl font-black text-electric-green">$65,500</span>
+								<span className="text-3xl font-black text-electric-green">£52,300</span>
 							</div>
 							<div className="mt-6 rounded-2xl border border-electric-green/25 bg-background/55 p-5 text-center">
-								<p className="text-4xl font-black text-electric-green">Save $394,500</p>
+								<p className="text-4xl font-black text-electric-green">Save £309,700</p>
 								<p className="mt-2 text-sm text-muted-foreground">85% cost reduction in year one</p>
 							</div>
 						</div>
@@ -280,30 +280,30 @@ export default function VsBuildYourselfPage() {
 						<div className="rounded-[1.5rem] border border-red-500/25 bg-background/60 p-6">
 							<h3 className="text-2xl font-extrabold text-red-400">Build in-house</h3>
 							<div className="mt-5 space-y-3 text-sm text-muted-foreground">
-								<div className="flex justify-between gap-4"><span>Year 1</span><strong>$460,000</strong></div>
-								<div className="flex justify-between gap-4"><span>Year 2</span><strong>$220,000</strong></div>
-								<div className="flex justify-between gap-4"><span>Year 3</span><strong>$250,000</strong></div>
+								<div className="flex justify-between gap-4"><span>Year 1</span><strong>£362,000</strong></div>
+								<div className="flex justify-between gap-4"><span>Year 2</span><strong>£175,000</strong></div>
+								<div className="flex justify-between gap-4"><span>Year 3</span><strong>£200,000</strong></div>
 							</div>
 							<div className="mt-5 flex justify-between border-t border-border pt-5">
 								<span className="font-bold">3-year total</span>
-								<span className="text-3xl font-black text-red-400">$930,000</span>
+								<span className="text-3xl font-black text-red-400">£737,000</span>
 							</div>
 						</div>
 						<div className="rounded-[1.5rem] border border-electric-green/25 bg-background/60 p-6">
 							<h3 className="text-2xl font-extrabold text-electric-green">Use Koreshield</h3>
 							<div className="mt-5 space-y-3 text-sm text-muted-foreground">
-								<div className="flex justify-between gap-4"><span>Year 1</span><strong>$65,500</strong></div>
-								<div className="flex justify-between gap-4"><span>Year 2</span><strong>$60,000</strong></div>
-								<div className="flex justify-between gap-4"><span>Year 3</span><strong>$70,000</strong></div>
+								<div className="flex justify-between gap-4"><span>Year 1</span><strong>£52,300</strong></div>
+								<div className="flex justify-between gap-4"><span>Year 2</span><strong>£48,000</strong></div>
+								<div className="flex justify-between gap-4"><span>Year 3</span><strong>£55,000</strong></div>
 							</div>
 							<div className="mt-5 flex justify-between border-t border-border pt-5">
 								<span className="font-bold">3-year total</span>
-								<span className="text-3xl font-black text-electric-green">$195,500</span>
+								<span className="text-3xl font-black text-electric-green">£155,300</span>
 							</div>
 						</div>
 					</div>
 					<div className="mt-10 text-center">
-						<p className="text-5xl font-black text-electric-green">Save $734,500</p>
+						<p className="text-5xl font-black text-electric-green">Save £581,700</p>
 						<p className="mt-2 text-sm text-muted-foreground">79% cost reduction over 3 years</p>
 					</div>
 				</div>
