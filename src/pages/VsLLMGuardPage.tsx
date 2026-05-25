@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
 const comparisonRows = [
-	['Deployment model', 'Managed runtime proxy + SDKs', 'Open-source scanner toolkit'],
+	['Deployment model', 'Managed cloud, self-hosted, or air-gapped', 'Open-source scanner toolkit'],
 	['Best fit', 'Production teams needing enforcement, evidence, and support', 'Teams that want to self-host and assemble controls'],
 	['Request path', 'Designed to sit between app and provider', 'Usually embedded inside application code'],
 	['Governance', 'Tenant context, audit logs, policy decisions, alerts', 'Depends on your implementation'],
@@ -15,6 +15,7 @@ const koreshieldWins = [
 	'You need runtime enforcement, not only scanner functions.',
 	'You need audit evidence and compliance reporting.',
 	'You want one layer across providers, teams, and applications.',
+	'You need self-hosted or air-gapped deployment with data residency guarantees.',
 	'You need a commercial support path for production incidents.',
 ];
 

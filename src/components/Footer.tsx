@@ -22,6 +22,7 @@ const footerGroups = [
 		links: [
 			{ label: 'Pricing', to: '/pricing' },
 			{ label: 'Book a Demo', to: '/demo' },
+			{ label: 'Self-Hosted Deployment', to: '/docs/integrations/deployment/self-hosted' },
 			{ label: 'Integrations', to: '/integrations' },
 			{ label: 'Changelog', to: '/changelog' },
 			{ label: 'Status', to: '/status' },
@@ -173,6 +174,10 @@ function Footer() {
 						<span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5">
 							<CheckCircle2 className="h-3.5 w-3.5 text-electric-green" />
 							UK company
+						</span>
+						<span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5">
+							<CheckCircle2 className="h-3.5 w-3.5 text-electric-green" />
+							Self-hosted + air-gapped
 						</span>
 						<span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5">
 							<CheckCircle2 className="h-3.5 w-3.5 text-electric-green" />
