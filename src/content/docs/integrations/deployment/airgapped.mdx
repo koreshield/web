@@ -20,9 +20,12 @@ For environments with no outbound internet access — classified networks, regul
 |---|---|---|
 | Container image source | Registry pull | Pre-loaded `.tar.gz` images |
 | LLM provider access | Direct API calls | Customer-managed proxy or local models |
-| Licence validation | Local (no phone-home) | Local (no phone-home) |
-| Threat corpus updates | Bundled + optional pull | Manual bundle import |
-| Telemetry / analytics | Local only | Local only |
+| Licence validation | Local HMAC (no phone-home) | Local HMAC (no phone-home) |
+| Threat corpus updates | Bundled + SIGHUP hot-reload | Manual JSONL bundle import + SIGHUP |
+| Billing / subscriptions | Bypassed (licence-based) | Bypassed (licence-based) |
+| OAuth login (GitHub/Google) | Optional | Disabled — use API key auth |
+| Remote audio URLs | Configurable | Blocked |
+| Telegram alerts | Optional | Skipped |
 | Dashboard | Bundled in stack | Bundled in stack |
 
 ## Deployment Mode
@@ -34,11 +37,13 @@ DEPLOYMENT_MODE=airgapped
 ENVIRONMENT=production
 ```
 
-When `DEPLOYMENT_MODE=airgapped`, the server:
+When `DEPLOYMENT_MODE=airgapped`, the server enforces these constraints at runtime:
 
-- Skips any optional outbound calls (update checks, telemetry, etc.)
-- Uses only the bundled threat detection corpus
-- Disables features that require internet (e.g. remote `audio_url` fetching for VoiceGuard)
+- **Polar billing calls are blocked** — entitlements come from the licence key
+- **OAuth login routes return 403** — authentication is via API keys only
+- **Remote `audio_url` fetching is disabled** — upload audio files directly or send base64
+- **Telegram alert dispatch is skipped** — use local log aggregation instead
+- **Licence validation is fully offline** — HMAC signature check, no network call
 
 ## Offline Bundle Contents
 
@@ -51,11 +56,13 @@ The Koreshield team delivers a signed bundle (`.tar.gz`) containing:
 | `images/postgres-16.tar` | PostgreSQL 16 image |
 | `images/redis-7.tar` | Redis 7 image |
 | `images/caddy-2.tar` | Caddy reverse proxy image |
-| `images/prometheus.tar` | Prometheus metrics image |
-| `images/grafana.tar` | Grafana dashboards image |
 | `docker-compose.prod.yml` | Production Compose stack |
+| `docker-compose.selfhosted.yml` | Self-hosted override (disables cloud billing) |
 | `.env.example` | Environment variable reference |
-| `threat-corpus/corpus-v2.x.x.json` | Offline detection rules |
+| `threat-corpus/corpus.jsonl` | Offline detection rules in JSONL format |
+| `scripts/verify_installation.py` | Post-install verification script |
+| `scripts/generate_licence.py` | Licence key generation tool (Koreshield team) |
+| `scripts/export_corpus_bundle.py` | Corpus export tool for creating update bundles |
 | `CHECKSUMS.sha256` | SHA-256 checksums for all files |
 | `CHANGELOG.md` | Release notes |
 
@@ -66,20 +73,19 @@ The Koreshield team delivers a signed bundle (`.tar.gz`) containing:
 Copy the bundle to your airgapped host via USB, secure file transfer, or approved media:
 
 ```bash
-scp koreshield-enterprise-v2.x.x-airgapped.tar.gz admin@secure-host:/path/to/koreshield/
+scp koreshield-enterprise-vX.Y.Z-airgapped.tar.gz admin@secure-host:/path/to/koreshield/
 ```
 
 ### 2. Extract
 
 ```bash
 cd /path/to/koreshield
-tar xzf koreshield-enterprise-v2.x.x-airgapped.tar.gz
+tar xzf koreshield-enterprise-vX.Y.Z-airgapped.tar.gz
 ```
 
 ### 3. Verify checksums
 
 ```bash
-cd koreshield-enterprise-v2.x.x-airgapped
 sha256sum -c CHECKSUMS.sha256
 ```
 
@@ -95,16 +101,19 @@ done
 
 ```bash
 cp .env.example .env
-# Edit .env with your secrets, licence key, and provider config
+# Edit .env — key settings below
 ```
 
 Key variables for airgapped:
 
 ```bash
 DEPLOYMENT_MODE=airgapped
-KS_LICENSE_KEY=ks_ent_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+KS_LICENSE_KEY=ks_ent_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.signature
 ENVIRONMENT=production
 JWT_SECRET=your-secret-here
+
+# External threat corpus (auto-loaded on startup)
+KS_THREAT_CORPUS_PATH=/data/threat-corpus/corpus.jsonl
 
 # LLM provider — use a local model endpoint or internal proxy
 OPENAI_API_BASE=http://internal-llm-gateway:8080/v1
@@ -114,14 +123,42 @@ OPENAI_API_KEY=internal-key
 ### 6. Start
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml -f docker-compose.selfhosted.yml up -d
 ```
 
 ### 7. Verify
 
 ```bash
 curl http://localhost:8000/health
-# → {"status": "ok", "deployment_mode": "airgapped", ...}
+```
+
+Expected response:
+
+```json
+{
+  "status": "healthy",
+  "deployment_mode": "airgapped",
+  "licence": {
+    "valid": true,
+    "organisation": "Your Corp",
+    "plan": "enterprise",
+    "features": ["private_deployment", "rag_security", "voiceguard"],
+    "days_until_expiry": 364,
+    "expired": false
+  },
+  "corpus": {
+    "source": "merged",
+    "builtin_entries": 302,
+    "external_entries": 150,
+    "external_path": "/data/threat-corpus/corpus.jsonl"
+  }
+}
+```
+
+Or run the verification script:
+
+```bash
+python scripts/verify_installation.py
 ```
 
 ## LLM Provider Access
@@ -151,18 +188,24 @@ Koreshield's proxy uses the OpenAI-compatible API format, so any compatible serv
 
 Detection rules ship with each release bundle. To apply an out-of-band update:
 
-1. Receive the updated `corpus-vX.Y.Z.json` from the Koreshield team
-2. Place it in the `threat-corpus/` directory
-3. Set the path in your environment:
+1. Receive the updated `corpus.jsonl` from the Koreshield team
+2. Place it in the `threat-corpus/` directory on the host
+3. Set the path in your environment (if not already set):
 
 ```bash
-KS_THREAT_CORPUS_PATH=/path/to/koreshield/threat-corpus/corpus-vX.Y.Z.json
+KS_THREAT_CORPUS_PATH=/data/threat-corpus/corpus.jsonl
 ```
 
-4. Restart the API container:
+4. Hot-reload without restart by sending SIGHUP to the API process:
 
 ```bash
-docker compose -f docker-compose.prod.yml restart koreshield
+docker compose -f docker-compose.prod.yml exec api kill -HUP 1
+```
+
+Or restart the container if preferred:
+
+```bash
+docker compose -f docker-compose.prod.yml restart api
 ```
 
 ## Updating the Stack
@@ -173,15 +216,16 @@ docker compose -f docker-compose.prod.yml restart koreshield
 
 ```bash
 for img in images/*.tar; do docker load -i "$img"; done
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml -f docker-compose.selfhosted.yml up -d
 ```
 
 Database migrations run automatically on startup.
 
 ## Security Considerations
 
-- **No outbound traffic**: `DEPLOYMENT_MODE=airgapped` disables all optional network calls
-- **Licence is offline**: validation uses a bundled public key, never phones home
+- **No outbound traffic**: `DEPLOYMENT_MODE=airgapped` enforces runtime guards that block Polar, OAuth, remote audio, and Telegram calls
+- **Licence is offline**: HMAC signature validation, never phones home
+- **Per-request enforcement**: expired licences enter a 14-day grace period, then requests are rejected with HTTP 503
 - **Audit logs are local**: append-only ledger stored in PostgreSQL and optionally on disk (`data/audit_ledger.jsonl`)
 - **Image integrity**: verify `CHECKSUMS.sha256` before loading images
 - **Secret management**: use your organisation's vault or HSM for `JWT_SECRET` and provider keys
@@ -190,4 +234,3 @@ Database migrations run automatically on startup.
 
 - [Self-Hosted Deployment](/docs/integrations/deployment/self-hosted): full self-hosted reference
 - [Configuration](/docs/configuration): tune policies and detection thresholds
-- [Production Checklist](/docs/configuration/production-checklist): hardening guide
