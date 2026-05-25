@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
 import { Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
@@ -11,70 +11,96 @@ import { ThemeProvider } from './context/ThemeContext';
 import { DashboardPage } from './pages/DashboardPage';
 import { ApiKeysPage } from './pages/ApiKeysPage';
 
+// Retry dynamic imports once on chunk-load failure (stale deploy cache)
+function lazyRetry<T extends { default: React.ComponentType }>(
+	importFn: () => Promise<T>,
+): React.LazyExoticComponent<T['default']> {
+	return lazy(() =>
+		importFn().catch((err: unknown) => {
+			const msg = err instanceof Error ? err.message.toLowerCase() : '';
+			const isChunkError =
+				msg.includes('failed to fetch dynamically imported module') ||
+				msg.includes('importing a module script failed') ||
+				msg.includes('loading chunk') ||
+				msg.includes('loading module from');
+			if (isChunkError) {
+				const reloaded = sessionStorage.getItem('ks:chunk-reload');
+				if (!reloaded) {
+					sessionStorage.setItem('ks:chunk-reload', '1');
+					window.location.reload();
+					return new Promise(() => {});
+				}
+				sessionStorage.removeItem('ks:chunk-reload');
+			}
+			throw err;
+		}),
+	);
+}
+
 // Lazy load pages for code splitting
-const LandingPage = lazy(() => import('./pages/LandingPage'));
-const BlogPage = lazy(() => import('./pages/BlogPageWrapper'));
-const DocsPage = lazy(() => import('./pages/DocsPage'));
-const StatusPage = lazy(() => import('./pages/StatusPage'));
-const PricingPage = lazy(() => import('./pages/PricingPage'));
-const ContactPage = lazy(() => import('./pages/ContactPage'));
-const AboutPage = lazy(() => import('./pages/AboutPage'));
-const ComparisonPage = lazy(() => import('./pages/ComparisonPage'));
-const VsLakeraPage = lazy(() => import('./pages/VsLakeraPage'));
-const VsLLMGuardPage = lazy(() => import('./pages/VsLLMGuardPage'));
-const VsBuildYourselfPage = lazy(() => import('./pages/VsBuildYourselfPage'));
-const WhyKoreShieldPage = lazy(() => import('./pages/WhyKoreShieldPage'));
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-const DemoPage = lazy(() => import('./pages/DemoPage'));
-const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
-const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })));
-const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
-const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
-const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage })));
-const GitHubCallbackPage = lazy(() => import('./pages/GitHubCallbackPage').then(m => ({ default: m.GitHubCallbackPage })));
-const GoogleCallbackPage = lazy(() => import('./pages/GoogleCallbackPage').then(m => ({ default: m.GoogleCallbackPage })));
-const IntegrationsPage = lazy(() => import('./pages/IntegrationsPage'));
-const ChangelogPage = lazy(() => import('./pages/ChangelogPage'));
-const PoliciesPage = lazy(() => import('./pages/PoliciesPage').then(m => ({ default: m.PoliciesPage })));
-const MetricsPage = lazy(() => import('./pages/MetricsPage').then(m => ({ default: m.MetricsPage })));
-const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })));
-const RulesPage = lazy(() => import('./pages/RulesPage').then(m => ({ default: m.RulesPage })));
-const AlertsPage = lazy(() => import('./pages/AlertsPage').then(m => ({ default: m.AlertsPage })));
+const LandingPage = lazyRetry(() => import('./pages/LandingPage'));
+const BlogPage = lazyRetry(() => import('./pages/BlogPageWrapper'));
+const DocsPage = lazyRetry(() => import('./pages/DocsPage'));
+const StatusPage = lazyRetry(() => import('./pages/StatusPage'));
+const PricingPage = lazyRetry(() => import('./pages/PricingPage'));
+const ContactPage = lazyRetry(() => import('./pages/ContactPage'));
+const AboutPage = lazyRetry(() => import('./pages/AboutPage'));
+const ComparisonPage = lazyRetry(() => import('./pages/ComparisonPage'));
+const VsLakeraPage = lazyRetry(() => import('./pages/VsLakeraPage'));
+const VsLLMGuardPage = lazyRetry(() => import('./pages/VsLLMGuardPage'));
+const VsBuildYourselfPage = lazyRetry(() => import('./pages/VsBuildYourselfPage'));
+const WhyKoreShieldPage = lazyRetry(() => import('./pages/WhyKoreShieldPage'));
+const NotFoundPage = lazyRetry(() => import('./pages/NotFoundPage'));
+const DemoPage = lazyRetry(() => import('./pages/DemoPage'));
+const LoginPage = lazyRetry(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const SignupPage = lazyRetry(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })));
+const ForgotPasswordPage = lazyRetry(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazyRetry(() => import('./pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
+const VerifyEmailPage = lazyRetry(() => import('./pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage })));
+const GitHubCallbackPage = lazyRetry(() => import('./pages/GitHubCallbackPage').then(m => ({ default: m.GitHubCallbackPage })));
+const GoogleCallbackPage = lazyRetry(() => import('./pages/GoogleCallbackPage').then(m => ({ default: m.GoogleCallbackPage })));
+const IntegrationsPage = lazyRetry(() => import('./pages/IntegrationsPage'));
+const ChangelogPage = lazyRetry(() => import('./pages/ChangelogPage'));
+const PoliciesPage = lazyRetry(() => import('./pages/PoliciesPage').then(m => ({ default: m.PoliciesPage })));
+const MetricsPage = lazyRetry(() => import('./pages/MetricsPage').then(m => ({ default: m.MetricsPage })));
+const AnalyticsPage = lazyRetry(() => import('./pages/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })));
+const RulesPage = lazyRetry(() => import('./pages/RulesPage').then(m => ({ default: m.RulesPage })));
+const AlertsPage = lazyRetry(() => import('./pages/AlertsPage').then(m => ({ default: m.AlertsPage })));
 // Phase 3 pages
-const CostAnalyticsPage = lazy(() => import('./pages/CostAnalyticsPage').then(m => ({ default: m.CostAnalyticsPage })));
-const RBACPage = lazy(() => import('./pages/RBACPage').then(m => ({ default: m.RBACPage })));
-const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
-const TeamsPage = lazy(() => import('./pages/TeamsPage').then(m => ({ default: m.TeamsPage })));
-const TeamDetailsPage = lazy(() => import('./pages/TeamDetailsPage').then(m => ({ default: m.TeamDetailsPage })));
-const RAGSecurityPage = lazy(() => import('./pages/RAGSecurityPage').then(m => ({ default: m.RAGSecurityPage })));
-const AudioSecurityPage = lazy(() => import('./pages/AudioSecurityPage').then(m => ({ default: m.AudioSecurityPage })));
-const ThreatMonitoringPage = lazy(() => import('./pages/ThreatMonitoringPage').then(m => ({ default: m.ThreatMonitoringPage })));
-const ThreatMapPage = lazy(() => import('./pages/ThreatMapPage').then(m => ({ default: m.ThreatMapPage })));
-const ProviderHealthPage = lazy(() => import('./pages/ProviderHealthPage').then(m => ({ default: m.ProviderHealthPage })));
-const ApiKeyManagementPage = lazy(() => import('./pages/ApiKeyManagementPage'));
-const AuditLogsPage = lazy(() => import('./pages/AuditLogsPage'));
-const AdvancedAnalyticsPage = lazy(() => import('./pages/AdvancedAnalyticsPage').then(m => ({ default: m.AdvancedAnalyticsPage })));
-const ComplianceReportsPage = lazy(() => import('./pages/ComplianceReportsPage').then(m => ({ default: m.ComplianceReportsPage })));
-const FounderPortalPage = lazy(() => import('./pages/FounderPortalPage').then(m => ({ default: m.FounderPortalPage })));
-const InviteAcceptPage = lazy(() => import('./pages/InviteAcceptPage').then(m => ({ default: m.InviteAcceptPage })));
-const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
-const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
-const BillingPage = lazy(() => import('./pages/BillingPage'));
-const UsageLimitsPage = lazy(() => import('./pages/UsageLimitsPage'));
-const LegalPage = lazy(() => import('./pages/LegalPage'));
-const CareersPage = lazy(() => import('./pages/CareersPage'));
-const CareerRolePage = lazy(() => import('./pages/CareerRolePage'));
-const ResearchPage = lazy(() => import('./pages/ResearchPage'));
-const ResearchArticlePage = lazy(() => import('./pages/ResearchArticlePage'));
+const CostAnalyticsPage = lazyRetry(() => import('./pages/CostAnalyticsPage').then(m => ({ default: m.CostAnalyticsPage })));
+const RBACPage = lazyRetry(() => import('./pages/RBACPage').then(m => ({ default: m.RBACPage })));
+const ReportsPage = lazyRetry(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
+const TeamsPage = lazyRetry(() => import('./pages/TeamsPage').then(m => ({ default: m.TeamsPage })));
+const TeamDetailsPage = lazyRetry(() => import('./pages/TeamDetailsPage').then(m => ({ default: m.TeamDetailsPage })));
+const RAGSecurityPage = lazyRetry(() => import('./pages/RAGSecurityPage').then(m => ({ default: m.RAGSecurityPage })));
+const AudioSecurityPage = lazyRetry(() => import('./pages/AudioSecurityPage').then(m => ({ default: m.AudioSecurityPage })));
+const ThreatMonitoringPage = lazyRetry(() => import('./pages/ThreatMonitoringPage').then(m => ({ default: m.ThreatMonitoringPage })));
+const ThreatMapPage = lazyRetry(() => import('./pages/ThreatMapPage').then(m => ({ default: m.ThreatMapPage })));
+const ProviderHealthPage = lazyRetry(() => import('./pages/ProviderHealthPage').then(m => ({ default: m.ProviderHealthPage })));
+const ApiKeyManagementPage = lazyRetry(() => import('./pages/ApiKeyManagementPage'));
+const AuditLogsPage = lazyRetry(() => import('./pages/AuditLogsPage'));
+const AdvancedAnalyticsPage = lazyRetry(() => import('./pages/AdvancedAnalyticsPage').then(m => ({ default: m.AdvancedAnalyticsPage })));
+const ComplianceReportsPage = lazyRetry(() => import('./pages/ComplianceReportsPage').then(m => ({ default: m.ComplianceReportsPage })));
+const FounderPortalPage = lazyRetry(() => import('./pages/FounderPortalPage').then(m => ({ default: m.FounderPortalPage })));
+const InviteAcceptPage = lazyRetry(() => import('./pages/InviteAcceptPage').then(m => ({ default: m.InviteAcceptPage })));
+const ProfilePage = lazyRetry(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
+const SettingsPage = lazyRetry(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const BillingPage = lazyRetry(() => import('./pages/BillingPage'));
+const UsageLimitsPage = lazyRetry(() => import('./pages/UsageLimitsPage'));
+const LegalPage = lazyRetry(() => import('./pages/LegalPage'));
+const CareersPage = lazyRetry(() => import('./pages/CareersPage'));
+const CareerRolePage = lazyRetry(() => import('./pages/CareerRolePage'));
+const ResearchPage = lazyRetry(() => import('./pages/ResearchPage'));
+const ResearchArticlePage = lazyRetry(() => import('./pages/ResearchArticlePage'));
 // Solution pages
-const SolutionDetectionResponsePage = lazy(() => import('./pages/SolutionDetectionResponsePage'));
-const SolutionsPage = lazy(() => import('./pages/SolutionsPage'));
-const SolutionApplicationProtectionPage = lazy(() => import('./pages/SolutionApplicationProtectionPage'));
-const SolutionAgentsSecurityPage = lazy(() => import('./pages/SolutionAgentsSecurityPage'));
-const SolutionUsageControlPage = lazy(() => import('./pages/SolutionUsageControlPage'));
-const SolutionRAGSecurityPage = lazy(() => import('./pages/SolutionRAGSecurityPage'));
-const SolutionKorePilotPage = lazy(() => import('./pages/SolutionKorePilotPage'));
-const SolutionVoiceAudioProtectionPage = lazy(() => import('./pages/SolutionVoiceAudioProtectionPage'));
+const SolutionDetectionResponsePage = lazyRetry(() => import('./pages/SolutionDetectionResponsePage'));
+const SolutionsPage = lazyRetry(() => import('./pages/SolutionsPage'));
+const SolutionApplicationProtectionPage = lazyRetry(() => import('./pages/SolutionApplicationProtectionPage'));
+const SolutionAgentsSecurityPage = lazyRetry(() => import('./pages/SolutionAgentsSecurityPage'));
+const SolutionUsageControlPage = lazyRetry(() => import('./pages/SolutionUsageControlPage'));
+const SolutionRAGSecurityPage = lazyRetry(() => import('./pages/SolutionRAGSecurityPage'));
+const SolutionKorePilotPage = lazyRetry(() => import('./pages/SolutionKorePilotPage'));
+const SolutionVoiceAudioProtectionPage = lazyRetry(() => import('./pages/SolutionVoiceAudioProtectionPage'));
 
 function ScrollToTop() {
 	const { hash, pathname, search } = useLocation();
