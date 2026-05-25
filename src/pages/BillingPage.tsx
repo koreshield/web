@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, CreditCard, RefreshCw } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, CreditCard, Lock, RefreshCw } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import {
 	AppCallout,
@@ -20,6 +20,7 @@ import {
 	getHostedCheckoutProductId,
 	getHostedPlanBySlug,
 } from '../lib/pricing';
+import { FEATURE_LABELS, PLAN_FEATURES, normalizePlanSlug, type PlanFeature } from '../lib/entitlements';
 
 type BillingAccount = {
 	id: string;
@@ -40,6 +41,8 @@ type BillingAccount = {
 		team_access?: string;
 		retention?: string;
 		support?: string;
+		features?: PlanFeature[];
+		locked_features?: PlanFeature[];
 	};
 };
 
@@ -56,6 +59,8 @@ type BillingAccountMetadata = {
 	team_access?: string;
 	retention?: string;
 	support?: string;
+	features?: PlanFeature[];
+	locked_features?: PlanFeature[];
 };
 
 function normalizeBillingAccount(raw: unknown): BillingAccount | null {
@@ -79,6 +84,12 @@ function normalizeBillingAccount(raw: unknown): BillingAccount | null {
 		team_access: typeof metadataRaw.team_access === 'string' ? metadataRaw.team_access : undefined,
 		retention: typeof metadataRaw.retention === 'string' ? metadataRaw.retention : undefined,
 		support: typeof metadataRaw.support === 'string' ? metadataRaw.support : undefined,
+		features: Array.isArray(metadataRaw.features)
+			? metadataRaw.features.filter((feature): feature is PlanFeature => typeof feature === 'string' && feature in FEATURE_LABELS)
+			: undefined,
+		locked_features: Array.isArray(metadataRaw.locked_features)
+			? metadataRaw.locked_features.filter((feature): feature is PlanFeature => typeof feature === 'string' && feature in FEATURE_LABELS)
+			: undefined,
 	};
 
 	return {
@@ -245,6 +256,12 @@ export default function BillingPage() {
 	const displayPlan = getHostedPlanBySlug(account?.plan_slug);
 	const isInternalUnlimited = account?.metadata?.internal_unlimited === true;
 	const hasPolarCustomer = Boolean(account?.polar_customer_id);
+	const normalizedPlan = normalizePlanSlug(account?.plan_slug);
+	const allowedFeatures = account?.metadata?.features?.length
+		? account.metadata.features
+		: PLAN_FEATURES[normalizedPlan];
+	const lockedFeatures = account?.metadata?.locked_features
+		?? (Object.keys(FEATURE_LABELS) as PlanFeature[]).filter((feature) => !allowedFeatures.includes(feature));
 
 	return (
 		<AppPage maxWidth="6xl">
@@ -343,6 +360,35 @@ export default function BillingPage() {
 									<span className="font-medium capitalize">{account?.metadata?.support ?? 'priority'}</span>
 								</div>
 							</>
+						) : null}
+					</div>
+					<div className="mt-6 border-t border-border pt-5">
+						<div className="mb-3 flex items-center justify-between gap-3">
+							<h3 className="text-sm font-bold text-foreground">Platform access</h3>
+							<span className="rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+								{allowedFeatures.length} unlocked
+							</span>
+						</div>
+						<div className="flex flex-wrap gap-2">
+							{allowedFeatures.map((feature) => (
+								<span key={feature} className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-500">
+									<CheckCircle2 className="h-3.5 w-3.5" />
+									{FEATURE_LABELS[feature]}
+								</span>
+							))}
+						</div>
+						{lockedFeatures.length ? (
+							<div className="mt-4">
+								<p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Upgrade unlocks</p>
+								<div className="flex flex-wrap gap-2">
+									{lockedFeatures.slice(0, 8).map((feature) => (
+										<span key={feature} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 py-1 text-xs font-semibold text-muted-foreground">
+											<Lock className="h-3.5 w-3.5" />
+											{FEATURE_LABELS[feature]}
+										</span>
+									))}
+								</div>
+							</div>
 						) : null}
 					</div>
 				</AppPageSection>
