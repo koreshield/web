@@ -6,7 +6,6 @@ import {
 	ChevronRight,
 	ClipboardList,
 	Crown,
-	DollarSign,
 	ExternalLink,
 	FileText,
 	Gauge,
@@ -28,6 +27,8 @@ import {
 	Map,
 	AlertTriangle,
 	CheckCircle2,
+	PoundSterling,
+	DollarSign,
 	Settings as SettingsIcon,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -92,7 +93,7 @@ const NAV_GROUPS: NavGroup[] = [
 		items: [
 			{ label: 'API Keys', to: '/settings/api-keys', icon: Key, feature: 'api_keys' },
 			{ label: 'Usage', to: '/usage', icon: Gauge, feature: 'usage' },
-			{ label: 'Billing', to: '/billing', icon: DollarSign, feature: 'billing' },
+			{ label: 'Billing', to: '/billing', icon: PoundSterling, feature: 'billing' },
 			{ label: 'Rules', to: '/rules', icon: ListFilter, feature: 'rules' },
 			{ label: 'Policies', to: '/policies', icon: Shield, feature: 'policies' },
 			{ label: 'Reports', to: '/reports', icon: FileText, feature: 'reports' },
@@ -108,7 +109,7 @@ const NAV_GROUPS: NavGroup[] = [
 			{ label: 'Analytics', to: '/advanced-analytics', icon: BarChart3, feature: 'advanced_analytics' },
 			{ label: 'Compliance', to: '/compliance-reports', icon: ClipboardList, feature: 'compliance_reports' },
 			{ label: 'RBAC', to: '/rbac', icon: Lock, feature: 'rbac' },
-			{ label: 'Cost', to: '/cost-analytics', icon: DollarSign, feature: 'cost_analytics' },
+			{ label: 'Cost', to: '/cost-analytics', icon: PoundSterling, feature: 'cost_analytics' },
 		],
 	},
 ];
