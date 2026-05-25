@@ -44,23 +44,20 @@ When `DEPLOYMENT_MODE=airgapped`, the server:
 
 The Koreshield team delivers a signed bundle (`.tar.gz`) containing:
 
-```
-koreshield-enterprise-v2.x.x-airgapped/
-├── images/
-│   ├── koreshield-api.tar       # docker load -i
-│   ├── koreshield-web.tar       # docker load -i
-│   ├── postgres-16.tar          # docker load -i
-│   ├── redis-7.tar              # docker load -i
-│   ├── caddy-2.tar              # docker load -i
-│   ├── prometheus.tar            # docker load -i
-│   └── grafana.tar              # docker load -i
-├── docker-compose.prod.yml
-├── .env.example
-├── threat-corpus/
-│   └── corpus-v2.x.x.json      # offline detection rules
-├── CHECKSUMS.sha256
-└── CHANGELOG.md
-```
+| Path | Description |
+|---|---|
+| `images/koreshield-api.tar` | Koreshield API server image |
+| `images/koreshield-web.tar` | Dashboard / web UI image |
+| `images/postgres-16.tar` | PostgreSQL 16 image |
+| `images/redis-7.tar` | Redis 7 image |
+| `images/caddy-2.tar` | Caddy reverse proxy image |
+| `images/prometheus.tar` | Prometheus metrics image |
+| `images/grafana.tar` | Grafana dashboards image |
+| `docker-compose.prod.yml` | Production Compose stack |
+| `.env.example` | Environment variable reference |
+| `threat-corpus/corpus-v2.x.x.json` | Offline detection rules |
+| `CHECKSUMS.sha256` | SHA-256 checksums for all files |
+| `CHANGELOG.md` | Release notes |
 
 ## Installation Steps
 
