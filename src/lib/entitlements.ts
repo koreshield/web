@@ -77,6 +77,13 @@ export const PLAN_NAMES: Record<PublicPlanId, string> = {
 	enterprise: 'Enterprise',
 };
 
+export const PLAN_API_KEY_LIMITS: Record<PublicPlanId, number | null> = {
+	free: 1,
+	growth: 10,
+	scale: 50,
+	enterprise: null,
+};
+
 export const FEATURE_LABELS: Record<PlanFeature, string> = {
 	dashboard: 'Dashboard',
 	api_keys: 'API keys',
