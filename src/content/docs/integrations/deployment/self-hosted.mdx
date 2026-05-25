@@ -21,10 +21,11 @@ When you activate a self-hosted Enterprise licence, the Koreshield team provides
 | Deliverable | Description |
 |---|---|
 | Docker image bundle | Signed, audited container images for the API server, status updater, and web dashboard |
-| `docker-compose.prod.yml` | Production-ready Compose stack with Postgres, Redis, Caddy, Prometheus, and Grafana |
+| `docker-compose.prod.yml` | Compose stack with Postgres, Redis, and Caddy |
+| `docker-compose.selfhosted.yml` | Self-hosted override that disables cloud billing and sets correct env vars |
 | `.env.example` | Full environment variable reference pre-filled with safe defaults |
 | Licence key | A `KS_LICENSE_KEY` tied to your organisation, plan limits, and expiry date |
-| Threat corpus snapshot | Offline-compatible detection rules for airgapped environments |
+| Threat corpus snapshot | Offline-compatible JSONL detection rules for airgapped environments |
 
 ## Architecture
 
@@ -36,8 +37,6 @@ Everything runs inside your network boundary. No data leaves your infrastructure
 | **Koreshield API** | Core security engine — scanning, detection, policy enforcement | 8000 |
 | **PostgreSQL** | Primary datastore with per-tenant schema isolation | 5432 |
 | **Redis** | Session cache, rate limiting, real-time pub/sub | 6379 |
-| **Prometheus** | Metrics collection, scrapes `/metrics` every 15s | 9090 |
-| **Grafana** | Pre-built dashboards for request volume, latency, and attacks | 3000 |
 
 **Traffic flow**: Caddy → Koreshield API → PostgreSQL / Redis. All inter-service communication is on an internal Docker network. External traffic only enters through Caddy.
 
@@ -55,22 +54,19 @@ Everything runs inside your network boundary. No data leaves your infrastructure
 
 ## Quick Start
 
-### 1. Load the licence key
+### 1. Set the deployment mode and licence
 
-Set `KS_LICENSE_KEY` in your `.env` file. The key is validated on startup — the server will not start without a valid Enterprise licence.
-
-```bash
-KS_LICENSE_KEY=ks_ent_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-### 2. Set the deployment mode
+Create a `.env` file (start from `.env.example`) and configure:
 
 ```bash
 DEPLOYMENT_MODE=self-hosted
+KS_LICENSE_KEY=ks_ent_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.signature
 ENVIRONMENT=production
 ```
 
-### 3. Configure core secrets
+The licence key is validated on startup — the server will not start without a valid Enterprise licence.
+
+### 2. Configure core secrets
 
 ```bash
 JWT_SECRET=replace-with-a-strong-random-secret
@@ -80,7 +76,7 @@ DATABASE_URL=postgresql+asyncpg://koreshield:secret@postgres:5432/koreshield
 REDIS_URL=redis://redis:6379/0
 ```
 
-### 4. Add LLM provider keys
+### 3. Add LLM provider keys
 
 Add keys for whichever providers your teams use:
 
@@ -90,30 +86,78 @@ ANTHROPIC_API_KEY=sk-ant-...
 DEEPSEEK_API_KEY=sk-...
 ```
 
-### 5. Start the stack
+### 4. Start the stack
+
+Use the self-hosted override to disable cloud billing automatically:
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml -f docker-compose.selfhosted.yml up -d
 ```
 
-### 6. Verify
+### 5. Verify
 
 ```bash
 curl http://localhost:8000/health
-# → {"status": "ok", "version": "...", "deployment_mode": "self-hosted"}
-
-curl http://localhost:8000/status
-# → full system status with licence info
 ```
 
-## Licence Validation
+A healthy response includes `deployment_mode`, licence status, and corpus metadata:
 
-Self-hosted instances validate the licence key on every startup:
+```json
+{
+  "status": "healthy",
+  "deployment_mode": "self-hosted",
+  "licence": {
+    "valid": true,
+    "organisation": "Your Corp",
+    "plan": "enterprise",
+    "features": ["private_deployment", "rag_security", "voiceguard", "..."],
+    "days_until_expiry": 364,
+    "expired": false,
+    "in_grace_period": false,
+    "monthly_usage": 0,
+    "monthly_cap": null,
+    "requests_remaining": null
+  },
+  "corpus": {
+    "source": "built-in",
+    "builtin_entries": 302
+  }
+}
+```
 
-- **Key format**: `ks_ent_<base64-encoded payload>`
-- **Checked on boot**: organisation ID, plan tier, feature set, expiry date
-- **Grace period**: if the licence expires, the server continues running for **14 days** with a warning in logs and the `/health` response. After the grace period, the server refuses new requests until the licence is renewed.
-- **No phone-home**: validation is performed locally using a bundled public key. No network call is made.
+You can also run the verification script:
+
+```bash
+python scripts/verify_installation.py
+```
+
+## How It Works
+
+### Licence Validation
+
+- **Startup check**: the server validates `KS_LICENSE_KEY` and refuses to boot if invalid
+- **Per-request enforcement**: expired licences enter a **14-day grace period** where the server continues running with `X-KoreShield-Licence: expiring` headers. After the grace period, requests receive HTTP 503
+- **Monthly cap**: if your licence includes a `max_requests_per_month`, the server returns HTTP 429 when the cap is reached
+- **Live reload**: send `SIGHUP` to the process to reload the licence key without restarting
+- **No phone-home**: validation uses HMAC signatures — no network call is made
+
+### Billing Bypass
+
+Self-hosted deployments skip Polar (cloud billing) entirely. Entitlements are derived from the licence key's feature list and plan tier. All Enterprise features are unlocked by default.
+
+### External Threat Corpus
+
+You can provide an external JSONL corpus file for custom detection rules:
+
+```bash
+KS_THREAT_CORPUS_PATH=/data/threat-corpus/corpus.jsonl
+```
+
+Entries are merged with the built-in corpus on startup. Send `SIGHUP` to hot-reload the corpus without restarting. Use the export script to create a corpus bundle:
+
+```bash
+python scripts/export_corpus_bundle.py -o corpus-bundle.jsonl
+```
 
 ## Tenant Data Isolation
 
@@ -125,9 +169,9 @@ See [RBAC](/docs/features/rbac) for role-based access control within a deploymen
 
 The production Compose stack includes:
 
-- **Prometheus** scraping `/metrics` every 15 seconds
-- **Grafana** with pre-built dashboards for request volume, latency, attack detection, and provider health
 - **Structured JSON logs** via `structlog` — compatible with any log aggregator (ELK, Datadog, Splunk)
+- **Prometheus metrics** at `/metrics` — scrape every 15 seconds
+- **`/health` endpoint** with licence status, corpus metadata, and service health
 
 ## Updating
 
@@ -135,17 +179,16 @@ The production Compose stack includes:
 2. Pull the new images and restart:
 
 ```bash
-docker compose -f docker-compose.prod.yml pull
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml -f docker-compose.selfhosted.yml pull
+docker compose -f docker-compose.prod.yml -f docker-compose.selfhosted.yml up -d
 ```
 
 3. Database migrations run automatically on container startup via Alembic
 
-For airgapped environments, see the [Airgapped Deployment](/docs/integrations/deployment/airgapped) guide.
+For environments without internet access, see the [Airgapped Deployment](/docs/integrations/deployment/airgapped) guide.
 
 ## Next Steps
 
 - [Airgapped Deployment](/docs/integrations/deployment/airgapped): offline installation without internet access
 - [Configuration](/docs/configuration): tune detection policies, rate limits, and provider routing
-- [Production Checklist](/docs/configuration/production-checklist): security hardening before go-live
 - [Kubernetes](/docs/integrations/deployment/kubernetes): running on K8s instead of Docker Compose
