@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Key, Plus, Copy, Trash2, CheckCircle, AlertTriangle, Calendar, Clock, Globe, Zap } from 'lucide-react';
+import { Key, Plus, Copy, Trash2, CheckCircle, AlertTriangle, Calendar, Clock, Globe, Lock, Zap } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
+import { normalizePlanSlug, PLAN_API_KEY_LIMITS, PLAN_NAMES } from '../lib/entitlements';
 import {
 	AppPage,
 	AppPageHeader,
@@ -44,8 +46,14 @@ type CreateAPIKeyPayload = {
 	monthly_ceiling?: number;
 };
 
+function isExpired(expiresAt: string | null) {
+	if (!expiresAt) return false;
+	return new Date(expiresAt) < new Date();
+}
+
 export function ApiKeysPage() {
 	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showKeyLimitPrompt, setShowKeyLimitPrompt] = useState(false);
 	const [newKeyData, setNewKeyData] = useState<NewAPIKey | null>(null);
 	const [formData, setFormData] = useState<{
 		name: string;
@@ -69,11 +77,32 @@ export function ApiKeysPage() {
 
 	const queryClient = useQueryClient();
 
+	const billingQuery = useQuery({
+		queryKey: ['billing-account-entitlements'],
+		queryFn: () => api.getBillingAccount() as Promise<{ plan_slug?: string | null }>,
+		staleTime: 60 * 1000,
+		retry: false,
+	});
+	const planSlug = normalizePlanSlug(billingQuery.data?.plan_slug);
+	const keyLimit = PLAN_API_KEY_LIMITS[planSlug];
+	const planName = PLAN_NAMES[planSlug];
+
 	// Fetch API keys
 	const { data: apiKeys = [], isLoading } = useQuery<APIKey[]>({
 		queryKey: ['api-keys'],
 		queryFn: () => api.getApiKeys() as Promise<APIKey[]>,
 	});
+
+	const activeKeyCount = apiKeys.filter((k) => !k.is_revoked && !isExpired(k.expires_at)).length;
+	const atKeyLimit = keyLimit !== null && activeKeyCount >= keyLimit;
+
+	const handleGenerateClick = () => {
+		if (atKeyLimit) {
+			setShowKeyLimitPrompt(true);
+		} else {
+			setShowCreateModal(true);
+		}
+	};
 
 	// Generate API key mutation
 	const generateKeyMutation = useMutation<NewAPIKey, Error, CreateAPIKeyPayload>({
@@ -179,12 +208,6 @@ export function ApiKeysPage() {
 		});
 	};
 
-	const isExpired = (expiresAt: string | null) => {
-		if (!expiresAt) return false;
-		return new Date(expiresAt) < new Date();
-	};
-
-	const activeKeyCount = apiKeys.filter((key) => !key.is_revoked && !isExpired(key.expires_at)).length;
 	const revokedKeyCount = apiKeys.filter((key) => key.is_revoked).length;
 	const expiredKeyCount = apiKeys.filter((key) => !key.is_revoked && isExpired(key.expires_at)).length;
 
@@ -198,7 +221,7 @@ export function ApiKeysPage() {
 					description="Generate and manage API keys for authentication"
 					icon={Key}
 					actions={
-						<AppPrimaryButton onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
+						<AppPrimaryButton onClick={handleGenerateClick} className="w-full sm:w-auto">
 							<Plus className="w-4 h-4" />
 							<span className="hidden sm:inline">Generate New Key</span>
 							<span className="sm:hidden">New Key</span>
@@ -264,7 +287,7 @@ export function ApiKeysPage() {
 						title="No API Keys Yet"
 						description="Generate your first API key to start using the Koreshield API"
 						action={
-							<AppPrimaryButton onClick={() => setShowCreateModal(true)}>
+							<AppPrimaryButton onClick={handleGenerateClick}>
 								<Plus className="w-4 h-4" />
 								Generate Your First Key
 							</AppPrimaryButton>
@@ -528,6 +551,39 @@ export function ApiKeysPage() {
 									{generateKeyMutation.isPending ? 'Generating...' : 'Generate Key'}
 								</AppPrimaryButton>
 							</div>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{showKeyLimitPrompt && (
+				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+					<div className="dashboard-modal bg-card border border-border rounded-2xl max-w-md w-full p-6 text-center">
+						<div className="mx-auto w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mb-4">
+							<Lock className="w-6 h-6 text-amber-500" />
+						</div>
+						<h2 className="text-xl font-bold mb-2">API Key Limit Reached</h2>
+						<p className="text-muted-foreground mb-1">
+							Your <span className="font-semibold text-foreground">{planName}</span> plan includes{' '}
+							<span className="font-semibold text-foreground">{keyLimit}</span> active API key{keyLimit === 1 ? '' : 's'}.
+						</p>
+						<p className="text-sm text-muted-foreground mb-6">
+							Upgrade your plan to generate additional keys, or revoke an existing key to free up a slot.
+						</p>
+						<div className="flex gap-3">
+							<AppSecondaryButton
+								onClick={() => setShowKeyLimitPrompt(false)}
+								className="flex-1"
+							>
+								Close
+							</AppSecondaryButton>
+							<Link
+								to="/billing?feature=API+Keys"
+								className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border-0 bg-primary text-primary-foreground font-bold px-4 py-2.5 text-sm hover:bg-primary/90 transition-colors"
+							>
+								<Zap className="w-4 h-4" />
+								Upgrade Plan
+							</Link>
 						</div>
 					</div>
 				</div>
