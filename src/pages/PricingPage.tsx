@@ -8,6 +8,7 @@ import {
 	type BillingInterval,
 	type PublicPlanId,
 	PRICING_FAQS,
+	PRICING_FEATURE_ROWS,
 	PRICING_PLANS,
 } from '../lib/pricing';
 import { SEOConfig } from '../lib/seo-config';
@@ -353,18 +354,7 @@ export default function PricingPage() {
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-border text-sm">
-								{[
-									['Protected requests included', '10,000', '100,000', '1,000,000', 'Custom'],
-									['Prompt and RAG screening', 'Baseline', 'Advanced', 'Advanced', 'Advanced + custom tuning'],
-									['Teams', 'Basic', 'Included', 'Included', 'Included'],
-									['Policies and alerts', 'Baseline', 'Included', 'Included', 'Included'],
-									['Basic reports', 'N/A', 'Included', 'Included', 'Included'],
-									['RBAC and audit logs', 'N/A', 'N/A', 'Included', 'Included'],
-									['Advanced analytics and provider health', 'N/A', 'N/A', 'Included', 'Included'],
-									['SSO / SAML', 'N/A', 'N/A', 'N/A', 'Included'],
-									['SIEM export and custom retention', 'N/A', 'N/A', 'N/A', 'Included'],
-									['Private or self-hosted deployment', 'N/A', 'N/A', 'N/A', 'Included'],
-								].map(([label, dev, growth, scale, enterprise]) => (
+								{PRICING_FEATURE_ROWS.map(([label, dev, growth, scale, enterprise]) => (
 									<tr key={label}>
 										<td className="p-4 font-medium text-foreground/85">{label}</td>
 										<td className="p-4 text-center text-muted-foreground">{dev}</td>
