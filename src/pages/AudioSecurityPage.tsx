@@ -310,7 +310,7 @@ export function AudioSecurityPage() {
 			/>
 
 			<AppCallout variant="info">
-				VoiceGuard accepts ASR transcripts or raw audio uploads (WAV, MP3, M4A, WebM). Transcribe server-side with OPENAI_API_KEY, or paste your own ASR output before the LLM or tools run.
+				VoiceGuard accepts ASR transcripts or raw audio uploads (WAV, MP3, M4A, WebM). Upload audio for server-side transcription, or paste your own ASR output before the LLM or tools run.
 			</AppCallout>
 
 			{scannedTranscript && (
@@ -399,7 +399,7 @@ export function AudioSecurityPage() {
 									</p>
 								)}
 								<p className="mt-2 text-xs text-muted-foreground">
-									Server transcribes with Whisper when OPENAI_API_KEY is configured; otherwise use the transcript tab.
+									Koreshield transcribes the audio server-side. If transcription is unavailable, use the transcript tab instead.
 								</p>
 							</div>
 						)}
