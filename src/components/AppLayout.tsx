@@ -39,6 +39,15 @@ import { useAuthState } from '../hooks/useAuthState';
 import { wsClient } from '../lib/websocket-client';
 import { ThemeToggle } from './ThemeToggle';
 import { api } from '../lib/api-client';
+import {
+	FEATURE_LABELS,
+	PLAN_NAMES,
+	featureForPath,
+	minimumPlanForFeature,
+	normalizePlanSlug,
+	planAllowsFeature,
+	type PlanFeature,
+} from '../lib/entitlements';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -46,6 +55,7 @@ interface NavItem {
 	label: string;
 	to: string;
 	icon: React.ComponentType<{ className?: string }>;
+	feature?: PlanFeature;
 	adminOnly?: boolean;
 	founderOnly?: boolean;
 }
@@ -68,25 +78,26 @@ const NAV_GROUPS: NavGroup[] = [
 	{
 		label: 'Security',
 		items: [
-			{ label: 'RAG Security', to: '/rag-security', icon: ScanSearch },
-			{ label: 'Voice Security', to: '/voice-security', icon: AudioLines },
-			{ label: 'Threats', to: '/threat-monitoring', icon: ShieldAlert },
-			{ label: 'Threat Map', to: '/threat-map', icon: Map },
-			{ label: 'Alerts', to: '/alerts', icon: Bell },
-			{ label: 'Providers', to: '/provider-health', icon: Activity },
-			{ label: 'Audit Logs', to: '/audit-logs', icon: FileText },
+			{ label: 'RAG Security', to: '/rag-security', icon: ScanSearch, feature: 'rag_security' },
+			{ label: 'Voice Security', to: '/voice-security', icon: AudioLines, feature: 'voice_security' },
+			{ label: 'Threats', to: '/threat-monitoring', icon: ShieldAlert, feature: 'threat_monitoring' },
+			{ label: 'Threat Map', to: '/threat-map', icon: Map, feature: 'threat_monitoring' },
+			{ label: 'Alerts', to: '/alerts', icon: Bell, feature: 'alerts' },
+			{ label: 'Providers', to: '/provider-health', icon: Activity, feature: 'provider_health' },
+			{ label: 'Audit Logs', to: '/audit-logs', icon: FileText, feature: 'audit_logs' },
 		],
 	},
 	{
 		label: 'Config',
 		items: [
-			{ label: 'API Keys', to: '/settings/api-keys', icon: Key },
-			{ label: 'Usage', to: '/usage', icon: Gauge },
-			{ label: 'Billing', to: '/billing', icon: DollarSign },
-			{ label: 'Rules', to: '/rules', icon: ListFilter },
-			{ label: 'Policies', to: '/policies', icon: Shield },
-			{ label: 'Teams', to: '/teams', icon: Users },
-			{ label: 'Settings', to: '/settings', icon: SettingsIcon },
+			{ label: 'API Keys', to: '/settings/api-keys', icon: Key, feature: 'api_keys' },
+			{ label: 'Usage', to: '/usage', icon: Gauge, feature: 'usage' },
+			{ label: 'Billing', to: '/billing', icon: DollarSign, feature: 'billing' },
+			{ label: 'Rules', to: '/rules', icon: ListFilter, feature: 'rules' },
+			{ label: 'Policies', to: '/policies', icon: Shield, feature: 'policies' },
+			{ label: 'Reports', to: '/reports', icon: FileText, feature: 'reports' },
+			{ label: 'Teams', to: '/teams', icon: Users, feature: 'teams' },
+			{ label: 'Settings', to: '/settings', icon: SettingsIcon, feature: 'settings' },
 		],
 	},
 	{
@@ -94,10 +105,10 @@ const NAV_GROUPS: NavGroup[] = [
 		adminOnly: true,
 		items: [
 			{ label: 'Founder Portal', to: '/founder', icon: Crown, founderOnly: true },
-			{ label: 'Analytics', to: '/advanced-analytics', icon: BarChart3 },
-			{ label: 'Compliance', to: '/compliance-reports', icon: ClipboardList },
-			{ label: 'RBAC', to: '/rbac', icon: Lock },
-			{ label: 'Cost', to: '/cost-analytics', icon: DollarSign },
+			{ label: 'Analytics', to: '/advanced-analytics', icon: BarChart3, feature: 'advanced_analytics' },
+			{ label: 'Compliance', to: '/compliance-reports', icon: ClipboardList, feature: 'compliance_reports' },
+			{ label: 'RBAC', to: '/rbac', icon: Lock, feature: 'rbac' },
+			{ label: 'Cost', to: '/cost-analytics', icon: DollarSign, feature: 'cost_analytics' },
 		],
 	},
 ];
@@ -106,15 +117,26 @@ const SIDEBAR_WIDTH = 220;
 const SIDEBAR_COLLAPSED_WIDTH = 56;
 const SIDEBAR_STORAGE_KEY = 'ks_sidebar_collapsed';
 
+type BillingAccountPlan = {
+	plan_slug?: string | null;
+	plan_name?: string | null;
+	metadata?: {
+		features?: string[];
+		feature_access?: Record<string, boolean>;
+	};
+};
+
 // ─── Sidebar nav item ────────────────────────────────────────────────────────
 
 function NavLink({
 	item,
 	collapsed,
+	locked,
 	onClick,
 }: {
 	item: NavItem;
 	collapsed: boolean;
+	locked: boolean;
 	onClick?: () => void;
 }) {
 	const location = useLocation();
@@ -123,12 +145,13 @@ function NavLink({
 
 	return (
 		<Link
-			to={item.to}
+			to={locked ? `/billing?feature=${encodeURIComponent(item.feature ?? item.label)}` : item.to}
 			onClick={onClick}
-			title={collapsed ? item.label : undefined}
+			title={collapsed ? item.label : locked ? `${item.label} is not included in your plan` : undefined}
 			className={[
 				'group relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-150',
 				collapsed ? 'justify-center' : '',
+				locked ? 'opacity-60' : '',
 				isActive
 					? 'bg-primary/10 text-primary'
 					: 'text-muted-foreground hover:text-foreground hover:bg-white/[0.04]',
@@ -141,9 +164,8 @@ function NavLink({
 
 			<Icon className={['w-4 h-4 shrink-0 transition-colors', isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'].join(' ')} />
 
-			{!collapsed && (
-				<span className="truncate">{item.label}</span>
-			)}
+			{!collapsed && <span className="truncate">{item.label}</span>}
+			{locked && !collapsed && <Lock className="ml-auto h-3.5 w-3.5 text-muted-foreground/70" />}
 
 			{/* Tooltip on collapse */}
 			{collapsed && (
@@ -162,12 +184,14 @@ function Sidebar({
 	onCollapse,
 	isAdmin,
 	isFounder,
+	planSlug,
 	onNavClick,
 }: {
 	collapsed: boolean;
 	onCollapse: () => void;
 	isAdmin: boolean;
 	isFounder: boolean;
+	planSlug: string | null | undefined;
 	onNavClick?: () => void;
 }) {
 	const { theme } = useTheme();
@@ -211,7 +235,13 @@ function Sidebar({
 							)}
 							<div className="space-y-0.5">
 								{visibleItems.map(item => (
-									<NavLink key={item.to} item={item} collapsed={collapsed} onClick={onNavClick} />
+									<NavLink
+										key={item.to}
+										item={item}
+										collapsed={collapsed}
+										locked={!planAllowsFeature(planSlug, item.feature)}
+										onClick={onNavClick}
+									/>
 								))}
 							</div>
 						</div>
@@ -394,10 +424,56 @@ function WsStatus() {
 	);
 }
 
+function LockedFeaturePanel({
+	feature,
+	planSlug,
+}: {
+	feature: PlanFeature;
+	planSlug: string | null | undefined;
+}) {
+	const requiredPlan = minimumPlanForFeature(feature);
+	const requiredPlanName = PLAN_NAMES[requiredPlan];
+	const currentPlanName = PLAN_NAMES[normalizePlanSlug(planSlug)];
+
+	return (
+		<div className="px-4 py-12 sm:px-6 lg:px-8">
+			<div className="mx-auto max-w-3xl overflow-hidden rounded-[2rem] border border-border bg-card shadow-2xl">
+				<div className="border-b border-border bg-gradient-to-br from-primary/15 via-transparent to-transparent p-8 sm:p-10">
+					<div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
+						<Lock className="h-6 w-6" />
+					</div>
+					<p className="mt-6 text-xs font-bold uppercase tracking-[0.28em] text-primary">Plan gate</p>
+					<h1 className="mt-3 text-3xl font-black tracking-[-0.04em] text-foreground sm:text-4xl">
+						{FEATURE_LABELS[feature]} is not on {currentPlanName}.
+					</h1>
+					<p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
+						This feature starts on {requiredPlanName}. Your core protection still works; upgrade when you need this control in production.
+					</p>
+				</div>
+				<div className="flex flex-col gap-3 p-6 sm:flex-row sm:p-8">
+					<Link
+						to={`/billing?feature=${encodeURIComponent(feature)}&plan=${requiredPlan}`}
+						className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+					>
+						View upgrade options
+					</Link>
+					<Link
+						to="/dashboard"
+						className="inline-flex items-center justify-center rounded-xl border border-border px-5 py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted"
+					>
+						Back to dashboard
+					</Link>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 // ─── AppLayout ───────────────────────────────────────────────────────────────
 
 export function AppLayout() {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { isAuthenticated, user } = useAuthState();
 	const isAdmin = user?.role === 'admin' || user?.role === 'owner' || user?.role === 'superuser';
 	const founderAccessQuery = useQuery({
@@ -409,6 +485,17 @@ export function AppLayout() {
 		refetchOnWindowFocus: false,
 	});
 	const isFounder = Boolean(founderAccessQuery.data?.allowed);
+	const billingQuery = useQuery({
+		queryKey: ['billing-account-entitlements'],
+		queryFn: () => api.getBillingAccount() as Promise<BillingAccountPlan>,
+		enabled: Boolean(isAuthenticated),
+		staleTime: 60 * 1000,
+		retry: false,
+		refetchOnWindowFocus: false,
+	});
+	const planSlug = billingQuery.data?.plan_slug ?? 'free';
+	const currentFeature = featureForPath(location.pathname);
+	const routeLocked = Boolean(billingQuery.isSuccess && currentFeature && !planAllowsFeature(planSlug, currentFeature));
 	const [resendingVerification, setResendingVerification] = useState(false);
 	const [verificationBannerState, setVerificationBannerState] = useState<'none' | 'sent' | 'verified'>('none');
 
@@ -508,6 +595,7 @@ export function AppLayout() {
 					onCollapse={toggleCollapse}
 					isAdmin={isAdmin}
 					isFounder={isFounder}
+					planSlug={planSlug}
 				/>
 			</aside>
 
@@ -540,6 +628,7 @@ export function AppLayout() {
 							onCollapse={() => setMobileOpen(false)}
 							isAdmin={isAdmin}
 							isFounder={isFounder}
+							planSlug={planSlug}
 							onNavClick={() => setMobileOpen(false)}
 						/>
 					</aside>
@@ -634,7 +723,11 @@ export function AppLayout() {
 							) : null}
 						</div>
 					)}
-					<Outlet />
+					{routeLocked && currentFeature ? (
+						<LockedFeaturePanel feature={currentFeature} planSlug={planSlug} />
+					) : (
+						<Outlet />
+					)}
 				</main>
 			</div>
 		</div>
