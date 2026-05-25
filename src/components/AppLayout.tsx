@@ -28,7 +28,6 @@ import {
 	AlertTriangle,
 	CheckCircle2,
 	PoundSterling,
-	DollarSign,
 	Settings as SettingsIcon,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -134,11 +133,13 @@ function NavLink({
 	collapsed,
 	locked,
 	onClick,
+	onLockedClick,
 }: {
 	item: NavItem;
 	collapsed: boolean;
 	locked: boolean;
 	onClick?: () => void;
+	onLockedClick?: (item: NavItem) => void;
 }) {
 	const location = useLocation();
 	const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
@@ -147,8 +148,15 @@ function NavLink({
 	return (
 		<Link
 			to={locked ? `/billing?feature=${encodeURIComponent(item.feature ?? item.label)}` : item.to}
-			onClick={onClick}
-			title={collapsed ? item.label : locked ? `${item.label} is not included in your plan` : undefined}
+			onClick={(event) => {
+				if (locked) {
+					event.preventDefault();
+					onLockedClick?.(item);
+					return;
+				}
+				onClick?.();
+			}}
+			title={collapsed ? item.label : locked ? `Upgrade to unlock ${item.label}` : undefined}
 			className={[
 				'group relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-150',
 				collapsed ? 'justify-center' : '',
@@ -171,7 +179,7 @@ function NavLink({
 			{/* Tooltip on collapse */}
 			{collapsed && (
 				<span className="pointer-events-none absolute left-full ml-3 px-2 py-1 rounded bg-card border border-white/[0.08] text-xs font-medium text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg">
-					{item.label}
+					{locked ? `Upgrade to unlock ${item.label}` : item.label}
 				</span>
 			)}
 		</Link>
@@ -187,6 +195,7 @@ function Sidebar({
 	isFounder,
 	planSlug,
 	onNavClick,
+	onLockedNav,
 }: {
 	collapsed: boolean;
 	onCollapse: () => void;
@@ -194,6 +203,7 @@ function Sidebar({
 	isFounder: boolean;
 	planSlug: string | null | undefined;
 	onNavClick?: () => void;
+	onLockedNav?: (item: NavItem) => void;
 }) {
 	const { theme } = useTheme();
 	const logoSrc = theme === 'light' ? '/logo/dark/SVG/Black.svg' : '/logo/light/SVG/White.svg';
@@ -242,6 +252,7 @@ function Sidebar({
 										collapsed={collapsed}
 										locked={!planAllowsFeature(planSlug, item.feature)}
 										onClick={onNavClick}
+										onLockedClick={onLockedNav}
 									/>
 								))}
 							</div>
@@ -361,7 +372,7 @@ function UserMenu({ onLogout }: { onLogout: () => void }) {
 						onClick={() => setOpen(false)}
 						className="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
 					>
-						<DollarSign className="w-4 h-4" />
+						<PoundSterling className="w-4 h-4" />
 						Billing
 					</Link>
 
@@ -385,6 +396,97 @@ function UserMenu({ onLogout }: { onLogout: () => void }) {
 					</div>
 				</div>
 			)}
+		</div>
+	);
+}
+
+function UpgradeFeaturePrompt({
+	item,
+	planSlug,
+	onClose,
+}: {
+	item: NavItem | null;
+	planSlug: string | null | undefined;
+	onClose: () => void;
+}) {
+	const feature = item?.feature;
+	if (!item || !feature) return null;
+
+	const requiredPlan = minimumPlanForFeature(feature);
+	const requiredPlanName = PLAN_NAMES[requiredPlan];
+	const currentPlanName = PLAN_NAMES[normalizePlanSlug(planSlug)];
+
+	return (
+		<div
+			className="fixed inset-0 z-[70] flex items-center justify-center px-4 py-6"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="upgrade-feature-title"
+		>
+			<button
+				type="button"
+				className="absolute inset-0 bg-black/70 backdrop-blur-md"
+				aria-label="Close upgrade prompt"
+				onClick={onClose}
+			/>
+			<div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-border bg-card shadow-2xl shadow-black/40">
+				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,rgba(16,185,129,0.18),transparent_38%),radial-gradient(circle_at_100%_0%,rgba(59,130,246,0.1),transparent_32%)]" />
+				<div className="relative p-6 sm:p-8">
+					<div className="flex items-start justify-between gap-4">
+						<div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
+							<Lock className="h-5 w-5" />
+						</div>
+						<button
+							type="button"
+							onClick={onClose}
+							className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+							aria-label="Close"
+						>
+							<X className="h-4 w-4" />
+						</button>
+					</div>
+
+					<p className="mt-6 text-xs font-bold uppercase tracking-[0.28em] text-primary">Upgrade needed</p>
+					<h2 id="upgrade-feature-title" className="mt-3 text-3xl font-black tracking-[-0.045em] text-foreground sm:text-4xl">
+						Unlock {item.label}
+					</h2>
+					<p className="mt-4 text-sm leading-6 text-muted-foreground sm:text-base">
+						Your current {currentPlanName} plan keeps core protection active. {item.label} starts on {requiredPlanName} for teams that need deeper controls.
+					</p>
+
+					<div className="mt-6 grid gap-3 rounded-2xl border border-border bg-background/55 p-4 text-sm sm:grid-cols-3">
+						<div>
+							<p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Current</p>
+							<p className="mt-1 font-bold text-foreground">{currentPlanName}</p>
+						</div>
+						<div>
+							<p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Needed</p>
+							<p className="mt-1 font-bold text-primary">{requiredPlanName}</p>
+						</div>
+						<div>
+							<p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Feature</p>
+							<p className="mt-1 font-bold text-foreground">{FEATURE_LABELS[feature]}</p>
+						</div>
+					</div>
+
+					<div className="mt-7 flex flex-col gap-3 sm:flex-row">
+						<Link
+							to={`/billing?feature=${encodeURIComponent(feature)}&plan=${requiredPlan}`}
+							onClick={onClose}
+							className="inline-flex flex-1 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+						>
+							View upgrade options
+						</Link>
+						<Link
+							to="/pricing"
+							onClick={onClose}
+							className="inline-flex flex-1 items-center justify-center rounded-xl border border-border px-5 py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted"
+						>
+							Compare plans
+						</Link>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 }
