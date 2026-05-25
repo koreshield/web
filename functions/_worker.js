@@ -19,14 +19,7 @@ export async function onRequest(context) {
         !pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|json|xml|webp|woff|woff2|ttf|eot)$/i) &&
         !pathname.includes('.')
       ) {
-        // Serve index.html for SPA routes (including /docs/*)
-        return new Response(await context.env.ASSETS.get('index.html'), {
-          status: 200,
-          headers: withSecurityHeaders(new Headers({
-            'Content-Type': 'text/html; charset=utf-8',
-            'Cache-Control': 'no-store, no-cache, must-revalidate'
-          }), pathname)
-        });
+        return await serveSpaShell(context, pathname);
       }
     }
     
@@ -40,6 +33,33 @@ export async function onRequest(context) {
     // Pass through on error
     return await context.next();
   }
+}
+
+async function serveSpaShell(context, pathname) {
+  const headers = withSecurityHeaders(new Headers({
+    'Content-Type': 'text/html; charset=utf-8',
+    'Cache-Control': 'no-store, no-cache, must-revalidate'
+  }), pathname);
+
+  const indexUrl = new URL('/index.html', context.request.url);
+  const assets = context.env && context.env.ASSETS;
+
+  if (assets && typeof assets.fetch === 'function') {
+    const assetResponse = await assets.fetch(new Request(indexUrl.toString(), { method: 'GET' }));
+    return new Response(assetResponse.body, {
+      status: 200,
+      headers,
+    });
+  }
+
+  if (assets && typeof assets.get === 'function') {
+    return new Response(await assets.get('index.html'), {
+      status: 200,
+      headers,
+    });
+  }
+
+  return await context.next();
 }
 
 function withSecurityHeaders(headers, pathname) {
