@@ -15,11 +15,11 @@ const faqCategories: FAQCategory[] = [
 		questions: [
 			{
 				q: 'What is Koreshield?',
-				a: 'Koreshield is a proxy-layer security firewall for LLM-powered applications. It sits between your app and your AI providers, scanning every prompt, response, and RAG context for threats like injection attacks, jailbreaks, data exfiltration, and PII leakage — before they reach the model or your users.',
+				a: 'Koreshield is a proxy-layer security firewall for LLM-powered applications. It sits between your app and your AI providers, scanning every prompt, response, and RAG context for threats like injection attacks, jailbreaks, data exfiltration, and PII leakage before they reach the model or your users.',
 			},
 			{
 				q: 'How does Koreshield differ from prompt filtering libraries?',
-				a: 'Most open-source libraries are scanner functions you embed inside your code. Koreshield is a runtime proxy that intercepts traffic at the network layer, enforces policies, logs audit evidence, and works across every provider and framework — without touching your application code.',
+				a: 'Most open-source libraries are scanner functions you embed inside your code. Koreshield is a runtime proxy that intercepts traffic at the network layer, enforces policies, logs audit evidence, and works across every provider and framework without touching your application code.',
 			},
 			{
 				q: 'Which LLM providers does Koreshield support?',
@@ -52,7 +52,7 @@ const faqCategories: FAQCategory[] = [
 			},
 			{
 				q: 'Can Koreshield detect prompt injection in RAG contexts?',
-				a: 'Yes. Koreshield scans every document in your retrieval context before it reaches the model. This catches indirect prompt injection — malicious instructions hidden inside retrieved documents that your vector database has no way of detecting.',
+				a: 'Yes. Koreshield scans every document in your retrieval context before it reaches the model. This catches indirect prompt injection, where malicious instructions are hidden inside retrieved documents that your vector database has no way of detecting.',
 			},
 		],
 	},
@@ -123,7 +123,7 @@ const faqCategories: FAQCategory[] = [
 			},
 			{
 				q: 'Where is my data processed?',
-				a: 'On managed cloud, data is processed in-memory on our infrastructure and not retained by default. For self-hosted and air-gapped deployments, all data stays on your own infrastructure — nothing leaves your network.',
+				a: 'On managed cloud, data is processed in-memory on our infrastructure and not retained by default. For self-hosted and air-gapped deployments, all data stays on your own infrastructure. Nothing leaves your network.',
 			},
 		],
 	},
@@ -136,7 +136,7 @@ const faqCategories: FAQCategory[] = [
 			},
 			{
 				q: 'I\'m seeing high false positive rates. What should I do?',
-				a: 'Start by reviewing your blocked requests in the dashboard to identify patterns. Then create policy rules to allowlist legitimate patterns that are being flagged. If false positives persist, contact support — we can help tune the detection model for your specific traffic.',
+				a: 'Start by reviewing your blocked requests in the dashboard to identify patterns. Then create policy rules to allowlist legitimate patterns that are being flagged. If false positives persist, contact support and we can help tune the detection model for your specific traffic.',
 			},
 			{
 				q: 'How do I rotate API keys without downtime?',
@@ -188,7 +188,7 @@ export default function FAQPage() {
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="FAQ"
-				description={`Answers to the ${totalQuestions} most common questions about Koreshield — security, privacy, deployment, pricing, compliance, and troubleshooting.`}
+				description={`Answers to the ${totalQuestions} most common questions about Koreshield, covering security, privacy, deployment, pricing, compliance, and troubleshooting.`}
 			/>
 
 			<section className="relative px-6 py-24 ambient-glow">
@@ -202,7 +202,7 @@ export default function FAQPage() {
 							Frequently Asked Questions
 						</h1>
 						<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-							Everything you need to know about Koreshield — from how it works to how to deploy it in your environment.
+							Everything you need to know about Koreshield, starting from how it works.
 						</p>
 					</motion.div>
 				</div>
@@ -210,17 +210,18 @@ export default function FAQPage() {
 
 			<div className="mx-auto max-w-4xl px-6 pb-24">
 				{/* Category nav */}
-				<div className="mb-12 flex flex-wrap justify-center gap-2">
-					{faqCategories.map((cat) => (
-						<a
-							key={cat.title}
-							href={`#${cat.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
-							className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-electric-green/30 hover:text-foreground"
-						>
-							{cat.title}
-							<span className="ml-1.5 text-electric-green">{cat.questions.length}</span>
-						</a>
-					))}
+				<div className="mb-12 flex justify-center overflow-x-auto">
+					<div className="flex gap-1.5">
+						{faqCategories.map((cat) => (
+							<a
+								key={cat.title}
+								href={`#${cat.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
+								className="shrink-0 rounded-full border border-border bg-card px-3.5 py-1.5 text-[11px] font-semibold text-muted-foreground transition-colors hover:border-electric-green/30 hover:text-foreground"
+							>
+								{cat.title}
+							</a>
+						))}
+					</div>
 				</div>
 
 				{/* FAQ sections */}

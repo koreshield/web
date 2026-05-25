@@ -153,7 +153,7 @@ function LandingPage() {
                             Your infrastructure. Your rules.
                         </h2>
                         <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
-                            Run Koreshield in our managed cloud, on your own servers, or in fully air-gapped environments with no internet access. Enterprise licence validation is offline — no phone-home, ever.
+                            Run Koreshield in our managed cloud, on your own servers, or in fully air-gapped environments with no internet access. Enterprise licence validation is offline. No phone-home, ever.
                         </p>
                     </motion.div>
 
