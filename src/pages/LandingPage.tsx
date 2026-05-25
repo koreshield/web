@@ -11,7 +11,8 @@ import { TrustBadges } from '../components/TrustBadges';
 import UseCases from '../components/UseCases';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2, Cloud, Copy, Lock, Server, Terminal } from 'lucide-react';
+import { ArrowRight, Check, CheckCircle2, Cloud, Copy, Lock, Server, Terminal } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
@@ -19,6 +20,25 @@ const quickStartCommands = [
     { label: 'Python', command: 'pip install koreshield' },
     { label: 'Node.js', command: 'npm install koreshield' },
 ];
+
+function CopyButton({ text }: { text: string }) {
+    const [copied, setCopied] = useState(false);
+    return (
+        <button
+            type="button"
+            aria-label="Copy to clipboard"
+            onClick={() => {
+                navigator.clipboard.writeText(text).then(() => {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                });
+            }}
+            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-white/[0.08] hover:text-foreground"
+        >
+            {copied ? <Check className="h-4 w-4 text-electric-green" /> : <Copy className="h-4 w-4" />}
+        </button>
+    );
+}
 
 function LandingPage() {
     return (
@@ -91,7 +111,7 @@ function LandingPage() {
                                 <div key={item.label} className="rounded-2xl border border-white/[0.08] bg-card/80 p-4">
                                     <div className="mb-3 flex items-center justify-between">
                                         <span className="text-sm font-bold text-foreground">{item.label}</span>
-                                        <Copy className="h-4 w-4 text-muted-foreground" />
+                                        <CopyButton text={item.command} />
                                     </div>
                                     <code className="block overflow-x-auto rounded-xl border border-white/[0.06] bg-black/40 px-3 py-3 text-sm text-muted-foreground">
                                         <span className="text-electric-green">$</span> {item.command}
