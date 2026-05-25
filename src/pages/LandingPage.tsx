@@ -194,9 +194,9 @@ function LandingPage() {
                                 </div>
                                 <h3 className="mb-3 text-xl font-black tracking-[-0.035em] text-foreground">{option.title}</h3>
                                 <p className="mb-5 text-sm leading-relaxed text-muted-foreground">{option.desc}</p>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex gap-1.5 overflow-hidden">
                                     {option.chips.map((chip) => (
-                                        <span key={chip} className="rounded-full border border-white/[0.08] bg-background/60 px-3 py-1.5 text-xs font-semibold text-foreground/80">
+                                        <span key={chip} className="shrink-0 rounded-full border border-white/[0.08] bg-background/60 px-2.5 py-1 text-[11px] font-semibold text-foreground/80">
                                             {chip}
                                         </span>
                                     ))}
