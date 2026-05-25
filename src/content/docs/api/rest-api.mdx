@@ -67,7 +67,7 @@ Different scan types consume different numbers of protected requests against you
 | Scan type | Weight | Example |
 |---|---|---|
 | Prompt / response (`/v1/chat/completions`, `/v1/scan`, `/v1/scan/batch`) | **1 per scan** | 100 scans = 100 requests |
-| RAG document scan (`/v1/rag/scan`) | **1 per document** | 1 call with 10 docs = 10 requests |
+| RAG document scan (`/v1/rag/scan`) | **25 per document** | 1 call with 4 docs = 100 requests |
 | VoiceGuard audio scan (`/v1/audio/scan`) | **50 per scan** | 100 scans = 5,000 requests |
 
 RAG scans are charged per document in the batch (minimum 1) so usage scales with actual resource consumption. VoiceGuard audio scans carry a fixed weight to cover server-side transcription costs. Tool session auto-gating with `speech_context` does **not** consume additional audio-scan units — only explicit calls to `/v1/audio/scan` are weighted.
