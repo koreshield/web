@@ -70,6 +70,7 @@ const companyLinks: Array<{ label: string; to: string }> = [
 const resourceLinks: DropdownItem[] = [
 	{ label: 'Research', to: '/research' },
 	{ label: 'Docs', to: '/docs' },
+	{ label: 'FAQ', to: '/faq' },
 	{ label: 'Blog', to: '/blog' },
 	{ label: 'GitHub', href: 'https://github.com/koreshield/' },
 ];
