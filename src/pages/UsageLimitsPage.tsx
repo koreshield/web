@@ -445,17 +445,20 @@ export default function UsageLimitsPage() {
 					<AppSurface>
 						<CheckCircle2 className="mb-4 h-5 w-5 text-electric-green" />
 						<h3 className="font-bold">Prompts and responses</h3>
+						<p className="mt-1 text-2xl font-black">1 request</p>
 						<p className="mt-2 text-sm text-muted-foreground">Each prompt or response scanned via the proxy counts as one protected request, whether it passes or gets blocked.</p>
 					</AppSurface>
 					<AppSurface>
 						<CheckCircle2 className="mb-4 h-5 w-5 text-electric-green" />
 						<h3 className="font-bold">RAG document scans</h3>
-						<p className="mt-2 text-sm text-muted-foreground">Each call to the RAG scan endpoint counts as one protected request per document batch submitted.</p>
+						<p className="mt-1 text-2xl font-black">20 requests</p>
+						<p className="mt-2 text-sm text-muted-foreground">Each RAG scan consumes 20 protected requests to cover multi-document parsing and deep threat detection.</p>
 					</AppSurface>
 					<AppSurface>
 						<CheckCircle2 className="mb-4 h-5 w-5 text-electric-green" />
 						<h3 className="font-bold">VoiceGuard audio scans</h3>
-						<p className="mt-2 text-sm text-muted-foreground">Each transcript or audio file scanned via VoiceGuard counts as one protected request.</p>
+						<p className="mt-1 text-2xl font-black">50 requests</p>
+						<p className="mt-2 text-sm text-muted-foreground">Each audio scan consumes 50 protected requests to cover server-side transcription and speech threat analysis.</p>
 					</AppSurface>
 					<AppSurface>
 						<CheckCircle2 className="mb-4 h-5 w-5 text-electric-green" />
