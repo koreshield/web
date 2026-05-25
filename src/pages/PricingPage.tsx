@@ -393,6 +393,11 @@ export default function PricingPage() {
 							</div>
 						))}
 					</div>
+					<div className="mt-8 text-center">
+						<Link to="/faq" className="inline-flex items-center gap-2 text-sm font-bold text-electric-green transition-colors hover:text-emerald-bright">
+							See all FAQs <ArrowRight className="h-4 w-4" />
+						</Link>
+					</div>
 				</div>
 			</section>
 		</div>

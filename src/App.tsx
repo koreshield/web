@@ -50,6 +50,7 @@ const VsLakeraPage = lazyRetry(() => import('./pages/VsLakeraPage'));
 const VsLLMGuardPage = lazyRetry(() => import('./pages/VsLLMGuardPage'));
 const VsBuildYourselfPage = lazyRetry(() => import('./pages/VsBuildYourselfPage'));
 const WhyKoreShieldPage = lazyRetry(() => import('./pages/WhyKoreShieldPage'));
+const FAQPage = lazyRetry(() => import('./pages/FAQPage'));
 const NotFoundPage = lazyRetry(() => import('./pages/NotFoundPage'));
 const DemoPage = lazyRetry(() => import('./pages/DemoPage'));
 const LoginPage = lazyRetry(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
@@ -232,6 +233,16 @@ function AppContent() {
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<WhyKoreShieldPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/faq"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<FAQPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}

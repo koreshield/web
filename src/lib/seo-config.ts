@@ -149,4 +149,53 @@ export const SEOConfig = {
 			{ name: 'Contact', url: 'https://koreshield.ai/contact' },
 		],
 	},
+	faq: {
+		title: 'FAQ',
+		description: 'Answers to common questions about Koreshield — security, privacy, deployment, pricing, compliance, and troubleshooting for LLM security.',
+		keywords: 'Koreshield FAQ, LLM security questions, AI firewall FAQ, self-hosted FAQ, air-gapped deployment FAQ, prompt injection FAQ',
+		ogImage: 'https://koreshield.ai/og-faq.png',
+		ogType: 'website' as const,
+		breadcrumbs: [
+			{ name: 'Home', url: 'https://koreshield.ai' },
+			{ name: 'FAQ', url: 'https://koreshield.ai/faq' },
+		],
+		structuredData: {
+			'@context': 'https://schema.org',
+			'@type': 'FAQPage',
+			mainEntity: [
+				{
+					'@type': 'Question',
+					name: 'What is Koreshield?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Koreshield is a proxy-layer security firewall for LLM-powered applications. It sits between your app and your AI providers, scanning every prompt, response, and RAG context for threats.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'Does Koreshield store my prompts or responses?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'No. Koreshield is zero-log by default. Requests and responses are inspected in memory and discarded immediately.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'Can I self-host Koreshield?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Yes. Enterprise customers can deploy Koreshield on their own infrastructure using Docker Compose with offline licence validation.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'Do you support air-gapped environments?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Yes. Koreshield supports fully air-gapped deployment with no outbound internet, offline licence validation, and bundled threat corpus updates.',
+					},
+				},
+			],
+		},
+	},
 };
