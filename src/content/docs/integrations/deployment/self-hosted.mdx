@@ -28,30 +28,18 @@ When you activate a self-hosted Enterprise licence, the Koreshield team provides
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────┐
-│              Your Infrastructure             │
-│                                              │
-│  ┌──────────┐  ┌──────────┐  ┌───────────┐  │
-│  │  Caddy   │  │Koreshield│  │  Postgres  │  │
-│  │ (reverse │──│   API    │──│ (per-tenant│  │
-│  │  proxy)  │  │ :8000    │  │  schemas)  │  │
-│  └──────────┘  └────┬─────┘  └───────────┘  │
-│                     │                        │
-│               ┌─────┴─────┐                  │
-│               │   Redis   │                  │
-│               │  (cache,  │                  │
-│               │  sessions)│                  │
-│               └───────────┘                  │
-│                                              │
-│  ┌───────────┐  ┌───────────┐               │
-│  │Prometheus │  │  Grafana  │               │
-│  │ (metrics) │  │(dashboards│               │
-│  └───────────┘  └───────────┘               │
-└─────────────────────────────────────────────┘
-```
+Everything runs inside your network boundary. No data leaves your infrastructure.
 
-All traffic stays inside your network boundary. No data is sent to Koreshield servers.
+| Service | Role | Port |
+|---|---|---|
+| **Caddy** | Reverse proxy, TLS termination, security headers | 443 → 8000 |
+| **Koreshield API** | Core security engine — scanning, detection, policy enforcement | 8000 |
+| **PostgreSQL** | Primary datastore with per-tenant schema isolation | 5432 |
+| **Redis** | Session cache, rate limiting, real-time pub/sub | 6379 |
+| **Prometheus** | Metrics collection, scrapes `/metrics` every 15s | 9090 |
+| **Grafana** | Pre-built dashboards for request volume, latency, and attacks | 3000 |
+
+**Traffic flow**: Caddy → Koreshield API → PostgreSQL / Redis. All inter-service communication is on an internal Docker network. External traffic only enters through Caddy.
 
 ## System Requirements
 
