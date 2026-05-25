@@ -451,8 +451,8 @@ export default function UsageLimitsPage() {
 					<AppSurface>
 						<CheckCircle2 className="mb-4 h-5 w-5 text-electric-green" />
 						<h3 className="font-bold">RAG document scans</h3>
-						<p className="mt-1 text-2xl font-black">20 requests</p>
-						<p className="mt-2 text-sm text-muted-foreground">Each RAG scan consumes 20 protected requests to cover multi-document parsing and deep threat detection.</p>
+						<p className="mt-1 text-2xl font-black">1 per document</p>
+						<p className="mt-2 text-sm text-muted-foreground">Each document in a RAG scan batch counts as one protected request. Scanning 10 documents in one call uses 10 requests.</p>
 					</AppSurface>
 					<AppSurface>
 						<CheckCircle2 className="mb-4 h-5 w-5 text-electric-green" />
