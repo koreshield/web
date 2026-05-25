@@ -1,4 +1,5 @@
 {
+    "label": "API",
     "pages": [
         "rest-api"
     ]
