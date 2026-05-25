@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Key, Plus, Copy, Trash2, CheckCircle, AlertTriangle, Calendar, Clock, Globe, Lock, Zap } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api-client';
@@ -213,6 +214,7 @@ export function ApiKeysPage() {
 
 	return (
 		<>
+			<SEOMeta title="API Keys" noindex />
 			<AppPage>
 				<AppPageHeader
 					eyebrow="Credentials"

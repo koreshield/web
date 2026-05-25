@@ -1,5 +1,6 @@
 import { ArrowRight, BookOpen, CreditCard, Key, ScanSearch, Shield, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SEOMeta } from '../components/SEOMeta';
 
 const steps = [
 	{
@@ -43,6 +44,7 @@ const steps = [
 export default function GettingStartedPage() {
 	return (
 		<div>
+			<SEOMeta title="Getting Started" noindex />
 			<header className="border-b border-border bg-card">
 				<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
 					<p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Client onboarding</p>

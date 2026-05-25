@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { authService } from '../lib/auth';
 import { Lock, Mail, Github } from 'lucide-react';
 import { AuthLayout } from '../components/AuthLayout';
+import { SEOMeta } from '../components/SEOMeta';
 
 interface LocationState {
 	from?: {
@@ -143,6 +144,7 @@ export function LoginPage() {
 				'Keep production AI traffic protected',
 			]}
 		>
+			<SEOMeta title="Sign In" noindex />
 					{locationState?.passwordReset && (
 						<div className="mb-6 p-3 bg-electric-green/10 border border-electric-green/20 rounded-lg text-sm text-electric-green font-medium">
 							Password updated. Sign in with your new credentials.

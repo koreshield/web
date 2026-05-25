@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../lib/auth';
 import { AlertCircle, ShieldCheck } from 'lucide-react';
 import { AuthLayout, AuthStatusPanel } from '../components/AuthLayout';
+import { SEOMeta } from '../components/SEOMeta';
 
 export function GitHubCallbackPage() {
 	const navigate = useNavigate();
@@ -43,6 +44,7 @@ export function GitHubCallbackPage() {
 				'Developer-friendly access',
 			]}
 		>
+			<SEOMeta title="Signing In" noindex />
 			{loading ? (
 				<AuthStatusPanel icon={ShieldCheck} tone="loading" title="Completing sign-in…">
 					<p className="text-muted-foreground">Please wait while we authenticate your account.</p>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { authService } from '../lib/auth';
 import { ArrowLeft, Mail } from 'lucide-react';
 import { AuthFormHeader, AuthLayout, AuthStatusPanel, authInputClass } from '../components/AuthLayout';
+import { SEOMeta } from '../components/SEOMeta';
 
 export function ForgotPasswordPage() {
 	const [email, setEmail] = useState('');
@@ -33,6 +34,7 @@ export function ForgotPasswordPage() {
 				'Active sessions stay preserved after reset',
 			]}
 		>
+			<SEOMeta title="Forgot Password" noindex />
 			{status === 'sent' ? (
 				<AuthStatusPanel icon={Mail} tone="success" title="Check your email">
 					<p className="mb-2 text-muted-foreground">We sent a password reset link to</p>

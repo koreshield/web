@@ -23,6 +23,7 @@ import {
 	AppSurface,
 } from '../components/AppPageLayout';
 import { api } from '../lib/api-client';
+import { SEOMeta } from '../components/SEOMeta';
 import { useAuthState } from '../hooks/useAuthState';
 import { useToast } from '../components/ToastNotification';
 
@@ -269,6 +270,7 @@ export function TeamDetailsPage() {
 
 	return (
 		<AppPage>
+			<SEOMeta title="Team Details" noindex />
 			<Link to="/teams" className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
 				<ArrowLeft className="w-4 h-4" />
 				Back to Teams

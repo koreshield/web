@@ -29,7 +29,7 @@ export default function CareersPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground transition-colors">
 			<SEOMeta
-				title="Careers at Koreshield"
+				title="Careers"
 				description="Explore open roles at Koreshield across growth, product, security, research, engineering, and sales."
 			/>
 

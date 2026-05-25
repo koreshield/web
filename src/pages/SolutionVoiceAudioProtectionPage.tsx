@@ -20,7 +20,7 @@ export default function SolutionVoiceAudioProtectionPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="Voice & Audio AI Protection | Koreshield"
+				title="VoiceGuard"
 				description="Protect speech prompts, transcripts, and voice-agent actions before they reach models or tools."
 			/>
 

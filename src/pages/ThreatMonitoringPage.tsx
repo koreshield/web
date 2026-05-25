@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, Shield, Download, Clock, TrendingUp, Activity } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useRecentAttacks } from '../hooks/useApi';
 import { AttackDetailModal } from '../components/AttackDetailModal';
 import { ThreatTypeBreakdown, ThreatTimeline } from '../components/ThreatAnalytics';
@@ -161,6 +162,7 @@ export function ThreatMonitoringPage() {
 
 	return (
 		<AppPage>
+			<SEOMeta title="Threats" noindex />
 			<AppPageHeader
 				eyebrow="Real-time"
 				eyebrowIcon={Activity}

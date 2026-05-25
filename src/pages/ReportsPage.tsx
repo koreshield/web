@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FileText, Calendar, Download, Plus, Clock, Play, Trash2, Pencil } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api-client';
@@ -215,6 +216,7 @@ export function ReportsPage() {
 
 	return (
 		<AppPage>
+			<SEOMeta title="Reports" noindex />
 			<AppPageHeader
 				eyebrow="Reporting"
 				eyebrowIcon={FileText}

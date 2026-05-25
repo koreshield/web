@@ -1,6 +1,7 @@
 import { authService } from '../lib/auth';
 import { ArrowRight, Github, Lock, Mail, User } from 'lucide-react';
 import { AuthLayout } from '../components/AuthLayout';
+import { SEOMeta } from '../components/SEOMeta';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { resolveApiBaseUrl } from '../lib/api-base';
@@ -129,6 +130,7 @@ export function SignupPage() {
                 'Review threats and audit evidence',
             ]}
         >
+            <SEOMeta title="Create Account" noindex />
                     <div className="mb-8">
                         <h1 className="text-3xl font-black text-foreground mb-2 tracking-[-0.045em]">
                             Create your workspace
