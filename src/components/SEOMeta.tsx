@@ -76,7 +76,7 @@ export function SEOMeta({
 			offers: {
 				'@type': 'Offer',
 				price: '0',
-				priceCurrency: 'USD',
+				priceCurrency: 'GBP',
 			},
 			provider: {
 				'@type': 'Organization',

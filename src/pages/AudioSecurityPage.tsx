@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
 	AudioLines,
 	CheckCircle,
+	Circle,
 	Clock,
 	Download,
 	Loader2,
 	Mic2,
 	ShieldAlert,
+	Square,
 	Trash2,
 	XCircle,
 } from 'lucide-react';
@@ -162,7 +164,7 @@ function decisionTone(decision?: string) {
 
 export function AudioSecurityPage() {
 	const { success, error: showError } = useToast();
-	const [inputMode, setInputMode] = useState<'transcript' | 'audio'>('transcript');
+	const [inputMode, setInputMode] = useState<'transcript' | 'audio' | 'record'>('transcript');
 	const [audioFile, setAudioFile] = useState<File | null>(null);
 	const [form, setForm] = useState<AudioScanPayload>(DEFAULT_FORM);
 	const [alternativesText, setAlternativesText] = useState('');
@@ -173,6 +175,56 @@ export function AudioSecurityPage() {
 	const [history, setHistory] = useState<AudioHistoryEntry[]>([]);
 	const [historyLoading, setHistoryLoading] = useState(false);
 	const [historyError, setHistoryError] = useState<string | null>(null);
+
+	const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+	const chunksRef = useRef<Blob[]>([]);
+	const [recording, setRecording] = useState(false);
+	const [recordingSeconds, setRecordingSeconds] = useState(0);
+	const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+	const startRecording = async () => {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+				? 'audio/webm;codecs=opus'
+				: 'audio/webm';
+			const recorder = new MediaRecorder(stream, { mimeType });
+			chunksRef.current = [];
+			recorder.ondataavailable = (e) => {
+				if (e.data.size > 0) chunksRef.current.push(e.data);
+			};
+			recorder.onstop = () => {
+				stream.getTracks().forEach((t) => t.stop());
+				const blob = new Blob(chunksRef.current, { type: mimeType });
+				const file = new File([blob], `recording-${Date.now()}.webm`, { type: mimeType });
+				setAudioFile(file);
+			};
+			recorder.start(250);
+			mediaRecorderRef.current = recorder;
+			setRecording(true);
+			setRecordingSeconds(0);
+			timerRef.current = setInterval(() => setRecordingSeconds((s) => s + 1), 1000);
+		} catch {
+			showError('Microphone access denied. Check your browser permissions.');
+		}
+	};
+
+	const stopRecording = () => {
+		mediaRecorderRef.current?.stop();
+		mediaRecorderRef.current = null;
+		setRecording(false);
+		if (timerRef.current) {
+			clearInterval(timerRef.current);
+			timerRef.current = null;
+		}
+	};
+
+	useEffect(() => {
+		return () => {
+			mediaRecorderRef.current?.stop();
+			if (timerRef.current) clearInterval(timerRef.current);
+		};
+	}, []);
 
 	const buildPayload = useCallback((): AudioScanPayload => ({
 		...form,
@@ -203,14 +255,14 @@ export function AudioSecurityPage() {
 			showError('Enter a transcript to scan');
 			return;
 		}
-		if (inputMode === 'audio' && !audioFile) {
-			showError('Choose an audio file to upload');
+		if ((inputMode === 'audio' || inputMode === 'record') && !audioFile) {
+			showError(inputMode === 'record' ? 'Record audio first, then scan' : 'Choose an audio file to upload');
 			return;
 		}
 		setScanning(true);
 		try {
 			const payload = buildPayload();
-			const response = inputMode === 'audio' && audioFile
+			const response = (inputMode === 'audio' || inputMode === 'record') && audioFile
 				? await api.scanAudioFile(audioFile, {
 					source_type: form.source_type,
 					channel: form.channel,
@@ -355,7 +407,18 @@ export function AudioSecurityPage() {
 									: 'border-border bg-background/60 text-muted-foreground hover:text-foreground'
 							}`}
 						>
-							Raw audio file
+							Upload audio
+						</button>
+						<button
+							type="button"
+							onClick={() => setInputMode('record')}
+							className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+								inputMode === 'record'
+									? 'border-red-500 bg-red-500/10 text-foreground'
+									: 'border-border bg-background/60 text-muted-foreground hover:text-foreground'
+							}`}
+						>
+							Record live
 						</button>
 					</div>
 
@@ -373,7 +436,7 @@ export function AudioSecurityPage() {
 					</div>
 
 					<div className="space-y-4">
-						{inputMode === 'transcript' ? (
+						{inputMode === 'transcript' && (
 							<div>
 								<label className="mb-2 block text-sm font-medium">Primary transcript</label>
 								<textarea
@@ -384,7 +447,8 @@ export function AudioSecurityPage() {
 									placeholder="Summarise this call for the account notes."
 								/>
 							</div>
-						) : (
+						)}
+						{inputMode === 'audio' && (
 							<div>
 								<label className="mb-2 block text-sm font-medium">Audio file</label>
 								<input
@@ -401,6 +465,63 @@ export function AudioSecurityPage() {
 								<p className="mt-2 text-xs text-muted-foreground">
 									Koreshield transcribes the audio server-side. If transcription is unavailable, use the transcript tab instead.
 								</p>
+							</div>
+						)}
+						{inputMode === 'record' && (
+							<div>
+								<label className="mb-2 block text-sm font-medium">Live recording</label>
+								<div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-muted/30 p-8">
+									{!recording && !audioFile && (
+										<button
+											type="button"
+											onClick={() => void startRecording()}
+											className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-red-500 bg-red-500/10 transition-colors hover:bg-red-500/20"
+										>
+											<Circle className="h-8 w-8 fill-red-500 text-red-500" />
+										</button>
+									)}
+									{recording && (
+										<>
+											<button
+												type="button"
+												onClick={stopRecording}
+												className="flex h-20 w-20 animate-pulse items-center justify-center rounded-full border-2 border-red-500 bg-red-500/20"
+											>
+												<Square className="h-8 w-8 fill-red-500 text-red-500" />
+											</button>
+											<p className="text-sm font-semibold text-red-400">
+												Recording… {Math.floor(recordingSeconds / 60)}:{String(recordingSeconds % 60).padStart(2, '0')}
+											</p>
+										</>
+									)}
+									{!recording && audioFile && (
+										<>
+											<div className="text-center">
+												<p className="text-sm font-medium">{audioFile.name}</p>
+												<p className="text-xs text-muted-foreground">{Math.round(audioFile.size / 1024)} KB · {recordingSeconds}s</p>
+											</div>
+											<div className="flex gap-3">
+												<button
+													type="button"
+													onClick={() => { setAudioFile(null); setRecordingSeconds(0); }}
+													className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+												>
+													Discard
+												</button>
+												<button
+													type="button"
+													onClick={() => void startRecording()}
+													className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/20"
+												>
+													Re-record
+												</button>
+											</div>
+										</>
+									)}
+									<p className="text-xs text-muted-foreground">
+										{!recording && !audioFile ? 'Click to start recording from your microphone' : ''}
+									</p>
+								</div>
 							</div>
 						)}
 						{inputMode === 'transcript' && (
@@ -518,7 +639,7 @@ export function AudioSecurityPage() {
 						</div>
 						<AppPrimaryButton onClick={() => void handleScan()} disabled={scanning} className="w-full sm:w-auto">
 							{scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic2 className="h-4 w-4" />}
-							{scanning ? 'Scanning…' : inputMode === 'audio' ? 'Scan audio file' : 'Scan transcript'}
+							{scanning ? 'Scanning…' : inputMode === 'transcript' ? 'Scan transcript' : inputMode === 'record' ? 'Scan recording' : 'Scan audio file'}
 						</AppPrimaryButton>
 					</div>
 				</AppPageSection>
