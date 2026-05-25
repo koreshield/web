@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Activity, ArrowRight, Database, FileText, Globe, Network, Shield } from 'lucide-react';
+import { Activity, ArrowRight, Database, FileText, Globe, Network, Server, Shield } from 'lucide-react';
 
 const features = [
     {
@@ -43,6 +43,13 @@ const features = [
         eyebrow: 'Live operations',
         description: 'Sub-30ms interception overhead at the proxy layer. Scan results are logged immediately and surfaced in your audit dashboard for review.',
         proof: 'Sub-30ms proxy overhead',
+    },
+    {
+        icon: Server,
+        title: 'Deploy Anywhere',
+        eyebrow: 'Data sovereignty',
+        description: 'Run in our managed cloud, self-hosted on your VPC, or fully air-gapped with no internet. Offline licence validation and bundled threat corpus included.',
+        proof: 'Cloud, self-hosted, or air-gapped',
     },
 ];
 

@@ -36,7 +36,7 @@ export const PRICING_FEATURE_ROWS = [
 	['Compliance evidence reports', 'N/A', 'N/A', 'N/A', 'Included'],
 	['SSO / SAML', 'N/A', 'N/A', 'N/A', 'Included'],
 	['SIEM export and custom retention', 'N/A', 'N/A', 'N/A', 'Included'],
-	['Private or self-hosted deployment', 'N/A', 'N/A', 'N/A', 'Included'],
+	['Self-hosted, VPC, or air-gapped deployment', 'N/A', 'N/A', 'N/A', 'Included'],
 ] as const;
 
 export const PRICING_FAQS = [
@@ -78,7 +78,7 @@ export const PRICING_FAQS = [
 	{
 		question: 'What is included on Enterprise?',
 		answer:
-			'VPC, private, or self-hosted deployment, SSO and SAML, SIEM export, custom retention and SLA, and dedicated onboarding and security review support. Pricing is scoped to your protected-request volume and deployment requirements.',
+			'Self-hosted or air-gapped deployment with offline licence validation, SSO and SAML, SIEM export, custom retention and SLA, external threat corpus support, and dedicated onboarding and security review. Pricing is scoped to your protected-request volume and deployment requirements.',
 	},
 	{
 		question: 'Is annual pricing available?',
@@ -172,7 +172,8 @@ export const PRICING_PLANS: PricingPlan[] = [
 			'Everything in Scale',
 			'SSO and SAML',
 			'SIEM export',
-			'VPC, private, or self-hosted deployment',
+			'Self-hosted, VPC, or air-gapped deployment',
+			'Offline licence validation and threat corpus',
 			'Custom retention and SLA',
 			'Dedicated onboarding and security review support',
 		],

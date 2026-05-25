@@ -11,7 +11,7 @@ import { TrustBadges } from '../components/TrustBadges';
 import UseCases from '../components/UseCases';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2, Copy, Terminal } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Cloud, Copy, Lock, Server, Terminal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
@@ -117,6 +117,84 @@ function LandingPage() {
 
             <TrustBadges />
             <UseCases />
+
+            <section className="relative overflow-hidden border-y border-white/[0.06] bg-background px-4 py-24 sm:px-6 md:py-32">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.08),transparent_28rem)]" />
+                <div className="relative mx-auto max-w-7xl">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        viewport={{ once: true }}
+                        className="mx-auto mb-14 max-w-3xl text-center"
+                    >
+                        <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-electric-green">Deploy Anywhere</p>
+                        <h2 className="mb-5 text-4xl font-extrabold tracking-[-0.04em] text-foreground md:text-5xl">
+                            Your infrastructure. Your rules.
+                        </h2>
+                        <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
+                            Run Koreshield in our managed cloud, on your own servers, or in fully air-gapped environments with no internet access. Enterprise licence validation is offline — no phone-home, ever.
+                        </p>
+                    </motion.div>
+
+                    <div className="grid gap-5 md:grid-cols-3">
+                        {[
+                            {
+                                icon: <Cloud className="h-6 w-6 text-blue-400" />,
+                                title: 'Managed Cloud',
+                                desc: 'Zero infrastructure to manage. We handle scaling, updates, and availability.',
+                                chips: ['Auto-scaling', 'Global edge', 'Zero maintenance'],
+                                border: 'border-blue-400/20',
+                            },
+                            {
+                                icon: <Server className="h-6 w-6 text-electric-green" />,
+                                title: 'Self-Hosted',
+                                desc: 'Deploy on your own VPC or data centre with a signed Enterprise licence.',
+                                chips: ['Data residency', 'VPC / on-prem', 'Docker Compose'],
+                                border: 'border-electric-green/20',
+                            },
+                            {
+                                icon: <Lock className="h-6 w-6 text-amber-400" />,
+                                title: 'Air-Gapped',
+                                desc: 'No outbound internet. Offline licence validation, bundled threat corpus, local-only operation.',
+                                chips: ['Offline licence', 'Bundled corpus', 'No phone-home'],
+                                border: 'border-amber-400/20',
+                            },
+                        ].map((option) => (
+                            <motion.div
+                                key={option.title}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
+                                viewport={{ once: true }}
+                                className={`group relative overflow-hidden rounded-[2rem] border ${option.border} bg-card/70 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-card lg:p-8`}
+                            >
+                                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
+                                    {option.icon}
+                                </div>
+                                <h3 className="mb-3 text-xl font-black tracking-[-0.035em] text-foreground">{option.title}</h3>
+                                <p className="mb-5 text-sm leading-relaxed text-muted-foreground">{option.desc}</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {option.chips.map((chip) => (
+                                        <span key={chip} className="rounded-full border border-white/[0.08] bg-background/60 px-3 py-1.5 text-xs font-semibold text-foreground/80">
+                                            {chip}
+                                        </span>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    <div className="mt-10 text-center">
+                        <Link
+                            to="/docs/integrations/deployment/self-hosted"
+                            className="inline-flex items-center gap-2 text-sm font-bold text-electric-green transition-colors hover:text-emerald-bright"
+                        >
+                            Read the self-hosted deployment guide <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </div>
+                </div>
+            </section>
 
             <section className="border-t border-white/[0.08] bg-background px-6 py-14">
                 <div className="mx-auto max-w-7xl">

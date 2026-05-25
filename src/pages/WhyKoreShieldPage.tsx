@@ -81,14 +81,25 @@ const deploymentOptions = [
 		bullets: ['Managed reliability', 'Automatic scaling', 'Zero maintenance', 'Global edge deployment'],
 		border: 'border-blue-400/20',
 		bg: 'bg-blue-400/5',
+		docLink: '/docs/integrations/deployment',
 	},
 	{
 		icon: <Building2 className="w-5 h-5 text-electric-green" />,
 		title: 'Self-Hosted',
-		description: 'Deploy on your own infrastructure for complete control and data sovereignty.',
-		bullets: ['Full data control', 'VPC / on-premise', 'Air-gapped options', 'Custom compliance'],
+		description: 'Deploy on your own infrastructure with offline licence validation and full data sovereignty.',
+		bullets: ['Docker Compose deployment', 'VPC / on-premise', 'Offline licence validation', 'Custom threat corpus'],
 		border: 'border-electric-green/20',
 		bg: 'bg-electric-green/5',
+		docLink: '/docs/integrations/deployment/self-hosted',
+	},
+	{
+		icon: <Lock className="w-5 h-5 text-amber-400" />,
+		title: 'Air-Gapped',
+		description: 'Fully offline operation for classified and regulated environments. No outbound internet, ever.',
+		bullets: ['No phone-home', 'Bundled threat corpus', 'SIGHUP hot-reload', 'Zero external dependencies'],
+		border: 'border-amber-400/20',
+		bg: 'bg-amber-400/5',
+		docLink: '/docs/integrations/deployment/airgapped',
 	},
 	{
 		icon: <Wrench className="w-5 h-5 text-purple-400" />,
@@ -189,7 +200,7 @@ export default function WhyKoreshieldPage() {
 				<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
 					<h2 className="text-3xl font-bold text-foreground mb-3 text-center tracking-tight">Deploy Your Way</h2>
 					<p className="text-center text-muted-foreground mb-10">On our infrastructure, yours, or both. No architecture changes required.</p>
-					<div className="grid md:grid-cols-3 gap-5">
+					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
 						{deploymentOptions.map((opt) => (
 							<div key={opt.title} className={`bg-card border ${opt.border} rounded-xl p-6`}>
 								<div className={`${opt.bg} w-10 h-10 rounded-lg flex items-center justify-center mb-4`}>
@@ -197,7 +208,7 @@ export default function WhyKoreshieldPage() {
 								</div>
 								<h3 className="text-base font-bold text-foreground mb-2">{opt.title}</h3>
 								<p className="text-sm text-muted-foreground mb-4 leading-relaxed">{opt.description}</p>
-								<ul className="space-y-1.5">
+								<ul className="space-y-1.5 mb-4">
 									{opt.bullets.map((b) => (
 										<li key={b} className="flex items-center gap-1.5 text-xs text-muted-foreground">
 											<span className="w-1 h-1 rounded-full bg-muted-foreground/50 shrink-0" />
@@ -205,6 +216,11 @@ export default function WhyKoreshieldPage() {
 										</li>
 									))}
 								</ul>
+								{'docLink' in opt && opt.docLink && (
+									<Link to={opt.docLink} className="inline-flex items-center gap-1.5 text-xs font-semibold text-electric-green hover:text-emerald-bright transition-colors">
+										Read the guide <ArrowRight className="w-3 h-3" />
+									</Link>
+								)}
 							</div>
 						))}
 					</div>

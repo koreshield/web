@@ -2,7 +2,7 @@ export const SEOConfig = {
 	home: {
 		title: 'AI Security Firewall',
 		description: 'Proxy-layer AI security for prompts, RAG context, provider routing, policy enforcement, and audit evidence.',
-		keywords: 'LLM security, AI security, prompt injection, jailbreak detection, GPT security, OpenAI security, LLM firewall, AI safety, machine learning security, AI infrastructure protection',
+		keywords: 'LLM security, AI security, prompt injection, jailbreak detection, GPT security, OpenAI security, LLM firewall, AI safety, machine learning security, AI infrastructure protection, self-hosted LLM security, air-gapped AI firewall, on-premise AI security, data residency',
 		ogImage: 'https://koreshield.ai/og-home.png',
 		ogType: 'website' as const,
 		structuredData: {
@@ -27,8 +27,8 @@ export const SEOConfig = {
 	},
 	features: {
 		title: 'Features',
-		description: 'Discover Koreshield\'s advanced LLM security features including real-time threat detection, prompt injection prevention, jailbreak detection, and comprehensive threat monitoring.',
-		keywords: 'LLM security features, prompt injection detection, jailbreak detection, threat monitoring, security controls, API filtering',
+		description: 'Discover Koreshield\'s advanced LLM security features including real-time threat detection, prompt injection prevention, jailbreak detection, comprehensive threat monitoring, and flexible deployment options.',
+		keywords: 'LLM security features, prompt injection detection, jailbreak detection, threat monitoring, security controls, API filtering, self-hosted deployment, air-gapped AI security',
 		ogImage: 'https://koreshield.ai/og-features.png',
 		ogType: 'website' as const,
 		breadcrumbs: [
@@ -38,8 +38,8 @@ export const SEOConfig = {
 	},
 	pricing: {
 		title: 'Pricing Plans',
-		description: 'Koreshield pricing plans for teams of all sizes. Start free with 10,000 protected requests/month, then pay-as-you-grow. Enterprise plans available.',
-		keywords: 'LLM security pricing, protected requests pricing, AI security cost, enterprise LLM security pricing, pricing plans',
+		description: 'Koreshield pricing plans for teams of all sizes. Start free with 10,000 protected requests/month, then pay-as-you-grow. Enterprise self-hosted and air-gapped plans available.',
+		keywords: 'LLM security pricing, protected requests pricing, AI security cost, enterprise LLM security pricing, pricing plans, self-hosted AI security pricing, air-gapped deployment',
 		ogImage: 'https://koreshield.ai/og-pricing.png',
 		ogType: 'website' as const,
 		breadcrumbs: [

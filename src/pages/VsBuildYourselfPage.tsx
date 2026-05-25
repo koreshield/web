@@ -72,6 +72,7 @@ const hiddenCosts = [
 const included = [
 	['Core features', ['Prompt and response scanning', 'RAG/context inspection', 'Multi-provider support', 'Policy enforcement', 'Python and Node SDKs']],
 	['Enterprise controls', ['Tenant-aware events', 'RBAC and scoped keys', 'Audit logs', 'Alerts', 'Compliance evidence']],
+	['Deployment flexibility', ['Managed cloud', 'Self-hosted on your VPC', 'Air-gapped / offline operation', 'Docker Compose deployment', 'Offline licence validation']],
 	['Support and updates', ['Detection updates', 'Red-team informed testing', 'Production support path', 'Documentation', 'Deployment guidance']],
 ] satisfies Array<[string, string[]]>;
 
