@@ -60,6 +60,18 @@ JWT validation is strict:
 
 All protected proxy endpoints are rate-limited via SlowAPI (default: `60/minute`, configurable via `security.rate_limit` in config).
 
+### Usage weights
+
+Different scan types consume different numbers of protected requests against your monthly plan limit:
+
+| Scan type | Weight | Example |
+|---|---|---|
+| Prompt / response (`/v1/chat/completions`, `/v1/scan`, `/v1/scan/batch`) | **1** | 100 scans = 100 requests |
+| RAG document scan (`/v1/rag/scan`) | **20** | 100 scans = 2,000 requests |
+| VoiceGuard audio scan (`/v1/audio/scan`) | **50** | 100 scans = 5,000 requests |
+
+Heavier scan types require more server-side resources (multi-document parsing, speech transcription) and are weighted accordingly. Tool session auto-gating with `speech_context` does **not** consume additional audio-scan units — only explicit calls to `/v1/audio/scan` are weighted.
+
 ### Tool Governance
 
 | Endpoint | Method | Auth | Description |
