@@ -32,6 +32,7 @@ const footerGroups = [
 		title: 'Resources',
 		links: [
 			{ label: 'Documentation', to: '/docs' },
+			{ label: 'FAQ', to: '/faq' },
 			{ label: 'Blog', to: '/blog' },
 			{ label: 'Research', to: '/research' },
 			{ label: 'RAG Security Guide', to: '/solutions/rag-security' },
