@@ -601,6 +601,7 @@ export function AppLayout() {
 	const routeLocked = Boolean(billingQuery.isSuccess && currentFeature && !planAllowsFeature(planSlug, currentFeature));
 	const [resendingVerification, setResendingVerification] = useState(false);
 	const [verificationBannerState, setVerificationBannerState] = useState<'none' | 'sent' | 'verified'>('none');
+	const [upgradePromptItem, setUpgradePromptItem] = useState<NavItem | null>(null);
 
 	// Sidebar collapse state (persisted)
 	const [collapsed, setCollapsed] = useState(() => {
@@ -699,6 +700,7 @@ export function AppLayout() {
 					isAdmin={isAdmin}
 					isFounder={isFounder}
 					planSlug={planSlug}
+					onLockedNav={setUpgradePromptItem}
 				/>
 			</aside>
 
@@ -733,6 +735,10 @@ export function AppLayout() {
 							isFounder={isFounder}
 							planSlug={planSlug}
 							onNavClick={() => setMobileOpen(false)}
+							onLockedNav={(item) => {
+								setMobileOpen(false);
+								setUpgradePromptItem(item);
+							}}
 						/>
 					</aside>
 				</div>
@@ -833,6 +839,11 @@ export function AppLayout() {
 					)}
 				</main>
 			</div>
+			<UpgradeFeaturePrompt
+				item={upgradePromptItem}
+				planSlug={planSlug}
+				onClose={() => setUpgradePromptItem(null)}
+			/>
 		</div>
 	);
 }

@@ -610,8 +610,8 @@ export function FounderPortalPage() {
 					<>
 						{/* Revenue */}
 						<AppStatGrid columns={4}>
-							<AppStatCard label="MRR" value={`$${numberFormat(metrics.revenue.mrr)}`} icon={CreditCard} detail={`ARR: $${numberFormat(metrics.revenue.arr)}`} />
-							<AppStatCard label="ARPU" value={`$${metrics.revenue.arpu}`} icon={BadgeCheck} detail={`${metrics.revenue.paying_users} paying customers`} />
+							<AppStatCard label="MRR" value={`£${numberFormat(metrics.revenue.mrr)}`} icon={CreditCard} detail={`ARR: £${numberFormat(metrics.revenue.arr)}`} />
+							<AppStatCard label="ARPU" value={`£${metrics.revenue.arpu}`} icon={BadgeCheck} detail={`${metrics.revenue.paying_users} paying customers`} />
 							<AppStatCard label="Paid conversion" value={`${metrics.revenue.paid_conversion_rate_pct}%`} icon={TrendingUp} detail={`${metrics.revenue.free_accounts} still on free`} />
 							<AppStatCard label="Teams" value={numberFormat(metrics.teams.total_teams)} icon={Users} detail={`${metrics.teams.avg_team_size} avg members · ${metrics.teams.paid_teams} paid`} />
 						</AppStatGrid>
@@ -696,15 +696,15 @@ export function FounderPortalPage() {
 													<span className="text-muted-foreground">{p.count} accounts</span>
 												</div>
 												<div className="flex justify-between text-xs text-muted-foreground mt-0.5">
-													<span>${p.monthly_price}/mo per seat</span>
-													<span className={p.mrr_contribution > 0 ? 'text-emerald-600 font-semibold' : ''}>${numberFormat(p.mrr_contribution)} MRR</span>
+													<span>£{p.monthly_price}/mo per seat</span>
+													<span className={p.mrr_contribution > 0 ? 'text-emerald-600 font-semibold' : ''}>£{numberFormat(p.mrr_contribution)} MRR</span>
 												</div>
 											</div>
 										</div>
 									))}
 									<div className="flex justify-between pt-3 font-bold text-sm">
 										<span>Total MRR</span>
-										<span className="text-emerald-600">${numberFormat(metrics.revenue.mrr)}</span>
+										<span className="text-emerald-600">£{numberFormat(metrics.revenue.mrr)}</span>
 									</div>
 								</div>
 							</AppPageSection>
