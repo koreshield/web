@@ -6,6 +6,8 @@ import {
 	ChevronRight,
 	ClipboardList,
 	Crown,
+	BookOpen,
+	CircleHelp,
 	ExternalLink,
 	FileText,
 	Gauge,
@@ -261,25 +263,61 @@ function Sidebar({
 				})}
 			</nav>
 
-			<div className="shrink-0 border-t border-white/[0.06] p-2">
-				<a
-					href="https://koreshield.ai"
-					target="_blank"
-					rel="noreferrer noopener"
-					title={collapsed ? 'Visit website' : undefined}
-					className={[
-						'group relative mb-1.5 flex items-center gap-2 w-full px-3 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all duration-150',
-						collapsed ? 'justify-center' : '',
-					].join(' ')}
-				>
-					<ExternalLink className="w-4 h-4 shrink-0" />
-					{!collapsed && <span>Visit website</span>}
-					{collapsed && (
-						<span className="pointer-events-none absolute left-full ml-3 px-2 py-1 rounded bg-card border border-white/[0.08] text-xs font-medium text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg">
-							Visit website
-						</span>
-					)}
-				</a>
+		<div className="shrink-0 border-t border-white/[0.06] p-2">
+			<a
+				href="https://koreshield.ai/docs"
+				target="_blank"
+				rel="noreferrer noopener"
+				title={collapsed ? 'Documentation' : undefined}
+				className={[
+					'group relative mb-1.5 flex items-center gap-2 w-full px-3 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all duration-150',
+					collapsed ? 'justify-center' : '',
+				].join(' ')}
+			>
+				<BookOpen className="w-4 h-4 shrink-0" />
+				{!collapsed && <span>Documentation</span>}
+				{collapsed && (
+					<span className="pointer-events-none absolute left-full ml-3 px-2 py-1 rounded bg-card border border-white/[0.08] text-xs font-medium text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg">
+						Documentation
+					</span>
+				)}
+			</a>
+			<a
+				href="https://koreshield.ai/faq"
+				target="_blank"
+				rel="noreferrer noopener"
+				title={collapsed ? 'FAQ' : undefined}
+				className={[
+					'group relative mb-1.5 flex items-center gap-2 w-full px-3 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all duration-150',
+					collapsed ? 'justify-center' : '',
+				].join(' ')}
+			>
+				<CircleHelp className="w-4 h-4 shrink-0" />
+				{!collapsed && <span>FAQ</span>}
+				{collapsed && (
+					<span className="pointer-events-none absolute left-full ml-3 px-2 py-1 rounded bg-card border border-white/[0.08] text-xs font-medium text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg">
+						FAQ
+					</span>
+				)}
+			</a>
+			<a
+				href="https://koreshield.ai"
+				target="_blank"
+				rel="noreferrer noopener"
+				title={collapsed ? 'Visit website' : undefined}
+				className={[
+					'group relative mb-1.5 flex items-center gap-2 w-full px-3 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all duration-150',
+					collapsed ? 'justify-center' : '',
+				].join(' ')}
+			>
+				<ExternalLink className="w-4 h-4 shrink-0" />
+				{!collapsed && <span>Visit website</span>}
+				{collapsed && (
+					<span className="pointer-events-none absolute left-full ml-3 px-2 py-1 rounded bg-card border border-white/[0.08] text-xs font-medium text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg">
+						Visit website
+					</span>
+				)}
+			</a>
 				<button
 					type="button"
 					onClick={onCollapse}
