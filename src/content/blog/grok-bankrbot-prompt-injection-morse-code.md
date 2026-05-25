@@ -54,7 +54,7 @@ In this case, there were apparently no enforced boundaries around what trading i
 
 Here's the uncomfortable extension of this: the same pattern works across the entire surface area of AI agent deployments. Not just crypto. An agent that manages your Salesforce CRM can be manipulated via a customer email. An agent that summarizes your documents can be redirected by content hidden in a file it ingests. An agent that handles support tickets can be turned against the company by a cleverly crafted ticket.
 
-The wallet attack was visible because blockchain transactions are public and the loss was in dollars. Most prompt injection attacks against enterprise agents are quiet. You probably wouldn't know one happened.
+The wallet attack was visible because blockchain transactions are public and the loss was visible on-chain. Most prompt injection attacks against enterprise agents are quiet. You probably wouldn't know one happened.
 
 ## What Needs to Change
 
