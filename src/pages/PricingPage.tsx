@@ -60,7 +60,7 @@ export default function PricingPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-background text-foreground transition-colors">
+		<div className="min-h-screen overflow-x-hidden bg-background text-foreground transition-colors">
 			<SEOMeta {...SEOConfig.pricing} />
 
 			{/* ── Hero ─────────────────────────────────────────────────────── */}
@@ -71,18 +71,19 @@ export default function PricingPage() {
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5 }}
-						className="rounded-[2rem] border border-border bg-card/75 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.16)] backdrop-blur md:p-10"
+						className="mx-auto w-full overflow-hidden rounded-[2rem] border border-border bg-card/75 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.16)] backdrop-blur md:p-10"
 					>
-						<p className="mx-auto mb-6 inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
-							Platform fee plus protected usage
+						<p className="mx-auto mb-6 inline-flex max-w-full rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary sm:px-4 sm:text-xs sm:tracking-[0.24em]">
+							<span className="sm:hidden">Protected usage</span>
+							<span className="hidden sm:inline">Platform fee plus protected usage</span>
 						</p>
-						<h1 className="text-4xl font-black tracking-[-0.06em] md:text-6xl">
+						<h1 className="mx-auto max-w-[19rem] text-3xl font-black leading-[0.95] tracking-[-0.06em] sm:max-w-3xl sm:text-4xl md:text-6xl">
 							The firewall every LLM deployment is missing.
 						</h1>
-						<p className="mx-auto mt-6 max-w-3xl text-lg text-muted-foreground md:text-xl">
+						<p className="mx-auto mt-6 max-w-[20rem] text-base leading-relaxed text-muted-foreground sm:max-w-3xl md:text-xl">
 							One URL change. Zero-log by default. Koreshield inspects every request and response before it completes, without touching your codebase.
 						</p>
-						<p className="mt-3 text-sm text-muted-foreground">
+						<p className="mx-auto mt-3 max-w-[20rem] text-sm leading-relaxed text-muted-foreground sm:max-w-3xl">
 							Compatible with OpenAI, Anthropic, Gemini, and DeepSeek. Public SDK on PyPI and npm.
 						</p>
 
@@ -102,7 +103,7 @@ export default function PricingPage() {
 							</Link>
 						</div>
 
-						<div className="mt-10 flex items-center justify-center gap-4">
+						<div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
 							<span className={`text-base font-medium ${billingPeriod === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
 								Monthly
 							</span>
@@ -119,7 +120,7 @@ export default function PricingPage() {
 								/>
 							</button>
 							<span className={`text-base font-medium ${billingPeriod === 'annual' ? 'text-foreground' : 'text-muted-foreground'}`}>
-								Annual <span className="ml-2 text-sm font-semibold text-electric-green">Save 20%</span>
+								Annual <span className="ml-1 text-sm font-semibold text-electric-green sm:ml-2">Save 20%</span>
 							</span>
 						</div>
 					</motion.div>
@@ -129,7 +130,7 @@ export default function PricingPage() {
 			{/* ── Stats bar ────────────────────────────────────────────────── */}
 			<section className="mt-14 border-y border-border/50 bg-muted/20 py-10 px-4">
 				<div className="mx-auto max-w-5xl">
-					<div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+					<div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 md:grid-cols-4 md:gap-6">
 						{pricingStats.map((stat, i) => (
 							<motion.div
 								key={stat.label}
@@ -137,13 +138,13 @@ export default function PricingPage() {
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true }}
 								transition={{ duration: 0.4, delay: i * 0.07 }}
-								className="rounded-2xl border border-border bg-card/60 p-5 text-center"
+								className="flex min-h-[132px] flex-col items-center justify-center rounded-2xl border border-border bg-card/60 p-5 text-center"
 							>
-								<span className="text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">
+								<span className="block text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">
 									{stat.value}
 								</span>
-								<span className="mt-1 text-sm font-semibold text-foreground/80">{stat.label}</span>
-								<span className="mt-0.5 text-xs text-muted-foreground">{stat.sub}</span>
+								<span className="mt-2 block text-sm font-semibold text-foreground/80">{stat.label}</span>
+								<span className="mt-1 block text-xs leading-5 text-muted-foreground">{stat.sub}</span>
 							</motion.div>
 						))}
 					</div>

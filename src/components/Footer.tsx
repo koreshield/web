@@ -85,28 +85,28 @@ const socialLinks = [
 
 function Footer() {
 	return (
-		<footer className="relative overflow-hidden border-t border-white/[0.08] bg-[#070909] px-6 py-16 text-foreground">
+		<footer className="relative overflow-hidden border-t border-white/[0.08] bg-[#070909] px-4 py-16 text-foreground sm:px-6">
 			<div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-electric-green/50 to-transparent" />
 			<div className="pointer-events-none absolute -left-32 top-0 h-72 w-72 rounded-full bg-electric-green/10 blur-3xl" />
 			<div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 rounded-full bg-blue-500/5 blur-3xl" />
 
-			<div className="relative mx-auto max-w-7xl">
+			<div className="relative mx-auto max-w-7xl min-w-0">
 				<div className="mb-12 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-					<div className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.03] p-7 md:p-8">
+					<div className="relative min-w-0 overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.03] p-6 md:p-8">
 						<div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-electric-green/10 blur-3xl" />
 						<div className="relative flex h-full flex-col gap-8">
-							<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+							<div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 								<div>
 									<p className="text-xs font-bold uppercase tracking-[0.28em] text-electric-green">Connect on socials</p>
 									<h2 className="mt-3 text-3xl font-extrabold tracking-tight text-white md:text-4xl">Follow Koreshield</h2>
 								</div>
-								<div className="flex items-center gap-3 text-sm text-muted-foreground">
+								<div className="flex min-w-0 items-center gap-3 text-sm text-muted-foreground">
 									<img src="/logo/light/SVG/White.svg" alt="Koreshield" className="h-8 w-8" />
 									<span>Secure AI before it acts.</span>
 								</div>
 							</div>
 
-							<div className="grid flex-1 gap-3 sm:grid-cols-3">
+							<div className="grid min-w-0 flex-1 gap-3 sm:grid-cols-3">
 								{socialLinks.map((social) => (
 									<a
 										key={social.label}
@@ -114,7 +114,7 @@ function Footer() {
 										target="_blank"
 										rel="noreferrer noopener"
 										aria-label={`Koreshield on ${social.label}`}
-										className="group flex min-h-36 flex-col justify-between rounded-[1.35rem] border border-white/[0.08] bg-black/20 p-5 text-muted-foreground transition-all duration-300 hover:-translate-y-1 hover:border-electric-green/35 hover:bg-electric-green/[0.07] hover:text-white hover:shadow-2xl hover:shadow-emerald-500/10"
+										className="group flex min-h-32 min-w-0 flex-col justify-between rounded-[1.35rem] border border-white/[0.08] bg-black/20 p-5 text-muted-foreground transition-all duration-300 hover:-translate-y-1 hover:border-electric-green/35 hover:bg-electric-green/[0.07] hover:text-white hover:shadow-2xl hover:shadow-emerald-500/10 sm:min-h-36"
 									>
 										<span className="transition-colors group-hover:text-electric-green">{social.icon}</span>
 										<span className="text-sm font-bold tracking-tight">{social.label}</span>
@@ -124,19 +124,19 @@ function Footer() {
 						</div>
 					</div>
 
-					<div className="rounded-[2rem] border border-electric-green/20 bg-electric-green/[0.075] p-7 md:p-8">
+					<div className="min-w-0 overflow-hidden rounded-[2rem] border border-electric-green/20 bg-electric-green/[0.075] p-6 md:p-8">
 						<div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-electric-green/15">
 							<ShieldCheck className="h-6 w-6 text-electric-green" />
 						</div>
-						<h2 className="text-2xl font-extrabold tracking-tight text-white">See what your AI is exposed to.</h2>
+						<h2 className="max-w-full text-2xl font-extrabold tracking-tight text-white">See what your AI is exposed to.</h2>
 						<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
 							Run a guided demo against your stack: prompts, RAG, providers, alerts, and audit evidence.
 						</p>
 						<div className="mt-6 flex flex-col gap-3 sm:flex-row">
-							<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright">
+							<Link to="/demo" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-electric-green px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright sm:w-auto">
 								Book a demo <ArrowRight className="h-4 w-4" />
 							</Link>
-							<Link to="/docs" className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.1] bg-black/20 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-black/35">
+							<Link to="/docs" className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.1] bg-black/20 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-black/35 sm:w-auto">
 								Read docs
 							</Link>
 						</div>

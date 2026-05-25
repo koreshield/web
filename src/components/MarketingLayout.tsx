@@ -274,14 +274,14 @@ export function MarketingLayout() {
 						{isAuthenticated ? (
 							<Link
 								to="/dashboard"
-								className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+								className="hidden rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 min-[390px]:inline-flex"
 							>
 								Dashboard
 							</Link>
 						) : (
 							<Link
 								to="/login"
-								className="rounded-full border border-border bg-card/80 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary/30 hover:bg-card"
+								className="hidden rounded-full border border-border bg-card/80 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary/30 hover:bg-card min-[390px]:inline-flex"
 							>
 								Sign In
 							</Link>
