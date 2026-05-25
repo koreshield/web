@@ -219,7 +219,7 @@ export function MarketingLayout() {
 					</Link>
 
 					{/* Desktop nav */}
-					<nav className="hidden items-center gap-6 md:flex">
+					<nav className="hidden items-center gap-6 md:flex md:ml-10">
 						<NavDropdown label="Solutions" items={solutionsLinks} />
 						<Link
 							to="/pricing"

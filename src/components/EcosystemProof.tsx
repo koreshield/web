@@ -2,15 +2,15 @@ import { motion } from 'framer-motion';
 
 const ecosystemItems = [
 	{
-		name: 'NVIDIA Inception',
+		name: 'NVIDIA Inception program',
 		label: 'Startup program',
-		description: 'Part of NVIDIA Inception for AI startups building advanced infrastructure and applied AI systems.',
-		logo: '/logos/ecosystem/nvidia-logo.png',
+		description: 'Part of NVIDIA Inception program for AI startups building advanced infrastructure and applied AI systems.',
+		logo: '/logos/ecosystem/nvidia-inception-program-badge-rgb-for-screen.jpg',
 		logoClassName: 'h-11 w-auto object-contain',
 		accent: 'from-[#76B900]/20 to-electric-green/10',
 	},
 	{
-		name: 'AWS',
+		name: 'AWS Activate',
 		label: 'Cloud ecosystem',
 		description: 'Designed for teams deploying AI security controls across modern AWS-hosted workloads.',
 		logo: '/logos/ecosystem/powered-by-aws-white.png',
