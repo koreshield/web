@@ -66,13 +66,13 @@ The Koreshield team delivers a signed bundle (`.tar.gz`) containing:
 Copy the bundle to your airgapped host via USB, secure file transfer, or approved media:
 
 ```bash
-scp koreshield-enterprise-v2.x.x-airgapped.tar.gz admin@secure-host:/opt/koreshield/
+scp koreshield-enterprise-v2.x.x-airgapped.tar.gz admin@secure-host:/path/to/koreshield/
 ```
 
 ### 2. Extract
 
 ```bash
-cd /opt/koreshield
+cd /path/to/koreshield
 tar xzf koreshield-enterprise-v2.x.x-airgapped.tar.gz
 ```
 
@@ -156,7 +156,7 @@ Detection rules ship with each release bundle. To apply an out-of-band update:
 3. Set the path in your environment:
 
 ```bash
-KS_THREAT_CORPUS_PATH=/opt/koreshield/threat-corpus/corpus-vX.Y.Z.json
+KS_THREAT_CORPUS_PATH=/path/to/koreshield/threat-corpus/corpus-vX.Y.Z.json
 ```
 
 4. Restart the API container:
