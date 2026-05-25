@@ -1,55 +1,48 @@
 import { motion } from 'framer-motion';
-import { Activity, ArrowRight, Database, FileText, Globe, Network, Server, Shield } from 'lucide-react';
+import { Activity, Database, FileText, Globe, Network, Shield } from 'lucide-react';
 
 const features = [
     {
         icon: Shield,
         title: '95% Detection Accuracy',
         eyebrow: 'Detection engine',
-        description: 'Fewer than 3 false positives per 100 blocked requests. Tuned on millions of real-world attack attempts, not synthetic test data, so it catches what matters without crying wolf.',
+        description: 'Tuned for production traffic, not toy prompts. Koreshield blocks high-risk requests while keeping useful AI workflows moving.',
         proof: '<3 false positives per 100 blocked requests',
     },
     {
         icon: Network,
         title: 'Multi-Provider',
         eyebrow: 'Provider control',
-        description: 'One SDK. One API key. full coverage across LLMs.',
+        description: 'One proxy policy across OpenAI, Anthropic, Gemini, and DeepSeek.',
         proof: 'One policy layer across every model route',
     },
     {
         icon: Database,
         title: 'RAG Defense',
         eyebrow: 'Retrieval inspection',
-        description: 'Scans every document in your retrieval context before it reaches the LLM, catching injected instructions your vector db doesn\'t know to look for.',
+        description: 'Scan retrieved documents before they become model instructions.',
         proof: 'Context scanned before model exposure',
     },
     {
         icon: Globe,
         title: 'CRM Integrations',
         eyebrow: 'Workflow coverage',
-        description: 'Pre-built connectors for Salesforce, HubSpot, and Zendesk. Secure your CRM-to-LLM pipelines without writing custom data extraction logic.',
+        description: 'Secure Salesforce, HubSpot, and Zendesk data before it reaches AI workflows.',
         proof: 'Salesforce, HubSpot, and Zendesk paths',
     },
     {
         icon: FileText,
         title: 'Audit Trails',
         eyebrow: 'Evidence trail',
-        description: 'Every scan, every block, every decision: logged with full context. Query your threat history, or export to your SIEM in one command.',
+        description: 'Every scan, block, and policy decision becomes reviewable evidence.',
         proof: 'Exportable history for review',
     },
     {
         icon: Activity,
         title: 'Threat Monitoring',
         eyebrow: 'Live operations',
-        description: 'Sub-30ms interception overhead at the proxy layer. Scan results are logged immediately and surfaced in your audit dashboard for review.',
+        description: 'See risky traffic, blocked requests, and provider health as it happens.',
         proof: 'Sub-30ms proxy overhead',
-    },
-    {
-        icon: Server,
-        title: 'Deploy Anywhere',
-        eyebrow: 'Data sovereignty',
-        description: 'Run in our managed cloud, self-hosted on your VPC, or fully air-gapped with no internet. Offline licence validation and bundled threat corpus included.',
-        proof: 'Cloud, self-hosted, or air-gapped',
     },
 ];
 
@@ -58,7 +51,7 @@ const modelRoutes = ['OpenAI', 'Anthropic', 'Gemini', 'DeepSeek'];
 const metricChips = [
     '50+ attack patterns',
     'RAG-aware scanning',
-    'Audit-ready events',
+    'Evidence logs',
 ];
 
 function Features() {
@@ -94,7 +87,7 @@ function Features() {
                         className="group relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(255,255,255,0.035)_45%,rgba(15,23,42,0.45))] p-6 shadow-2xl shadow-emerald-950/20 lg:col-span-7 lg:p-8"
                     >
                         <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border border-electric-green/20 bg-electric-green/10 blur-2xl transition-transform duration-500 group-hover:scale-110" />
-                        <div className="relative z-10 flex h-full flex-col justify-between gap-10">
+                        <div className="relative z-10 flex h-full flex-col justify-between gap-8">
                             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
                                     <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-electric-green">
@@ -102,7 +95,7 @@ function Features() {
                                         {features[0].eyebrow}
                                     </div>
                                     <h3 className="max-w-lg text-2xl font-black tracking-[-0.04em] text-foreground sm:text-3xl">
-                                        Tuned to stop real attacks without turning your app into a false-positive machine.
+                                        Real attack detection, without drowning your team in noise.
                                     </h3>
                                 </div>
                                 <div className="shrink-0 rounded-3xl border border-white/[0.08] bg-background/70 p-5 text-center shadow-inner">
@@ -140,14 +133,13 @@ function Features() {
                             <h3 className="mb-4 text-2xl font-black tracking-[-0.035em] text-foreground">{features[1].title}</h3>
                             <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">{features[1].description}</p>
 
-                            <div className="mt-7 space-y-2">
+                            <div className="mt-7 grid grid-cols-2 gap-2">
                                 {modelRoutes.map((provider, index) => (
-                                    <div key={provider} className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-background/55 px-3 py-2.5">
+                                    <div key={provider} className="flex items-center gap-2 rounded-2xl border border-white/[0.06] bg-background/55 px-3 py-2.5">
                                         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-electric-green/10 text-[10px] font-black text-electric-green">
                                             {index + 1}
                                         </span>
                                         <span className="text-sm font-semibold text-foreground/85">{provider}</span>
-                                        <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground/60" />
                                     </div>
                                 ))}
                             </div>
@@ -177,6 +169,24 @@ function Features() {
                             <p className="mt-auto border-t border-white/[0.06] pt-4 text-xs font-semibold text-electric-green/90">{feature.proof}</p>
                         </motion.div>
                     ))}
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.32 }}
+                        viewport={{ once: true }}
+                        className="rounded-3xl border border-electric-green/15 bg-electric-green/[0.06] p-6 lg:col-span-12"
+                    >
+                        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                            <div>
+                                <p className="text-xs font-bold uppercase tracking-[0.24em] text-electric-green">Deployment</p>
+                                <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-foreground">Cloud, VPC, or air-gapped.</h3>
+                            </div>
+                            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                                Use Koreshield as managed cloud, self-hosted infrastructure, or an offline deployment with bundled policy and threat updates.
+                            </p>
+                        </div>
+                    </motion.div>
                 </div>
             </div>
         </section>
