@@ -1,0 +1,163 @@
+---
+title: Self-Hosted Deployment
+description: Run Koreshield on your own infrastructure with full data residency and network control.
+sidebar_position: 1
+last_update:
+  date: 2026-05-25
+---
+
+# Self-Hosted Deployment
+
+Self-hosted deployment is available on the **Enterprise plan**. You run Koreshield inside your own infrastructure — VPC, on-prem data centre, or private cloud — with full control over data residency, network policies, and update cadence.
+
+> **Not on Enterprise?** Use the hosted API at `api.koreshield.com` instead. See the [Quick Start](/docs/getting-started/quick-start).
+
+---
+
+## What You Receive
+
+When you activate a self-hosted Enterprise licence, the Koreshield team provides:
+
+| Deliverable | Description |
+|---|---|
+| Docker image bundle | Signed, audited container images for the API server, status updater, and web dashboard |
+| `docker-compose.prod.yml` | Production-ready Compose stack with Postgres, Redis, Caddy, Prometheus, and Grafana |
+| `.env.example` | Full environment variable reference pre-filled with safe defaults |
+| Licence key | A `KS_LICENSE_KEY` tied to your organisation, plan limits, and expiry date |
+| Threat corpus snapshot | Offline-compatible detection rules for airgapped environments |
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────┐
+│              Your Infrastructure             │
+│                                              │
+│  ┌──────────┐  ┌──────────┐  ┌───────────┐  │
+│  │  Caddy   │  │Koreshield│  │  Postgres  │  │
+│  │ (reverse │──│   API    │──│ (per-tenant│  │
+│  │  proxy)  │  │ :8000    │  │  schemas)  │  │
+│  └──────────┘  └────┬─────┘  └───────────┘  │
+│                     │                        │
+│               ┌─────┴─────┐                  │
+│               │   Redis   │                  │
+│               │  (cache,  │                  │
+│               │  sessions)│                  │
+│               └───────────┘                  │
+│                                              │
+│  ┌───────────┐  ┌───────────┐               │
+│  │Prometheus │  │  Grafana  │               │
+│  │ (metrics) │  │(dashboards│               │
+│  └───────────┘  └───────────┘               │
+└─────────────────────────────────────────────┘
+```
+
+All traffic stays inside your network boundary. No data is sent to Koreshield servers.
+
+## System Requirements
+
+| Component | Minimum | Recommended |
+|---|---|---|
+| CPU | 2 vCPUs | 4 vCPUs |
+| RAM | 2 GB | 4 GB |
+| Disk | 20 GB | 50 GB (includes Postgres data) |
+| Docker | 24.0+ | Latest stable |
+| Docker Compose | v2.20+ | Latest stable |
+| PostgreSQL | 15+ | 16 (bundled in Compose) |
+| Redis | 7+ | 7.2 (bundled in Compose) |
+
+## Quick Start
+
+### 1. Load the licence key
+
+Set `KS_LICENSE_KEY` in your `.env` file. The key is validated on startup — the server will not start without a valid Enterprise licence.
+
+```bash
+KS_LICENSE_KEY=ks_ent_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+### 2. Set the deployment mode
+
+```bash
+DEPLOYMENT_MODE=self-hosted
+ENVIRONMENT=production
+```
+
+### 3. Configure core secrets
+
+```bash
+JWT_SECRET=replace-with-a-strong-random-secret
+JWT_ISSUER=koreshield.yourcompany.com
+JWT_AUDIENCE=koreshield-api
+DATABASE_URL=postgresql+asyncpg://koreshield:secret@postgres:5432/koreshield
+REDIS_URL=redis://redis:6379/0
+```
+
+### 4. Add LLM provider keys
+
+Add keys for whichever providers your teams use:
+
+```bash
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+DEEPSEEK_API_KEY=sk-...
+```
+
+### 5. Start the stack
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
+### 6. Verify
+
+```bash
+curl http://localhost:8000/health
+# → {"status": "ok", "version": "...", "deployment_mode": "self-hosted"}
+
+curl http://localhost:8000/status
+# → full system status with licence info
+```
+
+## Licence Validation
+
+Self-hosted instances validate the licence key on every startup:
+
+- **Key format**: `ks_ent_<base64-encoded payload>`
+- **Checked on boot**: organisation ID, plan tier, feature set, expiry date
+- **Grace period**: if the licence expires, the server continues running for **14 days** with a warning in logs and the `/health` response. After the grace period, the server refuses new requests until the licence is renewed.
+- **No phone-home**: validation is performed locally using a bundled public key. No network call is made.
+
+## Tenant Data Isolation
+
+Each tenant receives a dedicated PostgreSQL schema (`tenant_<id>`). Cross-tenant queries are prevented at the middleware layer. Audit logs are append-only and tagged with compliance labels (GDPR, SOC 2, HIPAA) based on tenant configuration.
+
+See [RBAC](/docs/features/rbac) for role-based access control within a deployment.
+
+## Monitoring
+
+The production Compose stack includes:
+
+- **Prometheus** scraping `/metrics` every 15 seconds
+- **Grafana** with pre-built dashboards for request volume, latency, attack detection, and provider health
+- **Structured JSON logs** via `structlog` — compatible with any log aggregator (ELK, Datadog, Splunk)
+
+## Updating
+
+1. The Koreshield team provides updated container images and a changelog
+2. Pull the new images and restart:
+
+```bash
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
+
+3. Database migrations run automatically on container startup via Alembic
+
+For airgapped environments, see the [Airgapped Deployment](/docs/integrations/deployment/airgapped) guide.
+
+## Next Steps
+
+- [Airgapped Deployment](/docs/integrations/deployment/airgapped): offline installation without internet access
+- [Configuration](/docs/configuration): tune detection policies, rate limits, and provider routing
+- [Production Checklist](/docs/configuration/production-checklist): security hardening before go-live
+- [Kubernetes](/docs/integrations/deployment/kubernetes): running on K8s instead of Docker Compose
