@@ -20,7 +20,14 @@ import {
 	getHostedCheckoutProductId,
 	getHostedPlanBySlug,
 } from '../lib/pricing';
-import { FEATURE_LABELS, PLAN_FEATURES, normalizePlanSlug, type PlanFeature } from '../lib/entitlements';
+import {
+	FEATURE_LABELS,
+	PLAN_FEATURES,
+	PLAN_NAMES,
+	minimumPlanForFeature,
+	normalizePlanSlug,
+	type PlanFeature,
+} from '../lib/entitlements';
 
 type BillingAccount = {
 	id: string;
@@ -262,6 +269,13 @@ export default function BillingPage() {
 		: PLAN_FEATURES[normalizedPlan];
 	const lockedFeatures = account?.metadata?.locked_features
 		?? (Object.keys(FEATURE_LABELS) as PlanFeature[]).filter((feature) => !allowedFeatures.includes(feature));
+	const requestedFeatureParam = searchParams.get('feature');
+	const requestedFeature =
+		requestedFeatureParam && requestedFeatureParam in FEATURE_LABELS
+			? requestedFeatureParam as PlanFeature
+			: null;
+	const requestedFeaturePlan = requestedFeature ? minimumPlanForFeature(requestedFeature) : null;
+	const requestedFeatureUnlocked = requestedFeature ? allowedFeatures.includes(requestedFeature) : false;
 
 	return (
 		<AppPage maxWidth="6xl">
@@ -295,6 +309,11 @@ export default function BillingPage() {
 			) : null}
 			{checkoutNotice ? (
 				<AppCallout variant="success">{checkoutNotice}</AppCallout>
+			) : null}
+			{requestedFeature && !requestedFeatureUnlocked ? (
+				<AppCallout variant="info">
+					<strong>{FEATURE_LABELS[requestedFeature]}</strong> starts on {PLAN_NAMES[requestedFeaturePlan ?? 'growth']}. Choose a plan below to unlock it for this workspace.
+				</AppCallout>
 			) : null}
 
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr,0.9fr]">
@@ -426,11 +445,22 @@ export default function BillingPage() {
 					{hostedPlans.map((plan) => {
 						const productId = getHostedCheckoutProductId(plan.id, billingPeriod);
 						const missingProduct = !productId;
+						const isRecommendedUpgrade = requestedFeaturePlan === plan.id;
 						return (
-							<AppSurface key={plan.id}>
+							<AppSurface
+								key={plan.id}
+								className={isRecommendedUpgrade ? 'border-primary/40 bg-primary/5 shadow-lg shadow-primary/10' : undefined}
+							>
 								<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 									<div>
-										<h3 className="text-lg font-bold tracking-[-0.03em]">{plan.name}</h3>
+										<div className="flex flex-wrap items-center gap-2">
+											<h3 className="text-lg font-bold tracking-[-0.03em]">{plan.name}</h3>
+											{isRecommendedUpgrade ? (
+												<span className="rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+													Recommended
+												</span>
+											) : null}
+										</div>
 										<p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
 									</div>
 									<div className="text-left sm:text-right">

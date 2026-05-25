@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DollarSign, Filter, Download, Calendar, TrendingUp } from 'lucide-react';
+import { PoundSterling, Filter, Download, Calendar, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { api } from '../lib/api-client';
@@ -137,10 +137,10 @@ export function CostAnalyticsPage() {
         <AppPage>
             <AppPageHeader
                 eyebrow="Spend"
-                eyebrowIcon={DollarSign}
+                eyebrowIcon={PoundSterling}
                 title="Cost Analytics"
                 description="Track spending across providers, accounts, and time periods"
-                icon={DollarSign}
+                icon={PoundSterling}
                 actions={
                     <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
                         <select
@@ -196,7 +196,7 @@ export function CostAnalyticsPage() {
                         <AppStatCard
                             label="Current Period Cost"
                             value={`£${currentPeriodCost.toFixed(2)}`}
-                            icon={DollarSign}
+                            icon={PoundSterling}
                             tone="text-emerald-400"
                             detail={`${trend.isPositive ? '↓' : '↑'} ${trend.value.toFixed(1)}% vs previous period`}
                         />

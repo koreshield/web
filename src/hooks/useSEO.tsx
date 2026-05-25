@@ -156,7 +156,7 @@ export function generateProductSchema(product: {
 			offers: {
 				'@type': 'Offer',
 				price: product.price,
-				priceCurrency: product.currency || 'USD',
+				priceCurrency: product.currency || 'GBP',
 				availability: product.availability || 'https://schema.org/InStock',
 			},
 		}),

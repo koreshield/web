@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { Building2, DollarSign, HeartPulse, Scale } from 'lucide-react';
+import { Building2, PoundSterling, HeartPulse, Scale } from 'lucide-react';
 
 const useCases = [
 	{
-		icon: DollarSign,
+		icon: PoundSterling,
 		title: 'Financial Services',
 		description: 'Detect payment data, account identifiers, and social-engineering prompts before they pass through customer-facing AI workflows.',
 		tag: 'PCI data',

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { TrendingUp, DollarSign, Zap, BarChart3, Download, Activity } from 'lucide-react';
+import { TrendingUp, PoundSterling, Zap, BarChart3, Download, Activity } from 'lucide-react';
 import {
 	BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
 	Tooltip, ResponsiveContainer, PieChart, Pie, Cell
@@ -308,8 +308,8 @@ export function AdvancedAnalyticsPage() {
 			<AppStatGrid>
 				<AppStatCard
 					label="Total Spend"
-					value={loadingCosts ? '…' : `$${totalCost.toFixed(4)}`}
-					icon={DollarSign}
+					value={loadingCosts ? '…' : `£${totalCost.toFixed(4)}`}
+					icon={PoundSterling}
 					tone="text-emerald-400"
 					detail="Selected period"
 				/>
@@ -322,7 +322,7 @@ export function AdvancedAnalyticsPage() {
 				/>
 				<AppStatCard
 					label="Projected Monthly"
-					value={loadingCosts ? '…' : `$${(costSummary?.projected_monthly_cost ?? 0).toFixed(2)}`}
+					value={loadingCosts ? '…' : `£${(costSummary?.projected_monthly_cost ?? 0).toFixed(2)}`}
 					icon={Zap}
 					tone="text-amber-400"
 					detail="Based on recent trend"
@@ -370,7 +370,7 @@ export function AdvancedAnalyticsPage() {
 					{loadingCosts ? (
 						<AppPageLoading label="Loading cost trend…" />
 					) : budgetChartData.length === 0 ? (
-						<AppEmptyState icon={DollarSign} title="No cost data" description="No cost data available for this period." />
+						<AppEmptyState icon={PoundSterling} title="No cost data" description="No cost data available for this period." />
 					) : (
 						<ResponsiveContainer width="100%" height={300}>
 							<LineChart data={budgetChartData}>
@@ -431,7 +431,7 @@ export function AdvancedAnalyticsPage() {
 					{loadingProviders ? (
 						<AppPageLoading label="Loading cost allocation…" />
 					) : costAllocation.length === 0 ? (
-						<AppEmptyState icon={DollarSign} title="No cost data yet" description="No cost data available yet." />
+						<AppEmptyState icon={PoundSterling} title="No cost data yet" description="No cost data available yet." />
 					) : (
 						<>
 							<ResponsiveContainer width="100%" height={260}>
@@ -462,7 +462,7 @@ export function AdvancedAnalyticsPage() {
 											border: '1px solid hsl(var(--border))',
 											borderRadius: '8px',
 										}}
-										formatter={(v: number | undefined) => [v != null ? `$${v.toFixed(6)}` : 'N/A', 'Cost']}
+										formatter={(v: number | undefined) => [v != null ? `£${v.toFixed(6)}` : 'N/A', 'Cost']}
 									/>
 								</PieChart>
 							</ResponsiveContainer>
@@ -476,7 +476,7 @@ export function AdvancedAnalyticsPage() {
 											/>
 											<span>{item.name}</span>
 										</div>
-										<span className="font-semibold">${item.value.toFixed(4)}</span>
+										<span className="font-semibold">£{item.value.toFixed(4)}</span>
 									</div>
 								))}
 							</div>
