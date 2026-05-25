@@ -118,6 +118,7 @@ const NAV_GROUPS: NavGroup[] = [
 const SIDEBAR_WIDTH = 220;
 const SIDEBAR_COLLAPSED_WIDTH = 56;
 const SIDEBAR_STORAGE_KEY = 'ks_sidebar_collapsed';
+const PLAN_SLUG_STORAGE_KEY = 'ks_plan_slug';
 
 type BillingAccountPlan = {
 	plan_slug?: string | null;
@@ -134,12 +135,14 @@ function NavLink({
 	item,
 	collapsed,
 	locked,
+	planLoading,
 	onClick,
 	onLockedClick,
 }: {
 	item: NavItem;
 	collapsed: boolean;
 	locked: boolean;
+	planLoading?: boolean;
 	onClick?: () => void;
 	onLockedClick?: (item: NavItem) => void;
 }) {
@@ -149,20 +152,20 @@ function NavLink({
 
 	return (
 		<Link
-			to={locked ? `/billing?feature=${encodeURIComponent(item.feature ?? item.label)}` : item.to}
+			to={locked && !planLoading ? `/billing?feature=${encodeURIComponent(item.feature ?? item.label)}` : item.to}
 			onClick={(event) => {
-				if (locked) {
+				if (locked && !planLoading) {
 					event.preventDefault();
 					onLockedClick?.(item);
 					return;
 				}
 				onClick?.();
 			}}
-			title={collapsed ? item.label : locked ? `Upgrade to unlock ${item.label}` : undefined}
+			title={collapsed ? item.label : (locked && !planLoading) ? `Upgrade to unlock ${item.label}` : undefined}
 			className={[
 				'group relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-150',
 				collapsed ? 'justify-center' : '',
-				locked ? 'opacity-60' : '',
+				locked && !planLoading ? 'opacity-60' : '',
 				isActive
 					? 'bg-primary/10 text-primary'
 					: 'text-muted-foreground hover:text-foreground hover:bg-white/[0.04]',
@@ -176,7 +179,10 @@ function NavLink({
 			<Icon className={['w-4 h-4 shrink-0 transition-colors', isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'].join(' ')} />
 
 			{!collapsed && <span className="truncate">{item.label}</span>}
-			{locked && !collapsed && <Lock className="ml-auto h-3.5 w-3.5 text-muted-foreground/70" />}
+			{planLoading && item.feature && !collapsed && (
+				<span className="ml-auto h-3.5 w-3.5 rounded bg-muted-foreground/15 animate-pulse" />
+			)}
+			{!planLoading && locked && !collapsed && <Lock className="ml-auto h-3.5 w-3.5 text-muted-foreground/70" />}
 
 			{/* Tooltip on collapse */}
 			{collapsed && (
@@ -196,6 +202,7 @@ function Sidebar({
 	isAdmin,
 	isFounder,
 	planSlug,
+	planLoading,
 	onNavClick,
 	onLockedNav,
 }: {
@@ -204,6 +211,7 @@ function Sidebar({
 	isAdmin: boolean;
 	isFounder: boolean;
 	planSlug: string | null | undefined;
+	planLoading?: boolean;
 	onNavClick?: () => void;
 	onLockedNav?: (item: NavItem) => void;
 }) {
@@ -253,6 +261,7 @@ function Sidebar({
 										item={item}
 										collapsed={collapsed}
 										locked={!planAllowsFeature(planSlug, item.feature)}
+										planLoading={planLoading}
 										onClick={onNavClick}
 										onLockedClick={onLockedNav}
 									/>
@@ -634,7 +643,20 @@ export function AppLayout() {
 		retry: false,
 		refetchOnWindowFocus: false,
 	});
-	const planSlug = billingQuery.data?.plan_slug ?? 'free';
+
+	const cachedPlanSlug = (() => {
+		try { return localStorage.getItem(PLAN_SLUG_STORAGE_KEY); } catch { return null; }
+	})();
+	const planSlug = billingQuery.data?.plan_slug ?? cachedPlanSlug ?? 'free';
+	const planLoading = billingQuery.isLoading && !cachedPlanSlug;
+
+	useEffect(() => {
+		const slug = billingQuery.data?.plan_slug;
+		if (slug) {
+			try { localStorage.setItem(PLAN_SLUG_STORAGE_KEY, slug); } catch { /* */ }
+		}
+	}, [billingQuery.data?.plan_slug]);
+
 	const currentFeature = featureForPath(location.pathname);
 	const routeLocked = Boolean(billingQuery.isSuccess && currentFeature && !planAllowsFeature(planSlug, currentFeature));
 	const [resendingVerification, setResendingVerification] = useState(false);
@@ -738,6 +760,7 @@ export function AppLayout() {
 					isAdmin={isAdmin}
 					isFounder={isFounder}
 					planSlug={planSlug}
+					planLoading={planLoading}
 					onLockedNav={setUpgradePromptItem}
 				/>
 			</aside>
@@ -772,6 +795,7 @@ export function AppLayout() {
 							isAdmin={isAdmin}
 							isFounder={isFounder}
 							planSlug={planSlug}
+							planLoading={planLoading}
 							onNavClick={() => setMobileOpen(false)}
 							onLockedNav={(item) => {
 								setMobileOpen(false);
