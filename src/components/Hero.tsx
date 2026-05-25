@@ -33,8 +33,8 @@ function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.2 }}
 					>
-						Every Prompt is a{' '}
-						<span className="text-electric-green">Potential Attack.</span>
+						Block Prompt Attacks Before{' '}
+						<span className="text-electric-green">They Reach the Model.</span>
 					</motion.h1>
 
 					<motion.p
@@ -58,7 +58,7 @@ function Hero() {
 							className="group relative bg-electric-green hover:bg-emerald-bright text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 w-full sm:w-auto overflow-hidden"
 						>
 							<span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-							<span className="relative z-10">Start Free</span>
+							<span className="relative z-10">Start Protecting</span>
 							<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10 shrink-0" />
 						</Link>
 
