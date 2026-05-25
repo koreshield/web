@@ -269,7 +269,7 @@ export default function AuditLogsPage() {
 	return (
 		<>
 			<SEOMeta
-				title="Audit & Compliance Logs | Koreshield"
+				title="Audit Logs"
 				description="View and analyze audit logs for compliance and security monitoring"
 			/>
 

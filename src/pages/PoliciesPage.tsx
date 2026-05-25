@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Shield, Plus, Edit, Trash2, X, CheckCircle, AlertTriangle } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
@@ -215,6 +216,7 @@ export function PoliciesPage() {
 
     return (
         <>
+            <SEOMeta title="Policies" noindex />
             <AppPage>
                 <AppPageHeader
                     eyebrow="Access control"

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { SEOMeta } from '../components/SEOMeta';
 import {
 	AudioLines,
 	CheckCircle,
@@ -353,6 +354,7 @@ export function AudioSecurityPage() {
 
 	return (
 		<AppPage>
+			<SEOMeta title="VoiceGuard" noindex />
 			<AppPageHeader
 				eyebrow="VoiceGuard"
 				eyebrowIcon={AudioLines}

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Shield, Users, Plus, Edit2, Trash2, Key, Search, Filter } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
@@ -214,6 +215,7 @@ export function RBACPage() {
 
 	return (
 		<AppPage>
+			<SEOMeta title="Access Control" noindex />
 			<AppPageHeader
 				eyebrow="Access control"
 				eyebrowIcon={Shield}

@@ -30,7 +30,7 @@ export default function VsLLMGuardPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="Koreshield vs LLM Guard"
+				title="vs LLM Guard"
 				description="A practical comparison of Koreshield and LLM Guard for teams choosing an LLM security layer."
 			/>
 

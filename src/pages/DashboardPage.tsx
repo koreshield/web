@@ -16,6 +16,7 @@ import {
 	AppPrimaryButton,
 	AppSurface,
 } from '../components/AppPageLayout';
+import { SEOMeta } from '../components/SEOMeta';
 import { api } from '../lib/api-client';
 export function DashboardPage() {
 	const { user } = useAuthState();
@@ -128,6 +129,7 @@ const client = new OpenAI({
 
 	return (
 		<AppPage>
+			<SEOMeta title="Dashboard" noindex />
 			<AppPageHeader
 				eyebrow="API connected"
 				eyebrowIcon={CheckCircle}

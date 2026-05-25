@@ -70,7 +70,7 @@ export default function SolutionsPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="Solutions | Koreshield"
+				title="Solutions"
 				description="Explore Koreshield solutions for AI detection, application protection, RAG security, agent security, VoiceGuard, usage control, and KorePilot evidence."
 			/>
 

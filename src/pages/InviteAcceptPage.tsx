@@ -4,6 +4,7 @@ import { CheckCircle2, XCircle, Loader2, Users, LogIn } from 'lucide-react';
 import { api } from '../lib/api-client';
 import { useAuthState } from '../hooks/useAuthState';
 import { AuthFormHeader, AuthLayout, AuthStatusPanel } from '../components/AuthLayout';
+import { SEOMeta } from '../components/SEOMeta';
 
 interface InvitePreview {
 	invite_id: string;
@@ -81,6 +82,7 @@ export function InviteAcceptPage() {
 					'Unified audit trail',
 				]}
 			>
+				<SEOMeta title="Accept Invite" noindex />
 				<AuthStatusPanel icon={Loader2} tone="loading" title="Loading your invitation…">
 					<p className="text-muted-foreground">Please wait while we fetch invite details.</p>
 				</AuthStatusPanel>
@@ -99,6 +101,7 @@ export function InviteAcceptPage() {
 					'Unified audit trail',
 				]}
 			>
+				<SEOMeta title="Accept Invite" noindex />
 				<AuthStatusPanel icon={XCircle} tone="error" title="Invite not found">
 					<p className="mb-8 text-muted-foreground">{errorMsg}</p>
 					<Link
@@ -124,6 +127,7 @@ export function InviteAcceptPage() {
 					'Unified audit trail',
 				]}
 			>
+				<SEOMeta title="Accept Invite" noindex />
 				<AuthStatusPanel icon={CheckCircle2} tone="success" title="You're in!">
 					<p className="mb-2 text-muted-foreground">{successMsg}</p>
 					<p className="mb-6 text-sm text-muted-foreground">Redirecting to your team…</p>
@@ -143,6 +147,7 @@ export function InviteAcceptPage() {
 				'Unified audit trail',
 			]}
 		>
+			<SEOMeta title="Accept Invite" noindex />
 			<AuthFormHeader
 				title="Team invitation"
 				description="You've been invited to join a team on Koreshield."

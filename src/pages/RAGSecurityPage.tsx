@@ -816,7 +816,7 @@ export function RAGSecurityPage() {
 	return (
 		<>
 			<SEOMeta
-				title="RAG Security Scanner | Koreshield"
+				title="RAG Scanner"
 				description="Scan retrieved documents for indirect prompt injection attacks in RAG systems"
 			/>
 

@@ -93,7 +93,7 @@ export default function VsBuildYourselfPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="Koreshield vs Building Your Own"
+				title="vs Building In-House"
 				description="Compare building an internal LLM security layer with using Koreshield."
 			/>
 

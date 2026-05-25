@@ -21,7 +21,7 @@ export default function SolutionDetectionResponsePage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="AI Detection & Response | Koreshield"
+				title="Detection & Response"
 				description="Detect, classify, block, and record LLM threats before they reach your model or users."
 			/>
 

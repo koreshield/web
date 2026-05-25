@@ -15,7 +15,7 @@ export default function SolutionAgentsSecurityPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="AI Agents Security | Koreshield"
+				title="Agent Security"
 				description="Secure agentic AI pipelines against tool abuse, indirect prompt injection, and autonomous action escalation."
 			/>
 

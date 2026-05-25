@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Activity, Copy, Download, CheckCircle, AlertTriangle } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useMetrics } from '../hooks/useApi';
 import {
 	AppPage,
@@ -49,6 +50,7 @@ export function MetricsPage() {
 
 	return (
 		<AppPage>
+			<SEOMeta title="Metrics" noindex />
 			<AppPageHeader
 				eyebrow="Observability"
 				eyebrowIcon={Activity}

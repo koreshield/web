@@ -165,7 +165,7 @@ export default function DemoPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="Book a Live Demo | Koreshield"
+				title="Book a Demo"
 				description="See Koreshield intercept real LLM attacks live. Book a 30-minute demo tailored to your stack and use case."
 			/>
 

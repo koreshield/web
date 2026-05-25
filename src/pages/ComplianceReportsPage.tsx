@@ -117,7 +117,7 @@ export function ComplianceReportsPage() {
 	return (
 		<AppPage>
 			<SEOMeta
-				title="Compliance Reports | Koreshield"
+				title="Compliance Reports"
 				description="Real-time compliance posture assessment for SOC 2, ISO 27001, and GDPR"
 			/>
 

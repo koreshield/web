@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../lib/auth';
 import { ArrowLeft, Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-react';
 import { AuthFormHeader, AuthLayout, AuthStatusPanel, authInputClass } from '../components/AuthLayout';
+import { SEOMeta } from '../components/SEOMeta';
 
 export function ResetPasswordPage() {
 	const [searchParams] = useSearchParams();
@@ -44,6 +45,7 @@ export function ResetPasswordPage() {
 				'Your security posture stays intact',
 			]}
 		>
+			<SEOMeta title="Reset Password" noindex />
 			{!token ? (
 				<AuthStatusPanel icon={KeyRound} tone="error" title="Invalid reset link">
 					<p className="mb-8 text-muted-foreground">

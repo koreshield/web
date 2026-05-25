@@ -175,7 +175,7 @@ export function ThreatMapPage() {
 	return (
 		<>
 			<SEOMeta
-				title="Threat Map | Koreshield"
+				title="Threat Map"
 				description="Real-time geographic visualization of security threats and attack patterns"
 			/>
 

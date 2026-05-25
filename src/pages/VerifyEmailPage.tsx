@@ -4,6 +4,7 @@ import { Mail, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import { resolveApiBaseUrl } from '../lib/api-base';
 import { authService } from '../lib/auth';
 import { AuthLayout, AuthStatusPanel } from '../components/AuthLayout';
+import { SEOMeta } from '../components/SEOMeta';
 
 export function VerifyEmailPage() {
 	const [searchParams] = useSearchParams();
@@ -68,6 +69,7 @@ export function VerifyEmailPage() {
 				'Takes just a few seconds',
 			]}
 		>
+			<SEOMeta title="Verify Email" noindex />
 			{!token ? (
 				<AuthStatusPanel icon={AlertCircle} tone="error" title="Invalid verification link">
 					<p className="mb-8 text-muted-foreground">

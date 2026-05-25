@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Sliders, Plus, Edit, Trash2, Code, AlertTriangle, CheckCircle, XCircle, X, TestTube2, Loader } from 'lucide-react';
+import { SEOMeta } from '../components/SEOMeta';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api-client';
 import { useToast } from '../components/ToastNotification';
@@ -217,6 +218,7 @@ export function RulesPage() {
 
     return (
         <>
+            <SEOMeta title="Rules" noindex />
             <AppPage>
                 <AppPageHeader
                     eyebrow="Detection"

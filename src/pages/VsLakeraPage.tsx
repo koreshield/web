@@ -16,7 +16,7 @@ export default function VsLakeraPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="Koreshield vs Lakera Guard"
+				title="vs Lakera Guard"
 				description="Compare Koreshield and Lakera Guard by deployment model, operating model, RAG coverage, and governance needs."
 			/>
 

@@ -74,7 +74,7 @@ export default function SolutionKorePilotPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="KorePilot | AI Compliance Evidence | Koreshield"
+				title="KorePilot"
 				description="KorePilot is Koreshield's planned compliance evidence layer, designed to map detection events, audit logs, red-team results, and CI/CD gates to SOC 2 and ISO 42001 controls."
 			/>
 

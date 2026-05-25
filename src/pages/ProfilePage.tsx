@@ -1,6 +1,7 @@
 import { AlertTriangle, BookOpen, Building, CheckCircle2, CreditCard, Key, Mail, Pencil, Rocket, Shield, Trash2, User, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { SEOMeta } from '../components/SEOMeta';
 import {
 	AppPage,
 	AppPageHeader,
@@ -148,6 +149,7 @@ export function ProfilePage() {
 
 	return (
 		<AppPage maxWidth="6xl">
+			<SEOMeta title="Profile" noindex />
 			<div className="mx-auto max-w-3xl">
 			<AppPageHeader
 				eyebrow="Account"
