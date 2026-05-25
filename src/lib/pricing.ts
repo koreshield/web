@@ -22,6 +22,23 @@ export type PricingPlan = {
 	limitations?: string[];
 };
 
+export const PRICING_FEATURE_ROWS = [
+	['Protected requests included', '10,000', '100,000', '1,000,000', 'Custom'],
+	['Request rate limit', '60/min', '600/min', '5,000/min', 'Custom'],
+	['API keys', '1', '10', '50', 'Custom'],
+	['Prompt and RAG screening', 'Baseline', 'Advanced', 'Advanced', 'Advanced + custom tuning'],
+	['Voice Security', 'N/A', 'Included', 'Included', 'Included'],
+	['Teams', 'N/A', 'Included', 'Included', 'Included'],
+	['Policies, rules, and alerts', 'N/A', 'Included', 'Included', 'Included'],
+	['Reports', 'N/A', 'Included', 'Included', 'Included'],
+	['RBAC and audit logs', 'N/A', 'N/A', 'Included', 'Included'],
+	['Advanced analytics and provider health', 'N/A', 'N/A', 'Included', 'Included'],
+	['Compliance evidence reports', 'N/A', 'N/A', 'N/A', 'Included'],
+	['SSO / SAML', 'N/A', 'N/A', 'N/A', 'Included'],
+	['SIEM export and custom retention', 'N/A', 'N/A', 'N/A', 'Included'],
+	['Private or self-hosted deployment', 'N/A', 'N/A', 'N/A', 'Included'],
+] as const;
+
 export const PRICING_FAQS = [
 	{
 		question: 'Does Koreshield store my prompts or responses?',
