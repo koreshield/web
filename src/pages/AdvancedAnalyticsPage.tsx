@@ -256,7 +256,7 @@ export function AdvancedAnalyticsPage() {
 
 	const metricLabel = {
 		latency: 'Avg Latency (ms)',
-		cost: 'Cost per Request ($)',
+		cost: 'Cost per Request (£)',
 		reliability: 'Success Rate (%)',
 		throughput: 'Throughput (req/min)',
 	}[selectedMetric];
@@ -384,7 +384,7 @@ export function AdvancedAnalyticsPage() {
 										borderRadius: '8px',
 									}}
 								/>
-								<Line type="monotone" dataKey="cost" stroke="#3b82f6" strokeWidth={2} name="Cost ($)" dot={false} />
+								<Line type="monotone" dataKey="cost" stroke="#3b82f6" strokeWidth={2} name="Cost (£)" dot={false} />
 							</LineChart>
 						</ResponsiveContainer>
 					)}
