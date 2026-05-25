@@ -1,0 +1,196 @@
+---
+title: Airgapped Deployment
+description: Install and run Koreshield in environments with no internet access.
+sidebar_position: 2
+last_update:
+  date: 2026-05-25
+---
+
+# Airgapped Deployment
+
+For environments with no outbound internet access — classified networks, regulated data centres, secure enclaves — Koreshield can run fully offline. This guide covers the additional steps beyond a standard [self-hosted deployment](/docs/integrations/deployment/self-hosted).
+
+> **Prerequisite**: You must have an active Enterprise licence with airgapped access enabled. Contact the Koreshield team to receive your offline deployment bundle.
+
+---
+
+## What Changes in Airgapped Mode
+
+| Capability | Standard Self-Hosted | Airgapped |
+|---|---|---|
+| Container image source | Registry pull | Pre-loaded `.tar.gz` images |
+| LLM provider access | Direct API calls | Customer-managed proxy or local models |
+| Licence validation | Local (no phone-home) | Local (no phone-home) |
+| Threat corpus updates | Bundled + optional pull | Manual bundle import |
+| Telemetry / analytics | Local only | Local only |
+| Dashboard | Bundled in stack | Bundled in stack |
+
+## Deployment Mode
+
+Set the deployment mode to `airgapped`:
+
+```bash
+DEPLOYMENT_MODE=airgapped
+ENVIRONMENT=production
+```
+
+When `DEPLOYMENT_MODE=airgapped`, the server:
+
+- Skips any optional outbound calls (update checks, telemetry, etc.)
+- Uses only the bundled threat detection corpus
+- Disables features that require internet (e.g. remote `audio_url` fetching for VoiceGuard)
+
+## Offline Bundle Contents
+
+The Koreshield team delivers a signed bundle (`.tar.gz`) containing:
+
+```
+koreshield-enterprise-v2.x.x-airgapped/
+├── images/
+│   ├── koreshield-api.tar       # docker load -i
+│   ├── koreshield-web.tar       # docker load -i
+│   ├── postgres-16.tar          # docker load -i
+│   ├── redis-7.tar              # docker load -i
+│   ├── caddy-2.tar              # docker load -i
+│   ├── prometheus.tar            # docker load -i
+│   └── grafana.tar              # docker load -i
+├── docker-compose.prod.yml
+├── .env.example
+├── threat-corpus/
+│   └── corpus-v2.x.x.json      # offline detection rules
+├── CHECKSUMS.sha256
+└── CHANGELOG.md
+```
+
+## Installation Steps
+
+### 1. Transfer the bundle
+
+Copy the bundle to your airgapped host via USB, secure file transfer, or approved media:
+
+```bash
+scp koreshield-enterprise-v2.x.x-airgapped.tar.gz admin@secure-host:/opt/koreshield/
+```
+
+### 2. Extract
+
+```bash
+cd /opt/koreshield
+tar xzf koreshield-enterprise-v2.x.x-airgapped.tar.gz
+```
+
+### 3. Verify checksums
+
+```bash
+cd koreshield-enterprise-v2.x.x-airgapped
+sha256sum -c CHECKSUMS.sha256
+```
+
+### 4. Load container images
+
+```bash
+for img in images/*.tar; do
+  docker load -i "$img"
+done
+```
+
+### 5. Configure
+
+```bash
+cp .env.example .env
+# Edit .env with your secrets, licence key, and provider config
+```
+
+Key variables for airgapped:
+
+```bash
+DEPLOYMENT_MODE=airgapped
+KS_LICENSE_KEY=ks_ent_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ENVIRONMENT=production
+JWT_SECRET=your-secret-here
+
+# LLM provider — use a local model endpoint or internal proxy
+OPENAI_API_BASE=http://internal-llm-gateway:8080/v1
+OPENAI_API_KEY=internal-key
+```
+
+### 6. Start
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
+### 7. Verify
+
+```bash
+curl http://localhost:8000/health
+# → {"status": "ok", "deployment_mode": "airgapped", ...}
+```
+
+## LLM Provider Access
+
+In airgapped environments, the Koreshield proxy cannot reach public LLM APIs. You have two options:
+
+### Option A: Internal LLM gateway
+
+Route requests through an internal proxy or VPN gateway that has controlled outbound access:
+
+```bash
+OPENAI_API_BASE=http://internal-gateway:8080/v1
+```
+
+### Option B: Local models
+
+Point Koreshield at a locally hosted model (vLLM, Ollama, TGI):
+
+```bash
+OPENAI_API_BASE=http://local-vllm:8000/v1
+OPENAI_API_KEY=not-needed
+```
+
+Koreshield's proxy uses the OpenAI-compatible API format, so any compatible server works.
+
+## Updating the Threat Corpus
+
+Detection rules ship with each release bundle. To apply an out-of-band update:
+
+1. Receive the updated `corpus-vX.Y.Z.json` from the Koreshield team
+2. Place it in the `threat-corpus/` directory
+3. Set the path in your environment:
+
+```bash
+KS_THREAT_CORPUS_PATH=/opt/koreshield/threat-corpus/corpus-vX.Y.Z.json
+```
+
+4. Restart the API container:
+
+```bash
+docker compose -f docker-compose.prod.yml restart koreshield
+```
+
+## Updating the Stack
+
+1. Receive the new airgapped bundle from Koreshield
+2. Transfer to the secure host
+3. Load new images and restart:
+
+```bash
+for img in images/*.tar; do docker load -i "$img"; done
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Database migrations run automatically on startup.
+
+## Security Considerations
+
+- **No outbound traffic**: `DEPLOYMENT_MODE=airgapped` disables all optional network calls
+- **Licence is offline**: validation uses a bundled public key, never phones home
+- **Audit logs are local**: append-only ledger stored in PostgreSQL and optionally on disk (`data/audit_ledger.jsonl`)
+- **Image integrity**: verify `CHECKSUMS.sha256` before loading images
+- **Secret management**: use your organisation's vault or HSM for `JWT_SECRET` and provider keys
+
+## Next Steps
+
+- [Self-Hosted Deployment](/docs/integrations/deployment/self-hosted): full self-hosted reference
+- [Configuration](/docs/configuration): tune policies and detection thresholds
+- [Production Checklist](/docs/configuration/production-checklist): hardening guide
