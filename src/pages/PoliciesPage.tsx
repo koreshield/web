@@ -76,9 +76,13 @@ export function PoliciesPage() {
             return Array.isArray(response) ? response : [];
         },
         refetchInterval: 30000,
+        retry: 1,
     });
     const hasPermissionError =
-        error instanceof Error && error.message.toLowerCase().includes('insufficient permissions');
+        error instanceof Error && (
+            error.message.toLowerCase().includes('insufficient permissions') ||
+            error.message.toLowerCase().includes('multi-factor authentication')
+        );
 
     const createMutation = useMutation({
         mutationFn: (policy: CreatePolicyForm) =>
