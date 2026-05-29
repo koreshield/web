@@ -12,8 +12,6 @@ import {
 	Download,
 	Trash2,
 	Eye,
-	ChevronDown,
-	ChevronUp,
 	Database,
 	Mail,
 	Globe,
@@ -395,9 +393,16 @@ const normalizeRagResponse = (
 	sourceDocuments: RetrievedDocument[],
 	userQueryValue: string
 ): RAGScanResult => {
-	// Already normalized
+	// Already normalized — but still map from context_analysis if threats were omitted
 	if (payload && typeof payload === 'object' && 'scan_metadata' in payload) {
-		return payload as RAGScanResult;
+		const prebuilt = payload as RAGScanResult;
+		if (prebuilt.document_threats?.length > 0) {
+			return prebuilt;
+		}
+		const nested = (payload as RAGApiResponse).context_analysis;
+		if (!nested?.document_threats?.length) {
+			return prebuilt;
+		}
 	}
 
 	const apiPayload = payload as RAGApiResponse;
@@ -515,8 +520,8 @@ export function RAGSecurityPage() {
 	const [pasteContent, setPasteContent] = useState('');
 	const [selectedTemplate, setSelectedTemplate] = useState<keyof typeof CRM_TEMPLATES | null>(null);
 	const [templateFields, setTemplateFields] = useState<Record<string, string>>({});
-	const [expandedThreat, setExpandedThreat] = useState<string | null>(null);
 	const threatAnalysisRef = useRef<HTMLDivElement>(null);
+	const lastScanIdRef = useRef<string | null>(null);
 
 	const getDocumentLabel = (documentId: string) => {
 		const index = documents.findIndex((item) => item.id === documentId);
@@ -708,12 +713,7 @@ export function RAGSecurityPage() {
 		setDocuments(item.documents);
 		setUserQuery(item.user_query);
 		setScanResult(item.result);
-		if (item.result.document_threats.length > 0) {
-			const firstThreat = item.result.document_threats[0];
-			setExpandedThreat(`${firstThreat.document_id}-0`);
-		} else {
-			setExpandedThreat(null);
-		}
+		lastScanIdRef.current = item.result.scan_metadata.scan_id;
 		success('Loaded previous scan');
 	};
 
@@ -721,7 +721,7 @@ export function RAGSecurityPage() {
 		setDocuments(NORTHSTAR_RAG_DEMO_DOCUMENTS.map((document) => ({ ...document })));
 		setUserQuery(NORTHSTAR_RAG_DEMO_QUERY);
 		setScanResult(null);
-		setExpandedThreat(null);
+		lastScanIdRef.current = null;
 		setActiveTab('paste');
 		success('Northstar demo scenario loaded');
 	};
@@ -781,28 +781,26 @@ export function RAGSecurityPage() {
 					userQuery
 				)
 				: buildLocalRagScanResult(documents, userQuery, scanConfig);
+			lastScanIdRef.current = normalized.scan_metadata.scan_id;
 			setScanResult(normalized);
 			if (normalized.document_threats.length > 0) {
-				const firstThreat = normalized.document_threats[0];
-				setExpandedThreat(`${firstThreat.document_id}-0`);
 				window.requestAnimationFrame(() => {
 					threatAnalysisRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 				});
-			} else {
-				setExpandedThreat(null);
-			}
-			if (isAuthenticated) {
-				await refreshHistory();
 			}
 
 			if (normalized.is_safe) {
 				success(isAuthenticated ? 'No threats detected - Documents are safe!' : 'Guest sandbox scan complete - no threats detected.');
 			} else {
-				showError(
+				success(
 					isAuthenticated
-						? `${normalized.total_threats_found} threat(s) detected!`
-						: `Guest sandbox found ${normalized.total_threats_found} potential threat(s).`
+						? `${normalized.total_threats_found} threat(s) detected and blocked from model context.`
+						: `Guest sandbox found ${normalized.total_threats_found} potential threat(s).`,
 				);
+			}
+
+			if (isAuthenticated) {
+				void refreshHistory();
 			}
 		} catch (error) {
 			showError(getErrorMessage(error, 'Failed to scan documents'));
@@ -1463,57 +1461,31 @@ export function RAGSecurityPage() {
 
 						{/* Document Threats */}
 						{scanResult.document_threats.map((threat, index) => (
-							<motion.div
+							<div
 								key={`${threat.document_id}-${index}`}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: index * 0.05 }}
 								className="dashboard-card overflow-hidden rounded-2xl"
 							>
-								<button
-									onClick={() => setExpandedThreat(
-										expandedThreat === `${threat.document_id}-${index}`
-											? null
-											: `${threat.document_id}-${index}`
-									)}
-									className="w-full p-3 sm:p-4 text-left hover:bg-muted/50 transition-colors"
-								>
-									<div className="flex items-start justify-between">
-										<div className="flex-1">
-											<div className="mb-2 text-lg font-semibold">
-												{getDocumentLabel(threat.document_id)}
-											</div>
-											<div className="flex items-center gap-3 mb-2">
-												<span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getSeverityColor(threat.severity)
-													}`}>
-													{threat.severity.toUpperCase()}
-												</span>
-												<span className="text-xs font-medium uppercase tracking-wide text-red-600">
-													Blocked from model context
-												</span>
-											</div>
-											<div className="font-semibold text-base mb-1 text-muted-foreground">
-												{threat.threat_type.replace(/_/g, ' ')}
-											</div>
-											<div className="text-sm text-muted-foreground">
-												Confidence: {(threat.confidence * 100).toFixed(1)}%
-											</div>
-										</div>
-										{expandedThreat === `${threat.document_id}-${index}` ? (
-											<ChevronUp className="w-5 h-5 text-muted-foreground" />
-										) : (
-											<ChevronDown className="w-5 h-5 text-muted-foreground" />
-										)}
+								<div className="border-b border-border p-3 sm:p-4">
+									<div className="mb-2 text-lg font-semibold">
+										{getDocumentLabel(threat.document_id)}
 									</div>
-								</button>
+									<div className="mb-2 flex items-center gap-3">
+										<span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getSeverityColor(threat.severity)}`}>
+											{threat.severity.toUpperCase()}
+										</span>
+										<span className="text-xs font-medium uppercase tracking-wide text-red-600">
+											Blocked from model context
+										</span>
+									</div>
+									<div className="mb-1 text-base font-semibold text-muted-foreground">
+										{threat.threat_type.replace(/_/g, ' ')}
+									</div>
+									<div className="text-sm text-muted-foreground">
+										Confidence: {(threat.confidence * 100).toFixed(1)}%
+									</div>
+								</div>
 
-								{expandedThreat === `${threat.document_id}-${index}` && (
-									<motion.div
-										initial={{ opacity: 0, height: 0 }}
-										animate={{ opacity: 1, height: 'auto' }}
-										exit={{ opacity: 0, height: 0 }}
-										className="border-t border-border p-4 space-y-4"
-									>
+								<div className="space-y-4 p-4">
 										{/* Excerpt */}
 										<div>
 											<div className="text-sm font-medium mb-2">Threat Excerpt</div>
@@ -1611,9 +1583,8 @@ export function RAGSecurityPage() {
 										<div className="text-xs text-muted-foreground">
 											Location: {threat.location.basis === 'original' ? 'document' : 'normalized'} characters {threat.location.start}-{threat.location.end}
 										</div>
-									</motion.div>
-								)}
-							</motion.div>
+								</div>
+							</div>
 						))}
 
 						{/* Cross-Document Threats */}
