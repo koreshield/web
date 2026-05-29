@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
 	Upload,
@@ -12,7 +12,6 @@ import {
 	Download,
 	Trash2,
 	Eye,
-	EyeOff,
 	ChevronDown,
 	ChevronUp,
 	Database,
@@ -21,7 +20,8 @@ import {
 	MessageSquare,
 	FileType,
 	Clock,
-	Zap
+	Zap,
+	Sparkles
 } from 'lucide-react';
 import { SEOMeta } from '../components/SEOMeta';
 import { AppCallout, AppPage, AppPageHeader, AppStatCard, AppStatGrid, AppSurface } from '../components/AppPageLayout';
@@ -30,6 +30,10 @@ import { useToast } from '../components/ToastNotification';
 import { getDocumentReadErrorMessage, readUploadedDocument } from '../lib/documentExtraction';
 import { useAuthState } from '../hooks/useAuthState';
 import { analyzeThreat, type ThreatResult } from '../lib/threat-engine';
+import {
+	NORTHSTAR_RAG_DEMO_DOCUMENTS,
+	NORTHSTAR_RAG_DEMO_QUERY,
+} from '../lib/rag-demo-scenario';
 
 // Types based on backend schema
 interface RetrievedDocument {
@@ -211,9 +215,27 @@ function getErrorMessage(error: unknown, fallback: string) {
 }
 
 function getDocumentDisplayName(document: RetrievedDocument, index: number) {
-	return typeof document.metadata?.filename === 'string'
-		? document.metadata.filename
-		: `Document ${index + 1}`;
+	if (typeof document.metadata?.label === 'string' && document.metadata.label.trim()) {
+		return document.metadata.label.trim();
+	}
+	if (typeof document.metadata?.filename === 'string' && document.metadata.filename.trim()) {
+		return document.metadata.filename.trim();
+	}
+	const firstLine = document.content.split('\n').find((line) => line.trim())?.trim() || '';
+	if (firstLine) {
+		return firstLine.length > 72 ? `${firstLine.slice(0, 69)}…` : firstLine;
+	}
+	return `Document ${index + 1}`;
+}
+
+function getDocumentScanStatus(
+	documentId: string,
+	scanResult: RAGScanResult | null
+): 'safe' | 'unsafe' | null {
+	if (!scanResult) return null;
+	if (scanResult.unsafe_documents.includes(documentId)) return 'unsafe';
+	if (scanResult.safe_documents.includes(documentId)) return 'safe';
+	return null;
 }
 
 const buildTaxonomyCounts = (values: string[] | undefined): Record<string, number> => {
@@ -494,13 +516,14 @@ export function RAGSecurityPage() {
 	const [selectedTemplate, setSelectedTemplate] = useState<keyof typeof CRM_TEMPLATES | null>(null);
 	const [templateFields, setTemplateFields] = useState<Record<string, string>>({});
 	const [expandedThreat, setExpandedThreat] = useState<string | null>(null);
+	const threatAnalysisRef = useRef<HTMLDivElement>(null);
 
 	const getDocumentLabel = (documentId: string) => {
-		const document = documents.find((item) => item.id === documentId);
-		const filename = typeof document?.metadata?.filename === 'string' ? document.metadata.filename : null;
-		return filename || documentId;
+		const index = documents.findIndex((item) => item.id === documentId);
+		const document = index >= 0 ? documents[index] : documents.find((item) => item.id === documentId);
+		if (!document) return documentId;
+		return getDocumentDisplayName(document, index >= 0 ? index : 0);
 	};
-	const [showSafeDocuments, setShowSafeDocuments] = useState(false);
 	const [scanConfig, setScanConfig] = useState<ScanConfig>({
 		min_confidence: 0.3,
 		enable_cross_document_analysis: true,
@@ -591,6 +614,7 @@ export function RAGSecurityPage() {
 		}
 
 		setDocuments(prev => [...prev, ...newDocuments]);
+		setScanResult(null);
 		e.target.value = '';
 
 		if (newDocuments.length > 0) {
@@ -617,6 +641,7 @@ export function RAGSecurityPage() {
 		};
 
 		setDocuments(prev => [...prev, newDoc]);
+		setScanResult(null);
 		setPasteContent('');
 		success('Document added successfully');
 	};
@@ -644,6 +669,7 @@ export function RAGSecurityPage() {
 		};
 
 		setDocuments(prev => [...prev, newDoc]);
+		setScanResult(null);
 		setTemplateFields({});
 		setSelectedTemplate(null);
 		success('CRM template added successfully');
@@ -652,6 +678,7 @@ export function RAGSecurityPage() {
 	// Remove document
 	const handleRemoveDocument = (id: string) => {
 		setDocuments(prev => prev.filter(doc => doc.id !== id));
+		setScanResult(null);
 		success('Document removed');
 	};
 
@@ -681,7 +708,22 @@ export function RAGSecurityPage() {
 		setDocuments(item.documents);
 		setUserQuery(item.user_query);
 		setScanResult(item.result);
+		if (item.result.document_threats.length > 0) {
+			const firstThreat = item.result.document_threats[0];
+			setExpandedThreat(`${firstThreat.document_id}-0`);
+		} else {
+			setExpandedThreat(null);
+		}
 		success('Loaded previous scan');
+	};
+
+	const handleLoadNorthstarDemo = () => {
+		setDocuments(NORTHSTAR_RAG_DEMO_DOCUMENTS.map((document) => ({ ...document })));
+		setUserQuery(NORTHSTAR_RAG_DEMO_QUERY);
+		setScanResult(null);
+		setExpandedThreat(null);
+		setActiveTab('paste');
+		success('Northstar demo scenario loaded');
 	};
 
 	const handleDeleteHistory = (id: string) => {
@@ -740,6 +782,15 @@ export function RAGSecurityPage() {
 				)
 				: buildLocalRagScanResult(documents, userQuery, scanConfig);
 			setScanResult(normalized);
+			if (normalized.document_threats.length > 0) {
+				const firstThreat = normalized.document_threats[0];
+				setExpandedThreat(`${firstThreat.document_id}-0`);
+				window.requestAnimationFrame(() => {
+					threatAnalysisRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				});
+			} else {
+				setExpandedThreat(null);
+			}
 			if (isAuthenticated) {
 				await refreshHistory();
 			}
@@ -840,13 +891,27 @@ export function RAGSecurityPage() {
 					]}
 				/>
 
-				<p className="-mt-4 mb-8 text-sm text-muted-foreground">
+				<p className="-mt-4 mb-4 text-sm text-muted-foreground">
 					{isAuthenticated
 						? 'Signed in: scans are saved to your account history and scan packs can be downloaded.'
 						: isHydrating
 							? 'Checking your session...'
 							: 'Guest sandbox: scans run locally in the browser. Sign in to save history and download full scan packs.'}
 				</p>
+
+				<div className="mb-8 flex flex-wrap items-center gap-3">
+					<button
+						type="button"
+						onClick={handleLoadNorthstarDemo}
+						className="inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+					>
+						<Sparkles className="h-4 w-4" />
+						Load Northstar demo
+					</button>
+					<span className="text-xs text-muted-foreground">
+						Preloads the Northstar Retail Group escalation scenario for demos and dry runs.
+					</span>
+				</div>
 
 				{scanResult && (
 					<AppStatGrid columns={3}>
@@ -1050,28 +1115,54 @@ export function RAGSecurityPage() {
 									</button>
 								</div>
 								<div className="space-y-2">
-									{documents.map((doc, index) => (
-										<div
-											key={doc.id}
-											className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg group"
-										>
-											<FileText className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-											<div className="flex-1 min-w-0">
-												<div className="font-medium text-sm">
-													{getDocumentDisplayName(doc, index)}
-												</div>
-												<div className="text-xs text-muted-foreground truncate">
-													{doc.content.substring(0, 100)}...
-												</div>
-											</div>
-											<button
-												onClick={() => handleRemoveDocument(doc.id)}
-												className="opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700"
+									{documents.map((doc, index) => {
+										const scanStatus = getDocumentScanStatus(doc.id, scanResult);
+										return (
+											<div
+												key={doc.id}
+												className={`flex items-start gap-3 rounded-lg border p-3 group ${scanStatus === 'unsafe'
+														? 'border-red-500/40 bg-red-500/5'
+														: scanStatus === 'safe'
+															? 'border-green-500/40 bg-green-500/5'
+															: 'border-transparent bg-muted/50'
+													}`}
 											>
-												<Trash2 className="w-4 h-4" />
-											</button>
-										</div>
-									))}
+												{scanStatus === 'unsafe' ? (
+													<XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+												) : scanStatus === 'safe' ? (
+													<CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+												) : (
+													<FileText className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+												)}
+												<div className="flex-1 min-w-0">
+													<div className="flex flex-wrap items-center gap-2 mb-1">
+														<div className="font-medium text-sm">
+															{getDocumentDisplayName(doc, index)}
+														</div>
+														{scanStatus === 'unsafe' && (
+															<span className="rounded-full border border-red-500/40 bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-600">
+																Blocked
+															</span>
+														)}
+														{scanStatus === 'safe' && (
+															<span className="rounded-full border border-green-500/40 bg-green-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-green-600">
+																Safe
+															</span>
+														)}
+													</div>
+													<div className="text-xs text-muted-foreground truncate">
+														{doc.content.substring(0, 100)}...
+													</div>
+												</div>
+												<button
+													onClick={() => handleRemoveDocument(doc.id)}
+													className="opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700"
+												>
+													<Trash2 className="w-4 h-4" />
+												</button>
+											</div>
+										);
+									})}
 								</div>
 						</AppSurface>
 						)}
@@ -1227,44 +1318,59 @@ export function RAGSecurityPage() {
 
 								{/* Document Status */}
 								<div>
-									<div className="flex items-center justify-between mb-2">
-										<div className="text-sm font-medium">Document Status</div>
-										<button
-											onClick={() => setShowSafeDocuments(!showSafeDocuments)}
-											className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 whitespace-nowrap"
-										>
-											{showSafeDocuments ? (
-												<>
-													<EyeOff className="w-3 h-3" />
-													Hide Safe
-												</>
-											) : (
-												<>
-													<Eye className="w-3 h-3" />
-													Show Safe
-												</>
-											)}
-										</button>
+									<div className="mb-3 text-sm font-medium">Document verdicts</div>
+									<div className="mb-3 rounded-lg border border-border bg-muted/30 p-3 text-sm">
+										<span className="font-semibold text-green-600">{scanResult.safe_documents.length}</span>
+										<span className="text-muted-foreground"> safe for model context</span>
+										<span className="mx-2 text-muted-foreground">·</span>
+										<span className="font-semibold text-red-600">{scanResult.unsafe_documents.length}</span>
+										<span className="text-muted-foreground"> blocked</span>
 									</div>
 									<div className="space-y-2">
-										<div className="flex items-center justify-between text-sm">
-											<span className="flex items-center gap-2">
-												<XCircle className="w-4 h-4 text-red-600" />
-												Unsafe
-											</span>
-											<span className="font-semibold">{scanResult.unsafe_documents.length}</span>
-										</div>
-										{showSafeDocuments && (
-											<div className="flex items-center justify-between text-sm">
-												<span className="flex items-center gap-2">
-													<CheckCircle className="w-4 h-4 text-green-600" />
-													Safe
-												</span>
-												<span className="font-semibold">{scanResult.safe_documents.length}</span>
-											</div>
-										)}
+										{documents.map((doc, index) => {
+											const scanStatus = getDocumentScanStatus(doc.id, scanResult);
+											if (!scanStatus) return null;
+											const label = getDocumentDisplayName(doc, index);
+											return (
+												<div
+													key={doc.id}
+													className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm ${scanStatus === 'unsafe'
+															? 'border-red-500/30 bg-red-500/5'
+															: 'border-green-500/30 bg-green-500/5'
+														}`}
+												>
+													<span className="min-w-0 truncate font-medium">{label}</span>
+													<span
+														className={`flex shrink-0 items-center gap-1 text-xs font-semibold uppercase tracking-wide ${scanStatus === 'unsafe' ? 'text-red-600' : 'text-green-600'
+															}`}
+													>
+														{scanStatus === 'unsafe' ? (
+															<>
+																<XCircle className="h-3.5 w-3.5" />
+																Blocked
+															</>
+														) : (
+															<>
+																<CheckCircle className="h-3.5 w-3.5" />
+																Safe
+															</>
+														)}
+													</span>
+												</div>
+											);
+										})}
 									</div>
 								</div>
+
+								{scanResult.unsafe_documents.length > 0 && scanResult.safe_documents.length > 0 && (
+									<div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm text-muted-foreground">
+										<span className="font-medium text-foreground">Filtered context:</span>{' '}
+										{scanResult.safe_documents.length} document
+										{scanResult.safe_documents.length === 1 ? '' : 's'} can reach the model.{' '}
+										{scanResult.unsafe_documents.length} poisoned document
+										{scanResult.unsafe_documents.length === 1 ? ' was' : 's were'} removed before inference.
+									</div>
+								)}
 						</AppSurface>
 						)}
 
@@ -1352,7 +1458,7 @@ export function RAGSecurityPage() {
 
 				{/* Detailed Threat Analysis */}
 				{scanResult && scanResult.document_threats.length > 0 && (
-					<div className="mt-8 space-y-4">
+					<div ref={threatAnalysisRef} className="mt-8 space-y-4 scroll-mt-8">
 						<h2 className="text-xl sm:text-2xl font-bold">Threat Analysis</h2>
 
 						{/* Document Threats */}
@@ -1374,17 +1480,20 @@ export function RAGSecurityPage() {
 								>
 									<div className="flex items-start justify-between">
 										<div className="flex-1">
+											<div className="mb-2 text-lg font-semibold">
+												{getDocumentLabel(threat.document_id)}
+											</div>
 											<div className="flex items-center gap-3 mb-2">
 												<span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getSeverityColor(threat.severity)
 													}`}>
 													{threat.severity.toUpperCase()}
 												</span>
-												<span className="font-mono text-sm text-muted-foreground">
-													{threat.document_id}
+												<span className="text-xs font-medium uppercase tracking-wide text-red-600">
+													Blocked from model context
 												</span>
 											</div>
-											<div className="font-semibold text-lg mb-1">
-												{threat.threat_type.replace(/_/g, ' ').toUpperCase()}
+											<div className="font-semibold text-base mb-1 text-muted-foreground">
+												{threat.threat_type.replace(/_/g, ' ')}
 											</div>
 											<div className="text-sm text-muted-foreground">
 												Confidence: {(threat.confidence * 100).toFixed(1)}%
@@ -1412,7 +1521,7 @@ export function RAGSecurityPage() {
 												<code className="text-sm">{threat.excerpt}</code>
 											</div>
 											<div className="mt-2 text-xs text-muted-foreground">
-												Reference source: {getDocumentLabel(threat.document_id)}
+												Source document: {getDocumentLabel(threat.document_id)}
 											</div>
 										</div>
 
@@ -1535,8 +1644,8 @@ export function RAGSecurityPage() {
 														{stage.stage_number}
 													</div>
 													<div className="flex-1">
-														<div className="font-mono text-xs text-muted-foreground mb-1">
-															{stage.document_id}
+														<div className="text-xs font-medium text-muted-foreground mb-1">
+															{getDocumentLabel(stage.document_id)}
 														</div>
 														<div className="text-sm">{stage.component_description}</div>
 													</div>
