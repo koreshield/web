@@ -1,6 +1,7 @@
 import type { ChatCompletionRequest, ChatCompletionResponse, HealthCheckResponse, AttackStats } from '../types/api';
 import { authService } from './auth';
 import { resolveApiBaseUrl } from './api-base';
+import { normalizeRuleFromApi, normalizeRulePayload, normalizeRuleTestResult } from './rule-api';
 
 const API_BASE_URL = resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
@@ -176,6 +177,10 @@ class ApiClient {
 				return messages.join('; ');
 			}
 		}
+		if (typeof errorObject?.detail === 'object' && errorObject.detail !== null) {
+			const detail = errorObject.detail as JsonRecord;
+			if (typeof detail.message === 'string') return detail.message;
+		}
 		return `HTTP ${status}`;
 	}
 
@@ -317,21 +322,21 @@ class ApiClient {
 
 	// Policy Management
 	async getPolicies() {
-		return this.fetch('/v1/management/policies');
+		return this.fetch('/v1/management/policies', {}, 1);
 	}
 
 	async createPolicy(policy: JsonRecord) {
 		return this.fetch('/v1/management/policies', {
 			method: 'POST',
 			body: JSON.stringify(policy),
-		});
+		}, 1);
 	}
 
 	async updatePolicy(policyId: string, policy: JsonRecord) {
 		return this.fetch(`/v1/management/policies/${policyId}`, {
 			method: 'PUT',
 			body: JSON.stringify(policy),
-		});
+		}, 1);
 	}
 
 	async updateMe(data: { name?: string; company?: string; job_title?: string }) {
@@ -633,43 +638,46 @@ class ApiClient {
 
 	// Rules Management APIs (custom detection rules)
 	async getRules() {
-		return this.fetch('/v1/management/rules');
+		const rules = await this.fetch<JsonRecord[]>('/v1/management/rules', {}, 1);
+		return Array.isArray(rules) ? rules.map((rule) => normalizeRuleFromApi(rule)) : [];
 	}
 
 	async getRule(ruleId: string) {
-		return this.fetch(`/v1/management/rules/${ruleId}`);
+		const rule = await this.fetch<JsonRecord>(`/v1/management/rules/${ruleId}`, {}, 1);
+		return normalizeRuleFromApi(rule);
 	}
 
 	async createRule(ruleData: JsonRecord) {
 		return this.fetch('/v1/management/rules', {
 			method: 'POST',
-			body: JSON.stringify(ruleData),
-		});
+			body: JSON.stringify(normalizeRulePayload(ruleData)),
+		}, 1);
 	}
 
 	async updateRule(ruleId: string, ruleData: JsonRecord) {
 		return this.fetch(`/v1/management/rules/${ruleId}`, {
 			method: 'PUT',
-			body: JSON.stringify(ruleData),
-		});
+			body: JSON.stringify(normalizeRulePayload(ruleData)),
+		}, 1);
 	}
 
 	async deleteRule(ruleId: string) {
 		return this.fetch(`/v1/management/rules/${ruleId}`, {
 			method: 'DELETE',
-		});
+		}, 1);
 	}
 
 	async testRule(ruleData: JsonRecord) {
-		return this.fetch('/v1/management/rules/test', {
+		const result = await this.fetch<JsonRecord>('/v1/management/rules/test', {
 			method: 'POST',
-			body: JSON.stringify(ruleData),
-		});
+			body: JSON.stringify(normalizeRulePayload(ruleData)),
+		}, 1);
+		return normalizeRuleTestResult(result);
 	}
 
 	// Alerts Management APIs
 	async getAlertRules() {
-		return this.fetch('/v1/management/alerts/rules');
+		return this.fetch('/v1/management/alerts/rules', {}, 1);
 	}
 
 	async getAlertRule(ruleId: string) {
@@ -680,24 +688,24 @@ class ApiClient {
 		return this.fetch('/v1/management/alerts/rules', {
 			method: 'POST',
 			body: JSON.stringify(ruleData),
-		});
+		}, 1);
 	}
 
 	async updateAlertRule(ruleId: string, ruleData: JsonRecord) {
 		return this.fetch(`/v1/management/alerts/rules/${ruleId}`, {
 			method: 'PUT',
 			body: JSON.stringify(ruleData),
-		});
+		}, 1);
 	}
 
 	async deleteAlertRule(ruleId: string) {
 		return this.fetch(`/v1/management/alerts/rules/${ruleId}`, {
 			method: 'DELETE',
-		});
+		}, 1);
 	}
 
 		async getAlertChannels() {
-			return this.fetch('/v1/management/alerts/channels');
+			return this.fetch('/v1/management/alerts/channels', {}, 1);
 		}
 
 		// Founder Portal APIs
@@ -793,20 +801,20 @@ class ApiClient {
 		return this.fetch('/v1/management/alerts/channels', {
 			method: 'POST',
 			body: JSON.stringify(channelData),
-		});
+		}, 1);
 	}
 
 	async updateAlertChannel(channelId: string, channelData: JsonRecord) {
 		return this.fetch(`/v1/management/alerts/channels/${channelId}`, {
 			method: 'PUT',
 			body: JSON.stringify(channelData),
-		});
+		}, 1);
 	}
 
 	async deleteAlertChannel(channelId: string) {
 		return this.fetch(`/v1/management/alerts/channels/${channelId}`, {
 			method: 'DELETE',
-		});
+		}, 1);
 	}
 
 	async testAlertChannel(channelId: string) {

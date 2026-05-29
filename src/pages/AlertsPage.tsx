@@ -118,6 +118,7 @@ export function AlertsPage() {
             return await api.getAlertRules() as AlertRule[];
         },
         refetchInterval: 30000,
+        retry: 1,
     });
 
     // Fetch alert channels from API
@@ -127,6 +128,7 @@ export function AlertsPage() {
             return await api.getAlertChannels() as AlertChannel[];
         },
         refetchInterval: 30000,
+        retry: 1,
     });
 
     // Create rule mutation
@@ -262,9 +264,24 @@ export function AlertsPage() {
 
     const handleCreateRule = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!ruleFormData.name.trim()) {
+            showError('Alert name is required');
+            return;
+        }
+        if (!ruleFormData.description.trim()) {
+            showError('Description is required');
+            return;
+        }
+        if (!ruleFormData.condition.trim()) {
+            showError('Condition is required');
+            return;
+        }
         const channelsList = ruleFormData.channels ? ruleFormData.channels.split(',').map(c => c.trim()).filter(Boolean) : [];
         createRuleMutation.mutate({
             ...ruleFormData,
+            name: ruleFormData.name.trim(),
+            description: ruleFormData.description.trim(),
+            condition: ruleFormData.condition.trim(),
             channels: channelsList,
         });
     };
