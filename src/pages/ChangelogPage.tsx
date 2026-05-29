@@ -593,7 +593,7 @@ function ChangelogPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground transition-colors">
 			<SEOMeta
-				title="Changelog"
+				title="Changelog | Koreshield"
 				description="Curated Koreshield release notes covering platform updates, security improvements, product changes, and operational milestones."
 			/>
 
