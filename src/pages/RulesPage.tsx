@@ -12,6 +12,7 @@ import {
 	AppEmptyState,
 	AppPrimaryButton,
 	AppSecondaryButton,
+	AppCallout,
 } from '../components/AppPageLayout';
 
 interface Rule {
@@ -23,7 +24,7 @@ interface Rule {
     pattern: string;
     pattern_type: 'regex' | 'keyword' | 'contains' | 'starts_with' | 'ends_with';
     severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
-    action: 'block' | 'flag' | 'log' | 'warn';
+    action: 'block' | 'warn' | 'log' | 'allow';
     tags?: string[];
     conditions: {
         type: string;
@@ -46,7 +47,7 @@ interface RuleFormData {
     pattern: string;
     pattern_type: 'regex' | 'keyword' | 'contains' | 'starts_with' | 'ends_with';
     severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
-    action: 'block' | 'flag' | 'log' | 'warn';
+    action: 'block' | 'warn' | 'log' | 'allow';
     tags: string;
 }
 
@@ -58,11 +59,11 @@ export function RulesPage() {
         name: '',
         description: '',
         enabled: true,
-        priority: 100,
+        priority: 5,
         pattern: '',
         pattern_type: 'contains',
         severity: 'medium',
-        action: 'flag',
+        action: 'warn',
         tags: '',
     });
     const [testText, setTestText] = useState('');
@@ -73,12 +74,13 @@ export function RulesPage() {
     const { success, error: showError } = useToast();
 
     // Fetch rules from API
-    const { data: rules = [], isLoading } = useQuery<Rule[]>({
+    const { data: rules = [], isLoading, isError, error: rulesError, refetch } = useQuery<Rule[]>({
         queryKey: ['rules'],
         queryFn: async () => {
             return await api.getRules() as Rule[];
         },
         refetchInterval: 30000,
+        retry: 1,
     });
 
     // Create rule mutation
@@ -133,11 +135,11 @@ export function RulesPage() {
             name: '',
             description: '',
             enabled: true,
-            priority: 100,
+            priority: 5,
             pattern: '',
             pattern_type: 'contains',
             severity: 'medium',
-            action: 'flag',
+            action: 'warn',
             tags: '',
         });
         setTestText('');
@@ -168,25 +170,48 @@ export function RulesPage() {
 
     const handleCreateRule = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!formData.name.trim()) {
+            showError('Rule name is required');
+            return;
+        }
+        if (!formData.description.trim()) {
+            showError('Description is required');
+            return;
+        }
+        if (!formData.pattern.trim()) {
+            showError('Pattern is required');
+            return;
+        }
+        const priority = Math.min(10, Math.max(1, formData.priority || 5));
         const tags = formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
         createRuleMutation.mutate({
             ...formData,
+            name: formData.name.trim(),
+            description: formData.description.trim(),
+            pattern: formData.pattern.trim(),
+            priority,
             tags,
         });
     };
 
     const handleUpdateRule = (e: React.FormEvent) => {
         e.preventDefault();
-        if (editingRule) {
-            const tags = formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
-            updateRuleMutation.mutate({
-                id: editingRule.id,
-                data: {
-                    ...formData,
-                    tags,
-                },
-            });
+        if (!editingRule) return;
+        if (!formData.description.trim()) {
+            showError('Description is required');
+            return;
         }
+        const priority = Math.min(10, Math.max(1, formData.priority || 5));
+        const tags = formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+        updateRuleMutation.mutate({
+            id: editingRule.id,
+            data: {
+                ...formData,
+                description: formData.description.trim(),
+                priority,
+                tags,
+            },
+        });
     };
 
     const openEditModal = (rule: Rule) => {
@@ -199,7 +224,7 @@ export function RulesPage() {
             pattern: rule.pattern,
             pattern_type: rule.pattern_type,
             severity: rule.severity,
-            action: rule.action,
+            action: rule.action === 'flag' ? 'warn' : rule.action as RuleFormData['action'],
             tags: rule.tags?.join(', ') || '',
         });
         setShowEditModal(true);
@@ -261,6 +286,20 @@ export function RulesPage() {
                     {isLoading ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                        </div>
+                    ) : isError ? (
+                        <div className="p-6">
+                            <AppCallout variant="warning">
+                                <p className="font-medium text-foreground">Could not load rules</p>
+                                <p className="mt-1">
+                                    {rulesError instanceof Error ? rulesError.message : 'Unable to reach the rules API. Check that the backend is running and your plan includes Rules.'}
+                                </p>
+                            </AppCallout>
+                            <div className="mt-4">
+                                <AppSecondaryButton onClick={() => void refetch()}>
+                                    Try again
+                                </AppSecondaryButton>
+                            </div>
                         </div>
                     ) : rules.length === 0 ? (
                         <AppEmptyState
@@ -394,20 +433,23 @@ export function RulesPage() {
                                     <label className="block text-sm font-medium mb-2">Priority</label>
                                     <input
                                         type="number"
+                                        min={1}
+                                        max={10}
                                         value={formData.priority}
-                                        onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) })}
+                                        onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value, 10) || 5 })}
                                         className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-2">Description</label>
+                                <label className="block text-sm font-medium mb-2">Description *</label>
                                 <textarea
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                                     rows={2}
                                     placeholder="Rule description"
+                                    required
                                 />
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -488,7 +530,6 @@ export function RulesPage() {
                                         <option value="high">High</option>
                                         <option value="medium">Medium</option>
                                         <option value="low">Low</option>
-                                        <option value="info">Info</option>
                                     </select>
                                 </div>
                                 <div>
@@ -499,9 +540,9 @@ export function RulesPage() {
                                         className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                                     >
                                         <option value="block">Block</option>
-                                        <option value="flag">Flag</option>
-                                        <option value="log">Log</option>
                                         <option value="warn">Warn</option>
+                                        <option value="log">Log</option>
+                                        <option value="allow">Allow</option>
                                     </select>
                                 </div>
                                 <div>
@@ -567,8 +608,10 @@ export function RulesPage() {
                                     <label className="block text-sm font-medium mb-2">Priority</label>
                                     <input
                                         type="number"
+                                        min={1}
+                                        max={10}
                                         value={formData.priority}
-                                        onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) })}
+                                        onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value, 10) || 5 })}
                                         className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                                     />
                                 </div>
@@ -659,7 +702,6 @@ export function RulesPage() {
                                         <option value="high">High</option>
                                         <option value="medium">Medium</option>
                                         <option value="low">Low</option>
-                                        <option value="info">Info</option>
                                     </select>
                                 </div>
                                 <div>
@@ -670,9 +712,9 @@ export function RulesPage() {
                                         className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                                     >
                                         <option value="block">Block</option>
-                                        <option value="flag">Flag</option>
-                                        <option value="log">Log</option>
                                         <option value="warn">Warn</option>
+                                        <option value="log">Log</option>
+                                        <option value="allow">Allow</option>
                                     </select>
                                 </div>
                                 <div>
