@@ -24,7 +24,7 @@ interface Rule {
     pattern: string;
     pattern_type: 'regex' | 'keyword' | 'contains' | 'starts_with' | 'ends_with';
     severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
-    action: 'block' | 'warn' | 'log' | 'allow';
+    action: 'block' | 'warn' | 'log' | 'allow' | 'flag';
     tags?: string[];
     conditions: {
         type: string;
@@ -77,7 +77,7 @@ export function RulesPage() {
     const { data: rules = [], isLoading, isError, error: rulesError, refetch } = useQuery<Rule[]>({
         queryKey: ['rules'],
         queryFn: async () => {
-            return await api.getRules() as Rule[];
+            return await api.getRules() as unknown as Rule[];
         },
         refetchInterval: 30000,
         retry: 1,
