@@ -24,15 +24,13 @@ export function InviteAcceptPage() {
 	const navigate = useNavigate();
 	const { isAuthenticated, user } = useAuthState();
 
-	const [pageState, setPageState] = useState<PageState>('loading');
+	const [pageState, setPageState] = useState<PageState>(token ? 'loading' : 'error');
 	const [invite, setInvite] = useState<InvitePreview | null>(null);
-	const [errorMsg, setErrorMsg] = useState('');
+	const [errorMsg, setErrorMsg] = useState(token ? '' : 'No invite token found in the link. Please check the link and try again.');
 	const [successMsg, setSuccessMsg] = useState('');
 
 	useEffect(() => {
 		if (!token) {
-			setErrorMsg('No invite token found in the link. Please check the link and try again.');
-			setPageState('error');
 			return;
 		}
 
