@@ -8,145 +8,145 @@
 
 	<url>
 		<loc>https://koreshield.ai/docs/api</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/api-reference</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/api/rest-api</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/api/websocket</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/best-practices/caching</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/best-practices/error-handling</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/case-studies</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/compliance/dpa</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/compliance/gdpr</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/compliance/hipaa</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/configuration</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/configuration/policies</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/configuration/production-checklist</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/configuration/rate-limiting</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/configuration/settings</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/features/attack-detection</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/integrations/crm</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/integrations/databases</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/integrations/deployment</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/integrations/frameworks</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/integrations/models</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/integrations/monitoring</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/integrations/platforms</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs/integrations/svelte</loc>
-		<lastmod>2026-05-29</lastmod>
+		<lastmod>2026-06-01</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.5</priority>
 	</url>
