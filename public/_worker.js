@@ -11,32 +11,47 @@ const SECURITY_HEADERS = {
 };
 
 const ASSET_PATH_PATTERN = /\.(js|css|png|jpg|jpeg|gif|svg|ico|json|xml|webp|woff|woff2|ttf|eot|txt|map)$/i;
+const SEO_PATH_PATTERN = /^\/(robots\.txt|sitemap.*\.xml)$/i;
+const HTML_CACHE = 'public, max-age=0, must-revalidate, s-maxage=300, stale-while-revalidate=86400';
+const SEO_CACHE = 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800';
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const response = await env.ASSETS.fetch(request);
+    const { pathname } = url;
 
-    if (shouldServeSpaShell(request, url.pathname, response.status)) {
-      return serveSpaShell(request, env, url.pathname);
+    if (!['GET', 'HEAD'].includes(request.method)) {
+      return env.ASSETS.fetch(request);
     }
 
-    return withSecurityHeaders(response, url.pathname);
+    if (SEO_PATH_PATTERN.test(pathname)) {
+      const response = await env.ASSETS.fetch(request);
+      return finalizeResponse(response, pathname, SEO_CACHE);
+    }
+
+    if (isSpaRoute(pathname)) {
+      return serveSpaShell(request, env, pathname);
+    }
+
+    const response = await env.ASSETS.fetch(request);
+    return finalizeResponse(response, pathname);
   },
 };
 
-function shouldServeSpaShell(request, pathname, status) {
-  if (status !== 404 || !['GET', 'HEAD'].includes(request.method)) {
-    return false;
+function isSpaRoute(pathname) {
+  if (pathname === '/' || pathname === '') {
+    return true;
   }
 
   if (
     pathname.startsWith('/api/') ||
     pathname.startsWith('/assets/') ||
-    pathname.startsWith('/static/') ||
-    ASSET_PATH_PATTERN.test(pathname) ||
-    pathname.includes('.')
+    pathname.startsWith('/static/')
   ) {
+    return false;
+  }
+
+  if (ASSET_PATH_PATTERN.test(pathname) || pathname.includes('.')) {
     return false;
   }
 
@@ -52,7 +67,7 @@ async function serveSpaShell(request, env, pathname) {
   const response = await env.ASSETS.fetch(indexRequest);
   const headers = new Headers(response.headers);
   headers.set('Content-Type', 'text/html; charset=utf-8');
-  headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  headers.set('Cache-Control', HTML_CACHE);
 
   return new Response(request.method === 'HEAD' ? null : response.body, {
     status: 200,
@@ -60,11 +75,13 @@ async function serveSpaShell(request, env, pathname) {
   });
 }
 
-function withSecurityHeaders(response, pathname) {
+function finalizeResponse(response, pathname, cacheControl) {
   const headers = applySecurityHeaders(new Headers(response.headers), pathname);
 
-  if (pathname === '/robots.txt' || pathname.endsWith('.html') || !pathname.includes('.')) {
-    headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  if (cacheControl) {
+    headers.set('Cache-Control', cacheControl);
+  } else if (pathname.endsWith('.html')) {
+    headers.set('Cache-Control', HTML_CACHE);
   }
 
   return new Response(response.body, {
