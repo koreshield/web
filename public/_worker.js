@@ -1,6 +1,6 @@
 const SECURITY_HEADERS = {
   'Content-Security-Policy':
-    "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data: blob: https://koreshield.ai https://www.koreshield.ai https://cdn.sanity.io; font-src 'self' data:; connect-src 'self' https://api.koreshield.com wss://api.koreshield.com https://api.emailjs.com https://static.cloudflareinsights.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+    "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data: blob: https://koreshield.ai https://www.koreshield.ai https://koreshield.com https://www.koreshield.com https://cdn.sanity.io; font-src 'self' data:; connect-src 'self' https://api.koreshield.com wss://api.koreshield.com https://api.emailjs.com https://static.cloudflareinsights.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
   'X-Frame-Options': 'DENY',
   'X-Content-Type-Options': 'nosniff',

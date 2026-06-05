@@ -4,6 +4,8 @@
 const KNOWN_API_OVERRIDES: Record<string, string> = {
 	'koreshield.ai': 'https://api.koreshield.com',
 	'www.koreshield.ai': 'https://api.koreshield.com',
+	'koreshield.com': 'https://api.koreshield.com',
+	'www.koreshield.com': 'https://api.koreshield.com',
 };
 
 export function resolveApiBaseUrl(value?: string) {
