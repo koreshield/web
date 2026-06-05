@@ -1,47 +1,72 @@
-# https://www.robotstxt.org/robotstxt.html
+# Koreshield robots.txt
+# Public site aliases: koreshield.ai and koreshield.com (same frontend and content).
+# Cloudflare may prepend managed AI crawler directives above this file.
+
+# Public marketing, docs, blog, research, careers, legal, and status pages.
 User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
 Disallow: /private/
-Disallow: /.well-known/
+Disallow: /dashboard
+Disallow: /getting-started
+Disallow: /profile
+Disallow: /settings
+Disallow: /settings/
+Disallow: /billing
+Disallow: /usage
+Disallow: /policies
+Disallow: /metrics
+Disallow: /analytics
+Disallow: /rules
+Disallow: /alerts
+Disallow: /cost-analytics
+Disallow: /rbac
+Disallow: /reports
+Disallow: /teams/
+Disallow: /api-key-management
+Disallow: /rag-security
+Disallow: /voice-security
+Disallow: /threat-monitoring
+Disallow: /threat-map
+Disallow: /provider-health
+Disallow: /advanced-analytics
+Disallow: /founder
+Disallow: /compliance-reports
+Disallow: /audit-logs
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /auth/
+Disallow: /invites/
 
-# Specific bot rules
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Slurp
-Allow: /
-Crawl-delay: 2
-
-User-agent: DuckDuckBot
-Allow: /
-
-User-agent: Baiduspider
-Allow: /
-
-User-agent: Yandexbot
-Allow: /
-
-User-agent: MJ12bot
-Allow: /
-
-# Block bad bots
+# Aggressive SEO scrapers — no indexing value for a product site.
 User-agent: MJ12bot
 Disallow: /
 
 User-agent: AhrefsBot
-Crawl-delay: 10
+Disallow: /
 
 User-agent: SemrushBot
-Crawl-delay: 10
+Disallow: /
 
-# Sitemap
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+# Sitemaps for both public domains
+Sitemap: https://koreshield.ai/sitemap-index.xml
 Sitemap: https://koreshield.ai/sitemap.xml
 Sitemap: https://koreshield.ai/sitemap-blog.xml
 Sitemap: https://koreshield.ai/sitemap-docs.xml
+Sitemap: https://koreshield.com/sitemap.com-index.xml
+Sitemap: https://koreshield.com/sitemap.com.xml
+Sitemap: https://koreshield.com/sitemap.com-blog.xml
+Sitemap: https://koreshield.com/sitemap.com-docs.xml
