@@ -1,4 +1,4 @@
-const SITE_URL = 'https://koreshield.ai';
+import { PRIMARY_SITE_URL } from './site-url';
 
 function upsertJsonLd(id: string, data: object) {
 	if (typeof document === 'undefined') return;
@@ -36,8 +36,8 @@ export const defaultOrganizationSchema = {
 	'@context': 'https://schema.org',
 	'@type': 'Organization',
 	name: 'Koreshield',
-	url: SITE_URL,
-	logo: `${SITE_URL}/logo.png`,
+	url: PRIMARY_SITE_URL,
+	logo: `${PRIMARY_SITE_URL}/logo.png`,
 	description: 'Enterprise-grade LLM security firewall for protecting AI infrastructure',
 	sameAs: [
 		'https://github.com/koreshield',

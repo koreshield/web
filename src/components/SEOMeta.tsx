@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { useEffect, useMemo } from 'react';
 import { syncJsonLd } from '../lib/seoSchema';
+import { PRIMARY_SITE_URL, resolveCanonicalUrl } from '../lib/site-url';
 
 interface SEOMetaProps {
 	title?: string;
@@ -25,7 +26,6 @@ const DEFAULT_TITLE = 'Koreshield | AI Security Firewall';
 const DEFAULT_DESCRIPTION = 'Proxy-layer AI security for prompts, RAG context, provider routing, policy enforcement, and audit evidence.';
 const DEFAULT_KEYWORDS = 'LLM security, AI security, prompt injection, jailbreak detection, GPT security, OpenAI security, LLM firewall, AI safety, AI infrastructure protection, threat detection';
 const DEFAULT_OG_IMAGE = 'https://koreshield.ai/og-image.png';
-const SITE_URL = 'https://koreshield.ai';
 
 export function SEOMeta({
 	title,
@@ -46,7 +46,7 @@ export function SEOMeta({
 	breadcrumbs,
 }: SEOMetaProps) {
 	const fullTitle = title ? `${title} | Koreshield` : DEFAULT_TITLE;
-	const canonical = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : SITE_URL);
+	const canonical = resolveCanonicalUrl(canonicalUrl);
 	
 	const robotsContent = noindex ? 'noindex, nofollow' : nofollow ? 'index, nofollow' : robots;
 
@@ -70,7 +70,7 @@ export function SEOMeta({
 			'@type': 'SoftwareApplication',
 			name: 'Koreshield',
 			description: DEFAULT_DESCRIPTION,
-			url: SITE_URL,
+			url: PRIMARY_SITE_URL,
 			applicationCategory: 'SecurityApplication',
 			operatingSystem: 'Cross-platform',
 			offers: {
@@ -81,7 +81,7 @@ export function SEOMeta({
 			provider: {
 				'@type': 'Organization',
 				name: 'Koreshield',
-				url: SITE_URL,
+				url: PRIMARY_SITE_URL,
 				logo: {
 					'@type': 'ImageObject',
 					url: 'https://koreshield.ai/logo/light/1x/White.png',

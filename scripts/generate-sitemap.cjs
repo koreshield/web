@@ -9,7 +9,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const SITE_URL = 'https://koreshield.ai';
+const { SITE_ORIGINS } = require('./robots-policy.cjs');
+const PRIMARY_SITE_URL = SITE_ORIGINS[0];
+const ALIAS_SITE_URL = SITE_ORIGINS[1];
 const CURRENT_DATE = new Date().toISOString().split('T')[0];
 const publicDir = path.join(__dirname, '../public');
 const contentDir = path.join(__dirname, '../src/content');
@@ -143,7 +145,7 @@ const ROUTES = [
 /**
  * Generate sitemap XML
  */
-function generateSitemap(routes = ROUTES) {
+function generateSitemap(routes = ROUTES, siteUrl = PRIMARY_SITE_URL) {
 	const seen = new Set();
 	const uniqueRoutes = routes.filter((route) => {
 		if (seen.has(route.path)) {
@@ -155,7 +157,7 @@ function generateSitemap(routes = ROUTES) {
 
 	const urls = uniqueRoutes.map((route) => `
 	<url>
-		<loc>${SITE_URL}${route.path}</loc>
+		<loc>${siteUrl}${route.path}</loc>
 		<lastmod>${CURRENT_DATE}</lastmod>
 		<changefreq>${route.changefreq}</changefreq>
 		<priority>${route.priority}</priority>
@@ -174,104 +176,61 @@ ${urls}
 	return sitemap;
 }
 
-/**
- * Generate robots.txt
- */
 function generateRobotsTxt() {
-	const robotsTxt = `# https://www.robotstxt.org/robotstxt.html
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /api/
-Disallow: /private/
-Disallow: /.well-known/
-
-# Specific bot rules
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Slurp
-Allow: /
-Crawl-delay: 2
-
-User-agent: DuckDuckBot
-Allow: /
-
-User-agent: Baiduspider
-Allow: /
-
-User-agent: Yandexbot
-Allow: /
-
-User-agent: MJ12bot
-Allow: /
-
-# Block bad bots
-User-agent: MJ12bot
-Disallow: /
-
-User-agent: AhrefsBot
-Crawl-delay: 10
-
-User-agent: SemrushBot
-Crawl-delay: 10
-
-# Sitemap
-Sitemap: https://koreshield.ai/sitemap.xml
-Sitemap: https://koreshield.ai/sitemap-blog.xml
-Sitemap: https://koreshield.ai/sitemap-docs.xml
-`;
-
-	return robotsTxt;
+	const { ROBOTS_TXT } = require('./robots-policy.cjs');
+	return ROBOTS_TXT;
 }
 
-/**
- * Write files
- */
-function writeSitemaps() {
+function writeSitemapBundle(siteUrl, basename) {
 	const blogRoutes = readMarkdownRoutes('blog', '/blog');
 	const docsRoutes = readDocsRoutes();
 
-	// Create sitemap.xml
-	const sitemapContent = generateSitemap();
-	fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemapContent, 'utf-8');
-	console.log('[YES] Created: web/public/sitemap.xml');
+	fs.writeFileSync(path.join(publicDir, `${basename}.xml`), generateSitemap(ROUTES, siteUrl), 'utf-8');
+	console.log(`[YES] Created: web/public/${basename}.xml`);
 
-	fs.writeFileSync(path.join(publicDir, 'sitemap-blog.xml'), generateSitemap(blogRoutes), 'utf-8');
-	console.log('[YES] Created: web/public/sitemap-blog.xml');
+	fs.writeFileSync(
+		path.join(publicDir, `${basename}-blog.xml`),
+		generateSitemap(blogRoutes, siteUrl),
+		'utf-8',
+	);
+	console.log(`[YES] Created: web/public/${basename}-blog.xml`);
 
-	fs.writeFileSync(path.join(publicDir, 'sitemap-docs.xml'), generateSitemap(docsRoutes), 'utf-8');
-	console.log('[YES] Created: web/public/sitemap-docs.xml');
+	fs.writeFileSync(
+		path.join(publicDir, `${basename}-docs.xml`),
+		generateSitemap(docsRoutes, siteUrl),
+		'utf-8',
+	);
+	console.log(`[YES] Created: web/public/${basename}-docs.xml`);
 
-	// Create robots.txt
-	const robotsContent = generateRobotsTxt();
-	fs.writeFileSync(path.join(publicDir, 'robots.txt'), robotsContent, 'utf-8');
-	console.log('[YES] Created: web/public/robots.txt');
+	fs.writeFileSync(path.join(publicDir, `${basename}-index.xml`), writeSitemapIndex(siteUrl, basename), 'utf-8');
+	console.log(`[YES] Created: web/public/${basename}-index.xml`);
+}
 
-	// Create sitemap index for large sites
-	const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+function writeSitemapIndex(siteUrl, basename = 'sitemap') {
+	return `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<sitemap>
-		<loc>https://koreshield.ai/sitemap.xml</loc>
+		<loc>${siteUrl}/${basename}.xml</loc>
 		<lastmod>${CURRENT_DATE}</lastmod>
 	</sitemap>
 	<sitemap>
-		<loc>https://koreshield.ai/sitemap-blog.xml</loc>
+		<loc>${siteUrl}/${basename}-blog.xml</loc>
 		<lastmod>${CURRENT_DATE}</lastmod>
 	</sitemap>
 	<sitemap>
-		<loc>https://koreshield.ai/sitemap-docs.xml</loc>
+		<loc>${siteUrl}/${basename}-docs.xml</loc>
 		<lastmod>${CURRENT_DATE}</lastmod>
 	</sitemap>
 </sitemapindex>`;
+}
 
-	fs.writeFileSync(path.join(publicDir, 'sitemap-index.xml'), sitemapIndex, 'utf-8');
-	console.log('[YES] Created: web/public/sitemap-index.xml');
+function writeSitemaps() {
+	writeSitemapBundle(PRIMARY_SITE_URL, 'sitemap');
+	writeSitemapBundle(ALIAS_SITE_URL, 'sitemap.com');
+
+	const robotsContent = generateRobotsTxt();
+	fs.writeFileSync(path.join(publicDir, 'robots.txt'), robotsContent, 'utf-8');
+	console.log('[YES] Created: web/public/robots.txt');
 
 	console.log('\n[YES] All sitemaps generated successfully!');
 }

@@ -7,61 +7,61 @@
 	xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 
 	<url>
-		<loc>https://koreshield.ai/blog/getting-started-with-koreshield</loc>
+		<loc>https://koreshield.com/blog/getting-started-with-koreshield</loc>
 		<lastmod>2026-06-05</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.55</priority>
 	</url>
 	<url>
-		<loc>https://koreshield.ai/blog/grok-bankrbot-prompt-injection-morse-code</loc>
+		<loc>https://koreshield.com/blog/grok-bankrbot-prompt-injection-morse-code</loc>
 		<lastmod>2026-06-05</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.55</priority>
 	</url>
 	<url>
-		<loc>https://koreshield.ai/blog/meet-koreshield-llm-firewall</loc>
+		<loc>https://koreshield.com/blog/meet-koreshield-llm-firewall</loc>
 		<lastmod>2026-06-05</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.55</priority>
 	</url>
 	<url>
-		<loc>https://koreshield.ai/blog/prompt-injection-is-not-solved</loc>
+		<loc>https://koreshield.com/blog/prompt-injection-is-not-solved</loc>
 		<lastmod>2026-06-05</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.55</priority>
 	</url>
 	<url>
-		<loc>https://koreshield.ai/blog/rag-security-best-practices</loc>
+		<loc>https://koreshield.com/blog/rag-security-best-practices</loc>
 		<lastmod>2026-06-05</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.55</priority>
 	</url>
 	<url>
-		<loc>https://koreshield.ai/blog/six-ai-security-incidents-one-week</loc>
+		<loc>https://koreshield.com/blog/six-ai-security-incidents-one-week</loc>
 		<lastmod>2026-06-05</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.55</priority>
 	</url>
 	<url>
-		<loc>https://koreshield.ai/blog/understanding-ai-threats</loc>
+		<loc>https://koreshield.com/blog/understanding-ai-threats</loc>
 		<lastmod>2026-06-05</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.55</priority>
 	</url>
 	<url>
-		<loc>https://koreshield.ai/blog/weekly-security-update-april-27</loc>
+		<loc>https://koreshield.com/blog/weekly-security-update-april-27</loc>
 		<lastmod>2026-06-05</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.55</priority>
 	</url>
 	<url>
-		<loc>https://koreshield.ai/blog/why-agentic-ai-is-largest-unsecured-attack-surface</loc>
+		<loc>https://koreshield.com/blog/why-agentic-ai-is-largest-unsecured-attack-surface</loc>
 		<lastmod>2026-06-05</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.55</priority>
 	</url>
 	<url>
-		<loc>https://koreshield.ai/blog/why-we-built-koreshield</loc>
+		<loc>https://koreshield.com/blog/why-we-built-koreshield</loc>
 		<lastmod>2026-06-05</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>0.55</priority>

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import type { JSX } from 'react';
 import { syncJsonLd } from '../lib/seoSchema';
+import { PRIMARY_SITE_URL, resolveCanonicalUrl } from '../lib/site-url';
 
 export interface SEOMetadata {
 	title: string;
@@ -31,7 +32,6 @@ export interface SEOMetadata {
  * @param metadata - SEO metadata object
  */
 export function useSEO(metadata: SEOMetadata): JSX.Element {
-	const baseUrl = 'https://koreshield.ai';
 	const defaultOgImage = '/logo.png';
 
 	useEffect(() => {
@@ -41,7 +41,7 @@ export function useSEO(metadata: SEOMetadata): JSX.Element {
 		}
 	}, [metadata.title, metadata.description]);
 
-	const canonicalUrl = metadata.canonical || (typeof window !== 'undefined' ? window.location.href : '');
+	const canonicalUrl = resolveCanonicalUrl(metadata.canonical);
 	const ogImage = metadata.ogImage || defaultOgImage;
 	const schemaJson = metadata.schema || defaultSchema(metadata);
 
@@ -72,7 +72,7 @@ export function useSEO(metadata: SEOMetadata): JSX.Element {
 			/>
 			{ogImage && <meta property="og:image" content={ogImage} />}
 			<meta property="og:type" content={metadata.ogType || 'website'} />
-			<meta property="og:url" content={canonicalUrl || baseUrl} />
+			<meta property="og:url" content={canonicalUrl || PRIMARY_SITE_URL} />
 
 			{/* Twitter Card Tags */}
 			<meta name="twitter:card" content={metadata.twitterCard || 'summary_large_image'} />
@@ -104,7 +104,7 @@ function defaultSchema(metadata: SEOMetadata): Record<string, unknown> {
 		'@type': metadata.ogType === 'article' ? 'Article' : 'WebPage',
 		name: metadata.title,
 		description: metadata.description,
-		url: typeof window !== 'undefined' ? window.location.href : '',
+		url: typeof window !== 'undefined' ? resolveCanonicalUrl() : PRIMARY_SITE_URL,
 		image: metadata.ogImage || '/logo.png',
 		...(metadata.ogType === 'article' && {
 			author: {
