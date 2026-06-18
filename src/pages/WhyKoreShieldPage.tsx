@@ -9,8 +9,8 @@ import { SEOMeta } from '../components/SEOMeta';
 const differentiators = [
 	{
 		icon: <Shield className="w-6 h-6" />,
-		title: '95%+ Accuracy',
-		description: 'Industry-leading detection with 96.55% true positive rate and only 3.03% false positives.',
+		title: 'High Detection Accuracy',
+		description: 'In our internal benchmark, Koreshield achieved a ~96.5% true-positive rate at ~3% false positives. Results vary by workload and are not a contractual guarantee.',
 		color: 'text-electric-green',
 		bg: 'bg-electric-green/10',
 	},
@@ -30,8 +30,8 @@ const differentiators = [
 	},
 	{
 		icon: <Users className="w-6 h-6" />,
-		title: 'Enterprise Ready',
-		description: 'Multi-tenancy, RBAC, audit logs, SOC2-ready, and compliance features out of the box.',
+		title: 'Built for Teams',
+		description: 'Per-account isolation, RBAC, audit logs, and compliance tooling. SOC 2 controls are in progress (not yet certified).',
 		color: 'text-purple-400',
 		bg: 'bg-purple-400/10',
 	},
@@ -111,9 +111,10 @@ const deploymentOptions = [
 	},
 ];
 
+// Indicative figures from internal benchmarking; not contractual guarantees.
 const stats = [
-	{ value: '95%+', label: 'Detection Accuracy' },
-	{ value: '<30ms', label: 'Latency Overhead' },
+	{ value: '~95%', label: 'Detection Accuracy (internal benchmark)' },
+	{ value: '<30ms', label: 'Latency Overhead (typical)' },
 	{ value: '50+', label: 'Attack Patterns' },
 	{ value: '5+', label: 'LLM Providers' },
 ];
@@ -129,7 +130,7 @@ export default function WhyKoreshieldPage() {
 		<div className="min-h-screen bg-background text-foreground transition-colors">
 			<SEOMeta
 				title="Why Koreshield"
-				description="Discover what makes Koreshield the best LLM security solution: 95% detection accuracy, enterprise-ready features, and flexible deployment."
+				description="Discover what makes Koreshield a strong LLM security solution: high detection accuracy in internal benchmarks, team-ready features, and flexible deployment."
 			/>
 
 			{/* Hero */}

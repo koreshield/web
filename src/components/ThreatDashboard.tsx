@@ -21,14 +21,16 @@ const THREAT_TYPES = [
     'Instruction Override',
 ];
 
+// Generic example sectors for the illustrative feed. These are NOT real
+// customers — the component renders sample data to preview the dashboard UI.
 const CLIENT_TYPES = [
-    'Healthcare Client',
-    'FinTech Platform',
-    'SaaS Provider',
-    'E-Commerce API',
-    'Legal AI Service',
-    'EdTech Platform',
-    'Insurance SaaS',
+    'Healthcare (example)',
+    'FinTech (example)',
+    'SaaS (example)',
+    'E-Commerce (example)',
+    'Legal AI (example)',
+    'EdTech (example)',
+    'Insurance (example)',
 ];
 
 interface LogEntry {
@@ -110,13 +112,13 @@ export function ThreatDashboard() {
                         <Activity className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold tracking-tight">Live Threat Monitor</h3>
-                        <p className="text-sm text-muted-foreground">Real-time infrastructure analysis</p>
+                        <h3 className="text-xl font-bold tracking-tight">Threat Monitor Preview</h3>
+                        <p className="text-sm text-muted-foreground">Illustrative dashboard view — sample data</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 text-primary font-mono bg-primary/10 px-3 py-1.5 rounded-full text-xs">
-                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    ACTIVE
+                <div className="flex items-center gap-2 text-muted-foreground font-mono bg-muted/60 px-3 py-1.5 rounded-full text-xs border border-border">
+                    <span className="w-2 h-2 rounded-full bg-muted-foreground/70" />
+                    SAMPLE
                 </div>
             </div>
 
@@ -125,22 +127,22 @@ export function ThreatDashboard() {
                 <div className="bg-muted/50 p-4 md:p-5 rounded-lg border border-border">
                     <div className="text-xs md:text-sm text-muted-foreground mb-1">Threats Blocked</div>
                     <div className="text-2xl md:text-3xl font-bold font-mono tracking-tight">{blockedCount.toLocaleString()}</div>
-                    <div className="text-xs text-primary mt-1.5 flex items-center gap-1">
-                        <Shield className="w-3 h-3" /> +12% last hour
+                    <div className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
+                        <Shield className="w-3 h-3" /> sample
                     </div>
                 </div>
                 <div className="bg-muted/50 p-4 md:p-5 rounded-lg border border-border">
                     <div className="text-xs md:text-sm text-muted-foreground mb-1">Avg Latency</div>
-                    <div className="text-2xl md:text-3xl font-bold font-mono tracking-tight">24ms</div>
-                    <div className="text-xs text-primary mt-1.5 flex items-center gap-1">
-                        <Activity className="w-3 h-3" /> Optimized
+                    <div className="text-2xl md:text-3xl font-bold font-mono tracking-tight">—</div>
+                    <div className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
+                        <Activity className="w-3 h-3" /> sample
                     </div>
                 </div>
                 <div className="bg-muted/50 p-4 md:p-5 rounded-lg border border-border">
                     <div className="text-xs md:text-sm text-muted-foreground mb-1">Security Score</div>
-                    <div className="text-2xl md:text-3xl font-bold font-mono text-primary tracking-tight">A+</div>
+                    <div className="text-2xl md:text-3xl font-bold font-mono text-muted-foreground tracking-tight">—</div>
                     <div className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> Audited
+                        <Lock className="w-3 h-3" /> sample
                     </div>
                 </div>
             </div>
@@ -182,8 +184,8 @@ export function ThreatDashboard() {
             {/* Live Log Ticker */}
             <div className="border border-white/[0.08] rounded-xl overflow-hidden">
                 <div className="flex items-center gap-2 px-4 py-2 bg-muted/50 dark:bg-white/[0.03] border-b border-white/[0.06]">
-                    <Radio className="w-3.5 h-3.5 text-red-400 animate-pulse" />
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Live Feed</span>
+                    <Radio className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Sample Feed (illustrative)</span>
                 </div>
                 <div className="max-h-36 overflow-hidden relative">
                     <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-card to-transparent z-10 pointer-events-none" />

@@ -1,15 +1,17 @@
 import { motion } from 'framer-motion';
 
+// Detection/latency figures below are from our internal benchmark corpus and
+// vary by workload — they are indicative, not contractual guarantees.
 const stats = [
 	{
-		value: '95%',
+		value: '~95%',
 		label: 'Detection Accuracy',
-		sub: '< 3% false positives',
+		sub: 'internal benchmark',
 	},
 	{
 		value: '< 30ms',
 		label: 'Interception Latency',
-		sub: 'No perceptible overhead',
+		sub: 'typical, excludes LLM time',
 	},
 	{
 		value: '50+',

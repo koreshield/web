@@ -44,7 +44,7 @@ const faqCategories: FAQCategory[] = [
 			},
 			{
 				q: 'How accurate is the detection engine?',
-				a: 'Koreshield achieves 95%+ detection accuracy with fewer than 3 false positives per 100 blocked requests. The detection engine is tuned on millions of real-world attack attempts and continuously updated with new threat patterns from red-team research.',
+				a: 'In our internal benchmark corpus, Koreshield achieves roughly 95% detection accuracy with a low single-digit false-positive rate; real-world results vary by workload. The detection engine is trained and tuned on a large corpus of public and synthetic attack samples and is continuously updated with new threat patterns from our research.',
 			},
 			{
 				q: 'Does Koreshield add latency to my requests?',
@@ -115,7 +115,7 @@ const faqCategories: FAQCategory[] = [
 			},
 			{
 				q: 'Can Koreshield provide audit evidence for compliance?',
-				a: 'Yes. Every scan, block, and policy decision is logged with full context. You can query threat history, generate compliance evidence reports, and export to your SIEM. This covers audit requirements for SOC 2, ISO 27001, HIPAA, and similar frameworks.',
+				a: 'Yes. Every scan, block, and policy decision is logged with full context. You can query threat history, generate compliance evidence reports, and export to your SIEM. This helps support audit requirements for frameworks such as SOC 2, ISO 27001, and HIPAA (Koreshield provides supporting evidence; it is not itself a certification).',
 			},
 			{
 				q: 'Does Koreshield support RBAC?',

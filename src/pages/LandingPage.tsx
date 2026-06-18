@@ -54,8 +54,8 @@ function LandingPage() {
 
             <section className="py-28 md:py-36 px-6 relative ambient-glow">
                 <div className="max-w-7xl mx-auto relative z-10">
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4 tracking-[-0.04em]">Threats Blocked. Right Now.</h2>
-                    <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto">Watch Koreshield intercept real attack patterns as they happen. These are the same threats hitting production AI systems today: classified, scored, and stopped.</p>
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4 tracking-[-0.04em]">See How Koreshield Works</h2>
+                    <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto">An illustrative preview of the Koreshield dashboard, showing the kinds of attacks it classifies, scores, and blocks. Sample data — your live numbers appear in your own dashboard.</p>
                     <ErrorBoundary fallback={<div className="h-64 bg-muted/20 border border-white/[0.08] rounded-2xl text-center p-8">Unable to load dashboard</div>}>
                         <ThreatDashboard />
                     </ErrorBoundary>
