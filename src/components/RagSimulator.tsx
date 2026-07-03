@@ -78,11 +78,9 @@ export function RagSimulator() {
   const [selectedScenarioIndex, setSelectedScenarioIndex] = useState(0);
   const [scanStep, setScanStep] = useState<ScanStep>('idle');
   const [hoveredDocId, setHoveredDocId] = useState<string | null>(null);
-  const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>(scenarios[0].documents.map((doc) => doc.id));
 
   const scenario = scenarios[selectedScenarioIndex];
-  const selectedDocuments = scenario.documents.filter((doc) => selectedDocumentIds.includes(doc.id));
-  const selectedPayload = selectedDocuments.filter((doc) => !doc.isInjected);
+  const selectedPayload = scenario.documents.filter((doc) => !doc.isInjected);
 
   const triggerScan = () => {
     setScanStep('scanning');
@@ -104,16 +102,7 @@ export function RagSimulator() {
 
   const handleScenarioChange = (index: number) => {
     setSelectedScenarioIndex(index);
-    setSelectedDocumentIds(scenarios[index].documents.map((doc) => doc.id));
     setScanStep('idle');
-  };
-
-  const toggleDocumentSelection = (docId: string) => {
-    setSelectedDocumentIds((current) =>
-      current.includes(docId)
-        ? current.filter((id) => id !== docId)
-        : [...current, docId]
-    );
   };
 
   return (
@@ -162,15 +151,10 @@ export function RagSimulator() {
 
             {/* Retrieved Documents List */}
             <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-1">
-                <div>
-                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-                    Retrieved RAG Chunks ({scenario.documents.length})
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    Selected: {selectedDocuments.length}/{scenario.documents.length} chunks
-                  </div>
-                </div>
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                  Retrieved RAG Chunks ({scenario.documents.length})
+                </span>
                 <span className="text-xs text-muted-foreground italic">Hover to view content</span>
               </div>
 
@@ -217,14 +201,8 @@ export function RagSimulator() {
                         <div className="absolute inset-0 bg-electric-green/[0.01] backdrop-blur-[0.5px] pointer-events-none rounded-2xl transition-all" />
                       )}
 
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-2">
+                      <div className="flex items-center justify-between gap-3 mb-2">
                         <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedDocumentIds.includes(doc.id)}
-                            onChange={() => toggleDocumentSelection(doc.id)}
-                            className="h-4 w-4 rounded border-white/[0.08] bg-white/[0.06] accent-electric-green"
-                          />
                           <FileText className={`w-4 h-4 transition-colors ${
                             isCompleted && doc.isInjected ? 'text-red-400' : 'text-muted-foreground'
                           }`} />
@@ -405,9 +383,7 @@ export function RagSimulator() {
                     >
                       <div className="text-[10px] text-muted-foreground uppercase">Payload Forwarded to LLM:</div>
                       <div className="bg-black/40 border border-white/[0.04] p-2.5 rounded-lg text-white/50 text-[10px] line-clamp-3 select-all leading-normal">
-                        {selectedPayload.length > 0
-                          ? selectedPayload.map((d) => `[Source: ${d.title}] ${d.content}`).join(' ')
-                          : 'No selected chunks available for forwarding.'}
+                        {selectedPayload.map((d) => `[Source: ${d.title}] ${d.content}`).join(' ')}
                       </div>
                     </motion.div>
                   )}
