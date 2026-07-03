@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Github, Linkedin, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Github, Linkedin, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const linkClass = 'text-sm text-muted-foreground transition-colors hover:text-foreground';
@@ -144,9 +144,9 @@ function Footer() {
 					</div>
 				</div>
 
-				<div className="grid gap-10 border-y border-white/[0.08] py-10 sm:grid-cols-2 lg:grid-cols-5">
+				<div className="flex flex-wrap justify-between gap-x-8 gap-y-10 border-y border-white/[0.08] py-10">
 					{footerGroups.map((group) => (
-						<div key={group.title}>
+						<div key={group.title} className="min-w-[140px] flex-1 md:flex-initial">
 							<h3 className="mb-4 text-xs font-bold uppercase tracking-[0.25em] text-white">{group.title}</h3>
 							<ul className="space-y-3">
 								{group.links.map((link) => (
@@ -167,24 +167,6 @@ function Footer() {
 				</div>
 
 				<div className="flex flex-col gap-6 pt-8 md:flex-row md:items-center md:justify-between">
-					<div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-						<span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5">
-							<CheckCircle2 className="h-3.5 w-3.5 text-electric-green" />
-							Zero-retention default
-						</span>
-						<span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5">
-							<CheckCircle2 className="h-3.5 w-3.5 text-electric-green" />
-							UK company
-						</span>
-						<span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5">
-							<CheckCircle2 className="h-3.5 w-3.5 text-electric-green" />
-							Self-hosted + air-gapped
-						</span>
-						<span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5">
-							<CheckCircle2 className="h-3.5 w-3.5 text-electric-green" />
-							Python + Node SDKs
-						</span>
-					</div>
 					<div className="text-sm text-muted-foreground md:text-right">
 						<p>© {new Date().getFullYear()} Koreshield. All rights reserved.</p>
 						<p className="mt-1 text-xs text-muted-foreground/70">Koreshield Labs Ltd. · Incorporated in England & Wales · Co. No. 17057784</p>

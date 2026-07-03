@@ -23,20 +23,20 @@ export type PricingPlan = {
 };
 
 export const PRICING_FEATURE_ROWS = [
-	['Protected requests included', '10,000', '100,000', '1,000,000', 'Custom'],
-	['Request rate limit', '60/min', '600/min', '5,000/min', 'Custom'],
-	['API keys', '1', '10', '50', 'Custom'],
-	['Prompt and RAG screening', 'Baseline', 'Advanced', 'Advanced', 'Advanced + custom tuning'],
-	['Voice Security', 'N/A', 'Included', 'Included', 'Included'],
-	['Teams', 'N/A', 'Included', 'Included', 'Included'],
-	['Policies, rules, and alerts', 'N/A', 'Included', 'Included', 'Included'],
-	['Reports', 'N/A', 'Included', 'Included', 'Included'],
-	['RBAC and audit logs', 'N/A', 'N/A', 'Included', 'Included'],
-	['Advanced analytics and provider health', 'N/A', 'N/A', 'Included', 'Included'],
-	['Compliance evidence reports', 'N/A', 'N/A', 'N/A', 'Included'],
-	['SSO / SAML', 'N/A', 'N/A', 'N/A', 'Included'],
-	['SIEM export and custom retention', 'N/A', 'N/A', 'N/A', 'Included'],
-	['Self-hosted, VPC, or air-gapped deployment', 'N/A', 'N/A', 'N/A', 'Included'],
+	['Protected requests included', '100,000', '1,000,000', 'Custom'],
+	['Request rate limit', '600/min', '5,000/min', 'Custom'],
+	['API keys', '10', '50', 'Custom'],
+	['Prompt and RAG screening', 'Advanced', 'Advanced', 'Advanced + custom tuning'],
+	['Voice Security', 'Included', 'Included', 'Included'],
+	['Teams', 'Included', 'Included', 'Included'],
+	['Policies, rules, and alerts', 'Included', 'Included', 'Included'],
+	['Reports', 'Included', 'Included', 'Included'],
+	['RBAC and audit logs', 'N/A', 'Included', 'Included'],
+	['Advanced analytics and provider health', 'N/A', 'Included', 'Included'],
+	['Compliance evidence reports', 'N/A', 'N/A', 'Included'],
+	['SSO / SAML', 'N/A', 'N/A', 'Included'],
+	['SIEM export and custom retention', 'N/A', 'N/A', 'Included'],
+	['Self-hosted, VPC, or air-gapped deployment', 'N/A', 'N/A', 'Included'],
 ] as const;
 
 export const PRICING_FAQS = [
@@ -83,32 +83,11 @@ export const PRICING_FAQS = [
 	{
 		question: 'Is annual pricing available?',
 		answer:
-			'Yes. Annual plans apply a flat 20% discount across Dev, Growth, and Scale tiers. Enterprise contracts are scoped individually.',
+			'Yes. Annual plans apply a flat 20% discount across Growth, and Scale tiers. Enterprise contracts are scoped individually.',
 	},
 ];
 
 export const PRICING_PLANS: PricingPlan[] = [
-	{
-		id: 'free',
-		name: 'Dev',
-		description: 'For internal evaluation and prototyping.',
-		monthlyPriceLabel: '£0',
-		monthlyPriceValue: 0,
-		annualPriceValue: 0,
-		includedRequests: '10,000 protected requests/month',
-		retention: '7-day retention',
-		cta: 'Start building',
-		features: [
-			'Baseline prompt and RAG screening',
-			'Basic dashboard visibility',
-			'Hosted setup for fast evaluation',
-			'Core logs and recent scan history',
-		],
-		limitations: [
-			'No SSO, SIEM export, or advanced governance',
-			'No custom retention or enterprise support terms',
-		],
-	},
 	{
 		id: 'growth',
 		name: 'Growth',

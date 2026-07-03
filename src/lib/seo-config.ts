@@ -33,7 +33,7 @@ export const SEOConfig = {
 	},
 	pricing: {
 		title: 'Pricing Plans',
-		description: 'Koreshield pricing plans for teams of all sizes. Start free with 10,000 protected requests/month, then pay-as-you-grow. Enterprise self-hosted and air-gapped plans available.',
+		description: 'Koreshield pricing plans for teams of all sizes. Growth and Scale plans with pay-as-you-grow requests, plus custom Enterprise self-hosted and air-gapped options.',
 		keywords: 'LLM security pricing, protected requests pricing, AI security cost, enterprise LLM security pricing, pricing plans, self-hosted AI security pricing, air-gapped deployment',
 		ogImage: 'https://koreshield.ai/og-pricing.png',
 		ogType: 'website' as const,
@@ -51,14 +51,6 @@ export const SEOConfig = {
 					acceptedAnswer: {
 						'@type': 'Answer',
 						text: 'Koreshield charges a platform fee plus included protected requests each month. Additional requests scale with usage. Enterprise plans are available with advanced governance and deployment controls.',
-					},
-				},
-				{
-					'@type': 'Question',
-					name: 'Can I start for free?',
-					acceptedAnswer: {
-						'@type': 'Answer',
-						text: 'Yes! The Dev tier includes 10,000 protected requests per month, which is ideal for evaluation and early prototypes.',
 					},
 				},
 			],

@@ -48,7 +48,7 @@ export function SEOMeta({
 	const fullTitle = title ? `${title} | Koreshield` : DEFAULT_TITLE;
 	const canonical = resolveCanonicalUrl(canonicalUrl);
 	
-	const robotsContent = noindex ? 'noindex, nofollow' : nofollow ? 'index, nofollow' : robots;
+	const robotsContent = noindex ? 'noindex, follow' : nofollow ? 'index, nofollow' : robots;
 
 	// Breadcrumb schema
 	const breadcrumbSchema = useMemo(() => breadcrumbs ? {
@@ -93,8 +93,8 @@ export function SEOMeta({
 	);
 
 	const finalStructuredData = useMemo(
-		() => structuredData || defaultStructuredData,
-		[structuredData, defaultStructuredData],
+		() => noindex ? null : (structuredData || defaultStructuredData),
+		[noindex, structuredData, defaultStructuredData],
 	);
 	useEffect(() => {
 		syncJsonLd('page', finalStructuredData);

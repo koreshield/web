@@ -9,6 +9,7 @@ import { TableOfContents } from './TableOfContents';
 import { CodeBlock } from './CodeBlock';
 import { extractNodeText, slugifyHeading } from './tableOfContentsUtils';
 import { getDocPageByRoute, isSectionIndexRoute, type DocLink } from '../docs/loader';
+import { SEOMeta } from './SEOMeta';
 
 function normalizeRelativeDocLink(currentPath: string, href: string) {
 	if (!href || href.startsWith('http://') || href.startsWith('https://') || href.startsWith('#')) {
@@ -165,6 +166,7 @@ export function DocPage() {
 	if (!page) {
 		return (
 			<div className="max-w-4xl mx-auto">
+				<SEOMeta title="Documentation Page Not Found" noindex />
 				<DocBreadcrumb />
 				<div className="text-center py-12">
 					<h1 className="text-4xl font-bold text-foreground mb-4">Page Not Found</h1>
@@ -183,8 +185,33 @@ export function DocPage() {
 		);
 	}
 
+	const breadcrumbs = page.path
+		.split('/')
+		.filter(Boolean)
+		.map((segment, index, segments) => ({
+			name: segment === 'docs'
+				? 'Documentation'
+				: segment.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' '),
+			url: `https://koreshield.ai/${segments.slice(0, index + 1).join('/')}`,
+		}));
+
 	return (
 		<div className="flex gap-8">
+			<SEOMeta
+				title={page.title === 'Documentation' ? 'Documentation' : `${page.title} Documentation`}
+				description={page.description || `Learn how to configure and use ${page.title} with Koreshield.`}
+				canonicalUrl={`https://koreshield.ai${page.path}`}
+				breadcrumbs={breadcrumbs}
+				structuredData={{
+					'@context': 'https://schema.org',
+					'@type': 'TechArticle',
+					headline: page.title,
+					description: page.description || `Koreshield documentation for ${page.title}.`,
+					url: `https://koreshield.ai${page.path}`,
+					dateModified: page.lastUpdated,
+					publisher: { '@type': 'Organization', name: 'Koreshield', url: 'https://koreshield.ai' },
+				}}
+			/>
 			<div className="flex-1 min-w-0">
 				<DocBreadcrumb />
 

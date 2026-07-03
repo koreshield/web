@@ -1,6 +1,5 @@
 import Architecture from '../components/Architecture';
 import { ErrorBoundary } from '../components/ErrorBoundary';
-import { EcosystemProof } from '../components/EcosystemProof';
 import Features from '../components/Features';
 import Hero from '../components/Hero';
 import { IntegrationTicker } from '../components/IntegrationTicker';
@@ -45,8 +44,6 @@ function LandingPage() {
         <div className="bg-background text-foreground">
             <SEOMeta />
             <Hero />
-
-            <EcosystemProof />
 
             <ErrorBoundary fallback={<div className="h-20 bg-muted/50" />}>
                 <IntegrationTicker />
@@ -230,15 +227,15 @@ function LandingPage() {
                                 Ready to put Koreshield in the path?
                             </h2>
                             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                                Start free, or walk through your AI stack with us.
+                                Get started instantly, or walk through your AI stack with us.
                             </p>
                         </div>
                         <div className="flex flex-col gap-3 sm:flex-row">
                             <Link
-                                to="/signup?plan=free"
+                                to="/signup?plan=growth"
                                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-bright"
                             >
-                                Start for free <ArrowRight className="h-4 w-4" />
+                                Get started <ArrowRight className="h-4 w-4" />
                             </Link>
                             <Link
                                 to="/demo"

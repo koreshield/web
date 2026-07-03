@@ -5,7 +5,7 @@
 import { useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Calendar, Clock, User, Folder, Tag, ChevronRight, ArrowRight } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
+import { SEOMeta } from './SEOMeta';
 import {
 	listBlogPosts,
 	getBlogCategories,
@@ -72,14 +72,19 @@ export function BlogListPage() {
 
 	return (
 		<>
-			<Helmet>
-				<title>Blog | Koreshield</title>
-				<meta name="description" content="Stay updated with Koreshield blog - Security news, tutorials, and insights." />
-				<meta property="og:title" content="Blog | Koreshield" />
-				<meta property="og:description" content="Stay updated with Koreshield blog - Security news, tutorials, and insights." />
-				<meta property="og:type" content="website" />
-				<meta property="og:url" content="https://koreshield.ai/blog" />
-			</Helmet>
+			<SEOMeta
+				title="AI Security Blog"
+				description="Technical articles about LLM security, prompt injection, RAG attacks, AI agents, and production defenses."
+				canonicalUrl="https://koreshield.ai/blog"
+				structuredData={{
+					'@context': 'https://schema.org',
+					'@type': 'Blog',
+					name: 'Koreshield AI Security Blog',
+					url: 'https://koreshield.ai/blog',
+					description: 'Technical articles about production AI and LLM security.',
+					publisher: { '@type': 'Organization', name: 'Koreshield', url: 'https://koreshield.ai' },
+				}}
+			/>
 
 			{/* Page hero */}
 			<div className="border-b border-border pb-12 pt-12">

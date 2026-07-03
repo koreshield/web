@@ -56,8 +56,8 @@ export default function SolutionRAGSecurityPage() {
 							RAG risk starts when retrieved content becomes instruction. Koreshield checks that context before it reaches the LLM.
 						</p>
 						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
-							<Link to="/signup?plan=free" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-bold text-white transition-colors hover:bg-emerald-bright">
-								Start for free <ArrowRight className="h-4 w-4" />
+							<Link to="/signup?plan=growth" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-bold text-white transition-colors hover:bg-emerald-bright">
+								Get started <ArrowRight className="h-4 w-4" />
 							</Link>
 							<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card/70 px-7 py-3 font-bold text-foreground transition-colors hover:bg-muted">
 								Book a demo
@@ -212,8 +212,8 @@ else:
 						<p className="mt-2 text-sm text-muted-foreground">RAG scanning is part of the Koreshield security layer.</p>
 					</div>
 					<div className="flex flex-col gap-3 sm:flex-row">
-						<Link to="/signup?plan=free" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright">
-							Start for free <ArrowRight className="h-4 w-4" />
+						<Link to="/signup?plan=growth" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright">
+							Get started <ArrowRight className="h-4 w-4" />
 						</Link>
 						<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-6 py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted">
 							Book a demo

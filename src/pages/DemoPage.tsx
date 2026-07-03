@@ -219,10 +219,10 @@ export default function DemoPage() {
 
 						<p className="mt-8 text-sm text-muted-foreground">
 							Prefer to start immediately?{' '}
-							<Link to="/signup?plan=free" className="font-semibold text-foreground underline underline-offset-2 hover:text-electric-green transition-colors">
-								Start for free
+							<Link to="/signup?plan=growth" className="font-semibold text-foreground underline underline-offset-2 hover:text-electric-green transition-colors">
+								Get started
 							</Link>{' '}
-							(no credit card required).
+							now.
 						</p>
 					</motion.div>
 
@@ -245,10 +245,10 @@ export default function DemoPage() {
 									</p>
 									<div className="mt-8 flex flex-col gap-3 sm:flex-row">
 										<Link
-											to="/signup?plan=free"
+											to="/signup?plan=growth"
 											className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-500"
 										>
-											Start for free in the meantime
+											Get started in the meantime
 											<ArrowRight className="h-4 w-4" />
 										</Link>
 										<Link

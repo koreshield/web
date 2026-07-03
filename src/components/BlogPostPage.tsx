@@ -9,8 +9,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { getBlogPost, getRelatedBlogPosts, toSlug } from '../blog/loader';
 import type { BlogPost } from '../blog/loader';
-import { Helmet } from 'react-helmet-async';
 import { CodeBlock } from './CodeBlock';
+import { SEOMeta } from './SEOMeta';
 
 interface BlogPostPageProps {
 	slug?: string;
@@ -33,6 +33,7 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 	if (!post) {
 		return (
 			<div className="flex items-center justify-center min-h-[50vh]">
+				<SEOMeta title="Blog Post Not Found" noindex />
 				<div className="text-center">
 					<h1 className="text-4xl font-bold text-foreground mb-4">Post Not Found</h1>
 					<p className="text-muted-foreground mb-8">
@@ -60,17 +61,32 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 
 	return (
 		<>
-			<Helmet>
-				<title>{post.title} | Koreshield Blog</title>
-				<meta name="description" content={post.excerpt} />
-				<meta property="og:title" content={post.title} />
-				<meta property="og:description" content={post.excerpt} />
-				{post.coverImage && <meta property="og:image" content={post.coverImage} />}
-				<meta property="og:type" content="article" />
-				<meta property="og:url" content={`https://koreshield.ai${post.path}`} />
-				<meta name="author" content={post.author} />
-				<link rel="canonical" href={`https://koreshield.ai${post.path}`} />
-			</Helmet>
+			<SEOMeta
+				title={post.title}
+				description={post.excerpt}
+				canonicalUrl={`https://koreshield.ai${post.path}`}
+				ogType="article"
+				ogImage={post.coverImage || 'https://koreshield.ai/logo.png'}
+				author={post.author}
+				publishedTime={post.date}
+				section={post.categories[0]}
+				breadcrumbs={[
+					{ name: 'Home', url: 'https://koreshield.ai' },
+					{ name: 'Blog', url: 'https://koreshield.ai/blog' },
+					{ name: post.title, url: `https://koreshield.ai${post.path}` },
+				]}
+				structuredData={{
+					'@context': 'https://schema.org',
+					'@type': 'TechArticle',
+					headline: post.title,
+					description: post.excerpt,
+					datePublished: post.date,
+					author: { '@type': post.author === 'Koreshield Labs' ? 'Organization' : 'Person', name: post.author },
+					publisher: { '@type': 'Organization', name: 'Koreshield', url: 'https://koreshield.ai' },
+					mainEntityOfPage: `https://koreshield.ai${post.path}`,
+					...(post.coverImage ? { image: post.coverImage } : {}),
+				}}
+			/>
 
 			{/* Back link */}
 			<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">

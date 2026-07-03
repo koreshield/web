@@ -1,14 +1,24 @@
 import { motion } from 'framer-motion';
 import { ArrowDown, ArrowRight, Cloud, Code2, Zap } from 'lucide-react';
-
 function FlowArrow({ branded = false }: { branded?: boolean }) {
     return (
         <>
-            <div className="hidden lg:flex h-full min-w-16 items-center justify-center">
-                    <div className="relative flex w-20 items-center justify-center">
-                        <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-electric-green/60 to-transparent" />
-                        <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full border border-electric-green/25 bg-background shadow-lg shadow-emerald-500/10">
-                            {branded ? (
+            <div className="hidden lg:flex h-full min-w-16 items-center justify-center relative">
+                <div className="relative flex w-full items-center justify-center">
+                    <div className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 bg-gradient-to-r from-transparent via-electric-green/30 to-transparent" />
+                    {/* Flowing particle */}
+                    <motion.div
+                        className="absolute h-[3px] w-8 rounded-full bg-gradient-to-r from-transparent via-electric-green to-transparent"
+                        style={{ top: 'calc(50% - 1.5px)' }}
+                        animate={{ x: [-40, 40] }}
+                        transition={{
+                            ease: "linear",
+                            duration: 2,
+                            repeat: Infinity,
+                        }}
+                    />
+                    <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full border border-electric-green/25 bg-background shadow-lg shadow-emerald-500/10">
+                        {branded ? (
                             <>
                                 <img src="/logo/dark/SVG/Black.svg" alt="" className="h-5 w-5 dark:hidden" />
                                 <img src="/logo/light/SVG/White.svg" alt="" className="hidden h-5 w-5 dark:block" />
@@ -19,8 +29,20 @@ function FlowArrow({ branded = false }: { branded?: boolean }) {
                     </div>
                 </div>
             </div>
-            <div className="flex lg:hidden justify-center py-2">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-electric-green/25 bg-muted shadow-sm">
+            <div className="flex lg:hidden justify-center py-4 relative">
+                <div className="absolute left-1/2 top-0 bottom-0 w-[2px] -translate-x-1/2 bg-gradient-to-b from-transparent via-electric-green/30 to-transparent" />
+                {/* Flowing particle downwards */}
+                <motion.div
+                    className="absolute h-8 w-[3px] rounded-full bg-gradient-to-b from-transparent via-electric-green to-transparent"
+                    style={{ left: 'calc(50% - 1.5px)' }}
+                    animate={{ y: [-24, 24] }}
+                    transition={{
+                        ease: "linear",
+                        duration: 1.5,
+                        repeat: Infinity,
+                    }}
+                />
+                <div className="relative z-10 flex h-11 w-11 items-center justify-center rounded-2xl border border-electric-green/25 bg-muted shadow-sm">
                     <ArrowDown className="text-electric-green w-5 h-5" />
                 </div>
             </div>

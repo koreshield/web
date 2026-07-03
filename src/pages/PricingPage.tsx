@@ -46,7 +46,7 @@ export default function PricingPage() {
 
 	const handlePlanAction = (planId: PublicPlanId) => {
 		if (planId === 'free') {
-			navigate('/signup?plan=free');
+			navigate('/signup?plan=growth');
 			return;
 		}
 
@@ -89,10 +89,10 @@ export default function PricingPage() {
 
 						<div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
 							<Link
-								to="/signup?plan=free"
+								to="/signup?plan=growth"
 								className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500"
 							>
-								Start for free
+								Get started
 								<ArrowRight className="h-4 w-4" />
 							</Link>
 							<Link
@@ -167,7 +167,7 @@ export default function PricingPage() {
 					</div>
 
 					{/* Standard plan cards */}
-					<div className="grid gap-6 md:grid-cols-3">
+					<div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
 						{standardPlans.map((plan, index) => {
 							const price = billingPeriod === 'annual' && plan.annualPriceLabel ? plan.annualPriceLabel : plan.monthlyPriceLabel;
 							const periodLabel = plan.id === 'free'
@@ -348,17 +348,15 @@ export default function PricingPage() {
 							<thead>
 								<tr className="border-b border-border">
 									<th className="p-4 text-left font-semibold">Capability</th>
-									<th className="p-4 text-center font-semibold">Dev</th>
 									<th className="p-4 text-center font-semibold">Growth</th>
 									<th className="p-4 text-center font-semibold">Scale</th>
 									<th className="p-4 text-center font-semibold">Enterprise</th>
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-border text-sm">
-								{PRICING_FEATURE_ROWS.map(([label, dev, growth, scale, enterprise]) => (
+								{PRICING_FEATURE_ROWS.map(([label, growth, scale, enterprise]) => (
 									<tr key={label}>
 										<td className="p-4 font-medium text-foreground/85">{label}</td>
-										<td className="p-4 text-center text-muted-foreground">{dev}</td>
 										<td className="p-4 text-center text-muted-foreground">{growth}</td>
 										<td className="p-4 text-center text-muted-foreground">{scale}</td>
 										<td className="p-4 text-center text-muted-foreground">{enterprise}</td>
