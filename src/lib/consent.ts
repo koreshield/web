@@ -30,6 +30,14 @@ export function loadConsent(): ConsentState {
   }
 }
 
+export function hasSavedConsent(): boolean {
+  try {
+    return localStorage.getItem(STORAGE_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
 export function saveConsent(state: ConsentState) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -81,16 +89,18 @@ export async function loadScriptWhenConsented(options: {
     return s;
   };
 
-  if (hasConsent(category)) return inject();
+  if (hasConsent(category)) {
+    return inject();
+  }
 
-  const unsub = onConsentChange((s) => {
-    if ((s as any)[category]) {
-      inject();
-      unsub();
-    }
+  return new Promise<HTMLScriptElement | null>((resolve) => {
+    const unsub = onConsentChange((s) => {
+      if ((s as any)[category]) {
+        resolve(inject());
+        unsub();
+      }
+    });
   });
-
-  return null;
 }
 
 export { defaultConsent };
