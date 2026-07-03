@@ -11,7 +11,7 @@ import { CodeSwap } from '../components/CodeSwap';
 import { RagSimulator } from '../components/RagSimulator';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, Check, CheckCircle2, Cloud, Copy, Link2, Lock, Server, Shield, Terminal, Zap, Clock } from 'lucide-react';
+import { ArrowRight, Check, CheckCircle2, Cloud, Copy, Lock, Server, Terminal } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
@@ -63,86 +63,6 @@ function LandingPage() {
                         </p>
                     </div>
                     <RagSimulator />
-                </div>
-            </section>
-
-            <section className="py-16 md:py-20 px-6 bg-background border-t border-white/[0.04]">
-                <div className="max-w-7xl mx-auto">
-                    <div className="mb-10 text-center">
-                        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-electric-green">Real product metrics</p>
-                        <h2 className="text-3xl md:text-4xl font-extrabold tracking-[-0.04em] text-foreground">
-                            Trusted performance you can deploy with confidence
-                        </h2>
-                        <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-                            These are the operational numbers we show customers during integration, not stock photography or artificial benchmarks.
-                        </p>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                        <div className="rounded-3xl border border-white/[0.08] bg-card/70 p-6">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-electric-green/10 text-electric-green">
-                                <Shield className="h-5 w-5" />
-                            </div>
-                            <p className="text-3xl font-black tracking-tight text-foreground">~95%</p>
-                            <p className="mt-2 text-sm text-muted-foreground">Detection Accuracy</p>
-                            <p className="mt-3 text-xs uppercase tracking-[0.2em] text-electric-green/80">Internal benchmark</p>
-                        </div>
-                        <div className="rounded-3xl border border-white/[0.08] bg-card/70 p-6">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/10 text-amber-400">
-                                <Zap className="h-5 w-5" />
-                            </div>
-                            <p className="text-3xl font-black tracking-tight text-foreground">&lt;30ms</p>
-                            <p className="mt-2 text-sm text-muted-foreground">Interception Latency</p>
-                            <p className="mt-3 text-xs uppercase tracking-[0.2em] text-electric-green/80">Typical, excludes LLM time</p>
-                        </div>
-                        <div className="rounded-3xl border border-white/[0.08] bg-card/70 p-6">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-400/10 text-sky-400">
-                                <Server className="h-5 w-5" />
-                            </div>
-                            <p className="text-3xl font-black tracking-tight text-foreground">50+</p>
-                            <p className="mt-2 text-sm text-muted-foreground">Attack Patterns</p>
-                            <p className="mt-3 text-xs uppercase tracking-[0.2em] text-electric-green/80">Prompt injection to SQL injection</p>
-                        </div>
-                        <div className="rounded-3xl border border-white/[0.08] bg-card/70 p-6">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-400">
-                                <Cloud className="h-5 w-5" />
-                            </div>
-                            <p className="text-3xl font-black tracking-tight text-foreground">4+</p>
-                            <p className="mt-2 text-sm text-muted-foreground">LLM Providers</p>
-                            <p className="mt-3 text-xs uppercase tracking-[0.2em] text-electric-green/80">OpenAI, Anthropic, Gemini, DeepSeek</p>
-                        </div>
-                    </div>
-
-                    <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                        <div className="rounded-3xl border border-white/[0.08] bg-card/70 p-6">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-400/10 text-slate-400">
-                                <Link2 className="h-5 w-5" />
-                            </div>
-                            <p className="text-3xl font-black tracking-tight text-foreground">1 URL</p>
-                            <p className="mt-2 text-sm text-muted-foreground">change to integrate</p>
-                        </div>
-                        <div className="rounded-3xl border border-white/[0.08] bg-card/70 p-6">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-400">
-                                <Clock className="h-5 w-5" />
-                            </div>
-                            <p className="text-3xl font-black tracking-tight text-foreground">&lt;50ms</p>
-                            <p className="mt-2 text-sm text-muted-foreground">latency overhead</p>
-                        </div>
-                        <div className="rounded-3xl border border-white/[0.08] bg-card/70 p-6">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/10 text-amber-400">
-                                <Lock className="h-5 w-5" />
-                            </div>
-                            <p className="text-3xl font-black tracking-tight text-foreground">0</p>
-                            <p className="mt-2 text-sm text-muted-foreground">prompts stored by default</p>
-                        </div>
-                        <div className="rounded-3xl border border-white/[0.08] bg-card/70 p-6">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-green-400/10 text-green-400">
-                                <ArrowRight className="h-5 w-5" />
-                            </div>
-                            <p className="text-3xl font-black tracking-tight text-foreground">&lt;30 min</p>
-                            <p className="mt-2 text-sm text-muted-foreground">to first protected request</p>
-                        </div>
-                    </div>
                 </div>
             </section>
 
