@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Shield, AlertTriangle, Play, RefreshCw, FileText, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Shield, AlertTriangle, Play, RefreshCw, FileText, CheckCircle2, Terminal } from 'lucide-react';
 
 interface MockDocument {
   id: string;
@@ -72,31 +72,40 @@ const scenarios: Scenario[] = [
   }
 ];
 
+type ScanStep = 'idle' | 'scanning' | 'log1' | 'log2' | 'log3' | 'completed';
+
 export function RagSimulator() {
   const [selectedScenarioIndex, setSelectedScenarioIndex] = useState(0);
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanCompleted, setScanCompleted] = useState(false);
+  const [scanStep, setScanStep] = useState<ScanStep>('idle');
   const [hoveredDocId, setHoveredDocId] = useState<string | null>(null);
 
   const scenario = scenarios[selectedScenarioIndex];
 
   const triggerScan = () => {
-    setIsScanning(true);
-    setScanCompleted(false);
+    setScanStep('scanning');
+    
+    // Simulate multi-stage scanning pipeline
     setTimeout(() => {
-      setIsScanning(false);
-      setScanCompleted(true);
+      setScanStep('log1');
+      setTimeout(() => {
+        setScanStep('log2');
+        setTimeout(() => {
+          setScanStep('log3');
+          setTimeout(() => {
+            setScanStep('completed');
+          }, 500);
+        }, 500);
+      }, 500);
     }, 1800);
   };
 
   const handleScenarioChange = (index: number) => {
     setSelectedScenarioIndex(index);
-    setScanCompleted(false);
-    setIsScanning(false);
+    setScanStep('idle');
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto rounded-3xl border border-white/[0.08] bg-card/30 p-6 md:p-8 backdrop-blur-sm relative overflow-hidden shadow-2xl">
+    <div className="w-full max-w-5xl mx-auto rounded-3xl border border-white/[0.08] bg-card/30 p-6 md:p-8 backdrop-blur-sm relative overflow-hidden shadow-2xl transition-all duration-300">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.01] via-transparent to-transparent pointer-events-none" />
 
       {/* Header and Scenario Selector */}
@@ -115,9 +124,9 @@ export function RagSimulator() {
             <button
               key={sc.title}
               onClick={() => handleScenarioChange(index)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                 selectedScenarioIndex === index
-                  ? 'bg-electric-green/10 text-electric-green border-electric-green/30'
+                  ? 'bg-electric-green/10 text-electric-green border-electric-green/30 shadow-[0_0_12px_rgba(16,185,129,0.1)]'
                   : 'bg-white/[0.02] text-muted-foreground border-white/[0.06] hover:text-foreground hover:bg-white/[0.05]'
               }`}
             >
@@ -127,65 +136,119 @@ export function RagSimulator() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
+      <div className="grid lg:grid-cols-12 gap-8 items-stretch">
         {/* Left: Input/Retrieved Documents Panel */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* User Query Display */}
-          <div className="rounded-2xl border border-white/[0.06] bg-black/40 p-4">
-            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">User LLM Query</div>
-            <div className="font-mono text-sm text-foreground bg-black/20 p-3 rounded-lg border border-white/[0.04] select-all">
-              "{scenario.query}"
-            </div>
-          </div>
-
-          {/* Retrieved Documents List */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-center px-1">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-                Retrieved RAG Chunks ({scenario.documents.length})
-              </span>
-              <span className="text-xs text-muted-foreground italic">Hover to view content</span>
+        <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
+          <div className="space-y-6">
+            {/* User Query Display */}
+            <div className="rounded-2xl border border-white/[0.06] bg-black/40 p-4">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">User LLM Query</div>
+              <div className="font-mono text-sm text-foreground bg-black/20 p-3 rounded-lg border border-white/[0.04] select-all">
+                "{scenario.query}"
+              </div>
             </div>
 
+            {/* Retrieved Documents List */}
             <div className="space-y-3">
-              {scenario.documents.map((doc) => (
-                <div
-                  key={doc.id}
-                  onMouseEnter={() => setHoveredDocId(doc.id)}
-                  onMouseLeave={() => setHoveredDocId(null)}
-                  className={`p-4 rounded-2xl border transition-all relative ${
-                    hoveredDocId === doc.id
-                      ? 'border-white/[0.12] bg-white/[0.03]'
-                      : 'border-white/[0.06] bg-white/[0.01]'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm font-bold text-foreground">{doc.title}</span>
-                    </div>
-                    <span className="text-[10px] font-mono bg-white/[0.04] text-muted-foreground px-2 py-0.5 rounded border border-white/[0.04]">
-                      {doc.source}
-                    </span>
-                  </div>
+              <div className="flex justify-between items-center px-1">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                  Retrieved RAG Chunks ({scenario.documents.length})
+                </span>
+                <span className="text-xs text-muted-foreground italic">Hover to view content</span>
+              </div>
 
-                  <p className="text-xs text-muted-foreground font-mono leading-relaxed line-clamp-2">
-                    {doc.content}
-                  </p>
+              {/* Relative container wrapping documents for absolute laser scan */}
+              <div className="space-y-3 relative overflow-hidden rounded-2xl p-1 -m-1">
+                {/* Laser scan line */}
+                {scanStep === 'scanning' && (
+                  <motion.div
+                    className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-electric-green to-transparent opacity-95 z-20 shadow-[0_0_12px_rgba(16,185,129,0.9)]"
+                    initial={{ top: "0%" }}
+                    animate={{ top: "100%" }}
+                    transition={{ duration: 1.8, ease: "easeInOut" }}
+                  />
+                )}
 
-                  {/* Visual clue about prompt injection (subtle warning icon, only if scan completed) */}
-                  {scanCompleted && doc.isInjected && (
+                {scenario.documents.map((doc) => {
+                  const isScanning = scanStep === 'scanning';
+                  const isCompleted = scanStep === 'completed';
+                  
+                  let borderClass = 'border-white/[0.06] bg-white/[0.01]';
+                  if (hoveredDocId === doc.id) {
+                    borderClass = 'border-white/[0.12] bg-white/[0.03] shadow-md';
+                  }
+
+                  // Finished state styles
+                  if (isCompleted) {
+                    if (doc.isInjected) {
+                      borderClass = 'border-red-500/40 bg-red-950/5 shadow-[0_0_15px_rgba(239,68,68,0.05)]';
+                    } else {
+                      borderClass = 'border-emerald-500/30 bg-emerald-950/5 shadow-[0_0_15px_rgba(16,185,129,0.05)]';
+                    }
+                  }
+
+                  return (
                     <motion.div
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="absolute right-3 bottom-3 flex items-center gap-1.5 bg-red-500/10 border border-red-500/30 text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                      key={doc.id}
+                      layout
+                      onMouseEnter={() => setHoveredDocId(doc.id)}
+                      onMouseLeave={() => setHoveredDocId(null)}
+                      className={`p-4 rounded-2xl border transition-all duration-300 relative ${borderClass}`}
                     >
-                      <AlertTriangle className="w-3 h-3" />
-                      Injection Detected
+                      {/* Laser scanner blur layer overlay */}
+                      {isScanning && (
+                        <div className="absolute inset-0 bg-electric-green/[0.01] backdrop-blur-[0.5px] pointer-events-none rounded-2xl transition-all" />
+                      )}
+
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div className="flex items-center gap-2">
+                          <FileText className={`w-4 h-4 transition-colors ${
+                            isCompleted && doc.isInjected ? 'text-red-400' : 'text-muted-foreground'
+                          }`} />
+                          <span className={`text-sm font-bold transition-colors ${
+                            isCompleted && doc.isInjected ? 'text-red-400' : 'text-foreground'
+                          }`}>{doc.title}</span>
+                        </div>
+                        <span className="text-[10px] font-mono bg-white/[0.04] text-muted-foreground px-2 py-0.5 rounded border border-white/[0.04]">
+                          {doc.source}
+                        </span>
+                      </div>
+
+                      <p className={`text-xs font-mono leading-relaxed line-clamp-2 transition-colors ${
+                        isCompleted && doc.isInjected ? 'text-red-300/80' : 'text-muted-foreground'
+                      }`}>
+                        {doc.content}
+                      </p>
+
+                      {/* scan badge indicator */}
+                      <AnimatePresence>
+                        {isCompleted && doc.isInjected && (
+                          <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            className="absolute right-3 bottom-3 flex items-center gap-1.5 bg-red-500/10 border border-red-500/30 text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                          >
+                            <AlertTriangle className="w-3 h-3" />
+                            Purged
+                          </motion.div>
+                        )}
+                        {isCompleted && !doc.isInjected && (
+                          <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            className="absolute right-3 bottom-3 flex items-center gap-1.5 bg-electric-green/10 border border-electric-green/30 text-electric-green px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                          >
+                            <CheckCircle2 className="w-3 h-3" />
+                            Cleared
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
-                  )}
-                </div>
-              ))}
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -193,14 +256,14 @@ export function RagSimulator() {
           <div className="flex justify-end pt-2">
             <button
               onClick={triggerScan}
-              disabled={isScanning}
-              className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                isScanning
+              disabled={scanStep === 'scanning'}
+              className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all cursor-pointer select-none ${
+                scanStep === 'scanning'
                   ? 'bg-white/[0.05] text-muted-foreground border border-white/[0.08]'
-                  : 'bg-electric-green text-white hover:bg-emerald-bright shadow-lg shadow-emerald-500/10'
+                  : 'bg-electric-green text-white hover:bg-emerald-bright shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-95'
               }`}
             >
-              {isScanning ? (
+              {scanStep === 'scanning' ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin text-electric-green" />
                   Scanning Context...
@@ -216,11 +279,14 @@ export function RagSimulator() {
         </div>
 
         {/* Right: Security Analysis Panel */}
-        <div className="lg:col-span-5 relative h-full">
-          <div className="rounded-2xl border border-white/[0.06] bg-black/60 p-5 font-mono text-xs leading-relaxed min-h-[380px] flex flex-col justify-between">
+        <div className="lg:col-span-5 relative flex flex-col">
+          <div className="rounded-2xl border border-white/[0.06] bg-black/60 p-5 font-mono text-xs leading-relaxed min-h-[420px] flex flex-col justify-between">
             {/* Terminal Top bar */}
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-4">
-              <span className="text-[10px] font-bold text-muted-foreground tracking-wider">SECURE AUDIT TERMINAL</span>
+              <div className="flex items-center gap-1.5">
+                <Terminal className="w-3.5 h-3.5 text-electric-green" />
+                <span className="text-[10px] font-bold text-muted-foreground tracking-wider">SECURE AUDIT TERMINAL</span>
+              </div>
               <div className="flex gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
                 <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
@@ -230,14 +296,14 @@ export function RagSimulator() {
 
             {/* Terminal Body */}
             <div className="flex-grow space-y-4">
-              {!isScanning && !scanCompleted && (
-                <div className="h-48 flex flex-col items-center justify-center text-center text-muted-foreground select-none">
+              {scanStep === 'idle' && (
+                <div className="h-64 flex flex-col items-center justify-center text-center text-muted-foreground select-none">
                   <TerminalIcon />
-                  <p className="mt-4 max-w-[240px]">Click "Run Security Scan" to test Koreshield RAG Defense-in-Depth.</p>
+                  <p className="mt-4 max-w-[240px] text-xs">Click "Run Security Scan" to audit context chunks for indirect prompt injection.</p>
                 </div>
               )}
 
-              {isScanning && (
+              {scanStep === 'scanning' && (
                 <div className="space-y-3 py-6">
                   <div className="flex items-center gap-2 text-electric-green">
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -251,56 +317,76 @@ export function RagSimulator() {
                 </div>
               )}
 
-              {scanCompleted && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="space-y-4"
-                >
-                  <div className="flex items-center gap-2 border-b border-white/[0.04] pb-3">
+              {scanStep !== 'idle' && scanStep !== 'scanning' && (
+                <div className="space-y-4">
+                  {/* Log 1: Threat Scan Header */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center gap-2 border-b border-white/[0.04] pb-3"
+                  >
                     <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
                     <span className="text-red-400 font-bold">SCAN COMPLETED: THREAT DETECTED</span>
-                  </div>
+                  </motion.div>
 
-                  {/* Taxonomy fields */}
-                  <div className="bg-red-950/15 border border-red-500/20 rounded-xl p-3 space-y-2">
-                    <div className="text-[10px] text-muted-foreground uppercase">Threat Taxonomy Matching</div>
-                    <div>
-                      <span className="text-red-400">Class:</span>{' '}
-                      <span className="text-white">{scenario.documents.find(d => d.isInjected)?.attackType}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
+                  {/* Log 2: Classification Details */}
+                  {['log2', 'log3', 'completed'].includes(scanStep) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-red-950/15 border border-red-500/20 rounded-xl p-3 space-y-2"
+                    >
+                      <div className="text-[10px] text-muted-foreground uppercase">Threat Taxonomy Matching</div>
                       <div>
-                        <span className="text-red-400">Risk Score:</span>{' '}
-                        <span className="text-white font-bold">99.8%</span>
+                        <span className="text-red-400">Class:</span>{' '}
+                        <span className="text-white">{scenario.documents.find(d => d.isInjected)?.attackType}</span>
                       </div>
-                      <div>
-                        <span className="text-red-400">Severity:</span>{' '}
-                        <span className="text-white bg-red-500/10 px-1.5 py-0.5 rounded font-bold border border-red-500/20">CRITICAL</span>
+                      <div className="flex items-center gap-4 text-[11px]">
+                        <div>
+                          <span className="text-red-400">Risk Score:</span>{' '}
+                          <span className="text-white font-bold">99.8%</span>
+                        </div>
+                        <div>
+                          <span className="text-red-400">Severity:</span>{' '}
+                          <span className="text-white bg-red-500/10 px-1.5 py-0.5 rounded font-bold border border-red-500/20">CRITICAL</span>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    </motion.div>
+                  )}
 
-                  {/* Mitigation Action */}
-                  <div className="bg-emerald-950/10 border border-electric-green/20 rounded-xl p-3 space-y-2">
-                    <div className="text-[10px] text-muted-foreground uppercase">Mitigation Action</div>
-                    <div className="flex items-center gap-2 text-electric-green font-bold">
-                      <CheckCircle2 className="w-4 h-4 shrink-0" />
-                      <span>Document Filtered Out</span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground leading-normal">
-                      The Koreshield client client-side utility safely dropped the flagged document context prior to passing RAG context to downstream model.
-                    </p>
-                  </div>
+                  {/* Log 3: Mitigation Action */}
+                  {['log3', 'completed'].includes(scanStep) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-emerald-950/10 border border-electric-green/20 rounded-xl p-3 space-y-2"
+                    >
+                      <div className="text-[10px] text-muted-foreground uppercase">Mitigation Action</div>
+                      <div className="flex items-center gap-2 text-electric-green font-bold">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <span>Document Filtered Out</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground leading-normal">
+                        Koreshield RAG handler automatically identified and purged the malicious document from context before model ingestion.
+                      </p>
+                    </motion.div>
+                  )}
 
-                  {/* Safe context info */}
-                  <div className="space-y-1.5">
-                    <div className="text-[10px] text-muted-foreground uppercase">Filtered RAG Payload Sent to LLM:</div>
-                    <div className="bg-black/40 border border-white/[0.04] p-2.5 rounded-lg text-white/50 text-[10px] line-clamp-3">
-                      {scenario.documents.filter(d => !d.isInjected).map(d => `[Source: ${d.title}] ${d.content}`).join(' ')}
-                    </div>
-                  </div>
-                </motion.div>
+                  {/* Log 4: Filtered payload sent to LLM */}
+                  {scanStep === 'completed' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-1.5"
+                    >
+                      <div className="text-[10px] text-muted-foreground uppercase">Payload Forwarded to LLM:</div>
+                      <div className="bg-black/40 border border-white/[0.04] p-2.5 rounded-lg text-white/50 text-[10px] line-clamp-3 select-all leading-normal">
+                        {scenario.documents.filter(d => !d.isInjected).map(d => `[Source: ${d.title}] ${d.content}`).join(' ')}
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
               )}
             </div>
 

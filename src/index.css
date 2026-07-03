@@ -1,5 +1,44 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500;1,6..72,600;1,6..72,700&display=swap');
+
+@font-face {
+  font-family: 'Aeonik';
+  src: url("https://cdn.prod.website-files.com/6a16d2a26330dc8d02325ee0/6a182e4769f2737388b78401_AeonikFonoVF-Regular.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Rhymes Display';
+  src: url("https://cdn.prod.website-files.com/6a16d2a26330dc8d02325ee0/6a1947353de2dbc833022fb7_Rhymes%20Display%20Light.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interdisplay';
+  src: url("https://cdn.prod.website-files.com/6a16d2a26330dc8d02325ee0/6a1949b24b8ad7985448900d_InterDisplay-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interdisplay';
+  src: url("https://cdn.prod.website-files.com/6a16d2a26330dc8d02325ee0/6a1be37ea2cdcf4a94abf026_InterDisplay-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interdisplay';
+  src: url("https://cdn.prod.website-files.com/6a16d2a26330dc8d02325ee0/6a1be37ee5f5c22bc8405f7a_InterDisplay-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* Enable class-based dark mode (toggled via .dark on <html>) */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -81,9 +120,9 @@
   --color-ruby: #E11D48;
 
   /* Font families */
-  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-serif: 'Newsreader', Georgia, serif;
-  --font-mono: 'Geist Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-sans: 'Interdisplay', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Rhymes Display', Georgia, serif;
+  --font-mono: 'Aeonik', 'Geist Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
 }
 
 @layer base {
@@ -96,16 +135,16 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Headings  -  tight tracking, bold, Geist */
+  /* Headings  -  tight tracking, bold, Rhymes Display */
   h1, h2 {
     font-family: var(--font-serif);
-    letter-spacing: -0.02em;
-    font-weight: 500;
+    letter-spacing: -0.01em;
+    font-weight: 400;
   }
   
   h3, h4, h5, h6 {
-    letter-spacing: -0.025em;
-    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-weight: 600;
   }
 }
 

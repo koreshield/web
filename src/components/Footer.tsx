@@ -1,4 +1,4 @@
-import { ArrowRight, Github, Linkedin, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Github, Instagram, Linkedin, ShieldCheck, Twitter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const linkClass = 'text-sm text-muted-foreground transition-colors hover:text-foreground';
@@ -167,6 +167,20 @@ function Footer() {
 				</div>
 
 				<div className="flex flex-col gap-6 pt-8 md:flex-row md:items-center md:justify-between">
+					<div className="flex gap-4">
+						<a href="https://linkedin.com/company/koreshield" target="_blank" rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="LinkedIn">
+							<Linkedin className="h-5 w-5" />
+						</a>
+						<a href="https://twitter.com/koreshield" target="_blank" rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="Twitter">
+							<Twitter className="h-5 w-5" />
+						</a>
+						<a href="https://instagram.com/koreshield" target="_blank" rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="Instagram">
+							<Instagram className="h-5 w-5" />
+						</a>
+						<a href="https://github.com/koreshield" target="_blank" rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="GitHub">
+							<Github className="h-5 w-5" />
+						</a>
+					</div>
 					<div className="text-sm text-muted-foreground md:text-right">
 						<p>© {new Date().getFullYear()} Koreshield. All rights reserved.</p>
 						<p className="mt-1 text-xs text-muted-foreground/70">Koreshield Labs Ltd. · Incorporated in England & Wales · Co. No. 17057784</p>
