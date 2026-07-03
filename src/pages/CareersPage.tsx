@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Briefcase, Clock, MapPin, Sparkles } from 'lucide-react';
+import { ArrowRight, Briefcase, Clock, MapPin, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 import { careerRoles, getFeaturedCareerRole } from '../content/careers';
@@ -31,6 +31,20 @@ export default function CareersPage() {
 			<SEOMeta
 				title="Careers"
 				description="Explore open roles at Koreshield across growth, product, security, research, engineering, and sales."
+				canonicalUrl="https://koreshield.ai/careers"
+				structuredData={{
+					'@context': 'https://schema.org',
+					'@type': 'CollectionPage',
+					'@id': 'https://koreshield.ai/careers#webpage',
+					url: 'https://koreshield.ai/careers',
+					name: 'Careers at Koreshield',
+					description: 'Open roles at Koreshield Labs Ltd.',
+					isPartOf: { '@id': 'https://koreshield.ai/#website' },
+				}}
+				breadcrumbs={[
+					{ name: 'Home', url: 'https://koreshield.ai' },
+					{ name: 'Careers', url: 'https://koreshield.ai/careers' },
+				]}
 			/>
 
 			<section className="relative overflow-hidden px-4 py-20 md:px-6 md:py-24">
@@ -54,7 +68,7 @@ export default function CareersPage() {
 
 							<div className="bg-background/70 backdrop-blur border border-border rounded-2xl p-6 shadow-[0_18px_80px_rgba(0,0,0,0.14)]">
 								<div className="inline-flex items-center gap-2 text-electric-green text-xs font-semibold uppercase tracking-[0.18em] mb-4">
-									<Sparkles className="w-3.5 h-3.5" />
+									<Target className="w-3.5 h-3.5" />
 									Latest opening
 								</div>
 								<h2 className="text-xl font-bold text-foreground mb-2">{featuredRole.title}</h2>

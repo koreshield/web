@@ -14,6 +14,7 @@ import { ArrowRight, Check, CheckCircle2, Cloud, Copy, Lock, Server, Terminal } 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
+import { SEOConfig } from '../lib/seo-config';
 
 const quickStartCommands = [
     { label: 'Python', command: 'pip install koreshield' },
@@ -42,7 +43,7 @@ function CopyButton({ text }: { text: string }) {
 function LandingPage() {
     return (
         <div className="bg-background text-foreground">
-            <SEOMeta />
+            <SEOMeta {...SEOConfig.home} />
             <Hero />
 
             <ErrorBoundary fallback={<div className="h-20 bg-muted/50" />}>
@@ -128,8 +129,8 @@ function LandingPage() {
                                         <span className="text-sm font-bold text-foreground">{item.label}</span>
                                         <CopyButton text={item.command} />
                                     </div>
-                                    <code className="block overflow-x-auto rounded-xl border border-white/[0.06] bg-black/40 px-3 py-3 text-sm text-muted-foreground">
-                                        <span className="text-electric-green">$</span> {item.command}
+                                    <code className="block overflow-x-auto rounded-xl border border-emerald-900/10 bg-emerald-950/[0.045] px-3 py-3 text-sm text-slate-700 dark:border-white/[0.06] dark:bg-black/40 dark:text-zinc-300">
+                                        <span className="font-bold text-emerald-700 dark:text-electric-green">$</span> {item.command}
                                     </code>
                                 </div>
                             ))}

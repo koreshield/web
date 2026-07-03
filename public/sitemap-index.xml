@@ -9,4 +9,10 @@
 	<sitemap>
 		<loc>https://koreshield.ai/sitemap-docs.xml</loc>
 	</sitemap>
+	<sitemap>
+		<loc>https://koreshield.ai/sitemap-research.xml</loc>
+	</sitemap>
+	<sitemap>
+		<loc>https://koreshield.ai/sitemap-careers.xml</loc>
+	</sitemap>
 </sitemapindex>

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Bot, Braces, GitBranch, MousePointerClick, ShieldAlert, Wrench } from 'lucide-react';
+import { ArrowRight, Braces, GitBranch, MousePointerClick, ShieldAlert, Workflow, Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
 
@@ -24,7 +24,7 @@ export default function SolutionAgentsSecurityPage() {
 				<div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
 					<motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
 						<span className="mb-6 inline-flex items-center gap-2 rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-electric-green">
-							<Bot className="h-3.5 w-3.5" />
+							<Workflow className="h-3.5 w-3.5" />
 							AI Agents Security
 						</span>
 						<h1 className="max-w-4xl text-5xl font-extrabold tracking-[-0.055em] md:text-7xl">

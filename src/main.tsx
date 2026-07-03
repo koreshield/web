@@ -10,6 +10,7 @@ import '@fontsource/geist-sans/700.css';
 import './index.css'
 import App from './App.tsx'
 import CookieConsent from './components/CookieConsent';
+import initThirdPartyScripts from './lib/thirdparty';
 
 const SPA_REDIRECT_KEY = 'koreshield-spa-redirect';
 
@@ -47,6 +48,11 @@ if (import.meta.env.PROD) {
 }
 
 syncJsonLd('organization', defaultOrganizationSchema);
+
+if (typeof window !== 'undefined') {
+  // Initialize third-party scripts — they will only load when consented.
+  initThirdPartyScripts();
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

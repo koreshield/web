@@ -34,12 +34,45 @@ export default function CareerRolePage() {
 
 	const relatedRoles = careerRoles.filter((item) => item.slug !== role.slug).slice(0, 3);
 	const applyHref = `mailto:${role.recruitmentEmail}?subject=${encodeURIComponent(`Application: ${role.title}`)}`;
+	const jobPostingSchema = {
+		'@context': 'https://schema.org',
+		'@type': 'JobPosting',
+		title: role.title,
+		description: [role.summary, ...role.overview].join(' '),
+		employmentType: role.type === 'Full-time' ? 'FULL_TIME' : 'OTHER',
+		hiringOrganization: {
+			'@type': 'Organization',
+			'@id': 'https://koreshield.ai/#organization',
+			name: 'Koreshield Labs Ltd',
+			sameAs: 'https://koreshield.ai',
+			logo: 'https://koreshield.ai/logo.png',
+		},
+		...(role.location.includes('Remote') ? { jobLocationType: 'TELECOMMUTE' } : {}),
+		...(role.location.includes('London') ? {
+			jobLocation: {
+				'@type': 'Place',
+				address: {
+					'@type': 'PostalAddress',
+					addressLocality: 'London',
+					addressCountry: 'GB',
+				},
+			},
+		} : {}),
+		url: `https://koreshield.ai/careers/${role.slug}`,
+	};
 
 	return (
 		<div className="min-h-screen bg-background text-foreground transition-colors">
 			<SEOMeta
 				title={role.title}
 				description={role.summary}
+				canonicalUrl={`https://koreshield.ai/careers/${role.slug}`}
+				structuredData={jobPostingSchema}
+				breadcrumbs={[
+					{ name: 'Home', url: 'https://koreshield.ai' },
+					{ name: 'Careers', url: 'https://koreshield.ai/careers' },
+					{ name: role.title, url: `https://koreshield.ai/careers/${role.slug}` },
+				]}
 			/>
 
 			<section className="relative overflow-hidden px-4 py-20 md:px-6">

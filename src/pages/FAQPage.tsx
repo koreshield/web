@@ -183,12 +183,29 @@ export default function FAQPage() {
 	};
 
 	const totalQuestions = faqCategories.reduce((sum, cat) => sum + cat.questions.length, 0);
+	const faqSchema = {
+		'@context': 'https://schema.org',
+		'@type': 'FAQPage',
+		mainEntity: faqCategories.flatMap((category) =>
+			category.questions.map((item) => ({
+				'@type': 'Question',
+				name: item.q,
+				acceptedAnswer: { '@type': 'Answer', text: item.a },
+			})),
+		),
+	};
 
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="FAQ"
 				description={`Answers to the ${totalQuestions} most common questions about Koreshield, covering security, privacy, deployment, pricing, compliance, and troubleshooting.`}
+				canonicalUrl="https://koreshield.ai/faq"
+				structuredData={faqSchema}
+				breadcrumbs={[
+					{ name: 'Home', url: 'https://koreshield.ai' },
+					{ name: 'FAQ', url: 'https://koreshield.ai/faq' },
+				]}
 			/>
 
 			<section className="relative px-6 py-24 ambient-glow">

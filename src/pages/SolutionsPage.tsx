@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import {
 	ArrowRight,
 	AudioLines,
-	Bot,
+	Route,
 	FileSearch,
 	Gauge,
 	Radar,
@@ -30,7 +30,7 @@ const solutions = [
 	{
 		title: 'AI Agents Security',
 		to: '/solutions/ai-agents-security',
-		icon: Bot,
+		icon: Route,
 		body: 'Gate tool calls, session state, and agent actions before they execute.',
 		label: 'Tool control',
 	},

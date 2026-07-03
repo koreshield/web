@@ -296,6 +296,17 @@ textarea {
   border-color: rgba(15, 23, 42, 0.1) !important;
 }
 
+/* Components that intentionally emulate terminals keep dark-theme contrast in light mode. */
+.console-surface {
+  color-scheme: dark;
+  --foreground: 0 0% 95%;
+  --card: 240 4% 9.4%;
+  --card-foreground: 0 0% 95%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --border: 240 3.7% 15.9%;
+}
+
 /* ═══ Glass card effect ═══ */
 .glass-card {
   background: rgba(24, 24, 27, 0.6);

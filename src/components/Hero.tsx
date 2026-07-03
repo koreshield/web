@@ -8,7 +8,7 @@ function Hero() {
 	return (
 		<section className="relative min-h-[90vh] flex items-center justify-center px-6 py-28 overflow-hidden bg-background transition-colors ambient-glow">
 			{/* Subtle dot grid  -  barely visible */}
-			<div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+			<div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.045)_1px,transparent_1px)] bg-[size:4rem_4rem] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)]" />
 
 			<div className="relative z-10 max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
 				{/* Left: Text content */}
@@ -64,7 +64,7 @@ function Hero() {
 
 						<Link
 							to="/docs"
-							className="group relative border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 text-foreground font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto backdrop-blur-sm"
+							className="group relative flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card/70 px-6 py-3 font-semibold text-foreground shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-electric-green/35 hover:bg-muted sm:w-auto sm:px-8 sm:py-4 dark:bg-white/5 dark:hover:bg-white/10"
 						>
 							<span className="relative z-10">Read the Docs</span>
 							<ArrowRight className="w-4 h-4 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform shrink-0" />

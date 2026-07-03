@@ -84,7 +84,7 @@ function Features() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                         viewport={{ once: true }}
-                        className="group relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(255,255,255,0.035)_45%,rgba(15,23,42,0.45))] p-6 shadow-2xl shadow-emerald-950/20 lg:col-span-7 lg:p-8"
+                        className="group relative overflow-hidden rounded-[2rem] border border-border/80 bg-[linear-gradient(135deg,rgba(16,185,129,0.13),rgba(255,255,255,0.78)_48%,rgba(236,253,245,0.9))] p-6 shadow-xl shadow-emerald-950/10 dark:bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(255,255,255,0.035)_45%,rgba(15,23,42,0.45))] dark:shadow-2xl dark:shadow-emerald-950/20 lg:col-span-7 lg:p-8"
                     >
                         <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border border-electric-green/20 bg-electric-green/10 blur-2xl transition-transform duration-500 group-hover:scale-110" />
                         <div className="relative z-10 flex h-full flex-col justify-between gap-8">

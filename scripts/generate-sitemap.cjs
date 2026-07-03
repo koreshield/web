@@ -61,6 +61,8 @@ function readMarkdownRoutes(folder, prefix) {
 			}
 			return {
 				path: `${prefix}/${mdSlug(file)}`,
+				title: content.match(/^title:\s*(.+)$/m)?.[1]?.trim() || mdSlug(file),
+				description: content.match(/^excerpt:\s*(.+)$/m)?.[1]?.trim() || 'Koreshield AI security article.',
 				lastmod: content.match(/^date:\s*(\d{4}-\d{2}-\d{2})$/m)?.[1],
 			};
 		})
@@ -78,7 +80,40 @@ function docRouteFromFile(fullPath, dir) {
 		fragment = fragment.replace(/\/index$/, '');
 	}
 	const lastmod = content.match(/^last_update:\s*\n\s+date:\s*(\d{4}-\d{2}-\d{2})$/m)?.[1];
-	return { path: fragment ? `/docs/${fragment}` : '/docs', lastmod };
+	return {
+		path: fragment ? `/docs/${fragment}` : '/docs',
+		title: content.match(/^title:\s*(.+)$/m)?.[1]?.trim() || fragment.split('/').at(-1) || 'Documentation',
+		description: content.match(/^description:\s*(.+)$/m)?.[1]?.trim() || 'Koreshield technical documentation.',
+		lastmod,
+	};
+}
+
+function readTypedContentRoutes(filename, prefix, descriptionFallback) {
+	const fullPath = path.join(contentDir, filename);
+	if (!fs.existsSync(fullPath)) return [];
+	const content = fs.readFileSync(fullPath, 'utf-8');
+	const slugMatches = [...content.matchAll(/\bslug:\s*'([^']+)'/g)];
+	return slugMatches.map((match, index) => {
+		const start = match.index || 0;
+		const end = slugMatches[index + 1]?.index || content.length;
+		const block = content.slice(start, end);
+		const title = block.match(/\btitle:\s*'([^']+)'/)?.[1] || match[1];
+		const summary = block.match(/\b(?:summary|description):\s*\n?\s*'([^']+)'/)?.[1] || descriptionFallback;
+		const dateText = block.match(/\bdate:\s*'([^']+)'/)?.[1];
+		const lastmod = dateText?.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/)?.[0];
+		return { path: `${prefix}/${match[1]}`, title, description: summary, lastmod };
+	});
+}
+
+function titleFromPath(routePath) {
+	if (routePath === '/') return 'Koreshield | AI Security Firewall';
+	return routePath
+		.split('/')
+		.filter(Boolean)
+		.at(-1)
+		.split('-')
+		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+		.join(' ');
 }
 
 function readDocsRoutes() {
@@ -164,8 +199,6 @@ const ROUTES = [
 
 	// Get Started
 	{ path: '/demo', priority: 0.8, changefreq: 'weekly' },
-	...CAREER_SLUGS.map((slug) => ({ path: `/careers/${slug}`, priority: 0.45, changefreq: 'monthly' })),
-	...RESEARCH_SLUGS.map((slug) => ({ path: `/research/${slug}`, priority: 0.55, changefreq: 'monthly' })),
 ];
 
 /**
@@ -208,6 +241,16 @@ function generateRobotsTxt() {
 function writeSitemapBundle(siteUrl, basename) {
 	const blogRoutes = readMarkdownRoutes('blog', '/blog');
 	const docsRoutes = readDocsRoutes();
+	const researchRoutes = readTypedContentRoutes(
+		'research.ts',
+		'/research',
+		'Koreshield research on production AI and LLM security.',
+	).filter((route) => RESEARCH_SLUGS.includes(route.path.split('/').at(-1)));
+	const careerRoutes = readTypedContentRoutes(
+		'careers.ts',
+		'/careers',
+		'Join Koreshield and help secure production AI systems.',
+	).filter((route) => CAREER_SLUGS.includes(route.path.split('/').at(-1)));
 
 	fs.writeFileSync(path.join(publicDir, `${basename}.xml`), generateSitemap(ROUTES, siteUrl), 'utf-8');
 	console.log(`[YES] Created: web/public/${basename}.xml`);
@@ -226,6 +269,35 @@ function writeSitemapBundle(siteUrl, basename) {
 	);
 	console.log(`[YES] Created: web/public/${basename}-docs.xml`);
 
+	fs.writeFileSync(
+		path.join(publicDir, `${basename}-research.xml`),
+		generateSitemap(researchRoutes, siteUrl),
+		'utf-8',
+	);
+	console.log(`[YES] Created: web/public/${basename}-research.xml`);
+
+	fs.writeFileSync(
+		path.join(publicDir, `${basename}-careers.xml`),
+		generateSitemap(careerRoutes, siteUrl),
+		'utf-8',
+	);
+	console.log(`[YES] Created: web/public/${basename}-careers.xml`);
+
+	const manifestRoutes = [...ROUTES, ...blogRoutes, ...docsRoutes, ...researchRoutes, ...careerRoutes]
+		.reduce((result, route) => {
+			result[route.path] = {
+				title: route.title || titleFromPath(route.path),
+				description: route.description || 'Koreshield runtime security for production AI applications.',
+			};
+			return result;
+		}, {});
+	fs.writeFileSync(
+		path.join(publicDir, 'seo-routes.json'),
+		`${JSON.stringify({ origin: siteUrl, routes: manifestRoutes }, null, 2)}\n`,
+		'utf-8',
+	);
+	console.log('[YES] Created: web/public/seo-routes.json');
+
 	fs.writeFileSync(path.join(publicDir, `${basename}-index.xml`), writeSitemapIndex(siteUrl, basename), 'utf-8');
 	console.log(`[YES] Created: web/public/${basename}-index.xml`);
 }
@@ -241,6 +313,12 @@ function writeSitemapIndex(siteUrl, basename = 'sitemap') {
 	</sitemap>
 	<sitemap>
 		<loc>${siteUrl}/${basename}-docs.xml</loc>
+	</sitemap>
+	<sitemap>
+		<loc>${siteUrl}/${basename}-research.xml</loc>
+	</sitemap>
+	<sitemap>
+		<loc>${siteUrl}/${basename}-careers.xml</loc>
 	</sitemap>
 </sitemapindex>`;
 }

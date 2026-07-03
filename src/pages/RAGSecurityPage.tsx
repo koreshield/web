@@ -19,7 +19,7 @@ import {
 	FileType,
 	Clock,
 	Zap,
-	Sparkles
+	FolderInput
 } from 'lucide-react';
 import { SEOMeta } from '../components/SEOMeta';
 import { AppCallout, AppPage, AppPageHeader, AppStatCard, AppStatGrid, AppSurface } from '../components/AppPageLayout';
@@ -903,7 +903,7 @@ export function RAGSecurityPage() {
 						onClick={handleLoadNorthstarDemo}
 						className="inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
 					>
-						<Sparkles className="h-4 w-4" />
+						<FolderInput className="h-4 w-4" />
 						Load Northstar demo
 					</button>
 					<span className="text-xs text-muted-foreground">

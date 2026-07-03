@@ -40,7 +40,6 @@ const PUBLIC_EXACT_PATHS = new Set([
   '/solutions/ai-usage-control', '/solutions/rag-security',
   '/solutions/korepilot', '/solutions/voice-audio-protection', '/blog', '/docs',
 ]);
-const PUBLIC_PREFIXES = ['/blog/', '/docs/', '/research/', '/careers/'];
 const PRIVATE_PREFIXES = [
   '/dashboard', '/getting-started', '/profile', '/settings', '/billing', '/usage',
   '/policies', '/metrics', '/analytics', '/rules', '/alerts', '/cost-analytics',
@@ -72,6 +71,7 @@ const PAGE_METADATA = {
   '/solutions/korepilot': ['KorePilot AI Security Assistant | Koreshield', 'Investigate AI security events, policies, providers, and audit evidence with KorePilot.'],
   '/solutions/voice-audio-protection': ['Voice and Audio AI Protection | Koreshield', 'Protect voice and audio AI workflows from unsafe content, adversarial input, and policy violations.'],
 };
+let seoManifestCache;
 
 export default {
   async fetch(request, env) {
@@ -99,16 +99,18 @@ export default {
       return finalizeResponse(response, pathname, SEO_CACHE);
     }
 
-    if (isPublicRoute(pathname)) {
-      return serveSpaShell(request, env, pathname, 200, false);
+    const seoManifest = await loadSeoManifest(request, env);
+
+    if (isPublicRoute(pathname, seoManifest)) {
+      return serveSpaShell(request, env, pathname, 200, false, seoManifest);
     }
 
     if (isPrivateRoute(pathname)) {
-      return serveSpaShell(request, env, pathname, 200, true);
+      return serveSpaShell(request, env, pathname, 200, true, seoManifest);
     }
 
     if (isSpaRoute(pathname)) {
-      return serveSpaShell(request, env, pathname, 404, true);
+      return serveSpaShell(request, env, pathname, 404, true, seoManifest);
     }
 
     const response = await env.ASSETS.fetch(request);
@@ -137,8 +139,22 @@ function canonicalHostRedirect(url) {
   return null;
 }
 
-function isPublicRoute(pathname) {
-  return PUBLIC_EXACT_PATHS.has(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+async function loadSeoManifest(request, env) {
+  if (seoManifestCache) return seoManifestCache;
+  try {
+    const manifestUrl = new URL('/seo-routes.json', request.url);
+    manifestUrl.hostname = CANONICAL_HOST;
+    const response = await env.ASSETS.fetch(new Request(manifestUrl.toString()));
+    if (!response.ok) return null;
+    seoManifestCache = await response.json();
+    return seoManifestCache;
+  } catch {
+    return null;
+  }
+}
+
+function isPublicRoute(pathname, manifest) {
+  return Boolean(manifest?.routes?.[pathname]) || PUBLIC_EXACT_PATHS.has(pathname);
 }
 
 function isPrivateRoute(pathname) {
@@ -167,7 +183,7 @@ function isSpaRoute(pathname) {
   return true;
 }
 
-async function serveSpaShell(request, env, pathname, status, noindex) {
+async function serveSpaShell(request, env, pathname, status, noindex, manifest) {
   const indexUrl = new URL('/index.html', request.url);
   const indexRequest = new Request(indexUrl.toString(), {
     method: request.method,
@@ -183,7 +199,7 @@ async function serveSpaShell(request, env, pathname, status, noindex) {
 
   const body = request.method === 'HEAD'
     ? null
-    : injectSeoMetadata(await response.text(), pathname, noindex);
+    : injectSeoMetadata(await response.text(), pathname, noindex, manifest);
 
   return new Response(body, {
     status,
@@ -191,8 +207,8 @@ async function serveSpaShell(request, env, pathname, status, noindex) {
   });
 }
 
-function injectSeoMetadata(html, pathname, noindex) {
-  const [title, description] = metadataForPath(pathname, noindex);
+function injectSeoMetadata(html, pathname, noindex, manifest) {
+  const [title, description] = metadataForPath(pathname, noindex, manifest);
   const canonical = `${CANONICAL_ORIGIN}${pathname === '/' ? '' : pathname}`;
   const robots = noindex ? 'noindex, follow' : 'index, follow';
   const escapedTitle = escapeHtml(title);
@@ -207,11 +223,15 @@ function injectSeoMetadata(html, pathname, noindex) {
     `<meta property="og:url" content="${escapedCanonical}" />`,
     `<meta property="og:title" content="${escapedTitle}" />`,
     `<meta property="og:description" content="${escapedDescription}" />`,
-    `<meta property="og:image" content="${CANONICAL_ORIGIN}/logo.png" />`,
-    '<meta name="twitter:card" content="summary" />',
+    `<meta property="og:image" content="${CANONICAL_ORIGIN}/og-default.png" />`,
+    '<meta property="og:image:width" content="1200" />',
+    '<meta property="og:image:height" content="630" />',
+    '<meta property="og:image:alt" content="Koreshield AI Security Firewall" />',
+    '<meta property="og:locale" content="en_GB" />',
+    '<meta name="twitter:card" content="summary_large_image" />',
     `<meta name="twitter:title" content="${escapedTitle}" />`,
     `<meta name="twitter:description" content="${escapedDescription}" />`,
-    `<meta name="twitter:image" content="${CANONICAL_ORIGIN}/logo.png" />`,
+    `<meta name="twitter:image" content="${CANONICAL_ORIGIN}/og-default.png" />`,
   ].join('\n\t');
 
   return html
@@ -221,13 +241,18 @@ function injectSeoMetadata(html, pathname, noindex) {
     .replace('</head>', `\t${metadata}\n</head>`);
 }
 
-function metadataForPath(pathname, noindex) {
+function metadataForPath(pathname, noindex, manifest) {
   if (noindex) {
     return ['Page Not Found | Koreshield', 'The requested Koreshield page could not be found.'];
   }
 
   if (PAGE_METADATA[pathname]) {
     return PAGE_METADATA[pathname];
+  }
+
+  const manifestMetadata = manifest?.routes?.[pathname];
+  if (manifestMetadata) {
+    return [manifestMetadata.title, manifestMetadata.description];
   }
 
   const label = titleize(pathname.split('/').filter(Boolean).pop() || 'Koreshield');

@@ -1,4 +1,4 @@
-import { ChevronDown, Github, Menu, Sparkles, X } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Github, Menu, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
@@ -334,7 +334,7 @@ export function MarketingLayout() {
 												className={mobileNavLinkClass}
 											>
 												<span>{item.label}</span>
-												<Sparkles className="h-4 w-4 text-primary/80" />
+												<ArrowUpRight className="h-4 w-4 text-primary/80" />
 											</Link>
 										))}
 									</MobileNavSection>

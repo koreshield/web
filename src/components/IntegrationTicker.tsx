@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
 
 // Inline SVG logos for crisp, themeable icons
 const logos = {
@@ -90,63 +91,121 @@ const logos = {
 };
 
 // Keep this list limited to documented/code-backed integrations.
-const integrations = [
-    { name: 'OpenAI', Logo: logos.OpenAI },
-    { name: 'Anthropic', Logo: logos.Anthropic },
-    { name: 'Gemini', Logo: logos.Google },
-    { name: 'Azure OpenAI', Logo: logos.Azure },
-    { name: 'DeepSeek', Logo: logos.DeepSeek },
-    { name: 'Salesforce', Logo: logos.Salesforce },
-    { name: 'HubSpot', Logo: logos.HubSpot },
-    { name: 'Zendesk', Logo: logos.Zendesk },
-    { name: 'Slack', Logo: logos.Slack },
-    { name: 'LangChain', Logo: logos.LangChain },
-    { name: 'LlamaIndex', Logo: logos.LlamaIndex },
-    { name: 'FastAPI', Logo: logos.FastAPI },
-    { name: 'Vercel', Logo: logos.Vercel },
-    { name: 'Cloudflare Workers', Logo: logos.Cloudflare },
-    { name: 'PostgreSQL', Logo: logos.PostgreSQL },
-    { name: 'Redis', Logo: logos.Redis },
+const integrationGroups = [
+    {
+        label: 'Model layer',
+        description: 'Keep your provider choices open.',
+        items: [
+            { name: 'OpenAI', Logo: logos.OpenAI },
+            { name: 'Anthropic', Logo: logos.Anthropic },
+            { name: 'Gemini', Logo: logos.Google },
+            { name: 'Azure OpenAI', Logo: logos.Azure },
+            { name: 'DeepSeek', Logo: logos.DeepSeek },
+        ],
+    },
+    {
+        label: 'Application layer',
+        description: 'Protect the tools where work happens.',
+        items: [
+            { name: 'Salesforce', Logo: logos.Salesforce },
+            { name: 'HubSpot', Logo: logos.HubSpot },
+            { name: 'Zendesk', Logo: logos.Zendesk },
+            { name: 'Slack', Logo: logos.Slack },
+        ],
+    },
+    {
+        label: 'AI framework',
+        description: 'Add enforcement without a rebuild.',
+        items: [
+            { name: 'LangChain', Logo: logos.LangChain },
+            { name: 'LlamaIndex', Logo: logos.LlamaIndex },
+            { name: 'FastAPI', Logo: logos.FastAPI },
+        ],
+    },
+    {
+        label: 'Runtime & data',
+        description: 'Deploy inside the stack you run today.',
+        items: [
+            { name: 'Vercel', Logo: logos.Vercel },
+            { name: 'Cloudflare', Logo: logos.Cloudflare },
+            { name: 'PostgreSQL', Logo: logos.PostgreSQL },
+            { name: 'Redis', Logo: logos.Redis },
+        ],
+    },
 ];
 
 export function IntegrationTicker() {
     return (
-        <section className="relative overflow-hidden border-y border-white/[0.06] bg-background py-8 backdrop-blur-sm sm:py-10">
-            <div className="absolute left-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-r from-background to-transparent sm:w-20"></div>
-            <div className="absolute right-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-l from-background to-transparent sm:w-20"></div>
+        <section className="relative overflow-hidden border-y border-border/80 bg-card/45 px-4 py-16 sm:px-6 sm:py-20">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(16,185,129,0.13),transparent_25rem)] dark:bg-[radial-gradient(circle_at_12%_20%,rgba(16,185,129,0.09),transparent_25rem)]" />
+            <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(hsl(var(--border)/0.35)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--border)/0.35)_1px,transparent_1px)] [background-size:48px_48px] [mask-image:linear-gradient(to_bottom,black,transparent_90%)]" />
 
-            <div className="mx-auto mb-6 max-w-7xl px-4 text-center sm:px-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-sm sm:tracking-widest">
-                    Works with the tools your team already uses
-                </p>
-            </div>
-
-            <div className="flex overflow-hidden">
+            <div className="relative mx-auto grid max-w-7xl gap-10 xl:grid-cols-[0.78fr_1.62fr] xl:items-center">
                 <motion.div
-                    className="flex min-w-max items-center gap-8 whitespace-nowrap pr-8 sm:gap-14 sm:pr-14"
-                    animate={{ x: ['0%', '-50%'] }}
-                    transition={{
-                        x: {
-                            repeat: Infinity,
-                            repeatType: "loop",
-                            duration: 45,
-                            ease: "linear",
-                        },
-                    }}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.45 }}
                 >
-                    {[...integrations, ...integrations].map((item, i) => (
-                        <div
-                            key={i}
-                            className="flex items-center gap-2.5 opacity-70 transition-opacity hover:opacity-100 sm:gap-3 cursor-default"
-                            aria-label={item.name}
-                        >
-                            <span className="text-muted-foreground hover:text-electric-green transition-colors">
-                                <item.Logo />
-                            </span>
-                            <span className="text-base font-semibold text-foreground/80 sm:text-xl">{item.name}</span>
-                        </div>
-                    ))}
+                    <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-electric-green/25 bg-electric-green/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.22em] text-emerald-700 dark:text-emerald-bright">
+                        <span className="h-1.5 w-1.5 rounded-full bg-electric-green shadow-[0_0_10px_rgba(16,185,129,0.7)]" />
+                        Drop-in compatibility
+                    </div>
+                    <h2 className="max-w-lg text-3xl leading-[1.03] tracking-[-0.035em] sm:text-4xl lg:text-5xl">
+                        Your stack stays yours. <span className="text-emerald-700 dark:text-emerald-bright">We secure the path between.</span>
+                    </h2>
+                    <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
+                        Route traffic through one enforcement layer without replacing the models, frameworks, business tools, or infrastructure your team trusts.
+                    </p>
+                    <div className="mt-7 flex items-center gap-3 text-sm font-semibold text-foreground/75">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-electric-green/25 bg-electric-green/10 text-emerald-700 dark:text-emerald-bright">
+                            <ShieldCheck className="h-5 w-5" />
+                        </span>
+                        One security boundary
+                        <ArrowRight className="h-4 w-4 text-electric-green" />
+                        Every request
+                    </div>
                 </motion.div>
+
+                <div className="relative">
+                    <div className="pointer-events-none absolute left-1/2 top-1/2 hidden h-px w-16 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-transparent via-electric-green/50 to-transparent lg:block" />
+                    <div className="grid gap-3 sm:grid-cols-2">
+                        {integrationGroups.map((group, groupIndex) => (
+                            <motion.article
+                                key={group.label}
+                                initial={{ opacity: 0, y: 14 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.45, delay: groupIndex * 0.06 }}
+                                className="group rounded-[1.35rem] border border-border/85 bg-background/85 p-5 shadow-[0_18px_50px_-35px_rgba(15,23,42,0.35)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-electric-green/35 hover:shadow-[0_22px_55px_-34px_rgba(16,185,129,0.4)] dark:bg-card/75"
+                            >
+                                <div className="mb-4 flex items-start justify-between gap-4">
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-bright">{group.label}</p>
+                                        <p className="mt-1.5 text-sm leading-snug text-muted-foreground">{group.description}</p>
+                                    </div>
+                                    <span className="rounded-full border border-border bg-muted/60 px-2.5 py-1 text-[10px] font-bold tabular-nums text-muted-foreground">
+                                        0{group.items.length}
+                                    </span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {group.items.map((item) => (
+                                        <div
+                                            key={item.name}
+                                            className="flex items-center gap-2 rounded-xl border border-border/75 bg-card px-3 py-2 text-foreground/80 transition-colors group-hover:border-border dark:bg-background/55"
+                                            aria-label={item.name}
+                                        >
+                                            <span className="text-muted-foreground [&>svg]:h-4 [&>svg]:w-4">
+                                                <item.Logo />
+                                            </span>
+                                            <span className="text-xs font-semibold sm:text-sm">{item.name}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.article>
+                        ))}
+                    </div>
+                </div>
             </div>
         </section>
     );

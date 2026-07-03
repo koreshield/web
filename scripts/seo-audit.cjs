@@ -4,7 +4,13 @@ const fs = require('fs');
 const path = require('path');
 
 const publicDir = path.join(__dirname, '../public');
-const sitemapFiles = ['sitemap.xml', 'sitemap-blog.xml', 'sitemap-docs.xml'];
+const sitemapFiles = [
+	'sitemap.xml',
+	'sitemap-blog.xml',
+	'sitemap-docs.xml',
+	'sitemap-research.xml',
+	'sitemap-careers.xml',
+];
 const canonicalOrigin = 'https://koreshield.ai';
 const failures = [];
 const allUrls = new Map();
@@ -64,6 +70,45 @@ if (robots.match(/^Sitemap:/gm)?.length !== 1) {
 }
 if (fs.readdirSync(publicDir).some((filename) => filename.startsWith('sitemap.com'))) {
 	fail('non-canonical .com sitemap files still exist');
+}
+
+const manifestPath = path.join(publicDir, 'seo-routes.json');
+if (!fs.existsSync(manifestPath)) {
+	fail('SEO route manifest is missing');
+} else {
+	const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+	if (manifest.origin !== canonicalOrigin) {
+		fail(`SEO route manifest uses non-canonical origin ${manifest.origin}`);
+	}
+	for (const urlValue of allUrls.keys()) {
+		const routePath = new URL(urlValue).pathname;
+		const metadata = manifest.routes?.[routePath];
+		if (!metadata) {
+			fail(`SEO route manifest is missing ${routePath}`);
+			continue;
+		}
+		if (!metadata.title?.trim() || !metadata.description?.trim()) {
+			fail(`SEO route manifest has incomplete metadata for ${routePath}`);
+		}
+	}
+	for (const routePath of Object.keys(manifest.routes || {})) {
+		const urlValue = `${canonicalOrigin}${routePath === '/' ? '/' : routePath}`;
+		if (!allUrls.has(urlValue)) {
+			fail(`SEO route manifest contains a URL not found in sitemaps: ${routePath}`);
+		}
+	}
+}
+
+const socialImage = path.join(publicDir, 'og-default.png');
+if (!fs.existsSync(socialImage)) {
+	fail('default social image is missing');
+} else {
+	const imageBuffer = fs.readFileSync(socialImage);
+	const width = imageBuffer.readUInt32BE(16);
+	const height = imageBuffer.readUInt32BE(20);
+	if (width !== 1200 || height !== 630) {
+		fail(`default social image must be 1200x630, found ${width}x${height}`);
+	}
 }
 
 if (failures.length > 0) {

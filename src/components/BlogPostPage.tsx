@@ -66,7 +66,7 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 				description={post.excerpt}
 				canonicalUrl={`https://koreshield.ai${post.path}`}
 				ogType="article"
-				ogImage={post.coverImage || 'https://koreshield.ai/logo.png'}
+				ogImage={post.coverImage || 'https://koreshield.ai/og-default.png'}
 				author={post.author}
 				publishedTime={post.date}
 				section={post.categories[0]}

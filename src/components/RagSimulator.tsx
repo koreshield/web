@@ -142,9 +142,9 @@ export function RagSimulator() {
         <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
           <div className="space-y-6">
             {/* User Query Display */}
-            <div className="rounded-2xl border border-white/[0.06] bg-black/40 p-4">
+            <div className="rounded-2xl border border-border bg-muted/45 p-4 dark:border-white/[0.06] dark:bg-black/40">
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">User LLM Query</div>
-              <div className="font-mono text-sm text-foreground bg-black/20 p-3 rounded-lg border border-white/[0.04] select-all">
+              <div className="rounded-lg border border-border bg-background p-3 font-mono text-sm text-foreground select-all dark:border-white/[0.04] dark:bg-black/20">
                 "{scenario.query}"
               </div>
             </div>
@@ -281,7 +281,7 @@ export function RagSimulator() {
 
         {/* Right: Security Analysis Panel */}
         <div className="lg:col-span-5 relative flex flex-col">
-          <div className="rounded-2xl border border-white/[0.06] bg-black/60 p-5 font-mono text-xs leading-relaxed min-h-[420px] flex flex-col justify-between">
+          <div className="console-surface flex min-h-[420px] flex-col justify-between rounded-2xl border border-white/[0.06] bg-black/85 p-5 font-mono text-xs leading-relaxed dark:bg-black/60">
             {/* Terminal Top bar */}
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-4">
               <div className="flex items-center gap-1.5">

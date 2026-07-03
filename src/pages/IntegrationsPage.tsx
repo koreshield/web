@@ -1,4 +1,4 @@
-import { Box, Cloud, Code2, Cpu, Database, Layers, Search, ShieldCheck, type LucideIcon } from 'lucide-react';
+import { Box, Cable, Cloud, Code2, Database, Layers, Search, ServerCog, ShieldCheck, type LucideIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
@@ -45,7 +45,7 @@ const INTEGRATIONS: Integration[] = [
 		name: 'OpenAI',
 		category: 'LLM',
 		description: 'Proxy support for GPT-5, GPT-4o, and embeddings.',
-		icon: Cpu,
+		icon: Cable,
 		logoTone: 'bg-foreground text-background',
 		link: '/docs/integrations/models/openai',
 		featured: true,
@@ -67,7 +67,7 @@ const INTEGRATIONS: Integration[] = [
 		name: 'Google Gemini',
 		category: 'LLM',
 		description: 'Full support for Gemini Pro and Ultra models.',
-		icon: Cpu,
+		icon: Cable,
 		logoTone: 'bg-gradient-to-br from-blue-500 via-violet-500 to-emerald-400 text-white',
 		link: '/docs/integrations/models/gemini',
 		featured: true,
@@ -153,7 +153,7 @@ const INTEGRATIONS: Integration[] = [
 		name: 'NVIDIA',
 		category: 'Infrastructure',
 		description: 'Run protected AI workloads around NVIDIA-accelerated infrastructure.',
-		icon: Cpu,
+		icon: ServerCog,
 		logo: '/logos/ecosystem/nvidia-logo.png',
 		link: '/docs/integrations/deployment/gpu-infrastructure',
 		statusNote: 'Ecosystem signal'

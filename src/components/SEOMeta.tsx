@@ -24,13 +24,11 @@ interface SEOMetaProps {
 
 const DEFAULT_TITLE = 'Koreshield | AI Security Firewall';
 const DEFAULT_DESCRIPTION = 'Proxy-layer AI security for prompts, RAG context, provider routing, policy enforcement, and audit evidence.';
-const DEFAULT_KEYWORDS = 'LLM security, AI security, prompt injection, jailbreak detection, GPT security, OpenAI security, LLM firewall, AI safety, AI infrastructure protection, threat detection';
-const DEFAULT_OG_IMAGE = 'https://koreshield.ai/logo.png';
+const DEFAULT_OG_IMAGE = 'https://koreshield.ai/og-default.png';
 
 export function SEOMeta({
 	title,
 	description = DEFAULT_DESCRIPTION,
-	keywords = DEFAULT_KEYWORDS,
 	ogImage = DEFAULT_OG_IMAGE,
 	ogType = 'website',
 	twitterCard = 'summary_large_image',
@@ -67,29 +65,24 @@ export function SEOMeta({
 	const defaultStructuredData = useMemo(
 		() => ({
 			'@context': 'https://schema.org',
-			'@type': 'SoftwareApplication',
-			name: 'Koreshield',
-			description: DEFAULT_DESCRIPTION,
-			url: PRIMARY_SITE_URL,
-			applicationCategory: 'SecurityApplication',
-			operatingSystem: 'Cross-platform',
-			provider: {
-				'@type': 'Organization',
-				name: 'Koreshield',
+			'@type': 'WebPage',
+			'@id': `${canonical}#webpage`,
+			url: canonical,
+			name: fullTitle,
+			description,
+			isPartOf: {
+				'@type': 'WebSite',
+				'@id': `${PRIMARY_SITE_URL}/#website`,
 				url: PRIMARY_SITE_URL,
-				logo: {
-					'@type': 'ImageObject',
-					url: 'https://koreshield.ai/logo/light/1x/White.png',
-				},
-				sameAs: [
-					'https://github.com/koreshield/',
-					'https://twitter.com/koreshield',
-					'https://linkedin.com/company/koreshield',
-				],
+				name: 'Koreshield',
 			},
-			screenshot: ogImage,
+			about: { '@id': `${PRIMARY_SITE_URL}/#organization` },
+			primaryImageOfPage: {
+				'@type': 'ImageObject',
+				url: ogImage,
+			},
 		}),
-		[ogImage],
+		[canonical, description, fullTitle, ogImage],
 	);
 
 	const finalStructuredData = useMemo(
@@ -111,7 +104,6 @@ export function SEOMeta({
 			<title>{fullTitle}</title>
 			<meta name="title" content={fullTitle} />
 			<meta name="description" content={description} />
-			{keywords && <meta name="keywords" content={keywords} />}
 			{author && <meta name="author" content={author} />}
 
 			{/* Robots & Indexing */}
@@ -131,7 +123,10 @@ export function SEOMeta({
 			<meta property="og:description" content={description} />
 			<meta property="og:image" content={ogImage} />
 			<meta property="og:image:alt" content={`${fullTitle} social preview`} />
+			<meta property="og:image:width" content="1200" />
+			<meta property="og:image:height" content="630" />
 			<meta property="og:site_name" content="Koreshield" />
+			<meta property="og:locale" content="en_GB" />
 			{publishedTime && <meta property="article:published_time" content={publishedTime} />}
 			{modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
 			{section && <meta property="article:section" content={section} />}

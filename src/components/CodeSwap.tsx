@@ -115,7 +115,7 @@ export function CodeSwap() {
       
       {/* Top Bar with Language Tabs and Before/After Switcher */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/[0.06] pb-5 relative z-10">
-        <div className="flex items-center gap-1.5 bg-black/20 p-1 rounded-xl border border-white/[0.04]">
+        <div className="flex items-center gap-1.5 rounded-xl border border-border bg-muted/60 p-1 dark:border-white/[0.04] dark:bg-black/20">
           {['cURL', 'Python', 'Node.js'].map((item) => (
             <button
               key={item}
@@ -138,7 +138,7 @@ export function CodeSwap() {
 
         <div className="flex items-center gap-3">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Gateway State:</span>
-          <div className="flex bg-black/40 rounded-xl p-1 border border-white/[0.06] relative">
+          <div className="relative flex rounded-xl border border-border bg-muted/60 p-1 dark:border-white/[0.06] dark:bg-black/40">
             <button
               onClick={() => setIsProtected(false)}
               className={`relative px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer select-none z-10 ${
@@ -175,7 +175,7 @@ export function CodeSwap() {
       </div>
 
       {/* Code Display Area */}
-      <div className="relative rounded-2xl border border-white/[0.06] bg-black/50 p-5 font-mono text-sm leading-relaxed overflow-x-auto min-h-[280px] transition-all">
+      <div className="console-surface relative min-h-[280px] overflow-x-auto rounded-2xl border border-white/[0.06] bg-black/90 p-5 font-mono text-sm leading-relaxed transition-all dark:bg-black/50">
         {/* Copy Button */}
         <button
           onClick={handleCopy}
