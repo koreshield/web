@@ -4,7 +4,6 @@ import Features from '../components/Features';
 import Hero from '../components/Hero';
 import { IntegrationTicker } from '../components/IntegrationTicker';
 import { ProductExtensions } from '../components/ProductExtensions';
-import { StatsBanner } from '../components/StatsBanner';
 import { TrustBadges } from '../components/TrustBadges';
 import UseCases from '../components/UseCases';
 import { CodeSwap } from '../components/CodeSwap';
@@ -50,7 +49,7 @@ function LandingPage() {
                 <IntegrationTicker />
             </ErrorBoundary>
 
-            <StatsBanner />
+            
 
             <section className="py-20 md:py-28 px-6 bg-muted/10 relative overflow-hidden border-t border-white/[0.04] select-none">
                 <div className="max-w-7xl mx-auto relative z-10">
