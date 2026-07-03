@@ -9,6 +9,7 @@ import { ThreatDashboard } from '../components/ThreatDashboard';
 import { TrustBadges } from '../components/TrustBadges';
 import UseCases from '../components/UseCases';
 import { CodeSwap } from '../components/CodeSwap';
+import { RagSimulator } from '../components/RagSimulator';
 
 import { motion } from 'framer-motion';
 import { ArrowRight, Check, CheckCircle2, Cloud, Copy, Lock, Server, Terminal } from 'lucide-react';
@@ -61,6 +62,20 @@ function LandingPage() {
             </section>
 
             <StatsBanner />
+
+            <section className="py-20 md:py-28 px-6 bg-muted/10 relative overflow-hidden border-t border-white/[0.04] select-none">
+                <div className="max-w-7xl mx-auto relative z-10">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-extrabold tracking-[-0.04em] mb-4">
+                            Try the RAG Context Scanner
+                        </h2>
+                        <p className="text-muted-foreground text-base max-w-xl mx-auto leading-relaxed">
+                            Simulate how Koreshield filters malicious indirect prompt injection payloads out of your RAG context documents in real-time.
+                        </p>
+                    </div>
+                    <RagSimulator />
+                </div>
+            </section>
 
             <Architecture />
 
