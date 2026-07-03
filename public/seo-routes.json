@@ -2,587 +2,595 @@
   "origin": "https://koreshield.ai",
   "routes": {
     "/": {
-      "title": "Koreshield | AI Security Firewall",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "AI Security Firewall | Koreshield",
+      "description": "Koreshield is a runtime AI security firewall that blocks prompt injection, jailbreaks, unsafe RAG context, and data exfiltration before traffic reaches the model."
     },
     "/pricing": {
-      "title": "Pricing",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "LLM Security Pricing | Koreshield",
+      "description": "Compare Koreshield plans for production AI security, protected requests, governance controls, self-hosting, and air-gapped deployment."
     },
     "/docs": {
-      "title": "Docs",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "LLM Security Documentation | Koreshield",
+      "description": "Koreshield API, SDK, deployment, configuration, integration, and production LLM security documentation."
     },
     "/blog": {
-      "title": "Blog",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "AI Security Blog | Koreshield",
+      "description": "Technical articles about LLM security, prompt injection, RAG attacks, AI agents, and production defenses."
     },
     "/status": {
-      "title": "Status",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "System Status | Koreshield",
+      "description": "Current availability, incidents, maintenance, and service health for the Koreshield AI security platform."
     },
     "/about": {
-      "title": "About",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "About Koreshield | AI Security Company",
+      "description": "Learn how Koreshield Labs Ltd is building the runtime security layer for production AI applications."
     },
     "/contact": {
-      "title": "Contact",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Contact Koreshield | AI Security Support and Sales",
+      "description": "Contact Koreshield for technical support, enterprise AI security, partnerships, or product questions."
     },
     "/faq": {
-      "title": "Faq",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "LLM Security FAQ | Koreshield",
+      "description": "Answers about Koreshield security, privacy, deployment, pricing, compliance, integrations, and troubleshooting."
     },
     "/vs": {
-      "title": "Vs",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Compare LLM Security Solutions | Koreshield",
+      "description": "Compare Koreshield with LLM Guard, Lakera Guard, and building an internal AI security layer."
     },
     "/vs/lakera-guard": {
-      "title": "Lakera Guard",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Koreshield vs Lakera Guard",
+      "description": "Compare Koreshield and Lakera Guard by deployment model, operating model, RAG coverage, and governance needs."
     },
     "/vs/llm-guard": {
-      "title": "Llm Guard",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Koreshield vs LLM Guard",
+      "description": "A practical comparison of Koreshield and LLM Guard for teams choosing an LLM security layer."
     },
     "/vs/build-yourself": {
-      "title": "Build Yourself",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Koreshield vs Building an LLM Security Layer",
+      "description": "Compare building an internal LLM security layer with deploying Koreshield."
     },
     "/solutions": {
-      "title": "Solutions",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "AI Security Solutions | Koreshield",
+      "description": "Explore Koreshield solutions for AI detection, application protection, RAG security, agent security, usage control, and audit evidence."
     },
     "/solutions/ai-detection-response": {
-      "title": "Ai Detection Response",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "AI Detection and Response | Koreshield",
+      "description": "Detect, classify, block, and record LLM threats before they reach models, tools, or users."
     },
     "/solutions/ai-application-protection": {
-      "title": "Ai Application Protection",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "AI Application Protection | Koreshield",
+      "description": "Protect LLM-powered applications with a runtime proxy security layer and no application rewrite."
     },
     "/solutions/ai-agents-security": {
-      "title": "Ai Agents Security",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "AI Agent Security | Koreshield",
+      "description": "Secure agentic AI pipelines against tool abuse, indirect prompt injection, data exfiltration, and autonomous action escalation."
     },
     "/solutions/ai-usage-control": {
-      "title": "Ai Usage Control",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "AI Usage Control and Governance | Koreshield",
+      "description": "Define and enforce what AI systems can and cannot do using scoped policies, logs, limits, and alerts."
     },
     "/solutions/rag-security": {
-      "title": "Rag Security",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "RAG Security and Indirect Prompt Injection | Koreshield",
+      "description": "Protect RAG pipelines from poisoned documents and indirect prompt injection by scanning retrieved context before inference."
     },
     "/solutions/korepilot": {
-      "title": "Korepilot",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "KorePilot AI Security Evidence | Koreshield",
+      "description": "Explore the planned Koreshield compliance evidence layer for detection events, audit logs, red-team results, and delivery gates."
     },
     "/solutions/voice-audio-protection": {
-      "title": "Voice Audio Protection",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Voice and Audio AI Protection | Koreshield",
+      "description": "Protect speech prompts, transcripts, and voice-agent actions before they reach models or tools."
     },
     "/why-koreshield": {
-      "title": "Why Koreshield",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Why Koreshield | Runtime LLM Security",
+      "description": "See how Koreshield combines runtime LLM inspection, flexible deployment, policy controls, and audit evidence."
     },
     "/integrations": {
-      "title": "Integrations",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "AI Security Integrations | Koreshield",
+      "description": "Connect Koreshield with model providers, LLM frameworks, application stacks, monitoring tools, and deployment platforms."
     },
     "/changelog": {
-      "title": "Changelog",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Changelog | Koreshield",
+      "description": "Koreshield release notes covering platform updates, security improvements, product changes, and operational milestones."
     },
     "/research": {
-      "title": "Research",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "AI Security Research | Koreshield",
+      "description": "Applied Koreshield research on prompt injection, RAG pipelines, AI agents, jailbreaks, and production attack patterns."
     },
     "/careers": {
-      "title": "Careers",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "AI Security Careers | Koreshield",
+      "description": "Explore open roles at Koreshield across security, research, engineering, product, growth, and sales."
     },
     "/privacy-policy": {
-      "title": "Privacy Policy",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Privacy Policy | Koreshield",
+      "description": "Read the Koreshield privacy policy and how Koreshield Labs Ltd handles personal data."
     },
     "/terms-of-service": {
-      "title": "Terms Of Service",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Terms of Service | Koreshield",
+      "description": "Read the terms governing access to and use of Koreshield services, software, APIs, and websites."
     },
     "/cookie-policy": {
-      "title": "Cookie Policy",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Cookie Policy | Koreshield",
+      "description": "Read how Koreshield uses essential and optional cookies and how visitors can control consent."
     },
     "/dpa": {
-      "title": "Dpa",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Data Processing Agreement | Koreshield",
+      "description": "Read the Koreshield Data Processing Agreement for customers using Koreshield as a data processor."
     },
     "/legal/sub-processors": {
-      "title": "Sub Processors",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Sub-processors | Koreshield",
+      "description": "Review the service providers that may process customer data on behalf of Koreshield."
     },
     "/legal/transfer-policy": {
-      "title": "Transfer Policy",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "International Data Transfer Policy | Koreshield",
+      "description": "Read the safeguards Koreshield uses for international transfers of personal data."
     },
     "/demo": {
-      "title": "Demo",
-      "description": "Koreshield runtime security for production AI applications."
+      "title": "Book an AI Security Demo | Koreshield",
+      "description": "See Koreshield intercept LLM attacks and book a guided demo tailored to your AI stack and use case."
+    },
+    "/authors/isaac-emmanuel": {
+      "title": "Isaac Emmanuel, Koreshield CTO and Engineering Lead",
+      "description": "Read about Isaac Emmanuel and his work on Koreshield runtime AI security, SDKs, detection systems, and infrastructure."
+    },
+    "/authors/teslim-kazeem": {
+      "title": "Teslim O. Kazeem, Koreshield CEO and Product Lead",
+      "description": "Read about Teslim O. Kazeem and his work on Koreshield product direction, customer discovery, and practical AI security."
     },
     "/blog/getting-started-with-koreshield": {
-      "title": "Getting Started with Koreshield",
+      "title": "Getting Started with Koreshield | Koreshield",
       "description": "A comprehensive guide to integrating Koreshield into your application for AI security."
     },
     "/blog/grok-bankrbot-prompt-injection-morse-code": {
-      "title": "The Grok Wallet Hack Was Not Clever. It Was Inevitable.",
+      "title": "The Grok Wallet Hack Was Not Clever. It Was Inevitable. | Koreshield",
       "description": "On May 4, someone hid a trading command in Morse code on X. A Grok-linked AI agent read it, decoded it, and sent $175,000 worth of tokens to an attacker. This is what prompt injection looks like when it has a wallet attached."
     },
     "/blog/meet-koreshield-llm-firewall": {
-      "title": "Meet Koreshield - An LLM Firewall for AI Systems in CRM, Fintech, and Healthcare",
+      "title": "Meet Koreshield - An LLM Firewall for AI Systems in CRM, Fintech, and Healthcare | Koreshield",
       "description": "Your AI Agent is one CRM note away from a data breach. Koreshield is a security proxy that sits between your data sources and models, evaluating every input before it reaches your LLM."
     },
     "/blog/prompt-injection-is-not-solved": {
-      "title": "Prompt Injection Is Not Solved - How a Real-Time LLM Firewall Actually Works",
+      "title": "Prompt Injection Is Not Solved - How a Real-Time LLM Firewall Actually Works | Koreshield",
       "description": "Learn how Koreshield's detection engine works through three layers of protection - text normalization, rule-based detection, and semantic scoring - to catch prompt injection attacks in production systems."
     },
     "/blog/rag-security-best-practices": {
-      "title": "RAG Security Best Practices",
+      "title": "RAG Security Best Practices | Koreshield",
       "description": "Learn how to secure your Retrieval-Augmented Generation (RAG) systems from prompt injection and data extraction attacks."
     },
     "/blog/six-ai-security-incidents-one-week": {
-      "title": "Six AI and Software Security Incidents in One Week - What Nobody Is Saying",
+      "title": "Six AI and Software Security Incidents in One Week - What Nobody Is Saying | Koreshield",
       "description": "Three of six recent security incidents were LLM-layer attacks. Most engineering teams have no runtime protection between their applications and models. Here's why that matters."
     },
     "/blog/understanding-ai-threats": {
-      "title": "Understanding AI Threats: A Deep Dive",
+      "title": "Understanding AI Threats: A Deep Dive | Koreshield",
       "description": "Explore the landscape of threats targeting AI systems and how to mitigate them."
     },
     "/blog/weekly-security-update-april-27": {
-      "title": "Weekly Security Update - April 27, 2026",
+      "title": "Weekly Security Update - April 27, 2026 | Koreshield",
       "description": "Latest security patches, threat intelligence, and feature updates for this week."
     },
     "/blog/why-agentic-ai-is-largest-unsecured-attack-surface": {
-      "title": "Why Agentic AI Is Your Largest Unsecured Attack Surface",
+      "title": "Why Agentic AI Is Your Largest Unsecured Attack Surface | Koreshield",
       "description": "88% of organizations running AI agents have reported security incidents. The architectural vulnerabilities of agentic systems require structural defense, not just classifiers."
     },
     "/blog/why-we-built-koreshield": {
-      "title": "Why We Built Koreshield - Securing the New Intelligence Layer",
+      "title": "Why We Built Koreshield - Securing the New Intelligence Layer | Koreshield",
       "description": "For the last two decades, enterprise security was structurally straightforward. But LLMs changed everything. A valid English sentence can now drop tables or exfiltrate PII. Traditional security tools are blind to semantic manipulation."
     },
     "/docs/api": {
-      "title": "API Reference",
+      "title": "API Reference Documentation | Koreshield",
       "description": "API and CLI reference for Koreshield."
     },
     "/docs/api-reference": {
-      "title": "API Reference",
+      "title": "API Reference Documentation | Koreshield",
       "description": "API Reference alias."
     },
     "/docs/api/rest-api": {
-      "title": "REST API",
+      "title": "REST API Documentation | Koreshield",
       "description": "Generated OpenAPI contract, authentication model, and endpoint reference for Koreshield APIs."
     },
     "/docs/api/websocket": {
-      "title": "WebSocket Events",
+      "title": "WebSocket Events Documentation | Koreshield",
       "description": "Real-time event streaming via WebSocket."
     },
     "/docs/best-practices": {
-      "title": "Best Practices",
+      "title": "Best Practices Documentation | Koreshield",
       "description": "Learn about the best practices for using Koreshield to secure your LLM applications."
     },
     "/docs/best-practices/caching": {
-      "title": "Caching",
+      "title": "Caching Documentation | Koreshield",
       "description": "Caching best practices."
     },
     "/docs/best-practices/error-handling": {
-      "title": "Error Handling",
+      "title": "Error Handling Documentation | Koreshield",
       "description": "Error handling best practices."
     },
     "/docs/case-studies": {
-      "title": "Case Studies",
+      "title": "Case Studies Documentation | Koreshield",
       "description": "Real-world examples of Koreshield in action."
     },
     "/docs/case-studies/ai-agents": {
-      "title": "AI Agents",
+      "title": "AI Agents Documentation | Koreshield",
       "description": "Securing autonomous agent interactions with Koreshield."
     },
     "/docs/case-studies/code-generation": {
-      "title": "Code Generation",
+      "title": "Code Generation Documentation | Koreshield",
       "description": "Protecting code assistants against prompt injection and unsafe context."
     },
     "/docs/case-studies/customer-service": {
-      "title": "Customer Service",
+      "title": "Customer Service Documentation | Koreshield",
       "description": "Applying Koreshield to support-assistant workflows."
     },
     "/docs/case-studies/ecommerce": {
-      "title": "Ecommerce",
+      "title": "Ecommerce Documentation | Koreshield",
       "description": "Securing commerce chat and recommendation assistants with Koreshield."
     },
     "/docs/case-studies/financial-services": {
-      "title": "Financial Services",
+      "title": "Financial Services Documentation | Koreshield",
       "description": "Hardening financial AI workflows with Koreshield controls."
     },
     "/docs/case-studies/healthcare": {
-      "title": "Healthcare",
+      "title": "Healthcare Documentation | Koreshield",
       "description": "Protecting clinical and patient-facing AI workflows with Koreshield."
     },
     "/docs/case-studies/legal-tech": {
-      "title": "Legal Tech",
+      "title": "Legal Tech Documentation | Koreshield",
       "description": "Applying Koreshield to legal document and advisory AI use cases."
     },
     "/docs/client-integration": {
-      "title": "Client Integration Guide",
+      "title": "Client Integration Guide Documentation | Koreshield",
       "description": "How to integrate Koreshield into your application."
     },
     "/docs/client-integration/guide": {
-      "title": "Client Integration Guide",
+      "title": "Client Integration Guide Documentation | Koreshield",
       "description": "How to integrate your app with the Koreshield API and SDKs."
     },
     "/docs/compliance": {
-      "title": "Compliance",
+      "title": "Compliance Documentation | Koreshield",
       "description": "Review Koreshield's compliance with data protection regulations and security standards."
     },
     "/docs/compliance/dpa": {
-      "title": "UK Data Protection Act (DPA 2018)",
+      "title": "UK Data Protection Act (DPA 2018) Documentation | Koreshield",
       "description": "Practical guidance for UK Data Protection Act compliance with Koreshield."
     },
     "/docs/compliance/gdpr": {
-      "title": "GDPR Compliance",
+      "title": "GDPR Compliance Documentation | Koreshield",
       "description": "GDPR considerations when deploying Koreshield."
     },
     "/docs/compliance/hipaa": {
-      "title": "HIPAA Compliance",
+      "title": "HIPAA Compliance Documentation | Koreshield",
       "description": "HIPAA compliance with Koreshield."
     },
     "/docs/configuration": {
-      "title": "Settings & Policies",
+      "title": "Settings & Policies Documentation | Koreshield",
       "description": "Configure Koreshield behavior from the dashboard or your deployment settings."
     },
     "/docs/configuration/policies": {
-      "title": "Policy Rules",
+      "title": "Policy Rules Documentation | Koreshield",
       "description": "Define policy rules for detection, blocking, and redaction."
     },
     "/docs/configuration/production-checklist": {
-      "title": "Production Checklist",
+      "title": "Production Checklist Documentation | Koreshield",
       "description": "Client-facing checklist for launching Koreshield in production."
     },
     "/docs/configuration/rate-limiting": {
-      "title": "Rate Limiting",
+      "title": "Rate Limiting Documentation | Koreshield",
       "description": "Manage API rate limits and usage guardrails."
     },
     "/docs/configuration/settings": {
-      "title": "Runtime Settings",
+      "title": "Runtime Settings Documentation | Koreshield",
       "description": "Configure Koreshield runtime behavior for hosted or self-hosted deployments."
     },
     "/docs/features": {
-      "title": "Features",
+      "title": "Features Documentation | Koreshield",
       "description": "Overview of Koreshield security features."
     },
     "/docs/features/attack-detection": {
-      "title": "Attack Detection",
+      "title": "Attack Detection Documentation | Koreshield",
       "description": "Multi-layered detection system for prompt injection and policy violations."
     },
     "/docs/features/monitoring": {
-      "title": "Monitoring & Alerting",
+      "title": "Monitoring & Alerting Documentation | Koreshield",
       "description": "Prometheus metrics, multi-channel alerting, and real-time monitoring."
     },
     "/docs/features/rag-defense": {
-      "title": "RAG Defense Engine",
+      "title": "RAG Defense Engine Documentation | Koreshield",
       "description": "Detect and block indirect prompt injection attacks in Retrieval-Augmented Generation systems."
     },
     "/docs/features/rbac": {
-      "title": "RBAC",
+      "title": "RBAC Documentation | Koreshield",
       "description": "Role-based access control for users, roles, and permissions."
     },
     "/docs/features/security": {
-      "title": "Security",
+      "title": "Security Documentation | Koreshield",
       "description": "Koreshield security capabilities and guidance."
     },
     "/docs/getting-started/installation": {
-      "title": "Installation",
+      "title": "Installation Documentation | Koreshield",
       "description": "Run Koreshield on your own infrastructure."
     },
     "/docs/getting-started/quick-start": {
-      "title": "Quick Start",
+      "title": "Quick Start Documentation | Koreshield",
       "description": "Sign up, get an API key, and scan your first prompt in under 5 minutes."
     },
     "/docs/integrations": {
-      "title": "Integration Overview",
+      "title": "Integration Overview Documentation | Koreshield",
       "description": "Browse Koreshield integration docs with current server API contract notes."
     },
     "/docs/integrations/crm": {
-      "title": "CRM",
+      "title": "CRM Documentation | Koreshield",
       "description": "Overview of Koreshield CRM integrations."
     },
     "/docs/integrations/crm/hubspot": {
-      "title": "HubSpot Integration",
+      "title": "HubSpot Integration Documentation | Koreshield",
       "description": "Protect HubSpot Chatflows and ticketing pipelines from indirect injection."
     },
     "/docs/integrations/crm/salesforce": {
-      "title": "Salesforce Integration",
+      "title": "Salesforce Integration Documentation | Koreshield",
       "description": "Secure your Salesforce Einstein bots and RAG pipelines against prompt injection."
     },
     "/docs/integrations/databases": {
-      "title": "Databases",
+      "title": "Databases Documentation | Koreshield",
       "description": "Overview of Koreshield database integrations."
     },
     "/docs/integrations/databases/postgresql": {
-      "title": "PostgreSQL Integration",
+      "title": "PostgreSQL Integration Documentation | Koreshield",
       "description": "Store Koreshield security events and metrics in PostgreSQL."
     },
     "/docs/integrations/databases/redis": {
-      "title": "Redis Integration",
+      "title": "Redis Integration Documentation | Koreshield",
       "description": "Use Redis for caching, rate limiting, and distributed state."
     },
     "/docs/integrations/deployment": {
-      "title": "Deployment",
+      "title": "Deployment Documentation | Koreshield",
       "description": "Overview of Koreshield deployment options."
     },
     "/docs/integrations/deployment/airgapped": {
-      "title": "Airgapped Deployment",
+      "title": "Airgapped Deployment Documentation | Koreshield",
       "description": "Install and run Koreshield in environments with no internet access."
     },
     "/docs/integrations/deployment/aws": {
-      "title": "AWS Deployment",
+      "title": "AWS Deployment Documentation | Koreshield",
       "description": "Deploy the Koreshield proxy on AWS using Docker or ECS."
     },
     "/docs/integrations/deployment/azure": {
-      "title": "Azure Deployment",
+      "title": "Azure Deployment Documentation | Koreshield",
       "description": "Deploy the Koreshield proxy on Azure using Container Apps or VM Docker."
     },
     "/docs/integrations/deployment/digital-ocean": {
-      "title": "DigitalOcean Deployment",
+      "title": "DigitalOcean Deployment Documentation | Koreshield",
       "description": "Deploy the Koreshield proxy on DigitalOcean with Docker or App Platform."
     },
     "/docs/integrations/deployment/docker": {
-      "title": "Docker Deployment",
+      "title": "Docker Deployment Documentation | Koreshield",
       "description": "Deploy Koreshield using the provided Docker image and Compose stack."
     },
     "/docs/integrations/deployment/gcp": {
-      "title": "GCP Deployment",
+      "title": "GCP Deployment Documentation | Koreshield",
       "description": "Deploy the Koreshield proxy on Google Cloud using Compute Engine or Cloud Run."
     },
     "/docs/integrations/deployment/heroku": {
-      "title": "Heroku Deployment",
+      "title": "Heroku Deployment Documentation | Koreshield",
       "description": "Deploy the Koreshield proxy on Heroku using Docker."
     },
     "/docs/integrations/deployment/kubernetes": {
-      "title": "Kubernetes Deployment",
+      "title": "Kubernetes Deployment Documentation | Koreshield",
       "description": "Deploy self-hosted Koreshield server on Kubernetes."
     },
     "/docs/integrations/deployment/railway": {
-      "title": "Railway Deployment",
+      "title": "Railway Deployment Documentation | Koreshield",
       "description": "Deploy the Koreshield proxy on Railway using a Docker image."
     },
     "/docs/integrations/deployment/self-hosted": {
-      "title": "Self-Hosted Deployment",
+      "title": "Self-Hosted Deployment Documentation | Koreshield",
       "description": "Run Koreshield on your own infrastructure with full data residency and network control."
     },
     "/docs/integrations/frameworks": {
-      "title": "Frameworks",
+      "title": "Frameworks Documentation | Koreshield",
       "description": "Overview of Koreshield framework integrations."
     },
     "/docs/integrations/frameworks/astro": {
-      "title": "Astro Integration",
+      "title": "Astro Integration Documentation | Koreshield",
       "description": "Secure Astro server routes by proxying LLM requests through Koreshield."
     },
     "/docs/integrations/frameworks/autogen": {
-      "title": "AutoGen Integration",
+      "title": "AutoGen Integration Documentation | Koreshield",
       "description": "Secure multi-agent workflows in AutoGen with Koreshield."
     },
     "/docs/integrations/frameworks/browser": {
-      "title": "Browser Integration",
+      "title": "Browser Integration Documentation | Koreshield",
       "description": "Direct browser integration with Koreshield SDK"
     },
     "/docs/integrations/frameworks/express": {
-      "title": "Express.js",
+      "title": "Express.js Documentation | Koreshield",
       "description": "Secure Express LLM routes with Koreshield proxy."
     },
     "/docs/integrations/frameworks/fastify": {
-      "title": "Fastify Integration",
+      "title": "Fastify Integration Documentation | Koreshield",
       "description": "Secure Fastify routes with the Koreshield JS SDK."
     },
     "/docs/integrations/frameworks/langchain": {
-      "title": "LangChain Integration",
+      "title": "LangChain Integration Documentation | Koreshield",
       "description": "Use LangChain with Koreshield proxy endpoints."
     },
     "/docs/integrations/frameworks/llamaindex": {
-      "title": "LlamaIndex",
+      "title": "LlamaIndex Documentation | Koreshield",
       "description": "Integrate Koreshield with LlamaIndex RAG pipelines"
     },
     "/docs/integrations/frameworks/nuxt": {
-      "title": "Nuxt.js",
+      "title": "Nuxt.js Documentation | Koreshield",
       "description": "Integrate Nuxt server routes with Koreshield proxy APIs."
     },
     "/docs/integrations/frameworks/python-django": {
-      "title": "Django",
+      "title": "Django Documentation | Koreshield",
       "description": "Integrate Koreshield with Django applications"
     },
     "/docs/integrations/frameworks/python-fastapi": {
-      "title": "FastAPI",
+      "title": "FastAPI Documentation | Koreshield",
       "description": "Integrate FastAPI services with Koreshield proxy."
     },
     "/docs/integrations/frameworks/python-flask": {
-      "title": "Flask",
+      "title": "Flask Documentation | Koreshield",
       "description": "Integrate Koreshield with Flask applications"
     },
     "/docs/integrations/frameworks/react-nextjs": {
-      "title": "React/Next.js Integration",
+      "title": "React/Next.js Integration Documentation | Koreshield",
       "description": "Integrate Koreshield SDK with React and Next.js applications"
     },
     "/docs/integrations/models": {
-      "title": "Models",
+      "title": "Models Documentation | Koreshield",
       "description": "Overview of Koreshield model integrations."
     },
     "/docs/integrations/models/anthropic": {
-      "title": "Anthropic Claude Integration",
+      "title": "Anthropic Claude Integration Documentation | Koreshield",
       "description": "Secure Claude requests through Koreshield with streaming and tool support."
     },
     "/docs/integrations/models/azure-openai": {
-      "title": "Azure OpenAI Integration",
+      "title": "Azure OpenAI Integration Documentation | Koreshield",
       "description": "Route Azure OpenAI traffic through Koreshield with streaming support."
     },
     "/docs/integrations/models/custom-models": {
-      "title": "Custom Models Integration",
+      "title": "Custom Models Integration Documentation | Koreshield",
       "description": "Route any OpenAI-compatible API through Koreshield with streaming support."
     },
     "/docs/integrations/models/deepseek": {
-      "title": "DeepSeek Integration",
+      "title": "DeepSeek Integration Documentation | Koreshield",
       "description": "Route DeepSeek-compatible chat calls through Koreshield."
     },
     "/docs/integrations/models/gemini": {
-      "title": "Google Gemini Integration",
+      "title": "Google Gemini Integration Documentation | Koreshield",
       "description": "Route Gemini requests through Koreshield with streaming support."
     },
     "/docs/integrations/models/openai": {
-      "title": "OpenAI Integration",
+      "title": "OpenAI Integration Documentation | Koreshield",
       "description": "Integrate Koreshield with OpenAI for secure LLM interactions."
     },
     "/docs/integrations/monitoring": {
-      "title": "Monitoring & Alerting",
+      "title": "Monitoring & Alerting Documentation | Koreshield",
       "description": "Observability integrations for Koreshield."
     },
     "/docs/integrations/monitoring/datadog": {
-      "title": "Datadog Monitoring",
+      "title": "Datadog Monitoring Documentation | Koreshield",
       "description": "Export Koreshield metrics to Datadog using Prometheus scraping."
     },
     "/docs/integrations/monitoring/grafana": {
-      "title": "Grafana Monitoring",
+      "title": "Grafana Monitoring Documentation | Koreshield",
       "description": "Visualize Koreshield metrics with Grafana dashboards."
     },
     "/docs/integrations/monitoring/prometheus": {
-      "title": "Prometheus Monitoring",
+      "title": "Prometheus Monitoring Documentation | Koreshield",
       "description": "Scrape Koreshield metrics from the built-in Prometheus endpoint."
     },
     "/docs/integrations/monitoring/sentry": {
-      "title": "Sentry Monitoring",
+      "title": "Sentry Monitoring Documentation | Koreshield",
       "description": "Track Koreshield errors and security context with Sentry."
     },
     "/docs/integrations/platforms": {
-      "title": "Platforms",
+      "title": "Platforms Documentation | Koreshield",
       "description": "Overview of Koreshield platform integrations."
     },
     "/docs/integrations/platforms/aws-lambda": {
-      "title": "AWS Lambda Integration",
+      "title": "AWS Lambda Integration Documentation | Koreshield",
       "description": "Secure AWS Lambda-based LLM calls with the Koreshield proxy."
     },
     "/docs/integrations/platforms/cloudflare-workers": {
-      "title": "Cloudflare Workers Integration",
+      "title": "Cloudflare Workers Integration Documentation | Koreshield",
       "description": "Run Koreshield-protected requests on Cloudflare's edge network."
     },
     "/docs/integrations/platforms/netlify": {
-      "title": "Netlify Integration",
+      "title": "Netlify Integration Documentation | Koreshield",
       "description": "Secure Netlify Functions and edge handlers with Koreshield."
     },
     "/docs/integrations/platforms/vercel": {
-      "title": "Vercel Integration",
+      "title": "Vercel Integration Documentation | Koreshield",
       "description": "Deploy Koreshield-protected apps on Vercel with edge and serverless support."
     },
     "/docs/integrations/svelte": {
-      "title": "Svelte",
+      "title": "Svelte Documentation | Koreshield",
       "description": "Integrating Koreshield with Svelte."
     },
     "/docs/troubleshooting": {
-      "title": "Troubleshooting",
+      "title": "Troubleshooting Documentation | Koreshield",
       "description": "Common issues and solutions for Koreshield deployments."
     },
     "/research/state-of-prompt-injection-in-production-llm-systems": {
-      "title": "The State of Prompt Injection in Production LLM Systems",
+      "title": "The State of Prompt Injection in Production LLM Systems | Koreshield",
       "description": "This threat report analyses prompt injection activity observed across production LLM deployments integrated with Koreshield during Q1 2025. Drawing on a corpus of more than two million intercepted requests, it characterises prevalent attack patterns by frequency, detection rate, and target model family, and documents a clear shift in the threat landscape. Indirect injection through retrieval-augmented generation pipelines emerges as the dominant attack vector in enterprise deployments, overtaking direct user-input injection. The report attributes this shift to the widespread adoption of RAG architectures for enterprise knowledge retrieval, which introduces a document-layer attack surface that many deployed defenses do not adequately inspect. Detection rates by attack class, common evasion patterns, and recommendations for layered defensive controls are included."
     },
     "/research/indirect-prompt-injection-via-retrieved-documents": {
-      "title": "Indirect Prompt Injection via Retrieved Documents: Attack Taxonomy and Mitigations",
+      "title": "Indirect Prompt Injection via Retrieved Documents: Attack Taxonomy and Mitigations | Koreshield",
       "description": "This paper introduces a structured taxonomy of indirect prompt injection attacks targeting retrieval-augmented generation pipelines. Observed attack patterns are organised into four classes: instruction embedding, role impersonation, context poisoning, and cross-document chaining. For each class, the paper evaluates detection efficacy across representative attack instances and finds that static blocklist approaches remain adequate for straightforward instruction embedding but degrade substantially on role impersonation and context poisoning. The paper concludes that a proxy-layer mitigation architecture at the retrieval boundary is the most operationally tractable point for consistent cross-class defense."
     },
     "/research/tool-call-hijacking-in-agentic-pipelines": {
-      "title": "Tool Call Hijacking in Agentic Pipelines: A Practical Demonstration",
+      "title": "Tool Call Hijacking in Agentic Pipelines: A Practical Demonstration | Koreshield",
       "description": "This advisory demonstrates a class of attack in which malicious instructions embedded in tool outputs redirect an autonomous LLM agent to execute actions outside its intended scope. Agentic systems that invoke tools and act on their results are structurally exposed to this pattern because tool responses are commonly treated as trusted context. An attacker who can influence a tool response, whether through a compromised API, a manipulated retrieved document, or a web page processed by a browsing agent, can redirect subsequent agent behavior without direct user-level access. Proof-of-concept scenarios are documented across LangChain, AutoGen, and Claude Tools, supporting the claim that the weakness is architectural rather than framework-specific. The advisory closes with a discussion of proxy-layer enforcement for tool inputs and outputs as a practical way to reduce the blast radius of successful injection attempts."
     },
     "/research/jailbreak-technique-drift": {
-      "title": "Jailbreak Technique Drift: How Attack Patterns Evolve Month-Over-Month",
+      "title": "Jailbreak Technique Drift: How Attack Patterns Evolve Month-Over-Month | Koreshield",
       "description": "Jailbreak techniques observed in production LLM deployments do not remain static. Analysis of requests processed through Koreshield over successive months shows iterative adaptation, with attack variants clustering around recently disclosed techniques before drifting toward new formulations as detection coverage matures. This note characterises the lifecycle of a jailbreak technique and outlines what that lifecycle means for classifiers trained on historical attack distributions."
     },
     "/research/pii-exfiltration-via-llm-output": {
-      "title": "PII Exfiltration via LLM Output: Common Patterns and Detection Signals",
+      "title": "PII Exfiltration via LLM Output: Common Patterns and Detection Signals | Koreshield",
       "description": "A class of prompt injection attacks aims not to alter model behavior but to extract sensitive data present in the model context window. Common patterns include instruction sequences that ask the model to summarise, reformat, or translate content containing personally identifiable information, thereby embedding exfiltration inside what appears to be a legitimate output transformation. This note documents recurring attack structures observed in production and identifies output-layer signals that correlate reliably with exfiltration intent."
     },
     "/research/evaluating-confidence-thresholds-for-prompt-injection-classifiers": {
-      "title": "Evaluating Confidence Thresholds for Prompt Injection Classifiers",
+      "title": "Evaluating Confidence Thresholds for Prompt Injection Classifiers | Koreshield",
       "description": "Binary classification of prompt injection attacks requires a threshold decision: at what confidence score should a request be blocked rather than allowed to proceed? This note examines the precision-recall tradeoff across threshold configurations on a held-out evaluation set and characterises how false positive rate and over-blocking risk vary across deployment contexts with different tolerances for incorrect blocks and missed attacks."
     },
     "/research/bypass-resistance-of-system-prompt-hardening-alone": {
-      "title": "Bypass Resistance of System-Prompt Hardening Alone",
+      "title": "Bypass Resistance of System-Prompt Hardening Alone | Koreshield",
       "description": "Embedding defensive instructions directly in a model system context is a widely recommended mitigation for prompt injection. This note evaluates the bypass resistance of hardened system prompts against role impersonation, authority override phrasing, and context poisoning. The consistent finding is that instruction-level defenses are bypassed when retrieved context carries adversarial authority signals, making proxy-layer enforcement a necessary complement rather than an alternative."
     },
     "/research/multi-turn-injection-building-attack-context-across-conversation-rounds": {
-      "title": "Multi-Turn Injection: Building Attack Context Across Conversation Rounds",
+      "title": "Multi-Turn Injection: Building Attack Context Across Conversation Rounds | Koreshield",
       "description": "Some injection attacks are not self-contained within a single request. This note documents a class of multi-turn attacks in which the adversary incrementally establishes context across successive conversation rounds, ultimately steering the model toward a target behavior that would likely have been blocked if attempted in a single turn. The pattern exploits the limited attention that request-level safety classifiers often allocate to historical context and therefore requires session-aware inspection to detect reliably."
     },
     "/research/false-positive-rates-semantic-vs-rule-based-detectors-at-scale": {
-      "title": "False Positive Rates in Semantic vs. Rule-Based Detectors at Scale",
+      "title": "False Positive Rates in Semantic vs. Rule-Based Detectors at Scale | Koreshield",
       "description": "Production LLM deployments handle a significant volume of legitimate requests that superficially resemble injection attempts. This note benchmarks false positive rates for semantic embedding-based detectors against rule-based pattern-matching classifiers across a large production request set. Semantic classifiers achieve lower false positive rates on paraphrased and obfuscated content, while rule-based systems continue to perform well on structured attack signatures. Hybrid pipelines that combine both methods reduce false positives across both categories."
     },
     "/careers/social-media-operator": {
-      "title": "Social Media Operator",
+      "title": "Social Media Operator | Koreshield",
       "description": "Help Koreshield show up where LLM security conversations are already happening. This is a hands-on role for someone who understands X and LinkedIn deeply and knows how to earn attention with sharp, human, technically credible engagement."
     },
     "/careers/senior-backend-engineer": {
-      "title": "Senior Backend Engineer",
+      "title": "Senior Backend Engineer | Koreshield",
       "description": "Join Koreshield and help secure production AI systems."
     },
     "/careers/ml-security-researcher": {
-      "title": "ML Security Researcher",
+      "title": "ML Security Researcher | Koreshield",
       "description": "Join Koreshield and help secure production AI systems."
     },
     "/careers/product-designer": {
-      "title": "Product Designer",
+      "title": "Product Designer | Koreshield",
       "description": "Join Koreshield and help secure production AI systems."
     },
     "/careers/enterprise-account-executive": {
-      "title": "Enterprise Account Executive",
+      "title": "Enterprise Account Executive | Koreshield",
       "description": "Build relationships with enterprise security and engineering teams. You understand the AI landscape, can speak credibly to technical buyers, and are driven by helping customers solve real problems."
     },
     "/careers/global-sales-manager": {
-      "title": "Global Sales Manager",
+      "title": "Global Sales Manager | Koreshield",
       "description": "Lead and scale our global sales motion, from pipeline strategy to closing enterprise deals. You bring experience selling security or developer tooling internationally and know how to build and coach high-performing teams."
     },
     "/careers/ui-engineer": {
-      "title": "UI Engineer",
+      "title": "UI Engineer | Koreshield",
       "description": "Join Koreshield and help secure production AI systems."
     },
     "/careers/security-engineer-red-team": {
-      "title": "Security Engineer (Red Team)",
+      "title": "Security Engineer (Red Team) | Koreshield",
       "description": "Join Koreshield and help secure production AI systems."
     },
     "/careers/data-engineer-big-data": {
-      "title": "Data Engineer (Big Data)",
+      "title": "Data Engineer (Big Data) | Koreshield",
       "description": "Design and operate the data infrastructure that powers Koreshield at scale. You have hands-on experience with large-scale streaming and batch pipelines and a strong bias towards reliability and observability."
     },
     "/careers/ai-product-manager": {
-      "title": "AI Product Manager",
+      "title": "AI Product Manager | Koreshield",
       "description": "Join Koreshield and help secure production AI systems."
     },
     "/careers/senior-devops-engineer": {
-      "title": "Senior DevOps Engineer",
+      "title": "Senior DevOps Engineer | Koreshield",
       "description": "Own the infrastructure that keeps Koreshield fast, secure, and always-on. You bring deep experience with cloud-native deployments, CI/CD, and operating systems at high availability under real production pressure."
     }
   }

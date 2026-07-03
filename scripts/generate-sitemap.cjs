@@ -40,6 +40,43 @@ const RESEARCH_SLUGS = [
 	'false-positive-rates-semantic-vs-rule-based-detectors-at-scale',
 ];
 
+const CORE_METADATA = {
+	'/': ['AI Security Firewall | Koreshield', 'Koreshield is a runtime AI security firewall that blocks prompt injection, jailbreaks, unsafe RAG context, and data exfiltration before traffic reaches the model.'],
+	'/pricing': ['LLM Security Pricing | Koreshield', 'Compare Koreshield plans for production AI security, protected requests, governance controls, self-hosting, and air-gapped deployment.'],
+	'/docs': ['LLM Security Documentation | Koreshield', 'Koreshield API, SDK, deployment, configuration, integration, and production LLM security documentation.'],
+	'/blog': ['AI Security Blog | Koreshield', 'Technical articles about LLM security, prompt injection, RAG attacks, AI agents, and production defenses.'],
+	'/status': ['System Status | Koreshield', 'Current availability, incidents, maintenance, and service health for the Koreshield AI security platform.'],
+	'/about': ['About Koreshield | AI Security Company', 'Learn how Koreshield Labs Ltd is building the runtime security layer for production AI applications.'],
+	'/contact': ['Contact Koreshield | AI Security Support and Sales', 'Contact Koreshield for technical support, enterprise AI security, partnerships, or product questions.'],
+	'/faq': ['LLM Security FAQ | Koreshield', 'Answers about Koreshield security, privacy, deployment, pricing, compliance, integrations, and troubleshooting.'],
+	'/vs': ['Compare LLM Security Solutions | Koreshield', 'Compare Koreshield with LLM Guard, Lakera Guard, and building an internal AI security layer.'],
+	'/vs/lakera-guard': ['Koreshield vs Lakera Guard', 'Compare Koreshield and Lakera Guard by deployment model, operating model, RAG coverage, and governance needs.'],
+	'/vs/llm-guard': ['Koreshield vs LLM Guard', 'A practical comparison of Koreshield and LLM Guard for teams choosing an LLM security layer.'],
+	'/vs/build-yourself': ['Koreshield vs Building an LLM Security Layer', 'Compare building an internal LLM security layer with deploying Koreshield.'],
+	'/solutions': ['AI Security Solutions | Koreshield', 'Explore Koreshield solutions for AI detection, application protection, RAG security, agent security, usage control, and audit evidence.'],
+	'/solutions/ai-detection-response': ['AI Detection and Response | Koreshield', 'Detect, classify, block, and record LLM threats before they reach models, tools, or users.'],
+	'/solutions/ai-application-protection': ['AI Application Protection | Koreshield', 'Protect LLM-powered applications with a runtime proxy security layer and no application rewrite.'],
+	'/solutions/ai-agents-security': ['AI Agent Security | Koreshield', 'Secure agentic AI pipelines against tool abuse, indirect prompt injection, data exfiltration, and autonomous action escalation.'],
+	'/solutions/ai-usage-control': ['AI Usage Control and Governance | Koreshield', 'Define and enforce what AI systems can and cannot do using scoped policies, logs, limits, and alerts.'],
+	'/solutions/rag-security': ['RAG Security and Indirect Prompt Injection | Koreshield', 'Protect RAG pipelines from poisoned documents and indirect prompt injection by scanning retrieved context before inference.'],
+	'/solutions/korepilot': ['KorePilot AI Security Evidence | Koreshield', 'Explore the planned Koreshield compliance evidence layer for detection events, audit logs, red-team results, and delivery gates.'],
+	'/solutions/voice-audio-protection': ['Voice and Audio AI Protection | Koreshield', 'Protect speech prompts, transcripts, and voice-agent actions before they reach models or tools.'],
+	'/why-koreshield': ['Why Koreshield | Runtime LLM Security', 'See how Koreshield combines runtime LLM inspection, flexible deployment, policy controls, and audit evidence.'],
+	'/integrations': ['AI Security Integrations | Koreshield', 'Connect Koreshield with model providers, LLM frameworks, application stacks, monitoring tools, and deployment platforms.'],
+	'/changelog': ['Changelog | Koreshield', 'Koreshield release notes covering platform updates, security improvements, product changes, and operational milestones.'],
+	'/research': ['AI Security Research | Koreshield', 'Applied Koreshield research on prompt injection, RAG pipelines, AI agents, jailbreaks, and production attack patterns.'],
+	'/careers': ['AI Security Careers | Koreshield', 'Explore open roles at Koreshield across security, research, engineering, product, growth, and sales.'],
+	'/privacy-policy': ['Privacy Policy | Koreshield', 'Read the Koreshield privacy policy and how Koreshield Labs Ltd handles personal data.'],
+	'/terms-of-service': ['Terms of Service | Koreshield', 'Read the terms governing access to and use of Koreshield services, software, APIs, and websites.'],
+	'/cookie-policy': ['Cookie Policy | Koreshield', 'Read how Koreshield uses essential and optional cookies and how visitors can control consent.'],
+	'/dpa': ['Data Processing Agreement | Koreshield', 'Read the Koreshield Data Processing Agreement for customers using Koreshield as a data processor.'],
+	'/legal/sub-processors': ['Sub-processors | Koreshield', 'Review the service providers that may process customer data on behalf of Koreshield.'],
+	'/legal/transfer-policy': ['International Data Transfer Policy | Koreshield', 'Read the safeguards Koreshield uses for international transfers of personal data.'],
+	'/demo': ['Book an AI Security Demo | Koreshield', 'See Koreshield intercept LLM attacks and book a guided demo tailored to your AI stack and use case.'],
+	'/authors/isaac-emmanuel': ['Isaac Emmanuel, Koreshield CTO and Engineering Lead', 'Read about Isaac Emmanuel and his work on Koreshield runtime AI security, SDKs, detection systems, and infrastructure.'],
+	'/authors/teslim-kazeem': ['Teslim O. Kazeem, Koreshield CEO and Product Lead', 'Read about Teslim O. Kazeem and his work on Koreshield product direction, customer discovery, and practical AI security.'],
+};
+
 function mdSlug(file) {
 	return file.replace(/\.(md|mdx)$/i, '');
 }
@@ -199,6 +236,8 @@ const ROUTES = [
 
 	// Get Started
 	{ path: '/demo', priority: 0.8, changefreq: 'weekly' },
+	{ path: '/authors/isaac-emmanuel' },
+	{ path: '/authors/teslim-kazeem' },
 ];
 
 /**
@@ -285,9 +324,13 @@ function writeSitemapBundle(siteUrl, basename) {
 
 	const manifestRoutes = [...ROUTES, ...blogRoutes, ...docsRoutes, ...researchRoutes, ...careerRoutes]
 		.reduce((result, route) => {
+			const configured = CORE_METADATA[route.path];
+			const contentTitle = route.path.startsWith('/docs/')
+				? `${route.title} Documentation | Koreshield`
+				: route.title ? `${route.title} | Koreshield` : titleFromPath(route.path);
 			result[route.path] = {
-				title: route.title || titleFromPath(route.path),
-				description: route.description || 'Koreshield runtime security for production AI applications.',
+				title: configured?.[0] || contentTitle,
+				description: configured?.[1] || route.description || 'Koreshield runtime security for production AI applications.',
 			};
 			return result;
 		}, {});

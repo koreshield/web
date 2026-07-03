@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, AudioLines, FileAudio, Mic2, ShieldCheck, Volume2, Music } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
+import { RelatedSecurityTopics } from '../components/RelatedSecurityTopics';
 
 const layers = [
 	['Speech', 'transcribe + normalize'],
@@ -20,7 +21,7 @@ export default function SolutionVoiceAudioProtectionPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="Voice & Audio AI Protection | Koreshield"
+				title="Voice & Audio AI Protection"
 				description="Protect speech prompts, transcripts, and voice-agent actions before they reach models or tools."
 			/>
 
@@ -112,6 +113,7 @@ export default function SolutionVoiceAudioProtectionPage() {
 					</Link>
 				</div>
 			</section>
+			<RelatedSecurityTopics currentPath="/solutions/voice-audio-protection" />
 		</div>
 	);
 }

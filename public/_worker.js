@@ -246,13 +246,13 @@ function metadataForPath(pathname, noindex, manifest) {
     return ['Page Not Found | Koreshield', 'The requested Koreshield page could not be found.'];
   }
 
-  if (PAGE_METADATA[pathname]) {
-    return PAGE_METADATA[pathname];
-  }
-
   const manifestMetadata = manifest?.routes?.[pathname];
   if (manifestMetadata) {
     return [manifestMetadata.title, manifestMetadata.description];
+  }
+
+  if (PAGE_METADATA[pathname]) {
+    return PAGE_METADATA[pathname];
   }
 
   const label = titleize(pathname.split('/').filter(Boolean).pop() || 'Koreshield');

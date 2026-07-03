@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, FileText, KeyRound, ListChecks, Settings2, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
+import { RelatedSecurityTopics } from '../components/RelatedSecurityTopics';
 
 const policyRows = [
 	['Customer support bot', 'Redact PII', 'Log evidence'],
@@ -103,6 +104,7 @@ export default function SolutionUsageControlPage() {
 					</Link>
 				</div>
 			</section>
+			<RelatedSecurityTopics currentPath="/solutions/ai-usage-control" />
 		</div>
 	);
 }

@@ -190,7 +190,7 @@ function BrandLogo({ item }: { item: Pick<Integration, 'name' | 'logo' | 'logoTo
 	if (item.logo) {
 		return (
 			<div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-black/70 p-2.5 shadow-inner">
-				<img src={item.logo} alt={`${item.name} logo`} className="max-h-7 max-w-8 object-contain" />
+				<img src={item.logo} alt={`${item.name} logo`} loading="lazy" decoding="async" className="max-h-7 max-w-8 object-contain" />
 			</div>
 		);
 	}
@@ -251,7 +251,7 @@ function IntegrationsPage() {
 						{LOGO_STRIP.map((brand) => (
 							<div key={brand.name} className="flex min-h-24 flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-background/55 p-4">
 								{'logo' in brand && brand.logo ? (
-									<img src={brand.logo} alt={`${brand.name} logo`} className="max-h-8 max-w-20 object-contain" />
+									<img src={brand.logo} alt={`${brand.name} logo`} loading="lazy" decoding="async" className="max-h-8 max-w-20 object-contain" />
 								) : (
 									<div className={`flex h-10 w-10 items-center justify-center rounded-xl text-xs font-black ${brand.tone}`}>{brand.initials}</div>
 								)}

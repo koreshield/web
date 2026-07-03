@@ -11,6 +11,7 @@ import { getBlogPost, getRelatedBlogPosts, toSlug } from '../blog/loader';
 import type { BlogPost } from '../blog/loader';
 import { CodeBlock } from './CodeBlock';
 import { SEOMeta } from './SEOMeta';
+import { getAuthorByName } from '../content/authors';
 
 interface BlogPostPageProps {
 	slug?: string;
@@ -52,6 +53,7 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 	}
 
 	const readTime = post.readingTime || 5;
+	const authorProfile = getAuthorByName(post.author);
 	const publishDate = new Date(post.date);
 	const formattedDate = publishDate.toLocaleDateString('en-US', {
 		year: 'numeric',
@@ -81,7 +83,13 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 					headline: post.title,
 					description: post.excerpt,
 					datePublished: post.date,
-					author: { '@type': post.author === 'Koreshield Labs' ? 'Organization' : 'Person', name: post.author },
+					author: post.author === 'Koreshield Labs'
+						? { '@type': 'Organization', '@id': 'https://koreshield.ai/#organization', name: post.author }
+						: {
+							'@type': 'Person',
+							name: post.author,
+							...(authorProfile ? { url: `https://koreshield.ai/authors/${authorProfile.slug}` } : {}),
+						},
 					publisher: { '@type': 'Organization', name: 'Koreshield', url: 'https://koreshield.ai' },
 					mainEntityOfPage: `https://koreshield.ai${post.path}`,
 					...(post.coverImage ? { image: post.coverImage } : {}),
@@ -105,6 +113,8 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 					<img
 						src={post.coverImage}
 						alt={post.title}
+						fetchPriority="high"
+						decoding="async"
 						className="w-full h-full object-cover"
 						onError={(e) => {
 							e.currentTarget.style.display = 'none';
@@ -145,7 +155,9 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 					<div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
 						<div className="flex items-center gap-2">
 							<User size={16} />
-							<span>{post.author}</span>
+							{authorProfile ? (
+								<Link to={`/authors/${authorProfile.slug}`} className="hover:text-foreground hover:underline">{post.author}</Link>
+							) : <span>{post.author}</span>}
 						</div>
 						<div className="flex items-center gap-2">
 							<Calendar size={16} />
@@ -219,7 +231,9 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 							<User size={24} className="text-primary-foreground" />
 						</div>
 						<div>
-							<h3 className="font-semibold text-foreground">{post.author}</h3>
+							{authorProfile ? (
+								<Link to={`/authors/${authorProfile.slug}`} className="font-semibold text-foreground hover:text-primary hover:underline">{post.author}</Link>
+							) : <h3 className="font-semibold text-foreground">{post.author}</h3>}
 							<p className="text-sm text-muted-foreground">
 								Koreshield Security Team
 							</p>

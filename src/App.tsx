@@ -40,6 +40,7 @@ function lazyRetry<T extends { default: React.ComponentType }>(
 // Lazy load pages for code splitting
 const LandingPage = lazyRetry(() => import('./pages/LandingPage'));
 const BlogPage = lazyRetry(() => import('./pages/BlogPageWrapper'));
+const AuthorPage = lazyRetry(() => import('./pages/AuthorPage'));
 const DocsPage = lazyRetry(() => import('./pages/DocsPage'));
 const StatusPage = lazyRetry(() => import('./pages/StatusPage'));
 const PricingPage = lazyRetry(() => import('./pages/PricingPage'));
@@ -586,6 +587,16 @@ function AppContent() {
 							<Suspense fallback={<SuspenseFallback />}>
 								<RouteErrorBoundary>
 									<BlogPage />
+								</RouteErrorBoundary>
+							</Suspense>
+						}
+					/>
+					<Route
+						path="/authors/:slug"
+						element={
+							<Suspense fallback={<SuspenseFallback />}>
+								<RouteErrorBoundary>
+									<AuthorPage />
 								</RouteErrorBoundary>
 							</Suspense>
 						}

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Bell, Fingerprint, Radar, ShieldCheck, Siren, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
+import { RelatedSecurityTopics } from '../components/RelatedSecurityTopics';
 
 const signals = [
 	['prompt_injection', 'blocked'],
@@ -122,6 +123,7 @@ export default function SolutionDetectionResponsePage() {
 					</Link>
 				</div>
 			</section>
+			<RelatedSecurityTopics currentPath="/solutions/ai-detection-response" />
 		</div>
 	);
 }

@@ -48,18 +48,35 @@ export function SEOMeta({
 	
 	const robotsContent = noindex ? 'noindex, follow' : nofollow ? 'index, nofollow' : robots;
 
-	// Breadcrumb schema
-	const breadcrumbSchema = useMemo(() => breadcrumbs ? {
+	const resolvedBreadcrumbs = useMemo(() => {
+		if (noindex) return null;
+		if (breadcrumbs) return breadcrumbs;
+		const pathname = new URL(canonical).pathname;
+		const segments = pathname.split('/').filter(Boolean);
+		if (segments.length === 0) return null;
+		return [
+			{ name: 'Home', url: PRIMARY_SITE_URL },
+			...segments.map((segment, index) => ({
+				name: segment
+					.split('-')
+					.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+					.join(' '),
+				url: `${PRIMARY_SITE_URL}/${segments.slice(0, index + 1).join('/')}`,
+			})),
+		];
+	}, [breadcrumbs, canonical, noindex]);
+
+	const breadcrumbSchema = useMemo(() => resolvedBreadcrumbs ? {
 			'@context': 'https://schema.org',
 			'@type': 'BreadcrumbList',
-			itemListElement: breadcrumbs.map((item, index) => ({
+			itemListElement: resolvedBreadcrumbs.map((item, index) => ({
 				'@type': 'ListItem',
 				position: index + 1,
 				name: item.name,
 				item: item.url,
 			})),
 		} : null,
-		[breadcrumbs],
+		[resolvedBreadcrumbs],
 	);
 
 	const defaultStructuredData = useMemo(

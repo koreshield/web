@@ -206,7 +206,9 @@ export function BlogListPage() {
 												<div className="w-full h-32 md:h-full bg-accent rounded overflow-hidden">
 													<img
 														src={post.coverImage}
-														alt={post.title}
+												alt={post.title}
+												loading="lazy"
+												decoding="async"
 														className="w-full h-full object-cover group-hover:scale-105 transition-transform"
 														onError={(e) => {
 															e.currentTarget.style.display = 'none';

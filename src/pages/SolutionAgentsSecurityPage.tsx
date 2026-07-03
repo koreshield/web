@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Braces, GitBranch, MousePointerClick, ShieldAlert, Workflow, Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
+import { RelatedSecurityTopics } from '../components/RelatedSecurityTopics';
 
 const agentRisks = [
 	{ icon: Braces, title: 'Tool output becomes instruction', body: 'A web page, API response, or retrieved file can smuggle a command back into the chain.' },
@@ -104,6 +105,7 @@ export default function SolutionAgentsSecurityPage() {
 					</Link>
 				</div>
 			</section>
+			<RelatedSecurityTopics currentPath="/solutions/ai-agents-security" />
 		</div>
 	);
 }

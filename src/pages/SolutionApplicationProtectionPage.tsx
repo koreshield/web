@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, Code2, PlugZap, Route, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
+import { RelatedSecurityTopics } from '../components/RelatedSecurityTopics';
 
 const steps = [
 	['01', 'Point', 'Change the LLM base URL to Koreshield.'],
@@ -107,6 +108,7 @@ export default function SolutionApplicationProtectionPage() {
 					))}
 				</div>
 			</section>
+			<RelatedSecurityTopics currentPath="/solutions/ai-application-protection" />
 		</div>
 	);
 }

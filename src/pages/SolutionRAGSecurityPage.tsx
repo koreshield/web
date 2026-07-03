@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, Database, FileSearch, Lock, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
+import { RelatedSecurityTopics } from '../components/RelatedSecurityTopics';
 
 const riskMoments = [
 	{
@@ -221,6 +222,7 @@ else:
 					</div>
 				</div>
 			</section>
+			<RelatedSecurityTopics currentPath="/solutions/rag-security" />
 		</div>
 	);
 }

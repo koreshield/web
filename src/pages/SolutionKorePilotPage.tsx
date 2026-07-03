@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Bell, Database, FileCheck2, GitBranch, LockKeyhole, ShieldCheck, Target, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOMeta } from '../components/SEOMeta';
+import { RelatedSecurityTopics } from '../components/RelatedSecurityTopics';
 
 const evidenceFeeds = [
 	{
@@ -263,6 +264,7 @@ export default function SolutionKorePilotPage() {
 					</div>
 				</motion.div>
 			</section>
+			<RelatedSecurityTopics currentPath="/solutions/korepilot" />
 		</div>
 	);
 }

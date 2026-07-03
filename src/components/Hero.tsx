@@ -33,8 +33,8 @@ function Hero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.2 }}
 					>
-						Every Prompt is a{' '}
-						<span className="text-electric-green">Potential Attack.</span>
+						The AI Security Firewall for{' '}
+						<span className="text-electric-green">Every Prompt.</span>
 					</motion.h1>
 
 					<motion.p

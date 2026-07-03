@@ -11,6 +11,7 @@ const team = [
 		bio: 'Leads product direction, customer discovery, and the commercial path for Koreshield.',
 		image: '/team/teslim-kazeem.png',
 		linkedin: 'https://www.linkedin.com/in/teslim-kazeem/',
+		profile: '/authors/teslim-kazeem',
 	},
 	{
 		name: 'Isaac Emmanuel',
@@ -18,6 +19,7 @@ const team = [
 		bio: 'Architects the platform, SDKs, proxy layer, and operational infrastructure behind Koreshield.',
 		image: '/team/isaac-emmanuel.jpg',
 		linkedin: 'https://www.linkedin.com/in/isaacnsisong/',
+		profile: '/authors/isaac-emmanuel',
 	},
 	{
 		name: 'Uwagba Obinna',
@@ -25,6 +27,7 @@ const team = [
 		bio: 'Shapes governance, risk, and compliance workflows so AI security evidence is usable by real organisations.',
 		image: '/team/obinna.jpeg',
 		linkedin: 'https://www.linkedin.com/in/uwagba-obinna',
+		profile: undefined,
 	},
 ];
 
@@ -223,13 +226,18 @@ export default function AboutPage() {
 							>
 								<div className="pointer-events-none absolute -right-14 -top-14 h-32 w-32 rounded-full bg-electric-green/10 blur-3xl opacity-0 transition-opacity group-hover:opacity-100" />
 								<div className="relative mb-6 h-20 w-20 overflow-hidden rounded-2xl border border-white/[0.12] bg-white/[0.04]">
-									<img src={member.image} alt={member.name} className="h-full w-full object-cover" />
+									<img src={member.image} alt={member.name} width="460" height="460" loading="lazy" decoding="async" className="h-full w-full object-cover" />
 								</div>
 								<h3 className="text-xl font-bold text-white">{member.name}</h3>
 								<p className="mt-2 inline-flex rounded-full border border-electric-green/20 bg-electric-green/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-electric-green">
 									{member.role}
 								</p>
 								<p className="mt-4 text-sm leading-relaxed text-muted-foreground">{member.bio}</p>
+								{member.profile ? (
+									<Link to={member.profile} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-electric-green">
+										View author profile <ArrowRight className="h-4 w-4" />
+									</Link>
+								) : null}
 								<a
 									href={member.linkedin}
 									target="_blank"
