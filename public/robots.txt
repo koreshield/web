@@ -41,7 +41,7 @@ Disallow: /verify-email
 Disallow: /auth/
 Disallow: /invites/
 
-# Aggressive SEO scrapers — no indexing value for a product site.
+# Aggressive SEO scrapers - no indexing value for a product site.
 User-agent: MJ12bot
 Disallow: /
 
