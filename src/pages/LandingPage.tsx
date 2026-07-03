@@ -8,6 +8,7 @@ import { StatsBanner } from '../components/StatsBanner';
 import { ThreatDashboard } from '../components/ThreatDashboard';
 import { TrustBadges } from '../components/TrustBadges';
 import UseCases from '../components/UseCases';
+import { CodeSwap } from '../components/CodeSwap';
 
 import { motion } from 'framer-motion';
 import { ArrowRight, Check, CheckCircle2, Cloud, Copy, Lock, Server, Terminal } from 'lucide-react';
@@ -62,6 +63,20 @@ function LandingPage() {
             <StatsBanner />
 
             <Architecture />
+
+            <section className="py-20 md:py-28 px-6 bg-muted/10 relative overflow-hidden border-t border-white/[0.04]">
+                <div className="max-w-7xl mx-auto relative z-10">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-extrabold tracking-[-0.04em] mb-4">
+                            Integrate in under 60 seconds
+                        </h2>
+                        <p className="text-muted-foreground text-base max-w-xl mx-auto leading-relaxed">
+                            Simply redirect your existing LLM provider requests by changing the endpoint URL. No SDK migrations or complex libraries required.
+                        </p>
+                    </div>
+                    <CodeSwap />
+                </div>
+            </section>
 
             <section className="relative overflow-hidden border-y border-white/[0.06] bg-card/30 px-6 py-20">
                 <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12),transparent_55%)]" />
