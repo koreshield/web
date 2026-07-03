@@ -68,7 +68,7 @@ User-agent: *
 Allow: /
 ${DISALLOW_LINES}
 
-# Aggressive SEO scrapers — no indexing value for a product site.
+# Aggressive SEO scrapers - no indexing value for a product site.
 ${BLOCKED_AGENTS.map((agent) => `User-agent: ${agent}\nDisallow: /`).join('\n\n')}
 
 # Canonical sitemap

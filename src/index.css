@@ -691,7 +691,7 @@ select:focus-visible {
   margin-bottom: 1.25em;
 }
 
-/* Headings — h1/h2/h3 are also handled by custom ReactMarkdown components
+/* Headings - h1/h2/h3 are also handled by custom ReactMarkdown components
    that add scroll-mt. The CSS here adds size/weight/color/spacing for all
    levels. h1 in article content is rare (page title already shown above). */
 .prose h1 {
@@ -829,7 +829,7 @@ select:focus-visible {
   border: 1px solid hsl(var(--border));
 }
 
-/* First/last child — remove redundant outer margins */
+/* First/last child - remove redundant outer margins */
 .prose > :first-child { margin-top: 0; }
 .prose > :last-child  { margin-bottom: 0; }
 .prose li > :first-child { margin-top: 0; }

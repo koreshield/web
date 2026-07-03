@@ -89,7 +89,7 @@ function computeOptimizations(providers: ProviderMetric[]): CostOptimization[] {
 	const cheapest = providers.reduce((min, p) => p.cost_per_request < min.cost_per_request ? p : min, providers[0]);
 	const mostExpensive = sorted[0];
 	const highLatency = providers.filter(p => p.avg_latency_ms > 1500);
-	// 90% threshold — anything above is acceptable provider reliability.
+	// 90% threshold - anything above is acceptable provider reliability.
 	// (Previously 99%, which flagged every provider including healthy ones.)
 	const lowReliability = providers.filter(p => p.success_rate < 90);
 
@@ -187,7 +187,7 @@ export function AdvancedAnalyticsPage() {
 		projected_monthly_cost?: number;
 	} | undefined;
 
-	// Budget forecast chart data — last 30 days daily costs
+	// Budget forecast chart data - last 30 days daily costs
 	const budgetChartData = costData.slice(-30).map(d => ({
 		period: d.period,
 		cost: d.total_cost,

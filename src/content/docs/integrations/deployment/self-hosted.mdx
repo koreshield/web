@@ -8,7 +8,7 @@ last_update:
 
 # Self-Hosted Deployment
 
-Self-hosted deployment is available on the **Enterprise plan**. You run Koreshield inside your own infrastructure — VPC, on-prem data centre, or private cloud — with full control over data residency, network policies, and update cadence.
+Self-hosted deployment is available on the **Enterprise plan**. You run Koreshield inside your own infrastructure - VPC, on-prem data centre, or private cloud - with full control over data residency, network policies, and update cadence.
 
 > **Not on Enterprise?** Use the hosted API at `api.koreshield.com` instead. See the [Quick Start](/docs/getting-started/quick-start).
 
@@ -34,7 +34,7 @@ Everything runs inside your network boundary. No data leaves your infrastructure
 | Service | Role | Port |
 |---|---|---|
 | **Caddy** | Reverse proxy, TLS termination, security headers | 443 → 8000 |
-| **Koreshield API** | Core security engine — scanning, detection, policy enforcement | 8000 |
+| **Koreshield API** | Core security engine - scanning, detection, policy enforcement | 8000 |
 | **PostgreSQL** | Primary datastore with per-tenant schema isolation | 5432 |
 | **Redis** | Session cache, rate limiting, real-time pub/sub | 6379 |
 
@@ -64,7 +64,7 @@ KS_LICENSE_KEY=ks_ent_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.signature
 ENVIRONMENT=production
 ```
 
-The licence key is validated on startup — the server will not start without a valid Enterprise licence.
+The licence key is validated on startup - the server will not start without a valid Enterprise licence.
 
 ### 2. Configure core secrets
 
@@ -139,7 +139,7 @@ python scripts/verify_installation.py
 - **Per-request enforcement**: expired licences enter a **14-day grace period** where the server continues running with `X-KoreShield-Licence: expiring` headers. After the grace period, requests receive HTTP 503
 - **Monthly cap**: if your licence includes a `max_requests_per_month`, the server returns HTTP 429 when the cap is reached
 - **Live reload**: send `SIGHUP` to the process to reload the licence key without restarting
-- **No phone-home**: validation uses HMAC signatures — no network call is made
+- **No phone-home**: validation uses HMAC signatures - no network call is made
 
 ### Billing Bypass
 
@@ -169,8 +169,8 @@ See [RBAC](/docs/features/rbac) for role-based access control within a deploymen
 
 The production Compose stack includes:
 
-- **Structured JSON logs** via `structlog` — compatible with any log aggregator (ELK, Datadog, Splunk)
-- **Prometheus metrics** at `/metrics` — scrape every 15 seconds
+- **Structured JSON logs** via `structlog` - compatible with any log aggregator (ELK, Datadog, Splunk)
+- **Prometheus metrics** at `/metrics` - scrape every 15 seconds
 - **`/health` endpoint** with licence status, corpus metadata, and service health
 
 ## Updating

@@ -15,7 +15,7 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 
 	return (
 		<>
-			{/* Mobile docs toolbar — visible only on small screens, sticks below the site header */}
+			{/* Mobile docs toolbar - visible only on small screens, sticks below the site header */}
 			<div className="sticky top-16 z-30 flex items-center justify-between border-b border-border bg-background/90 px-4 py-2 backdrop-blur-sm lg:hidden">
 				<button
 					onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -34,7 +34,7 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 						sidebarOpen ? 'block' : 'hidden'
 					} lg:block fixed lg:sticky top-[6.75rem] lg:top-16 left-0 w-64 h-[calc(100vh-6.75rem)] lg:h-[calc(100vh-4rem)] border-r border-border bg-card/30 overflow-y-auto z-30`}
 				>
-					{/* Search — desktop only; mobile has it in the toolbar above */}
+					{/* Search - desktop only; mobile has it in the toolbar above */}
 					<div className="hidden px-3 pt-4 pb-2 lg:block">
 						<DocSearch />
 					</div>

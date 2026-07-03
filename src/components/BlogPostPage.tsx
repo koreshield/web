@@ -27,7 +27,7 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 
 		return getRelatedBlogPosts(slug, 3);
 	}, [post, slug]);
-	// Strip leading h1 — BlogPostPage renders the title in <header> already
+	// Strip leading h1 - BlogPostPage renders the title in <header> already
 	const strippedContent = useMemo(() => (post ? post.content.replace(/^\s*#\s+[^\n]+\n+/, '') : ''), [post]);
 
 	if (!post) {

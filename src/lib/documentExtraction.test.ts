@@ -40,7 +40,7 @@ describe('documentExtraction', () => {
 		const file = new File([new Uint8Array([1, 2, 3])], 'sample.pdf', { type: 'application/pdf' });
 
 		await expect(readUploadedDocument(file)).resolves.toBe('Hello world');
-		// disableWorker is no longer passed — workerSrc is set via GlobalWorkerOptions instead
+		// disableWorker is no longer passed - workerSrc is set via GlobalWorkerOptions instead
 		expect(getDocument).toHaveBeenCalledWith(
 			expect.objectContaining({
 				useSystemFonts: true,

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 // Detection/latency figures below are from our internal benchmark corpus and
-// vary by workload — they are indicative, not contractual guarantees.
+// vary by workload - they are indicative, not contractual guarantees.
 const stats = [
 	{
 		value: '~95%',

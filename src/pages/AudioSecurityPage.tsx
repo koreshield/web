@@ -380,7 +380,7 @@ export function AudioSecurityPage() {
 				<AppStatCard label="Threats logged" value={threatCount} icon={ShieldAlert} tone="text-orange-400" />
 				<AppStatCard
 					label="Latest decision"
-					value={result?.decision || '—'}
+					value={result?.decision || '-'}
 					icon={CheckCircle}
 					tone={decisionTone(result?.decision)}
 				/>

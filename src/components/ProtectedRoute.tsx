@@ -22,7 +22,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     useEffect(() => {
         let isMounted = true;
         const checkAuth = async () => {
-            // Always validate with backend — belt-and-suspenders with localStorage token fallback.
+            // Always validate with backend - belt-and-suspenders with localStorage token fallback.
             const ok = await authService.restoreSession(true);
             if (isMounted) {
                 setIsAuthenticated(ok);

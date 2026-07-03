@@ -730,7 +730,7 @@ export function FounderPortalPage() {
 						</div>
 
 						{/* Top tenants */}
-						<AppPageSection title={`Top tenants by usage — last 30 days (${metrics.top_tenants.length})`}>
+						<AppPageSection title={`Top tenants by usage - last 30 days (${metrics.top_tenants.length})`}>
 							{metrics.top_tenants.length ? (
 								<div className="overflow-x-auto">
 									<table className="w-full text-sm">
@@ -996,7 +996,7 @@ export function FounderPortalPage() {
 				</div>
 
 				{/* ── Threats Panel ─────────────────────────────────────── */}
-				<AppPageSection title={`Threats — last ${threatsQuery.data?.window_days ?? 30} days (${(threatsQuery.data?.total_blocked ?? 0).toLocaleString()} blocked)`}>
+				<AppPageSection title={`Threats - last ${threatsQuery.data?.window_days ?? 30} days (${(threatsQuery.data?.total_blocked ?? 0).toLocaleString()} blocked)`}>
 					<div className="grid gap-6 xl:grid-cols-3">
 						<div>
 							<p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">

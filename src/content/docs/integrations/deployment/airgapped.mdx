@@ -8,7 +8,7 @@ last_update:
 
 # Airgapped Deployment
 
-For environments with no outbound internet access — classified networks, regulated data centres, secure enclaves — Koreshield can run fully offline. This guide covers the additional steps beyond a standard [self-hosted deployment](/docs/integrations/deployment/self-hosted).
+For environments with no outbound internet access - classified networks, regulated data centres, secure enclaves - Koreshield can run fully offline. This guide covers the additional steps beyond a standard [self-hosted deployment](/docs/integrations/deployment/self-hosted).
 
 > **Prerequisite**: You must have an active Enterprise licence with airgapped access enabled. Contact the Koreshield team to receive your offline deployment bundle.
 
@@ -23,7 +23,7 @@ For environments with no outbound internet access — classified networks, regul
 | Licence validation | Local HMAC (no phone-home) | Local HMAC (no phone-home) |
 | Threat corpus updates | Bundled + SIGHUP hot-reload | Manual JSONL bundle import + SIGHUP |
 | Billing / subscriptions | Bypassed (licence-based) | Bypassed (licence-based) |
-| OAuth login (GitHub/Google) | Optional | Disabled — use API key auth |
+| OAuth login (GitHub/Google) | Optional | Disabled - use API key auth |
 | Remote audio URLs | Configurable | Blocked |
 | Telegram alerts | Optional | Skipped |
 | Dashboard | Bundled in stack | Bundled in stack |
@@ -39,11 +39,11 @@ ENVIRONMENT=production
 
 When `DEPLOYMENT_MODE=airgapped`, the server enforces these constraints at runtime:
 
-- **Polar billing calls are blocked** — entitlements come from the licence key
-- **OAuth login routes return 403** — authentication is via API keys only
-- **Remote `audio_url` fetching is disabled** — upload audio files directly or send base64
-- **Telegram alert dispatch is skipped** — use local log aggregation instead
-- **Licence validation is fully offline** — HMAC signature check, no network call
+- **Polar billing calls are blocked** - entitlements come from the licence key
+- **OAuth login routes return 403** - authentication is via API keys only
+- **Remote `audio_url` fetching is disabled** - upload audio files directly or send base64
+- **Telegram alert dispatch is skipped** - use local log aggregation instead
+- **Licence validation is fully offline** - HMAC signature check, no network call
 
 ## Offline Bundle Contents
 
@@ -101,7 +101,7 @@ done
 
 ```bash
 cp .env.example .env
-# Edit .env — key settings below
+# Edit .env - key settings below
 ```
 
 Key variables for airgapped:
@@ -115,7 +115,7 @@ JWT_SECRET=your-secret-here
 # External threat corpus (auto-loaded on startup)
 KS_THREAT_CORPUS_PATH=/data/threat-corpus/corpus.jsonl
 
-# LLM provider — use a local model endpoint or internal proxy
+# LLM provider - use a local model endpoint or internal proxy
 OPENAI_API_BASE=http://internal-llm-gateway:8080/v1
 OPENAI_API_KEY=internal-key
 ```

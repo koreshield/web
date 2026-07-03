@@ -185,7 +185,7 @@ export function ProfilePage() {
 				}
 			>
 						<div className="grid gap-4 md:grid-cols-2">
-							{/* Name — editable */}
+							{/* Name - editable */}
 							<div className="space-y-2">
 								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
 									<User className="w-4 h-4" /> Full Name
@@ -244,7 +244,7 @@ export function ProfilePage() {
 								)}
 							</div>
 
-							{/* Email — read-only */}
+							{/* Email - read-only */}
 							<div className="space-y-2">
 								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
 									<Mail className="w-4 h-4" /> Email Address
@@ -295,7 +295,7 @@ export function ProfilePage() {
 								</div>
 							</div>
 
-							{/* Status — read-only */}
+							{/* Status - read-only */}
 							<div className="space-y-2">
 								<label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
 									<Building className="w-4 h-4" /> Account Status

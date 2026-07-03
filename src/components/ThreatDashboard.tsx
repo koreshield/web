@@ -22,7 +22,7 @@ const THREAT_TYPES = [
 ];
 
 // Generic example sectors for the illustrative feed. These are NOT real
-// customers — the component renders sample data to preview the dashboard UI.
+// customers - the component renders sample data to preview the dashboard UI.
 const CLIENT_TYPES = [
     'Healthcare (example)',
     'FinTech (example)',
@@ -113,7 +113,7 @@ export function ThreatDashboard() {
                     </div>
                     <div>
                         <h3 className="text-xl font-bold tracking-tight">Threat Monitor Preview</h3>
-                        <p className="text-sm text-muted-foreground">Illustrative dashboard view — sample data</p>
+                        <p className="text-sm text-muted-foreground">Illustrative dashboard view - sample data</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground font-mono bg-muted/60 px-3 py-1.5 rounded-full text-xs border border-border">
@@ -133,14 +133,14 @@ export function ThreatDashboard() {
                 </div>
                 <div className="bg-muted/50 p-4 md:p-5 rounded-lg border border-border">
                     <div className="text-xs md:text-sm text-muted-foreground mb-1">Avg Latency</div>
-                    <div className="text-2xl md:text-3xl font-bold font-mono tracking-tight">—</div>
+                    <div className="text-2xl md:text-3xl font-bold font-mono tracking-tight">-</div>
                     <div className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
                         <Activity className="w-3 h-3" /> sample
                     </div>
                 </div>
                 <div className="bg-muted/50 p-4 md:p-5 rounded-lg border border-border">
                     <div className="text-xs md:text-sm text-muted-foreground mb-1">Security Score</div>
-                    <div className="text-2xl md:text-3xl font-bold font-mono text-muted-foreground tracking-tight">—</div>
+                    <div className="text-2xl md:text-3xl font-bold font-mono text-muted-foreground tracking-tight">-</div>
                     <div className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
                         <Lock className="w-3 h-3" /> sample
                     </div>

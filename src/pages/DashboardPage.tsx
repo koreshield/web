@@ -170,7 +170,7 @@ const client = new OpenAI({
 					variant="panel"
 				>
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-3 mb-4">
-								{/* Step 1 — inline key creator */}
+								{/* Step 1 - inline key creator */}
 								<div className="rounded-2xl border border-border bg-background/60 p-4">
 									<div className="flex items-center gap-2 mb-2">
 										<div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0">1</div>
@@ -178,7 +178,7 @@ const client = new OpenAI({
 									</div>
 									{generatedKey ? (
 										<div>
-											<p className="text-xs text-green-600 font-medium mb-2">Key generated! Copy it now — it won't be shown again.</p>
+											<p className="text-xs text-green-600 font-medium mb-2">Key generated! Copy it now - it won't be shown again.</p>
 											<div className="flex items-center gap-1 bg-muted rounded p-2 mb-2">
 												<code className="text-[10px] font-mono flex-1 break-all">{generatedKey}</code>
 												<button onClick={handleCopyKey} className="shrink-0 p-1 rounded hover:bg-primary/10 text-primary" title="Copy key">

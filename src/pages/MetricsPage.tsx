@@ -86,7 +86,7 @@ export function MetricsPage() {
 				/>
 				<AppStatCard
 					label="Series lines"
-					value={metricLineCount || '—'}
+					value={metricLineCount || '-'}
 					icon={Activity}
 					detail="Non-empty metric lines in latest scrape"
 				/>

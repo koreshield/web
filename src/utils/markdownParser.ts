@@ -35,7 +35,7 @@ export function parseMarkdown(markdown: string): string {
 		return codeBlocks[index];
 	});
 
-	// Headings — strip leading h1 to avoid duplicate (BlogPostPage already renders title in header)
+	// Headings - strip leading h1 to avoid duplicate (BlogPostPage already renders title in header)
 	html = html.replace(/^\s*# [^\n]+\n+/, '');
 	html = html.replace(/^### (.*?)$/gm, '<h3 class="text-xl font-bold mt-6 mb-3 text-[hsl(var(--foreground))] scroll-mt-24">$1</h3>');
 	html = html.replace(/^## (.*?)$/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-[hsl(var(--foreground))] border-b border-[hsl(var(--border))] pb-2 scroll-mt-24">$1</h2>');
@@ -55,7 +55,7 @@ export function parseMarkdown(markdown: string): string {
 	// Links
 	html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-[hsl(var(--primary))] underline hover:opacity-80 transition-opacity">$1</a>');
 
-	// Unordered lists — collect consecutive <li> items into a single <ul>
+	// Unordered lists - collect consecutive <li> items into a single <ul>
 	html = html.replace(/^\* (.*?)$/gm, '<li>$1</li>');
 	html = html.replace(/^- (.*?)$/gm, '<li>$1</li>');
 	html = html.replace(/(<li>[\s\S]*?<\/li>)(\n<li>[\s\S]*?<\/li>)*/g, (match) => {
@@ -74,7 +74,7 @@ export function parseMarkdown(markdown: string): string {
 	// Horizontal rules
 	html = html.replace(/^---$/gm, '<hr class="border-[hsl(var(--border))] my-6" />');
 
-	// Line breaks — convert multiple newlines to paragraph breaks
+	// Line breaks - convert multiple newlines to paragraph breaks
 	html = html.replace(/\n\n+/g, '</p><p class="mb-4 leading-relaxed text-[hsl(var(--foreground))]">');
 	html = `<p class="mb-4 leading-relaxed text-[hsl(var(--foreground))]">${html}</p>`;
 

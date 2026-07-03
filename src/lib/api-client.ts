@@ -196,7 +196,7 @@ class ApiClient {
 	}
 
 	async getStats(): Promise<AttackStats> {
-		// Per-account stats scoped to the authenticated user — never platform-wide
+		// Per-account stats scoped to the authenticated user - never platform-wide
 		return this.fetch<AttackStats>('/v1/management/stats');
 	}
 
@@ -205,7 +205,7 @@ class ApiClient {
 	}
 
 	async getPublicStats(): Promise<AttackStats> {
-		// Aggregate platform-wide stats — no auth required, safe for the public status page
+		// Aggregate platform-wide stats - no auth required, safe for the public status page
 		return this.fetch<AttackStats>('/v1/management/stats/public');
 	}
 
@@ -939,7 +939,7 @@ class ApiClient {
 		return response.blob();
 	}
 
-	// VoiceGuard — scan speech-derived input before LLM/tool execution
+	// VoiceGuard - scan speech-derived input before LLM/tool execution
 	async scanAudio(payload: {
 		policy_id?: string;
 		policy?: Record<string, unknown>;

@@ -58,7 +58,7 @@ export function DocSearch() {
 
 	return (
 		<>
-			{/* Search trigger button — desktop */}
+			{/* Search trigger button - desktop */}
 			<button
 				onClick={() => setOpen(true)}
 				className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-card text-muted-foreground hover:bg-accent transition-colors text-sm w-full"
@@ -68,7 +68,7 @@ export function DocSearch() {
 				<span className="ml-auto text-xs text-muted-foreground/60">⌘K</span>
 			</button>
 
-			{/* Search trigger button — mobile icon */}
+			{/* Search trigger button - mobile icon */}
 			<button
 				onClick={() => setOpen(true)}
 				className="lg:hidden p-2 rounded-lg text-muted-foreground hover:bg-accent transition-colors"

@@ -41,7 +41,7 @@ export function VerifyEmailPage() {
 					throw new Error(
 						errData?.detail ||
 						errData?.message ||
-						'Verification failed. The link may have expired — please request a new one from your account settings.'
+						'Verification failed. The link may have expired - please request a new one from your account settings.'
 					);
 				}
 

@@ -13,7 +13,7 @@ interface LocationState {
 	passwordReset?: boolean;
 }
 
-// Official Google "G" mark — uses the brand colours on all backgrounds
+// Official Google "G" mark - uses the brand colours on all backgrounds
 function GoogleIcon() {
 	return (
 		<svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">

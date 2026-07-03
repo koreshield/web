@@ -140,7 +140,7 @@ export function ProviderHealthPage() {
 				eyebrowIcon={Activity}
 				icon={Server}
 				title="Provider Health Dashboard"
-				description={wsConnected ? 'Live monitoring of LLM provider infrastructure' : 'LLM provider health — connect to WebSocket for live updates'}
+				description={wsConnected ? 'Live monitoring of LLM provider infrastructure' : 'LLM provider health - connect to WebSocket for live updates'}
 				actions={liveStatusBadge}
 			/>
 

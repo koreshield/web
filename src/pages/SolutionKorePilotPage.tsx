@@ -106,7 +106,7 @@ export default function SolutionKorePilotPage() {
 						</h1>
 
 						<p className="mx-auto max-w-3xl text-lg md:text-xl text-muted-foreground leading-relaxed mb-12">
-							KorePilot maps Koreshield's security detection layer directly to compliance frameworks. No translation layers, no guesswork—just audit-ready evidence derived from the same controls protecting your production traffic.
+							KorePilot maps Koreshield's security detection layer directly to compliance frameworks. No translation layers, no guesswork-just audit-ready evidence derived from the same controls protecting your production traffic.
 						</p>
 
 						<div className="flex flex-col sm:flex-row items-center justify-center gap-4">

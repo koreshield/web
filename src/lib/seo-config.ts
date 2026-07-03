@@ -131,7 +131,7 @@ export const SEOConfig = {
 	},
 	faq: {
 		title: 'FAQ',
-		description: 'Answers to common questions about Koreshield — security, privacy, deployment, pricing, compliance, and troubleshooting for LLM security.',
+		description: 'Answers to common questions about Koreshield - security, privacy, deployment, pricing, compliance, and troubleshooting for LLM security.',
 		keywords: 'Koreshield FAQ, LLM security questions, AI firewall FAQ, self-hosted FAQ, air-gapped deployment FAQ, prompt injection FAQ',
 		ogImage: 'https://koreshield.ai/og-faq.png',
 		ogType: 'website' as const,

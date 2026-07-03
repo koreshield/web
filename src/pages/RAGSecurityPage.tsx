@@ -393,7 +393,7 @@ const normalizeRagResponse = (
 	sourceDocuments: RetrievedDocument[],
 	userQueryValue: string
 ): RAGScanResult => {
-	// Already normalized — but still map from context_analysis if threats were omitted
+	// Already normalized - but still map from context_analysis if threats were omitted
 	if (payload && typeof payload === 'object' && 'scan_metadata' in payload) {
 		const prebuilt = payload as RAGScanResult;
 		if (prebuilt.document_threats?.length > 0) {

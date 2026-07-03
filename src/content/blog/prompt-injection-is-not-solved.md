@@ -64,9 +64,9 @@ The rule engine is the core detection layer. It applies a library of named detec
 
 Each rule targets a specific attack class. Each rule contributes a weighted score when it fires. The total score is normalised to 0–1:
 
-- **Score < 0.3**: Pass — forward to the model
-- **0.3 ≤ Score < 0.6**: Flag — forward with metadata, alert logged
-- **Score ≥ 0.6**: Block — request rejected before reaching the model
+- **Score < 0.3**: Pass - forward to the model
+- **0.3 ≤ Score < 0.6**: Flag - forward with metadata, alert logged
+- **Score ≥ 0.6**: Block - request rejected before reaching the model
 
 These thresholds are configurable per deployment. High-security deployments lower the block threshold. High-availability deployments raise it. The defaults are calibrated against real attack data.
 
