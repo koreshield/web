@@ -8,320 +8,158 @@
 
 	<url>
 		<loc>https://koreshield.ai/</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>daily</changefreq>
-		<priority>1</priority>
-	</url>
-	<url>
-		<loc>https://koreshield.ai/features</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>weekly</changefreq>
-		<priority>0.9</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/pricing</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>weekly</changefreq>
-		<priority>0.9</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/docs</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>daily</changefreq>
-		<priority>0.8</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/blog</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>daily</changefreq>
-		<priority>0.8</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/status</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>hourly</changefreq>
-		<priority>0.7</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/about</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.7</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/contact</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>yearly</changefreq>
-		<priority>0.6</priority>
+	</url>
+	<url>
+		<loc>https://koreshield.ai/faq</loc>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/vs</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.8</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/vs/lakera-guard</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.8</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/vs/llm-guard</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.8</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/vs/build-yourself</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.8</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/solutions</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>weekly</changefreq>
-		<priority>0.85</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/solutions/ai-detection-response</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.7</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/solutions/ai-application-protection</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.7</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/solutions/ai-agents-security</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.7</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/solutions/ai-usage-control</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.7</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/solutions/rag-security</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.7</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/solutions/korepilot</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.7</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/solutions/voice-audio-protection</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.7</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/why-koreshield</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.7</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/integrations</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>weekly</changefreq>
-		<priority>0.6</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/changelog</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>weekly</changefreq>
-		<priority>0.6</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/research</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.6</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.5</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/privacy-policy</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>yearly</changefreq>
-		<priority>0.4</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/terms-of-service</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>yearly</changefreq>
-		<priority>0.4</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/cookie-policy</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>yearly</changefreq>
-		<priority>0.4</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/dpa</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>yearly</changefreq>
-		<priority>0.4</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/legal/sub-processors</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>yearly</changefreq>
-		<priority>0.35</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/legal/transfer-policy</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>yearly</changefreq>
-		<priority>0.35</priority>
-	</url>
-	<url>
-		<loc>https://koreshield.ai/getting-started</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>weekly</changefreq>
-		<priority>0.8</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/demo</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>weekly</changefreq>
-		<priority>0.8</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers/social-media-operator</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.45</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers/senior-backend-engineer</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.45</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers/ml-security-researcher</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.45</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers/product-designer</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.45</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers/enterprise-account-executive</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.45</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers/global-sales-manager</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.45</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers/ui-engineer</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.45</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers/security-engineer-red-team</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.45</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers/data-engineer-big-data</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.45</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers/ai-product-manager</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.45</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/careers/senior-devops-engineer</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.45</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/research/state-of-prompt-injection-in-production-llm-systems</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/research/indirect-prompt-injection-via-retrieved-documents</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/research/tool-call-hijacking-in-agentic-pipelines</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/research/jailbreak-technique-drift</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/research/pii-exfiltration-via-llm-output</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/research/evaluating-confidence-thresholds-for-prompt-injection-classifiers</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/research/bypass-resistance-of-system-prompt-hardening-alone</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/research/multi-turn-injection-building-attack-context-across-conversation-rounds</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/research/false-positive-rates-semantic-vs-rule-based-detectors-at-scale</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
 	</url>
 </urlset>

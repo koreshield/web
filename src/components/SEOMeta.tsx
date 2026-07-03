@@ -25,7 +25,7 @@ interface SEOMetaProps {
 const DEFAULT_TITLE = 'Koreshield | AI Security Firewall';
 const DEFAULT_DESCRIPTION = 'Proxy-layer AI security for prompts, RAG context, provider routing, policy enforcement, and audit evidence.';
 const DEFAULT_KEYWORDS = 'LLM security, AI security, prompt injection, jailbreak detection, GPT security, OpenAI security, LLM firewall, AI safety, AI infrastructure protection, threat detection';
-const DEFAULT_OG_IMAGE = 'https://koreshield.ai/og-image.png';
+const DEFAULT_OG_IMAGE = 'https://koreshield.ai/logo.png';
 
 export function SEOMeta({
 	title,
@@ -73,11 +73,6 @@ export function SEOMeta({
 			url: PRIMARY_SITE_URL,
 			applicationCategory: 'SecurityApplication',
 			operatingSystem: 'Cross-platform',
-			offers: {
-				'@type': 'Offer',
-				price: '0',
-				priceCurrency: 'GBP',
-			},
 			provider: {
 				'@type': 'Organization',
 				name: 'Koreshield',
@@ -93,11 +88,6 @@ export function SEOMeta({
 				],
 			},
 			screenshot: ogImage,
-			aggregateRating: {
-				'@type': 'AggregateRating',
-				ratingValue: '4.8',
-				ratingCount: '156',
-			},
 		}),
 		[ogImage],
 	);
@@ -121,7 +111,7 @@ export function SEOMeta({
 			<title>{fullTitle}</title>
 			<meta name="title" content={fullTitle} />
 			<meta name="description" content={description} />
-			<meta name="keywords" content={keywords} />
+			{keywords && <meta name="keywords" content={keywords} />}
 			{author && <meta name="author" content={author} />}
 
 			{/* Robots & Indexing */}
@@ -134,16 +124,13 @@ export function SEOMeta({
 			<link rel="canonical" href={canonical} />
 
 			{/* Alternate Links */}
-			<link rel="alternate" hrefLang="en-US" href={canonical} />
-
 			{/* Open Graph / Facebook */}
 			<meta property="og:type" content={ogType} />
 			<meta property="og:url" content={canonical} />
 			<meta property="og:title" content={fullTitle} />
 			<meta property="og:description" content={description} />
 			<meta property="og:image" content={ogImage} />
-			<meta property="og:image:width" content="1200" />
-			<meta property="og:image:height" content="630" />
+			<meta property="og:image:alt" content={`${fullTitle} social preview`} />
 			<meta property="og:site_name" content="Koreshield" />
 			{publishedTime && <meta property="article:published_time" content={publishedTime} />}
 			{modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
@@ -161,7 +148,6 @@ export function SEOMeta({
 
 			{/* Additional Meta Tags */}
 			<meta name="language" content="English" />
-			<meta name="revisit-after" content="7 days" />
 			<meta name="theme-color" content="#0EA5E9" />
 			<meta name="apple-mobile-web-app-capable" content="yes" />
 			<meta name="format-detection" content="telephone=no" />

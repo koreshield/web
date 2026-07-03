@@ -6,7 +6,6 @@ author: Koreshield Labs
 categories: Updates, Security
 tags: updates, security, weekly
 status: published
-coverImage: /images/blog/updates.png
 ---
 
 # Weekly Security Update - April 27, 2026

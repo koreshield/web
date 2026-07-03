@@ -11,8 +11,6 @@ const path = require('path');
 
 const { SITE_ORIGINS } = require('./robots-policy.cjs');
 const PRIMARY_SITE_URL = SITE_ORIGINS[0];
-const ALIAS_SITE_URL = SITE_ORIGINS[1];
-const CURRENT_DATE = new Date().toISOString().split('T')[0];
 const publicDir = path.join(__dirname, '../public');
 const contentDir = path.join(__dirname, '../src/content');
 
@@ -55,7 +53,32 @@ function readMarkdownRoutes(folder, prefix) {
 	return fs
 		.readdirSync(dir)
 		.filter((file) => /\.(md|mdx)$/i.test(file) && file.toLowerCase() !== 'readme.md')
-		.map((file) => ({ path: `${prefix}/${mdSlug(file)}`, priority: 0.55, changefreq: 'monthly' }));
+		.map((file) => {
+			const content = fs.readFileSync(path.join(dir, file), 'utf-8');
+			const status = content.match(/^status:\s*(.+)$/m)?.[1]?.trim();
+			if (status && status !== 'published') {
+				return null;
+			}
+			return {
+				path: `${prefix}/${mdSlug(file)}`,
+				lastmod: content.match(/^date:\s*(\d{4}-\d{2}-\d{2})$/m)?.[1],
+			};
+		})
+		.filter(Boolean);
+}
+
+function docRouteFromFile(fullPath, dir) {
+	const content = fs.readFileSync(fullPath, 'utf-8');
+	const relative = path.relative(dir, fullPath).replace(/\\/g, '/');
+	const slug = content.match(/^slug:\s*(.+)$/m)?.[1]?.trim().replace(/^\/+|\/+$/g, '');
+	let fragment = slug || relative.replace(/\.(md|mdx)$/i, '');
+	if (fragment === 'overview') {
+		fragment = '';
+	} else {
+		fragment = fragment.replace(/\/index$/, '');
+	}
+	const lastmod = content.match(/^last_update:\s*\n\s+date:\s*(\d{4}-\d{2}-\d{2})$/m)?.[1];
+	return { path: fragment ? `/docs/${fragment}` : '/docs', lastmod };
 }
 
 function readDocsRoutes() {
@@ -79,15 +102,19 @@ function readDocsRoutes() {
 				continue;
 			}
 
-			const content = fs.readFileSync(fullPath, 'utf-8');
-			const slugMatch = content.match(/^slug:\s*(.+)$/m);
-			if (slugMatch) {
-				routes.push({ path: `/docs${slugMatch[1].trim()}`, priority: 0.5, changefreq: 'monthly' });
-			}
+			routes.push(docRouteFromFile(fullPath, dir));
 		}
 	}
 
-	return routes.sort((a, b) => a.path.localeCompare(b.path));
+	const seen = new Set();
+	return routes
+		.filter((route) => route.path !== '/docs')
+		.filter((route) => {
+			if (seen.has(route.path)) return false;
+			seen.add(route.path);
+			return true;
+		})
+		.sort((a, b) => a.path.localeCompare(b.path));
 }
 
 // Define all public routes with metadata
@@ -96,13 +123,13 @@ const ROUTES = [
 	{ path: '/', priority: 1.0, changefreq: 'daily' },
 
 	// Main pages
-	{ path: '/features', priority: 0.9, changefreq: 'weekly' },
 	{ path: '/pricing', priority: 0.9, changefreq: 'weekly' },
 	{ path: '/docs', priority: 0.8, changefreq: 'daily' },
 	{ path: '/blog', priority: 0.8, changefreq: 'daily' },
 	{ path: '/status', priority: 0.7, changefreq: 'hourly' },
 	{ path: '/about', priority: 0.7, changefreq: 'monthly' },
 	{ path: '/contact', priority: 0.6, changefreq: 'yearly' },
+	{ path: '/faq', priority: 0.7, changefreq: 'monthly' },
 
 	// Comparison pages (high SEO value)
 	{ path: '/vs', priority: 0.8, changefreq: 'monthly' },
@@ -136,7 +163,6 @@ const ROUTES = [
 	{ path: '/legal/transfer-policy', priority: 0.35, changefreq: 'yearly' },
 
 	// Get Started
-	{ path: '/getting-started', priority: 0.8, changefreq: 'weekly' },
 	{ path: '/demo', priority: 0.8, changefreq: 'weekly' },
 	...CAREER_SLUGS.map((slug) => ({ path: `/careers/${slug}`, priority: 0.45, changefreq: 'monthly' })),
 	...RESEARCH_SLUGS.map((slug) => ({ path: `/research/${slug}`, priority: 0.55, changefreq: 'monthly' })),
@@ -157,10 +183,8 @@ function generateSitemap(routes = ROUTES, siteUrl = PRIMARY_SITE_URL) {
 
 	const urls = uniqueRoutes.map((route) => `
 	<url>
-		<loc>${siteUrl}${route.path}</loc>
-		<lastmod>${CURRENT_DATE}</lastmod>
-		<changefreq>${route.changefreq}</changefreq>
-		<priority>${route.priority}</priority>
+		<loc>${siteUrl}${route.path}</loc>${route.lastmod ? `
+		<lastmod>${route.lastmod}</lastmod>` : ''}
 	</url>`).join('');
 
 	const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -211,22 +235,18 @@ function writeSitemapIndex(siteUrl, basename = 'sitemap') {
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<sitemap>
 		<loc>${siteUrl}/${basename}.xml</loc>
-		<lastmod>${CURRENT_DATE}</lastmod>
 	</sitemap>
 	<sitemap>
 		<loc>${siteUrl}/${basename}-blog.xml</loc>
-		<lastmod>${CURRENT_DATE}</lastmod>
 	</sitemap>
 	<sitemap>
 		<loc>${siteUrl}/${basename}-docs.xml</loc>
-		<lastmod>${CURRENT_DATE}</lastmod>
 	</sitemap>
 </sitemapindex>`;
 }
 
 function writeSitemaps() {
 	writeSitemapBundle(PRIMARY_SITE_URL, 'sitemap');
-	writeSitemapBundle(ALIAS_SITE_URL, 'sitemap.com');
 
 	const robotsContent = generateRobotsTxt();
 	fs.writeFileSync(path.join(publicDir, 'robots.txt'), robotsContent, 'utf-8');

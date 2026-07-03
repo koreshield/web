@@ -189,7 +189,6 @@ The model is not your firewall.
 		tags: ['updates', 'security', 'weekly'],
 		status: 'published',
 		
-		coverImage: '/images/blog/updates.png',
 		readingTime: 1,
 		path: '/blog/weekly-security-update-april-27',
 		content: `# Weekly Security Update - April 27, 2026
@@ -235,7 +234,6 @@ Remember to keep your Koreshield SDK updated and enable all security features in
 		tags: ['threats', 'ai', 'security', 'research'],
 		status: 'published',
 		
-		coverImage: '/images/blog/ai-threats.png',
 		readingTime: 1,
 		path: '/blog/understanding-ai-threats',
 		content: `# Understanding AI Threats: A Deep Dive
@@ -560,7 +558,6 @@ Koreshield is a runtime enforcement proxy that sits between your application and
 		tags: ['rag', 'prompts', 'injection', 'ai'],
 		status: 'published',
 		
-		coverImage: '/images/blog/rag-security.png',
 		readingTime: 5,
 		path: '/blog/rag-security-best-practices',
 		content: `# RAG Security Best Practices
@@ -806,7 +803,6 @@ RAG systems are powerful but require careful security consideration:
 		tags: ['integration', 'beginner', 'setup'],
 		status: 'published',
 		
-		coverImage: '/images/blog/getting-started.png',
 		readingTime: 1,
 		path: '/blog/getting-started-with-koreshield',
 		content: `# Getting Started with Koreshield

@@ -27,7 +27,7 @@ const suggestedLinks = [
 export default function NotFoundPage() {
 	return (
 		<div className="min-h-[80vh] flex items-center justify-center px-6 py-20 bg-background">
-			<SEOMeta title="Page Not Found" />
+			<SEOMeta title="Page Not Found" noindex />
 			<div className="max-w-xl w-full text-center">
 				<motion.div
 					initial={{ opacity: 0, y: -16 }}

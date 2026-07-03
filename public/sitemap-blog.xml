@@ -8,62 +8,42 @@
 
 	<url>
 		<loc>https://koreshield.ai/blog/getting-started-with-koreshield</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
+		<lastmod>2025-11-27</lastmod>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/blog/grok-bankrbot-prompt-injection-morse-code</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
+		<lastmod>2026-05-05</lastmod>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/blog/meet-koreshield-llm-firewall</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
+		<lastmod>2026-03-04</lastmod>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/blog/prompt-injection-is-not-solved</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
+		<lastmod>2026-04-14</lastmod>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/blog/rag-security-best-practices</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
+		<lastmod>2026-02-26</lastmod>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/blog/six-ai-security-incidents-one-week</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
+		<lastmod>2026-03-31</lastmod>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/blog/understanding-ai-threats</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
+		<lastmod>2026-04-20</lastmod>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/blog/weekly-security-update-april-27</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
+		<lastmod>2026-04-27</lastmod>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/blog/why-agentic-ai-is-largest-unsecured-attack-surface</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
+		<lastmod>2026-05-11</lastmod>
 	</url>
 	<url>
 		<loc>https://koreshield.ai/blog/why-we-built-koreshield</loc>
-		<lastmod>2026-06-05</lastmod>
-		<changefreq>monthly</changefreq>
-		<priority>0.55</priority>
+		<lastmod>2026-03-02</lastmod>
 	</url>
 </urlset>

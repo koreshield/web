@@ -3,7 +3,7 @@ export const SEOConfig = {
 		title: 'AI Security Firewall',
 		description: 'Proxy-layer AI security for prompts, RAG context, provider routing, policy enforcement, and audit evidence.',
 		keywords: 'LLM security, AI security, prompt injection, jailbreak detection, GPT security, OpenAI security, LLM firewall, AI safety, machine learning security, AI infrastructure protection, self-hosted LLM security, air-gapped AI firewall, on-premise AI security, data residency',
-		ogImage: 'https://koreshield.ai/og-home.png',
+		ogImage: 'https://koreshield.ai/logo.png',
 		ogType: 'website' as const,
 		structuredData: {
 			'@context': 'https://schema.org',
@@ -11,11 +11,6 @@ export const SEOConfig = {
 			name: 'Koreshield',
 			url: 'https://koreshield.ai',
 			description: 'Enterprise-grade LLM security firewall',
-			potentialAction: {
-				'@type': 'SearchAction',
-				target: 'https://koreshield.ai/docs?q={search_term_string}',
-				'query-input': 'required name=search_term_string',
-			},
 			image: 'https://koreshield.ai/logo.png',
 			logo: 'https://koreshield.ai/logo.png',
 			sameAs: [
@@ -119,13 +114,6 @@ export const SEOConfig = {
 			url: 'https://koreshield.ai',
 			logo: 'https://koreshield.ai/logo.png',
 			description: 'Runtime AI security for production AI applications.',
-			foundingDate: '2023',
-			founders: [
-				{
-					'@type': 'Person',
-					name: 'Koreshield Team',
-				},
-			],
 			address: {
 				'@type': 'PostalAddress',
 				streetAddress: 'London',

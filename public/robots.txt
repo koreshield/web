@@ -1,5 +1,5 @@
 # Koreshield robots.txt
-# Public site aliases: koreshield.ai and koreshield.com (same frontend and content).
+# Canonical public site: koreshield.ai.
 # Cloudflare may prepend managed AI crawler directives above this file.
 
 # Public marketing, docs, blog, research, careers, legal, and status pages.
@@ -9,7 +9,6 @@ Disallow: /admin/
 Disallow: /api/
 Disallow: /private/
 Disallow: /dashboard
-Disallow: /getting-started
 Disallow: /profile
 Disallow: /settings
 Disallow: /settings/
@@ -61,12 +60,5 @@ Disallow: /
 User-agent: PetalBot
 Disallow: /
 
-# Sitemaps for both public domains
+# Canonical sitemap
 Sitemap: https://koreshield.ai/sitemap-index.xml
-Sitemap: https://koreshield.ai/sitemap.xml
-Sitemap: https://koreshield.ai/sitemap-blog.xml
-Sitemap: https://koreshield.ai/sitemap-docs.xml
-Sitemap: https://koreshield.com/sitemap.com-index.xml
-Sitemap: https://koreshield.com/sitemap.com.xml
-Sitemap: https://koreshield.com/sitemap.com-blog.xml
-Sitemap: https://koreshield.com/sitemap.com-docs.xml

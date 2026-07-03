@@ -6,7 +6,6 @@ author: Koreshield Labs
 categories: Security, Research
 tags: threats, ai, security, research
 status: published
-coverImage: /images/blog/ai-threats.png
 ---
 
 # Understanding AI Threats: A Deep Dive

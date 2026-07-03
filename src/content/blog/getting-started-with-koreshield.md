@@ -6,7 +6,6 @@ author: Koreshield Labs
 categories: Getting Started, Tutorials
 tags: integration, beginner, setup
 status: published
-coverImage: /images/blog/getting-started.png
 ---
 
 # Getting Started with Koreshield

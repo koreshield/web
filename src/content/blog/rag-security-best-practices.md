@@ -6,7 +6,6 @@ author: Koreshield Labs
 categories: Security, Best Practices
 tags: rag, prompts, injection, ai
 status: published
-coverImage: /images/blog/rag-security.png
 ---
 
 # RAG Security Best Practices

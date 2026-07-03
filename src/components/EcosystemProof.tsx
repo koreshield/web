@@ -10,14 +10,6 @@ const ecosystemItems = [
 		accent: 'from-[#76B900]/20 to-electric-green/10',
 	},
 	{
-		name: 'AWS',
-		label: 'Cloud ecosystem',
-		description: 'Designed for teams deploying AI security controls across modern AWS-hosted workloads.',
-		logo: '/logos/ecosystem/powered-by-aws-white.png',
-		logoClassName: 'h-8 w-auto object-contain',
-		accent: 'from-[#FF9900]/20 to-amber-500/10',
-	},
-	{
 		name: 'Nebius Cloud',
 		label: 'GPU cloud ecosystem',
 		description: 'Aligned with high-performance AI infrastructure for model-serving and security workloads.',
@@ -25,23 +17,6 @@ const ecosystemItems = [
 		logoClassName: 'h-8 w-auto object-contain',
 		accent: 'from-sky-500/20 to-cyan-500/10',
 	},
-	// Prepared but intentionally hidden until we can make a precise public claim without implying endorsement.
-	// {
-	// 	name: 'OVHcloud',
-	// 	label: 'Cloud ecosystem',
-	// 	description: 'Prepared for teams deploying Koreshield on OVHcloud infrastructure.',
-	// 	logo: '/logos/ecosystem/ovhcloud-logo.svg',
-	// 	logoClassName: 'h-8 w-auto object-contain',
-	// 	accent: 'from-blue-600/20 to-cyan-500/10',
-	// },
-	// {
-	// 	name: 'Cloudflare',
-	// 	label: 'Edge ecosystem',
-	// 	description: 'Prepared for edge routing and Worker-based Koreshield deployments.',
-	// 	logo: '/logos/ecosystem/cloudflare-logo.svg',
-	// 	logoClassName: 'h-8 w-auto object-contain',
-	// 	accent: 'from-orange-500/20 to-amber-400/10',
-	// },
 ];
 
 export function EcosystemProof() {
@@ -65,7 +40,7 @@ export function EcosystemProof() {
 						</h2>
 					</div>
 
-					<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:flex-1">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:flex-1">
 						{ecosystemItems.map((item, index) => (
 							<motion.div
 								key={item.name}

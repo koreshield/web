@@ -8,16 +8,16 @@ import {
 } from './site-url';
 
 describe('resolveSiteOrigin', () => {
-	it('maps each public hostname to its own origin', () => {
+	it('maps every public hostname to the canonical origin', () => {
 		expect(resolveSiteOrigin('koreshield.ai')).toBe(PRIMARY_SITE_URL);
-		expect(resolveSiteOrigin('koreshield.com')).toBe(ALIAS_SITE_URL);
+		expect(resolveSiteOrigin('koreshield.com')).toBe(PRIMARY_SITE_URL);
 	});
 });
 
 describe('siteUrl', () => {
-	it('builds URLs for either origin', () => {
+	it('builds canonical URLs', () => {
 		expect(siteUrl('/pricing', '', '', PRIMARY_SITE_URL)).toBe('https://koreshield.ai/pricing');
-		expect(siteUrl('/pricing', '', '', ALIAS_SITE_URL)).toBe('https://koreshield.com/pricing');
+		expect(siteUrl('/pricing', '', '', ALIAS_SITE_URL)).toBe('https://koreshield.ai/pricing');
 	});
 });
 
@@ -28,7 +28,7 @@ describe('resolveCanonicalUrl', () => {
 		);
 	});
 
-	it('keeps koreshield.com self-canonical for startup verification bots', () => {
+	it('canonicalizes koreshield.com pages onto koreshield.ai', () => {
 		const original = window.location;
 		Object.defineProperty(window, 'location', {
 			configurable: true,
@@ -41,7 +41,7 @@ describe('resolveCanonicalUrl', () => {
 			},
 		});
 
-		expect(resolveCanonicalUrl()).toBe('https://koreshield.com/pricing');
+		expect(resolveCanonicalUrl()).toBe('https://koreshield.ai/pricing');
 
 		Object.defineProperty(window, 'location', {
 			configurable: true,
