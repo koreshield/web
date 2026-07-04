@@ -1,4 +1,4 @@
-export type PublicPlanId = 'free' | 'growth' | 'scale' | 'enterprise';
+export type PublicPlanId = 'growth' | 'scale' | 'enterprise';
 export type HostedPlanId = 'growth' | 'scale';
 export type BillingInterval = 'monthly' | 'annual';
 
@@ -159,12 +159,15 @@ export const PRICING_PLANS: PricingPlan[] = [
 	},
 ];
 
-export const HOSTED_PLAN_DISPLAY_BY_INTERNAL_SLUG: Record<string, HostedPlanId | 'free'> = {
-	free: 'free',
+export const HOSTED_PLAN_DISPLAY_BY_INTERNAL_SLUG: Record<string, PublicPlanId | 'unpaid'> = {
+	free: 'unpaid',
 	startup: 'growth',
 	growth: 'growth',
 	scale: 'scale',
-	dev: 'free',
+	dev: 'unpaid',
+	developer: 'unpaid',
+	trial: 'unpaid',
+	unpaid: 'unpaid',
 };
 
 export const INTERNAL_HOSTED_PLAN_IDS: Record<HostedPlanId, { monthlyEnv: string; annualEnv: string }> = {
@@ -183,10 +186,10 @@ export function getPlanById(planId: PublicPlanId) {
 }
 
 export function getHostedPlanBySlug(slug: string | null | undefined) {
-	if (!slug) return getPlanById('free');
+	if (!slug) return undefined;
 	if (slug === 'enterprise') return getPlanById('enterprise');
-	const mapped = HOSTED_PLAN_DISPLAY_BY_INTERNAL_SLUG[slug] || 'free';
-	return getPlanById(mapped as PublicPlanId);
+	const mapped = HOSTED_PLAN_DISPLAY_BY_INTERNAL_SLUG[slug] || 'unpaid';
+	return mapped === 'unpaid' ? undefined : getPlanById(mapped);
 }
 
 export function getHostedCheckoutProductId(

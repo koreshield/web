@@ -254,7 +254,7 @@ function LandingPage() {
                                 to="/signup?plan=growth"
                                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-bright"
                             >
-                                Get started <ArrowRight className="h-4 w-4" />
+								Choose Growth <ArrowRight className="h-4 w-4" />
                             </Link>
                             <Link
                                 to="/demo"

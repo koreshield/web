@@ -220,7 +220,7 @@ type AttackTypeItem = { type: string; count: number };
 
 type FounderMetricsResponse = {
 	revenue: {
-		mrr: number; arr: number; arpu: number; paying_users: number; free_accounts: number;
+		mrr: number; arr: number; arpu: number; paying_users: number; unpaid_accounts: number;
 		total_billing_accounts: number; paid_conversion_rate_pct: number;
 		plan_breakdown: PlanBreakdownItem[];
 	};
@@ -612,7 +612,7 @@ export function FounderPortalPage() {
 						<AppStatGrid columns={4}>
 							<AppStatCard label="MRR" value={`£${numberFormat(metrics.revenue.mrr)}`} icon={CreditCard} detail={`ARR: £${numberFormat(metrics.revenue.arr)}`} />
 							<AppStatCard label="ARPU" value={`£${metrics.revenue.arpu}`} icon={BadgeCheck} detail={`${metrics.revenue.paying_users} paying customers`} />
-							<AppStatCard label="Paid conversion" value={`${metrics.revenue.paid_conversion_rate_pct}%`} icon={TrendingUp} detail={`${metrics.revenue.free_accounts} still on free`} />
+							<AppStatCard label="Paid conversion" value={`${metrics.revenue.paid_conversion_rate_pct}%`} icon={TrendingUp} detail={`${metrics.revenue.unpaid_accounts} awaiting activation`} />
 							<AppStatCard label="Teams" value={numberFormat(metrics.teams.total_teams)} icon={Users} detail={`${metrics.teams.avg_team_size} avg members · ${metrics.teams.paid_teams} paid`} />
 						</AppStatGrid>
 
@@ -817,7 +817,7 @@ export function FounderPortalPage() {
 												{user.email_verified ? 'Verified' : 'Unverified'}
 											</span>
 										</td>
-											<td className="py-3 pr-4"><Badge>{user.plan_slug || 'free'}</Badge></td>
+											<td className="py-3 pr-4"><Badge>{user.plan_slug || 'unpaid'}</Badge></td>
 											<td className="py-3 pr-4 font-mono">{numberFormat(user.request_count)}</td>
 											<td className="py-3 pr-4 font-mono">{numberFormat(user.api_key_count)}</td>
 											<td className="py-3 pr-4 text-muted-foreground">{dateLabel(user.first_login_at ?? user.created_at)}</td>
@@ -958,7 +958,7 @@ export function FounderPortalPage() {
 									<div>
 										<div className="font-semibold">{account.owner_email}</div>
 										<div className="mt-1 flex flex-wrap gap-2">
-											<Badge>{account.plan_slug || 'free'}</Badge>
+											<Badge>{account.plan_slug || 'unpaid'}</Badge>
 											<Badge>{account.status || 'inactive'}</Badge>
 											{account.subscription_status ? <Badge>{account.subscription_status}</Badge> : null}
 										</div>

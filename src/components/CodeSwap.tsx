@@ -177,8 +177,10 @@ export function CodeSwap() {
       {/* Code Display Area */}
       <div className="console-surface relative min-h-[280px] overflow-x-auto rounded-2xl border border-white/[0.06] bg-black/90 p-5 font-mono text-sm leading-relaxed transition-all dark:bg-black/50">
         {/* Copy Button */}
-        <button
-          onClick={handleCopy}
+		<button
+		  onClick={handleCopy}
+		  type="button"
+		  aria-label={copied ? 'Code copied' : 'Copy code'}
           className="absolute right-4 top-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-2 text-muted-foreground transition-all hover:bg-white/[0.08] hover:text-foreground active:scale-95 cursor-pointer z-10"
         >
           {copied ? <Check className="w-4 h-4 text-electric-green" /> : <Copy className="w-4 h-4" />}

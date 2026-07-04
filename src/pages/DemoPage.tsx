@@ -220,7 +220,7 @@ export default function DemoPage() {
 						<p className="mt-8 text-sm text-muted-foreground">
 							Prefer to start immediately?{' '}
 							<Link to="/signup?plan=growth" className="font-semibold text-foreground underline underline-offset-2 hover:text-electric-green transition-colors">
-								Get started
+								Choose a paid plan
 							</Link>{' '}
 							now.
 						</p>
@@ -248,7 +248,7 @@ export default function DemoPage() {
 											to="/signup?plan=growth"
 											className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-500"
 										>
-											Get started in the meantime
+											Choose Growth instead
 											<ArrowRight className="h-4 w-4" />
 										</Link>
 										<Link

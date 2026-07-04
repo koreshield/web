@@ -286,14 +286,14 @@ export default function WhyKoreshieldPage() {
 							to="/signup"
 							className="inline-flex items-center gap-2 px-7 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-semibold transition-colors"
 						>
-							Get started free
+							Choose a paid plan
 							<ArrowRight className="w-4 h-4" />
 						</Link>
 						<Link
 							to="/demo"
 							className="inline-flex items-center gap-2 px-7 py-3 bg-card border border-border hover:border-primary/40 text-foreground rounded-lg font-semibold transition-colors"
 						>
-							Try the live demo
+							Request a demo
 						</Link>
 					</div>
 				</motion.div>

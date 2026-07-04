@@ -498,7 +498,9 @@ function UpgradeFeaturePrompt({
 						Unlock {item.label}
 					</h2>
 					<p className="mt-4 text-sm leading-6 text-muted-foreground sm:text-base">
-						Your current {currentPlanName} plan keeps core protection active. {item.label} starts on {requiredPlanName} for teams that need deeper controls.
+						{normalizePlanSlug(planSlug) === 'unpaid'
+							? `Your account has no active subscription. ${item.label} becomes available after you activate ${requiredPlanName} or a higher paid plan.`
+							: `Your current ${currentPlanName} plan does not include this control. ${item.label} starts on ${requiredPlanName}.`}
 					</p>
 
 					<div className="mt-6 grid gap-3 rounded-2xl border border-border bg-background/55 p-4 text-sm sm:grid-cols-3">
@@ -597,7 +599,9 @@ function LockedFeaturePanel({
 						{FEATURE_LABELS[feature]} is not on {currentPlanName}.
 					</h1>
 					<p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-						This feature starts on {requiredPlanName}. Your core protection still works; upgrade when you need this control in production.
+						{normalizePlanSlug(planSlug) === 'unpaid'
+							? `Koreshield requires an active paid subscription. Choose ${requiredPlanName} or a higher plan to activate product access, or request a demo for a guided evaluation.`
+							: `This feature starts on ${requiredPlanName}. Upgrade to add this control to your production workspace.`}
 					</p>
 				</div>
 				<div className="flex flex-col gap-3 p-6 sm:flex-row sm:p-8">
@@ -647,7 +651,7 @@ export function AppLayout() {
 	const cachedPlanSlug = (() => {
 		try { return localStorage.getItem(PLAN_SLUG_STORAGE_KEY); } catch { return null; }
 	})();
-	const planSlug = billingQuery.data?.plan_slug ?? cachedPlanSlug ?? 'free';
+	const planSlug = billingQuery.data?.plan_slug ?? cachedPlanSlug ?? 'unpaid';
 	const planLoading = billingQuery.isLoading && !cachedPlanSlug;
 
 	useEffect(() => {

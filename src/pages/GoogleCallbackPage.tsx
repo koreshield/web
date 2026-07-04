@@ -24,7 +24,9 @@ export function GoogleCallbackPage() {
 
 			try {
 				const result = await authService.handleGoogleCallback(code, state);
-				navigate(result.status === 'mfa_required' ? '/login' : '/dashboard', { replace: true });
+				const postAuthPath = sessionStorage.getItem('koreshield-post-auth-path');
+				sessionStorage.removeItem('koreshield-post-auth-path');
+				navigate(result.status === 'mfa_required' ? '/login' : postAuthPath || '/dashboard', { replace: true });
 			} catch (err) {
 				setError(err instanceof Error ? err.message : 'Authentication failed');
 				setLoading(false);

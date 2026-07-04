@@ -14,7 +14,8 @@ function readState(): Omit<AuthState, 'isHydrating'> {
 	};
 }
 
-export function useAuthState(): AuthState {
+export function useAuthState(options: { restoreSession?: boolean } = {}): AuthState {
+	const { restoreSession = true } = options;
 	const [state, setState] = useState<AuthState>(() => ({
 		...readState(),
 		// Start as false so Sign In / Dashboard buttons render immediately on
@@ -33,6 +34,14 @@ export function useAuthState(): AuthState {
 
 		authService.on('login', syncState);
 		authService.on('logout', syncState);
+
+		if (!restoreSession) {
+			return () => {
+				active = false;
+				authService.off('login', syncState);
+				authService.off('logout', syncState);
+			};
+		}
 
 		if (!authService.isAuthenticated()) {
 			// Hard cap: never hide nav buttons for more than 800ms on any connection
@@ -61,7 +70,7 @@ export function useAuthState(): AuthState {
 			authService.off('login', syncState);
 			authService.off('logout', syncState);
 		};
-	}, []);
+	}, [restoreSession]);
 
 	return state;
 }

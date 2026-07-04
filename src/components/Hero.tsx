@@ -13,13 +13,13 @@ function Hero() {
 			<div className="relative z-10 max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
 				{/* Left: Text content */}
 				<motion.div
-					initial={{ opacity: 0, y: 20 }}
+					initial={false}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8 }}
 				>
 					<motion.div
 						className="inline-flex items-center gap-2 bg-electric-green/10 border border-electric-green/20 text-electric-green text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-widest"
-						initial={{ opacity: 0, y: 10 }}
+						initial={false}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6, delay: 0.1 }}
 					>
@@ -29,7 +29,7 @@ function Hero() {
 
 					<motion.h1
 						className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.08] tracking-[-0.04em] text-foreground"
-						initial={{ opacity: 0, y: 20 }}
+						initial={false}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.2 }}
 					>
@@ -39,7 +39,7 @@ function Hero() {
 
 					<motion.p
 						className="text-base sm:text-lg md:text-xl text-muted-foreground mb-10 max-w-xl leading-relaxed"
-						initial={{ opacity: 0, y: 20 }}
+						initial={false}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.4 }}
 					>
@@ -48,17 +48,17 @@ function Hero() {
 
 					<motion.div
 						className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
-						initial={{ opacity: 0, y: 20 }}
+						initial={false}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.6 }}
 					>
 						<Link
-							to="/signup"
+							to="/signup?plan=growth"
 							rel="noopener"
 							className="group relative bg-electric-green hover:bg-emerald-bright text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 w-full sm:w-auto overflow-hidden"
 						>
 							<span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-							<span className="relative z-10">Start Protecting</span>
+							<span className="relative z-10">Choose a paid plan</span>
 							<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10 shrink-0" />
 						</Link>
 
@@ -74,7 +74,7 @@ function Hero() {
 
 				{/* Right: Interactive terminal */}
 				<motion.div
-					initial={{ opacity: 0, scale: 0.95 }}
+					initial={false}
 					animate={{ opacity: 1, scale: 1 }}
 					transition={{ duration: 0.8, delay: 0.4 }}
 				>

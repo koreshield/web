@@ -42,7 +42,7 @@ export default function SolutionDetectionResponsePage() {
 						</p>
 						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
 							<Link to="/signup?plan=growth" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-bold text-white transition-colors hover:bg-emerald-bright">
-								Get started <ArrowRight className="h-4 w-4" />
+								Choose a plan <ArrowRight className="h-4 w-4" />
 							</Link>
 							<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card/70 px-7 py-3 font-bold text-foreground transition-colors hover:bg-muted">
 								Book a demo

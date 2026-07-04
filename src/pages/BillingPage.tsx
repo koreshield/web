@@ -103,7 +103,7 @@ function normalizeBillingAccount(raw: unknown): BillingAccount | null {
 	return {
 		id: typeof value.id === 'string' ? value.id : 'unknown',
 		status: typeof value.status === 'string' ? value.status : 'inactive',
-		plan_slug: typeof value.plan_slug === 'string' ? value.plan_slug : 'free',
+		plan_slug: typeof value.plan_slug === 'string' ? value.plan_slug : 'unpaid',
 		plan_name: typeof value.plan_name === 'string' ? value.plan_name : null,
 		subscription_status:
 			typeof value.subscription_status === 'string' ? value.subscription_status : null,
@@ -294,7 +294,7 @@ export default function BillingPage() {
 					</AppSecondaryButton>
 				}
 				stats={!loading && account ? [
-					{ label: 'Plan', value: displayPlan?.name || account.plan_name || account.plan_slug || 'Dev' },
+					{ label: 'Plan', value: displayPlan?.name || (normalizedPlan === 'unpaid' ? 'No active plan' : account.plan_name || account.plan_slug) },
 					{ label: 'Status', value: <span className="capitalize">{account.subscription_status || account.status || 'inactive'}</span> },
 				] : undefined}
 			/>
@@ -306,7 +306,7 @@ export default function BillingPage() {
 			) : null}
 			{billingUnavailable ? (
 				<AppCallout variant="warning">
-					Hosted billing is not fully configured in this environment yet. You can still create your account, manage API keys, and finish product onboarding while checkout and portal access are being wired up.
+					Hosted billing is not fully configured in this environment. Product access remains locked until checkout is available and an active paid subscription is confirmed. Contact support if you need help activating your account.
 				</AppCallout>
 			) : null}
 			{checkoutNotice ? (
@@ -324,7 +324,7 @@ export default function BillingPage() {
 						<div className="text-sm text-muted-foreground">Loading billing account...</div>
 					) : (
 						<AppStatGrid columns={2} className="mb-0">
-							<AppStatCard label="Plan" value={displayPlan?.name || account?.plan_name || account?.plan_slug || 'Dev'} icon={CreditCard} />
+							<AppStatCard label="Plan" value={displayPlan?.name || (normalizedPlan === 'unpaid' ? 'No active plan' : account?.plan_name || account?.plan_slug)} icon={CreditCard} />
 							<AppStatCard label="Status" value={<span className="capitalize">{account?.subscription_status || account?.status || 'inactive'}</span>} />
 							<AppStatCard label="Billing email" value={<span className="text-base font-semibold break-all">{account?.billing_email || 'Not set yet'}</span>} />
 							<AppStatCard

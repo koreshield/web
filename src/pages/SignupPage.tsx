@@ -49,6 +49,9 @@ export function SignupPage() {
     }, [locationState, navigate]);
 
     const anyLoading = loading || oauthLoading !== null;
+    const selectedPlan = searchParams.get('plan') === 'scale' ? 'scale' : 'growth';
+    const selectedPeriod = searchParams.get('period') === 'annual' ? 'annual' : 'monthly';
+    const checkoutPath = `/billing?plan=${selectedPlan}&period=${selectedPeriod}&checkout=1`;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -79,14 +82,7 @@ export function SignupPage() {
                 return;
             }
 
-            const plan = searchParams.get('plan');
-            const period = searchParams.get('period');
-            if (plan && period) {
-                navigate(`/billing?plan=${encodeURIComponent(plan)}&period=${encodeURIComponent(period)}&checkout=1`, { replace: true });
-                return;
-            }
-
-            navigate('/dashboard');
+            navigate(checkoutPath, { replace: true });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Signup failed');
         } finally {
@@ -99,7 +95,8 @@ export function SignupPage() {
         setError('');
         setOauthLoading('github');
         try {
-            const { auth_url } = await authService.initializeGitHubOAuth();
+            sessionStorage.setItem('koreshield-post-auth-path', checkoutPath);
+            const { auth_url } = await authService.initializeGitHubOAuth(checkoutPath);
             window.location.href = auth_url;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to initialize GitHub sign-up');
@@ -112,7 +109,8 @@ export function SignupPage() {
         setError('');
         setOauthLoading('google');
         try {
-            const { auth_url } = await authService.initializeGoogleOAuth();
+            sessionStorage.setItem('koreshield-post-auth-path', checkoutPath);
+            const { auth_url } = await authService.initializeGoogleOAuth(checkoutPath);
             window.location.href = auth_url;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to initialize Google sign-up');
@@ -122,12 +120,12 @@ export function SignupPage() {
 
     return (
         <AuthLayout
-            eyebrow="Get started"
-            headline="Protect your first AI request today."
+            eyebrow="Choose a paid plan"
+            headline="Create your account, then activate protection."
             bullets={[
-                'Generate an API key',
-                'Route traffic through Koreshield',
-                'Review threats and audit evidence',
+                'Growth starts at £99/month',
+                'Payment activates API and dashboard access',
+                'Need an evaluation? Request a guided demo',
             ]}
         >
             <SEOMeta title="Create Account" noindex />
@@ -136,8 +134,11 @@ export function SignupPage() {
                             Create your workspace
                         </h1>
                         <p className="text-muted-foreground text-sm leading-6">
-                            Start free. Add a key, route traffic, and see Koreshield work.
+                            Koreshield has no free tier. After creating your account, you will continue to secure checkout for the {selectedPlan === 'scale' ? 'Scale' : 'Growth'} plan.
                         </p>
+                        <div className="mt-4 rounded-xl border border-primary/20 bg-primary/10 p-3 text-xs leading-5 text-foreground">
+                            Account creation alone does not include product access. For evaluation access, <Link to="/demo" className="font-bold text-primary hover:underline">request a demo</Link> and our team will contact you.
+                        </div>
                     </div>
 
                     {/* OAuth buttons */}

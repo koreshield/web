@@ -8,8 +8,6 @@ import { PageLoader, SuspenseFallback } from './components/LoadingStates';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ToastProvider, setGlobalToast, useToast } from './components/ToastNotification';
 import { ThemeProvider } from './context/ThemeContext';
-import { DashboardPage } from './pages/DashboardPage';
-import { ApiKeysPage } from './pages/ApiKeysPage';
 
 // Retry dynamic imports once on chunk-load failure (stale deploy cache)
 function lazyRetry<T extends { default: React.ComponentType }>(
@@ -39,6 +37,8 @@ function lazyRetry<T extends { default: React.ComponentType }>(
 
 // Lazy load pages for code splitting
 const LandingPage = lazyRetry(() => import('./pages/LandingPage'));
+const DashboardPage = lazyRetry(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
+const ApiKeysPage = lazyRetry(() => import('./pages/ApiKeysPage').then(m => ({ default: m.ApiKeysPage })));
 const BlogPage = lazyRetry(() => import('./pages/BlogPageWrapper'));
 const AuthorPage = lazyRetry(() => import('./pages/AuthorPage'));
 const DocsPage = lazyRetry(() => import('./pages/DocsPage'));

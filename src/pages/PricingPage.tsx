@@ -45,11 +45,6 @@ export default function PricingPage() {
 	const [openFaq, setOpenFaq] = useState<number | null>(null);
 
 	const handlePlanAction = (planId: PublicPlanId) => {
-		if (planId === 'free') {
-			navigate('/signup?plan=growth');
-			return;
-		}
-
 		const target = `/billing?plan=${encodeURIComponent(planId)}&period=${encodeURIComponent(billingPeriod)}&checkout=1`;
 		if (authService.isAuthenticated()) {
 			navigate(target);
@@ -92,7 +87,7 @@ export default function PricingPage() {
 								to="/signup?plan=growth"
 								className="inline-flex items-center gap-2 rounded-xl bg-electric-green px-7 py-3 font-semibold text-white transition-colors hover:bg-emerald-500"
 							>
-								Get started
+								Choose Growth
 								<ArrowRight className="h-4 w-4" />
 							</Link>
 							<Link
@@ -170,9 +165,7 @@ export default function PricingPage() {
 					<div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
 						{standardPlans.map((plan, index) => {
 							const price = billingPeriod === 'annual' && plan.annualPriceLabel ? plan.annualPriceLabel : plan.monthlyPriceLabel;
-							const periodLabel = plan.id === 'free'
-								? '/month'
-								: billingPeriod === 'annual'
+							const periodLabel = billingPeriod === 'annual'
 									? '/year'
 									: '/month';
 

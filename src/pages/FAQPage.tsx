@@ -86,7 +86,7 @@ const faqCategories: FAQCategory[] = [
 		questions: [
 			{
 				q: 'How does pricing work?',
-				a: 'You pay a fixed monthly platform fee that includes a block of protected requests. If you exceed that block, overages are billed at £12 per 100,000 requests. Annual plans apply a flat 20% discount. The Dev tier is free with 10,000 protected requests per month.',
+				a: 'Koreshield is a paid product. Growth starts at £99 per month and Scale starts at £399 per month, with included protected requests and predictable overage pricing. Annual plans apply a flat 20% discount.',
 			},
 			{
 				q: 'What is a protected request?',
@@ -97,8 +97,8 @@ const faqCategories: FAQCategory[] = [
 				a: 'No. Koreshield pricing is built around AI traffic, not headcount. Your entire product, security, and engineering team can access the platform on paid plans without additional per-seat charges.',
 			},
 			{
-				q: 'Can I start for free?',
-				a: 'Yes. The Dev tier includes 10,000 protected requests per month with baseline prompt and RAG screening, basic dashboard visibility, and core logs. No credit card required.',
+				q: 'Is there a free plan or trial?',
+				a: 'No. Koreshield does not provide free product access or an unguided trial. If you need to evaluate the product before purchasing, request a demo and our team will contact you to arrange a guided evaluation.',
 			},
 			{
 				q: 'What is included on Enterprise?',

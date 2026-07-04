@@ -37,37 +37,41 @@ function ConsentModal({
 
   if (!open) return null
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/20 md:items-center dark:bg-black/40 px-4 pb-6">
-      <div className="w-full max-w-2xl rounded-3xl bg-white/95 dark:bg-card/95 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur-sm text-slate-900 dark:text-white">
-        <div className="flex items-start justify-between gap-4">
+	  return (
+	    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/20 md:items-center dark:bg-black/40 px-4 pb-6">
+	      <div className="w-full max-w-2xl rounded-3xl bg-white/95 dark:bg-card/95 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur-sm text-slate-900 dark:text-white">
+	        <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-lg font-semibold">Customize cookie preferences</h3>
             <p className="text-sm text-muted-foreground mt-2">
               Enable only the categories you want. Functional cookies are necessary for the site to work.
             </p>
           </div>
-          <button className="text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" onClick={onClose}>
-            Close
-          </button>
-            <label
-              key={key}
-              className="flex cursor-pointer items-center justify-between rounded-3xl border border-slate-200 bg-white/90 px-4 py-4 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950/90 dark:hover:border-slate-700"
-            >
-            <label
-                <div className="font-semibold text-slate-900 dark:text-slate-100">{CATEGORY_LABELS[key]}</div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">{CATEGORY_DESCRIPTIONS[key]}</p>
-                <div className="font-semibold text-slate-100">{CATEGORY_LABELS[key]}</div>
-                <p className="text-sm text-slate-400">{CATEGORY_DESCRIPTIONS[key]}</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={Boolean(state[key])}
-                onChange={(e) => setState((current) => ({ ...current, [key]: e.target.checked }))}
-              />
-            </label>
-          ))}
-        </div>
+	          <button className="text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" onClick={onClose}>
+	            Close
+	          </button>
+	        </div>
+
+	        <div className="mt-6 space-y-3">
+	          {(Object.keys(CATEGORY_LABELS) as Array<keyof ConsentState>).map((key) => (
+	            <label
+	              key={key}
+	              className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 px-4 py-4 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950/90 dark:hover:border-slate-700"
+	            >
+	              <div>
+	                <div className="font-semibold text-slate-900 dark:text-slate-100">{CATEGORY_LABELS[key]}</div>
+	                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{CATEGORY_DESCRIPTIONS[key]}</p>
+	              </div>
+	              <input
+	                type="checkbox"
+	                checked={Boolean(state[key])}
+	                disabled={key === 'functional'}
+	                onChange={(e) => setState((current) => ({ ...current, [key]: e.target.checked }))}
+	                className="h-4 w-4 accent-emerald-500"
+	              />
+	            </label>
+	          ))}
+	        </div>
 
         <div className="mt-6 flex flex-wrap justify-end gap-3">
           <button className="rounded-full border border-slate-200 bg-white/50 px-4 py-2 text-sm text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-transparent dark:text-slate-200" onClick={onClose}>
@@ -93,13 +97,6 @@ export default function CookieConsent() {
   const [modalOpen, setModalOpen] = useState(false)
   const [visibleState, setVisibleState] = useState(() => !hasSavedConsent())
   const [consentState, setConsentState] = useState<ConsentState>(() => loadConsent())
-
-  useEffect(() => {
-    if (hasSavedConsent()) {
-      setConsentState(loadConsent())
-      setVisibleState(false)
-    }
-  }, [])
 
   const acceptAll = () => {
     const all = { functional: true, analytics: true, performance: true, advertisement: true, uncategorised: true }

@@ -32,9 +32,7 @@ type UsageSummaryView = UsageSummary & {
 };
 
 const PLAN_LIMITS: Record<string, number | null> = {
-	free: 10_000,
-	dev: 10_000,
-	developer: 10_000,
+	unpaid: 0,
 	growth: 100_000,
 	scale: 1_000_000,
 	enterprise: null,
@@ -71,11 +69,11 @@ function getNextMonthStart() {
 }
 
 function normalizePlanSlug(value: unknown) {
-	const slug = typeof value === 'string' ? value.toLowerCase() : 'free';
+	const slug = typeof value === 'string' ? value.toLowerCase() : 'unpaid';
 	if (slug.includes('enterprise')) return 'enterprise';
 	if (slug.includes('scale') || slug.includes('business') || slug.includes('pro')) return 'scale';
 	if (slug.includes('growth') || slug.includes('startup') || slug.includes('paid')) return 'growth';
-	return 'free';
+	return 'unpaid';
 }
 
 function buildFallbackUsage(statsRaw: unknown, billingRaw: unknown, keysRaw: unknown): UsageSummaryView {
@@ -85,7 +83,7 @@ function buildFallbackUsage(statsRaw: unknown, billingRaw: unknown, keysRaw: unk
 		: {};
 	const billing = billingRaw && typeof billingRaw === 'object' ? billingRaw as Record<string, unknown> : {};
 	const planSlug = normalizePlanSlug(billing.plan_slug || billing.plan_name);
-	const planLimit = PLAN_LIMITS[planSlug] ?? 10_000;
+	const planLimit = PLAN_LIMITS[planSlug] ?? 0;
 	const protectedRequests = typeof stats.requests_total === 'number' ? stats.requests_total : 0;
 	const blocked = typeof stats.requests_blocked === 'number' ? stats.requests_blocked : 0;
 	const attacks = typeof stats.attacks_detected === 'number' ? stats.attacks_detected : 0;

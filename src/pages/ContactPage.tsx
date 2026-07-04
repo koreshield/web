@@ -427,7 +427,7 @@ function TechnicalSupportForm() {
 				<div>
 					<label htmlFor="ts-tier" className={labelClass}>Your tier</label>
 					<select id="ts-tier" value={formData.tier} onChange={(e) => setFormData({ ...formData, tier: e.target.value })} className={selectClass}>
-						<option value={getPlanById('free')?.name ?? 'Dev'}>Dev</option>
+						<option value="No active plan">No active plan</option>
 						<option value={getPlanById('growth')?.name ?? 'Growth'}>Growth</option>
 						<option value={getPlanById('scale')?.name ?? 'Scale'}>Scale</option>
 						<option value={getPlanById('enterprise')?.name ?? 'Enterprise'}>Enterprise</option>

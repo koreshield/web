@@ -1,4 +1,5 @@
 import type { PublicPlanId } from './pricing';
+export type AccountPlanId = 'unpaid' | PublicPlanId;
 
 export type PlanFeature =
 	| 'dashboard'
@@ -35,6 +36,8 @@ const CORE_FEATURES: PlanFeature[] = [
 	'threat_monitoring',
 ];
 
+const UNPAID_ACCOUNT_FEATURES: PlanFeature[] = ['billing', 'settings'];
+
 const GROWTH_FEATURES: PlanFeature[] = [
 	...CORE_FEATURES,
 	'voice_security',
@@ -63,22 +66,22 @@ const ENTERPRISE_FEATURES: PlanFeature[] = [
 	'private_deployment',
 ];
 
-export const PLAN_FEATURES: Record<PublicPlanId, PlanFeature[]> = {
-	free: CORE_FEATURES,
+export const PLAN_FEATURES: Record<AccountPlanId, PlanFeature[]> = {
+	unpaid: UNPAID_ACCOUNT_FEATURES,
 	growth: GROWTH_FEATURES,
 	scale: SCALE_FEATURES,
 	enterprise: ENTERPRISE_FEATURES,
 };
 
-export const PLAN_NAMES: Record<PublicPlanId, string> = {
-	free: 'Dev',
+export const PLAN_NAMES: Record<AccountPlanId, string> = {
+	unpaid: 'No active plan',
 	growth: 'Growth',
 	scale: 'Scale',
 	enterprise: 'Enterprise',
 };
 
-export const PLAN_API_KEY_LIMITS: Record<PublicPlanId, number | null> = {
-	free: 1,
+export const PLAN_API_KEY_LIMITS: Record<AccountPlanId, number | null> = {
+	unpaid: 0,
 	growth: 10,
 	scale: 50,
 	enterprise: null,
@@ -111,6 +114,8 @@ export const FEATURE_LABELS: Record<PlanFeature, string> = {
 };
 
 export const ROUTE_FEATURES: Array<{ prefix: string; feature: PlanFeature }> = [
+	{ prefix: '/dashboard', feature: 'dashboard' },
+	{ prefix: '/profile', feature: 'settings' },
 	{ prefix: '/settings/api-keys', feature: 'api_keys' },
 	{ prefix: '/usage', feature: 'usage' },
 	{ prefix: '/billing', feature: 'billing' },
@@ -133,12 +138,13 @@ export const ROUTE_FEATURES: Array<{ prefix: string; feature: PlanFeature }> = [
 	{ prefix: '/compliance-reports', feature: 'compliance_reports' },
 ];
 
-const PLAN_ALIASES: Record<string, PublicPlanId> = {
-	'': 'free',
-	dev: 'free',
-	developer: 'free',
-	free: 'free',
-	trial: 'free',
+const PLAN_ALIASES: Record<string, AccountPlanId> = {
+	'': 'unpaid',
+	dev: 'unpaid',
+	developer: 'unpaid',
+	free: 'unpaid',
+	trial: 'unpaid',
+	unpaid: 'unpaid',
 	startup: 'growth',
 	paid: 'growth',
 	growth: 'growth',
@@ -148,13 +154,13 @@ const PLAN_ALIASES: Record<string, PublicPlanId> = {
 	enterprise: 'enterprise',
 };
 
-export function normalizePlanSlug(value?: string | null): PublicPlanId {
+export function normalizePlanSlug(value?: string | null): AccountPlanId {
 	const normalized = (value ?? '').trim().toLowerCase().replace(/[_\s-]+/g, '_');
-	return PLAN_ALIASES[normalized] ?? 'free';
+	return PLAN_ALIASES[normalized] ?? 'unpaid';
 }
 
 export function minimumPlanForFeature(feature: PlanFeature): PublicPlanId {
-	for (const plan of ['free', 'growth', 'scale', 'enterprise'] as const) {
+	for (const plan of ['growth', 'scale', 'enterprise'] as const) {
 		if (PLAN_FEATURES[plan].includes(feature)) return plan;
 	}
 	return 'enterprise';

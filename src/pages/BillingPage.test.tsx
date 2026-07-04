@@ -33,7 +33,7 @@ describe('BillingPage', () => {
 		);
 
 		await waitFor(() => {
-			expect(screen.getByText(/Hosted billing is not fully configured in this environment yet/i)).toBeInTheDocument();
+			expect(screen.getByText(/Hosted billing is not fully configured in this environment/i)).toBeInTheDocument();
 		});
 	});
 

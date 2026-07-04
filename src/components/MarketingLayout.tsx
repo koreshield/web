@@ -179,7 +179,7 @@ function MobileNavSection({
 
 export function MarketingLayout() {
 	const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-	const { isAuthenticated } = useAuthState();
+	const { isAuthenticated } = useAuthState({ restoreSession: false });
 	const { theme } = useTheme();
 	const logoSrc = theme === 'light' ? '/logo/dark/SVG/Black.svg' : '/logo/light/SVG/White.svg';
 

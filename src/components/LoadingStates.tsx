@@ -166,7 +166,7 @@ export function ProgressBar({ progress, className = '' }: { progress: number; cl
 // Suspense fallback
 export function SuspenseFallback() {
   return (
-    <div className="flex items-center justify-center p-12">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-12">
       <DotsLoader />
     </div>
   );

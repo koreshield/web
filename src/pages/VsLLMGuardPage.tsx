@@ -148,7 +148,7 @@ export default function VsLLMGuardPage() {
 				<div className="mx-auto max-w-5xl rounded-[2rem] border border-border bg-card/90 p-8 md:p-10 text-center shadow-sm">
 					<h2 className="text-3xl font-extrabold tracking-[-0.04em] mb-4">Ready to choose Koreshield?</h2>
 					<p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-						Start with a free evaluation or compare with other solutions to find the right fit for your team.
+						Request a guided demo or compare plans to find the right production fit for your team.
 					</p>
 					<div className="flex flex-wrap justify-center gap-4">
 						<Link

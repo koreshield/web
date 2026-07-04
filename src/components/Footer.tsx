@@ -134,7 +134,7 @@ function Footer() {
 							Run a guided demo against your stack: prompts, RAG, providers, alerts, and audit evidence.
 						</p>
 						<div className="mt-6 flex flex-col gap-3 sm:flex-row">
-							<Link to="/demo" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-electric-green px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright sm:w-auto">
+							<Link to="/demo" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-electric-green px-5 py-3 text-sm font-bold text-[#04130f] transition-colors hover:bg-emerald-bright sm:w-auto">
 								Book a demo <ArrowRight className="h-4 w-4" />
 							</Link>
 							<Link to="/docs" className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.1] bg-black/20 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-black/35 sm:w-auto">

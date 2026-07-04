@@ -90,7 +90,7 @@ export default function SolutionsPage() {
 						</p>
 						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
 							<Link to="/signup?plan=growth" className="inline-flex items-center justify-center gap-2 rounded-xl bg-electric-green px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-bright sm:px-7">
-								Get started <ArrowRight className="h-4 w-4" />
+								Choose a plan <ArrowRight className="h-4 w-4" />
 							</Link>
 							<Link to="/demo" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card/70 px-6 py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted sm:px-7">
 								Book a demo

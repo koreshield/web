@@ -332,7 +332,7 @@ export function ProfilePage() {
 						label="Plan"
 						value={
 							billingState === 'ready'
-								? billing?.plan_name || billing?.plan_slug || 'Dev'
+								? billing?.plan_name || billing?.plan_slug || 'No active plan'
 								: billingState === 'loading'
 									? 'Loading…'
 									: 'Unavailable'
