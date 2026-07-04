@@ -56,11 +56,25 @@ export function BlogListPage() {
 	};
 
 	const handleCategoryClick = (cat: string) => {
-		setSearchParams({ category: toSlug(cat) });
+		const slug = toSlug(cat);
+		if (category === slug) {
+			const newParams = new URLSearchParams(searchParams);
+			newParams.delete('category');
+			setSearchParams(newParams);
+		} else {
+			setSearchParams({ category: slug });
+		}
 	};
 
 	const handleTagClick = (t: string) => {
-		setSearchParams({ tag: toSlug(t) });
+		const slug = toSlug(t);
+		if (tag === slug) {
+			const newParams = new URLSearchParams(searchParams);
+			newParams.delete('tag');
+			setSearchParams(newParams);
+		} else {
+			setSearchParams({ tag: slug });
+		}
 	};
 
 	const clearFilters = () => {

@@ -206,8 +206,9 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 								code: ({ className, children }) => {
 									const match = /language-(\w+)/.exec(className || '');
 									const code = String(children).replace(/\n$/, '');
-									if (match) {
-										return <CodeBlock language={match[1]} code={code} />;
+									const isBlock = className?.includes('language-') || String(children).includes('\n');
+									if (isBlock) {
+										return <CodeBlock language={match ? match[1] : 'text'} code={code} />;
 									}
 									return (
 										<code className="bg-[hsl(var(--accent))] text-[hsl(var(--primary))] px-2 py-0.5 rounded text-sm font-mono">
@@ -262,7 +263,7 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 									<Link to={`/authors/${authorProfile.slug}`} className="font-semibold text-foreground hover:text-primary hover:underline">{post.author}</Link>
 								) : <h3 className="font-semibold text-foreground">{post.author}</h3>}
 								<p className="text-sm text-muted-foreground">
-									Koreshield Security Team
+									{authorProfile?.role || 'Koreshield Labs'}
 								</p>
 							</div>
 						</div>

@@ -139,8 +139,9 @@ const markdownComponents: Components = {
 	code: ({ className, children, ...props }) => {
 		const match = /language-(\w+)/.exec(className || '');
 		const code = String(children).replace(/\n$/, '');
-		if (match) {
-			return <CodeBlock language={match[1]} code={code} />;
+		const isBlock = className?.includes('language-') || String(children).includes('\n');
+		if (isBlock) {
+			return <CodeBlock language={match ? match[1] : 'text'} code={code} />;
 		}
 		return (
 			<code
