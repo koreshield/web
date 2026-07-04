@@ -25,7 +25,7 @@ const useCases = [
 	},
 	{
 		icon: Scale,
-		title: 'Legal & Professional Services',
+		title: 'Legal services',
 		description: 'Flag confidential-client data, privileged material, and unsafe document instructions before AI assistants act on sensitive work.',
 		tag: 'Confidentiality',
 		tagColor: 'text-amber-300 bg-amber-300/10 border-amber-300/20',
