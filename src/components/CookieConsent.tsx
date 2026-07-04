@@ -1,20 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useToast } from './ToastNotification';
-import { useAuthState } from '../hooks/useAuthState';
-import { api } from '../lib/api-client';
-import { authService } from '../lib/auth';
 import { hasSavedConsent, loadConsent, saveConsent } from '../lib/consent';
 import type { ConsentState } from '../lib/consent';
-
-type DeleteAccountModalProps = {
-  open: boolean;
-  email: string;
-  confirmText: string;
-  setConfirmText: (value: string) => void;
-  onClose: () => void;
-  onConfirm: () => void;
-  deleting: boolean;
-};
 
 const CATEGORY_LABELS: Record<keyof ConsentState, string> = {
   functional: 'Functional cookies',
@@ -37,15 +23,11 @@ function ConsentModal({
   onClose,
   onSave,
   initial,
-  canDelete,
-  onDeleteAccount,
 }: {
   open: boolean;
   onClose: () => void;
   onSave: (s: ConsentState) => void;
   initial: ConsentState;
-  canDelete: boolean;
-  onDeleteAccount: () => void;
 }) {
   const [state, setState] = useState<ConsentState>(initial);
 
@@ -102,15 +84,6 @@ function ConsentModal({
           >
             Cancel
           </button>
-          {canDelete ? (
-            <button
-              type="button"
-              className="rounded-full border border-destructive px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10"
-              onClick={onDeleteAccount}
-            >
-              Delete my account
-            </button>
-          ) : null}
           <button
             type="button"
             className="rounded-full bg-electric-green px-4 py-2 text-sm font-semibold text-black"
@@ -128,73 +101,10 @@ function ConsentModal({
   );
 }
 
-function DeleteAccountModal({
-  open,
-  email,
-  confirmText,
-  setConfirmText,
-  onClose,
-  onConfirm,
-  deleting,
-}: DeleteAccountModalProps) {
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl dark:bg-slate-900">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
-              <span className="text-xl">!</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">Delete my account</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Type your email to confirm deletion.</p>
-            </div>
-          </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-            This will permanently delete your account, API keys, billing records, and all associated data.
-          </p>
-          <p className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded mb-3 text-slate-700 dark:text-slate-300">{email}</p>
-          <input
-            type="text"
-            value={confirmText}
-            onChange={(e) => setConfirmText(e.target.value)}
-            placeholder={email}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-          />
-          <div className="mt-4 flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              disabled={confirmText !== email || deleting}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-            >
-              {deleting ? 'Deleting…' : 'Delete permanently'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function CookieConsent() {
-  const { user } = useAuthState();
-  const toast = useToast();
   const [modalOpen, setModalOpen] = useState(false);
   const [visibleState, setVisibleState] = useState(() => !hasSavedConsent());
   const [consentState, setConsentState] = useState<ConsentState>(() => loadConsent());
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
-  const [deleting, setDeleting] = useState(false);
 
   const acceptAll = () => {
     const all = { functional: true, analytics: true, performance: true, advertisement: true, uncategorised: true };
@@ -213,20 +123,6 @@ export default function CookieConsent() {
   const handleSavePreferences = (state: ConsentState) => {
     setConsentState(state);
     setVisibleState(false);
-  };
-
-  const handleDeleteAccount = async () => {
-    if (!user || deleteConfirmText !== user.email) return;
-    setDeleting(true);
-    try {
-      await api.deleteMyAccount();
-      await authService.logout();
-      window.location.href = '/';
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Please try again or contact support.';
-      toast.error('Failed to delete account', message);
-      setDeleting(false);
-    }
   };
 
   if (!visibleState) return null;
@@ -266,23 +162,6 @@ export default function CookieConsent() {
         initial={consentState}
         onClose={() => setModalOpen(false)}
         onSave={handleSavePreferences}
-        canDelete={Boolean(user)}
-        onDeleteAccount={() => {
-          setDeleteModalOpen(true);
-          setModalOpen(false);
-        }}
-      />
-      <DeleteAccountModal
-        open={deleteModalOpen}
-        email={user?.email ?? ''}
-        confirmText={deleteConfirmText}
-        setConfirmText={setDeleteConfirmText}
-        onClose={() => {
-          setDeleteModalOpen(false);
-          setDeleteConfirmText('');
-        }}
-        onConfirm={() => void handleDeleteAccount()}
-        deleting={deleting}
       />
     </>
   );

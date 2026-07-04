@@ -102,7 +102,7 @@ export function SettingsPage() {
 	};
 
 	const handleDeleteAccount = async () => {
-		if (deleteConfirmText !== 'delete my account') return;
+		if (deleteConfirmText.toLowerCase() !== 'delete my account') return;
 		setDeleting(true);
 		try {
 			await api.deleteMyAccount();

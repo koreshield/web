@@ -95,7 +95,7 @@ export function ProfilePage() {
 	};
 
 	const handleDeleteAccount = async () => {
-		if (deleteConfirmText !== user?.email) return;
+		if (deleteConfirmText.toLowerCase() !== 'delete my account') return;
 		setDeleting(true);
 		try {
 			await api.deleteMyAccount();
