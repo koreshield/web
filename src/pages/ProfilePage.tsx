@@ -95,7 +95,7 @@ export function ProfilePage() {
 	};
 
 	const handleDeleteAccount = async () => {
-		if (deleteConfirmText.toLowerCase() !== 'delete my account') return;
+		if (!user?.email || deleteConfirmText.trim().toLowerCase() !== user.email.toLowerCase()) return;
 		setDeleting(true);
 		try {
 			await api.deleteMyAccount();
@@ -436,7 +436,7 @@ export function ProfilePage() {
 							<button
 								type="button"
 								onClick={() => void handleDeleteAccount()}
-								disabled={deleteConfirmText !== user.email || deleting}
+								disabled={!user?.email || deleteConfirmText.trim().toLowerCase() !== user.email.toLowerCase() || deleting}
 								className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors text-sm font-medium disabled:opacity-50"
 							>
 								{deleting ? (
