@@ -56,7 +56,7 @@ export function RelatedSecurityTopics({ currentPath }: { currentPath: string }) 
 							<h3 className="font-bold text-foreground">{topic.title}</h3>
 							<p className="mt-2 text-sm leading-relaxed text-muted-foreground">{topic.description}</p>
 							<span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-electric-green">
-								Learn more <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+								Explore control <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
 							</span>
 						</Link>
 					))}

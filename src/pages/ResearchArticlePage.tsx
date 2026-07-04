@@ -69,10 +69,11 @@ export default function ResearchArticlePage() {
 							{article.sections.map((section, index) => (
 								<motion.section
 									key={section.heading}
+									id={section.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
 									initial={{ opacity: 0, y: 16 }}
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ duration: 0.35, delay: index * 0.04 }}
-									className="space-y-5"
+									className="space-y-5 scroll-mt-24"
 								>
 									<h2 className="text-2xl font-extrabold tracking-[-0.03em]">{section.heading}</h2>
 									<div className="space-y-5">
@@ -87,7 +88,23 @@ export default function ResearchArticlePage() {
 						</div>
 					</article>
 
-					<aside className="lg:sticky lg:top-24 lg:self-start">
+					<aside className="lg:sticky lg:top-24 lg:self-start space-y-6">
+						<div className="rounded-[1.5rem] border border-border bg-card/90 p-6 shadow-sm">
+							<p className="text-xs font-bold uppercase tracking-[0.22em] text-electric-green mb-4">Table of Contents</p>
+							<ul className="space-y-2.5">
+								{article.sections.map((section) => {
+									const id = section.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+									return (
+										<li key={id}>
+											<a href={`#${id}`} className="text-sm text-muted-foreground transition-colors hover:text-foreground hover:underline">
+												{section.heading}
+											</a>
+										</li>
+									);
+								})}
+							</ul>
+						</div>
+
 						<div className="rounded-[1.5rem] border border-border bg-card/90 p-6 shadow-sm">
 							<FileText className="mb-5 h-6 w-6 text-electric-green" />
 							<p className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">Research entry</p>

@@ -51,7 +51,7 @@ const PRIVATE_PATHS = [
 
 const DISALLOW_LINES = PRIVATE_PATHS.map((path) => `Disallow: ${path}`).join('\n');
 
-const BLOCKED_AGENTS = ['MJ12bot', 'AhrefsBot', 'SemrushBot', 'DotBot', 'BLEXBot', 'PetalBot'];
+const BLOCKED_AGENTS = ['MJ12bot', 'DotBot', 'BLEXBot', 'PetalBot'];
 
 const SITEMAP_BUNDLES = [{ origin: SITE_ORIGINS[0], basename: 'sitemap' }];
 

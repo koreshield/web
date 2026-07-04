@@ -12,6 +12,8 @@ import type { BlogPost } from '../blog/loader';
 import { CodeBlock } from './CodeBlock';
 import { SEOMeta } from './SEOMeta';
 import { getAuthorByName } from '../content/authors';
+import { TableOfContents } from './TableOfContents';
+import { extractNodeText, slugifyHeading } from './tableOfContentsUtils';
 
 interface BlogPostPageProps {
 	slug?: string;
@@ -124,177 +126,204 @@ export function BlogPostPage({ slug: propSlug }: BlogPostPageProps) {
 			)}
 
 			{/* Content */}
-			<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-				{/* Header */}
-				<header className="mb-12 pb-8 border-b border-border">
-					{/* Categories */}
-					<div className="flex flex-wrap gap-2 mb-4">
-						{post.categories.map(category => (
-							<Link
-								key={category}
-								to={`/blog?category=${toSlug(category)}`}
-								className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary/20 transition-colors"
-							>
-								<Folder size={14} />
-								{category}
-							</Link>
-						))}
-					</div>
-
-					{/* Title */}
-					<h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
-						{post.title}
-					</h1>
-
-					{/* Excerpt */}
-					<p className="text-xl text-muted-foreground mb-6">
-						{post.excerpt}
-					</p>
-
-					{/* Metadata */}
-					<div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-						<div className="flex items-center gap-2">
-							<User size={16} />
-							{authorProfile ? (
-								<Link to={`/authors/${authorProfile.slug}`} className="hover:text-foreground hover:underline">{post.author}</Link>
-							) : <span>{post.author}</span>}
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex gap-8">
+				<div className="flex-1 min-w-0">
+					{/* Header */}
+					<header className="mb-12 pb-8 border-b border-border">
+						{/* Categories */}
+						<div className="flex flex-wrap gap-2 mb-4">
+							{post.categories.map(category => (
+								<Link
+									key={category}
+									to={`/blog?category=${toSlug(category)}`}
+									className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary/20 transition-colors"
+								>
+									<Folder size={14} />
+									{category}
+								</Link>
+							))}
 						</div>
-						<div className="flex items-center gap-2">
-							<Calendar size={16} />
-							<time dateTime={post.date}>{formattedDate}</time>
-						</div>
-						<div className="flex items-center gap-2">
-							<Clock size={16} />
-							<span>{readTime} min read</span>
-						</div>
-					</div>
-				</header>
 
-				{/* Main Content */}
-				<article className="prose dark:prose-invert max-w-none prose-pre:bg-transparent prose-code:before:content-none prose-code:after:content-none mb-12">
-					<ReactMarkdown
-						remarkPlugins={[remarkGfm]}
-						components={{
-							pre: ({ children }) => <>{children}</>,
-							code: ({ className, children }) => {
-								const match = /language-(\w+)/.exec(className || '');
-								const code = String(children).replace(/\n$/, '');
-								if (match) {
-									return <CodeBlock language={match[1]} code={code} />;
-								}
-								return (
-									<code className="bg-[hsl(var(--accent))] text-[hsl(var(--primary))] px-2 py-0.5 rounded text-sm font-mono">
-										{children}
-									</code>
-								);
-							},
-							a: ({ href = '', children }) => {
-								const external = href.startsWith('http://') || href.startsWith('https://');
-								return (
-									<a
-										href={href}
-										target={external ? '_blank' : undefined}
-										rel={external ? 'noreferrer' : undefined}
+						{/* Title */}
+						<h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
+							{post.title}
+						</h1>
+
+						{/* Excerpt */}
+						<p className="text-xl text-muted-foreground mb-6">
+							{post.excerpt}
+						</p>
+
+						{/* Metadata */}
+						<div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+							<div className="flex items-center gap-2">
+								<User size={16} />
+								{authorProfile ? (
+									<Link to={`/authors/${authorProfile.slug}`} className="hover:text-foreground hover:underline">{post.author}</Link>
+								) : <span>{post.author}</span>}
+							</div>
+							<div className="flex items-center gap-2">
+								<Calendar size={16} />
+								<time dateTime={post.date}>{formattedDate}</time>
+							</div>
+							<div className="flex items-center gap-2">
+								<Clock size={16} />
+								<span>{readTime} min read</span>
+							</div>
+						</div>
+					</header>
+
+					{/* Main Content */}
+					<article className="prose dark:prose-invert max-w-none prose-pre:bg-transparent prose-code:before:content-none prose-code:after:content-none mb-12">
+						<ReactMarkdown
+							remarkPlugins={[remarkGfm]}
+							components={{
+								pre: ({ children }) => <>{children}</>,
+								h1: ({ children }) => {
+									const headingId = slugifyHeading(extractNodeText(children));
+									return (
+										<h1 id={headingId} data-heading-id={headingId} className="scroll-mt-24">
+											{children}
+										</h1>
+									);
+								},
+								h2: ({ children }) => {
+									const headingId = slugifyHeading(extractNodeText(children));
+									return (
+										<h2 id={headingId} data-heading-id={headingId} className="scroll-mt-24">
+											{children}
+										</h2>
+									);
+								},
+								h3: ({ children }) => {
+									const headingId = slugifyHeading(extractNodeText(children));
+									return (
+										<h3 id={headingId} data-heading-id={headingId} className="scroll-mt-24">
+											{children}
+										</h3>
+									);
+								},
+								code: ({ className, children }) => {
+									const match = /language-(\w+)/.exec(className || '');
+									const code = String(children).replace(/\n$/, '');
+									if (match) {
+										return <CodeBlock language={match[1]} code={code} />;
+									}
+									return (
+										<code className="bg-[hsl(var(--accent))] text-[hsl(var(--primary))] px-2 py-0.5 rounded text-sm font-mono">
+											{children}
+										</code>
+									);
+								},
+								a: ({ href = '', children }) => {
+									const external = href.startsWith('http://') || href.startsWith('https://');
+									return (
+										<a
+											href={href}
+											target={external ? '_blank' : undefined}
+											rel={external ? 'noreferrer' : undefined}
+										>
+											{children}
+										</a>
+									);
+								},
+							}}
+						>
+							{strippedContent}
+						</ReactMarkdown>
+					</article>
+
+					{/* Tags */}
+					{post.tags.length > 0 && (
+						<div className="mb-12 pb-8 border-t border-b border-border py-6">
+							<div className="flex flex-wrap gap-2">
+								{post.tags.map(tag => (
+									<Link
+										key={tag}
+										to={`/blog?tag=${toSlug(tag)}`}
+										className="inline-flex items-center gap-2 px-3 py-2 bg-card border border-border text-muted-foreground rounded-lg hover:text-foreground hover:border-primary/30 hover:bg-accent transition-colors"
 									>
-										{children}
-									</a>
-								);
-							},
-						}}
-					>
-						{strippedContent}
-					</ReactMarkdown>
-				</article>
+										<Tag size={16} />
+										{tag}
+									</Link>
+								))}
+							</div>
+						</div>
+					)}
 
-				{/* Tags */}
-				{post.tags.length > 0 && (
-					<div className="mb-12 pb-8 border-t border-b border-border py-6">
-						<div className="flex flex-wrap gap-2">
-							{post.tags.map(tag => (
-								<Link
-									key={tag}
-									to={`/blog?tag=${toSlug(tag)}`}
-									className="inline-flex items-center gap-2 px-3 py-2 bg-card border border-border text-muted-foreground rounded-lg hover:text-foreground hover:border-primary/30 hover:bg-accent transition-colors"
-								>
-									<Tag size={16} />
-									{tag}
-								</Link>
-							))}
+					{/* Author Info */}
+					<div className="mb-12 p-6 bg-card rounded-xl border border-border">
+						<div className="flex items-center gap-4">
+							<div className="w-12 h-12 bg-gradient-to-br from-primary/40 to-primary rounded-full flex items-center justify-center flex-shrink-0">
+								<User size={24} className="text-primary-foreground" />
+							</div>
+							<div>
+								{authorProfile ? (
+									<Link to={`/authors/${authorProfile.slug}`} className="font-semibold text-foreground hover:text-primary hover:underline">{post.author}</Link>
+								) : <h3 className="font-semibold text-foreground">{post.author}</h3>}
+								<p className="text-sm text-muted-foreground">
+									Koreshield Security Team
+								</p>
+							</div>
 						</div>
 					</div>
-				)}
 
-				{/* Author Info */}
-				<div className="mb-12 p-6 bg-card rounded-xl border border-border">
-					<div className="flex items-center gap-4">
-						<div className="w-12 h-12 bg-gradient-to-br from-primary/40 to-primary rounded-full flex items-center justify-center flex-shrink-0">
-							<User size={24} className="text-primary-foreground" />
-						</div>
-						<div>
-							{authorProfile ? (
-								<Link to={`/authors/${authorProfile.slug}`} className="font-semibold text-foreground hover:text-primary hover:underline">{post.author}</Link>
-							) : <h3 className="font-semibold text-foreground">{post.author}</h3>}
-							<p className="text-sm text-muted-foreground">
-								Koreshield Security Team
-							</p>
-						</div>
+					{/* Share */}
+					<div className="flex items-center gap-4 mb-12">
+						<span className="text-sm font-semibold text-foreground">Share:</span>
+						<a
+							href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(`https://koreshield.ai${post.path}`)}&text=${encodeURIComponent(post.title)}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="p-2 text-muted-foreground hover:text-primary transition-colors"
+							title="Share on X / Twitter"
+						>
+							<Twitter size={20} />
+						</a>
+						<a
+							href={`https://linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://koreshield.ai${post.path}`)}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="p-2 text-muted-foreground hover:text-primary transition-colors"
+							title="Share on LinkedIn"
+						>
+							<Linkedin size={20} />
+						</a>
 					</div>
+
+					{/* Related Posts */}
+					{relatedPosts.length > 0 && (
+						<div className="pt-8 border-t border-border">
+							<h2 className="text-2xl font-bold text-foreground mb-6">
+								Related Articles
+							</h2>
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+								{relatedPosts.map(relatedPost => (
+									<Link
+										key={relatedPost.slug}
+										to={relatedPost.path}
+										className="group p-5 bg-card rounded-xl border border-border hover:border-primary/40 transition-all hover:shadow-md hover:shadow-black/10"
+									>
+										<h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+											{relatedPost.title}
+										</h3>
+										<p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+											{relatedPost.excerpt}
+										</p>
+										<div className="flex items-center gap-2 text-xs text-muted-foreground">
+											<Calendar size={14} />
+											{new Date(relatedPost.date).toLocaleDateString('en-US', {
+												month: 'short',
+												day: 'numeric',
+											})}
+										</div>
+									</Link>
+								))}
+							</div>
+						</div>
+					)}
 				</div>
-
-				{/* Share */}
-				<div className="flex items-center gap-4 mb-12">
-					<span className="text-sm font-semibold text-foreground">Share:</span>
-					<a
-						href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(`https://koreshield.ai${post.path}`)}&text=${encodeURIComponent(post.title)}`}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="p-2 text-muted-foreground hover:text-primary transition-colors"
-						title="Share on X / Twitter"
-					>
-						<Twitter size={20} />
-					</a>
-					<a
-						href={`https://linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://koreshield.ai${post.path}`)}`}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="p-2 text-muted-foreground hover:text-primary transition-colors"
-						title="Share on LinkedIn"
-					>
-						<Linkedin size={20} />
-					</a>
-				</div>
-
-				{/* Related Posts */}
-				{relatedPosts.length > 0 && (
-					<div className="pt-8 border-t border-border">
-						<h2 className="text-2xl font-bold text-foreground mb-6">
-							Related Articles
-						</h2>
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-							{relatedPosts.map(relatedPost => (
-								<Link
-									key={relatedPost.slug}
-									to={relatedPost.path}
-									className="group p-5 bg-card rounded-xl border border-border hover:border-primary/40 transition-all hover:shadow-md hover:shadow-black/10"
-								>
-									<h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-										{relatedPost.title}
-									</h3>
-									<p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-										{relatedPost.excerpt}
-									</p>
-									<div className="flex items-center gap-2 text-xs text-muted-foreground">
-										<Calendar size={14} />
-										{new Date(relatedPost.date).toLocaleDateString('en-US', {
-											month: 'short',
-											day: 'numeric',
-										})}
-									</div>
-								</Link>
-							))}
-						</div>
-					</div>
-				)}
+				<TableOfContents content={strippedContent} />
 			</div>
 		</>
 	);
