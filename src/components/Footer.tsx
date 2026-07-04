@@ -13,8 +13,8 @@ const footerGroups = [
 			{ label: 'AI Agents Security', to: '/solutions/ai-agents-security' },
 			{ label: 'AI Usage Control', to: '/solutions/ai-usage-control' },
 			{ label: 'RAG Security', to: '/solutions/rag-security' },
-			{ label: 'KorePilot', to: '/solutions/korepilot' },
-			{ label: 'Voice & Audio Protection', to: '/solutions/voice-audio-protection' },
+				{ label: 'Koreshield Pilot', to: '/solutions/korepilot' },
+				{ label: 'Voice & Audio Protection', to: '/solutions/voice-audio-protection' }
 		],
 	},
 	{

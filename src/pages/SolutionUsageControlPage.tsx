@@ -100,7 +100,7 @@ export default function SolutionUsageControlPage() {
 						<p className="mt-2 text-sm text-muted-foreground">Policy, tenant context, and evidence all travel with the request.</p>
 					</div>
 					<Link to="/solutions/korepilot" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-6 py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted">
-						See KorePilot <ListChecks className="h-4 w-4" />
+					See Koreshield Pilot <ListChecks className="h-4 w-4" />
 					</Link>
 				</div>
 			</section>

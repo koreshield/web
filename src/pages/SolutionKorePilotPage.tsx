@@ -75,8 +75,8 @@ export default function SolutionKorePilotPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
-				title="KorePilot"
-				description="KorePilot is Koreshield's planned compliance evidence layer, designed to map detection events, audit logs, red-team results, and CI/CD gates to SOC 2 and ISO 42001 controls."
+				title="Koreshield Pilot"
+				description="Koreshield Pilot is Koreshield's planned compliance evidence layer, designed to map detection events, audit logs, red-team results, and CI/CD gates to SOC 2 and ISO 42001 controls."
 			/>
 
 			{/* Hero Section */}
@@ -96,9 +96,8 @@ export default function SolutionKorePilotPage() {
 					>
 						<div className="inline-flex items-center gap-2 rounded-full border border-electric-green/30 bg-electric-green/5 px-4 py-2 mb-8 backdrop-blur-sm">
 							<span className="h-1.5 w-1.5 rounded-full bg-electric-green" />
-							<span className="text-xs font-semibold uppercase tracking-widest text-electric-green/90">KorePilot roadmap</span>
+							<span className="text-xs font-semibold uppercase tracking-widest text-electric-green/90">Koreshield Pilot roadmap</span>
 						</div>
-
 						<h1 className="text-6xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
 							Live compliance evidence
 							<span className="block bg-gradient-to-r from-electric-green via-emerald-400 to-electric-green bg-clip-text text-transparent">
@@ -107,7 +106,7 @@ export default function SolutionKorePilotPage() {
 						</h1>
 
 						<p className="mx-auto max-w-3xl text-lg md:text-xl text-muted-foreground leading-relaxed mb-12">
-							KorePilot maps Koreshield's security detection layer directly to compliance frameworks. No translation layers, no guesswork-just audit-ready evidence derived from the same controls protecting your production traffic.
+							Koreshield Pilot maps Koreshield's security detection layer directly to compliance frameworks. No translation layers, no guesswork-just audit-ready evidence derived from the same controls protecting your production traffic.
 						</p>
 
 						<div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -115,7 +114,7 @@ export default function SolutionKorePilotPage() {
 								to="/demo"
 								className="inline-flex items-center gap-2 rounded-lg bg-electric-green px-8 py-3.5 font-semibold text-white transition-all hover:bg-emerald-500 hover:shadow-lg hover:shadow-electric-green/20 active:scale-95 group"
 							>
-								Discuss KorePilot
+								Discuss Koreshield Pilot
 								<ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
 							</Link>
 							<Link
@@ -140,9 +139,9 @@ export default function SolutionKorePilotPage() {
 						transition={{ duration: 0.6 }}
 						className="mb-16"
 					>
-						<h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">How KorePilot fits with Koreshield</h2>
-						<p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
-							Koreshield already emits structured security data on every request. KorePilot ingests it, maps it to controls, and surfaces audit-ready evidence.
+					<h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">How Koreshield Pilot fits with Koreshield</h2>
+					<p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
+						Koreshield already emits structured security data on every request. Koreshield Pilot ingests it, maps it to controls, and surfaces audit-ready evidence.
 						</p>
 					</motion.div>
 
@@ -244,7 +243,7 @@ export default function SolutionKorePilotPage() {
 				>
 					<h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">Plan your evidence pipeline early</h2>
 					<p className="text-lg text-muted-foreground leading-relaxed mb-10">
-						The architecture decision matters: does KorePilot ingest through webhooks for real-time evidence, or batch pulls for control? We can align that before the build hardens.
+						The architecture decision matters: does Koreshield Pilot ingest through webhooks for real-time evidence, or batch pulls for control? We can align that before the build hardens.
 					</p>
 
 					<div className="flex flex-col sm:flex-row items-center justify-center gap-4">

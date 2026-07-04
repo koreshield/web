@@ -49,7 +49,7 @@ const solutions = [
 		label: 'Context safety',
 	},
 	{
-		title: 'KorePilot',
+		title: 'Koreshield Pilot',
 		to: '/solutions/korepilot',
 		icon: Workflow,
 		body: 'Turn Koreshield events into compliance evidence and risk posture.',
@@ -71,9 +71,8 @@ export default function SolutionsPage() {
 		<div className="min-h-screen bg-background text-foreground">
 			<SEOMeta
 				title="Solutions"
-				description="Explore Koreshield solutions for AI detection, application protection, RAG security, agent security, VoiceGuard, usage control, and KorePilot evidence."
-			/>
-
+					description="Explore Koreshield solutions for AI detection, application protection, RAG security, agent security, VoiceGuard, usage control, and Koreshield Pilot evidence."
+				/>
 			<section className="relative overflow-hidden px-4 py-20 ambient-glow sm:px-6 md:py-28">
 				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(16,185,129,0.16),transparent_30%),radial-gradient(circle_at_78%_14%,rgba(59,130,246,0.08),transparent_24%)]" />
 				<div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">

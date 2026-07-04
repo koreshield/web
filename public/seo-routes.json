@@ -74,7 +74,7 @@
       "description": "Protect RAG pipelines from poisoned documents and indirect prompt injection by scanning retrieved context before inference."
     },
     "/solutions/korepilot": {
-      "title": "KorePilot AI Security Evidence | Koreshield",
+      "title": "Koreshield Pilot AI Security Evidence | Koreshield",
       "description": "Explore the planned Koreshield compliance evidence layer for detection events, audit logs, red-team results, and delivery gates."
     },
     "/solutions/voice-audio-protection": {

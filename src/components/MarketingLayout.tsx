@@ -49,7 +49,7 @@ const solutionsLinks: Array<{ label: string; to: string; desc: string }> = [
 		desc: 'Stop indirect injection via retrieved content',
 	},
 	{
-		label: 'KorePilot',
+		label: 'Koreshield Pilot',
 		to: '/solutions/korepilot',
 		desc: 'Audit-ready evidence from AI security data',
 	},

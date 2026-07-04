@@ -102,7 +102,7 @@ export function SettingsPage() {
 	};
 
 	const handleDeleteAccount = async () => {
-		if (deleteConfirmText !== user?.email) return;
+		if (deleteConfirmText !== 'delete my account') return;
 		setDeleting(true);
 		try {
 			await api.deleteMyAccount();
@@ -586,16 +586,16 @@ export function SettingsPage() {
 						<p className="text-sm text-muted-foreground mb-2">
 							This will permanently delete your account, API keys, billing records, and all associated data. There is no way to recover this.
 						</p>
-						<p className="text-sm font-medium mb-3">Type your email address to confirm:</p>
+						<p className="text-sm font-medium mb-3">Type <span className="font-semibold">delete my account</span> to confirm:</p>
 						<p className="text-xs font-mono bg-muted px-2 py-1 rounded mb-3 text-muted-foreground">
-							{user.email}
+							delete my account
 						</p>
 						<input
 							type="text"
 							value={deleteConfirmText}
 							onChange={(e) => setDeleteConfirmText(e.target.value)}
 							className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-destructive text-sm mb-4"
-							placeholder={user.email}
+							placeholder="delete my account"
 							autoComplete="off"
 						/>
 						<div className="flex gap-3">

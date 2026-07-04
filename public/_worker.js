@@ -29,6 +29,12 @@ const PATH_REDIRECTS = new Map([
   ['/terms', '/terms-of-service'],
   ['/cookies', '/cookie-policy'],
 ]);
+const GONE_PATHS = new Set([
+  '/docs/v1',
+  '/docs/v1/',
+  '/api-reference/legacy',
+  '/api-reference/legacy/',
+]);
 const PUBLIC_EXACT_PATHS = new Set([
   '/', '/status', '/pricing', '/contact', '/about', '/vs',
   '/vs/lakera-guard', '/vs/llm-guard', '/vs/build-yourself',
@@ -68,7 +74,7 @@ const PAGE_METADATA = {
   '/solutions/ai-agents-security': ['AI Agent Security | Koreshield', 'Protect AI agents from prompt injection, unsafe tool use, data exfiltration, and compromised context.'],
   '/solutions/ai-usage-control': ['AI Usage Control and Governance | Koreshield', 'Control model access, usage, costs, policies, and audit evidence across production AI systems.'],
   '/solutions/rag-security': ['RAG Security and Indirect Prompt Injection | Koreshield', 'Protect retrieval-augmented generation systems from poisoned documents, indirect prompt injection, and unsafe context.'],
-  '/solutions/korepilot': ['KorePilot AI Security Assistant | Koreshield', 'Investigate AI security events, policies, providers, and audit evidence with KorePilot.'],
+	'/solutions/korepilot': ['Koreshield Pilot AI Security Evidence | Koreshield', 'Explore the planned Koreshield compliance evidence layer for detection events, audit logs, red-team results, and delivery gates.'],
   '/solutions/voice-audio-protection': ['Voice and Audio AI Protection | Koreshield', 'Protect voice and audio AI workflows from unsafe content, adversarial input, and policy violations.'],
 };
 let seoManifestCache;
@@ -88,6 +94,16 @@ export default {
       url.hostname = CANONICAL_HOST;
       url.pathname = redirectedPath;
       return Response.redirect(url.toString(), 301);
+    }
+
+    if (GONE_PATHS.has(pathname)) {
+      return new Response('410 Gone - This resource has been permanently removed.', {
+        status: 410,
+        headers: applySecurityHeaders(new Headers({
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
+        }), pathname),
+      });
     }
 
     if (!['GET', 'HEAD'].includes(request.method)) {

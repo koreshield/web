@@ -5,11 +5,11 @@ import { Link } from 'react-router-dom';
 const extensions = [
 	{
 		icon: FileCheck2,
-		label: 'KorePilot',
+		label: 'Koreshield Pilot',
 		status: 'Roadmap',
 		title: 'Compliance evidence from real AI security data',
 		description:
-			'KorePilot is designed to turn Koreshield detection events, immutable audit logs, red-team results, and CI/CD gate outcomes into audit-ready SOC 2 and ISO 42001 evidence.',
+			'Koreshield Pilot is designed to turn Koreshield detection events, immutable audit logs, red-team results, and CI/CD gate outcomes into audit-ready SOC 2 and ISO 42001 evidence.',
 		to: '/solutions/korepilot',
 	},
 	{

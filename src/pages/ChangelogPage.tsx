@@ -48,14 +48,14 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 		entries: [
 			{
 				date: '2026-05-23',
-				title: 'KorePilot and voice protection were added to Solutions',
+				title: 'Koreshield Pilot and voice protection were added to Solutions',
 				category: 'Added',
 				summary:
-					'The Solutions area now includes KorePilot and Voice & Audio Protection as planned product extensions built around Koreshield security evidence and speech-to-agent protection paths.',
+					'The Solutions area now includes Koreshield Pilot and Voice & Audio Protection as planned product extensions built around Koreshield security evidence and speech-to-agent protection paths.',
 				customerImpact:
 					'Customers and investors can understand how Koreshield expands from runtime AI traffic protection into compliance evidence and voice-agent security without confusing those roadmap items with fully shipped features.',
 				items: [
-					'Added a KorePilot solution page explaining the evidence flow from detection events, risk scores, immutable audit logs, tenant context, red-team results, CI/CD gates, and alerts.',
+					'Added a Koreshield Pilot solution page explaining the evidence flow from detection events, risk scores, immutable audit logs, tenant context, red-team results, CI/CD gates, and alerts.',
 					'Added a Voice & Audio Protection solution page for speech prompts, transcripts, voice agents, and downstream model calls.',
 					'Added landing-page cards for these product extensions with conservative roadmap wording.',
 				],
@@ -122,7 +122,7 @@ const CHANGELOG_BATCHES: ChangelogBatch[] = [
 				title: 'Solution sitemap routes were corrected',
 				category: 'Infra',
 				summary:
-					'The sitemap generator now uses the actual public solution URLs and includes the new KorePilot and voice/audio protection pages.',
+					'The sitemap generator now uses the actual public solution URLs and includes the new Koreshield Pilot and voice/audio protection pages.',
 				customerImpact:
 					'Search engines receive cleaner public route metadata and avoid stale solution URLs.',
 				items: [

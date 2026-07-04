@@ -59,7 +59,7 @@ const CORE_METADATA = {
 	'/solutions/ai-agents-security': ['AI Agent Security | Koreshield', 'Secure agentic AI pipelines against tool abuse, indirect prompt injection, data exfiltration, and autonomous action escalation.'],
 	'/solutions/ai-usage-control': ['AI Usage Control and Governance | Koreshield', 'Define and enforce what AI systems can and cannot do using scoped policies, logs, limits, and alerts.'],
 	'/solutions/rag-security': ['RAG Security and Indirect Prompt Injection | Koreshield', 'Protect RAG pipelines from poisoned documents and indirect prompt injection by scanning retrieved context before inference.'],
-	'/solutions/korepilot': ['KorePilot AI Security Evidence | Koreshield', 'Explore the planned Koreshield compliance evidence layer for detection events, audit logs, red-team results, and delivery gates.'],
+	'/solutions/korepilot': ['Koreshield Pilot AI Security Evidence | Koreshield', 'Explore the planned Koreshield compliance evidence layer for detection events, audit logs, red-team results, and delivery gates.'],
 	'/solutions/voice-audio-protection': ['Voice and Audio AI Protection | Koreshield', 'Protect speech prompts, transcripts, and voice-agent actions before they reach models or tools.'],
 	'/why-koreshield': ['Why Koreshield | Runtime LLM Security', 'See how Koreshield combines runtime LLM inspection, flexible deployment, policy controls, and audit evidence.'],
 	'/integrations': ['AI Security Integrations | Koreshield', 'Connect Koreshield with model providers, LLM frameworks, application stacks, monitoring tools, and deployment platforms.'],
